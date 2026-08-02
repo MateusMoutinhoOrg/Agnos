@@ -1,0 +1,3 @@
+- rename the project 
+- adapt the project
+- create the docker-build-steps
