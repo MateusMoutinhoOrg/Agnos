@@ -1,3 +1,5 @@
 - rename the project 
-- adapt the project
+- adapt the project for cli 
+  - adapt agnos
+  - adapt 
 - create the docker-build-steps
