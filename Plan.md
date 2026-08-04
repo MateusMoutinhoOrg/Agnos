@@ -7,7 +7,7 @@ claude -p "$(cat prompts/prompts/1.Rename.md)" --dangerously-skip-permissions
 ~~~    
 
 
-### Aply the Factory mode 
+### Aply the Factory mode  (done)
 - Execute the prompts/prompts/2.FactoryMode.md script
 ~~~bash
 claude -p "$(cat prompts/prompts/2.FactoryMode.md)" --dangerously-skip-permissions

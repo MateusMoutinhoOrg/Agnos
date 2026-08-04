@@ -24,7 +24,7 @@ Contracts are **structs of function fields**, never interfaces — in [sandbox/c
 
 ## Factory Pattern
 
-Every struct of function fields in this project — an `api` struct inside the sandbox, a `deps.Deps` filled by an adapter outside it — is filled by **factories**, never by methods bound into fields and never by an internal mirror type. When you write or edit any file holding `<Field>Factory` functions, follow the [Factories](./Meta/Factories/Specs.md) specification on top of the one governing that file's tree.
+Every object this project hands out — an `api` struct built inside the sandbox, a `deps.Deps` filled by an adapter outside it — is built by its package's `New(...)` constructor running **factories**, never by methods bound into fields, never by an internal mirror type, and never by filling a struct literal at the call site. When you write or edit any file holding `<Field>Factory` functions, follow the [Factories](./Meta/Factories/Specs.md) specification on top of the one governing that file's tree.
 
 A factory takes a pointer to the **carrier** — the struct holding the state the closure reads — and returns exactly one field's value; the caller assigns it:
 
