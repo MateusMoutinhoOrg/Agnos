@@ -32,7 +32,7 @@ This design ensures the library remains portable, testable, and easy to extend w
 
 **1. Install the library:**
 ```bash
-go get github.com/MateusMoutinhoOrg/Agnos-Cli@v0.0.7
+go get github.com/MateusMoutinhoOrg/Agnos-Cli@v0.0.1
 ```
 
 **2. Create a `main.go` file:**
