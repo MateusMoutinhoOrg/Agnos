@@ -8,10 +8,10 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 
-	keepadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/Keep/adapters/standard"
-	keeplib "github.com/MateusMoutinhoOrg/Agnos-Cli/Keep/sandbox"
-	keepapi "github.com/MateusMoutinhoOrg/Agnos-Cli/Keep/sandbox/contracts/api"
-	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/Verb/sandbox"
+	keepadapter "github.com/MateusMoutinhoOrg/Keep/adapters/standard"
+	keeplib "github.com/MateusMoutinhoOrg/Keep/sandbox"
+	keepapi "github.com/MateusMoutinhoOrg/Keep/sandbox/contracts/api"
+	verblib "github.com/MateusMoutinhoOrg/Verb/sandbox"
 )
 
 // StandardAdapter fills deps.Deps using the Go standard library for the
