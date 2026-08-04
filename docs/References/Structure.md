@@ -134,11 +134,11 @@ Outside the sandbox. Shell scripts driving the built binary the way a user would
 
 | File | Description | Spec |
 |------|-------------|------|
-| `example<N>.sh` | Self-contained shell script demonstrating one goal against the built CLI | CliExamples |
+| `<Name>.sh` | Self-contained shell script demonstrating one goal against the built CLI | CliExamples |
 
 **Run a CLI example:**
 ```sh
-bash ./cliExamples/example1.sh
+bash ./cliExamples/ManageCategories.sh
 ```
 
 ---

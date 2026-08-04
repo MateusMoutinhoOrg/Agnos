@@ -14,7 +14,7 @@ The whole command-line interface lives **inside the sandbox**, as the `Sandboxma
 go build ./...                                   # build everything
 go run ./cmd/main <command> [args]               # run the CLI from source
 go run ./libraryExamples/TrackSpendSample/TrackSpendSample.go # run a library example
-bash ./cliExamples/example1.sh                   # run a CLI example
+bash ./cliExamples/ManageCategories.sh                   # run a CLI example
 go test ./...                                    # run tests (none exist yet)
 ```
 
@@ -49,7 +49,7 @@ Two trade-offs, neither caught by the compiler: **completeness is unchecked** �
 - **`adapters/<name>/`** — outside the sandbox; the only place OS-bound and third-party code is allowed. Each declares a struct carrying a `Deps deps.Deps` field, one `<Field>Factory(a *<Name>Adapter)` per `Deps` field returning that field's value, and a `New(...) deps.Deps` constructor that assigns each factory's return value into `a.Deps` and returns it — the populated **contract struct**, never the adapter type. `standard` is the default adapter (Go stdlib only).
 - **`sandbox/internal/cli/`** — the command-line interface itself: the `Run(l *api.Lib, args []string) int` dispatch `SandboxmainFactory` delegates to, the usage screen, and the amount parser. Like `store/` it is neither an object nor the entry point, so no spec governs it and it declares no types and no factories. Adding a command means editing here **and** `docs/References/Cli.md` — see `docs/Tutorials/AddCliCommand.md`.
 - **`cmd/main/main.go`** — outside the sandbox; the installed binary. Wires the standard adapter into the lib, calls `l.Sandboxmain(os.Args[1:])`, and `os.Exit`s with its return. The argument vector must be the same one the adapter wired `Deps.VerbLib` over. Governed by the `CliMain` spec.
-- **`cliExamples/example<N>.sh`** — outside the sandbox; shell scripts that build the CLI into a scratch dir, point it at `AGNOS_DATA` of their own, and drive it as a user would. Governed by the `CliExamples` spec.
+- **`cliExamples/<Name>.sh`** — outside the sandbox; shell scripts that build the CLI into a scratch dir, point it at `AGNOS_DATA` of their own, and drive it as a user would. Governed by the `CliExamples` spec.
 - **`libraryExamples/<name>/<name>.go`** — outside the sandbox; self-contained `package main` programs wiring an adapter into the lib.
 - **`bootstrap/`** — a second Agnos library embedding the root one, demonstrating the pattern when a lib's dependency is another lib built the same way: its sandbox declares a *copy* of the embedded api structs (`sandbox/contracts/deps/agnosdeps/`) and its adapter's `TrackerLibFactory` fills them by field assignment — the case where a factory assigns a value rather than a closure, because the field is a struct.
 

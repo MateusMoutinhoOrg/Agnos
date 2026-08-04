@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# example1.sh — set up a budget: create the categories transactions are
+# ManageCategories.sh — set up a budget: create the categories transactions are
 # tracked under, list them back, and drop one that was a mistake.
 #
 # Run it from the project root:
-#   bash ./cliExamples/example1.sh
+#   bash ./cliExamples/ManageCategories.sh
 set -euo pipefail
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

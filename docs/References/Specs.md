@@ -41,7 +41,7 @@ GeneralDoc applies on top of the others: a tutorial follows **both** GeneralDoc 
 | LibObjects | Factories and constructors for objects the lib creates, in `sandbox/internal/<object>/` | [Specs](/docs/References/Meta/LibObjects/Specs.md) · [sample](./Meta/LibObjects/sample.go) |
 | CliMain | `cmd/main/main.go` | [Specs](/docs/References/Meta/CliMain/Specs.md) · [sample](./Meta/CliMain/sample.go) |
 | LibraryExamples | `libraryExamples/<example>/<example>.go` | [Specs](/docs/References/Meta/LibraryExamples/Specs.md) · [sample](./Meta/LibraryExamples/sample.go) |
-| CliExamples | `cliExamples/<example>.sh` | [Specs](/docs/References/Meta/CliExamples/Specs.md) · [sample](./Meta/CliExamples/sample.sh) |
+| CliExamples | `cliExamples/<Name>.sh` | [Specs](/docs/References/Meta/CliExamples/Specs.md) · [sample](./Meta/CliExamples/sample.sh) |
 
 Factories applies on top of the others, as GeneralDoc does for documentation: an adapter follows **both** Factories and Adapters, and a lib function follows **both** Factories and LibFunctions.
 

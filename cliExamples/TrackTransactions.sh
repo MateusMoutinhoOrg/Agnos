@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# example2.sh — track money: record spend and received transactions, list
+# TrackTransactions.sh — track money: record spend and received transactions, list
 # them, and read the balance of one category and of the whole budget.
 #
 # Run it from the project root:
-#   bash ./cliExamples/example2.sh
+#   bash ./cliExamples/TrackTransactions.sh
 set -euo pipefail
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

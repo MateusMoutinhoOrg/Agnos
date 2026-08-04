@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
 # This file is an illustrative sample, not part of the build.
 #
-# example<N>.sh — one sentence naming the goal this script demonstrates.
+# <Name>.sh — one sentence naming the goal this script demonstrates.
 #
 # Run it from the project root:
-#   bash ./cliExamples/example<N>.sh
+#   bash ./cliExamples/<Name>.sh
 set -euo pipefail
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

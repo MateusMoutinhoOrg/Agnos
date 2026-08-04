@@ -1,12 +1,12 @@
 # CliExamples Specification
 
 ## Description
-Defines the required shape of a runnable command-line example in `cliExamples/<example>.sh`. A CLI example is a self-contained shell script that builds the binary in [cmd/main](/cmd/main/) and drives it the way a user would from a terminal — one script per goal a person actually has. Its Go counterpart, which wires the library from code instead, is governed by [LibraryExamples](/docs/References/Meta/LibraryExamples/Specs.md).
+Defines the required shape of a runnable command-line example in `cliExamples/<Name>.sh`. A CLI example is a self-contained shell script that builds the binary in [cmd/main](/cmd/main/) and drives it the way a user would from a terminal — one script per goal a person actually has. Its Go counterpart, which wires the library from code instead, is governed by [LibraryExamples](/docs/References/Meta/LibraryExamples/Specs.md).
 
 ### Rules
-- Each CLI example is a single `.sh` file directly under `cliExamples/`, named `example<N>.sh` in the order it should be read: `example1.sh` is the first one a newcomer runs.
+- Each CLI example is a single `.sh` file directly under `cliExamples/`, named with a descriptive PascalCase name matching the goal it demonstrates — e.g. `ManageCategories.sh`, `TrackTransactions.sh`.
 - The script opens with a shebang (`#!/usr/bin/env bash`), a comment block naming the goal it demonstrates, and the command that runs it from the project root.
-- It must be runnable with no arguments and no prior setup, from the project root: `bash ./cliExamples/<example>.sh`.
+- It must be runnable with no arguments and no prior setup, from the project root: `bash ./cliExamples/<Name>.sh`.
 - It builds the CLI itself with `go build -o "$workdir/agnos" ./cmd/main` into a `mktemp -d` directory removed by a `trap` on exit, and points the binary at a budget of its own by exporting `AGNOS_DATA`. A CLI example never writes to the records in the user's home directory and never requires the CLI to be installed first.
 - Every command it runs goes through the built binary — the example demonstrates the interface, so it must never `go run` a library example or reach into the sandbox.
 - Sections are announced with an `echo "== …"` line saying what the commands below show, so the transcript reads on its own.

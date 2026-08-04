@@ -10,10 +10,10 @@ Covers running the shell scripts in [cliExamples/](/cliExamples/), each of which
 ---
 
 ## Workflow
-1. Browse [cliExamples/](/cliExamples/) and pick a script — they are numbered in reading order, so `example1.sh` is the first one.
+1. Browse [cliExamples/](/cliExamples/) and pick a script — each is named after the goal it demonstrates, so `ManageCategories.sh` is a good starting point.
 2. Run it from the project root:
    ```bash
-   bash ./cliExamples/example1.sh
+   bash ./cliExamples/ManageCategories.sh
    ```
 3. Read the transcript alongside the script: each `== …` line in the output is the comment above the commands that produced what follows it.
 4. Run the rest in order to see the whole interface:

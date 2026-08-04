@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
-# example3.sh — script the CLI: drive it from a shell, read its exit codes,
+# ScriptTheCli.sh — script the CLI: drive it from a shell, read its exit codes,
 # and feed a listing into other tools.
 #
 # Run it from the project root:
-#   bash ./cliExamples/example3.sh
+#   bash ./cliExamples/ScriptTheCli.sh
 set -uo pipefail   # no -e here: this example inspects failing exit codes
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

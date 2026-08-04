@@ -139,9 +139,9 @@ Shell scripts driving the built binary the way a user would — each builds the 
 
 | Sample | Description |
 |----------|-------------|
-| [example1.sh](/cliExamples/example1.sh) | Set up a budget: create the categories, list them, and drop one |
-| [example2.sh](/cliExamples/example2.sh) | Track money: record spend and received, list them, read balances |
-| [example3.sh](/cliExamples/example3.sh) | Script the CLI: quiet output, exit codes, and piping listings into text tools |
+| [ManageCategories.sh](/cliExamples/ManageCategories.sh) | Set up a budget: create the categories, list them, and drop one |
+| [TrackTransactions.sh](/cliExamples/TrackTransactions.sh) | Track money: record spend and received, list them, read balances |
+| [ScriptTheCli.sh](/cliExamples/ScriptTheCli.sh) | Script the CLI: quiet output, exit codes, and piping listings into text tools |
 
 ---
 

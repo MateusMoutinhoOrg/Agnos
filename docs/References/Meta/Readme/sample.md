@@ -112,7 +112,7 @@ Shell scripts driving the built binary the way a user would.
 
 | Sample | Description |
 |----------|-------------|
-| [example1.sh](/cliExamples/example1.sh) | What this script demonstrates against the built CLI |
+| [ManageCategories.sh](/cliExamples/ManageCategories.sh) | What this script demonstrates against the built CLI |
 
 ---
 
