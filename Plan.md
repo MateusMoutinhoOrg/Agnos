@@ -3,7 +3,7 @@
 
 ### adapt verbe pt.1
 - clone Verbe (done)
-- prepare the prompts/prompts/VerbAdapt.md prompt
+- prepare the prompts/prompts/VerbAdapt.md prompt (Done)
 
 ### adapt keep pt.1
 - clone keep
