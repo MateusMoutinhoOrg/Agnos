@@ -3,11 +3,11 @@ package standard
 import (
 	"fmt"
 
-	"github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox/contracts/deps"
-	"github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox/contracts/deps/agnosdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/deps/agnosdeps"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 // StandardAdapter fills deps.Deps using the Go standard library plus the

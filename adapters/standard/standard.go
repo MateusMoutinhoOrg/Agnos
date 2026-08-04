@@ -6,7 +6,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 type record struct {

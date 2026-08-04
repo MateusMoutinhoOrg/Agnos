@@ -1,6 +1,6 @@
 package api
 
-import "github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox/contracts/deps"
+import "github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/deps"
 
 // Lib is the entry point handed back by lib.New, a struct of function
 // fields filled by the factories in sandbox/internal/lib, each closing over

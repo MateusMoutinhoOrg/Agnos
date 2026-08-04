@@ -26,8 +26,8 @@ Covers adding an object created by the library: its struct in [sandbox/contracts
    package bucket
 
    import (
-       "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/api"
-       "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
    )
 
    // FullKeyFactory returns the closure that fills api.Bucket.FullKey,

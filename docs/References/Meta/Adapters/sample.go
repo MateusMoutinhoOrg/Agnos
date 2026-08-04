@@ -4,7 +4,7 @@
 package standard
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 // StandardAdapter fills deps.Deps using the Go standard library only.

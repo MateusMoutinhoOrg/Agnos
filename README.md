@@ -1,7 +1,7 @@
 # Agnos
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
-[![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos-Cli.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos-Cli)
+[![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos-Cli)](https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.22-blue)](go.mod)
 [![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
@@ -32,7 +32,7 @@ This design ensures the library remains portable, testable, and easy to extend w
 
 **1. Install the library:**
 ```bash
-go get github.com/MateusMoutinhoOrg/Agnos@v0.0.7
+go get github.com/MateusMoutinhoOrg/Agnos-Cli@v0.0.7
 ```
 
 **2. Create a `main.go` file:**
@@ -40,8 +40,8 @@ go get github.com/MateusMoutinhoOrg/Agnos@v0.0.7
 package main
 
 import (
-    agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-    agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+    agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+    agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 func main() {

@@ -39,8 +39,8 @@ The simplest setup: an adapter builds a ready-to-use `deps.Deps`.
 package main
 
 import (
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 func main() {
@@ -69,8 +69,8 @@ package main
 import (
 	"time"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 func main() {
@@ -106,8 +106,8 @@ package main
 import (
 	"time"
 
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
-	agnosdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
+	agnosdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 func main() {

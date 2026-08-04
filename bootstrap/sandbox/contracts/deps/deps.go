@@ -1,6 +1,6 @@
 package deps
 
-import "github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox/contracts/deps/agnosdeps"
+import "github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/deps/agnosdeps"
 
 // Deps is the dependency contract every bootstrap adapter must satisfy.
 // Like every contract in this template it is a struct of fields, not an

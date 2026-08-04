@@ -4,7 +4,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 // record is one stored value together with the moment it expires.

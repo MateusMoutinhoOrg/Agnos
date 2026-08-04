@@ -3,7 +3,7 @@ package api
 import (
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 // Entry is a single cached record handed back by the library. Deps is the

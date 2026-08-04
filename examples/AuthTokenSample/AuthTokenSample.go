@@ -4,9 +4,9 @@ import (
 	"fmt"
 	"time"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
-	agnostypes "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/api"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
+	agnostypes "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
 // A real service caches the short-lived bearer token it gets from an auth

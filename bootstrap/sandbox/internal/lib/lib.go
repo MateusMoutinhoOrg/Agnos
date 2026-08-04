@@ -1,8 +1,8 @@
 package lib
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/deps"
 )
 
 // TestFuncFactory returns the closure that fills api.Lib.TestFunc, which

@@ -3,8 +3,8 @@ package entry
 import (
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 // IsExpiredFactory returns the closure that fills api.Entry.IsExpired, so the

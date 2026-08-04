@@ -1,9 +1,9 @@
 package lib
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib"
 )
 
 // New injects a Deps struct into the library and returns the api.Lib entry

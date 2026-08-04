@@ -35,8 +35,8 @@ import (
 	"fmt"
 	"time"
 
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
-	agnosdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
+	agnosdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 func main() {

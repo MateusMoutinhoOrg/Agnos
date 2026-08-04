@@ -7,9 +7,9 @@ import (
 	"strings"
 	"time"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
-	agnostypes "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/api"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
+	agnostypes "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
 // This sample caches a web page for 60 seconds: repeated reads inside the

@@ -3,7 +3,7 @@
 // This file is an illustrative sample, not part of the build.
 package api
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 
 // ExampleLibObject is an object handed back by the library, created
 // through Lib.NewExampleObject with the deps already wired in. Its

@@ -6,8 +6,8 @@ package example_object
 import (
 	"strconv"
 
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 // ExampleObjectMethodFactory returns the closure that fills

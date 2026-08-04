@@ -8,7 +8,7 @@ Covers installing the library and initializing it with the standard adapter in a
 ## Workflow
 1. Install the lib:
    ```bash
-   go get github.com/MateusMoutinhoOrg/Agnos@v0.0.7
+   go get github.com/MateusMoutinhoOrg/Agnos-Cli@v0.0.7
    ```
 2. Create a file called `main.go` with the following code:
    ```go
@@ -16,8 +16,8 @@ Covers installing the library and initializing it with the standard adapter in a
 
    // 1. Import the standard adapter and the lib
    import (
-       agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/standard"
-       agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+       agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
+       agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
    )
 
    func main() {

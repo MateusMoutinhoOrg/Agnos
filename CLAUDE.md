@@ -34,7 +34,7 @@ Two trade-offs, neither caught by the compiler: **completeness is unchecked** �
 
 `sandbox/` is a **closed sandbox**: nothing in it may import `adapters/`, `examples/`, a third-party module, or an OS-bound stdlib package (`os`, `net`, `syscall`, …). Every such effect is a `Deps` field reached through `l.Deps`. This is a binding rule — see `docs/References/RULES.md` and `docs/Explanations/SandboxIsolation.md`.
 
-- **`sandbox/new.go`** — package `lib`, the only wiring point consumers touch: `New(deps.Deps) api.Lib`. Never imports `adapters/`. Importers alias it: `agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"`.
+- **`sandbox/new.go`** — package `lib`, the only wiring point consumers touch: `New(deps.Deps) api.Lib`. Never imports `adapters/`. Importers alias it: `agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"`.
 - **`sandbox/contracts/deps/deps.go`** — the `Deps` **struct**. Adding a requirement = adding a function field here. This is the contract every adapter must fill.
 - **`sandbox/contracts/api/api.go`** — the output structs the lib hands back (`Lib`, `Entry`, …), each leading with a `Deps deps.Deps` field. Every field must be exported, or `sandbox/internal/` cannot fill it. **Every type in the project is declared here**, never in `internal/`. Types only — no function bodies.
 - **`sandbox/internal/lib/`** — the lib's factories: one `<Field>Factory(l *api.Lib)` per function field of `api.Lib`, each returning the field's closure, plus `New(d deps.Deps) api.Lib` assigning every factory's return value into the matching field (`sandbox/new.go` just delegates to it). Go's `internal/` rule keeps it unreachable from `adapters/`, `examples/`, and consumers.
@@ -66,6 +66,6 @@ Changes are governed by required-reading docs, and several actions **must** upda
 ## Conventions
 
 - Code that consumes the library from outside it (`examples/`, the `bootstrap/` adapter, third-party callers) aliases every import with the `agnos` prefix: `agnosadapter` (`adapters/<name>`), `agnoslib` (`sandbox`), `agnostypes` (`sandbox/contracts/api`), `agnosdeps` (`sandbox/contracts/deps`). Files belonging to the library itself — `sandbox/` and `adapters/` — keep the plain package names. See the Import Aliases rule in `docs/References/RULES.md`.
-- Module path is `github.com/MateusMoutinhoOrg/Agnos`; renaming it is a documented procedure — see `docs/Tutorials/RenameModule.md`.
+- Module path is `github.com/MateusMoutinhoOrg/Agnos-Cli`; renaming it is a documented procedure — see `docs/Tutorials/RenameModule.md`.
 - Public-facing lib API entries each get a detail page under `docs/References/PublicApi/` named `<pkg>.<Symbol>.md`.
 - `docs/References/Meta/` holds the specifications: one directory per kind of file, each pairing a `Specs.md` (how the file must be shaped) with a `sample`. Never browse it — always locate a spec through `docs/References/Specs.md`.

@@ -1,8 +1,8 @@
 package main
 
 import (
-	bootstrapadapter "github.com/MateusMoutinhoOrg/Agnos/bootstrap/adapters/standard"
-	bootstraplib "github.com/MateusMoutinhoOrg/Agnos/bootstrap/sandbox"
+	bootstrapadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/adapters/standard"
+	bootstraplib "github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox"
 )
 
 func main() {

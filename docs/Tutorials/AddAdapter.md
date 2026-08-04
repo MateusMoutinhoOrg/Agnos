@@ -23,7 +23,7 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
    import (
        "time"
 
-       "github.com/MateusMoutinhoOrg/Agnos/sandbox/contracts/deps"
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
    )
 
    // FrozenAdapter fills deps.Deps with a fixed clock, so expiry
