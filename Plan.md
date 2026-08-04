@@ -1,9 +1,9 @@
 
 ## Prepare Stage
 
-### adapt agnos pt.1
-- clone Agnos
-- prepare the prompts/prompts/AgnosAdapt.md prompt
+### adapt verbe pt.1
+- clone Verbe
+- prepare the prompts/prompts/VerbAdapt.md prompt
 
 ### adapt keep pt.1
 - clone keep
@@ -16,5 +16,5 @@
 
 ## Execution 
 - execute prompts/Rename.md 
-- execute prompts/prompts/AgnosAdapt.md
+- execute prompts/prompts/VerbAdapt.md
 - execute: prompts/prompts/mainMode.md
