@@ -36,11 +36,6 @@ func CacheLibFactory(cacheFilePath string) agnosdeps.Lib {
 	}
 }
 
-// New creates a deps.Deps backed by the standard adapter, ready for lib.New.
-// It builds the adapter instance and runs every field factory over it,
-// persisting the embedded library's records as a single JSON file at
-// cacheFilePath. Adding a field to deps.Deps means adding its factory call
-// here.
 func New(cacheFilePath string) deps.Deps {
 	deps := deps.Deps{
 		Println:  PrintlnFactory(),
