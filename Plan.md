@@ -7,10 +7,10 @@ claude -p "$(cat prompts/prompts/1.Rename.md)" --dangerously-skip-permissions
 ~~~    
 
 
-### Fix the adapters patterns
-- Execute the prompts/prompts/2.AdaptersFix.md script
+### Aply the Factory mode 
+- Execute the prompts/prompts/2.FactoryMode.md script
 ~~~bash
-claude -p "$(cat prompts/prompts/2.AdaptersFix.md)" --dangerously-skip-permissions
+claude -p "$(cat prompts/prompts/2.FactoryMode.md)" --dangerously-skip-permissions
 ~~~
 
 
