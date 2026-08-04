@@ -57,13 +57,13 @@ package main
 import (
 	"fmt"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/memory"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 	agnostypes "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New(nil))
+	l := agnoslib.New(agnosadapter.New("trackerdata"))
 
 	l.AddCategory("groceries")
 	transaction, _ := l.AddSpend("groceries", "coffee beans", 1290)

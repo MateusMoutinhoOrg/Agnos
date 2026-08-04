@@ -45,7 +45,7 @@ Keep is a schema database over a single-key storage backend: a [`Props`](#suppor
 
 Where Verb's fields return plain values, Keep's return further api structs, so this copy restates the whole tree and the adapter's `KeepLibFactory` wraps each such field in a closure that converts what it returns — nothing of the embedded library ever reaches the sandbox. See [DepsMechanic.md](/docs/Explanations/DepsMechanic.md#injecting-a-whole-library).
 
-The adapter also chooses the backend Keep itself runs on: `standard` wires Keep's filesystem adapter, `memory` wires Keep's native in-memory adapter. See [Adapters.md](/docs/References/Adapters.md).
+The adapter also chooses the backend Keep itself runs on: `standard` wires Keep's filesystem adapter. See [Adapters.md](/docs/References/Adapters.md).
 
 ## Fields
 
@@ -105,15 +105,15 @@ package main
 import (
 	"fmt"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/memory"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoskeep "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 )
 
 func main() {
 	// The adapter initializes the embedded Keep library — here over Keep's
-	// own in-memory backend — and hands it back as one field of the deps
+	// own filesystem backend — and hands it back as one field of the deps
 	// contract.
-	d := agnosadapter.New(nil)
+	d := agnosadapter.New("trackerdata")
 
 	db := d.KeepLib.NewDatabase(agnoskeep.Props{
 		Path: "app/",

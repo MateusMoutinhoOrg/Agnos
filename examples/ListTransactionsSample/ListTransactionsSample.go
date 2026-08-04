@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/memory"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 	agnostypes "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
 func main() {
-	// 1. Build deps via the memory adapter and inject them into the lib.
-	l := agnoslib.New(agnosadapter.New(nil))
+	// 1. Build deps via the standard adapter and inject them into the lib.
+	l := agnoslib.New(agnosadapter.New("trackerdata"))
 
 	// 2. Record a few transactions across two categories.
 	l.AddCategory("salary")

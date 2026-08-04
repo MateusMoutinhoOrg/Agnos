@@ -32,12 +32,12 @@ package main
 import (
 	"fmt"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/memory"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New(nil))
+	l := agnoslib.New(agnosadapter.New("trackerdata"))
 
 	l.AddCategory("salary")
 	l.AddReceived("salary", "august paycheck", 250000)

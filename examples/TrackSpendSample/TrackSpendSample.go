@@ -3,14 +3,14 @@ package main
 import (
 	"fmt"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/memory"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 func main() {
-	// 1. Build deps via the memory adapter, so this sample starts from an
-	//    empty tracker every run and writes nothing to disk.
-	deps := agnosadapter.New(nil)
+	// 1. Build deps via the standard adapter (real clock + a Keep database
+	//    on disk under "trackerdata").
+	deps := agnosadapter.New("trackerdata")
 
 	// 2. Inject deps into the pure library — a financial tracker.
 	l := agnoslib.New(deps)

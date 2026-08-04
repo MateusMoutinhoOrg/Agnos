@@ -15,7 +15,7 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
 ---
 
 ## Workflow
-1. Create the adapter directory and its file, both named after the adapter (e.g., `adapters/memory/memory.go`).
+1. Create the adapter directory and its file, both named after the adapter (e.g., `adapters/frozen/frozen.go`).
 2. Declare the package and the adapter struct — the **carrier**, leading with the `Deps` field its factories fill, followed by its configuration and state:
    ```go
    package frozen

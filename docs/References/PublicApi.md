@@ -35,9 +35,6 @@ Injects a `deps.Deps` into the library and returns an `api.Lib`.
 ### [standard.New](/docs/References/PublicApi/standard.New.md)
 Creates a `deps.Deps` using the standard library adapter (real clock + a Keep database on disk).
 
-### [memory.New](/docs/References/PublicApi/memory.New.md)
-Creates a `deps.Deps` using the memory adapter (real clock + a Keep database in memory).
-
 ---
 
 ## Fields

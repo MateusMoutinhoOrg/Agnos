@@ -31,12 +31,12 @@ import (
 	"fmt"
 	"time"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/memory"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
 func main() {
-	myDeps := agnosadapter.New(nil) // no CLI arguments to parse here
+	myDeps := agnosadapter.New("trackerdata")
 
 	// Correct: replace the clock while it is still a plain deps value.
 	frozen := time.Unix(0, 0)
