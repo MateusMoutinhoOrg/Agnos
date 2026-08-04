@@ -13,6 +13,7 @@ Explains how the library receives its dependencies. `Deps` is a **struct of func
 // sandbox/contracts/deps/deps.go — what the library needs
 type Deps struct {
 	Now     func() time.Time
+	Printf  func(format string, a ...any) (int, error)
 	VerbLib verbdeps.Lib
 	KeepLib keepdeps.Lib
 }
@@ -20,6 +21,7 @@ type Deps struct {
 // sandbox/contracts/api/api.go — what the library returns
 type Lib struct {
 	Deps        deps.Deps
+	Sandboxmain func(args []string) int
 	AddCategory func(name string) (Category, bool)
 	AddSpend    func(category string, description string, amount int64) (Transaction, bool)
 	Balance     func() int64
@@ -123,8 +125,9 @@ func main() {
 		KeepLib: agnoskeepdeps.Lib{
 			NewDatabase: myOwnDatabase, // your implementation of the api
 		},
-		// VerbLib is left zero here: nothing in this program parses
-		// command-line arguments.
+		// Printf and VerbLib are left zero here: this program calls the
+		// library functions directly, never Sandboxmain, so nothing
+		// parses arguments or prints.
 	}
 
 	// 2. Inject it into the library

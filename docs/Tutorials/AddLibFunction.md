@@ -7,7 +7,7 @@ Covers adding a function to the library: declaring it as a field of the `Lib` st
 - A function is only usable once its factory's return value is assigned from the package's `New(d deps.Deps) api.Lib` constructor, which doubles as the factory aggregate — an unassigned field stays nil and panics on first call. The compiler does not catch this.
 - One factory per field, named `<Field>Factory`, taking a single `*api.Lib` and returning one closure.
 - Dependencies are reached as `l.Deps.<Field>(...)` **inside** the closure, never captured at factory time — that is what keeps the injected value authoritative.
-- `sandbox/` is a closed sandbox: library code must never import [adapters/](../../adapters/), [examples/](../../examples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `l.Deps`. See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md).
+- `sandbox/` is a closed sandbox: library code must never import [adapters/](../../adapters/), [libraryExamples/](../../libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `l.Deps`. See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md).
 - Adding a file to [sandbox/internal/](../../sandbox/internal/) requires updating [Structure.md](/docs/References/Structure.md).
 
 ---

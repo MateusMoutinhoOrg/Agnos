@@ -100,6 +100,7 @@ func fromCategories(categories []agnostypes.Category) []agnosdeps.Category {
 func TrackerLibFactory(s *StandardAdapter) agnosdeps.Lib {
 	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath))
 	return agnosdeps.Lib{
+		Sandboxmain: inner.Sandboxmain,
 		AddCategory: func(name string) (agnosdeps.Category, bool) {
 			category, ok := inner.AddCategory(name)
 			return fromCategory(category), ok

@@ -14,8 +14,9 @@ import (
 //
 // Each field is one injectable behavior the library needs. For this
 // financial tracker the injectable behaviors are the clock (so a
-// transaction's timestamp can be fixed in a test) and the schema database
-// every category and transaction is persisted in.
+// transaction's timestamp can be fixed in a test), the formatted writer the
+// command-line interface reports through, and the schema database every
+// category and transaction is persisted in.
 //
 // VerbLib and KeepLib show what changes when the dependency is another
 // library built with this same pattern: the whole library arrives as one
@@ -27,6 +28,12 @@ type Deps struct {
 	// Now returns the current time, used to stamp categories and
 	// transactions as they are created.
 	Now func() time.Time
+	// Printf writes one formatted message to the interface's output,
+	// returning the number of bytes written and the write failure, if any.
+	// It is the only way the library emits text: api.Lib.Sandboxmain — the
+	// command-line interface — reports every result, every error, and its
+	// usage screen through it, so the sandbox never touches a stream itself.
+	Printf func(format string, a ...any) (n int, err error)
 	// VerbLib is the embedded Verb argv-parser library, already initialized
 	// by the adapter over the argument vector that adapter chose.
 	VerbLib verbdeps.Lib

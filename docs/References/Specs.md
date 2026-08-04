@@ -39,7 +39,9 @@ GeneralDoc applies on top of the others: a tutorial follows **both** GeneralDoc 
 | Adapters | `adapters/<name>/<name>.go` | [Specs](/docs/References/Meta/Adapters/Specs.md) · [sample](./Meta/Adapters/sample.go) |
 | LibFunctions | Factories filling `api.Lib` fields, in `sandbox/internal/lib/` | [Specs](/docs/References/Meta/LibFunctions/Specs.md) · [sample](./Meta/LibFunctions/sample.go) |
 | LibObjects | Factories and constructors for objects the lib creates, in `sandbox/internal/<object>/` | [Specs](/docs/References/Meta/LibObjects/Specs.md) · [sample](./Meta/LibObjects/sample.go) |
-| Examples | `examples/<example>/<example>.go` | [Specs](/docs/References/Meta/Examples/Specs.md) · [sample](./Meta/Examples/sample.go) |
+| CliMain | `cmd/main/main.go` | [Specs](/docs/References/Meta/CliMain/Specs.md) · [sample](./Meta/CliMain/sample.go) |
+| LibraryExamples | `libraryExamples/<example>/<example>.go` | [Specs](/docs/References/Meta/LibraryExamples/Specs.md) · [sample](./Meta/LibraryExamples/sample.go) |
+| CliExamples | `cliExamples/<example>.sh` | [Specs](/docs/References/Meta/CliExamples/Specs.md) · [sample](./Meta/CliExamples/sample.sh) |
 
 Factories applies on top of the others, as GeneralDoc does for documentation: an adapter follows **both** Factories and Adapters, and a lib function follows **both** Factories and LibFunctions.
 

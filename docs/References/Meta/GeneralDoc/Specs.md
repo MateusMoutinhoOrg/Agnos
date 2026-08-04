@@ -71,7 +71,9 @@ Defines the baseline shape every `.md` file in this project must have, whatever 
 | A function filling one field of a struct contract, taking a pointer to the struct that carries the state | **factory** |
 | The struct a factory takes a pointer to — an output struct in `/sandbox/internal/`, the adapter struct in `/adapters/` | **carrier** |
 | The `New` function that builds one carrier, runs every factory of its package over it, and returns the filled contract struct | **constructor** |
-| A runnable example in `/examples/` | **sample** |
+| A runnable example in `/libraryExamples/` or `/cliExamples/` | **sample** |
+| The `api.Lib.Sandboxmain` field and the dispatch behind it | **command-line interface** |
+| A word the interface dispatches on, such as `balance` | **command** |
 | A single-goal, step-by-step guide in `/docs/Tutorials/` | **tutorial** |
 | The description of how a file must be shaped | **specification** |
 

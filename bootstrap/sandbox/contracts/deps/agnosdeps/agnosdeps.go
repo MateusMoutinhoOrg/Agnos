@@ -80,6 +80,9 @@ type Category struct {
 // Lib mirrors the embedded library's api.Lib — a financial tracker over a
 // persisted schema database.
 type Lib struct {
+	// Sandboxmain is the embedded library's command-line interface, run over
+	// an argument vector and returning a process exit code.
+	Sandboxmain func(args []string) int
 	// AddCategory creates the named category, or returns the stored one when
 	// the name is already taken.
 	AddCategory func(name string) (Category, bool)

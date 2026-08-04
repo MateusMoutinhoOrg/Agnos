@@ -7,6 +7,7 @@
 ```go
 type Deps struct {
 	Now     func() time.Time
+	Printf  func(format string, a ...any) (n int, err error)
 	VerbLib verbdeps.Lib
 	KeepLib keepdeps.Lib
 }
@@ -14,7 +15,9 @@ type Deps struct {
 
 ## Description
 
-The dependency contract every adapter must fill. Each field is one injectable behavior the financial tracker needs: `Now` is the clock (injecting it fixes the timestamp a category or transaction is stamped with, which is what makes the tracker testable), and `KeepLib` is the schema database every category and transaction is persisted in (an adapter can back it with the filesystem or with any other backend). A filled `Deps` is built by an adapter — see [`standard.New`](/docs/References/PublicApi/standard.New.md) — and passed to [`lib.New`](/docs/References/PublicApi/lib.New.md).
+The dependency contract every adapter must fill. Each field is one injectable behavior the financial tracker needs: `Now` is the clock (injecting it fixes the timestamp a category or transaction is stamped with, which is what makes the tracker testable), `Printf` is the writer the command-line interface reports through (injecting it captures the whole interface's output), and `KeepLib` is the schema database every category and transaction is persisted in (an adapter can back it with the filesystem or with any other backend). A filled `Deps` is built by an adapter — see [`standard.New`](/docs/References/PublicApi/standard.New.md) — and passed to [`lib.New`](/docs/References/PublicApi/lib.New.md).
+
+`Printf` is the library's only way of emitting text: [`Sandboxmain`](/docs/References/PublicApi/api.Sandboxmain.md) prints every result, every error, and its usage screen through it, so the sandbox never touches a stream itself and the interface can be run against a buffer as easily as against a terminal.
 
 `VerbLib` and `KeepLib` are the exceptions to "every field is a function": the dependency is itself a library built with this pattern, so it arrives as one plain struct field — [`verbdeps.Lib`](/docs/References/PublicApi/verbdeps.Lib.md), [`keepdeps.Lib`](/docs/References/PublicApi/keepdeps.Lib.md) — with no getter around it. The sandbox never imports the embedded Verb or Keep libraries; it declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/`, and the adapter, which lives outside the sandbox, initializes the real library and assigns its fields onto that copy.
 
@@ -25,6 +28,7 @@ Because it is a struct and not an interface, a value returned by an adapter can 
 | Field | Description |
 | :--- | :--- |
 | `Now func() time.Time` | Returns the current time, used to stamp categories and transactions as they are created. |
+| `Printf func(format string, a ...any) (n int, err error)` | Writes one formatted message to the interface's output — the only way the library emits text. |
 | `VerbLib verbdeps.Lib` | The embedded Verb argv parser, already initialized by the adapter over the argument vector that adapter chose. |
 | `KeepLib keepdeps.Lib` | The embedded Keep schema database every category and transaction is stored in, already wired by the adapter to the storage backend that adapter chose. |
 

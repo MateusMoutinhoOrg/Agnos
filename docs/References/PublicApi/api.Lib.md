@@ -7,6 +7,7 @@
 ```go
 type Lib struct {
 	Deps             deps.Deps
+	Sandboxmain      func(args []string) int
 	AddCategory      func(name string) (Category, bool)
 	GetCategory      func(name string) (Category, bool)
 	ListCategories   func() []Category
@@ -23,6 +24,8 @@ The library entry point, returned by [`lib.New`](/docs/References/PublicApi/lib.
 
 Amounts are always expressed in the smallest currency unit (cents) as a positive `int64`; the direction of the money lives in the transaction's `Kind`, and `Balance` sums the signed amounts.
 
+[`Sandboxmain`](/docs/References/PublicApi/api.Sandboxmain.md) is the same idea taken one step further: the project's whole command-line interface is a field of this struct, so the installed binary in [cmd/main](/cmd/main/) holds no behavior of its own. A Go caller that wants the library rather than the CLI simply never calls it.
+
 `Deps` is exported because the library's own factories read it, but it is **read-only after construction**: the closures already captured the struct they were built over, so reassigning `Deps` here does not change behavior. Patch the `deps.Deps` value before calling `lib.New`.
 
 ## Fields
@@ -30,6 +33,7 @@ Amounts are always expressed in the smallest currency unit (cents) as a positive
 | Field | Description |
 | :--- | :--- |
 | [`Deps deps.Deps`](/docs/References/PublicApi/deps.Deps.md) | The dependency set injected by `lib.New`; read-only after construction. |
+| [`Sandboxmain func(args []string) int`](/docs/References/PublicApi/api.Sandboxmain.md) | The command-line interface: dispatches a command line over the fields below and returns the exit code. |
 | [`AddCategory func(name string) (Category, bool)`](/docs/References/PublicApi/api.AddCategory.md) | Creates a category, or returns the stored one when the name is taken. |
 | [`GetCategory func(name string) (Category, bool)`](/docs/References/PublicApi/api.GetCategory.md) | Returns the stored category with the given name, or `false` on a miss. |
 | [`ListCategories func() []Category`](/docs/References/PublicApi/api.ListCategories.md) | Returns every stored category, oldest first. |

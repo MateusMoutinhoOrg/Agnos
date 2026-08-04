@@ -10,13 +10,13 @@ Explains why the library lives in `sandbox/` and what "closed sandbox" means in 
 The project is split into three top-level directories, and the arrows only point one way:
 
 ```
-adapters/  ──▶  sandbox/  ◀──  examples/
+adapters/  ──▶  sandbox/  ◀──  libraryExamples/
 (reaches the OS)  (closed)     (wires the two together)
 ```
 
 - `sandbox/` is the library. It is closed: it imports only itself and OS-independent standard-library packages (`time`, `strings`, `errors`, …).
 - `adapters/` is outside the wall. It is the only place `os`, `net`, a database driver, or any third-party module may appear.
-- `examples/` is outside the wall too, and is the only place an adapter and the sandbox are named in the same file.
+- `libraryExamples/` is outside the wall too, and is the only place an adapter and the sandbox are named in the same file.
 
 The split is what makes the library OS-independent: nothing inside `sandbox/` can be affected by which operating system, filesystem, or network the program runs on, because it has no way to reach any of them.
 
@@ -29,7 +29,7 @@ A file under `sandbox/` may not import:
 | Forbidden | Why |
 |-----------|-----|
 | `adapters/…` | The library would bind itself to one concrete implementation, and injection would be pointless. |
-| `examples/…` | Samples are consumers of the library, never part of it. |
+| `cmd/…`, `libraryExamples/…` | The binary and the samples are consumers of the library, never part of it. |
 | Any third-party module | A dependency the caller cannot replace is a dependency the caller cannot test around. |
 | OS-bound stdlib (`os`, `net`, `os/exec`, `syscall`, …) | The effect belongs in an adapter, reached through a `Deps` field. |
 
@@ -39,11 +39,14 @@ Everything the library needs from the outside world is declared as a function fi
 // sandbox/contracts/deps/deps.go — the only door in the wall
 type Deps struct {
 	Now     func() time.Time // instead of time.Now()
+	Printf  func(format string, a ...any) (int, error) // instead of fmt.Printf
 	VerbLib verbdeps.Lib     // instead of importing the Verb library
 	KeepLib keepdeps.Lib     // instead of importing the Keep library, and
 	                         // with it every os.ReadFile the tracker needs
 }
 ```
+
+This is what lets the *whole command-line interface* live inside the wall. `api.Lib.Sandboxmain` reads the command line through `Deps.VerbLib` and writes every line through `Deps.Printf`, so it never touches `os.Args` or `os.Stdout` itself — the binary in `cmd/main/` hands it an argument vector and exits with its return, and a test can hand it a fixed vector and a buffer instead.
 
 `VerbLib` and `KeepLib` are the same door in a different shape: the Verb argv parser and the Keep schema database are third-party modules to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it. Restating the shape is cheap because it is a struct of function fields — see [StructContracts.md](/docs/Explanations/StructContracts.md) and [DepsMechanic.md](/docs/Explanations/DepsMechanic.md#injecting-a-whole-library).
 
@@ -110,7 +113,7 @@ import (
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
-// This line is in examples/, outside the wall — the only place
+// This line is in libraryExamples/, outside the wall — the only place
 // an adapter and the sandbox meet.
 l := agnoslib.New(agnosadapter.New("data.json"))
 ```

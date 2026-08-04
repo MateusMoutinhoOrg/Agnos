@@ -89,6 +89,20 @@ type Category struct {
 	String func() string
 }
 
+// Exit codes reported by Lib.Sandboxmain, and through it by the process that
+// calls it.
+const (
+	// ExitOk reports that the requested command ran to completion.
+	ExitOk = 0
+	// ExitUsage reports that the command line itself was wrong — an unknown
+	// command, a missing operand, an unparsable amount — and the usage
+	// screen was printed.
+	ExitUsage = 1
+	// ExitFailure reports that a well-formed command could not be carried
+	// out, because a record was missing or could not be written.
+	ExitFailure = 2
+)
+
 // Lib is the entry point handed back by lib.New. It is a financial tracker:
 // categories hold spend and received transactions, and every record is
 // persisted through the schema database injected as Deps.KeepLib. It is
@@ -103,6 +117,19 @@ type Lib struct {
 	// Deps is the dependency set injected by lib.New, carried here so every
 	// factory-built function field can reach it.
 	Deps deps.Deps
+	// Sandboxmain is the command-line interface: the whole program, run
+	// inside the sandbox. It reads the actions and flags of args through the
+	// injected Deps.VerbLib parser, calls the library functions below, prints
+	// every result and error through Deps.Printf, and returns the process
+	// exit code — ExitOk, ExitUsage, or ExitFailure. The caller in cmd/main
+	// does nothing but hand it the argument vector and exit with what it
+	// returns.
+	//
+	// args must be the same argument vector the adapter wired Deps.VerbLib
+	// over: the parser owns the reading, and args is what Sandboxmain checks
+	// for an empty command line. The standard adapter and cmd/main both take
+	// it from os.Args[1:], so they agree by construction.
+	Sandboxmain func(args []string) int
 	// AddCategory creates the category with the given name and returns it.
 	// Creation is idempotent: when the name is already taken the stored
 	// category is returned instead. The bool is false when the name is empty

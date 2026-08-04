@@ -15,6 +15,7 @@ Covers adding a requirement to the `Deps` contract in [sandbox/contracts/deps/de
    ```go
    type Deps struct {
        Now     func() time.Time
+       Printf  func(format string, a ...any) (n int, err error)
        VerbLib verbdeps.Lib
        KeepLib keepdeps.Lib
        Uuid    func() string // new requirement
@@ -48,5 +49,5 @@ Covers adding a requirement to the `Deps` contract in [sandbox/contracts/deps/de
 6. Build the project and run a sample — an unfilled field surfaces at runtime, not at build time:
    ```bash
    go build ./...
-   go run ./examples/TrackSpendSample/TrackSpendSample.go
+   go run ./libraryExamples/TrackSpendSample/TrackSpendSample.go
    ```

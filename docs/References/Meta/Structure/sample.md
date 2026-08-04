@@ -67,9 +67,29 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 
 ---
 
-## `/examples/`
-Outside the sandbox. Runnable examples demonstrating how to use the library.
+## `/cmd/`
+Outside the sandbox. The executables the project ships.
+
+### `/cmd/main/`
 
 | File | Description | Spec |
 |------|-------------|------|
-| `<example>/<example>.go` | Self-contained `package main` wiring an adapter into the lib | Examples |
+| `main.go` | Self-contained `package main` wiring an adapter into the lib, calling `api.Lib.Sandboxmain`, and exiting with its return | CliMain |
+
+---
+
+## `/cliExamples/`
+Outside the sandbox. Shell scripts driving the built binary the way a user would.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `example<N>.sh` | Self-contained shell script demonstrating one goal against the built CLI | CliExamples |
+
+---
+
+## `/libraryExamples/`
+Outside the sandbox. Runnable Go examples demonstrating how to use the library from code.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `<example>/<example>.go` | Self-contained `package main` wiring an adapter into the lib | LibraryExamples |

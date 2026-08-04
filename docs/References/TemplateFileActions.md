@@ -35,7 +35,9 @@ Written from scratch for the library being built or adapted. Nothing of the temp
 | `docs/References/PublicApi/*` | One detail page per public API entry | [ReferenceDocs](/docs/References/Meta/ReferenceDocs/Specs.md) |
 | `docs/References/<Name>.md` | Any reference page the new library needs beyond the public API index | [ReferenceDocs](/docs/References/Meta/ReferenceDocs/Specs.md) |
 | `docs/Tutorials/<Goal>.md` | One tutorial per workflow specific to the new library — the template tutorials carried over by **[Copy](#copy)** do **not** fulfill this | [TutorialDocs](/docs/References/Meta/TutorialDocs/Specs.md) |
-| `examples/<example>/<example>.go` | One runnable sample per demonstrated use case | [Examples](/docs/References/Meta/Examples/Specs.md) |
+| `libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | [LibraryExamples](/docs/References/Meta/LibraryExamples/Specs.md) |
+| `cliExamples/example<N>.sh` | One shell script per goal demonstrated against the built CLI | [CliExamples](/docs/References/Meta/CliExamples/Specs.md) |
+| `sandbox/internal/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, its usage screen, and its operand parsing | |
 
 ---
 
@@ -45,12 +47,14 @@ Kept in place, with their content replaced by the new library's. The file keeps 
 
 | Path | Rewrite with | Specification |
 |------|--------------|---------------|
-| `README.md` | The new library's overview, quick start, badges, Doc Index, and Samples section | [Readme](/docs/References/Meta/Readme/Specs.md) |
+| `README.md` | The new library's overview, both quick starts, badges, Doc Index, and Examples sections | [Readme](/docs/References/Meta/Readme/Specs.md) |
 | `sandbox/contracts/deps/deps.go` | The `Deps` function fields the new library requires | [Deps](/docs/References/Meta/Deps/Specs.md) |
 | `sandbox/contracts/api/api.go` | The `Lib` struct and one struct per object the new library hands back | [Outputs](/docs/References/Meta/Outputs/Specs.md) |
 | `adapters/standard/standard.go` | The default adapter, filling the new `Deps` contract | [Adapters](/docs/References/Meta/Adapters/Specs.md) |
 | `docs/References/PublicApi.md` | The index of the new public API entries | [ReferenceDocs](/docs/References/Meta/ReferenceDocs/Specs.md) |
 | `docs/References/Structure.md` | The layout of the new library | [Structure](/docs/References/Meta/Structure/Specs.md) |
+| `docs/References/Cli.md` | The commands, flags, and exit codes of the new library's interface | [ReferenceDocs](/docs/References/Meta/ReferenceDocs/Specs.md) |
+| `cmd/main/main.go` | The new library's entry point: wire, call `Sandboxmain`, exit | [CliMain](/docs/References/Meta/CliMain/Specs.md) |
 
 ---
 
@@ -63,4 +67,5 @@ The template's example content. Removed once the new library's own files exist.
 | `adapters/*` — except `adapters/standard/` | The example alternative adapters |
 | `sandbox/internal/*` | The example lib factories and object packages |
 | `docs/References/PublicApi/*` | The example API detail pages |
-| `examples/*` | The example samples |
+| `libraryExamples/*` | The example Go samples |
+| `cliExamples/*` | The example CLI scripts |

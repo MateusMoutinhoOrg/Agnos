@@ -2,22 +2,24 @@
 
 This document maps the project **schema** — the kinds of files the project is built from — not every concrete file. A slot with a **Spec** name is governed by a specification; resolve the name through [Specs.md](/docs/References/Specs.md) to get its description and sample.
 
-The project is split into three top-level trees, and the dependency flow between them is one-way:
+The project is a **CLI** whose interface lives inside the library. It is split into three top-level trees, and the dependency flow between them is one-way:
 
 ```
-adapters/  ──▶  sandbox/  ◀──  examples/
-(reaches the OS)  (closed)     (wires the two together)
+adapters/  ──▶  sandbox/  ◀──  cmd/, libraryExamples/
+(reaches the OS)  (closed)     (wire the two together)
 ```
 
-- **`/sandbox/`** is a **closed sandbox**: the pure library. Nothing inside it may import `adapters/`, `examples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md).
+- **`/sandbox/`** is a **closed sandbox**: the pure library, and the command-line interface with it. Nothing inside it may import `adapters/`, `cmd/`, `libraryExamples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md).
 - **`/adapters/`** sits outside the sandbox and is the only place OS-bound and third-party code is allowed. Each adapter imports `sandbox/contracts/deps` and nothing else from the sandbox.
-- **`/examples/`** sits outside the sandbox too, and is the only place where an adapter and the sandbox meet.
+- **`/cmd/`** and **`/libraryExamples/`** sit outside the sandbox too, and are the only places where an adapter and the sandbox meet — `cmd/` for the installable binary, `libraryExamples/` for the runnable Go samples.
+
+Because the interface is `api.Lib.Sandboxmain` — one field of the library like any other — the binary in `cmd/main/` holds no command, no flag, and no output of its own: it wires, runs, and exits.
 
 ## Root
 
 | File | Description | Spec |
 |------|-------------|------|
-| `README.md` | Project overview, quick start, Doc Index, and Samples section | Readme |
+| `README.md` | Project overview, quick starts, Doc Index, and the two Examples sections | Readme |
 | `LICENSE` | License terms for the project | |
 | `go.mod` | Go module definition and dependencies | |
 | `.gitignore` | Intentionally untracked files to ignore | |
@@ -70,7 +72,14 @@ The entry-point implementation. The `internal/` parent already marks it private,
 
 | File | Description | Spec |
 |------|-------------|------|
-| `lib.go` | One `<Field>Factory(l *api.Lib)` per lib function, each returning a closure, plus the `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
+| `lib.go` | One `<Field>Factory(l *api.Lib)` per lib function — `Sandboxmain` among them — each returning a closure, plus the `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
+
+#### `/sandbox/internal/cli/`
+The command-line interface itself: the command dispatch `Sandboxmain` delegates to, the usage screen, and the reading of amounts off the command line. It reads the command line through `deps.Deps.VerbLib` and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `cli.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the usage screen, and the amount parser | |
 
 #### `/sandbox/internal/<object>/`
 One package per object the library creates, named after the object itself — `category/` and `transaction/` for this library.
@@ -99,31 +108,66 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 
 ---
 
-## `/examples/`
-Outside the sandbox. Runnable examples demonstrating how to use the library — the only place an adapter and the sandbox are wired together.
+## `/cmd/`
+Outside the sandbox. The executables the project ships — for this project, the single binary a user installs.
 
-### `/examples/<example>/`
+### `/cmd/main/`
 
 | File | Description | Spec |
 |------|-------------|------|
-| `<example>.go` | Self-contained `package main` wiring an adapter into the lib | Examples |
+| `main.go` | Self-contained `package main` that wires an adapter into the lib, calls `api.Lib.Sandboxmain(os.Args[1:])`, and exits with its return | CliMain |
+
+**Run the CLI from source:**
+```sh
+go run ./cmd/main <command> [arguments]
+```
+
+**Install it globally:**
+```sh
+go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@latest
+```
+
+---
+
+## `/cliExamples/`
+Outside the sandbox. Shell scripts driving the built binary the way a user would from a terminal. Each one builds the CLI into a scratch directory and points it at a budget of its own, so nothing a script does touches the records in the user's home.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `example<N>.sh` | Self-contained shell script demonstrating one goal against the built CLI | CliExamples |
+
+**Run a CLI example:**
+```sh
+bash ./cliExamples/example1.sh
+```
+
+---
+
+## `/libraryExamples/`
+Outside the sandbox. Runnable Go examples demonstrating how to use the library from code, when the CLI is not what the caller wants.
+
+### `/libraryExamples/<example>/`
+
+| File | Description | Spec |
+|------|-------------|------|
+| `<example>.go` | Self-contained `package main` wiring an adapter into the lib | LibraryExamples |
 
 **Run an example:**
 ```sh
-go run ./examples/<example>/<example>.go
+go run ./libraryExamples/<example>/<example>.go
 ```
 
 ---
 
 ## `/bootstrap/`
-A second, self-contained Agnos library — same three trees (`sandbox/`, `adapters/`, `examples/`) and the same rules — demonstrating how one Agnos-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field.
+A second, self-contained Agnos library — same three trees (`sandbox/`, `adapters/`, `libraryExamples/`) and the same rules — demonstrating how one Agnos-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field.
 
 | Path | Description |
 |------|-------------|
 | `sandbox/contracts/deps/deps.go` | The `Deps` struct, including `TrackerLib` — the embedded library, held as a locally declared contract struct |
 | `sandbox/contracts/deps/agnosdeps/agnosdeps.go` | Copy of the embedded library's `api` structs, declared inside the sandbox so the sandbox never imports the embedded library |
 | `adapters/<name>/<name>.go` | Its `TrackerLibFactory` initializes the embedded library with the embedded library's own adapter, and copies its `api` fields onto the local `agnosdeps` ones |
-| `examples/<example>/<example>.go` | Self-contained `package main` wiring a bootstrap adapter into the bootstrap lib |
+| `libraryExamples/<example>/<example>.go` | Self-contained `package main` wiring a bootstrap adapter into the bootstrap lib |
 
 The copying lives in the adapter because only code outside the sandbox may import the embedded library. Because both sides are structs of function fields, the copy is field assignment: a wrapper is needed only where a named type differs between the two declarations. See [StructContracts.md](/docs/Explanations/StructContracts.md).
 
@@ -143,6 +187,7 @@ Listable material — structures, rules, specifications, and the public API inde
 | `PublicApi.md` | Index of all public-facing components, linking to their detail pages | ReferenceDocs |
 | `Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `TemplateFileActions.md` | The action each template file takes when forking or adapting a library | ReferenceDocs |
+| `Cli.md` | Every command, flag, and exit code of the command-line interface | ReferenceDocs |
 | `<Name>.md` | Any other reference page the library needs | ReferenceDocs |
 
 #### `/docs/References/Meta/`

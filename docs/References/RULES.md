@@ -16,7 +16,7 @@ Before creating or editing any file, read [Specs.md](/docs/References/Specs.md) 
 
 ## Sandbox Isolation
 
-[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [examples/](/examples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [AddDependency.md](/docs/Tutorials/AddDependency.md). The mechanic is explained in [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md).
+[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [libraryExamples/](/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [AddDependency.md](/docs/Tutorials/AddDependency.md). The mechanic is explained in [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md).
 
 Contracts are **structs of function fields**, never interfaces — in [sandbox/contracts/deps](/sandbox/contracts/deps/) and [sandbox/contracts/api](/sandbox/contracts/api/) alike. Every type in the project is declared in `sandbox/contracts/`; [sandbox/internal/](/sandbox/internal/) declares no types at all. See [StructContracts.md](/docs/Explanations/StructContracts.md).
 
@@ -71,7 +71,7 @@ Conversely, nothing outside the sandbox may reach into it beyond its three publi
 
 ## Import Aliases
 
-Any file that **consumes** the library from outside it — [examples/](/examples/), the adapter in `bootstrap/` that wires the embedded lib, and third-party consumers — imports it under `agnos`-prefixed aliases, so each call site says which layer it belongs to:
+Any file that **consumes** the library from outside it — [libraryExamples/](/libraryExamples/), the adapter in `bootstrap/` that wires the embedded lib, and third-party consumers — imports it under `agnos`-prefixed aliases, so each call site says which layer it belongs to:
 
 | Import | Alias |
 |--------|-------|
@@ -112,4 +112,12 @@ When you create, delete, or rename a `.md` file, update the Doc Index of [README
 
 ## Sample Changes
 
-When you create, delete, or rename a sample (any file inside [examples/](/examples/)), update the Samples section of [README.md](/README.md).
+When you create, delete, or rename a sample, update the section of [README.md](/README.md) that lists it: the CLI Examples section for a script in [cliExamples/](/cliExamples/), the Library Examples section for a program in [libraryExamples/](/libraryExamples/).
+
+---
+
+## Interface Changes
+
+The command-line interface lives **inside** the sandbox, as the `Sandboxmain` field of `api.Lib`, dispatching in [sandbox/internal/cli/](/sandbox/internal/cli/). The binary in [cmd/main/](/cmd/main/) wires an adapter into the library, calls that field, and exits with its return — it must never branch on a command, parse a flag, or print anything of its own, or the behavior stops being reachable from any other front end.
+
+When you add or change a command or a flag, update [Cli.md](/docs/References/Cli.md) and the usage screen in `sandbox/internal/cli/cli.go` in the same commit, following [AddCliCommand.md](/docs/Tutorials/AddCliCommand.md).

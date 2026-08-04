@@ -8,7 +8,7 @@ Index of every public-facing entry of the library. Callers hold **structs of fun
 ## Structs
 
 ### [api.Lib](/docs/References/PublicApi/api.Lib.md)
-The library entry point — a financial tracker persisting categories and transactions in the injected database. Returned by `lib.New`; exposes all library functions as fields.
+The library entry point — a financial tracker persisting categories and transactions in the injected database. Returned by `lib.New`; exposes all library functions, and the command-line interface itself, as fields.
 
 ### [api.Category](/docs/References/PublicApi/api.Category.md)
 One bucket transactions are tracked under, with its dependencies already wired into every field it exposes.
@@ -17,7 +17,7 @@ One bucket transactions are tracked under, with its dependencies already wired i
 A single spend or received record handed back by the library, with its dependencies already wired in.
 
 ### [deps.Deps](/docs/References/PublicApi/deps.Deps.md)
-The dependency contract every adapter must fill: the clock, the embedded Verb argv parser, and the embedded Keep schema database every record is persisted in.
+The dependency contract every adapter must fill: the clock, the writer the interface reports through, the embedded Verb argv parser, and the embedded Keep schema database.
 
 ### [verbdeps.Lib](/docs/References/PublicApi/verbdeps.Lib.md)
 The sandbox's copy of the embedded Verb argv-parser library's api, injected whole as the `deps.Deps.VerbLib` field.
@@ -43,6 +43,9 @@ The fields of [`api.Category`](/docs/References/PublicApi/api.Category.md) and [
 
 ### [api.Lib.Deps / api.Category.Deps / api.Transaction.Deps](/docs/References/PublicApi/api.Deps.md)
 The injected dependency set the struct was built with; read-only after construction.
+
+### [api.Lib.Sandboxmain](/docs/References/PublicApi/api.Sandboxmain.md)
+Runs the whole command-line interface over an argument vector and returns the process exit code.
 
 ### [api.Lib.AddCategory](/docs/References/PublicApi/api.AddCategory.md)
 Creates a category, or returns the stored one when the name is already taken.

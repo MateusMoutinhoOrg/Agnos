@@ -5,8 +5,21 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/category"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/cli"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/store"
 )
+
+// SandboxmainFactory fills api.Lib.Sandboxmain with a closure that runs the
+// whole command-line interface: it dispatches one command line — read
+// through the injected Verb parser, reported through the injected Printf —
+// over the library functions below, and returns the process exit code. The
+// dispatch itself lives in sandbox/internal/cli, so this file keeps one
+// factory per api.Lib field.
+func SandboxmainFactory(l *api.Lib) func(args []string) int {
+	return func(args []string) int {
+		return cli.Run(l, args)
+	}
+}
 
 // AddCategoryFactory fills api.Lib.AddCategory with a closure that creates
 // the named category in the injected database and returns it. Creation is
@@ -130,6 +143,7 @@ func BalanceFactory(l *api.Lib) func() int64 {
 // function field to api.Lib means adding its factory call here.
 func New(d deps.Deps) api.Lib {
 	l := api.Lib{Deps: d}
+	l.Sandboxmain = SandboxmainFactory(&l)
 	l.AddCategory = AddCategoryFactory(&l)
 	l.GetCategory = GetCategoryFactory(&l)
 	l.ListCategories = ListCategoriesFactory(&l)
