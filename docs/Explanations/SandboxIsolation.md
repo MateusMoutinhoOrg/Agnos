@@ -42,10 +42,11 @@ type Deps struct {
 	Load    func(key string) (value string, expiresAtUnix int64, ok bool) // instead of os.ReadFile
 	Store   func(key string, value string, expiresAtUnix int64)           // instead of os.WriteFile
 	VerbLib verbdeps.Lib                                                  // instead of importing the Verb library
+	KeepLib keepdeps.Lib                                                  // instead of importing the Keep library
 }
 ```
 
-`VerbLib` is the same door in a different shape: the Verb argv parser is a third-party module to this sandbox, so instead of importing it the sandbox declares a copy of its api in `sandbox/contracts/deps/verbdeps/` and lets the adapter fill it. Restating the shape is cheap because it is a struct of function fields — see [StructContracts.md](/docs/Explanations/StructContracts.md) and [DepsMechanic.md](/docs/Explanations/DepsMechanic.md#injecting-a-whole-library).
+`VerbLib` and `KeepLib` are the same door in a different shape: the Verb argv parser and the Keep schema database are third-party modules to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it. Restating the shape is cheap because it is a struct of function fields — see [StructContracts.md](/docs/Explanations/StructContracts.md) and [DepsMechanic.md](/docs/Explanations/DepsMechanic.md#injecting-a-whole-library).
 
 Inside the sandbox, the same behaviors are reached only through `l.Deps`:
 

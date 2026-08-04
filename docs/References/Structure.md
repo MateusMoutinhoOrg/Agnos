@@ -48,6 +48,13 @@ The sandbox's copy of the embedded [Verb](https://github.com/MateusMoutinhoOrg/V
 |------|-------------|------|
 | `verbdeps.go` | Copy of the embedded Verb library's `api.Lib` struct, injected whole as the `Deps.VerbLib` field | |
 
+##### `/sandbox/contracts/deps/keepdeps/`
+The sandbox's copy of the embedded [Keep](https://github.com/MateusMoutinhoOrg/Keep) schema-database library's public api, for the same reason `verbdeps/` exists. Keep's api is a tree of structs — `Lib` hands back a `KeepDatabase`, which hands back a `SchemaInstance`, which hands back `SchemaItem`s — so the copy restates the whole tree, and the adapter converts each returned struct as it crosses.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `keepdeps.go` | Copy of the embedded Keep library's api structs and constants, injected whole as the `Deps.KeepLib` field | |
+
 #### `/sandbox/contracts/api/`
 The structs the library hands back to callers.
 

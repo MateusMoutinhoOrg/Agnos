@@ -3,6 +3,7 @@ package deps
 import (
 	"time"
 
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 )
 
@@ -16,11 +17,12 @@ import (
 // without real waiting) and the storage backend (so records can live in
 // memory, on disk, or anywhere an adapter decides).
 //
-// VerbLib shows what changes when the dependency is another library built
-// with this same pattern: the whole library arrives as one struct field,
-// with no getter method and no bridging type around it. The sandbox never
-// imports Verb — it declares a copy of its api in verbdeps, and the
-// adapter, which lives outside the sandbox, fills it.
+// VerbLib and KeepLib show what changes when the dependency is another
+// library built with this same pattern: the whole library arrives as one
+// struct field, with no getter method and no bridging type around it. The
+// sandbox never imports Verb or Keep — it declares a copy of each api in
+// verbdeps and keepdeps, and the adapter, which lives outside the sandbox,
+// fills it.
 type Deps struct {
 	// Now returns the current time, used to stamp and check expiry.
 	Now func() time.Time
@@ -31,4 +33,7 @@ type Deps struct {
 	// VerbLib is the embedded Verb argv-parser library, already initialized
 	// by the adapter over the argument vector that adapter chose.
 	VerbLib verbdeps.Lib
+	// KeepLib is the embedded Keep schema-database library, already wired
+	// by the adapter to the storage backend that adapter chose.
+	KeepLib keepdeps.Lib
 }

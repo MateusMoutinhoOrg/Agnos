@@ -123,8 +123,9 @@ func main() {
 		Store: func(key, value string, expiresAtUnix int64) {
 			store[key] = value
 		},
-		// VerbLib is left zero here: nothing in this program parses
-		// arguments. See "Injecting a Whole Library" below.
+		// VerbLib and KeepLib are left zero here: nothing in this
+		// program parses arguments or opens a database. See "Injecting a
+		// Whole Library" below.
 	}
 
 	// 2. Inject it into the library
@@ -144,18 +145,19 @@ func main() {
 
 ## Injecting a Whole Library
 
-One dependency is not a behavior but another library built with this same pattern: [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), the embedded Verb argv parser. Because a contract is a struct of function fields and not an interface, the whole library fits in one plain field — no getter, no bridging type:
+Two dependencies are not behaviors but other libraries built with this same pattern: [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), the embedded Verb argv parser, and [`KeepLib`](/docs/References/PublicApi/keepdeps.Lib.md), the embedded Keep schema database. Because a contract is a struct of function fields and not an interface, the whole library fits in one plain field — no getter, no bridging type:
 
 ```go
 type Deps struct {
 	Now     func() time.Time
 	Load    func(key string) (value string, expiresAtUnix int64, ok bool)
 	Store   func(key string, value string, expiresAtUnix int64)
-	VerbLib verbdeps.Lib // the embedded library, injected whole
+	VerbLib verbdeps.Lib // an embedded library, injected whole
+	KeepLib keepdeps.Lib // and another one
 }
 ```
 
-The sandbox cannot import Verb — that would break [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) — so it declares a copy of Verb's api in `sandbox/contracts/deps/verbdeps/`. The adapter, outside the sandbox, initializes the real library and assigns its fields onto that copy:
+The sandbox cannot import Verb or Keep — that would break [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) — so it declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/`. The adapter, outside the sandbox, initializes the real library and assigns its fields onto that copy:
 
 ```go
 // adapters/standard/standard.go
@@ -170,6 +172,24 @@ func VerbLibFactory(s *StandardAdapter) verbdeps.Lib {
 ```
 
 The factory returns a **value** instead of a closure, because the field is a struct rather than a function — the one shape variation the [factory pattern](/docs/References/RULES.md#factory-pattern) allows. Building a `Deps` by hand means either filling `VerbLib` the same way or leaving it zero, in which case nothing may call through it. The same mechanic, seen from the other side, is what `bootstrap/` demonstrates: there, *this* library is the one being embedded.
+
+### When the embedded library hands back structs
+
+Verb's fields return plain values, so copying is one assignment per field. Keep's do not: `Lib.NewDatabase` returns a `KeepDatabase`, whose `GetSchema` returns a `SchemaInstance`, whose `NewItem` returns a `SchemaItem`. Assigning those functions straight across would leak the embedded library's types into the sandbox, so the factory wraps each one in a closure that converts what it returns:
+
+```go
+// adapters/standard/standard.go
+func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
+	inner := keeplib.New(keepadapter.NewWithBase(s.keepBasePath))
+	return keepdeps.Lib{
+		NewDatabase: func(props keepdeps.Props) keepdeps.KeepDatabase {
+			return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))
+		},
+	}
+}
+```
+
+The conversion runs in both directions — `toKeepProps` on the way in, `fromKeepDatabase` on the way out — and recurses as far as the api tree goes. That work is the price of the wall, and it is paid once per adapter, outside the sandbox. It stays mechanical for the same reason the copy itself does: every type on both sides is a struct of plain fields.
 
 ---
 

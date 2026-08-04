@@ -14,10 +14,13 @@ The library entry point — a key/value cache with per-key TTL. Returned by `lib
 A single cached record handed back by the library, with its dependencies already wired into `IsExpired`.
 
 ### [deps.Deps](/docs/References/PublicApi/deps.Deps.md)
-The dependency contract every adapter must fill: the clock, the storage backend, and the embedded Verb argv parser.
+The dependency contract every adapter must fill: the clock, the storage backend, the embedded Verb argv parser, and the embedded Keep schema database.
 
 ### [verbdeps.Lib](/docs/References/PublicApi/verbdeps.Lib.md)
 The sandbox's copy of the embedded Verb argv-parser library's api, injected whole as the `deps.Deps.VerbLib` field.
+
+### [keepdeps.Lib](/docs/References/PublicApi/keepdeps.Lib.md)
+The sandbox's copy of the embedded Keep schema-database library's api, injected whole as the `deps.Deps.KeepLib` field.
 
 ---
 
