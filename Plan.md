@@ -2,7 +2,7 @@
 ## Prepare Stage
 
 ### adapt verbe pt.1
-- clone Verbe
+- clone Verbe (done)
 - prepare the prompts/prompts/VerbAdapt.md prompt
 
 ### adapt keep pt.1
