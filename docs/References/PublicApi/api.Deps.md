@@ -36,7 +36,7 @@ import (
 )
 
 func main() {
-	myDeps := agnosadapter.New()
+	myDeps := agnosadapter.New(nil) // no CLI arguments to parse here
 
 	// Correct: replace the clock while it is still a plain deps value.
 	frozen := time.Unix(0, 0)

@@ -38,11 +38,14 @@ Everything the library needs from the outside world is declared as a function fi
 ```go
 // sandbox/contracts/deps/deps.go — the only door in the wall
 type Deps struct {
-	Now   func() time.Time                                                // instead of time.Now()
-	Load  func(key string) (value string, expiresAtUnix int64, ok bool)   // instead of os.ReadFile
-	Store func(key string, value string, expiresAtUnix int64)             // instead of os.WriteFile
+	Now     func() time.Time                                              // instead of time.Now()
+	Load    func(key string) (value string, expiresAtUnix int64, ok bool) // instead of os.ReadFile
+	Store   func(key string, value string, expiresAtUnix int64)           // instead of os.WriteFile
+	VerbLib verbdeps.Lib                                                  // instead of importing the Verb library
 }
 ```
+
+`VerbLib` is the same door in a different shape: the Verb argv parser is a third-party module to this sandbox, so instead of importing it the sandbox declares a copy of its api in `sandbox/contracts/deps/verbdeps/` and lets the adapter fill it. Restating the shape is cheap because it is a struct of function fields — see [StructContracts.md](/docs/Explanations/StructContracts.md) and [DepsMechanic.md](/docs/Explanations/DepsMechanic.md#injecting-a-whole-library).
 
 Inside the sandbox, the same behaviors are reached only through `l.Deps`:
 

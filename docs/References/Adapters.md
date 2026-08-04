@@ -9,5 +9,11 @@ Lists every adapter shipped with the library — the opinionated `deps.Deps` imp
 
 | Adapter | Factory | Behavior | Use When |
 |---------|---------|----------|----------|
-| `standard` | [standard.New](/docs/References/PublicApi/standard.New.md) | Single JSON file at a caller-chosen path; real wall clock | You want the default, with values surviving across runs |
-| `memory` | [memory.New](/docs/References/PublicApi/memory.New.md) | In-memory map guarded by a mutex; real wall clock | You want the fastest store and don't need values after the process exits |
+| `standard` | [standard.New](/docs/References/PublicApi/standard.New.md) | Single JSON file at a caller-chosen path; real wall clock; embedded Verb parser over `os.Args[1:]` | You want the default, with values surviving across runs |
+| `memory` | [memory.New](/docs/References/PublicApi/memory.New.md) | In-memory map guarded by a mutex; real wall clock; embedded Verb parser over caller-supplied args | You want the fastest store and don't need values after the process exits |
+
+---
+
+## Embedded Libraries
+
+`Deps` carries one field that is not a behavior but a whole library: [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), the embedded Verb argv parser. Every adapter must fill it, because the sandbox cannot import Verb itself — it holds only a copy of Verb's api in `sandbox/contracts/deps/verbdeps/`. An adapter's `VerbLibFactory` initializes the real library and assigns its fields onto that copy, which is why it returns a **value** rather than a closure. The only choice an adapter makes is which argument vector to parse: `standard` reads the process's command line, `memory` takes it from the caller.

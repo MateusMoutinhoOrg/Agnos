@@ -123,6 +123,8 @@ func main() {
 		Store: func(key, value string, expiresAtUnix int64) {
 			store[key] = value
 		},
+		// VerbLib is left zero here: nothing in this program parses
+		// arguments. See "Injecting a Whole Library" below.
 	}
 
 	// 2. Inject it into the library
@@ -137,6 +139,37 @@ func main() {
 ```
 
 > **Careful:** the compiler cannot tell you a field is missing. A `Deps` built by hand with an unfilled field holds a nil function that panics on first call — fill every field.
+
+---
+
+## Injecting a Whole Library
+
+One dependency is not a behavior but another library built with this same pattern: [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), the embedded Verb argv parser. Because a contract is a struct of function fields and not an interface, the whole library fits in one plain field — no getter, no bridging type:
+
+```go
+type Deps struct {
+	Now     func() time.Time
+	Load    func(key string) (value string, expiresAtUnix int64, ok bool)
+	Store   func(key string, value string, expiresAtUnix int64)
+	VerbLib verbdeps.Lib // the embedded library, injected whole
+}
+```
+
+The sandbox cannot import Verb — that would break [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) — so it declares a copy of Verb's api in `sandbox/contracts/deps/verbdeps/`. The adapter, outside the sandbox, initializes the real library and assigns its fields onto that copy:
+
+```go
+// adapters/standard/standard.go
+func VerbLibFactory(s *StandardAdapter) verbdeps.Lib {
+	inner := verblib.New(s.args)
+	return verbdeps.Lib{
+		Args:      inner.Args,
+		IsPresent: inner.IsPresent,
+		// ... one assignment per field
+	}
+}
+```
+
+The factory returns a **value** instead of a closure, because the field is a struct rather than a function — the one shape variation the [factory pattern](/docs/References/RULES.md#factory-pattern) allows. Building a `Deps` by hand means either filling `VerbLib` the same way or leaving it zero, in which case nothing may call through it. The same mechanic, seen from the other side, is what `bootstrap/` demonstrates: there, *this* library is the one being embedded.
 
 ---
 

@@ -39,7 +39,14 @@ The contract every adapter must fill.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `deps.go` | The `Deps` struct, one function field per injectable behavior | Deps |
+| `deps.go` | The `Deps` struct, one function field per injectable behavior, plus one plain field per embedded library | Deps |
+
+##### `/sandbox/contracts/deps/verbdeps/`
+The sandbox's copy of the embedded [Verb](https://github.com/MateusMoutinhoOrg/Verb) argv-parser library's public api. The sandbox may not import Verb — that would be a third-party import — so it restates the shape it needs, field for field; the adapter, outside the sandbox, is what fills it. Same mechanic as `bootstrap/sandbox/contracts/deps/agnosdeps/`.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `verbdeps.go` | Copy of the embedded Verb library's `api.Lib` struct, injected whole as the `Deps.VerbLib` field | |
 
 #### `/sandbox/contracts/api/`
 The structs the library hands back to callers.
