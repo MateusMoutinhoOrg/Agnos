@@ -40,12 +40,12 @@ import (
 
 func main() {
 	// 1. Build the deps through an adapter
-	deps := agnosadapter.New("cache.json")
+	deps := agnosadapter.New("trackerdata")
 
 	// 2. Inject them into the library
 	l := agnoslib.New(deps)
 
 	// The library instance 'l' is now ready for use.
-	log.Println("Library successfully initialized:", l.Set != nil)
+	log.Println("Library successfully initialized:", l.AddCategory != nil)
 }
 ```

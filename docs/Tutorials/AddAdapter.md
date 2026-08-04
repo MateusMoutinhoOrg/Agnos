@@ -26,18 +26,14 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
        "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
    )
 
-   // FrozenAdapter fills deps.Deps with a fixed clock, so expiry
-   // is deterministic. Records are kept in a map.
+   // FrozenAdapter fills deps.Deps with a fixed clock, so every category
+   // and transaction is stamped with a known time. The database and the argv
+   // parser come from the embedded libraries, as in every other adapter.
    type FrozenAdapter struct {
        // Deps is the contract this adapter fills; its factories assign into it.
-       Deps  deps.Deps
-       now   time.Time
-       store map[string]record
-   }
-
-   type record struct {
-       value         string
-       expiresAtUnix int64
+       Deps deps.Deps
+       now  time.Time
+       args []string
    }
    ```
 3. Write one `<Field>Factory` per field of the `Deps` contract, each returning a single closure that reads the adapter's state through the pointer:
@@ -48,32 +44,28 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
        return func() time.Time { return f.now }
    }
 
-   // LoadFactory returns the closure that fills deps.Deps.Load, fetching a
-   // record from the map.
-   func LoadFactory(f *FrozenAdapter) func(key string) (string, int64, bool) {
-       return func(key string) (string, int64, bool) {
-           r, ok := f.store[key]
-           return r.value, r.expiresAtUnix, ok
-       }
-   }
-
-   // StoreFactory returns the closure that fills deps.Deps.Store, writing a
-   // record into the map.
-   func StoreFactory(f *FrozenAdapter) func(key, value string, expiresAtUnix int64) {
-       return func(key, value string, expiresAtUnix int64) {
-           f.store[key] = record{value: value, expiresAtUnix: expiresAtUnix}
+   // KeepLibFactory returns the value that fills deps.Deps.KeepLib: the
+   // embedded Keep schema-database library, wired to Keep's in-memory
+   // adapter and copied onto the sandbox's local keepdeps.Lib. A field that
+   // is not a function has its factory return a value, not a closure.
+   func KeepLibFactory(f *FrozenAdapter) keepdeps.Lib {
+       inner := keeplib.New(keepadapter.New())
+       return keepdeps.Lib{
+           NewDatabase: func(props keepdeps.Props) keepdeps.KeepDatabase {
+               return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))
+           },
        }
    }
    ```
-   Reading `f.now` and `f.store` inside the closure — instead of capturing them when the factory runs — is what carries the adapter's live state into the library.
+   Reading `f.now` inside the closure — instead of capturing it when the factory runs — is what carries the adapter's live state into the library.
 4. Expose the `New` constructor: build the adapter instance, run every field factory over it, assign each return value into its matching field, and return its `Deps`:
    ```go
    // New creates a deps.Deps whose clock is frozen at the given time.
    func New(now time.Time) deps.Deps {
-       adapter := &FrozenAdapter{now: now, store: make(map[string]record)}
+       adapter := &FrozenAdapter{now: now}
        adapter.Deps.Now = NowFactory(adapter)
-       adapter.Deps.Load = LoadFactory(adapter)
-       adapter.Deps.Store = StoreFactory(adapter)
+       adapter.Deps.VerbLib = VerbLibFactory(adapter)
+       adapter.Deps.KeepLib = KeepLibFactory(adapter)
        return adapter.Deps
    }
    ```

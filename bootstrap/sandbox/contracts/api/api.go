@@ -9,6 +9,7 @@ type Lib struct {
 	// Deps is the dependency set injected by lib.New, carried here so every
 	// factory-built function field can reach it.
 	Deps deps.Deps
-	// TestFunc exercises the embedded cache library reached through the deps.
+	// TestFunc exercises the embedded financial-tracker library reached
+	// through the deps.
 	TestFunc func()
 }

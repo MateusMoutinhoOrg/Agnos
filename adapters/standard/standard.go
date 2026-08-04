@@ -1,10 +1,7 @@
 package standard
 
 import (
-	"encoding/json"
 	"os"
-	"path/filepath"
-	"sync"
 	"time"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
@@ -17,23 +14,17 @@ import (
 	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/Verb/sandbox"
 )
 
-type record struct {
-	Value         string `json:"value"`
-	ExpiresAtUnix int64  `json:"expiresAtUnix"`
-}
-
-// StandardAdapter fills deps.Deps using the Go standard library for storage
-// and the clock, the embedded Verb library — wired over the process's own
-// command line — for argument parsing, and the embedded Keep library — wired
-// to Keep's own filesystem adapter — for schema databases. It persists records
-// in a single JSON file configured on New, so values survive across runs, and
-// reads the real wall clock for Now. Only files outside the sandbox, like this
-// one, may import the embedded Verb and Keep libraries.
+// StandardAdapter fills deps.Deps using the Go standard library for the
+// clock, the embedded Verb library — wired over the process's own command
+// line — for argument parsing, and the embedded Keep library — wired to
+// Keep's own filesystem adapter — for the schema database every category and
+// transaction is persisted in. Records live on disk under a base directory
+// configured on New, so a tracked budget survives across runs. Only files
+// outside the sandbox, like this one, may import the embedded Verb and Keep
+// libraries.
 type StandardAdapter struct {
 	// Deps is the contract this adapter fills; its factories assign into it.
-	Deps     deps.Deps
-	mu       sync.RWMutex
-	filePath string
+	Deps deps.Deps
 	// args is the argument vector the embedded Verb library parses, taken
 	// from the process's own command line.
 	args []string
@@ -47,45 +38,6 @@ type StandardAdapter struct {
 func NowFactory(s *StandardAdapter) func() time.Time {
 	return func() time.Time {
 		return time.Now()
-	}
-}
-
-// LoadFactory returns the closure that fills deps.Deps.Load, reading a
-// record from the JSON file. ok is false when the file is absent, invalid,
-// or the key does not exist.
-func LoadFactory(s *StandardAdapter) func(key string) (value string, expiresAtUnix int64, ok bool) {
-	return func(key string) (value string, expiresAtUnix int64, ok bool) {
-		s.mu.RLock()
-		defer s.mu.RUnlock()
-		raw, err := os.ReadFile(s.filePath)
-		if err != nil {
-			return "", 0, false
-		}
-		var store map[string]record
-		if err := json.Unmarshal(raw, &store); err != nil {
-			return "", 0, false
-		}
-		if rec, found := store[key]; found {
-			return rec.Value, rec.ExpiresAtUnix, true
-		}
-		return "", 0, false
-	}
-}
-
-// StoreFactory returns the closure that fills deps.Deps.Store, writing a
-// record to the JSON file.
-func StoreFactory(s *StandardAdapter) func(key string, value string, expiresAtUnix int64) {
-	return func(key string, value string, expiresAtUnix int64) {
-		s.mu.Lock()
-		defer s.mu.Unlock()
-		store := make(map[string]record)
-		if raw, err := os.ReadFile(s.filePath); err == nil {
-			_ = json.Unmarshal(raw, &store)
-		}
-		store[key] = record{Value: value, ExpiresAtUnix: expiresAtUnix}
-		if raw, err := json.MarshalIndent(store, "", "  "); err == nil {
-			_ = os.WriteFile(s.filePath, raw, 0o644)
-		}
 	}
 }
 
@@ -312,22 +264,19 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 }
 
 // New creates a deps.Deps backed by the standard adapter, ready for lib.New.
-// Records live as a single JSON file at the provided filePath, the embedded
-// Verb library parses the process's own command line, os.Args[1:], and the
-// embedded Keep library stores its records in a "keepdata" directory beside
-// that JSON file — this adapter is the opinionated one, so it picks both
-// locations itself. It builds the adapter instance and runs every field
-// factory over it, so each closure reads the adapter's state at call time.
-// Adding a field to deps.Deps means adding its factory call here.
-func New(filePath string) deps.Deps {
+// The embedded Keep library writes the tracker's categories and transactions
+// under the provided basePath, one file per key, and the embedded Verb
+// library parses the process's own command line, os.Args[1:] — this adapter
+// is the opinionated one, so it picks the argument vector itself. It builds
+// the adapter instance and runs every field factory over it, so each closure
+// reads the adapter's state at call time. Adding a field to deps.Deps means
+// adding its factory call here.
+func New(basePath string) deps.Deps {
 	adapter := &StandardAdapter{
-		filePath:     filePath,
 		args:         os.Args[1:],
-		keepBasePath: filepath.Join(filepath.Dir(filePath), "keepdata"),
+		keepBasePath: basePath,
 	}
 	adapter.Deps.Now = NowFactory(adapter)
-	adapter.Deps.Load = LoadFactory(adapter)
-	adapter.Deps.Store = StoreFactory(adapter)
 	adapter.Deps.VerbLib = VerbLibFactory(adapter)
 	adapter.Deps.KeepLib = KeepLibFactory(adapter)
 	return adapter.Deps

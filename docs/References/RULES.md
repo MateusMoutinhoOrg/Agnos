@@ -30,15 +30,19 @@ A factory takes a pointer to the **carrier** — the struct holding the state th
 
 ```go
 // sandbox/internal/lib/ — the carrier is the api struct being filled
-func SetFactory(l *api.Lib) func(key string, value string, ttlSeconds int) {
-	return func(key string, value string, ttlSeconds int) {
-		l.Deps.Store(key, value, l.Deps.Now().Unix()+int64(ttlSeconds))
+func GetCategoryFactory(l *api.Lib) func(name string) (api.Category, bool) {
+	return func(name string) (api.Category, bool) {
+		record, ok := store.FindCategory(l.Deps, name)
+		if !ok {
+			return api.Category{}, false
+		}
+		return category.New(l.Deps, record), true
 	}
 }
 
 func New(d deps.Deps) api.Lib {
 	l := api.Lib{Deps: d}
-	l.Set = SetFactory(&l)
+	l.GetCategory = GetCategoryFactory(&l)
 	return l
 }
 

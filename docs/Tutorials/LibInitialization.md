@@ -1,7 +1,7 @@
 # Library Initialization
 
 ## Description
-Covers installing the library and initializing it with the standard adapter in a new program. Using the cache after initialization is covered by [CacheValue.md](/docs/Tutorials/CacheValue.md). For other ways to build the dependencies, see [DepsMechanic.md](/docs/Explanations/DepsMechanic.md).
+Covers installing the library and initializing it with the standard adapter in a new program. Creating categories after initialization is covered by [ManageCategories.md](/docs/Tutorials/ManageCategories.md), and recording transactions by [TrackTransactions.md](/docs/Tutorials/TrackTransactions.md). For other ways to build the dependencies, see [DepsMechanic.md](/docs/Explanations/DepsMechanic.md).
 
 ---
 
@@ -22,16 +22,15 @@ Covers installing the library and initializing it with the standard adapter in a
 
    func main() {
        // 2. Create deps via an adapter (the "opinionated" part)
-       deps := agnosadapter.New("cache.json")
+       deps := agnosadapter.New("trackerdata")
 
-       // 3. Inject deps into the pure library — a key/value cache with TTL
+       // 3. Inject deps into the pure library — a financial tracker
        l := agnoslib.New(deps)
 
        // 4. Use the library — it never knows which adapter is behind the scenes
-       l.Set("greeting", "hello world", 60)
-       if entry, ok := l.Get("greeting"); ok {
-           println(entry.Value)
-       }
+       l.AddCategory("groceries")
+       l.AddSpend("groceries", "weekly shopping", 8450) // 84.50
+       println(l.Balance())
    }
    ```
 3. Run the code:

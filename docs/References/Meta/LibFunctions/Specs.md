@@ -4,7 +4,7 @@
 Defines the required shape of a library function — a **factory** in `sandbox/internal/lib/` that returns the closure for one function field of the `Lib` struct declared in `sandbox/contracts/api/api.go`. A factory takes a pointer to the api struct and returns a closure; the caller (the package's `New` constructor) assigns it into the field, and the closure reaches dependencies only through that struct's `Deps`.
 
 ### Rules
-- One factory per function field, named `<Field>Factory` and taking a single `*api.Lib` parameter: `func SetFactory(l *api.Lib) func(...)`. Its only job is to build and return the closure.
+- One factory per function field, named `<Field>Factory` and taking a single `*api.Lib` parameter: `func GetCategoryFactory(l *api.Lib) func(...)`. Its only job is to build and return the closure.
 - The factory's body returns a closure for the field: `return func(...) ... { … }`. The closure's signature must match the field's declaration in `sandbox/contracts/api/api.go` exactly.
 - Every factory must be called from the package's `New(d deps.Deps) api.Lib` constructor, which assigns its return value into the matching field and doubles as the factory aggregate — there is no separate `Factory` function. A field whose factory's return value is never assigned stays nil and panics on first call; the compiler does not check this.
 - Dependencies are called **only** through `l.Deps.<Field>(...)` inside the closure — never construct or import a concrete implementation. Reading `l.Deps` inside the closure rather than capturing it at factory time is what lets the injected value stay authoritative.

@@ -10,7 +10,7 @@ func New(args []string) deps.Deps
 
 ## Description
 
-Creates a [`deps.Deps`](/docs/References/PublicApi/deps.Deps.md) backed by the memory adapter: an in-memory map (guarded by a mutex) for storage, the real wall clock for `Now`, and the embedded Verb argv-parser library — initialized over the `args` the caller passes in rather than over the process's command line — for [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), and the embedded Keep schema-database library — wired to Keep's own native adapter, so its records live in memory too — for [`KeepLib`](/docs/References/PublicApi/keepdeps.Lib.md). Nothing is persisted — neither the cache nor the Keep database survives the process, which makes it the fastest choice for ephemeral caches and tests. The factory returns the **contract struct**, never the concrete `MemoryAdapter`, so consumers stay decoupled from the implementation — each field is filled by a factory whose closure reads the adapter instance, which is how the map travels with the deps. For all shipped adapters, see [Adapters.md](/docs/References/Adapters.md).
+Creates a [`deps.Deps`](/docs/References/PublicApi/deps.Deps.md) backed by the memory adapter: the real wall clock for `Now`, the embedded Verb argv-parser library — initialized over the `args` the caller passes in rather than over the process's command line — for [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), and the embedded Keep schema-database library — wired to Keep's own native adapter, so its records live in memory — for [`KeepLib`](/docs/References/PublicApi/keepdeps.Lib.md). Nothing is persisted: the tracked categories and transactions do not survive the process, which makes it the fastest choice for tests and for programs that start from an empty tracker every run. The factory returns the **contract struct**, never the concrete `MemoryAdapter`, so consumers stay decoupled from the implementation — each field is filled by a factory whose closure reads the adapter instance, which is how the adapter's state travels with the deps. For all shipped adapters, see [Adapters.md](/docs/References/Adapters.md).
 
 ## Parameters
 
@@ -41,9 +41,9 @@ func main() {
 	d := agnosadapter.New(os.Args[1:])
 	l := agnoslib.New(d)
 
-	l.Set("greeting", "hello world", 60)
-	if entry, ok := l.Get("greeting"); ok {
-		fmt.Println(entry.Value) // hello world — gone when the process exits
-	}
+	l.AddCategory("groceries")
+	l.AddSpend("groceries", "weekly shopping", 8450)
+
+	fmt.Println(l.Balance()) // -8450 — gone when the process exits
 }
 ```

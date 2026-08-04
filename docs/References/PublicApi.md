@@ -8,13 +8,16 @@ Index of every public-facing entry of the library. Callers hold **structs of fun
 ## Structs
 
 ### [api.Lib](/docs/References/PublicApi/api.Lib.md)
-The library entry point — a key/value cache with per-key TTL. Returned by `lib.New`; exposes all library functions as fields.
+The library entry point — a financial tracker persisting categories and transactions in the injected database. Returned by `lib.New`; exposes all library functions as fields.
 
-### [api.Entry](/docs/References/PublicApi/api.Entry.md)
-A single cached record handed back by the library, with its dependencies already wired into `IsExpired`.
+### [api.Category](/docs/References/PublicApi/api.Category.md)
+One bucket transactions are tracked under, with its dependencies already wired into every field it exposes.
+
+### [api.Transaction](/docs/References/PublicApi/api.Transaction.md)
+A single spend or received record handed back by the library, with its dependencies already wired in.
 
 ### [deps.Deps](/docs/References/PublicApi/deps.Deps.md)
-The dependency contract every adapter must fill: the clock, the storage backend, the embedded Verb argv parser, and the embedded Keep schema database.
+The dependency contract every adapter must fill: the clock, the embedded Verb argv parser, and the embedded Keep schema database every record is persisted in.
 
 ### [verbdeps.Lib](/docs/References/PublicApi/verbdeps.Lib.md)
 The sandbox's copy of the embedded Verb argv-parser library's api, injected whole as the `deps.Deps.VerbLib` field.
@@ -30,29 +33,37 @@ The sandbox's copy of the embedded Keep schema-database library's api, injected 
 Injects a `deps.Deps` into the library and returns an `api.Lib`.
 
 ### [standard.New](/docs/References/PublicApi/standard.New.md)
-Creates a `deps.Deps` using the standard library adapter (JSON-file store + real clock).
+Creates a `deps.Deps` using the standard library adapter (real clock + a Keep database on disk).
 
 ### [memory.New](/docs/References/PublicApi/memory.New.md)
-Creates a `deps.Deps` using the memory adapter (in-memory store + real clock).
+Creates a `deps.Deps` using the memory adapter (real clock + a Keep database in memory).
 
 ---
 
 ## Fields
 
-### [api.Lib.Deps / api.Entry.Deps](/docs/References/PublicApi/api.Deps.md)
+The fields of [`api.Category`](/docs/References/PublicApi/api.Category.md) and [`api.Transaction`](/docs/References/PublicApi/api.Transaction.md) are documented on those structs' own pages; the entries below are the library functions `api.Lib` exposes.
+
+### [api.Lib.Deps / api.Category.Deps / api.Transaction.Deps](/docs/References/PublicApi/api.Deps.md)
 The injected dependency set the struct was built with; read-only after construction.
 
-### [api.Lib.Set](/docs/References/PublicApi/api.Set.md)
-Stores a value under a key, expiring after the given number of seconds.
+### [api.Lib.AddCategory](/docs/References/PublicApi/api.AddCategory.md)
+Creates a category, or returns the stored one when the name is already taken.
 
-### [api.Lib.Get](/docs/References/PublicApi/api.Get.md)
-Returns the live `api.Entry` stored under a key, or `false` on a miss or expiry.
+### [api.Lib.GetCategory](/docs/References/PublicApi/api.GetCategory.md)
+Returns the stored category with the given name, or `false` on a miss.
 
-### [api.Entry.Value](/docs/References/PublicApi/api.Value.md)
-The cached value.
+### [api.Lib.ListCategories](/docs/References/PublicApi/api.ListCategories.md)
+Returns every stored category, oldest first.
 
-### [api.Entry.ExpiresAt](/docs/References/PublicApi/api.ExpiresAt.md)
-The moment the entry stops being valid.
+### [api.Lib.AddSpend](/docs/References/PublicApi/api.AddSpend.md)
+Records money leaving the budget under an existing category.
 
-### [api.Entry.IsExpired](/docs/References/PublicApi/api.IsExpired.md)
-Reports whether the injected clock has passed the entry's expiry.
+### [api.Lib.AddReceived](/docs/References/PublicApi/api.AddReceived.md)
+Records money entering the budget under an existing category.
+
+### [api.Lib.ListTransactions](/docs/References/PublicApi/api.ListTransactions.md)
+Returns every transaction of every category.
+
+### [api.Lib.Balance](/docs/References/PublicApi/api.Balance.md)
+Sums the signed amounts of every stored transaction.

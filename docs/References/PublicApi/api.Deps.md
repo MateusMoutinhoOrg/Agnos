@@ -1,4 +1,4 @@
-# `api.Lib.Deps` / `api.Entry.Deps`
+# `api.Lib.Deps` / `api.Category.Deps` / `api.Transaction.Deps`
 
 **Type:** Field
 
@@ -10,7 +10,7 @@ Deps deps.Deps
 
 ## Description
 
-The injected dependency set the struct was built with. [`lib.New`](/docs/References/PublicApi/lib.New.md) writes it onto [`api.Lib`](/docs/References/PublicApi/api.Lib.md), and [`api.Lib.Get`](/docs/References/PublicApi/api.Get.md) propagates the same value onto every [`api.Entry`](/docs/References/PublicApi/api.Entry.md) it creates. Every other function field on those structs is a closure that reads this field at call time — it is how a dependency injected once reaches the whole object graph. See [DepsMechanic.md](/docs/Explanations/DepsMechanic.md).
+The injected dependency set the struct was built with. [`lib.New`](/docs/References/PublicApi/lib.New.md) writes it onto [`api.Lib`](/docs/References/PublicApi/api.Lib.md), which propagates the same value onto every [`api.Category`](/docs/References/PublicApi/api.Category.md) it creates, and each category propagates it again onto every [`api.Transaction`](/docs/References/PublicApi/api.Transaction.md) it hands back. Every other function field on those structs is a closure that reads this field at call time — it is how a dependency injected once reaches the whole object graph. See [DepsMechanic.md](/docs/Explanations/DepsMechanic.md).
 
 The field is exported because the library's own factories, which live in another package, must read it. It is **not** a customization point: the closures captured the struct the factories ran over, so assigning to `Deps` on a struct you already hold changes nothing. To replace a behavior, patch the [`deps.Deps`](/docs/References/PublicApi/deps.Deps.md) value **before** passing it to `lib.New`.
 
@@ -47,10 +47,10 @@ func main() {
 	// Wrong: the factories already captured l — this assignment is inert.
 	l.Deps.Now = time.Now
 
-	l.Set("k", "v", 60)
-	frozen = time.Unix(120, 0) // past the TTL
+	l.AddCategory("groceries")
+	transaction, _ := l.AddSpend("groceries", "coffee beans", 1290)
 
-	_, ok := l.Get("k")
-	fmt.Println(ok) // false — the frozen clock is still the one in effect
+	// The frozen clock is still the one in effect.
+	fmt.Println(transaction.OccurredAt.Equal(frozen)) // true
 }
 ```

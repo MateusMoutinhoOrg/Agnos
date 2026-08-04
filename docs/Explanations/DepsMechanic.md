@@ -12,16 +12,18 @@ Explains how the library receives its dependencies. `Deps` is a **struct of func
 ```go
 // sandbox/contracts/deps/deps.go — what the library needs
 type Deps struct {
-	Now   func() time.Time
-	Load  func(key string) (value string, expiresAtUnix int64, ok bool)
-	Store func(key string, value string, expiresAtUnix int64)
+	Now     func() time.Time
+	VerbLib verbdeps.Lib
+	KeepLib keepdeps.Lib
 }
 
 // sandbox/contracts/api/api.go — what the library returns
 type Lib struct {
-	Deps deps.Deps
-	Set  func(key string, value string, ttlSeconds int)
-	Get  func(key string) (Entry, bool)
+	Deps        deps.Deps
+	AddCategory func(name string) (Category, bool)
+	AddSpend    func(category string, description string, amount int64) (Transaction, bool)
+	Balance     func() int64
+	// ... one field per library function
 }
 ```
 
@@ -45,13 +47,12 @@ import (
 
 func main() {
 	// The standard adapter fills every field of deps.Deps
-	myDeps := agnosadapter.New("data.json")
+	myDeps := agnosadapter.New("trackerdata")
 	l := agnoslib.New(myDeps)
 
-	l.Set("greeting", "hello world", 60)
-	if entry, ok := l.Get("greeting"); ok {
-		println(entry.Value)
-	}
+	l.AddCategory("groceries")
+	l.AddSpend("groceries", "weekly shopping", 8450)
+	println(l.Balance()) // -8450
 }
 ```
 
@@ -61,7 +62,7 @@ func main() {
 
 To keep an adapter but change one behavior, take the `deps.Deps` it returns and assign the field you want to replace. Every other field keeps the adapter's implementation — no embedding, no wrapper type.
 
-This is exactly how you test expiry without waiting: keep the standard store, but replace `Now` so the clock is under your control.
+This is exactly how you make a timestamp deterministic: keep the standard database, but replace `Now` so the clock is under your control.
 
 ```go
 package main
@@ -75,20 +76,20 @@ import (
 
 func main() {
 	// 1. Get the default implementation from an adapter
-	myDeps := agnosadapter.New("data.json")
+	myDeps := agnosadapter.New("trackerdata")
 
-	// 2. Replace only the clock — Load and Store stay as the adapter built them
+	// 2. Replace only the clock — KeepLib stays as the adapter built it
 	now := time.Unix(0, 0)
 	myDeps.Now = func() time.Time { return now }
 
 	// 3. Inject — the lib sees a normal deps.Deps
 	l := agnoslib.New(myDeps)
-	l.Set("k", "v", 60) // expires 60s after time 0
+	l.AddCategory("groceries")
 
-	// 4. Jump the clock past expiry — no real waiting needed
+	// 4. Move the clock, and the next record is stamped with the new value
 	now = time.Unix(120, 0)
-	_, ok := l.Get("k")
-	println(ok) // false — expired
+	transaction, _ := l.AddSpend("groceries", "weekly shopping", 8450)
+	println(transaction.OccurredAt.Unix()) // 120
 }
 ```
 
@@ -108,38 +109,34 @@ import (
 
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 	agnosdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
+	agnoskeepdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 )
 
 func main() {
-	// 1. Build your own implementation, keeping records in a plain map
-	store := map[string]string{}
+	// 1. Build your own implementation. Now is a one-line closure; KeepLib
+	//    is an embedded library, so filling it by hand means supplying the
+	//    whole api — see "Injecting a Whole Library" below.
+	frozen := time.Unix(0, 0)
 
 	myDeps := agnosdeps.Deps{
-		Now: time.Now,
-		Load: func(key string) (string, int64, bool) {
-			v, ok := store[key]
-			return v, time.Now().Add(time.Hour).Unix(), ok
+		Now: func() time.Time { return frozen },
+		KeepLib: agnoskeepdeps.Lib{
+			NewDatabase: myOwnDatabase, // your implementation of the api
 		},
-		Store: func(key, value string, expiresAtUnix int64) {
-			store[key] = value
-		},
-		// VerbLib and KeepLib are left zero here: nothing in this
-		// program parses arguments or opens a database. See "Injecting a
-		// Whole Library" below.
+		// VerbLib is left zero here: nothing in this program parses
+		// command-line arguments.
 	}
 
 	// 2. Inject it into the library
 	l := agnoslib.New(myDeps)
 
 	// 3. Use the library normally
-	l.Set("k", "v", 60)
-	if entry, ok := l.Get("k"); ok {
-		println(entry.Value)
-	}
+	l.AddCategory("groceries")
+	println(l.Balance())
 }
 ```
 
-> **Careful:** the compiler cannot tell you a field is missing. A `Deps` built by hand with an unfilled field holds a nil function that panics on first call — fill every field.
+> **Careful:** the compiler cannot tell you a field is missing. A `Deps` built by hand with an unfilled field holds a nil function that panics on first call — fill every field the library actually reaches. In practice, start from an adapter and patch what you need: `KeepLib` is a whole database api, and no program should reimplement it just to change the clock.
 
 ---
 
@@ -150,10 +147,8 @@ Two dependencies are not behaviors but other libraries built with this same patt
 ```go
 type Deps struct {
 	Now     func() time.Time
-	Load    func(key string) (value string, expiresAtUnix int64, ok bool)
-	Store   func(key string, value string, expiresAtUnix int64)
 	VerbLib verbdeps.Lib // an embedded library, injected whole
-	KeepLib keepdeps.Lib // and another one
+	KeepLib keepdeps.Lib // and another one — the tracker's whole storage
 }
 ```
 
@@ -206,8 +201,10 @@ func New(d deps.Deps) api.Lib {
 // sandbox/internal/lib/lib.go
 func New(d deps.Deps) api.Lib {
 	l := api.Lib{Deps: d}
-	l.Set = SetFactory(&l)
-	l.Get = GetFactory(&l)
+	l.AddCategory = AddCategoryFactory(&l)
+	l.AddSpend = AddSpendFactory(&l)
+	l.Balance = BalanceFactory(&l)
+	// ... one assignment per field
 	return l
 }
 ```
@@ -216,10 +213,13 @@ The carrier is the **closure**. Each factory returns a closure that reads `l.Dep
 
 ```go
 // sandbox/internal/lib/lib.go
-func SetFactory(l *api.Lib) func(key string, value string, ttlSeconds int) {
-	return func(key string, value string, ttlSeconds int) {
-		expiresAt := l.Deps.Now().Add(time.Duration(ttlSeconds) * time.Second)
-		l.Deps.Store(key, value, expiresAt.Unix())
+func GetCategoryFactory(l *api.Lib) func(name string) (api.Category, bool) {
+	return func(name string) (api.Category, bool) {
+		record, ok := store.FindCategory(l.Deps, name)
+		if !ok {
+			return api.Category{}, false
+		}
+		return category.New(l.Deps, record), true
 	}
 }
 ```
@@ -227,18 +227,22 @@ func SetFactory(l *api.Lib) func(key string, value string, ttlSeconds int) {
 Every object the lib creates receives the same `Deps`, passed into the object package's `New` constructor, which stores it on the object's own api struct before running that object's factories:
 
 ```go
-// sandbox/internal/lib/lib.go — inside GetFactory's closure
-e := entry.New(l.Deps, value, expiresAtUnix)
+// sandbox/internal/lib/lib.go — inside GetCategoryFactory's closure
+c := category.New(l.Deps, record)
 ```
 
-So a dependency injected once is reachable from anywhere in the object graph — that is why an `Entry` can consult the injected clock in `IsExpired`.
+So a dependency injected once is reachable from anywhere in the object graph — that is why a `Category` can read the injected database in `ListTransactions`, and why each `Transaction` it hands back can delete itself through that same database.
 
 ```
 standard.New() ──▶ deps.Deps ──▶ lib.New(deps) ──▶ api.Lib
                                                      │
-                                             Get() (propagates Deps)
+                                        GetCategory() (propagates Deps)
                                                      ▼
-                                                api.Entry
+                                               api.Category
+                                                     │
+                                   ListTransactions() (propagates Deps)
+                                                     ▼
+                                             api.Transaction
 ```
 
 To add a new behavior to the contract, follow [AddDependency.md](/docs/Tutorials/AddDependency.md).

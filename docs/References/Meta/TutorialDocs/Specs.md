@@ -20,6 +20,6 @@ Defines the required shape of a **Tutorial** page — any `.md` file under `docs
 3. **`### Rules`** *(optional)*: constraints for this tutorial.
 4. **`---`**: horizontal rule separating the header from the workflow.
 5. **`## Workflow`**: numbered, actionable steps, with fenced code blocks where a step involves code, and links to other tutorials for any step that is itself a separate goal.
-6. **`## Full Code`** *(required when the workflow assembles a program across steps)*: the complete resulting code in a single fenced block, ready to copy and run — see [InspectEntryExpiration.md](/docs/Tutorials/InspectEntryExpiration.md) for a concrete example.
+6. **`## Full Code`** *(required when the workflow assembles a program across steps)*: the complete resulting code in a single fenced block, ready to copy and run — see [TrackTransactions.md](/docs/Tutorials/TrackTransactions.md) for a concrete example.
 
 > **Note**: For a concrete example, refer to [sample.md](/docs/References/Meta/TutorialDocs/sample.md).

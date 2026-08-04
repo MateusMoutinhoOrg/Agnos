@@ -6,8 +6,8 @@ Covers running the executable samples in [examples/](../../examples/) to see the
 ---
 
 ## Workflow
-1. Browse the [examples/](../../examples/) directory and pick a sample (e.g., `KvCacheSample/`).
+1. Browse the [examples/](../../examples/) directory and pick a sample (e.g., `TrackSpendSample/`).
 2. Run it from the project root with the Go toolchain:
    ```bash
-   go run ./examples/KvCacheSample/KvCacheSample.go
+   go run ./examples/TrackSpendSample/TrackSpendSample.go
    ```

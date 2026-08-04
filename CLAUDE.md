@@ -4,13 +4,13 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Agnos is a **Go library template** demonstrating OS-independent Dependency Injection. The value is in the *structure and documentation conventions*, not the (deliberately trivial) example code. Most "features" here are `Example*`-prefixed placeholders meant to be replaced when the template is adapted to a real library.
+Agnos is a **financial tracker** — categories holding spend and received transactions, persisted through an injected schema database — built as a Go library template demonstrating OS-independent Dependency Injection. The value is as much in the *structure and documentation conventions* as in the domain code.
 
 ## Commands
 
 ```bash
 go build ./...                                   # build everything
-go run ./examples/KvCacheSample/KvCacheSample.go # run an example
+go run ./examples/TrackSpendSample/TrackSpendSample.go # run an example
 go test ./...                                    # run tests (none exist yet)
 ```
 
@@ -24,11 +24,11 @@ Three top-level trees, wired through **structs of function fields** (never inter
 adapters/  ──▶  sandbox/  ◀──  examples/
 (reaches the OS)  (closed)     (wires the two together)
 
-standard.New()  ──▶  deps.Deps  ──▶  lib.New(deps)  ──▶  api.Lib  ──▶  api.Entry
+standard.New()  ──▶  deps.Deps  ──▶  lib.New(deps)  ──▶  api.Lib  ──▶  api.Category  ──▶  api.Transaction
 (opinionated impl)   (contract)      (entry point)       (output structs, filled by sandbox/internal/ factories)
 ```
 
-Contracts are structs whose fields hold functions, and **every** one of them is filled by **factories** — `func <Field>Factory(carrier *T) <FieldType>` bodies that return one closure reading the carrier at call time, with the assignment made explicitly by the caller. Inside the sandbox the carrier is the `api` struct, which carries its own `Deps` field, and `New` assigns the result (`l.Set = SetFactory(&l)`, reading `l.Deps` inside the closure); inside `adapters/` the carrier is the adapter struct, which declares a `Deps deps.Deps` field its `New` assigns into from each factory's return value (`s.Deps.Now = NowFactory(s)`). No methods bound into fields, no internal mirror type, no `Api()` projection. This is a binding rule — see `docs/References/RULES.md#factory-pattern`, the `Factories` spec (`docs/References/Meta/Factories/`), and `docs/Explanations/StructContracts.md`.
+Contracts are structs whose fields hold functions, and **every** one of them is filled by **factories** — `func <Field>Factory(carrier *T) <FieldType>` bodies that return one closure reading the carrier at call time, with the assignment made explicitly by the caller. Inside the sandbox the carrier is the `api` struct, which carries its own `Deps` field, and `New` assigns the result (`l.GetCategory = GetCategoryFactory(&l)`, reading `l.Deps` inside the closure); inside `adapters/` the carrier is the adapter struct, which declares a `Deps deps.Deps` field its `New` assigns into from each factory's return value (`s.Deps.Now = NowFactory(s)`). No methods bound into fields, no internal mirror type, no `Api()` projection. This is a binding rule — see `docs/References/RULES.md#factory-pattern`, the `Factories` spec (`docs/References/Meta/Factories/`), and `docs/Explanations/StructContracts.md`.
 
 Two trade-offs, neither caught by the compiler: **completeness is unchecked** — a field no factory fills is nil and panics on first call, so every factory must be called from its package's `New` constructor; and **`Deps` is read-only after construction** — the closures captured the struct the factories ran over, so patch `deps.Deps` before calling `lib.New`, never on the returned struct.
 
@@ -38,14 +38,15 @@ Two trade-offs, neither caught by the compiler: **completeness is unchecked** �
 - **`sandbox/contracts/deps/deps.go`** — the `Deps` **struct**. Adding a requirement = adding a function field here. This is the contract every adapter must fill. Two fields are not functions: `VerbLib` (the embedded Verb argv-parser library) and `KeepLib` (the embedded Keep schema-database library), each injected whole.
 - **`sandbox/contracts/deps/verbdeps/verbdeps.go`** — the sandbox's *copy* of the embedded Verb library's `api.Lib`, declared here because the sandbox may not import Verb. Each adapter's `VerbLibFactory` initializes the real library and assigns its fields onto this copy — the same mechanic `bootstrap/` uses for `agnosdeps`, with the roles reversed.
 - **`sandbox/contracts/deps/keepdeps/keepdeps.go`** — the same thing for the embedded Keep schema-database library: a copy of its whole api (`Lib`, `KeepDatabase`, `SchemaInstance`, `SchemaItem`, `Props`, `Schema`, `Item`, `Error` and the constants), filled by each adapter's `KeepLibFactory`. Because Keep's fields hand back further api structs, the factory wraps them in closures that convert each returned struct too.
-- **`sandbox/contracts/api/api.go`** — the output structs the lib hands back (`Lib`, `Entry`, …), each leading with a `Deps deps.Deps` field. Every field must be exported, or `sandbox/internal/` cannot fill it. **Every type in the project is declared here**, never in `internal/`. Types only — no function bodies.
+- **`sandbox/contracts/api/api.go`** — the output structs the lib hands back (`Lib`, `Category`, `Transaction`) plus the `Spend`/`Received` kind constants, each struct leading with a `Deps deps.Deps` field. Every field must be exported, or `sandbox/internal/` cannot fill it. **Every type in the project is declared here**, never in `internal/`. Types only — no function bodies.
 - **`sandbox/internal/lib/`** — the lib's factories: one `<Field>Factory(l *api.Lib)` per function field of `api.Lib`, each returning the field's closure, plus `New(d deps.Deps) api.Lib` assigning every factory's return value into the matching field (`sandbox/new.go` just delegates to it). Go's `internal/` rule keeps it unreachable from `adapters/`, `examples/`, and consumers.
-- **`sandbox/internal/<object>/`** — one package per object the lib creates, holding that object's `<Field>Factory` functions plus a `New(d deps.Deps, …) api.<Object>` constructor that runs them all. There is no separate `Factory` aggregate — `New` is the aggregate. **Factories only, no type declarations.** Packages here take no `internal_` prefix — the `internal/` parent already says it.
+- **`sandbox/internal/<object>/`** — one package per object the lib creates (`category/`, `transaction/`), holding that object's `<Field>Factory` functions plus a `New(d deps.Deps, …) api.<Object>` constructor that runs them all. There is no separate `Factory` aggregate — `New` is the aggregate. **Factories only, no type declarations.** Packages here take no `internal_` prefix — the `internal/` parent already says it.
+- **`sandbox/internal/store/`** — shared helpers over the injected Keep database: the tracker's `Props` (a `category` collection owning a nested `transactions` collection), the field-name constants, and the record readers. Neither an object nor the entry point, so no spec governs it; it declares no types. Keep offers unique string keys and integers only, so a transaction's non-unique description travels inside its unique `reference`, composed as `<sequence>|<description>`.
 - **`adapters/<name>/`** — outside the sandbox; the only place OS-bound and third-party code is allowed. Each declares a struct carrying a `Deps deps.Deps` field, one `<Field>Factory(a *<Name>Adapter)` per `Deps` field returning that field's value, and a `New(...) deps.Deps` constructor that assigns each factory's return value into `a.Deps` and returns it — the populated **contract struct**, never the adapter type. `standard` is the default adapter (Go stdlib only).
 - **`examples/<name>/<name>.go`** — outside the sandbox; self-contained `package main` programs wiring an adapter into the lib.
-- **`bootstrap/`** — a second Agnos library embedding the root one, demonstrating the pattern when a lib's dependency is another lib built the same way: its sandbox declares a *copy* of the embedded api structs (`sandbox/contracts/deps/agnosdeps/`) and its adapter's `CacheLibFactory` fills them by field assignment — the case where a factory assigns a value rather than a closure, because the field is a struct.
+- **`bootstrap/`** — a second Agnos library embedding the root one, demonstrating the pattern when a lib's dependency is another lib built the same way: its sandbox declares a *copy* of the embedded api structs (`sandbox/contracts/deps/agnosdeps/`) and its adapter's `TrackerLibFactory` fills them by field assignment — the case where a factory assigns a value rather than a closure, because the field is a struct.
 
-Every object propagates `Deps` to the objects it creates: a lib factory's closure calls `<object>.New(l.Deps, …)`, which stores the deps on the new api struct before running that object's factories — see `GetFactory` in `sandbox/internal/lib/lib.go`.
+Every object propagates `Deps` to the objects it creates: a lib factory's closure calls `<object>.New(l.Deps, …)`, which stores the deps on the new api struct before running that object's factories — see `GetCategoryFactory` in `sandbox/internal/lib/lib.go`. Objects hold no database handle: `Category` and `Transaction` carry only their identifying data and re-find their record through `store.FindCategory` on every call, so a value never goes stale.
 
 ## Critical: this repo is documentation-driven
 

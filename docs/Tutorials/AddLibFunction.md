@@ -16,31 +16,31 @@ Covers adding a function to the library: declaring it as a field of the `Lib` st
 1. Declare the function as a field of the `Lib` struct in [sandbox/contracts/api/api.go](../../sandbox/contracts/api/api.go):
    ```go
    type Lib struct {
-       Deps deps.Deps
-       Set  func(key string, value string, ttlSeconds int)
-       Get  func(key string) (Entry, bool)
-       Has  func(key string) bool // new function
+       Deps           deps.Deps
+       AddCategory    func(name string) (Category, bool)
+       GetCategory    func(name string) (Category, bool)
+       HasCategory    func(name string) bool // new function
    }
    ```
 2. Write its factory in a new or existing file in [sandbox/internal/lib/](../../sandbox/internal/lib/), with the identical signature, returning the closure:
    ```go
-   // HasFactory returns the closure that fills api.Lib.Has, reporting
-   // whether a live (non-expired) entry exists for key.
-   func HasFactory(l *api.Lib) func(key string) bool {
-       return func(key string) bool {
-           _, ok := l.Get(key)
+   // HasCategoryFactory returns the closure that fills api.Lib.HasCategory,
+   // reporting whether a category is stored under that name.
+   func HasCategoryFactory(l *api.Lib) func(name string) bool {
+       return func(name string) bool {
+           _, ok := l.GetCategory(name)
            return ok
        }
    }
    ```
-   > Calling another field from inside a closure (`l.Get` above) is fine: by the time `Has` runs, `New` has already filled every field.
+   > Calling another field from inside a closure (`l.GetCategory` above) is fine: by the time `HasCategory` runs, `New` has already filled every field.
 3. Assign the factory's return value in the package's `New` constructor — without this line the field stays nil and the function panics when called:
    ```go
    func New(d deps.Deps) api.Lib {
        l := api.Lib{Deps: d}
-       l.Set = SetFactory(&l)
-       l.Get = GetFactory(&l)
-       l.Has = HasFactory(&l) // register the new function
+       l.AddCategory = AddCategoryFactory(&l)
+       l.GetCategory = GetCategoryFactory(&l)
+       l.HasCategory = HasCategoryFactory(&l) // register the new function
        return l
    }
    ```

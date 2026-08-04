@@ -10,9 +10,9 @@ Defines the **factory pattern**, the single way any struct of function fields is
 - A factory returns the field's type. Its only job is to build and return that value; assignment happens at the call site in `New`.
 
 #### One Field, One Factory
-- One factory per field, named `<Field>Factory` after the field it fills — `SetFactory` fills `Set`, `NowFactory` fills `Deps.Now`.
+- One factory per field, named `<Field>Factory` after the field it fills — `GetCategoryFactory` fills `GetCategory`, `NowFactory` fills `Deps.Now`.
 - The body returns a single value for that field, and touches no other field.
-- A function field's factory returns a **closure**; a plain struct field's factory returns a **value** (e.g. `CacheLibFactory` in `bootstrap/adapters/standard/`).
+- A function field's factory returns a **closure**; a plain struct field's factory returns a **value** (e.g. `TrackerLibFactory` in `bootstrap/adapters/standard/`).
 - The returned closure's signature must match the field's declaration in the contract exactly.
 
 #### State Is Read Through the Pointer
@@ -25,7 +25,7 @@ Defines the **factory pattern**, the single way any struct of function fields is
 - Completeness is **not** checked by the compiler. A field no factory's return value is assigned into stays nil and panics on the first call, so keeping `New` complete is the author's job. See [StructContracts.md](/docs/Explanations/StructContracts.md).
 
 #### No Methods in Place of Factories
-- A field is never filled by binding a method of the carrier. Methods may exist only as unexported helpers a closure calls (e.g. `loadAll` in `adapters/standard/`).
+- A field is never filled by binding a method of the carrier. Methods may exist only as unexported helpers a closure calls (e.g. `fromKeepDatabase` in `adapters/standard/`).
 - There is no internal mirror type and no `Api()` projection anywhere in the project.
 
 ## Structure

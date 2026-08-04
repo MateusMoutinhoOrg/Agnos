@@ -38,11 +38,10 @@ Everything the library needs from the outside world is declared as a function fi
 ```go
 // sandbox/contracts/deps/deps.go — the only door in the wall
 type Deps struct {
-	Now     func() time.Time                                              // instead of time.Now()
-	Load    func(key string) (value string, expiresAtUnix int64, ok bool) // instead of os.ReadFile
-	Store   func(key string, value string, expiresAtUnix int64)           // instead of os.WriteFile
-	VerbLib verbdeps.Lib                                                  // instead of importing the Verb library
-	KeepLib keepdeps.Lib                                                  // instead of importing the Keep library
+	Now     func() time.Time // instead of time.Now()
+	VerbLib verbdeps.Lib     // instead of importing the Verb library
+	KeepLib keepdeps.Lib     // instead of importing the Keep library, and
+	                         // with it every os.ReadFile the tracker needs
 }
 ```
 
@@ -52,10 +51,20 @@ Inside the sandbox, the same behaviors are reached only through `l.Deps`:
 
 ```go
 // sandbox/internal/lib/lib.go — no os, no net, no third party
-func SetFactory(l *api.Lib) func(key string, value string, ttlSeconds int) {
-	return func(key string, value string, ttlSeconds int) {
-		expiresAt := l.Deps.Now().Add(time.Duration(ttlSeconds) * time.Second)
-		l.Deps.Store(key, value, expiresAt.Unix())
+func AddCategoryFactory(l *api.Lib) func(name string) (api.Category, bool) {
+	return func(name string) (api.Category, bool) {
+		categories, ok := store.Categories(l.Deps) // reaches l.Deps.KeepLib
+		if !ok {
+			return api.Category{}, false
+		}
+		record, err := categories.NewItem(map[string]any{
+			store.NameField:      name,
+			store.CreatedAtField: l.Deps.Now().Unix(),
+		})
+		if err != nil {
+			return api.Category{}, false
+		}
+		return category.New(l.Deps, record), true
 	}
 }
 ```

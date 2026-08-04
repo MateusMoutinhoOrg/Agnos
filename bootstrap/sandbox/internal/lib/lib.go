@@ -6,21 +6,25 @@ import (
 )
 
 // TestFuncFactory returns the closure that fills api.Lib.TestFunc, which
-// exercises the embedded library reached through the Deps: it stores a
-// record, reads it back, and prints it. The embedded library is never
-// imported here — the adapter injects it as an agnosdeps.Lib struct, so
-// calling it is just calling a function field.
+// exercises the embedded library reached through the Deps: it records one
+// transaction, reads the tracker back, and prints it. The embedded library
+// is never imported here — the adapter injects it as an agnosdeps.Lib
+// struct, so calling it is just calling a function field.
 func TestFuncFactory(l *api.Lib) func() {
 	return func() {
-		cache := l.Deps.CacheLib
-		cache.Set("greeting", "Hello World", 60)
+		tracker := l.Deps.TrackerLib
 
-		entry, found := cache.Get("greeting")
-		if !found {
-			l.Deps.Println("greeting: not cached")
+		category, created := tracker.AddCategory("groceries")
+		if !created {
+			l.Deps.Println("groceries: could not create the category")
 			return
 		}
-		l.Deps.Println("greeting:", entry.Value, "expires at", entry.ExpiresAt, "expired:", entry.IsExpired())
+		category.AddSpend("weekly shopping", 8450)
+
+		for _, transaction := range tracker.ListTransactions() {
+			l.Deps.Println("transaction:", transaction.String())
+		}
+		l.Deps.Println("balance:", tracker.Balance())
 	}
 }
 

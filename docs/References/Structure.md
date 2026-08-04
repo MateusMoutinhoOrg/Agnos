@@ -73,11 +73,18 @@ The entry-point implementation. The `internal/` parent already marks it private,
 | `lib.go` | One `<Field>Factory(l *api.Lib)` per lib function, each returning a closure, plus the `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
 
 #### `/sandbox/internal/<object>/`
-One package per object the library creates, named after the object itself.
+One package per object the library creates, named after the object itself — `category/` and `transaction/` for this library.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `<object>.go` | The object's `<Field>Factory` functions, each returning a closure, plus the `New(d deps.Deps, …) api.<Object>` constructor that propagates `Deps` and assigns every factory's return value | LibObjects |
+
+#### `/sandbox/internal/store/`
+Shared helpers over the injected database, used by `internal/lib/` and by every object package: the schema the tracker's records are persisted under, the lookups that reach it, and the encoding of a transaction's reference. It declares **no types and no factories** — it is the one internal package that is neither an object nor the entry point, so no specification governs it.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `store.go` | The database `Props`, the field-name constants, and the helpers that read a stored record through `deps.Deps.KeepLib` | |
 
 ---
 
@@ -113,9 +120,9 @@ A second, self-contained Agnos library — same three trees (`sandbox/`, `adapte
 
 | Path | Description |
 |------|-------------|
-| `sandbox/contracts/deps/deps.go` | The `Deps` struct, including `CacheLib` — the embedded library, held as a locally declared contract struct |
+| `sandbox/contracts/deps/deps.go` | The `Deps` struct, including `TrackerLib` — the embedded library, held as a locally declared contract struct |
 | `sandbox/contracts/deps/agnosdeps/agnosdeps.go` | Copy of the embedded library's `api` structs, declared inside the sandbox so the sandbox never imports the embedded library |
-| `adapters/<name>/<name>.go` | Its `CacheLibFactory` initializes the embedded library with the embedded library's own adapter, and copies its `api` fields onto the local `agnosdeps` ones |
+| `adapters/<name>/<name>.go` | Its `TrackerLibFactory` initializes the embedded library with the embedded library's own adapter, and copies its `api` fields onto the local `agnosdeps` ones |
 | `examples/<example>/<example>.go` | Self-contained `package main` wiring a bootstrap adapter into the bootstrap lib |
 
 The copying lives in the adapter because only code outside the sandbox may import the embedded library. Because both sides are structs of function fields, the copy is field assignment: a wrapper is needed only where a named type differs between the two declarations. See [StructContracts.md](/docs/Explanations/StructContracts.md).
