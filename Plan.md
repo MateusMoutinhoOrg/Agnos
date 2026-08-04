@@ -1,16 +1,16 @@
 
 
-###  Rename 
+###  Rename  (done)
 - execute prompts/prompts/1.Rename.md 
 ~~~bash
 claude -p "$(cat prompts/prompts/1.Rename.md)" --dangerously-skip-permissions
 ~~~    
 
 
-### Fix the boostrap system
-- Execute the prompts/prompts/2.BoostrapFix.md script
+### Fix the adapters patterns
+- Execute the prompts/prompts/2.AdaptersFix.md script
 ~~~bash
-claude -p "$(cat prompts/prompts/2.BoostrapFix.md)" --dangerously-skip-permissions
+claude -p "$(cat prompts/prompts/2.AdaptersFix.md)" --dangerously-skip-permissions
 ~~~
 
 
