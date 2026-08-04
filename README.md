@@ -1,4 +1,4 @@
-# Agnos
+V# Agnos
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos-Cli.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos-Cli)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos-Cli)](https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest)
@@ -185,4 +185,4 @@ The binding conventions every change to this repo must follow.
 
 ## License
 
-This project is licensed under the [MIT License](./LICENSE).
+This project is licensed under the [Unlicense](./LICENSE).
