@@ -1,20 +1,20 @@
-## rename the project 
 
-- open claude code 
-- calls it to rename to github.com/MateusMoutinhoOrg/Agnos-Cli
+## Prepare Stage
 
-## adapt the project for cli 
+### adapt agnos pt.1
+- clone Agnos
+- prepare the prompts/prompts/AgnosAdapt.md prompt
 
-### adapt agnos
+### adapt keep pt.1
+- clone keep
+- prepare the prompts/prompts/KeepAdapt.md prompt
 
-### adapt keep
-
-### create the main_mode
-
-### create the cmd execution process
-  - adapt the docs to the cli mode
-  
+### create the main  mode
+- prepare the required itens on RefTree
+- prepare the prompts/prompts/mainMode.md 
 
 
-
-## create the docker-build-steps
+## Execution 
+- execute prompts/Rename.md 
+- execute prompts/prompts/AgnosAdapt.md
+- execute: prompts/prompts/mainMode.md
