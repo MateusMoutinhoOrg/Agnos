@@ -1,6 +1,14 @@
 - refactor cli to look more usefull 
 - improve document organization
-  - make the documentation organized more short, and more user friendly 
-  
+
+  - create a bigger index 
+  - make the documentation based on 
+     - cli 
+       - install
+       - usage 
+    -  library 
+       - install 
+       - usage 
+
 - add docker build mode
 - improve instalation mechanics
