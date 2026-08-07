@@ -32,15 +32,46 @@ Consuming Agnos as a Go library still works and is fully documented — it is si
 
 ## Quick Start CLI
 
-**1. Install the CLI globally** — copy, paste, run:
+**1. Install the CLI globally** — pick your OS, copy the block, paste it in a terminal:
+
+**macOS / Linux (bash, zsh, etc.)**
 
 ```bash
-go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3 && \
-  mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos" && \
-  agnos version
+go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3 \
+  && mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos" \
+  && { \
+       case ":$PATH:" in \
+         *":$(go env GOPATH)/bin:"*) ;; \
+         *) \
+           PROF="$HOME/.profile"; \
+           [ -n "$ZSH_VERSION" ] && PROF="$HOME/.zshrc"; \
+           [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && PROF="$HOME/.bashrc"; \
+           echo 'export PATH="$PATH:$(go env GOPATH)/bin"' >> "$PROF"; \
+           export PATH="$PATH:$(go env GOPATH)/bin"; \
+           echo "Added GOPATH/bin to $PROF (open a new terminal or run: source $PROF)"; \
+       esac; \
+     } \
+  && agnos version
 ```
 
-> Needs Go 1.22+ and `$(go env GOPATH)/bin` on your `PATH`. The binary is built from `cmd/main`, so `go install` names it `main` — the `mv` gives it the name you actually type.
+**Windows (PowerShell)**
+
+```powershell
+go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3; `
+  if ($?) { `
+    $gobin = (go env GOPATH) + '\bin'; `
+    Move-Item "$gobin\main.exe" "$gobin\agnos.exe" -Force; `
+    if ($env:PATH -notlike "*$gobin*") { `
+      [Environment]::SetEnvironmentVariable('PATH', `
+        [Environment]::GetEnvironmentVariable('PATH','User') + ";$gobin", 'User'); `
+      $env:PATH += ";$gobin"; `
+      Write-Host "Added $gobin to your PATH (restart the terminal for full effect)"; `
+    }; `
+    agnos version `
+  }
+```
+
+> Needs Go ≥ 1.22 installed. The binary is built from `cmd/main`, so `go install` names it `main` — the rename gives it the name you actually type. The script also adds Go's binary directory to your PATH persistently if it isn't already there. See [InstallCli.md](/docs/Tutorials/InstallCli.md) for troubleshooting.
 
 **2. Track your first budget:**
 
