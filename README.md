@@ -35,7 +35,7 @@ Consuming Agnos as a Go library still works and is fully documented — it is si
 **1. Install the CLI globally** — copy, paste, run:
 
 ```bash
-go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@latest && \
+go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3 && \
   mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos" && \
   agnos version
 ```
@@ -63,7 +63,7 @@ Every command, flag, and exit code is listed in [Cli.md](/docs/References/Cli.md
 
 **1. Install the module:**
 ```bash
-go get github.com/MateusMoutinhoOrg/Agnos-Cli@latest
+go get github.com/MateusMoutinhoOrg/Agnos-Cli@v0.0.3
 ```
 
 **2. Create a `main.go` file:**

@@ -12,7 +12,7 @@ Covers installing the `agnos` command-line interface globally, so it runs from a
 ## Workflow
 1. Install the binary and give it its name:
    ```bash
-   go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@latest && \
+   go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3 && \
      mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos"
    ```
 2. Put Go's binary directory on your `PATH` if it is not already there, adding the line to your shell profile so it survives a new terminal:
