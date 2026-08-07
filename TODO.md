@@ -1,0 +1,4 @@
+- refactor cli to look more usefull 
+- improve document organization
+- add docker build mode
+- improve instalation mechanics
