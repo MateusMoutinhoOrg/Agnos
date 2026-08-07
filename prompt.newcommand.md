@@ -1,4 +1,7 @@
 - the cli commands should be like:
+### Command changes
+the project needs to be called agnos-cli , not just agnos 
+
 
 ### Category managment
 
