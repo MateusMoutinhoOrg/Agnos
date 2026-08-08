@@ -44,7 +44,7 @@ The fields of [`api.Category`](/docs/PublicApi/api.Category.md) and [`api.Transa
 ### [api.Lib.Deps / api.Category.Deps / api.Transaction.Deps](/docs/PublicApi/api.Deps.md)
 The injected dependency set the struct was built with; read-only after construction.
 
-### api.Lib.Sandboxmain
+### [api.Lib.Sandboxmain](/docs/PublicApi/api.Sandboxmain.md)
 Runs the whole command-line interface over an argument vector and returns the process exit code.
 
 ### [api.Lib.AddCategory](/docs/PublicApi/api.AddCategory.md)
