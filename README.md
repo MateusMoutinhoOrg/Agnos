@@ -161,6 +161,7 @@ go run main.go
 | Doc | Description |
 | --- | --- |
 | [/docs/LibInitialization.md](/docs/LibInitialization.md) | Install the lib, create deps via an adapter, and run a first program |
+| [/docs/Adapters.md](/docs/Adapters.md) | Every shipped adapter you can inject, and when to use each one |
 | [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | The `Deps` contract you inject: what each field is for, and how to swap or patch one |
 | [/docs/ManageCategories.md](/docs/ManageCategories.md) | Create the categories transactions are tracked under, list them, and remove one |
 | [/docs/TrackTransactions.md](/docs/TrackTransactions.md) | Record spend and received transactions, list them, and read a balance |
