@@ -130,7 +130,7 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 }
 ```
 
-That conversion is the price of the wall, paid once per adapter, outside the sandbox. `bootstrap/` demonstrates the same mechanic from the other side: there, *this* library is the one being embedded — see [StructContracts.md](/docs/StructContracts.md#consuming-a-library-that-uses-this-pattern).
+That conversion is the price of the wall, paid once per adapter, outside the sandbox. `bootstrap/` demonstrates the same mechanic from the other side: there, *this* library is the one being embedded — see [Bootstrap.md](/docs/Bootstrap.md) and [StructContracts.md](/docs/StructContracts.md#consuming-a-library-that-uses-this-pattern).
 
 ---
 

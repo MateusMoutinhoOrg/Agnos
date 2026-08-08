@@ -125,7 +125,7 @@ func TrackerLibFactory(s *StandardAdapter) agnosdeps.Lib {
 }
 ```
 
-Every field whose signature matches is one line; an interface would need a bridging type declaring every method. The `bootstrap/` tree is the worked example — see [Structure.md](/docs/Structure.md#bootstrap).
+Every field whose signature matches is one line; an interface would need a bridging type declaring every method. The `bootstrap/` tree is the worked example, explained end to end in [Bootstrap.md](/docs/Bootstrap.md) — see also [Structure.md](/docs/Structure.md#bootstrap).
 
 ---
 

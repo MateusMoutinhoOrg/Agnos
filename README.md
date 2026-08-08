@@ -168,6 +168,7 @@ go run main.go
 | [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
 | [/docs/RunApiSample.md](/docs/RunApiSample.md) | How to run API examples from the source |
 | [/docs/ApiSamplesList.md](/docs/ApiSamplesList.md) | A list of all examples that can be executed in API mode |
+| [/docs/Bootstrap.md](/docs/Bootstrap.md) | Embed this library as a dependency of another library built with the same pattern — the `bootstrap/` tree explained |
 
 ---
 
@@ -238,6 +239,7 @@ This section is for those using the `Agnos-Cli` project as a template to bootstr
 | [/docs/AdaptExistingLib.md](/docs/AdaptExistingLib.md) | **Start here for an existing library**: convert it to this DI structure |
 | [/docs/TemplateFileActions.md](/docs/TemplateFileActions.md) | The per-file action table both workflows follow: copy, create, rewrite, or delete |
 | [/docs/RenameModule.md](/docs/RenameModule.md) | Rename the Go module path and update all internal imports — the first step of both workflows |
+| [/docs/Bootstrap.md](/docs/Bootstrap.md) | The `bootstrap/` tree explained: how a library built from this template embeds another Agnos-style library |
 
 ---
 
