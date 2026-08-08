@@ -1,7 +1,7 @@
 # Handle Documents
 
 ## Description
-Covers creating, renaming, moving, and deleting `.md` files in [docs/](../), and registering them across the project.
+Covers creating, renaming, moving, and deleting `.md` files in [docs/](./), and registering them across the project — the companion step nearly every other tutorial ends in.
 
 ### Rules
 - Every `.md` file must comply with the specifications that govern it — locate them in [Specs.md](/docs/Specs.md).

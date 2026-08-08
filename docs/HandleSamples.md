@@ -1,14 +1,14 @@
 # Handle Library Samples
 
 ## Description
-Covers creating and running executable Go samples in [examples/libraryExamples/](../../examples/libraryExamples/) that demonstrate library features. The shell-script counterparts, demonstrating features against the built CLI, are covered by [HandleCliExamples.md](/docs/HandleCliExamples.md).
+Covers creating and running executable Go samples in [examples/libraryExamples/](../examples/libraryExamples/) that demonstrate library features — typically after adding one through [HandleLibElements.md](/docs/HandleLibElements.md). The shell-script counterparts, demonstrating features against the built CLI, are covered by [HandleCliExamples.md](/docs/HandleCliExamples.md).
 
 ---
 
 ## Run a Library Sample
 
 ### Workflow
-1. Browse the [examples/libraryExamples/](../../examples/libraryExamples/) directory and pick a sample (e.g., `TrackSpendSample/`).
+1. Browse the [examples/libraryExamples/](../examples/libraryExamples/) directory and pick a sample (e.g., `TrackSpendSample/`).
 2. Run it from the project root with the Go toolchain:
    ```bash
    go run ./examples/libraryExamples/TrackSpendSample/TrackSpendSample.go
@@ -28,7 +28,7 @@ Covers creating and running executable Go samples in [examples/libraryExamples/]
 - The sample file must follow its specification — locate it in [Specs.md](/docs/Specs.md).
 
 ### Workflow
-1. Create a directory inside [examples/libraryExamples/](../../examples/libraryExamples/) named after the feature being demonstrated (e.g., `examples/libraryExamples/NewFeatureSample/`).
+1. Create a directory inside [examples/libraryExamples/](../examples/libraryExamples/) named after the feature being demonstrated (e.g., `examples/libraryExamples/NewFeatureSample/`).
 2. Inside it, create the sample file with the same name as the directory (e.g., `NewFeatureSample.go`).
 3. Write a runnable `package main` program that builds deps through an adapter, injects them into the lib, and uses the feature. Comment the key parts.
 4. If the sample needs setup instructions, add a `README.md` in the sample's directory.

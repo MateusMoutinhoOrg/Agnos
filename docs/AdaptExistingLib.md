@@ -16,7 +16,7 @@ Covers converting a library that already exists into this project's dependency-i
 
 ## Workflow
 1. Recreate this project's directory layout inside the library being converted, using [Structure.md](/docs/Structure.md) as reference.
-2. Copy every **[Copy](/docs/TemplateFileActions.md#copy)** file into the library unchanged — the specifications, rules, tutorials, explanations, and [sandbox/new.go](../../sandbox/new.go).
+2. Copy every **[Copy](/docs/TemplateFileActions.md#copy)** file into the library unchanged — the specifications, rules, tutorials, explanations, and [sandbox/new.go](../sandbox/new.go).
 3. Rewrite `sandbox/contracts/deps/deps.go` with the OS-bound and third-party calls the library must receive as dependencies, one function field each, following [HandleDependencies.md](/docs/HandleDependencies.md).
 4. Rewrite `sandbox/contracts/api/api.go` with the `Lib` struct and one struct per type the library hands back, following [HandleLibElements.md](/docs/HandleLibElements.md) and [HandleLibElements.md](/docs/HandleLibElements.md).
 5. Rewrite `adapters/standard/standard.go` so the default adapter fills every field of that contract with the library's current behavior, following [HandleAdapters.md](/docs/HandleAdapters.md).

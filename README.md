@@ -182,22 +182,48 @@ This section is for contributors adding functionality, commands, or fixing bugs 
 > | [Structure](/docs/Structure.md) | The project's directory layout and the purpose of each component — needed to know **where** changes belong. |
 > | [Specs](/docs/Specs.md) | The index of every specification — needed to know **how** the file you are about to touch must be shaped. |
 
-### Development Documentation
+### Learning Path
+
+The documentation below is a reading path. The stages are ordered from what **every** change touches to what almost none does: read stage 1 once to absorb the mechanics, then jump to the stage matching your change.
+
+#### 1. Mechanics — read once, before any change
+
+Every contribution runs into these three mechanics; every tutorial below assumes them.
 
 | Doc | Description |
 | --- | --- |
-| [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | Why the library lives in a closed sandbox and what it may not import |
+| [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | The sandbox wall: what `sandbox/` may not import, and why every effect is a `Deps` field |
 | [/docs/StructContracts.md](/docs/StructContracts.md) | Why every contract is a struct of function fields, and how factories fill them |
-| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | Understand the dependency mechanism and add requirements to the Deps contract |
-| [/docs/HandleAdapters.md](/docs/HandleAdapters.md) | Create a new opinionated implementation of the Deps contract |
-| [/docs/Adapters.md](/docs/Adapters.md) | Lists every shipped adapter and when to use each one |
-| [/docs/DepsMechanic.md](/docs/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups |
-| [/docs/HandleLibElements.md](/docs/HandleLibElements.md) | Add functions or objects to the library, writing factories and propagating deps |
+| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | How injected deps travel the object graph, and how to add a field to the `Deps` contract |
+
+#### 2. Everyday changes — most contributions live here
+
+The typical feature is a library function plus the CLI command that calls it, published in the API index.
+
+| Doc | Description |
+| --- | --- |
+| [/docs/HandleLibElements.md](/docs/HandleLibElements.md) | Add a function or an object to the library: declare, write the factory, register it |
+| [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind `api.Lib.Sandboxmain` |
 | [/docs/ExposePublicApi.md](/docs/ExposePublicApi.md) | Publish a lib function, object, or field in the public API index |
-| [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
-| [/docs/HandleDocuments.md](/docs/HandleDocuments.md) | Create, rename, move, or delete a .md file without leaving broken references |
-| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Create and run shell scripts in examples/cliExamples/ |
-| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create and run executable Go samples in examples/libraryExamples/ |
+
+#### 3. Companion updates — after most changes
+
+New behavior is demonstrated by a sample and reflected in the docs, in the same commit.
+
+| Doc | Description |
+| --- | --- |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Create and run shell scripts in `examples/cliExamples/` driving the built CLI |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create and run executable Go samples in `examples/libraryExamples/` |
+| [/docs/HandleDocuments.md](/docs/HandleDocuments.md) | Create, rename, move, or delete a `.md` file without leaving broken references |
+
+#### 4. Infrastructure — rare changes
+
+The `Deps` implementations change far less often than the library they feed.
+
+| Doc | Description |
+| --- | --- |
+| [/docs/Adapters.md](/docs/Adapters.md) | Every shipped adapter and when to use each one |
+| [/docs/HandleAdapters.md](/docs/HandleAdapters.md) | Create a new opinionated implementation of the `Deps` contract |
 
 ---
 

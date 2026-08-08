@@ -16,12 +16,12 @@ Covers using this repository as a GitHub template to start a **new** dependency-
 1. On the GitHub repository page, click **"Use this template"** and create the new repository.
 2. Rename the module to the new GitHub path, following [RenameModule.md](/docs/RenameModule.md).
 3. Leave every **[Copy](/docs/TemplateFileActions.md#copy)** file untouched — they describe the structure, not the library.
-4. Rewrite [sandbox/contracts/deps/deps.go](../../sandbox/contracts/deps/deps.go) with the dependencies the new library requires, following [HandleDependencies.md](/docs/HandleDependencies.md).
-5. Rewrite [sandbox/contracts/api/api.go](../../sandbox/contracts/api/api.go) with the `Lib` struct and one struct per object the new library hands back, following [HandleLibElements.md](/docs/HandleLibElements.md) and [HandleLibElements.md](/docs/HandleLibElements.md).
-6. Rewrite [adapters/standard/standard.go](../../adapters/standard/standard.go) so the default adapter fills every field of the new contract, following [HandleAdapters.md](/docs/HandleAdapters.md).
-7. Create the new library logic in [sandbox/internal/](../../sandbox/internal/) — the lib's factories plus one package per object — following [HandleLibElements.md](/docs/HandleLibElements.md) and [HandleLibElements.md](/docs/HandleLibElements.md).
-8. Create any additional adapter in [adapters/](../../adapters/), following [HandleAdapters.md](/docs/HandleAdapters.md).
-9. Create the new samples: the Go programs in [examples/libraryExamples/](../../examples/libraryExamples/), following [HandleSamples.md](/docs/HandleSamples.md), and the shell scripts in [examples/cliExamples/](../../examples/cliExamples/), following [HandleCliExamples.md](/docs/HandleCliExamples.md).
+4. Rewrite [sandbox/contracts/deps/deps.go](../sandbox/contracts/deps/deps.go) with the dependencies the new library requires, following [HandleDependencies.md](/docs/HandleDependencies.md).
+5. Rewrite [sandbox/contracts/api/api.go](../sandbox/contracts/api/api.go) with the `Lib` struct and one struct per object the new library hands back, following [HandleLibElements.md](/docs/HandleLibElements.md) and [HandleLibElements.md](/docs/HandleLibElements.md).
+6. Rewrite [adapters/standard/standard.go](../adapters/standard/standard.go) so the default adapter fills every field of the new contract, following [HandleAdapters.md](/docs/HandleAdapters.md).
+7. Create the new library logic in [sandbox/internal/](../sandbox/internal/) — the lib's factories plus one package per object — following [HandleLibElements.md](/docs/HandleLibElements.md) and [HandleLibElements.md](/docs/HandleLibElements.md).
+8. Create any additional adapter in [adapters/](../adapters/), following [HandleAdapters.md](/docs/HandleAdapters.md).
+9. Create the new samples: the Go programs in [examples/libraryExamples/](../examples/libraryExamples/), following [HandleSamples.md](/docs/HandleSamples.md), and the shell scripts in [examples/cliExamples/](../examples/cliExamples/), following [HandleCliExamples.md](/docs/HandleCliExamples.md).
 10. Create the new detail pages in [docs/References/PublicApi/](../References/PublicApi/) and rewrite [PublicApi.md](/docs/PublicApi.md), following [ExposePublicApi.md](/docs/ExposePublicApi.md).
 11. Delete every remaining **[Delete](/docs/TemplateFileActions.md#delete)** file — the example internal logic, adapters, samples, and API pages the new library replaced. For `.md` files, follow [HandleDocuments.md](/docs/HandleDocuments.md).
 12. Rewrite [docs/References/Structure.md](/docs/Structure.md) to describe the resulting layout.

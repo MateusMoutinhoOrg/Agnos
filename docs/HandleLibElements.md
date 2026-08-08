@@ -1,21 +1,21 @@
 # Handle Library Elements
 
 ## Description
-Covers adding new elements — functions and objects — to the library's public API. This involves declaring structs/fields in [sandbox/contracts/api/api.go](../../sandbox/contracts/api/api.go), writing factories under [sandbox/internal/](../../sandbox/internal/), and registering them in the appropriate `New` constructors.
+Covers adding new elements — functions and objects — to the library's public API: declare the struct/field in [sandbox/contracts/api/api.go](../sandbox/contracts/api/api.go), write the factory under [sandbox/internal/](../sandbox/internal/), and register it in the package's `New` constructor. Assumes the mechanics in [StructContracts.md](/docs/StructContracts.md). The CLI command calling the new element is a separate goal — [HandleCliCommands.md](/docs/HandleCliCommands.md); publishing it is [ExposePublicApi.md](/docs/ExposePublicApi.md).
 
 ### Rules
 - A function or object field is only usable once its factory's return value is assigned from the package's `New(d deps.Deps, …)` constructor, which doubles as the factory aggregate — an unassigned field stays nil and panics on first call. The compiler does not catch this.
 - One factory per field, named `<Field>Factory`, returning one closure.
 - Dependencies are reached as `l.Deps.<Field>(...)` or `b.Deps.<Field>(...)` **inside** the closure, never captured at factory time — that is what keeps the injected value authoritative.
-- `sandbox/` is a closed sandbox: library code must never import [adapters/](../../adapters/), [examples/libraryExamples/](../../examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `Deps`. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
-- Adding a directory or file to [sandbox/internal/](../../sandbox/internal/) requires updating [Structure.md](/docs/Structure.md).
+- `sandbox/` is a closed sandbox: library code must never import [adapters/](../adapters/), [examples/libraryExamples/](../examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `Deps`. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
+- Adding a directory or file to [sandbox/internal/](../sandbox/internal/) requires updating [Structure.md](/docs/Structure.md).
 
 ---
 
 ## Add a Library Function
 
 ### Workflow
-1. Declare the function as a field of the `Lib` struct in [sandbox/contracts/api/api.go](../../sandbox/contracts/api/api.go):
+1. Declare the function as a field of the `Lib` struct in [sandbox/contracts/api/api.go](../sandbox/contracts/api/api.go):
    ```go
    type Lib struct {
        Deps           deps.Deps
@@ -24,7 +24,7 @@ Covers adding new elements — functions and objects — to the library's public
        HasCategory    func(name string) bool // new function
    }
    ```
-2. Write its factory in a new or existing file in [sandbox/internal/lib/](../../sandbox/internal/lib/), with the identical signature, returning the closure:
+2. Write its factory in a new or existing file in [sandbox/internal/lib/](../sandbox/internal/lib/), with the identical signature, returning the closure:
    ```go
    // HasCategoryFactory returns the closure that fills api.Lib.HasCategory,
    // reporting whether a category is stored under that name.
@@ -57,12 +57,12 @@ Covers adding new elements — functions and objects — to the library's public
 ## Add a Library Object
 
 ### Rules
-- The object **is** its api struct. There is no internal mirror type: [sandbox/internal/](../../sandbox/internal/) holds only the factories and the constructor.
+- The object **is** its api struct. There is no internal mirror type: [sandbox/internal/](../sandbox/internal/) holds only the factories and the constructor.
 - An object that needs dependencies declares a `Deps deps.Deps` field, filled by its `New` constructor from the parent lib's `l.Deps`. Its factories read that field inside their closures.
 - Every api field must be exported: the factories fill them from another package, and consumers read them.
 
 ### Workflow
-1. Declare the object's struct in [sandbox/contracts/api/api.go](../../sandbox/contracts/api/api.go).
+1. Declare the object's struct in [sandbox/contracts/api/api.go](../sandbox/contracts/api/api.go).
    ```go
    type Budget struct {
        Deps     deps.Deps
@@ -107,13 +107,13 @@ Covers adding new elements — functions and objects — to the library's public
        return b
    }
    ```
-3. Declare the constructor as a field of the `Lib` api struct in [sandbox/contracts/api/api.go](../../sandbox/contracts/api/api.go), returning the object's api struct:
+3. Declare the constructor as a field of the `Lib` api struct in [sandbox/contracts/api/api.go](../sandbox/contracts/api/api.go), returning the object's api struct:
    ```go
    type Lib struct {
        NewBudget func(category string, limit int64) Budget
    }
    ```
-4. Write the constructor's factory in [sandbox/internal/lib/](../../sandbox/internal/lib/), propagating `l.Deps` into the new object:
+4. Write the constructor's factory in [sandbox/internal/lib/](../sandbox/internal/lib/), propagating `l.Deps` into the new object:
    ```go
    // NewBudgetFactory returns the closure that fills api.Lib.NewBudget...
    func NewBudgetFactory(l *api.Lib) func(category string, limit int64) api.Budget {

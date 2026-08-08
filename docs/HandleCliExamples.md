@@ -1,7 +1,7 @@
 # Handle CLI Examples
 
 ## Description
-Covers creating and running shell scripts in [examples/cliExamples/](/examples/cliExamples/) that demonstrate how a user would drive the built CLI from a terminal. The Go counterparts — programs wiring the library from code — are covered by [HandleSamples.md](/docs/HandleSamples.md).
+Covers creating and running shell scripts in [examples/cliExamples/](/examples/cliExamples/) that demonstrate how a user would drive the built CLI from a terminal — typically after adding a command through [HandleCliCommands.md](/docs/HandleCliCommands.md). The Go counterparts, wiring the library from code, are covered by [HandleSamples.md](/docs/HandleSamples.md).
 
 ---
 

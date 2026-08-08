@@ -1,7 +1,7 @@
 # Handle CLI Commands
 
 ## Description
-Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Adding the *library* function a command calls is a separate goal, covered by [HandleLibElements.md](/docs/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/HandleDependencies.md) first.
+Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Add the *library* function the command calls first, following [HandleLibElements.md](/docs/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/HandleDependencies.md) before either.
 
 ### Rules
 - The interface is inside the closed sandbox: it may not import `adapters/`, `cmd/`, a third-party module, or an OS-bound standard-library package. It reads the command line through `l.Deps.VerbLib` and prints through `l.Deps.Printf`, and nothing else. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
