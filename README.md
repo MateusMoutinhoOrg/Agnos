@@ -106,7 +106,7 @@ agnos balance            # 2415.50
 | [/docs/InstallCli.md](/docs/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
 | [/docs/UseCli.md](/docs/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
 | [/docs/Cli.md](/docs/Cli.md) | Every command, flag, amount format, and exit code of the interface |
-| [/docs/RunSample.md](/docs/RunSample.md) | How to run CLI and library examples from the source |
+| [/docs/RunCliSample.md](/docs/RunCliSample.md) | How to run CLI examples from the source |
 
 ---
 
@@ -163,6 +163,7 @@ go run main.go
 | [/docs/ManageCategories.md](/docs/ManageCategories.md) | Create the categories transactions are tracked under, list them, and remove one |
 | [/docs/TrackTransactions.md](/docs/TrackTransactions.md) | Record spend and received transactions, list them, and read a balance |
 | [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
+| [/docs/RunLibrarySample.md](/docs/RunLibrarySample.md) | How to run library examples from the source |
 
 ---
 

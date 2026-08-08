@@ -1,7 +1,7 @@
-# Run Examples
+# Run CLI Examples
 
 ## Description
-How to run the CLI and library examples provided in the repository to understand the tool's behavior and API.
+How to run the CLI examples provided in the repository to understand the tool's behavior from the terminal.
 
 ---
 
@@ -21,18 +21,3 @@ CLI examples are shell scripts that demonstrate how to use the `agnos` command-l
    ```bash
    for script in ./examples/cliExamples/*.sh; do bash "$script"; done
    ```
-
----
-
-## Run Library Examples
-
-Library examples are Go programs that demonstrate how to consume the project as a dependency-injected library.
-
-### Workflow
-
-1. Browse the `/examples/libraryExamples/` directory for a package you want to explore.
-2. Run the package using `go run` from the project root:
-   ```bash
-   go run ./examples/libraryExamples/quickStart
-   ```
-3. Examine the source code of the example to understand how the library API is invoked.
