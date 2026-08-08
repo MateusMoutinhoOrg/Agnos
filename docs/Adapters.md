@@ -11,7 +11,7 @@ Lists every adapter shipped with the library — the opinionated `deps.Deps` imp
 |---------|---------|----------|----------|
 | `standard` | [standard.New](/docs/standard.New.md) | Real wall clock; `Printf` to standard output; embedded Verb parser over `os.Args[1:]`; embedded Keep database on the filesystem, one file per key under a caller-chosen base path | You want the default, with categories and transactions surviving across runs |
 
-An adapter filling `Printf` with a buffer and `VerbLib` with a fixed argument vector is what makes the command-line interface itself — [`api.Lib.Sandboxmain`](/docs/api.Sandboxmain.md) — runnable without a terminal.
+An adapter filling `Printf` with a buffer and `VerbLib` with a fixed argument vector is what makes the command-line interface itself — `api.Lib.Sandboxmain` — runnable without a terminal.
 
 ---
 
