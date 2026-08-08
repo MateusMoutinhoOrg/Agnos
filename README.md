@@ -106,6 +106,7 @@ agnos balance            # 2415.50
 | [/docs/InstallCli.md](/docs/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
 | [/docs/UseCli.md](/docs/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
 | [/docs/Cli.md](/docs/Cli.md) | Every command, flag, amount format, and exit code of the interface |
+| [/docs/RunSample.md](/docs/RunSample.md) | How to run CLI and library examples from the source |
 
 ---
 
