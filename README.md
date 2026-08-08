@@ -229,14 +229,14 @@ The `Deps` implementations change far less often than the library they feed.
 
 ## Template
 
-This section is for those using the `Agnos-Cli` project as a template to bootstrap their own CLI.
+This section is for those using the `Agnos-Cli` project as a template to bootstrap their own CLI. Pick **one** of the two workflows and follow it end to end — both are phased step lists, and both take each file's fate from the same per-file action table.
 
 | Doc | Description |
 | --- | --- |
-| [/docs/ForkTemplate.md](/docs/ForkTemplate.md) | Use this repo as a GitHub template to start a new DI library |
-| [/docs/AdaptExistingLib.md](/docs/AdaptExistingLib.md) | Convert a pre-existing library to this DI structure |
-| [/docs/RenameModule.md](/docs/RenameModule.md) | Rename the Go module path and update all internal imports |
-| [/docs/TemplateFileActions.md](/docs/TemplateFileActions.md) | The action each template file takes when adapting: copy, create, rewrite, or delete |
+| [/docs/ForkTemplate.md](/docs/ForkTemplate.md) | **Start here for a new library**: use this repo as a GitHub template |
+| [/docs/AdaptExistingLib.md](/docs/AdaptExistingLib.md) | **Start here for an existing library**: convert it to this DI structure |
+| [/docs/TemplateFileActions.md](/docs/TemplateFileActions.md) | The per-file action table both workflows follow: copy, create, rewrite, or delete |
+| [/docs/RenameModule.md](/docs/RenameModule.md) | Rename the Go module path and update all internal imports — the first step of both workflows |
 
 ---
 

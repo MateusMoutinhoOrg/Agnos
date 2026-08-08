@@ -1,7 +1,7 @@
 # TutorialDocs Specification
 
 ## Description
-Defines the required shape of a **Tutorial** page — any `.md` file under `docs/Tutorials/`. A tutorial is a workflow guide for a single goal (e.g. `HandleSamples.md`, `HandleDependencies.md`), built from actionable numbered steps.
+Defines the required shape of a **Tutorial** page — any `.md` file in `docs/` that guides a workflow. A tutorial covers a single goal (e.g. `HandleSamples.md`, `HandleDependencies.md`), built from actionable numbered steps.
 
 ### Rules
 - Every page must comply with [GeneralDoc](/docs/Meta/GeneralDoc/Specs.md).
@@ -11,7 +11,7 @@ Defines the required shape of a **Tutorial** page — any `.md` file under `docs
 - An optional `### Rules` section states constraints specific to that tutorial.
 - Steps prescribe actions, not descriptions; use fenced code blocks when a step involves writing or running code.
 - **Full Code at the end**: when the workflow builds a program across multiple steps (code snippets that the reader assembles into one file), the page must end with a `## Full Code` section containing the complete, copy-pasteable program the steps produce. A tutorial whose code already appears whole in a single step is exempt.
-- Background explanations belong in `docs/Explanations/` — link to them instead of embedding them.
+- Background explanations belong in their own explanation page — link to them instead of embedding them.
 - Every new page must be registered in the [README.md](/README.md) Doc Index.
 
 ## Structure

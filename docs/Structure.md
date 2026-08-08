@@ -174,10 +174,7 @@ The copying lives in the adapter because only code outside the sandbox may impor
 ---
 
 ## `/docs/`
-Documentation of the project.
-
-### `/docs/`
-Listable material — structures, rules, specifications, and the public API index.
+Documentation of the project, kept **flat**: reference pages, tutorials, explanations, and API detail pages sit side by side, indexed by the [README](/README.md) Doc Index. The kind of a page decides its specification, not its path.
 
 | File | Description | Spec |
 |------|-------------|------|
@@ -188,33 +185,15 @@ Listable material — structures, rules, specifications, and the public API inde
 | `Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `TemplateFileActions.md` | The action each template file takes when forking or adapting a library | ReferenceDocs |
 | `Cli.md` | Every command, flag, and exit code of the command-line interface | ReferenceDocs |
+| `<pkg>.<Symbol>.md` | One detail page per public struct, function, or field | ReferenceDocs |
 | `<Name>.md` | Any other reference page the library needs | ReferenceDocs |
+| `<Topic>.md` | One page per mechanic the library needs explained | ExplanationDocs |
+| `<Goal>.md` | One page per workflow the library's maintainers repeat | TutorialDocs |
 
-#### `/docs/Meta/`
+### `/docs/Meta/`
 The specifications describing how each kind of file in the project must be shaped. Never browse this directory — locate a specification by reading `Specs.md`.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `<Spec>/Specs.md` | The required shape of the artifact the specification governs | |
 | `<Spec>/sample.<ext>` | Concrete reference implementation of the specification | |
-
-#### `/docs/`
-Detailed documentation for each individual public API entry.
-
-| File | Description | Spec |
-|------|-------------|------|
-| `<pkg>.<Symbol>.md` | One detail page per public struct, function, or field | ReferenceDocs |
-
-### `/docs/`
-Explanations of the project's mechanics and features.
-
-| File | Description | Spec |
-|------|-------------|------|
-| `<Topic>.md` | One page per mechanic the library needs explained | ExplanationDocs |
-
-### `/docs/`
-Workflow guides explaining how to use, extend, and maintain the project. Each file covers a single goal.
-
-| File | Description | Spec |
-|------|-------------|------|
-| `<Goal>.md` | One page per workflow the library's maintainers repeat | TutorialDocs |

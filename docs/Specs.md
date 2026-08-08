@@ -3,11 +3,11 @@
 ## Description
 Entry point for every specification in this project. A specification is a **description of how a file, or a kind of file, must be shaped** — its required sections, in the required order, plus the rules it must respect. Each specification pairs a `Specs.md` (the description) with a `sample` (a concrete file that satisfies it).
 
-This index is the **only** place a specification is located from. Never browse `docs/References/Meta/` looking for one: find the file you are about to touch in an **Applies To** column below and follow the link.
+This index is the **only** place a specification is located from. Never browse `docs/Meta/` looking for one: find the file you are about to touch in an **Applies To** column below and follow the link.
 
 ### Rules
 - Before creating or editing a file, look it up in the **Applies To** columns below. If a row matches, the file must follow that specification — see [RULES.md](/docs/RULES.md#specification-compliance).
-- Every specification lives in its own directory under `docs/References/Meta/`, containing a `Specs.md` and a `sample` file.
+- Every specification lives in its own directory under `docs/Meta/`, containing a `Specs.md` and a `sample` file.
 - Creating, renaming, or deleting a specification requires updating this index in the same commit.
 
 ---
@@ -18,12 +18,12 @@ This index is the **only** place a specification is located from. Never browse `
 |------|------------|-------|
 | GeneralDoc | **Every** `.md` file in the project | [Specs](/docs/Meta/GeneralDoc/Specs.md) · [sample](/docs/Meta/GeneralDoc/sample.md) |
 | Readme | Root `README.md` | [Specs](/docs/Meta/Readme/Specs.md) · [sample](/docs/Meta/Readme/sample.md) |
-| Rules | `docs/References/RULES.md` | [Specs](/docs/Meta/Rules/Specs.md) · [sample](/docs/Meta/Rules/sample.md) |
-| Structure | `docs/References/Structure.md` | [Specs](/docs/Meta/Structure/Specs.md) · [sample](/docs/Meta/Structure/sample.md) |
-| AdaptersDoc | `docs/References/Adapters.md` | [Specs](/docs/Meta/AdaptersDoc/Specs.md) · [sample](/docs/Meta/AdaptersDoc/sample.md) |
-| ReferenceDocs | Any other `.md` under `docs/References/`, except this index and `docs/References/Meta/` | [Specs](/docs/Meta/ReferenceDocs/Specs.md) · [sample](/docs/Meta/ReferenceDocs/sample.md) |
-| ExplanationDocs | Any `.md` under `docs/Explanations/` | [Specs](/docs/Meta/ExplanationDocs/Specs.md) · [sample](/docs/Meta/ExplanationDocs/sample.md) |
-| TutorialDocs | Any `.md` under `docs/Tutorials/` | [Specs](/docs/Meta/TutorialDocs/Specs.md) · [sample](/docs/Meta/TutorialDocs/sample.md) |
+| Rules | `docs/RULES.md` | [Specs](/docs/Meta/Rules/Specs.md) · [sample](/docs/Meta/Rules/sample.md) |
+| Structure | `docs/Structure.md` | [Specs](/docs/Meta/Structure/Specs.md) · [sample](/docs/Meta/Structure/sample.md) |
+| AdaptersDoc | `docs/Adapters.md` | [Specs](/docs/Meta/AdaptersDoc/Specs.md) · [sample](/docs/Meta/AdaptersDoc/sample.md) |
+| ReferenceDocs | Any other **reference** page in `docs/` — listable content: indexes, API detail pages, command lists — except this index and `docs/Meta/` | [Specs](/docs/Meta/ReferenceDocs/Specs.md) · [sample](/docs/Meta/ReferenceDocs/sample.md) |
+| ExplanationDocs | Any **explanation** page in `docs/` — background on one mechanic, e.g. `SandboxIsolation.md` | [Specs](/docs/Meta/ExplanationDocs/Specs.md) · [sample](/docs/Meta/ExplanationDocs/sample.md) |
+| TutorialDocs | Any **tutorial** in `docs/` — a single-goal workflow guide, e.g. `HandleSamples.md`, `ForkTemplate.md` | [Specs](/docs/Meta/TutorialDocs/Specs.md) · [sample](/docs/Meta/TutorialDocs/sample.md) |
 
 GeneralDoc applies on top of the others: a tutorial follows **both** GeneralDoc and TutorialDocs. AdaptersDoc likewise builds on ReferenceDocs — `Adapters.md` follows all three.
 

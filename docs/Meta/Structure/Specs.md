@@ -1,7 +1,7 @@
 # Structure Specification
 
 ## Description
-Defines the required shape of `docs/References/Structure.md`. Structure.md describes the project's **schema** — the *kinds* of files a project is built from — not an exhaustive listing of every concrete file.
+Defines the required shape of `docs/Structure.md`. Structure.md describes the project's **schema** — the *kinds* of files a project is built from — not an exhaustive listing of every concrete file.
 
 ### Rules
 - Structure.md documents **schema slots**, not individual files. One row represents a kind of file (e.g. "an adapter", "a lib function"), not a specific instance.
@@ -14,7 +14,7 @@ Defines the required shape of `docs/References/Structure.md`. Structure.md descr
 
 ## Structure
 1. **Title** (H1): `# Project Structure`.
-2. **Intro**: one short paragraph explaining that the document is a schema map and that named specs are resolved through `docs/References/Specs.md`.
+2. **Intro**: one short paragraph explaining that the document is a schema map and that named specs are resolved through `docs/Specs.md`.
 3. **One `##` section per top-level directory** (`Root`, `/sandbox/`, `/adapters/`, `/cmd/`, `/examples/cliExamples/`, `/examples/libraryExamples/`, `/docs/`), each with a `File | Description | Spec` table (or nested subsection tables), separated by `---`. Directories nested inside a top-level directory (e.g. `/sandbox/contracts/`, `/sandbox/internal/`) are documented as subsections within their parent's `##` section.
 
 > **Note**: For a concrete example, refer to [sample.md](/docs/Meta/Structure/sample.md).

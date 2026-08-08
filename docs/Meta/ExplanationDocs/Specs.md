@@ -1,13 +1,13 @@
 # ExplanationDocs Specification
 
 ## Description
-Defines the required shape of an **Explanation** page — any `.md` file under `docs/Explanations/`. An explanation page describes how a mechanic, feature, or ability of the project works, building understanding rather than listing items or prescribing steps.
+Defines the required shape of an **Explanation** page — any `.md` file in `docs/` explaining a mechanic. An explanation page describes how a mechanic, feature, or ability of the project works, building understanding rather than listing items or prescribing steps.
 
 ### Rules
 - Every page must comply with [GeneralDoc](/docs/Meta/GeneralDoc/Specs.md).
 - Each `##` section must explain a single aspect of the topic.
 - Code examples are illustrative: complete and runnable where possible, with inline comments highlighting what the section explains.
-- Explanation pages must not contain step-by-step procedures — link to the relevant page in `docs/Tutorials/` instead.
+- Explanation pages must not contain step-by-step procedures — link to the relevant tutorial instead.
 - Every new page must be registered in the [README.md](/README.md) Doc Index.
 
 ## Structure

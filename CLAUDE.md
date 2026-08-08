@@ -32,11 +32,11 @@ standard.New()  ──▶  deps.Deps  ──▶  lib.New(deps)  ──▶  api.L
 (opinionated impl)   (contract)      (entry point)       (output structs, filled by sandbox/internal/ factories)
 ```
 
-Contracts are structs whose fields hold functions, and **every** one of them is filled by **factories** — `func <Field>Factory(carrier *T) <FieldType>` bodies that return one closure reading the carrier at call time, with the assignment made explicitly by the caller. Inside the sandbox the carrier is the `api` struct, which carries its own `Deps` field, and `New` assigns the result (`l.GetCategory = GetCategoryFactory(&l)`, reading `l.Deps` inside the closure); inside `adapters/` the carrier is the adapter struct, which declares a `Deps deps.Deps` field its `New` assigns into from each factory's return value (`s.Deps.Now = NowFactory(s)`). No methods bound into fields, no internal mirror type, no `Api()` projection. This is a binding rule — see `docs/References/RULES.md#factory-pattern`, the `Factories` spec (`docs/References/Meta/Factories/`), and `docs/Explanations/StructContracts.md`.
+Contracts are structs whose fields hold functions, and **every** one of them is filled by **factories** — `func <Field>Factory(carrier *T) <FieldType>` bodies that return one closure reading the carrier at call time, with the assignment made explicitly by the caller. Inside the sandbox the carrier is the `api` struct, which carries its own `Deps` field, and `New` assigns the result (`l.GetCategory = GetCategoryFactory(&l)`, reading `l.Deps` inside the closure); inside `adapters/` the carrier is the adapter struct, which declares a `Deps deps.Deps` field its `New` assigns into from each factory's return value (`s.Deps.Now = NowFactory(s)`). No methods bound into fields, no internal mirror type, no `Api()` projection. This is a binding rule — see `docs/RULES.md#factory-pattern`, the `Factories` spec (`docs/Meta/Factories/`), and `docs/StructContracts.md`.
 
 Two trade-offs, neither caught by the compiler: **completeness is unchecked** — a field no factory fills is nil and panics on first call, so every factory must be called from its package's `New` constructor; and **`Deps` is read-only after construction** — the closures captured the struct the factories ran over, so patch `deps.Deps` before calling `lib.New`, never on the returned struct.
 
-`sandbox/` is a **closed sandbox**: nothing in it may import `adapters/`, `cmd/`, `examples/libraryExamples/`, a third-party module, or an OS-bound stdlib package (`os`, `net`, `syscall`, …). Every such effect is a `Deps` field reached through `l.Deps`. This is a binding rule — see `docs/References/RULES.md` and `docs/Explanations/SandboxIsolation.md`.
+`sandbox/` is a **closed sandbox**: nothing in it may import `adapters/`, `cmd/`, `examples/libraryExamples/`, a third-party module, or an OS-bound stdlib package (`os`, `net`, `syscall`, …). Every such effect is a `Deps` field reached through `l.Deps`. This is a binding rule — see `docs/RULES.md` and `docs/SandboxIsolation.md`.
 
 - **`sandbox/new.go`** — package `lib`, the only wiring point consumers touch: `New(deps.Deps) api.Lib`. Never imports `adapters/`. Importers alias it: `agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"`.
 - **`sandbox/contracts/deps/deps.go`** — the `Deps` **struct**. Adding a requirement = adding a function field here. This is the contract every adapter must fill. Two fields are not functions: `VerbLib` (the embedded Verb argv-parser library) and `KeepLib` (the embedded Keep schema-database library), each injected whole.
@@ -47,7 +47,7 @@ Two trade-offs, neither caught by the compiler: **completeness is unchecked** �
 - **`sandbox/internal/<object>/`** — one package per object the lib creates (`category/`, `transaction/`), holding that object's `<Field>Factory` functions plus a `New(d deps.Deps, …) api.<Object>` constructor that runs them all. There is no separate `Factory` aggregate — `New` is the aggregate. **Factories only, no type declarations.** Packages here take no `internal_` prefix — the `internal/` parent already says it.
 - **`sandbox/internal/store/`** — shared helpers over the injected Keep database: the tracker's `Props` (a `category` collection owning a nested `transactions` collection), the field-name constants, and the record readers. Neither an object nor the entry point, so no spec governs it; it declares no types. Keep offers unique string keys and integers only, so a transaction's non-unique description travels inside its unique `reference`, composed as `<sequence>|<description>`.
 - **`adapters/<name>/`** — outside the sandbox; the only place OS-bound and third-party code is allowed. Each declares a struct carrying a `Deps deps.Deps` field, one `<Field>Factory(a *<Name>Adapter)` per `Deps` field returning that field's value, and a `New(...) deps.Deps` constructor that assigns each factory's return value into `a.Deps` and returns it — the populated **contract struct**, never the adapter type. `standard` is the default adapter (Go stdlib only).
-- **`sandbox/internal/cli/`** — the command-line interface itself: the `Run(l *api.Lib, args []string) int` dispatch `SandboxmainFactory` delegates to, the usage screen, and the amount parser. Like `store/` it is neither an object nor the entry point, so no spec governs it and it declares no types and no factories. Adding a command means editing here **and** `docs/References/Cli.md` — see `docs/Tutorials/AddCliCommand.md`.
+- **`sandbox/internal/cli/`** — the command-line interface itself: the `Run(l *api.Lib, args []string) int` dispatch `SandboxmainFactory` delegates to, the usage screen, and the amount parser. Like `store/` it is neither an object nor the entry point, so no spec governs it and it declares no types and no factories. Adding a command means editing here **and** `docs/Cli.md` — see `docs/HandleCliCommands.md`.
 - **`cmd/main/main.go`** — outside the sandbox; the installed binary. Wires the standard adapter into the lib, calls `l.Sandboxmain(os.Args[1:])`, and `os.Exit`s with its return. The argument vector must be the same one the adapter wired `Deps.VerbLib` over. Governed by the `CliMain` spec.
 - **`examples/cliExamples/<Name>.sh`** — outside the sandbox; shell scripts that build the CLI into a scratch dir, point it at `AGNOS_DATA` of their own, and drive it as a user would. Governed by the `CliExamples` spec.
 - **`examples/libraryExamples/<name>/<name>.go`** — outside the sandbox; self-contained `package main` programs wiring an adapter into the lib.
@@ -57,27 +57,27 @@ Every object propagates `Deps` to the objects it creates: a lib factory's closur
 
 ## Critical: this repo is documentation-driven
 
-Changes are governed by required-reading docs, and several actions **must** update companion files in the same commit. Each tutorial in `docs/Tutorials/` covers exactly one goal — read the one matching your change:
+Changes are governed by required-reading docs, and several actions **must** update companion files in the same commit. `docs/` is flat — each tutorial covers exactly one goal; read the one matching your change:
 
 | If you... | Read | And keep in sync |
 |-----------|------|------------------|
-| write or edit any `<Field>Factory` (sandbox **or** adapter) | `docs/References/Meta/Factories/Specs.md` | the `New` constructor that must call it |
-| add/rename/delete any file or dir | `docs/References/Structure.md` | `docs/References/Structure.md` |
-| add/rename/delete a `.md` file | `docs/Tutorials/AddDocument.md`, `RenameDocument.md`, `DeleteDocument.md` | Doc Index in `README.md` |
-| add a lib function/object | `docs/Tutorials/AddLibFunction.md`, `AddLibObject.md` | `docs/References/PublicApi.md` (+ detail page in `docs/References/PublicApi/`, see `ExposePublicApi.md`) |
-| add a `Deps` field | `docs/Tutorials/AddDependency.md` | **every** adapter in `adapters/` (and `bootstrap/adapters/`) |
-| add an adapter | `docs/Tutorials/AddAdapter.md` | `docs/References/Structure.md`, `docs/References/Adapters.md` |
-| need an OS/third-party call inside `sandbox/` | `docs/Explanations/SandboxIsolation.md`, `docs/Tutorials/AddDependency.md` | `sandbox/contracts/deps/deps.go` + **every** adapter |
-| add/rename/delete a library sample | `docs/Tutorials/AddSample.md` | Library Examples section in `README.md` |
-| add/rename/delete a CLI sample | `docs/Tutorials/AddCliExample.md` | CLI Examples section in `README.md` |
-| add or change a CLI command or flag | `docs/Tutorials/AddCliCommand.md` | the `Usage` screen in `sandbox/internal/cli/cli.go` + `docs/References/Cli.md` |
-| fork or adapt the template into a real library | `docs/Tutorials/ForkTemplate.md`, `AdaptExistingLib.md` | `docs/References/TemplateFileActions.md` (the per-file copy/create/rewrite/delete list both tutorials follow) |
+| write or edit any `<Field>Factory` (sandbox **or** adapter) | `docs/Meta/Factories/Specs.md` | the `New` constructor that must call it |
+| add/rename/delete any file or dir | `docs/Structure.md` | `docs/Structure.md` |
+| add/rename/delete a `.md` file | `docs/HandleDocuments.md` | Doc Index in `README.md` |
+| add a lib function/object | `docs/HandleLibElements.md` | `docs/PublicApi.md` (+ detail page `docs/<pkg>.<Symbol>.md`, see `ExposePublicApi.md`) |
+| add a `Deps` field | `docs/HandleDependencies.md` | **every** adapter in `adapters/` (and `bootstrap/adapters/`) |
+| add an adapter | `docs/HandleAdapters.md` | `docs/Structure.md`, `docs/Adapters.md` |
+| need an OS/third-party call inside `sandbox/` | `docs/SandboxIsolation.md`, `docs/HandleDependencies.md` | `sandbox/contracts/deps/deps.go` + **every** adapter |
+| add/rename/delete a library sample | `docs/HandleSamples.md` | `docs/ApiSamplesList.md` + Documentation section in `README.md` |
+| add/rename/delete a CLI sample | `docs/HandleCliExamples.md` | `docs/SamplesList.md` |
+| add or change a CLI command or flag | `docs/HandleCliCommands.md` | the `Usage` screen in `sandbox/internal/cli/cli.go` + `docs/Cli.md` |
+| fork or adapt the template into a real library | `docs/ForkTemplate.md`, `AdaptExistingLib.md` | `docs/TemplateFileActions.md` (the per-file copy/create/rewrite/delete list both tutorials follow) |
 
-`docs/References/RULES.md` is the binding rule set and `docs/References/Specs.md` is the index of every file specification; `AGENTS.md` points here. Adding a `Deps` field without filling it in all adapters breaks every consumer at **runtime**, not at build time — that's the most common footgun, and `go build` will not catch it. A new public lib function or object must be declared in `sandbox/contracts/api/api.go`, given a factory in `sandbox/internal/`, **and** called from that package's `New` constructor, or callers get a nil field.
+`docs/RULES.md` is the binding rule set and `docs/Specs.md` is the index of every file specification; `AGENTS.md` points here. Adding a `Deps` field without filling it in all adapters breaks every consumer at **runtime**, not at build time — that's the most common footgun, and `go build` will not catch it. A new public lib function or object must be declared in `sandbox/contracts/api/api.go`, given a factory in `sandbox/internal/`, **and** called from that package's `New` constructor, or callers get a nil field.
 
 ## Conventions
 
-- Code that consumes the library from outside it (`cmd/`, `examples/libraryExamples/`, the `bootstrap/` adapter, third-party callers) aliases every import with the `agnos` prefix: `agnosadapter` (`adapters/<name>`), `agnoslib` (`sandbox`), `agnostypes` (`sandbox/contracts/api`), `agnosdeps` (`sandbox/contracts/deps`). Files belonging to the library itself — `sandbox/` and `adapters/` — keep the plain package names. See the Import Aliases rule in `docs/References/RULES.md`.
-- Module path is `github.com/MateusMoutinhoOrg/Agnos-Cli`; renaming it is a documented procedure — see `docs/Tutorials/RenameModule.md`.
-- Public-facing lib API entries each get a detail page under `docs/References/PublicApi/` named `<pkg>.<Symbol>.md`.
-- `docs/References/Meta/` holds the specifications: one directory per kind of file, each pairing a `Specs.md` (how the file must be shaped) with a `sample`. Never browse it — always locate a spec through `docs/References/Specs.md`.
+- Code that consumes the library from outside it (`cmd/`, `examples/libraryExamples/`, the `bootstrap/` adapter, third-party callers) aliases every import with the `agnos` prefix: `agnosadapter` (`adapters/<name>`), `agnoslib` (`sandbox`), `agnostypes` (`sandbox/contracts/api`), `agnosdeps` (`sandbox/contracts/deps`). Files belonging to the library itself — `sandbox/` and `adapters/` — keep the plain package names. See the Import Aliases rule in `docs/RULES.md`.
+- Module path is `github.com/MateusMoutinhoOrg/Agnos-Cli`; renaming it is a documented procedure — see `docs/RenameModule.md`.
+- Public-facing lib API entries each get a detail page in `docs/` named `<pkg>.<Symbol>.md`.
+- `docs/Meta/` holds the specifications: one directory per kind of file, each pairing a `Specs.md` (how the file must be shaped) with a `sample`. Never browse it — always locate a spec through `docs/Specs.md`.
