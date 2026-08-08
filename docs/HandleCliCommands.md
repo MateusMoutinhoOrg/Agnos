@@ -65,4 +65,4 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    go build ./... && go run ./cmd/main largest groceries
    ```
 6. Add the command to the Commands table of [Cli.md](/docs/Cli.md), and any flag to its Flags table.
-7. Demonstrate it in a script under [cliExamples/](/cliExamples/) when it is worth showing, following [HandleCliExamples.md](/docs/HandleCliExamples.md).
+7. Demonstrate it in a script under [examples/cliExamples/](/examples/cliExamples/) when it is worth showing, following [HandleCliExamples.md](/docs/HandleCliExamples.md).

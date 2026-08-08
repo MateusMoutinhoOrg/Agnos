@@ -35,8 +35,8 @@ Written from scratch for the library being built or adapted. Nothing of the temp
 | `docs/References/PublicApi/*` | One detail page per public API entry | [ReferenceDocs](/docs/Meta/ReferenceDocs/Specs.md) |
 | `docs/References/<Name>.md` | Any reference page the new library needs beyond the public API index | [ReferenceDocs](/docs/Meta/ReferenceDocs/Specs.md) |
 | `docs/Tutorials/<Goal>.md` | One tutorial per workflow specific to the new library — the template tutorials carried over by **[Copy](#copy)** do **not** fulfill this | [TutorialDocs](/docs/Meta/TutorialDocs/Specs.md) |
-| `libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | [LibraryExamples](/docs/Meta/LibraryExamples/Specs.md) |
-| `cliExamples/example<N>.sh` | One shell script per goal demonstrated against the built CLI | [CliExamples](/docs/Meta/CliExamples/Specs.md) |
+| `examples/libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | [LibraryExamples](/docs/Meta/LibraryExamples/Specs.md) |
+| `examples/cliExamples/example<N>.sh` | One shell script per goal demonstrated against the built CLI | [CliExamples](/docs/Meta/CliExamples/Specs.md) |
 | `sandbox/internal/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, its usage screen, and its operand parsing | |
 
 ---
@@ -67,5 +67,5 @@ The template's example content. Removed once the new library's own files exist.
 | `adapters/*` — except `adapters/standard/` | The example alternative adapters |
 | `sandbox/internal/*` | The example lib factories and object packages |
 | `docs/References/PublicApi/*` | The example API detail pages |
-| `libraryExamples/*` | The example Go samples |
-| `cliExamples/*` | The example CLI scripts |
+| `examples/libraryExamples/*` | The example Go samples |
+| `examples/cliExamples/*` | The example CLI scripts |

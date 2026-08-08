@@ -3,7 +3,7 @@
 # tracked under, list them back, and drop one that was a mistake.
 #
 # Run it from the project root:
-#   bash ./cliExamples/ManageCategories.sh
+#   bash ./examples/cliExamples/ManageCategories.sh
 set -euo pipefail
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

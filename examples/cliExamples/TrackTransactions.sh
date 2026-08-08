@@ -3,7 +3,7 @@
 # them, and read the balance of one category and of the whole budget.
 #
 # Run it from the project root:
-#   bash ./cliExamples/TrackTransactions.sh
+#   bash ./examples/cliExamples/TrackTransactions.sh
 set -euo pipefail
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

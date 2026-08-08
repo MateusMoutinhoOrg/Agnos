@@ -10,7 +10,7 @@ Defines the required shape of the output contracts in `sandbox/contracts/api/api
 - `api.go` declares **types only** — never a function body. Every implementation lives in `sandbox/internal/`; see the [LibFunctions](/docs/Meta/LibFunctions/Specs.md) specification.
 - Every field must be **exported**: `sandbox/internal/` fills them from another package, and consumers read them.
 - A function field returning another library object must return that object's **api struct**; there is no internal type to return.
-- `api.go` may import `sandbox/contracts/deps`, and must not import anything from `adapters/`, `libraryExamples/`, `sandbox/internal/`, or `sandbox` (the entry point) — the contract stays free of implementations.
+- `api.go` may import `sandbox/contracts/deps`, and must not import anything from `adapters/`, `examples/libraryExamples/`, `sandbox/internal/`, or `sandbox` (the entry point) — the contract stays free of implementations.
 - The `Deps` field is **read-only after construction**. Factory closures capture the struct they were run over, so reassigning `Deps` on a returned copy does not change behavior — patch deps before calling `lib.New`.
 - Exported structs must have a doc comment and be listed in [PublicApi.md](/docs/PublicApi.md).
 

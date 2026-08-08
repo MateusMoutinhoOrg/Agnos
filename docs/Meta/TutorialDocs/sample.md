@@ -1,7 +1,7 @@
 # Add a Sample
 
 ## Description
-Covers creating a runnable sample in [libraryExamples/](/libraryExamples/) that demonstrates a library feature.
+Covers creating a runnable sample in [examples/libraryExamples/](/examples/libraryExamples/) that demonstrates a library feature.
 
 ### Rules
 - Creating a sample requires updating the Samples section of the [README.md](/README.md) and [Structure.md](/docs/Structure.md).
@@ -11,7 +11,7 @@ Covers creating a runnable sample in [libraryExamples/](/libraryExamples/) that 
 ---
 
 ## Workflow
-1. Create a directory inside [libraryExamples/](/libraryExamples/) named after the feature being demonstrated (e.g., `libraryExamples/NewFeatureSample/`).
+1. Create a directory inside [examples/libraryExamples/](/examples/libraryExamples/) named after the feature being demonstrated (e.g., `examples/libraryExamples/NewFeatureSample/`).
 2. Inside it, create the sample file with the same name as the directory (e.g., `NewFeatureSample.go`).
 3. Write a runnable `package main` program that builds deps through an adapter, injects them into the lib, and uses the feature. Comment the key parts.
 4. If the sample needs setup instructions, add a `README.md` in the sample's directory.

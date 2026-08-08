@@ -105,14 +105,14 @@ Shell scripts driving the built binary the way a user would.
 
 | Doc | Description | Type |
 | --- | --- | --- |
-| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Run the shell scripts in cliExamples/ and read their transcripts | Tutorial |
-| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Write a cliExamples/ script and register it in the README | Tutorial |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Run the shell scripts in examples/cliExamples/ and read their transcripts | Tutorial |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Write a examples/cliExamples/ script and register it in the README | Tutorial |
 
 ### Available CLI Examples
 
 | Sample | Description |
 |----------|-------------|
-| [ManageCategories.sh](/cliExamples/ManageCategories.sh) | What this script demonstrates against the built CLI |
+| [ManageCategories.sh](/examples/cliExamples/ManageCategories.sh) | What this script demonstrates against the built CLI |
 
 ---
 
@@ -129,18 +129,18 @@ For consuming the lib as a user: install it, run a first program, and understand
 
 ## Library Examples
 
-Runnable Go programs under `libraryExamples/`, wiring an adapter into the lib.
+Runnable Go programs under `examples/libraryExamples/`, wiring an adapter into the lib.
 
 | Doc | Description | Type |
 | --- | --- | --- |
-| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Browse and run the executable samples in the libraryExamples/ directory | Tutorial |
-| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create a runnable sample in libraryExamples/ and register it in the README | Tutorial |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Browse and run the executable samples in the examples/libraryExamples/ directory | Tutorial |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create a runnable sample in examples/libraryExamples/ and register it in the README | Tutorial |
 
 ### Available Library Examples
 
 | Sample | Description |
 |----------|-------------|
-| [ExampleSample](/libraryExamples/ExampleSample/ExampleSample.go) | How to use the library |
+| [ExampleSample](/examples/libraryExamples/ExampleSample/ExampleSample.go) | How to use the library |
 
 ---
 

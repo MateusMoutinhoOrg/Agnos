@@ -10,13 +10,13 @@ Explains why the library lives in `sandbox/` and what "closed sandbox" means in 
 The project is split into three top-level directories, and the arrows only point one way:
 
 ```
-adapters/  ──▶  sandbox/  ◀──  libraryExamples/
+adapters/  ──▶  sandbox/  ◀──  examples/libraryExamples/
 (reaches the OS)  (closed)     (wires the two together)
 ```
 
 - `sandbox/` is the library. It is closed: it imports only itself and OS-independent standard-library packages (`time`, `strings`, `errors`, …).
 - `adapters/` is outside the wall. It is the only place `os`, `net`, a database driver, or any third-party module may appear.
-- `libraryExamples/` is outside the wall too, and is the only place an adapter and the sandbox are named in the same file.
+- `examples/libraryExamples/` is outside the wall too, and is the only place an adapter and the sandbox are named in the same file.
 
 The split is what makes the library OS-independent: nothing inside `sandbox/` can be affected by which operating system, filesystem, or network the program runs on, because it has no way to reach any of them.
 
@@ -29,7 +29,7 @@ A file under `sandbox/` may not import:
 | Forbidden | Why |
 |-----------|-----|
 | `adapters/…` | The library would bind itself to one concrete implementation, and injection would be pointless. |
-| `cmd/…`, `libraryExamples/…` | The binary and the samples are consumers of the library, never part of it. |
+| `cmd/…`, `examples/libraryExamples/…` | The binary and the samples are consumers of the library, never part of it. |
 | Any third-party module | A dependency the caller cannot replace is a dependency the caller cannot test around. |
 | OS-bound stdlib (`os`, `net`, `os/exec`, `syscall`, …) | The effect belongs in an adapter, reached through a `Deps` field. |
 
@@ -113,7 +113,7 @@ import (
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
 
-// This line is in libraryExamples/, outside the wall — the only place
+// This line is in examples/libraryExamples/, outside the wall — the only place
 // an adapter and the sandbox meet.
 l := agnoslib.New(agnosadapter.New("data.json"))
 ```

@@ -78,7 +78,7 @@ Outside the sandbox. The executables the project ships.
 
 ---
 
-## `/cliExamples/`
+## `/examples/cliExamples/`
 Outside the sandbox. Shell scripts driving the built binary the way a user would.
 
 | File | Description | Spec |
@@ -87,7 +87,7 @@ Outside the sandbox. Shell scripts driving the built binary the way a user would
 
 ---
 
-## `/libraryExamples/`
+## `/examples/libraryExamples/`
 Outside the sandbox. Runnable Go examples demonstrating how to use the library from code.
 
 | File | Description | Spec |

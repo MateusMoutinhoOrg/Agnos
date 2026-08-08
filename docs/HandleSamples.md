@@ -1,21 +1,21 @@
 # Handle Library Samples
 
 ## Description
-Covers creating and running executable Go samples in [libraryExamples/](../../libraryExamples/) that demonstrate library features. The shell-script counterparts, demonstrating features against the built CLI, are covered by [HandleCliExamples.md](/docs/HandleCliExamples.md).
+Covers creating and running executable Go samples in [examples/libraryExamples/](../../examples/libraryExamples/) that demonstrate library features. The shell-script counterparts, demonstrating features against the built CLI, are covered by [HandleCliExamples.md](/docs/HandleCliExamples.md).
 
 ---
 
 ## Run a Library Sample
 
 ### Workflow
-1. Browse the [libraryExamples/](../../libraryExamples/) directory and pick a sample (e.g., `TrackSpendSample/`).
+1. Browse the [examples/libraryExamples/](../../examples/libraryExamples/) directory and pick a sample (e.g., `TrackSpendSample/`).
 2. Run it from the project root with the Go toolchain:
    ```bash
-   go run ./libraryExamples/TrackSpendSample/TrackSpendSample.go
+   go run ./examples/libraryExamples/TrackSpendSample/TrackSpendSample.go
    ```
 3. Pass arguments after the file when the sample takes them — `MainCallSample` runs the whole CLI, so it takes the same command line the installed binary does:
    ```bash
-   go run ./libraryExamples/MainCallSample/MainCallSample.go category list
+   go run ./examples/libraryExamples/MainCallSample/MainCallSample.go category list
    ```
 
 ---
@@ -28,7 +28,7 @@ Covers creating and running executable Go samples in [libraryExamples/](../../li
 - The sample file must follow its specification — locate it in [Specs.md](/docs/Specs.md).
 
 ### Workflow
-1. Create a directory inside [libraryExamples/](../../libraryExamples/) named after the feature being demonstrated (e.g., `libraryExamples/NewFeatureSample/`).
+1. Create a directory inside [examples/libraryExamples/](../../examples/libraryExamples/) named after the feature being demonstrated (e.g., `examples/libraryExamples/NewFeatureSample/`).
 2. Inside it, create the sample file with the same name as the directory (e.g., `NewFeatureSample.go`).
 3. Write a runnable `package main` program that builds deps through an adapter, injects them into the lib, and uses the feature. Comment the key parts.
 4. If the sample needs setup instructions, add a `README.md` in the sample's directory.

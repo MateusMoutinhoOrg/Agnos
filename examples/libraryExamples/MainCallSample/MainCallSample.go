@@ -22,8 +22,8 @@ func main() {
 	//    the process exit code. This is the entire body of cmd/main.
 	//
 	//    Run it the way you would run the installed binary:
-	//      go run ./libraryExamples/MainCallSample/MainCallSample.go category add groceries
-	//      go run ./libraryExamples/MainCallSample/MainCallSample.go spend groceries "weekly shopping" 84.50
-	//      go run ./libraryExamples/MainCallSample/MainCallSample.go balance
+	//      go run ./examples/libraryExamples/MainCallSample/MainCallSample.go category add groceries
+	//      go run ./examples/libraryExamples/MainCallSample/MainCallSample.go spend groceries "weekly shopping" 84.50
+	//      go run ./examples/libraryExamples/MainCallSample/MainCallSample.go balance
 	os.Exit(l.Sandboxmain(os.Args[1:]))
 }

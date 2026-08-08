@@ -52,7 +52,7 @@ Explains how the library receives its dependencies and covers adding a requireme
 5. Build the project and run a sample — an unfilled field surfaces at runtime, not at build time:
    ```bash
    go build ./...
-   go run ./libraryExamples/TrackSpendSample/TrackSpendSample.go
+   go run ./examples/libraryExamples/TrackSpendSample/TrackSpendSample.go
    ```
 
 ---

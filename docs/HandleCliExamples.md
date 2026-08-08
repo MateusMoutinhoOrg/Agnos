@@ -1,7 +1,7 @@
 # Handle CLI Examples
 
 ## Description
-Covers creating and running shell scripts in [cliExamples/](/cliExamples/) that demonstrate how a user would drive the built CLI from a terminal. The Go counterparts — programs wiring the library from code — are covered by [HandleSamples.md](/docs/HandleSamples.md).
+Covers creating and running shell scripts in [examples/cliExamples/](/examples/cliExamples/) that demonstrate how a user would drive the built CLI from a terminal. The Go counterparts — programs wiring the library from code — are covered by [HandleSamples.md](/docs/HandleSamples.md).
 
 ---
 
@@ -12,15 +12,15 @@ Covers creating and running shell scripts in [cliExamples/](/cliExamples/) that 
 - It writes to a scratch directory it removes on exit, so running one never touches the records in your home directory.
 
 ### Workflow
-1. Browse [cliExamples/](/cliExamples/) and pick a script — each is named after the goal it demonstrates, so `ManageCategories.sh` is a good starting point.
+1. Browse [examples/cliExamples/](/examples/cliExamples/) and pick a script — each is named after the goal it demonstrates, so `ManageCategories.sh` is a good starting point.
 2. Run it from the project root:
    ```bash
-   bash ./cliExamples/ManageCategories.sh
+   bash ./examples/cliExamples/ManageCategories.sh
    ```
 3. Read the transcript alongside the script: each `== …` line in the output is the comment above the commands that produced what follows it.
 4. Run the rest in order to see the whole interface:
    ```bash
-   for script in ./cliExamples/*.sh; do bash "$script"; done
+   for script in ./examples/cliExamples/*.sh; do bash "$script"; done
    ```
 5. Try the same commands against your own budget once you have installed the binary, following [InstallCli.md](/docs/InstallCli.md) and [UseCli.md](/docs/UseCli.md).
 
@@ -34,14 +34,14 @@ Covers creating and running shell scripts in [cliExamples/](/cliExamples/) that 
 - Adding one requires updating the CLI Examples section of [README.md](/README.md) and [Structure.md](/docs/Structure.md).
 
 ### Workflow
-1. Create the script under [cliExamples/](/cliExamples/), named with a descriptive PascalCase name matching the goal it demonstrates — e.g. `ManageCategories.sh`, `TrackTransactions.sh`.
+1. Create the script under [examples/cliExamples/](/examples/cliExamples/), named with a descriptive PascalCase name matching the goal it demonstrates — e.g. `ManageCategories.sh`, `TrackTransactions.sh`.
 2. Open it with the shebang, a comment naming the goal, how to run it, and the shell options:
    ```bash
    #!/usr/bin/env bash
    # <Name>.sh — one sentence naming what this script demonstrates.
    #
    # Run it from the project root:
-   #   bash ./cliExamples/<Name>.sh
+   #   bash ./examples/cliExamples/<Name>.sh
    set -euo pipefail
    ```
 3. Build the CLI into a scratch directory and point it at a budget of its own, so nothing the script does touches the user's records:
@@ -61,8 +61,8 @@ Covers creating and running shell scripts in [cliExamples/](/cliExamples/) that 
    ```
 5. Make it executable and run it:
    ```bash
-   chmod +x ./cliExamples/<Name>.sh
-   bash ./cliExamples/<Name>.sh
+   chmod +x ./examples/cliExamples/<Name>.sh
+   bash ./examples/cliExamples/<Name>.sh
    ```
 6. Add the script to the CLI Examples section of [README.md](/README.md).
 7. Register it in [Structure.md](/docs/Structure.md) if it introduces anything the schema does not already describe.

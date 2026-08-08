@@ -7,7 +7,7 @@ Covers adding new elements — functions and objects — to the library's public
 - A function or object field is only usable once its factory's return value is assigned from the package's `New(d deps.Deps, …)` constructor, which doubles as the factory aggregate — an unassigned field stays nil and panics on first call. The compiler does not catch this.
 - One factory per field, named `<Field>Factory`, returning one closure.
 - Dependencies are reached as `l.Deps.<Field>(...)` or `b.Deps.<Field>(...)` **inside** the closure, never captured at factory time — that is what keeps the injected value authoritative.
-- `sandbox/` is a closed sandbox: library code must never import [adapters/](../../adapters/), [libraryExamples/](../../libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `Deps`. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
+- `sandbox/` is a closed sandbox: library code must never import [adapters/](../../adapters/), [examples/libraryExamples/](../../examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `Deps`. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
 - Adding a directory or file to [sandbox/internal/](../../sandbox/internal/) requires updating [Structure.md](/docs/Structure.md).
 
 ---

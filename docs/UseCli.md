@@ -51,4 +51,4 @@ Covers running the `agnos` CLI end to end: creating categories, recording what c
    ```bash
    agnos balance nosuchcategory || echo "failed with $?"
    ```
-10. Read a worked transcript of all of this in [cliExamples/](/cliExamples/), following [HandleCliExamples.md](/docs/HandleCliExamples.md).
+10. Read a worked transcript of all of this in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/HandleCliExamples.md).

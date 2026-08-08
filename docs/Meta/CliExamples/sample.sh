@@ -4,7 +4,7 @@
 # <Name>.sh — one sentence naming the goal this script demonstrates.
 #
 # Run it from the project root:
-#   bash ./cliExamples/<Name>.sh
+#   bash ./examples/cliExamples/<Name>.sh
 set -euo pipefail
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

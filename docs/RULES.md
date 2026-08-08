@@ -16,7 +16,7 @@ Before creating or editing any file, read [Specs.md](/docs/Specs.md) and check w
 
 ## Sandbox Isolation
 
-[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [libraryExamples/](/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [HandleDependencies.md](/docs/HandleDependencies.md). The mechanic is explained in [SandboxIsolation.md](/docs/SandboxIsolation.md).
+[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [examples/libraryExamples/](/examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [HandleDependencies.md](/docs/HandleDependencies.md). The mechanic is explained in [SandboxIsolation.md](/docs/SandboxIsolation.md).
 
 Contracts are **structs of function fields**, never interfaces — in [sandbox/contracts/deps](/sandbox/contracts/deps/) and [sandbox/contracts/api](/sandbox/contracts/api/) alike. Every type in the project is declared in `sandbox/contracts/`; [sandbox/internal/](/sandbox/internal/) declares no types at all. See [StructContracts.md](/docs/StructContracts.md).
 
@@ -71,7 +71,7 @@ Conversely, nothing outside the sandbox may reach into it beyond its three publi
 
 ## Import Aliases
 
-Any file that **consumes** the library from outside it — [libraryExamples/](/libraryExamples/), the adapter in `bootstrap/` that wires the embedded lib, and third-party consumers — imports it under `agnos`-prefixed aliases, so each call site says which layer it belongs to:
+Any file that **consumes** the library from outside it — [examples/libraryExamples/](/examples/libraryExamples/), the adapter in `bootstrap/` that wires the embedded lib, and third-party consumers — imports it under `agnos`-prefixed aliases, so each call site says which layer it belongs to:
 
 | Import | Alias |
 |--------|-------|
@@ -112,7 +112,7 @@ When you create, delete, or rename a `.md` file, update the Doc Index of [README
 
 ## Sample Changes
 
-When you create, delete, or rename a sample, update the section of [README.md](/README.md) that lists it: the CLI Examples section for a script in [cliExamples/](/cliExamples/), the Library Examples section for a program in [libraryExamples/](/libraryExamples/).
+When you create, delete, or rename a sample, update the section of [README.md](/README.md) that lists it: the CLI Examples section for a script in [examples/cliExamples/](/examples/cliExamples/), the Library Examples section for a program in [examples/libraryExamples/](/examples/libraryExamples/).
 
 ---
 

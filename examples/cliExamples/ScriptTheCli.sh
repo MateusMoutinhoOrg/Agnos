@@ -3,7 +3,7 @@
 # and feed a listing into other tools.
 #
 # Run it from the project root:
-#   bash ./cliExamples/ScriptTheCli.sh
+#   bash ./examples/cliExamples/ScriptTheCli.sh
 set -uo pipefail   # no -e here: this example inspects failing exit codes
 
 # Build the CLI into a scratch directory and point it at a budget of its own,

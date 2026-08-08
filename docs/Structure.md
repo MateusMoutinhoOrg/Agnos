@@ -5,13 +5,13 @@ This document maps the project **schema** — the kinds of files the project is 
 The project is a **CLI** whose interface lives inside the library. It is split into three top-level trees, and the dependency flow between them is one-way:
 
 ```
-adapters/  ──▶  sandbox/  ◀──  cmd/, libraryExamples/
+adapters/  ──▶  sandbox/  ◀──  cmd/, examples/libraryExamples/
 (reaches the OS)  (closed)     (wire the two together)
 ```
 
-- **`/sandbox/`** is a **closed sandbox**: the pure library, and the command-line interface with it. Nothing inside it may import `adapters/`, `cmd/`, `libraryExamples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
+- **`/sandbox/`** is a **closed sandbox**: the pure library, and the command-line interface with it. Nothing inside it may import `adapters/`, `cmd/`, `examples/libraryExamples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
 - **`/adapters/`** sits outside the sandbox and is the only place OS-bound and third-party code is allowed. Each adapter imports `sandbox/contracts/deps` and nothing else from the sandbox.
-- **`/cmd/`** and **`/libraryExamples/`** sit outside the sandbox too, and are the only places where an adapter and the sandbox meet — `cmd/` for the installable binary, `libraryExamples/` for the runnable Go samples.
+- **`/cmd/`** and **`/examples/libraryExamples/`** sit outside the sandbox too, and are the only places where an adapter and the sandbox meet — `cmd/` for the installable binary, `examples/libraryExamples/` for the runnable Go samples.
 
 Because the interface is `api.Lib.Sandboxmain` — one field of the library like any other — the binary in `cmd/main/` holds no command, no flag, and no output of its own: it wires, runs, and exits.
 
@@ -129,7 +129,7 @@ go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3
 
 ---
 
-## `/cliExamples/`
+## `/examples/cliExamples/`
 Outside the sandbox. Shell scripts driving the built binary the way a user would from a terminal. Each one builds the CLI into a scratch directory and points it at a budget of its own, so nothing a script does touches the records in the user's home.
 
 | File | Description | Spec |
@@ -138,15 +138,15 @@ Outside the sandbox. Shell scripts driving the built binary the way a user would
 
 **Run a CLI example:**
 ```sh
-bash ./cliExamples/ManageCategories.sh
+bash ./examples/cliExamples/ManageCategories.sh
 ```
 
 ---
 
-## `/libraryExamples/`
+## `/examples/libraryExamples/`
 Outside the sandbox. Runnable Go examples demonstrating how to use the library from code, when the CLI is not what the caller wants.
 
-### `/libraryExamples/<example>/`
+### `/examples/libraryExamples/<example>/`
 
 | File | Description | Spec |
 |------|-------------|------|
@@ -154,20 +154,20 @@ Outside the sandbox. Runnable Go examples demonstrating how to use the library f
 
 **Run an example:**
 ```sh
-go run ./libraryExamples/<example>/<example>.go
+go run ./examples/libraryExamples/<example>/<example>.go
 ```
 
 ---
 
 ## `/bootstrap/`
-A second, self-contained Agnos library — same three trees (`sandbox/`, `adapters/`, `libraryExamples/`) and the same rules — demonstrating how one Agnos-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field.
+A second, self-contained Agnos library — same three trees (`sandbox/`, `adapters/`, `examples/libraryExamples/`) and the same rules — demonstrating how one Agnos-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field.
 
 | Path | Description |
 |------|-------------|
 | `sandbox/contracts/deps/deps.go` | The `Deps` struct, including `TrackerLib` — the embedded library, held as a locally declared contract struct |
 | `sandbox/contracts/deps/agnosdeps/agnosdeps.go` | Copy of the embedded library's `api` structs, declared inside the sandbox so the sandbox never imports the embedded library |
 | `adapters/<name>/<name>.go` | Its `TrackerLibFactory` initializes the embedded library with the embedded library's own adapter, and copies its `api` fields onto the local `agnosdeps` ones |
-| `libraryExamples/<example>/<example>.go` | Self-contained `package main` wiring a bootstrap adapter into the bootstrap lib |
+| `examples/libraryExamples/<example>/<example>.go` | Self-contained `package main` wiring a bootstrap adapter into the bootstrap lib |
 
 The copying lives in the adapter because only code outside the sandbox may import the embedded library. Because both sides are structs of function fields, the copy is field assignment: a wrapper is needed only where a named type differs between the two declarations. See [StructContracts.md](/docs/StructContracts.md).
 

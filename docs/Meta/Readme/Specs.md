@@ -39,9 +39,9 @@ One sentence saying who this theme is for / what it covers.
 7. **Must Read callout**: The required-reading table (Rules, Structure, Specs).
 8. **Theme sections**, in this order, each with its description and Doc Index table:
    - *CLI Usage* — installing, running, and extending the command-line interface.
-   - *CLI Examples* — carries the table of scripts in `cliExamples/`.
+   - *CLI Examples* — carries the table of scripts in `examples/cliExamples/`.
    - *Library Usage* — consuming the same behavior from Go code.
-   - *Library Examples* — carries the table of programs in `libraryExamples/`.
+   - *Library Examples* — carries the table of programs in `examples/libraryExamples/`.
    - *Sandbox Management* — adding lib functions and objects inside the sandbox.
    - *Dependency Management* — the `Deps` contract and the adapters filling it.
    - *Documentation Management*, *Template Adaptation*, *Project Rules & Structure* (maintenance).

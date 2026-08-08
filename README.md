@@ -14,7 +14,7 @@ An OS-independent Go **CLI template** — a command-line financial tracker whose
 Agnos-cli is a financial tracker you drive from the terminal. It is built as a structured Go template demonstrating how to build a **CLI** whose behavior is fully decoupled from the process hosting it. The program itself lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`.
 
 ```
-adapters/  ──▶  sandbox/  ◀──  cmd/, libraryExamples/
+adapters/  ──▶  sandbox/  ◀──  cmd/, examples/libraryExamples/
 (reaches the OS)  (closed)     (wire the two together)
 ```
 
@@ -22,7 +22,7 @@ The CLI is `api.Lib.Sandboxmain` — one field of the library like any other. Th
 
 - **`/sandbox/`**: The closed library taking a `Deps` and returning an `api.Lib`.
 - **`/adapters/`**: Concrete implementations of the `Deps` contract.
-- **`/cmd/`** & **`/libraryExamples/`**: Places where an adapter and the library are wired together.
+- **`/cmd/`** & **`/examples/libraryExamples/`**: Places where an adapter and the library are wired together.
 
 See [SandboxIsolation.md](/docs/SandboxIsolation.md) and [StructContracts.md](/docs/StructContracts.md) for the full mechanic.
 
@@ -192,8 +192,8 @@ This section is for contributors adding functionality, commands, or fixing bugs 
 | [/docs/ExposePublicApi.md](/docs/ExposePublicApi.md) | Publish a lib function, object, or field in the public API index |
 | [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
 | [/docs/HandleDocuments.md](/docs/HandleDocuments.md) | Create, rename, move, or delete a .md file without leaving broken references |
-| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Create and run shell scripts in cliExamples/ |
-| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create and run executable Go samples in libraryExamples/ |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Create and run shell scripts in examples/cliExamples/ |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create and run executable Go samples in examples/libraryExamples/ |
 
 ---
 
