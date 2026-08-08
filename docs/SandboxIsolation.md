@@ -48,7 +48,7 @@ type Deps struct {
 
 This is what lets the *whole command-line interface* live inside the wall. `api.Lib.Sandboxmain` reads the command line through `Deps.VerbLib` and writes every line through `Deps.Printf`, so it never touches `os.Args` or `os.Stdout` itself — the binary in `cmd/main/` hands it an argument vector and exits with its return, and a test can hand it a fixed vector and a buffer instead.
 
-`VerbLib` and `KeepLib` are the same door in a different shape: the Verb argv parser and the Keep schema database are third-party modules to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it. Restating the shape is cheap because it is a struct of function fields — see [StructContracts.md](/docs/StructContracts.md) and [DepsMechanic.md](/docs/DepsMechanic.md#injecting-a-whole-library).
+`VerbLib` and `KeepLib` are the same door in a different shape: the Verb argv parser and the Keep schema database are third-party modules to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it. Restating the shape is cheap because it is a struct of function fields — see [StructContracts.md](/docs/StructContracts.md) and [HandleDependencies.md](/docs/HandleDependencies.md#injecting-a-whole-library).
 
 Inside the sandbox, the same behaviors are reached only through `l.Deps`:
 
@@ -72,7 +72,7 @@ func AddCategoryFactory(l *api.Lib) func(name string) (api.Category, bool) {
 }
 ```
 
-To add a new door, follow [AddDependency.md](/docs/AddDependency.md).
+To add a new door, follow [HandleDependencies.md](/docs/HandleDependencies.md).
 
 ---
 
@@ -118,4 +118,4 @@ import (
 l := agnoslib.New(agnosadapter.New("data.json"))
 ```
 
-For how the injected value then travels through the object graph, see [DepsMechanic.md](/docs/DepsMechanic.md). For why the contracts are structs rather than interfaces, see [StructContracts.md](/docs/StructContracts.md).
+For how the injected value then travels through the object graph, see [HandleDependencies.md](/docs/HandleDependencies.md). For why the contracts are structs rather than interfaces, see [StructContracts.md](/docs/StructContracts.md).

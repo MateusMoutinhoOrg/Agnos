@@ -1,7 +1,7 @@
-# Add a CLI Command
+# Handle CLI Commands
 
 ## Description
-Covers adding a command or a flag to the command-line interface — the dispatch behind [`api.Lib.Sandboxmain`](/docs/api.Sandboxmain.md), which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Adding the *library* function a command calls is a separate goal, covered by [AddLibFunction.md](/docs/AddLibFunction.md); a command that needs a new OS-bound effect needs [AddDependency.md](/docs/AddDependency.md) first.
+Covers adding a command or a flag to the command-line interface — the dispatch behind [`api.Lib.Sandboxmain`](/docs/api.Sandboxmain.md), which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Adding the *library* function a command calls is a separate goal, covered by [HandleLibElements.md](/docs/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/HandleDependencies.md) first.
 
 ### Rules
 - The interface is inside the closed sandbox: it may not import `adapters/`, `cmd/`, a third-party module, or an OS-bound standard-library package. It reads the command line through `l.Deps.VerbLib` and prints through `l.Deps.Printf`, and nothing else. See [SandboxIsolation.md](/docs/SandboxIsolation.md).
@@ -11,7 +11,9 @@ Covers adding a command or a flag to the command-line interface — the dispatch
 
 ---
 
-## Workflow
+## Add a CLI Command
+
+### Workflow
 1. Add the command to the `Usage` constant in `sandbox/internal/cli/cli.go`, in the same column layout as the commands already there:
    ```go
    const Usage = `agnos — a financial tracker on the command line
@@ -63,4 +65,4 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    go build ./... && go run ./cmd/main largest groceries
    ```
 6. Add the command to the Commands table of [Cli.md](/docs/Cli.md), and any flag to its Flags table.
-7. Demonstrate it in a script under [cliExamples/](/cliExamples/) when it is worth showing, following [AddCliExample.md](/docs/AddCliExample.md).
+7. Demonstrate it in a script under [cliExamples/](/cliExamples/) when it is worth showing, following [HandleCliExamples.md](/docs/HandleCliExamples.md).

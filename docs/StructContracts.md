@@ -176,7 +176,7 @@ That moves one guarantee from the compiler to the author:
 
 - An adapter's `New` must call a factory for **every** field of `deps.Deps`.
 - A package's `New` constructor must call **every** field factory of its api struct.
-- Adding a field to a contract means visiting every adapter — see [AddDependency.md](/docs/AddDependency.md).
+- Adding a field to a contract means visiting every adapter — see [HandleDependencies.md](/docs/HandleDependencies.md).
 
 There is a second cost, specific to factories: **the `Deps` field is read-only once the struct is returned.** The closures capture the struct the factories ran over, so patching a copy has no effect on behavior.
 
@@ -188,6 +188,6 @@ myDeps.Now = func() time.Time { return time.Unix(0, 0) } // patch here instead
 l = agnoslib.New(myDeps)
 ```
 
-Replace behavior on the `deps.Deps` value **before** calling `lib.New` — that path is shown above and in [DepsMechanic.md](/docs/DepsMechanic.md).
+Replace behavior on the `deps.Deps` value **before** calling `lib.New` — that path is shown above and in [HandleDependencies.md](/docs/HandleDependencies.md).
 
 In exchange, there is no partial-implementation ambiguity at the call site: a filled contract is a value that can be copied, patched field by field, and passed on.

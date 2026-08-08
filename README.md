@@ -148,7 +148,7 @@ Installing the `agnos` binary, driving it from a terminal, and adding commands t
 | --- | --- |
 | [/docs/InstallCli.md](/docs/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
 | [/docs/UseCli.md](/docs/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
-| [/docs/AddCliCommand.md](/docs/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
+| [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
 | [/docs/Cli.md](/docs/Cli.md) | Every command, flag, amount format, and exit code of the interface |
 | [/docs/api.Sandboxmain.md](/docs/api.Sandboxmain.md) | The one library field the whole command-line interface lives behind |
 | [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | Why the interface lives in a closed sandbox and what it may not import |
@@ -161,8 +161,7 @@ Shell scripts driving the built binary the way a user would — each builds the 
 
 | Doc | Description |
 | --- | --- |
-| [/docs/RunCliExample.md](/docs/RunCliExample.md) | Run the shell scripts in cliExamples/ and read their transcripts |
-| [/docs/AddCliExample.md](/docs/AddCliExample.md) | Write a cliExamples/ script and register it in the README |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Create and run shell scripts in cliExamples/ that demonstrate how a user would drive the CLI |
 
 ### Available CLI Examples
 
@@ -196,8 +195,7 @@ Runnable Go programs under `libraryExamples/`, wiring an adapter into the lib.
 
 | Doc | Description |
 | --- | --- |
-| [/docs/RunSample.md](/docs/RunSample.md) | Browse and run the executable samples in the libraryExamples/ directory |
-| [/docs/AddSample.md](/docs/AddSample.md) | Create a runnable sample in libraryExamples/ and register it in the README |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create and run executable Go samples in libraryExamples/ to see the library in action |
 
 ### Available Library Examples
 
@@ -216,9 +214,8 @@ Adding to the library inside the closed sandbox, and exposing what you add.
 
 | Doc | Description |
 | --- | --- |
-| [/docs/AddLibFunction.md](/docs/AddLibFunction.md) | Declare a function field on api.Lib and write the factory that fills it |
-| [/docs/AddLibObject.md](/docs/AddLibObject.md) | Add an object created by the lib, with its deps propagated by its New constructor |
-| [/docs/AddCliCommand.md](/docs/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
+| [/docs/HandleLibElements.md](/docs/HandleLibElements.md) | Add functions or objects to the library, writing factories and propagating deps |
+| [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
 | [/docs/ExposePublicApi.md](/docs/ExposePublicApi.md) | Publish a lib function, object, or field in the public API index |
 | [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
 | [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | Why the library lives in a closed sandbox and what it may not import |
@@ -231,10 +228,9 @@ Working with the `Deps` contract and the adapters that satisfy it.
 
 | Doc | Description |
 | --- | --- |
-| [/docs/AddDependency.md](/docs/AddDependency.md) | Add a field to the Deps contract and fill it in every adapter |
-| [/docs/AddAdapter.md](/docs/AddAdapter.md) | Create a new opinionated implementation of the Deps contract |
+| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | Understand the dependency mechanism and add requirements to the Deps contract |
+| [/docs/HandleAdapters.md](/docs/HandleAdapters.md) | Create a new opinionated implementation of the Deps contract |
 | [/docs/Adapters.md](/docs/Adapters.md) | Lists every shipped adapter and when to use each one |
-| [/docs/DepsMechanic.md](/docs/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups |
 | [/docs/StructContracts.md](/docs/StructContracts.md) | Why every contract is a struct of function fields, and how factories fill them |
 
 ---
@@ -245,9 +241,7 @@ Maintaining the docs themselves: creating, renaming, and deleting `.md` files.
 
 | Doc | Description |
 | --- | --- |
-| [/docs/AddDocument.md](/docs/AddDocument.md) | Create or update a .md file and register it in README and Structure |
-| [/docs/RenameDocument.md](/docs/RenameDocument.md) | Rename or move a .md file without leaving broken references behind |
-| [/docs/DeleteDocument.md](/docs/DeleteDocument.md) | Remove a .md file and clear every reference pointing to it |
+| [/docs/HandleDocuments.md](/docs/HandleDocuments.md) | Create, rename, move, or delete a .md file without leaving broken references |
 | [/docs/Specs.md](/docs/Specs.md) | Lists every specification and the files each one governs |
 
 ---

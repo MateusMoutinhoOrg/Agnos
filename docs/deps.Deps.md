@@ -21,7 +21,7 @@ The dependency contract every adapter must fill. Each field is one injectable be
 
 `VerbLib` and `KeepLib` are the exceptions to "every field is a function": the dependency is itself a library built with this pattern, so it arrives as one plain struct field — [`verbdeps.Lib`](/docs/verbdeps.Lib.md), [`keepdeps.Lib`](/docs/keepdeps.Lib.md) — with no getter around it. The sandbox never imports the embedded Verb or Keep libraries; it declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/`, and the adapter, which lives outside the sandbox, initializes the real library and assigns its fields onto that copy.
 
-Because it is a struct and not an interface, a value returned by an adapter can be patched field by field before injection, and a custom contract needs no type declaration at all. The trade-off: the compiler cannot detect a field you forgot to fill — it stays nil and panics on first call. See [StructContracts.md](/docs/StructContracts.md) and [DepsMechanic.md](/docs/DepsMechanic.md).
+Because it is a struct and not an interface, a value returned by an adapter can be patched field by field before injection, and a custom contract needs no type declaration at all. The trade-off: the compiler cannot detect a field you forgot to fill — it stays nil and panics on first call. See [StructContracts.md](/docs/StructContracts.md) and [HandleDependencies.md](/docs/HandleDependencies.md).
 
 ## Fields
 

@@ -105,8 +105,8 @@ Shell scripts driving the built binary the way a user would.
 
 | Doc | Description | Type |
 | --- | --- | --- |
-| [/docs/RunCliExample.md](/docs/RunCliExample.md) | Run the shell scripts in cliExamples/ and read their transcripts | Tutorial |
-| [/docs/AddCliExample.md](/docs/AddCliExample.md) | Write a cliExamples/ script and register it in the README | Tutorial |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Run the shell scripts in cliExamples/ and read their transcripts | Tutorial |
+| [/docs/HandleCliExamples.md](/docs/HandleCliExamples.md) | Write a cliExamples/ script and register it in the README | Tutorial |
 
 ### Available CLI Examples
 
@@ -123,7 +123,7 @@ For consuming the lib as a user: install it, run a first program, and understand
 | Doc | Description | Type |
 | --- | --- | --- |
 | [/docs/LibInitialization.md](/docs/LibInitialization.md) | Install the lib, create deps via an adapter, and run a first program | Tutorial |
-| [/docs/DepsMechanic.md](/docs/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups | Explanation |
+| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | How the dependency-injection mechanism works, including custom setups | Explanation |
 
 ---
 
@@ -133,8 +133,8 @@ Runnable Go programs under `libraryExamples/`, wiring an adapter into the lib.
 
 | Doc | Description | Type |
 | --- | --- | --- |
-| [/docs/RunSample.md](/docs/RunSample.md) | Browse and run the executable samples in the libraryExamples/ directory | Tutorial |
-| [/docs/AddSample.md](/docs/AddSample.md) | Create a runnable sample in libraryExamples/ and register it in the README | Tutorial |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Browse and run the executable samples in the libraryExamples/ directory | Tutorial |
+| [/docs/HandleSamples.md](/docs/HandleSamples.md) | Create a runnable sample in libraryExamples/ and register it in the README | Tutorial |
 
 ### Available Library Examples
 
@@ -150,8 +150,8 @@ Adding to the library inside the closed sandbox, and exposing what you add.
 
 | Doc | Description | Type |
 | --- | --- | --- |
-| [/docs/AddLibFunction.md](/docs/AddLibFunction.md) | Declare a function field on api.Lib and write the factory that fills it | Tutorial |
-| [/docs/AddCliCommand.md](/docs/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain | Tutorial |
+| [/docs/HandleLibElements.md](/docs/HandleLibElements.md) | Declare a function field on api.Lib and write the factory that fills it | Tutorial |
+| [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain | Tutorial |
 
 ---
 
@@ -161,9 +161,9 @@ Working with the `Deps` contract and the adapters that satisfy it.
 
 | Doc | Description | Type |
 | --- | --- | --- |
-| [/docs/AddDependency.md](/docs/AddDependency.md) | Add a field to the Deps contract and implement it in every adapter | Tutorial |
-| [/docs/AddAdapter.md](/docs/AddAdapter.md) | Create a new opinionated implementation of the Deps contract | Tutorial |
-| [/docs/DepsMechanic.md](/docs/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups | Explanation |
+| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | Add a field to the Deps contract and implement it in every adapter | Tutorial |
+| [/docs/HandleAdapters.md](/docs/HandleAdapters.md) | Create a new opinionated implementation of the Deps contract | Tutorial |
+| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | How the dependency-injection mechanism works, including custom setups | Explanation |
 
 ---
 

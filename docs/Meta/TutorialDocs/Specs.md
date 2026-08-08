@@ -1,7 +1,7 @@
 # TutorialDocs Specification
 
 ## Description
-Defines the required shape of a **Tutorial** page — any `.md` file under `docs/Tutorials/`. A tutorial is a workflow guide for a single goal (e.g. `AddSample.md`, `AddDependency.md`), built from actionable numbered steps.
+Defines the required shape of a **Tutorial** page — any `.md` file under `docs/Tutorials/`. A tutorial is a workflow guide for a single goal (e.g. `HandleSamples.md`, `HandleDependencies.md`), built from actionable numbered steps.
 
 ### Rules
 - Every page must comply with [GeneralDoc](/docs/Meta/GeneralDoc/Specs.md).

@@ -10,7 +10,7 @@ Deps deps.Deps
 
 ## Description
 
-The injected dependency set the struct was built with. [`lib.New`](/docs/lib.New.md) writes it onto [`api.Lib`](/docs/api.Lib.md), which propagates the same value onto every [`api.Category`](/docs/api.Category.md) it creates, and each category propagates it again onto every [`api.Transaction`](/docs/api.Transaction.md) it hands back. Every other function field on those structs is a closure that reads this field at call time — it is how a dependency injected once reaches the whole object graph. See [DepsMechanic.md](/docs/DepsMechanic.md).
+The injected dependency set the struct was built with. [`lib.New`](/docs/lib.New.md) writes it onto [`api.Lib`](/docs/api.Lib.md), which propagates the same value onto every [`api.Category`](/docs/api.Category.md) it creates, and each category propagates it again onto every [`api.Transaction`](/docs/api.Transaction.md) it hands back. Every other function field on those structs is a closure that reads this field at call time — it is how a dependency injected once reaches the whole object graph. See [HandleDependencies.md](/docs/HandleDependencies.md).
 
 The field is exported because the library's own factories, which live in another package, must read it. It is **not** a customization point: the closures captured the struct the factories ran over, so assigning to `Deps` on a struct you already hold changes nothing. To replace a behavior, patch the [`deps.Deps`](/docs/deps.Deps.md) value **before** passing it to `lib.New`.
 

@@ -16,7 +16,7 @@ Before creating or editing any file, read [Specs.md](/docs/Specs.md) and check w
 
 ## Sandbox Isolation
 
-[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [libraryExamples/](/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [AddDependency.md](/docs/AddDependency.md). The mechanic is explained in [SandboxIsolation.md](/docs/SandboxIsolation.md).
+[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [libraryExamples/](/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [HandleDependencies.md](/docs/HandleDependencies.md). The mechanic is explained in [SandboxIsolation.md](/docs/SandboxIsolation.md).
 
 Contracts are **structs of function fields**, never interfaces — in [sandbox/contracts/deps](/sandbox/contracts/deps/) and [sandbox/contracts/api](/sandbox/contracts/api/) alike. Every type in the project is declared in `sandbox/contracts/`; [sandbox/internal/](/sandbox/internal/) declares no types at all. See [StructContracts.md](/docs/StructContracts.md).
 
@@ -120,4 +120,4 @@ When you create, delete, or rename a sample, update the section of [README.md](/
 
 The command-line interface lives **inside** the sandbox, as the `Sandboxmain` field of `api.Lib`, dispatching in [sandbox/internal/cli/](/sandbox/internal/cli/). The binary in [cmd/main/](/cmd/main/) wires an adapter into the library, calls that field, and exits with its return — it must never branch on a command, parse a flag, or print anything of its own, or the behavior stops being reachable from any other front end.
 
-When you add or change a command or a flag, update [Cli.md](/docs/Cli.md) and the usage screen in `sandbox/internal/cli/cli.go` in the same commit, following [AddCliCommand.md](/docs/AddCliCommand.md).
+When you add or change a command or a flag, update [Cli.md](/docs/Cli.md) and the usage screen in `sandbox/internal/cli/cli.go` in the same commit, following [HandleCliCommands.md](/docs/HandleCliCommands.md).

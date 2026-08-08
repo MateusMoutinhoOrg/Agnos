@@ -1,4 +1,4 @@
-# Add an Adapter
+# Handle Adapters
 
 ## Description
 Covers creating a new opinionated implementation of the `Deps` contract under [adapters/](../../adapters/).
@@ -14,7 +14,9 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
 
 ---
 
-## Workflow
+## Add an Adapter
+
+### Workflow
 1. Create the adapter directory and its file, both named after the adapter (e.g., `adapters/frozen/frozen.go`).
 2. Declare the package and the adapter struct — the **carrier**, leading with the `Deps` field its factories fill, followed by its configuration and state:
    ```go
@@ -72,7 +74,7 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
 5. Compare the assignments in your `New` against `sandbox/contracts/deps/deps.go` field by field. A missing field will **not** fail the build.
 6. Register the new directory and file in [Structure.md](/docs/Structure.md), and add a row for the adapter in [Adapters.md](/docs/Adapters.md).
 7. If the adapter is public-facing, expose its `New` factory following [ExposePublicApi.md](/docs/ExposePublicApi.md).
-8. If the adapter needs a runnable demonstration, add one following [AddSample.md](/docs/AddSample.md).
+8. If the adapter needs a runnable demonstration, add one following [HandleSamples.md](/docs/HandleSamples.md).
 9. Build the project and exercise the adapter:
    ```bash
    go build ./...

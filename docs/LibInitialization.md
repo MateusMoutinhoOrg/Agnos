@@ -1,7 +1,7 @@
 # Library Initialization
 
 ## Description
-Covers installing the library and initializing it with the standard adapter in a new program. Creating categories after initialization is covered by [ManageCategories.md](/docs/ManageCategories.md), and recording transactions by [TrackTransactions.md](/docs/TrackTransactions.md). For other ways to build the dependencies, see [DepsMechanic.md](/docs/DepsMechanic.md).
+Covers installing the library and initializing it with the standard adapter in a new program. Creating categories after initialization is covered by [ManageCategories.md](/docs/ManageCategories.md), and recording transactions by [TrackTransactions.md](/docs/TrackTransactions.md). For other ways to build the dependencies, see [HandleDependencies.md](/docs/HandleDependencies.md).
 
 ---
 

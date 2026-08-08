@@ -17,4 +17,4 @@ Covers creating a runnable sample in [libraryExamples/](/libraryExamples/) that 
 4. If the sample needs setup instructions, add a `README.md` in the sample's directory.
 5. Add the sample to the Samples section of the [README.md](/README.md).
 6. Register the new directory and file in [Structure.md](/docs/Structure.md).
-7. Verify the sample runs, following [RunSample.md](/docs/RunSample.md).
+7. Verify the sample runs, following [HandleSamples.md](/docs/HandleSamples.md).
