@@ -164,7 +164,8 @@ go run main.go
 | [/docs/ManageCategories.md](/docs/ManageCategories.md) | Create the categories transactions are tracked under, list them, and remove one |
 | [/docs/TrackTransactions.md](/docs/TrackTransactions.md) | Record spend and received transactions, list them, and read a balance |
 | [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
-| [/docs/RunLibrarySample.md](/docs/RunLibrarySample.md) | How to run library examples from the source |
+| [/docs/RunApiSample.md](/docs/RunApiSample.md) | How to run API examples from the source |
+| [/docs/ApiSamplesList.md](/docs/ApiSamplesList.md) | A list of all examples that can be executed in API mode |
 
 ---
 
