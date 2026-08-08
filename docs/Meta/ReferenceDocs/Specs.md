@@ -1,7 +1,7 @@
 # ReferenceDocs Specification
 
 ## Description
-Defines the required shape of a **Reference** page — any `.md` file in `docs/` that lists enumerable items (structures, specs, commands, API entries) and is not one of the special documents ([RULES](/docs/Meta/Rules/Specs.md), [Structure](/docs/Meta/Structure/Specs.md), the `Specs.md` index, or anything under `docs/Meta/`). A reference page is meant to be **scanned**, not read linearly.
+Defines the required shape of a **Reference** page — any `.md` file in `docs/` — including the API detail pages under `docs/PublicApi/` — that lists enumerable items (structures, specs, commands, API entries) and is not one of the special documents ([RULES](/docs/Meta/Rules/Specs.md), [Structure](/docs/Meta/Structure/Specs.md), the `Specs.md` index, or anything under `docs/Meta/`). A reference page is meant to be **scanned**, not read linearly.
 
 ### Rules
 - Every page must comply with [GeneralDoc](/docs/Meta/GeneralDoc/Specs.md).

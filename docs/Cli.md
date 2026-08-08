@@ -39,7 +39,7 @@ Flags are read by the injected [Verb](https://github.com/MateusMoutinhoOrg/Verb)
 
 ## Amounts
 
-Amounts are written the way a person types money — `84.50`, `84.5`, and `84` are all accepted — and stored in the smallest currency unit, which is what the library's [`AddSpend`](/docs/api.AddSpend.md) and [`AddReceived`](/docs/api.AddReceived.md) take.
+Amounts are written the way a person types money — `84.50`, `84.5`, and `84` are all accepted — and stored in the smallest currency unit, which is what the library's [`AddSpend`](/docs/PublicApi/api.AddSpend.md) and [`AddReceived`](/docs/PublicApi/api.AddReceived.md) take.
 
 | Written | Stored | |
 |---------|--------|--|

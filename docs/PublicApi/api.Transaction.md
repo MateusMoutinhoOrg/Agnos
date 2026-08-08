@@ -27,7 +27,7 @@ type Transaction struct {
 
 ## Description
 
-A single spend or received record handed back by the library, already persisted in the injected database. `Deps` is the dependency set propagated from the parent [`api.Lib`](/docs/api.Lib.md); the plain data fields are read from the stored record when the transaction is built; `SignedAmount`, `Remove` and `String` are function fields filled by factories in `sandbox/internal/transaction/`. A `Transaction` is always constructed by [`AddSpend`](/docs/api.AddSpend.md), [`AddReceived`](/docs/api.AddReceived.md), [`ListTransactions`](/docs/api.ListTransactions.md), or the matching fields of [`api.Category`](/docs/api.Category.md), which propagate the deps in.
+A single spend or received record handed back by the library, already persisted in the injected database. `Deps` is the dependency set propagated from the parent [`api.Lib`](/docs/PublicApi/api.Lib.md); the plain data fields are read from the stored record when the transaction is built; `SignedAmount`, `Remove` and `String` are function fields filled by factories in `sandbox/internal/transaction/`. A `Transaction` is always constructed by [`AddSpend`](/docs/PublicApi/api.AddSpend.md), [`AddReceived`](/docs/PublicApi/api.AddReceived.md), [`ListTransactions`](/docs/PublicApi/api.ListTransactions.md), or the matching fields of [`api.Category`](/docs/PublicApi/api.Category.md), which propagate the deps in.
 
 `Amount` is always **positive** and expressed in the smallest currency unit (cents); the direction of the money is `Kind`, one of `Spend` or `Received`. Use `SignedAmount()` to get the value with its sign applied, so a list of transactions can be summed directly.
 
@@ -37,7 +37,7 @@ A single spend or received record handed back by the library, already persisted 
 
 | Field | Description |
 | :--- | :--- |
-| [`Deps deps.Deps`](/docs/api.Deps.md) | The dependency set propagated from the lib; read-only after construction. |
+| [`Deps deps.Deps`](/docs/PublicApi/api.Deps.md) | The dependency set propagated from the lib; read-only after construction. |
 | `Id int64` | The record's permanent identifier inside its category. |
 | `Category string` | The name of the category the transaction belongs to. |
 | `Reference string` | The record's unique key inside its category. |

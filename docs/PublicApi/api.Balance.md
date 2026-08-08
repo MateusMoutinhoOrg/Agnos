@@ -12,7 +12,7 @@ Balance func() int64
 
 Sums the signed amounts of every stored transaction: received money counts up, spent money counts down. The result is expressed in the smallest currency unit (cents), and is negative when the tracked budget has spent more than it received.
 
-It is built on [`ListTransactions`](/docs/api.ListTransactions.md) and each transaction's `SignedAmount()`, so it re-reads the injected database on every call and never serves a stale total. For a single category's total, use `Category.Balance` on the value returned by [`GetCategory`](/docs/api.GetCategory.md).
+It is built on [`ListTransactions`](/docs/PublicApi/api.ListTransactions.md) and each transaction's `SignedAmount()`, so it re-reads the injected database on every call and never serves a stale total. For a single category's total, use `Category.Balance` on the value returned by [`GetCategory`](/docs/PublicApi/api.GetCategory.md).
 
 ## Parameters
 

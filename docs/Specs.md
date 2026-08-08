@@ -21,7 +21,7 @@ This index is the **only** place a specification is located from. Never browse `
 | Rules | `docs/RULES.md` | [Specs](/docs/Meta/Rules/Specs.md) · [sample](/docs/Meta/Rules/sample.md) |
 | Structure | `docs/Structure.md` | [Specs](/docs/Meta/Structure/Specs.md) · [sample](/docs/Meta/Structure/sample.md) |
 | AdaptersDoc | `docs/Adapters.md` | [Specs](/docs/Meta/AdaptersDoc/Specs.md) · [sample](/docs/Meta/AdaptersDoc/sample.md) |
-| ReferenceDocs | Any other **reference** page in `docs/` — listable content: indexes, API detail pages, command lists — except this index and `docs/Meta/` | [Specs](/docs/Meta/ReferenceDocs/Specs.md) · [sample](/docs/Meta/ReferenceDocs/sample.md) |
+| ReferenceDocs | Any other **reference** page in `docs/` — listable content: indexes, command lists, and the API detail pages under `docs/PublicApi/` — except this index and `docs/Meta/` | [Specs](/docs/Meta/ReferenceDocs/Specs.md) · [sample](/docs/Meta/ReferenceDocs/sample.md) |
 | ExplanationDocs | Any **explanation** page in `docs/` — background on one mechanic, e.g. `SandboxIsolation.md` | [Specs](/docs/Meta/ExplanationDocs/Specs.md) · [sample](/docs/Meta/ExplanationDocs/sample.md) |
 | TutorialDocs | Any **tutorial** in `docs/` — a single-goal workflow guide, e.g. `HandleSamples.md`, `ForkTemplate.md` | [Specs](/docs/Meta/TutorialDocs/Specs.md) · [sample](/docs/Meta/TutorialDocs/sample.md) |
 

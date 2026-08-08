@@ -10,9 +10,9 @@ AddSpend func(category string, description string, amount int64) (Transaction, b
 
 ## Description
 
-Records money **leaving** the tracked budget under an existing category and returns the persisted record as an [`api.Transaction`](/docs/api.Transaction.md) of kind `Spend`, stamped with the injected clock (`l.Deps.Now()`).
+Records money **leaving** the tracked budget under an existing category and returns the persisted record as an [`api.Transaction`](/docs/PublicApi/api.Transaction.md) of kind `Spend`, stamped with the injected clock (`l.Deps.Now()`).
 
-It is the lib-level shorthand for `l.GetCategory(category)` followed by `Category.AddSpend(...)`: the category must already exist, so declare it with [`AddCategory`](/docs/api.AddCategory.md) first. `amount` is expressed in the smallest currency unit (cents) and must be **positive** — the direction of the money is the transaction's `Kind`, not the sign of its amount.
+It is the lib-level shorthand for `l.GetCategory(category)` followed by `Category.AddSpend(...)`: the category must already exist, so declare it with [`AddCategory`](/docs/PublicApi/api.AddCategory.md) first. `amount` is expressed in the smallest currency unit (cents) and must be **positive** — the direction of the money is the transaction's `Kind`, not the sign of its amount.
 
 Descriptions need not be unique: the library composes the record's unique key from a sequence number and the description, so two transactions can carry the same note.
 
@@ -28,7 +28,7 @@ Descriptions need not be unique: the library composes the record's unique key fr
 
 | Type | Description |
 | :--- | :--- |
-| [`api.Transaction`](/docs/api.Transaction.md) | The persisted transaction, or the zero value on failure. |
+| [`api.Transaction`](/docs/PublicApi/api.Transaction.md) | The persisted transaction, or the zero value on failure. |
 | `bool` | `false` when the category is unknown, `amount` is not positive, or the record could not be written. |
 
 ## Examples

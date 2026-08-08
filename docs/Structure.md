@@ -174,7 +174,7 @@ The copying lives in the adapter because only code outside the sandbox may impor
 ---
 
 ## `/docs/`
-Documentation of the project, kept **flat**: reference pages, tutorials, explanations, and API detail pages sit side by side, indexed by the [README](/README.md) Doc Index. The kind of a page decides its specification, not its path.
+Documentation of the project, kept **flat**: reference pages, tutorials, and explanations sit side by side, indexed by the [README](/README.md) Doc Index. The kind of a page decides its specification, not its path. Only listable pages covered by an index page get a directory of their own — the specifications under `Meta/` and the API detail pages under `PublicApi/`.
 
 | File | Description | Spec |
 |------|-------------|------|
@@ -185,10 +185,16 @@ Documentation of the project, kept **flat**: reference pages, tutorials, explana
 | `Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `TemplateFileActions.md` | The action each template file takes when forking or adapting a library | ReferenceDocs |
 | `Cli.md` | Every command, flag, and exit code of the command-line interface | ReferenceDocs |
-| `<pkg>.<Symbol>.md` | One detail page per public struct, function, or field | ReferenceDocs |
 | `<Name>.md` | Any other reference page the library needs | ReferenceDocs |
 | `<Topic>.md` | One page per mechanic the library needs explained | ExplanationDocs |
 | `<Goal>.md` | One page per workflow the library's maintainers repeat | TutorialDocs |
+
+### `/docs/PublicApi/`
+One detail page per public-facing component, indexed by `PublicApi.md`. Reach a page through that index rather than by browsing the directory.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `<pkg>.<Symbol>.md` | One detail page per public struct, function, or field, named after the package the symbol is declared in | ReferenceDocs |
 
 ### `/docs/Meta/`
 The specifications describing how each kind of file in the project must be shaped. Never browse this directory — locate a specification by reading `Specs.md`.

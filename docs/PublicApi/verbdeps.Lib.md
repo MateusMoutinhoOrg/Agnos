@@ -38,7 +38,7 @@ type Lib struct {
 
 ## Description
 
-The sandbox's **copy** of the embedded Verb argv-parser library's `api.Lib`, declared in `sandbox/contracts/deps/verbdeps/` and injected whole as the [`deps.Deps.VerbLib`](/docs/deps.Deps.md) field. The sandbox may not import Verb — that would be a third-party import — so it restates the shape it needs, field for field; the adapter, which lives outside the sandbox, initializes the real library and assigns its fields onto this copy. Copying is cheap precisely because both sides are structs of function fields rather than interfaces: the copy is plain field assignment. See [StructContracts.md](/docs/StructContracts.md).
+The sandbox's **copy** of the embedded Verb argv-parser library's `api.Lib`, declared in `sandbox/contracts/deps/verbdeps/` and injected whole as the [`deps.Deps.VerbLib`](/docs/PublicApi/deps.Deps.md) field. The sandbox may not import Verb — that would be a third-party import — so it restates the shape it needs, field for field; the adapter, which lives outside the sandbox, initializes the real library and assigns its fields onto this copy. Copying is cheap precisely because both sides are structs of function fields rather than interfaces: the copy is plain field assignment. See [StructContracts.md](/docs/StructContracts.md).
 
 Every argument starts out unread. Calling any `Get*` field or `IsPresent` marks the argument(s) it matched as used in `Used`, so whatever is left in `Args` is exactly the positional arguments nothing asked for — drain them in order with `GetNextStringArg`. The two `*Size` fields are the exception: they count matches without ever marking anything used.
 

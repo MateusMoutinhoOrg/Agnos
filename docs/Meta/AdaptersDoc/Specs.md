@@ -5,7 +5,7 @@ Defines the required shape of `docs/Adapters.md` — the reference page listing 
 
 ### Rules
 - **Every** directory under `adapters/` must have exactly one row in the page's table. Creating, renaming, or deleting an adapter requires updating the page in the same commit.
-- Each row must state the adapter's name, its `New` factory (linked to the `docs/<pkg>.<Symbol>.md` detail page when one exists), how it fills each injected behavior, and when to use it.
+- Each row must state the adapter's name, its `New` factory (linked to the `docs/PublicApi/<pkg>.<Symbol>.md` detail page when one exists), how it fills each injected behavior, and when to use it.
 - The page must not contain workflows — building an adapter is covered by [HandleAdapters.md](/docs/HandleAdapters.md), which the page links to instead.
 
 ## Structure

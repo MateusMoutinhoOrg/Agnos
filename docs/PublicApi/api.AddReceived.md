@@ -10,9 +10,9 @@ AddReceived func(category string, description string, amount int64) (Transaction
 
 ## Description
 
-Records money **entering** the tracked budget under an existing category and returns the persisted record as an [`api.Transaction`](/docs/api.Transaction.md) of kind `Received`, stamped with the injected clock (`l.Deps.Now()`).
+Records money **entering** the tracked budget under an existing category and returns the persisted record as an [`api.Transaction`](/docs/PublicApi/api.Transaction.md) of kind `Received`, stamped with the injected clock (`l.Deps.Now()`).
 
-It mirrors [`AddSpend`](/docs/api.AddSpend.md) in every respect but the direction of the money: the category must already exist, and `amount` is expressed in the smallest currency unit (cents) and must be **positive**. What differs is how [`Balance`](/docs/api.Balance.md) counts it — a received transaction's `SignedAmount()` is positive.
+It mirrors [`AddSpend`](/docs/PublicApi/api.AddSpend.md) in every respect but the direction of the money: the category must already exist, and `amount` is expressed in the smallest currency unit (cents) and must be **positive**. What differs is how [`Balance`](/docs/PublicApi/api.Balance.md) counts it — a received transaction's `SignedAmount()` is positive.
 
 ## Parameters
 
@@ -26,7 +26,7 @@ It mirrors [`AddSpend`](/docs/api.AddSpend.md) in every respect but the directio
 
 | Type | Description |
 | :--- | :--- |
-| [`api.Transaction`](/docs/api.Transaction.md) | The persisted transaction, or the zero value on failure. |
+| [`api.Transaction`](/docs/PublicApi/api.Transaction.md) | The persisted transaction, or the zero value on failure. |
 | `bool` | `false` when the category is unknown, `amount` is not positive, or the record could not be written. |
 
 ## Examples

@@ -66,7 +66,7 @@ Written from scratch for the library being built or adapted. Nothing of the temp
 | `adapters/<name>/<name>.go` | One adapter per additional opinionated implementation of the `Deps` contract | Adapters |
 | `examples/libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | LibraryExamples |
 | `examples/cliExamples/<Name>.sh` | One shell script per goal demonstrated against the built CLI | CliExamples |
-| `docs/<pkg>.<Symbol>.md` | One detail page per public API entry | ReferenceDocs |
+| `docs/PublicApi/<pkg>.<Symbol>.md` | One detail page per public API entry | ReferenceDocs |
 | `docs/<Goal>.md` | One tutorial per workflow specific to the new library — the generic guides carried over by **[Copy](#copy)** do **not** fulfill this | TutorialDocs |
 | `docs/<Name>.md` | Any reference page the new library needs beyond the public API index | ReferenceDocs |
 
@@ -82,6 +82,6 @@ The template's example content — the financial tracker. Removed once the new l
 | `sandbox/contracts/deps/verbdeps/`, `sandbox/contracts/deps/keepdeps/` | The sandbox copies of the embedded Verb and Keep libraries — keep one only if the new library embeds the same library |
 | `examples/libraryExamples/*` | The tracker's Go samples |
 | `examples/cliExamples/*` | The tracker's CLI scripts |
-| `docs/api.*.md`, `docs/deps.Deps.md`, `docs/verbdeps.Lib.md`, `docs/keepdeps.Lib.md`, `docs/lib.New.md`, `docs/standard.New.md` | The tracker's public API detail pages |
+| `docs/PublicApi/*` | The tracker's public API detail pages |
 | `docs/ManageCategories.md`, `docs/TrackTransactions.md` | The tracker's domain tutorials |
 | `bootstrap/*` | The embedded-library demonstration — keep it only as reference while the new library embeds another Agnos-style library |

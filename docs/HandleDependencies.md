@@ -100,7 +100,7 @@ l := agnoslib.New(myDeps)
 
 ## Injecting a Whole Library
 
-Two fields are not behaviors but other libraries built with this same pattern: [`VerbLib`](/docs/verbdeps.Lib.md), the Verb argv parser, and [`KeepLib`](/docs/keepdeps.Lib.md), the Keep schema database. Because a contract is a struct of function fields, the whole library fits in one plain field — no getter, no bridging type.
+Two fields are not behaviors but other libraries built with this same pattern: [`VerbLib`](/docs/PublicApi/verbdeps.Lib.md), the Verb argv parser, and [`KeepLib`](/docs/PublicApi/keepdeps.Lib.md), the Keep schema database. Because a contract is a struct of function fields, the whole library fits in one plain field — no getter, no bridging type.
 
 The sandbox cannot import Verb or Keep, so it declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `keepdeps/`. The adapter initializes the real library and assigns its fields onto that copy — the factory returns a **value** instead of a closure, the one shape variation the [factory pattern](/docs/RULES.md#factory-pattern) allows:
 

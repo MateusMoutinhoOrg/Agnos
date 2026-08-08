@@ -10,7 +10,7 @@ AddCategory func(name string) (Category, bool)
 
 ## Description
 
-Creates the category `name` in the injected database, stamping it with the injected clock (`l.Deps.Now()`), and returns it as an [`api.Category`](/docs/api.Category.md) with the library's deps propagated in.
+Creates the category `name` in the injected database, stamping it with the injected clock (`l.Deps.Now()`), and returns it as an [`api.Category`](/docs/PublicApi/api.Category.md) with the library's deps propagated in.
 
 Creation is **idempotent**: the category name is a unique key, so a name already taken makes the injected database report a key conflict, and the stored category is returned instead of a failure. Re-running a program that starts by declaring its categories is therefore safe.
 
@@ -26,7 +26,7 @@ The field holds a closure assigned by `AddCategoryFactory` over the `api.Lib` st
 
 | Type | Description |
 | :--- | :--- |
-| [`api.Category`](/docs/api.Category.md) | The created or already-stored category, or the zero value on failure. |
+| [`api.Category`](/docs/PublicApi/api.Category.md) | The created or already-stored category, or the zero value on failure. |
 | `bool` | `false` when `name` is empty or the record could not be written. |
 
 ## Examples

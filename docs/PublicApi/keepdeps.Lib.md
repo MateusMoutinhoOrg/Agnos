@@ -39,7 +39,7 @@ type SchemaItem struct {
 
 ## Description
 
-The sandbox's **copy** of the embedded Keep schema-database library's public api, declared in `sandbox/contracts/deps/keepdeps/` and injected whole as the [`deps.Deps.KeepLib`](/docs/deps.Deps.md) field. The sandbox may not import Keep — that would be a third-party import — so it restates the shape it needs, struct for struct; the adapter, which lives outside the sandbox, initializes the real library and fills this copy. See [StructContracts.md](/docs/StructContracts.md).
+The sandbox's **copy** of the embedded Keep schema-database library's public api, declared in `sandbox/contracts/deps/keepdeps/` and injected whole as the [`deps.Deps.KeepLib`](/docs/PublicApi/deps.Deps.md) field. The sandbox may not import Keep — that would be a third-party import — so it restates the shape it needs, struct for struct; the adapter, which lives outside the sandbox, initializes the real library and fills this copy. See [StructContracts.md](/docs/StructContracts.md).
 
 Keep is a schema database over a single-key storage backend: a [`Props`](#supporting-types) description declares collections (`Schema`) and their fields (`Item`), `NewDatabase` binds that description, `GetSchema` hands back one collection, and a collection creates, finds, lists and removes records. A field typed `Key` is unique and indexed — that is what `FindByKey` looks through, and inserting a duplicate fails with a `KeyConflict` error. A field typed `Database` is a nested collection, reached through a record's `NewSubItem` and `ListAll`.
 

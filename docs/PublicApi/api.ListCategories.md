@@ -10,7 +10,7 @@ ListCategories func() []Category
 
 ## Description
 
-Reads every stored category back out of the injected database and returns them as [`api.Category`](/docs/api.Category.md) values, oldest first, each with the library's deps propagated in.
+Reads every stored category back out of the injected database and returns them as [`api.Category`](/docs/PublicApi/api.Category.md) values, oldest first, each with the library's deps propagated in.
 
 Returns an empty slice when the tracker holds no category, and `nil` when the injected database could not be read — callers that only range over the result need not tell the two apart.
 

@@ -10,9 +10,9 @@ ListTransactions func() []Transaction
 
 ## Description
 
-Walks every stored category and collects its transactions into one slice of [`api.Transaction`](/docs/api.Transaction.md) values, each with the library's deps propagated in. The records are grouped by category, in the order the categories were created, and each category's own transactions come oldest first.
+Walks every stored category and collects its transactions into one slice of [`api.Transaction`](/docs/PublicApi/api.Transaction.md) values, each with the library's deps propagated in. The records are grouped by category, in the order the categories were created, and each category's own transactions come oldest first.
 
-Every call re-reads the injected database, so the result reflects transactions added or removed since the last call. To list a single category's records, use `Category.ListTransactions` on the value returned by [`GetCategory`](/docs/api.GetCategory.md).
+Every call re-reads the injected database, so the result reflects transactions added or removed since the last call. To list a single category's records, use `Category.ListTransactions` on the value returned by [`GetCategory`](/docs/PublicApi/api.GetCategory.md).
 
 ## Parameters
 

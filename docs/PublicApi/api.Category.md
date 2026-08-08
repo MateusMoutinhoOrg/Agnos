@@ -21,7 +21,7 @@ type Category struct {
 
 ## Description
 
-One bucket transactions are tracked under — "groceries", "salary" — already persisted in the injected database. `Deps` is the dependency set propagated from the parent [`api.Lib`](/docs/api.Lib.md); `Id`, `Name` and `CreatedAt` are plain data read from the stored record; the function fields are filled by factories in `sandbox/internal/category/`, whose closures re-read the stored record through `Deps` on every call. A `Category` is always constructed by [`AddCategory`](/docs/api.AddCategory.md), [`GetCategory`](/docs/api.GetCategory.md), or [`ListCategories`](/docs/api.ListCategories.md), which propagate the deps in. The factories behind it live inside the closed sandbox and are not reachable by callers.
+One bucket transactions are tracked under — "groceries", "salary" — already persisted in the injected database. `Deps` is the dependency set propagated from the parent [`api.Lib`](/docs/PublicApi/api.Lib.md); `Id`, `Name` and `CreatedAt` are plain data read from the stored record; the function fields are filled by factories in `sandbox/internal/category/`, whose closures re-read the stored record through `Deps` on every call. A `Category` is always constructed by [`AddCategory`](/docs/PublicApi/api.AddCategory.md), [`GetCategory`](/docs/PublicApi/api.GetCategory.md), or [`ListCategories`](/docs/PublicApi/api.ListCategories.md), which propagate the deps in. The factories behind it live inside the closed sandbox and are not reachable by callers.
 
 Because every function field re-reads the database, a `Category` value never goes stale: transactions added through another value of the same category show up in `ListTransactions` and `Balance`.
 
@@ -29,7 +29,7 @@ Because every function field re-reads the database, a `Category` value never goe
 
 | Field | Description |
 | :--- | :--- |
-| [`Deps deps.Deps`](/docs/api.Deps.md) | The dependency set propagated from the lib; read-only after construction. |
+| [`Deps deps.Deps`](/docs/PublicApi/api.Deps.md) | The dependency set propagated from the lib; read-only after construction. |
 | `Id int64` | The record's permanent identifier. |
 | `Name string` | The category's unique name. |
 | `CreatedAt time.Time` | When the category was created, stamped from the injected clock. |
