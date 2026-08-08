@@ -1,4 +1,4 @@
-# Agnos
+# Agnos-cli
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos-Cli.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos-Cli)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos-Cli)](https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest)
@@ -11,22 +11,20 @@ An OS-independent Go **CLI template** — a command-line financial tracker whose
 
 ## Overview
 
-Agnos is a financial tracker you drive from the terminal: categories holding spend and received transactions, persisted through an injected schema database. It is built as a structured Go template showing how to build a **CLI** whose behavior is fully decoupled from the process hosting it. The program itself lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself — no adapter, no third-party module, no OS-bound standard-library package. Everything it can do arrives through an injected `Deps`.
+Agnos-cli is a financial tracker you drive from the terminal. It is built as a structured Go template demonstrating how to build a **CLI** whose behavior is fully decoupled from the process hosting it. The program itself lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/, libraryExamples/
 (reaches the OS)  (closed)     (wire the two together)
 ```
 
-The command-line interface is `api.Lib.Sandboxmain` — one field of the library like any other. It reads the command line through the injected argv parser and prints through the injected `Printf`, so the installed binary in **`/cmd/main/`** holds no command, no flag, and no output of its own: it wires an adapter into the library, calls that one field, and exits with what it returns.
+The CLI is `api.Lib.Sandboxmain` — one field of the library like any other. The installed binary in **`/cmd/main/`** holds no command, no flag, and no output of its own: it just wires an adapter into the library and calls that one field.
 
-- **`/sandbox/`** is the closed library and its single entry point: it takes a `Deps` and returns an `api.Lib`.
-  - **`/sandbox/contracts/`** holds the public types everything is wired through — the `Deps` contract every adapter must fill, and the `api` structs the library hands back. Contracts are **structs of function fields**, never interfaces. This is the only part of the sandbox the outside world imports.
-  - **`/sandbox/internal/`** holds the pure library logic as **factories** — functions that take a pointer to an `api` struct and fill its function fields with closures reading that struct's `Deps` — plus `cli/`, the command dispatch behind `Sandboxmain`. It declares no types and is unreachable from outside `sandbox/`.
-- **`/adapters/`** sits outside the sandbox and holds opinionated, concrete implementations of the `Deps` contract, filled by the **same factories** the sandbox uses — the carrier is the adapter struct rather than an `api` struct. This is the only place OS-bound and third-party code is allowed.
-- **`/cmd/`** and **`/libraryExamples/`** sit outside the sandbox too, and are the only places an adapter and the library are wired together.
+- **`/sandbox/`**: The closed library taking a `Deps` and returning an `api.Lib`.
+- **`/adapters/`**: Concrete implementations of the `Deps` contract.
+- **`/cmd/`** & **`/libraryExamples/`**: Places where an adapter and the library are wired together.
 
-Consuming Agnos as a Go library still works and is fully documented — it is simply the background feature. See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) for the full mechanic and [StructContracts.md](/docs/Explanations/StructContracts.md) for why the contracts are structs and how factories fill them.
+See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) and [StructContracts.md](/docs/Explanations/StructContracts.md) for the full mechanic.
 
 ---
 
