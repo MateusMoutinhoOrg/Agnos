@@ -73,7 +73,7 @@ Changes are governed by required-reading docs, and several actions **must** upda
 | write or edit any `<Field>Factory` (sandbox **or** adapter) | `docs/Meta/Factories/Specs.md` | the `New` constructor that must call it |
 | add/rename/delete any file or dir | `docs/Structure.md` | `docs/Structure.md` |
 | add/rename/delete a `.md` file | `docs/HandleDocuments.md` | Doc Index in `README.md` |
-| add a lib function/object | `docs/HandleLibElements.md` | `docs/PublicApi.md` (+ detail page `docs/PublicApi/<pkg>.<Symbol>.md`, see `ExposePublicApi.md`) |
+| add a lib function/object | `docs/HandleLibElements.md` | `docs/PublicApi.md` (+ detail page `docs/PublicApi/<pkg>.<Symbol>.md`) |
 | add a `Deps` field | `docs/HandleDependencies.md` | **every** adapter in `adapters/` (and `bootstrap/adapters/`) |
 | add an adapter | `docs/HandleAdapters.md` | `docs/Structure.md`, `docs/Adapters.md` |
 | need an OS/third-party call inside `sandbox/` | `docs/SandboxIsolation.md`, `docs/HandleDependencies.md` | `sandbox/contracts/deps/deps.go` + **every** adapter |

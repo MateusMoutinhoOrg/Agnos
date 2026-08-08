@@ -27,7 +27,7 @@ Copying these files carries over the template's **generic** guides and specifica
 | `docs/Specs.md` | The index locating each specification |
 | `docs/ForkTemplate.md`, `docs/AdaptExistingLib.md`, `docs/RenameModule.md`, `docs/TemplateFileActions.md` | The template workflows and this page |
 | `docs/SandboxIsolation.md`, `docs/StructContracts.md` | The explanations of the structure's mechanics |
-| `docs/HandleDependencies.md`, `docs/HandleLibElements.md`, `docs/HandleCliCommands.md`, `docs/HandleAdapters.md`, `docs/HandleSamples.md`, `docs/HandleCliExamples.md`, `docs/HandleDocuments.md`, `docs/ExposePublicApi.md` | The generic workflow guides for extending any library built on this structure |
+| `docs/HandleDependencies.md`, `docs/HandleLibElements.md`, `docs/HandleCliCommands.md`, `docs/HandleAdapters.md`, `docs/HandleSamples.md`, `docs/HandleCliExamples.md`, `docs/HandleDocuments.md` | The generic workflow guides for extending any library built on this structure |
 | `sandbox/new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it |
 
 ---

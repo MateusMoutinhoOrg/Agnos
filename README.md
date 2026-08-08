@@ -203,9 +203,8 @@ The typical feature is a library function plus the CLI command that calls it, pu
 
 | Doc | Description |
 | --- | --- |
-| [/docs/HandleLibElements.md](/docs/HandleLibElements.md) | Add a function or an object to the library: declare, write the factory, register it |
+| [/docs/HandleLibElements.md](/docs/HandleLibElements.md) | Add a function or an object to the library: declare, write the factory, register it, publish it |
 | [/docs/HandleCliCommands.md](/docs/HandleCliCommands.md) | Add a command or a flag to the interface behind `api.Lib.Sandboxmain` |
-| [/docs/ExposePublicApi.md](/docs/ExposePublicApi.md) | Publish a lib function, object, or field in the public API index |
 
 #### 3. Companion updates — after most changes
 
