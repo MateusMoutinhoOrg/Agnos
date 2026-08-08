@@ -57,7 +57,7 @@ Covers adding new elements — functions and objects — to the library's public
 ## Add a Library Object
 
 ### Rules
-- The object **is** its api struct. There is no internal mirror type: [sandbox/internal/](../sandbox/internal/) holds only the factories and the constructor.
+- The object handed to callers **is** its api struct — never an internal mirror of it. [sandbox/internal/](../sandbox/internal/) may declare internal types for its own private plumbing, as long as nothing public ever uses them: every type, field, or constant the public API exposes is declared in [sandbox/contracts/](../sandbox/contracts/).
 - An object that needs dependencies declares a `Deps deps.Deps` field, filled by its `New` constructor from the parent lib's `l.Deps`. Its factories read that field inside their closures.
 - Every api field must be exported: the factories fill them from another package, and consumers read them.
 
