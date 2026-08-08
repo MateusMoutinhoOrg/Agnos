@@ -107,6 +107,7 @@ agnos balance            # 2415.50
 | [/docs/UseCli.md](/docs/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
 | [/docs/Cli.md](/docs/Cli.md) | Every command, flag, amount format, and exit code of the interface |
 | [/docs/RunCliSample.md](/docs/RunCliSample.md) | How to run CLI examples from the source |
+| [/docs/SamplesList.md](/docs/SamplesList.md) | A list of all examples that can be executed in CLI mode |
 
 ---
 
