@@ -12,13 +12,22 @@ The whole command-line interface lives **inside the sandbox**, as the `Sandboxma
 
 ```bash
 go build ./...                                   # build everything
-go run ./cmd/main <command> [args]               # run the CLI from source
+go vet ./...                                     # the only linter available; currently clean
+go test ./...                                    # run tests (none exist yet)
+
+AGNOS_DATA=./scratch go run ./cmd/main <command> [args]           # run the CLI from source
 go run ./examples/libraryExamples/TrackSpendSample/TrackSpendSample.go # run a library example
 bash ./examples/cliExamples/ManageCategories.sh                   # run a CLI example
-go test ./...                                    # run tests (none exist yet)
+go run ./bootstrap/libraryExamples/Test/test.go                   # run the embedding lib's example
 ```
 
-There is no lint config, CI, or test suite in the repo yet. When adding adapters or lib functions, `go build ./...` is the primary verification step.
+There is no lint config, CI, or test suite in the repo yet. When adding adapters or lib functions, `go build ./...` is the primary verification step, and `go vet ./...` must stay silent.
+
+**Where each entry point writes its records** — none of this is decided inside the sandbox; `cmd/main/main.go:43` and every example pick the path themselves:
+
+- `go run ./cmd/main` writes to `~/.agnos` unless `AGNOS_DATA` is set. Always export `AGNOS_DATA` when driving the CLI from source, or you edit the user's real budget.
+- Library examples write `trackerdata/` in the working directory, `bootstrap/` writes `bootstrap-trackerdata/`; both are gitignored.
+- CLI examples build the binary into a `mktemp -d` dir and point `AGNOS_DATA` at it, so they touch nothing else — required by the `CliExamples` spec.
 
 ## Architecture
 
@@ -78,6 +87,8 @@ Changes are governed by required-reading docs, and several actions **must** upda
 ## Conventions
 
 - Code that consumes the library from outside it (`cmd/`, `examples/libraryExamples/`, the `bootstrap/` adapter, third-party callers) aliases every import with the `agnos` prefix: `agnosadapter` (`adapters/<name>`), `agnoslib` (`sandbox`), `agnostypes` (`sandbox/contracts/api`), `agnosdeps` (`sandbox/contracts/deps`). Files belonging to the library itself — `sandbox/` and `adapters/` — keep the plain package names. See the Import Aliases rule in `docs/RULES.md`.
+- **Money is always an `int64` in the smallest currency unit (cents), never a float.** `84.50` is `8450` across the whole library. Only two places convert: `cli.ParseAmount` turns the typed `84.50` into cents, and `store.Money` renders cents back for display. `Transaction.Amount` is always positive — direction lives in `Kind` (`Spend`/`Received`), and `Transaction.SignedAmount()` applies the sign, so balances are a plain sum.
+- The CLI version reported by `agnos version` and `--version` is the `Version` const at the top of `sandbox/internal/cli/cli.go`; it is independent of the `@v0.0.3` install tag pinned in `README.md`, `docs/InstallCli.md`, `docs/LibInitialization.md`, and `docs/Structure.md`. Bumping a release means touching both.
 - Module path is `github.com/MateusMoutinhoOrg/Agnos-Cli`; renaming it is a documented procedure — see `docs/RenameModule.md`.
 - Public-facing lib API entries each get a detail page in `docs/PublicApi/` named `<pkg>.<Symbol>.md`.
 - `docs/Meta/` holds the specifications: one directory per kind of file, each pairing a `Specs.md` (how the file must be shaped) with a `sample`. Never browse it — always locate a spec through `docs/Specs.md`.
