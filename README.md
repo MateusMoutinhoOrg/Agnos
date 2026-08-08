@@ -106,8 +106,8 @@ agnos balance            # 2415.50
 | [/docs/InstallCli.md](/docs/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
 | [/docs/UseCli.md](/docs/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
 | [/docs/Cli.md](/docs/Cli.md) | Every command, flag, amount format, and exit code of the interface |
-| [/docs/RunCliSample.md](/docs/RunCliSample.md) | How to run CLI examples from the source |
 | [/docs/SamplesList.md](/docs/SamplesList.md) | A list of all examples that can be executed in CLI mode |
+| [/docs/RunCliSample.md](/docs/RunCliSample.md) | How to run CLI examples from the source |
 
 ---
 
@@ -161,13 +161,13 @@ go run main.go
 | Doc | Description |
 | --- | --- |
 | [/docs/LibInitialization.md](/docs/LibInitialization.md) | Install the lib, create deps via an adapter, and run a first program |
-| [/docs/Adapters.md](/docs/Adapters.md) | Every shipped adapter you can inject, and when to use each one |
-| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | The `Deps` contract you inject: what each field is for, and how to swap or patch one |
 | [/docs/ManageCategories.md](/docs/ManageCategories.md) | Create the categories transactions are tracked under, list them, and remove one |
 | [/docs/TrackTransactions.md](/docs/TrackTransactions.md) | Record spend and received transactions, list them, and read a balance |
 | [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
-| [/docs/RunApiSample.md](/docs/RunApiSample.md) | How to run API examples from the source |
+| [/docs/Adapters.md](/docs/Adapters.md) | Every shipped adapter you can inject, and when to use each one |
+| [/docs/HandleDependencies.md](/docs/HandleDependencies.md) | The `Deps` contract you inject: what each field is for, and how to swap or patch one |
 | [/docs/ApiSamplesList.md](/docs/ApiSamplesList.md) | A list of all examples that can be executed in API mode |
+| [/docs/RunApiSample.md](/docs/RunApiSample.md) | How to run API examples from the source |
 | [/docs/Bootstrap.md](/docs/Bootstrap.md) | Embed this library as a dependency of another library built with the same pattern — the `bootstrap/` tree explained |
 
 ---

@@ -22,6 +22,7 @@ One sentence saying who this theme is for / what it covers.
 ```
 
 - **Theme ordering follows user need**: the CLI comes first, because that is how most readers meet the project; then the library behind it; then themes for *extending* it (sandbox items, dependencies, adapters); and finally themes for *maintaining* the repo (docs management, template adaptation, project rules). A new reader must hit what they need without scrolling past maintainer-only content.
+- **Rows inside a Doc Index table are ordered by reader need**: the docs a reader must hit first (installing, first usage, core operations) come before references, then customization/advanced topics, then samples, with niche material last. A row must never sit above one the reader needs earlier.
 - **A doc may appear under multiple themes** — duplicate rows across themes are expected and encouraged.
 - **Every top-level doc under `docs/` must appear in at least one theme.** No orphans. Files indexed by an index doc (specifications under `Meta/`, API detail pages under `PublicApi/`) are covered through that index doc's row.
 - **Link text and link target must match** and point to the real file location (a Tutorial always links into `/docs/`, never another directory).
