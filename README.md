@@ -24,7 +24,7 @@ The CLI is `api.Lib.Sandboxmain` — one field of the library like any other. Th
 - **`/adapters/`**: Concrete implementations of the `Deps` contract.
 - **`/cmd/`** & **`/libraryExamples/`**: Places where an adapter and the library are wired together.
 
-See [SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) and [StructContracts.md](/docs/Explanations/StructContracts.md) for the full mechanic.
+See [SandboxIsolation.md](/docs/SandboxIsolation.md) and [StructContracts.md](/docs/StructContracts.md) for the full mechanic.
 
 ---
 
@@ -69,7 +69,7 @@ go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3; `
   }
 ```
 
-> Needs Go ≥ 1.22 installed. The binary is built from `cmd/main`, so `go install` names it `main` — the rename gives it the name you actually type. The script also adds Go's binary directory to your PATH persistently if it isn't already there. See [InstallCli.md](/docs/Tutorials/InstallCli.md) for troubleshooting.
+> Needs Go ≥ 1.22 installed. The binary is built from `cmd/main`, so `go install` names it `main` — the rename gives it the name you actually type. The script also adds Go's binary directory to your PATH persistently if it isn't already there. See [InstallCli.md](/docs/InstallCli.md) for troubleshooting.
 
 **2. Track your first budget:**
 
@@ -84,7 +84,7 @@ agnos transactions
 agnos balance            # 2415.50
 ```
 
-Every command, flag, and exit code is listed in [Cli.md](/docs/References/Cli.md). Records live in `.agnos` in your home directory, or wherever `AGNOS_DATA` points.
+Every command, flag, and exit code is listed in [Cli.md](/docs/Cli.md). Records live in `.agnos` in your home directory, or wherever `AGNOS_DATA` points.
 
 ---
 
@@ -136,22 +136,22 @@ go run main.go
 >
 > | Document | Why it's required |
 > |----------|-------------------|
-> | [Rules](/docs/References/RULES.md) | The contribution rules and guidelines that **must** be followed for any change to be accepted. |
-> | [Structure](/docs/References/Structure.md) | The project's directory layout and the purpose of each component — needed to know **where** changes belong. |
-> | [Specs](/docs/References/Specs.md) | The index of every specification — needed to know **how** the file you are about to touch must be shaped. |
+> | [Rules](/docs/RULES.md) | The contribution rules and guidelines that **must** be followed for any change to be accepted. |
+> | [Structure](/docs/Structure.md) | The project's directory layout and the purpose of each component — needed to know **where** changes belong. |
+> | [Specs](/docs/Specs.md) | The index of every specification — needed to know **how** the file you are about to touch must be shaped. |
 
 ## CLI Usage
 
 Installing the `agnos` binary, driving it from a terminal, and adding commands to it.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/InstallCli.md](/docs/Tutorials/InstallCli.md) | Install the CLI globally, or build and run it from a checkout | Tutorial |
-| [/docs/Tutorials/UseCli.md](/docs/Tutorials/UseCli.md) | Create categories, record transactions, and read balances from the terminal | Tutorial |
-| [/docs/Tutorials/AddCliCommand.md](/docs/Tutorials/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain | Tutorial |
-| [/docs/References/Cli.md](/docs/References/Cli.md) | Every command, flag, amount format, and exit code of the interface | Reference |
-| [/docs/References/PublicApi/api.Sandboxmain.md](/docs/References/PublicApi/api.Sandboxmain.md) | The one library field the whole command-line interface lives behind | Reference |
-| [/docs/Explanations/SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) | Why the interface lives in a closed sandbox and what it may not import | Explanation |
+| Doc | Description |
+| --- | --- |
+| [/docs/InstallCli.md](/docs/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
+| [/docs/UseCli.md](/docs/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
+| [/docs/AddCliCommand.md](/docs/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
+| [/docs/Cli.md](/docs/Cli.md) | Every command, flag, amount format, and exit code of the interface |
+| [/docs/api.Sandboxmain.md](/docs/api.Sandboxmain.md) | The one library field the whole command-line interface lives behind |
+| [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | Why the interface lives in a closed sandbox and what it may not import |
 
 ---
 
@@ -159,10 +159,10 @@ Installing the `agnos` binary, driving it from a terminal, and adding commands t
 
 Shell scripts driving the built binary the way a user would — each builds the CLI itself and runs against a budget of its own.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/RunCliExample.md](/docs/Tutorials/RunCliExample.md) | Run the shell scripts in cliExamples/ and read their transcripts | Tutorial |
-| [/docs/Tutorials/AddCliExample.md](/docs/Tutorials/AddCliExample.md) | Write a cliExamples/ script and register it in the README | Tutorial |
+| Doc | Description |
+| --- | --- |
+| [/docs/RunCliExample.md](/docs/RunCliExample.md) | Run the shell scripts in cliExamples/ and read their transcripts |
+| [/docs/AddCliExample.md](/docs/AddCliExample.md) | Write a cliExamples/ script and register it in the README |
 
 ### Available CLI Examples
 
@@ -178,15 +178,15 @@ Shell scripts driving the built binary the way a user would — each builds the 
 
 Consuming the same behavior from Go code: install the module, track your money, and understand what the API offers.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/LibInitialization.md](/docs/Tutorials/LibInitialization.md) | Install the lib, create deps via an adapter, and run a first program | Tutorial |
-| [/docs/Tutorials/ManageCategories.md](/docs/Tutorials/ManageCategories.md) | Create the categories transactions are tracked under, list them, and remove one | Tutorial |
-| [/docs/Tutorials/TrackTransactions.md](/docs/Tutorials/TrackTransactions.md) | Record spend and received transactions, list them, and read a balance | Tutorial |
-| [/docs/References/PublicApi.md](/docs/References/PublicApi.md) | Index of all public structs, functions, and fields with detail links | Reference |
-| [/docs/References/Adapters.md](/docs/References/Adapters.md) | Lists every shipped adapter and when to use each one | Reference |
-| [/docs/Explanations/DepsMechanic.md](/docs/Explanations/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups | Explanation |
-| [/docs/Explanations/StructContracts.md](/docs/Explanations/StructContracts.md) | Why every contract is a struct of function fields, and how factories fill them | Explanation |
+| Doc | Description |
+| --- | --- |
+| [/docs/LibInitialization.md](/docs/LibInitialization.md) | Install the lib, create deps via an adapter, and run a first program |
+| [/docs/ManageCategories.md](/docs/ManageCategories.md) | Create the categories transactions are tracked under, list them, and remove one |
+| [/docs/TrackTransactions.md](/docs/TrackTransactions.md) | Record spend and received transactions, list them, and read a balance |
+| [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
+| [/docs/Adapters.md](/docs/Adapters.md) | Lists every shipped adapter and when to use each one |
+| [/docs/DepsMechanic.md](/docs/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups |
+| [/docs/StructContracts.md](/docs/StructContracts.md) | Why every contract is a struct of function fields, and how factories fill them |
 
 ---
 
@@ -194,10 +194,10 @@ Consuming the same behavior from Go code: install the module, track your money, 
 
 Runnable Go programs under `libraryExamples/`, wiring an adapter into the lib.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/RunSample.md](/docs/Tutorials/RunSample.md) | Browse and run the executable samples in the libraryExamples/ directory | Tutorial |
-| [/docs/Tutorials/AddSample.md](/docs/Tutorials/AddSample.md) | Create a runnable sample in libraryExamples/ and register it in the README | Tutorial |
+| Doc | Description |
+| --- | --- |
+| [/docs/RunSample.md](/docs/RunSample.md) | Browse and run the executable samples in the libraryExamples/ directory |
+| [/docs/AddSample.md](/docs/AddSample.md) | Create a runnable sample in libraryExamples/ and register it in the README |
 
 ### Available Library Examples
 
@@ -214,14 +214,14 @@ Runnable Go programs under `libraryExamples/`, wiring an adapter into the lib.
 
 Adding to the library inside the closed sandbox, and exposing what you add.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/AddLibFunction.md](/docs/Tutorials/AddLibFunction.md) | Declare a function field on api.Lib and write the factory that fills it | Tutorial |
-| [/docs/Tutorials/AddLibObject.md](/docs/Tutorials/AddLibObject.md) | Add an object created by the lib, with its deps propagated by its New constructor | Tutorial |
-| [/docs/Tutorials/AddCliCommand.md](/docs/Tutorials/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain | Tutorial |
-| [/docs/Tutorials/ExposePublicApi.md](/docs/Tutorials/ExposePublicApi.md) | Publish a lib function, object, or field in the public API index | Tutorial |
-| [/docs/References/PublicApi.md](/docs/References/PublicApi.md) | Index of all public structs, functions, and fields with detail links | Reference |
-| [/docs/Explanations/SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) | Why the library lives in a closed sandbox and what it may not import | Explanation |
+| Doc | Description |
+| --- | --- |
+| [/docs/AddLibFunction.md](/docs/AddLibFunction.md) | Declare a function field on api.Lib and write the factory that fills it |
+| [/docs/AddLibObject.md](/docs/AddLibObject.md) | Add an object created by the lib, with its deps propagated by its New constructor |
+| [/docs/AddCliCommand.md](/docs/AddCliCommand.md) | Add a command or a flag to the interface behind api.Lib.Sandboxmain |
+| [/docs/ExposePublicApi.md](/docs/ExposePublicApi.md) | Publish a lib function, object, or field in the public API index |
+| [/docs/PublicApi.md](/docs/PublicApi.md) | Index of all public structs, functions, and fields with detail links |
+| [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | Why the library lives in a closed sandbox and what it may not import |
 
 ---
 
@@ -229,13 +229,13 @@ Adding to the library inside the closed sandbox, and exposing what you add.
 
 Working with the `Deps` contract and the adapters that satisfy it.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/AddDependency.md](/docs/Tutorials/AddDependency.md) | Add a field to the Deps contract and fill it in every adapter | Tutorial |
-| [/docs/Tutorials/AddAdapter.md](/docs/Tutorials/AddAdapter.md) | Create a new opinionated implementation of the Deps contract | Tutorial |
-| [/docs/References/Adapters.md](/docs/References/Adapters.md) | Lists every shipped adapter and when to use each one | Reference |
-| [/docs/Explanations/DepsMechanic.md](/docs/Explanations/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups | Explanation |
-| [/docs/Explanations/StructContracts.md](/docs/Explanations/StructContracts.md) | Why every contract is a struct of function fields, and how factories fill them | Explanation |
+| Doc | Description |
+| --- | --- |
+| [/docs/AddDependency.md](/docs/AddDependency.md) | Add a field to the Deps contract and fill it in every adapter |
+| [/docs/AddAdapter.md](/docs/AddAdapter.md) | Create a new opinionated implementation of the Deps contract |
+| [/docs/Adapters.md](/docs/Adapters.md) | Lists every shipped adapter and when to use each one |
+| [/docs/DepsMechanic.md](/docs/DepsMechanic.md) | How the dependency-injection mechanism works, including custom setups |
+| [/docs/StructContracts.md](/docs/StructContracts.md) | Why every contract is a struct of function fields, and how factories fill them |
 
 ---
 
@@ -243,12 +243,12 @@ Working with the `Deps` contract and the adapters that satisfy it.
 
 Maintaining the docs themselves: creating, renaming, and deleting `.md` files.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/AddDocument.md](/docs/Tutorials/AddDocument.md) | Create or update a .md file and register it in README and Structure | Tutorial |
-| [/docs/Tutorials/RenameDocument.md](/docs/Tutorials/RenameDocument.md) | Rename or move a .md file without leaving broken references behind | Tutorial |
-| [/docs/Tutorials/DeleteDocument.md](/docs/Tutorials/DeleteDocument.md) | Remove a .md file and clear every reference pointing to it | Tutorial |
-| [/docs/References/Specs.md](/docs/References/Specs.md) | Lists every specification and the files each one governs | Reference |
+| Doc | Description |
+| --- | --- |
+| [/docs/AddDocument.md](/docs/AddDocument.md) | Create or update a .md file and register it in README and Structure |
+| [/docs/RenameDocument.md](/docs/RenameDocument.md) | Rename or move a .md file without leaving broken references behind |
+| [/docs/DeleteDocument.md](/docs/DeleteDocument.md) | Remove a .md file and clear every reference pointing to it |
+| [/docs/Specs.md](/docs/Specs.md) | Lists every specification and the files each one governs |
 
 ---
 
@@ -256,12 +256,12 @@ Maintaining the docs themselves: creating, renaming, and deleting `.md` files.
 
 Turning the template into a CLI of your own.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/Tutorials/ForkTemplate.md](/docs/Tutorials/ForkTemplate.md) | Use this repo as a GitHub template to start a new DI library | Tutorial |
-| [/docs/Tutorials/AdaptExistingLib.md](/docs/Tutorials/AdaptExistingLib.md) | Convert a pre-existing library to this DI structure | Tutorial |
-| [/docs/Tutorials/RenameModule.md](/docs/Tutorials/RenameModule.md) | Rename the Go module path and update all internal imports | Tutorial |
-| [/docs/References/TemplateFileActions.md](/docs/References/TemplateFileActions.md) | The action each template file takes when adapting: copy, create, rewrite, or delete | Reference |
+| Doc | Description |
+| --- | --- |
+| [/docs/ForkTemplate.md](/docs/ForkTemplate.md) | Use this repo as a GitHub template to start a new DI library |
+| [/docs/AdaptExistingLib.md](/docs/AdaptExistingLib.md) | Convert a pre-existing library to this DI structure |
+| [/docs/RenameModule.md](/docs/RenameModule.md) | Rename the Go module path and update all internal imports |
+| [/docs/TemplateFileActions.md](/docs/TemplateFileActions.md) | The action each template file takes when adapting: copy, create, rewrite, or delete |
 
 ---
 
@@ -269,12 +269,12 @@ Turning the template into a CLI of your own.
 
 The binding conventions every change to this repo must follow.
 
-| Doc | Description | Type |
-| --- | --- | --- |
-| [/docs/References/RULES.md](/docs/References/RULES.md) | The binding contribution rules and their required companion updates | Reference |
-| [/docs/References/Structure.md](/docs/References/Structure.md) | The project's directory layout and the purpose of each component | Reference |
-| [/docs/References/Specs.md](/docs/References/Specs.md) | Lists every specification and the files each one governs | Reference |
-| [/docs/Explanations/SandboxIsolation.md](/docs/Explanations/SandboxIsolation.md) | Why the library lives in a closed sandbox and what it may not import | Explanation |
+| Doc | Description |
+| --- | --- |
+| [/docs/RULES.md](/docs/RULES.md) | The binding contribution rules and their required companion updates |
+| [/docs/Structure.md](/docs/Structure.md) | The project's directory layout and the purpose of each component |
+| [/docs/Specs.md](/docs/Specs.md) | Lists every specification and the files each one governs |
+| [/docs/SandboxIsolation.md](/docs/SandboxIsolation.md) | Why the library lives in a closed sandbox and what it may not import |
 
 ---
 
