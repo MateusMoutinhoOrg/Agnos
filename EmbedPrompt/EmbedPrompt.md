@@ -3,7 +3,9 @@
 ### Embed mechanic 
 
 ### Objective:
-setup a embed mechanic were sandbox will be able to retrive embed informations from the binary 
+setup a embed mechanic were sandbox will be able to retrive embed files,from a given directory 
+
+
 
 ### Ideia:
 The ideia of embed assets its to store text,images,and templates for itens.
@@ -22,10 +24,17 @@ The ideia of embed assets its to store text,images,and templates for itens.
 - adapters/standard/standard.go
   - [example](./tree/adapters/standard/standard.go/example.go)
 
+- cmd/main/main.go
+  - [example](./tree/cmd/main/main.go/example.go)
+
+
+
+
+### Sandbox Changes:
+move all hardcoded text  , such as helps,etc, to /assets/ dir
 
 ### Doc Changes
-- add a documentation reference on readme on Lib Usage  a doc explaning how
-to handle embed assets 
+- add documentations n the lib usage section about these new embed mechanic
 
 
 
