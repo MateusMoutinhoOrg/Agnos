@@ -1,7 +1,7 @@
 # Handle Library Elements
 
 ## Description
-Covers adding new elements — functions and objects — to the library's public API: declare the struct/field in [sandbox/contracts/api/api.go](/sandbox/contracts/api/api.go), write the factory under [sandbox/internal/](/sandbox/internal/), register it in the package's `New` constructor, and publish it in [PublicApi.md](/docs/LibUsage/References/PublicApi.md). Assumes the mechanics in [StructContracts.md](/docs/Development/References/StructContracts.md). The CLI command calling the new element is a separate goal — [HandleCliCommands.md](/docs/Development/Protocols/HandleCliCommands.md).
+Covers adding new elements — functions and objects — to the library's public API: declare the struct/field in [sandbox/contracts/api/api.go](/sandbox/contracts/api/api.go), write the factory under [sandbox/internal/](/sandbox/internal/), register it in the package's `New` constructor, and publish it in [PublicApi.md](/docs/LibUsage/References/PublicApi.md). Assumes the mechanics in [StructContracts.md](/docs/Development/References/StructContracts.md). The CLI command calling the new element is a separate goal — [HandleCliCommands.md](/docs/Development/Tutorials/HandleCliCommands.md).
 
 ### Rules
 - A function or object field is only usable once its factory's return value is assigned from the package's `New(d deps.Deps, …)` constructor, which doubles as the factory aggregate — an unassigned field stays nil and panics on first call. The compiler does not catch this.
@@ -46,10 +46,10 @@ Covers adding new elements — functions and objects — to the library's public
        return l
    }
    ```
-4. If the function needs a dependency that is not yet in the contract, add it following [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md).
+4. If the function needs a dependency that is not yet in the contract, add it following [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md).
 5. Expose the function following [Expose in the Public API](#expose-in-the-public-api) below.
 6. If a new file was created, register it in [Structure.md](/docs/Development/References/Structure.md).
-7. If the function needs a runnable demonstration, add one following [HandleSamples.md](/docs/Development/Protocols/HandleSamples.md).
+7. If the function needs a runnable demonstration, add one following [HandleSamples.md](/docs/Development/Tutorials/HandleSamples.md).
 8. Build the project and call the new field once to confirm it is not nil.
 
 ---
@@ -138,6 +138,6 @@ Covers adding new elements — functions and objects — to the library's public
 ### Workflow
 1. Open [PublicApi.md](/docs/LibUsage/References/PublicApi.md).
 2. Add the struct, function, or field to the section matching its kind, with a one-line description. An object is public only through its `sandbox/contracts/api` struct — never document the `sandbox/internal/` type as the entry.
-3. Create the detail page under [docs/LibUsage/References/PublicApi/](/docs/LibUsage/References/PublicApi/), named `<pkg>.<Symbol>.md` after the package the symbol is declared in (e.g., `api.GetCategory.md`), following [HandleDocuments.md](/docs/Development/Protocols/HandleDocuments.md).
+3. Create the detail page under [docs/LibUsage/References/PublicApi/](/docs/LibUsage/References/PublicApi/), named `<pkg>.<Symbol>.md` after the package the symbol is declared in (e.g., `api.GetCategory.md`), following [HandleDocuments.md](/docs/Development/Tutorials/HandleDocuments.md).
 4. Link the new detail page from its entry in [PublicApi.md](/docs/LibUsage/References/PublicApi.md).
 5. Register the detail page in [Structure.md](/docs/Development/References/Structure.md).

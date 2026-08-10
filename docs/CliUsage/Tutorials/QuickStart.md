@@ -1,7 +1,7 @@
 # Get Started with the CLI
 
 ## Description
-Installs the `agnos` binary and tracks a first budget with it, in two steps. Troubleshooting the installation is covered by [InstallCli.md](/docs/CliUsage/Protocols/InstallCli.md); the full command surface is listed in [Commands.md](/docs/CliUsage/References/Commands.md); driving every operation from the terminal is covered by [UseCli.md](/docs/CliUsage/Protocols/UseCli.md).
+Installs the `agnos` binary and tracks a first budget with it, in two steps. Troubleshooting the installation is covered by [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); the full command surface is listed in [Commands.md](/docs/CliUsage/References/Commands.md); driving every operation from the terminal is covered by [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md).
 
 ### Rules
 - Go ≥ 1.22 must be installed.
@@ -65,4 +65,4 @@ Installs the `agnos` binary and tracks a first budget with it, in two steps. Tro
    agnos balance            # 2415.50
    ```
 
-3. Read [UseCli.md](/docs/CliUsage/Protocols/UseCli.md) for the rest of the operations, and [Commands.md](/docs/CliUsage/References/Commands.md) for every command, flag, and exit code.
+3. Read [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md) for the rest of the operations, and [Commands.md](/docs/CliUsage/References/Commands.md) for every command, flag, and exit code.

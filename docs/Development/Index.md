@@ -8,17 +8,17 @@ Index of the documentation for contributors changing this repository: the bindin
 
 ---
 
-## Protocols
+## Tutorials
 
 | Doc | Description |
 | --- | --- |
-| [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md) | How injected deps travel the object graph, and how to add a `Deps` field |
-| [HandleLibElements.md](/docs/Development/Protocols/HandleLibElements.md) | Add a function or an object: declare, write the factory, register, publish |
-| [HandleCliCommands.md](/docs/Development/Protocols/HandleCliCommands.md) | Add a command or a flag to the interface behind `api.Lib.Sandboxmain` |
-| [HandleAdapters.md](/docs/Development/Protocols/HandleAdapters.md) | Create a new opinionated implementation of the `Deps` contract |
-| [HandleSamples.md](/docs/Development/Protocols/HandleSamples.md) | Create and run executable Go samples in `examples/libraryExamples/` |
-| [HandleCliExamples.md](/docs/Development/Protocols/HandleCliExamples.md) | Create and run shell scripts in `examples/cliExamples/` driving the built CLI |
-| [HandleDocuments.md](/docs/Development/Protocols/HandleDocuments.md) | Create, rename, move, or delete a `.md` file without leaving broken references |
+| [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md) | How injected deps travel the object graph, and how to add a `Deps` field |
+| [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md) | Add a function or an object: declare, write the factory, register, publish |
+| [HandleCliCommands.md](/docs/Development/Tutorials/HandleCliCommands.md) | Add a command or a flag to the interface behind `api.Lib.Sandboxmain` |
+| [HandleAdapters.md](/docs/Development/Tutorials/HandleAdapters.md) | Create a new opinionated implementation of the `Deps` contract |
+| [HandleSamples.md](/docs/Development/Tutorials/HandleSamples.md) | Create and run executable Go samples in `examples/libraryExamples/` |
+| [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md) | Create and run shell scripts in `examples/cliExamples/` driving the built CLI |
+| [HandleDocuments.md](/docs/Development/Tutorials/HandleDocuments.md) | Create, rename, move, or delete a `.md` file without leaving broken references |
 
 ---
 

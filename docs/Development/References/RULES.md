@@ -5,7 +5,7 @@ Rules to follow when contributing to this project. Every file must also be shape
 ---
 
 ## Tutorials Guide
-Before making anything, open the theme index matching your goal — [CliUsage](/docs/CliUsage/Index.md), [LibUsage](/docs/LibUsage/Index.md), [Development](/docs/Development/Index.md), or [Templating](/docs/Templating/Index.md), all linked from the [README.md](/README.md) — and search its `Protocols` table for a tutorial about what you want to do. If there is one, follow it; if there isn't, you need to create one following the spec defined in [TutorialDocs](/docs/Development/References/Specs/TutorialDocs/).
+Before making anything, open the theme index matching your goal — [CliUsage](/docs/CliUsage/Index.md), [LibUsage](/docs/LibUsage/Index.md), [Development](/docs/Development/Index.md), or [Templating](/docs/Templating/Index.md), all linked from the [README.md](/README.md) — and search its `Tutorials` table for a tutorial about what you want to do. If there is one, follow it; if there isn't, you need to create one following the spec defined in [TutorialDocs](/docs/Development/References/Specs/TutorialDocs/).
 
 
 ## Specification Compliance
@@ -16,7 +16,7 @@ Before creating or editing any file, read [Specs.md](/docs/Development/Reference
 
 ## Sandbox Isolation
 
-[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [examples/libraryExamples/](/examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md). The mechanic is explained in [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md).
+[sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [examples/libraryExamples/](/examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md). The mechanic is explained in [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md).
 
 Contracts are **structs of function fields**, never interfaces — in [sandbox/contracts/deps](/sandbox/contracts/deps/) and [sandbox/contracts/api](/sandbox/contracts/api/) alike. Every type in the project is declared in `sandbox/contracts/`; [sandbox/internal/](/sandbox/internal/) declares no types at all. See [StructContracts.md](/docs/Development/References/StructContracts.md).
 
@@ -106,7 +106,7 @@ When you create, delete, or rename a specification inside [Specs/](/docs/Develop
 
 ## Documentation Changes
 
-When you create, delete, or rename a `.md` file, update the `Index.md` of its theme — see [HandleDocuments.md](/docs/Development/Protocols/HandleDocuments.md). The [README.md](/README.md) Doc Index changes only when a **theme** is added, renamed, or removed.
+When you create, delete, or rename a `.md` file, update the `Index.md` of its theme — see [HandleDocuments.md](/docs/Development/Tutorials/HandleDocuments.md). The [README.md](/README.md) Doc Index changes only when a **theme** is added, renamed, or removed.
 
 ---
 
@@ -120,4 +120,4 @@ When you create, delete, or rename a sample, update the reference page that list
 
 The command-line interface lives **inside** the sandbox, as the `Sandboxmain` field of `api.Lib`, dispatching in [sandbox/internal/cli/](/sandbox/internal/cli/). The binary in [cmd/main/](/cmd/main/) wires an adapter into the library, calls that field, and exits with its return — it must never branch on a command, parse a flag, or print anything of its own, or the behavior stops being reachable from any other front end.
 
-When you add or change a command or a flag, update [Commands.md](/docs/CliUsage/References/Commands.md) and the usage screen in `sandbox/internal/cli/cli.go` in the same commit, following [HandleCliCommands.md](/docs/Development/Protocols/HandleCliCommands.md).
+When you add or change a command or a flag, update [Commands.md](/docs/CliUsage/References/Commands.md) and the usage screen in `sandbox/internal/cli/cli.go` in the same commit, following [HandleCliCommands.md](/docs/Development/Tutorials/HandleCliCommands.md).

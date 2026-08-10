@@ -1,7 +1,7 @@
 # Install the CLI
 
 ## Description
-Covers installing the `agnos` command-line interface globally, so it runs from any directory and survives a terminal restart. To use it once installed, follow [UseCli.md](/docs/CliUsage/Protocols/UseCli.md); to consume the same behavior as a Go library instead, follow [LibInitialization.md](/docs/LibUsage/Protocols/LibInitialization.md).
+Covers installing the `agnos` command-line interface globally, so it runs from any directory and survives a terminal restart. To use it once installed, follow [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md); to consume the same behavior as a Go library instead, follow [LibInitialization.md](/docs/LibUsage/Tutorials/LibInitialization.md).
 
 ### Rules
 - Go 1.22 or newer must be installed and available on your `PATH` (`go version` must print a version).

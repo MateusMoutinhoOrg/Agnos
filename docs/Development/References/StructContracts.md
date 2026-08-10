@@ -1,7 +1,7 @@
 # Struct Contracts
 
 ## Description
-Explains why every contract in this project — `deps.Deps` and everything in `sandbox/contracts/api` — is a **struct of function fields** instead of an interface, what that buys, and what it costs. Second stage of the Development learning path, after [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md); [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md) shows the mechanic in motion.
+Explains why every contract in this project — `deps.Deps` and everything in `sandbox/contracts/api` — is a **struct of function fields** instead of an interface, what that buys, and what it costs. Second stage of the Development learning path, after [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md); [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md) shows the mechanic in motion.
 
 ---
 
@@ -135,7 +135,7 @@ Every field whose signature matches is one line; an interface would need a bridg
 
 - An adapter's `New` must call a factory for **every** field of `deps.Deps`.
 - A package's `New` must call **every** field factory of its api struct.
-- Adding a contract field means visiting every adapter — see [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md#add-a-dependency).
+- Adding a contract field means visiting every adapter — see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#add-a-dependency).
 
 **`Deps` is read-only once the struct is returned.** The closures captured the struct the factories ran over, so patch the `deps.Deps` value *before* calling `lib.New`:
 

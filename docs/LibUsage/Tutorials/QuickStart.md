@@ -1,7 +1,7 @@
 # Get Started with the Library
 
 ## Description
-Installs the module and runs the smallest program that uses it: an adapter builds the `Deps`, `lib.New` turns them into an `api.Lib`, and the tracker records its first transactions. Choosing and patching an adapter is covered by [LibInitialization.md](/docs/LibUsage/Protocols/LibInitialization.md); every public symbol is listed in [PublicApi.md](/docs/LibUsage/References/PublicApi.md).
+Installs the module and runs the smallest program that uses it: an adapter builds the `Deps`, `lib.New` turns them into an `api.Lib`, and the tracker records its first transactions. Choosing and patching an adapter is covered by [LibInitialization.md](/docs/LibUsage/Tutorials/LibInitialization.md); every public symbol is listed in [PublicApi.md](/docs/LibUsage/References/PublicApi.md).
 
 ### Rules
 - Consumers alias every import with the `agnos` prefix — see the Import Aliases rule in [RULES.md](/docs/Development/References/RULES.md#import-aliases).
@@ -54,7 +54,7 @@ Installs the module and runs the smallest program that uses it: an adapter build
    go run main.go
    ```
 
-4. Continue with [ManageCategories.md](/docs/LibUsage/Protocols/ManageCategories.md) and [TrackTransactions.md](/docs/LibUsage/Protocols/TrackTransactions.md) for the full set of operations.
+4. Continue with [ManageCategories.md](/docs/LibUsage/Tutorials/ManageCategories.md) and [TrackTransactions.md](/docs/LibUsage/Tutorials/TrackTransactions.md) for the full set of operations.
 
 ## Full Code
 

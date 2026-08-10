@@ -1,11 +1,11 @@
 # Track Transactions
 
 ## Description
-Covers recording spend and received transactions, listing them, and reading a balance. Creating the categories they are recorded under is covered by [ManageCategories.md](/docs/LibUsage/Protocols/ManageCategories.md); installing and initializing the lib is covered by [LibInitialization.md](/docs/LibUsage/Protocols/LibInitialization.md).
+Covers recording spend and received transactions, listing them, and reading a balance. Creating the categories they are recorded under is covered by [ManageCategories.md](/docs/LibUsage/Tutorials/ManageCategories.md); installing and initializing the lib is covered by [LibInitialization.md](/docs/LibUsage/Tutorials/LibInitialization.md).
 
 ### Rules
 - Amounts are expressed in the **smallest currency unit** (cents) and must be **positive**: `8450` is `84.50`. The direction of the money is the transaction's `Kind`, never the sign of its amount.
-- A transaction is always recorded under an existing category, so create it first — see [ManageCategories.md](/docs/LibUsage/Protocols/ManageCategories.md).
+- A transaction is always recorded under an existing category, so create it first — see [ManageCategories.md](/docs/LibUsage/Tutorials/ManageCategories.md).
 
 ---
 

@@ -86,7 +86,7 @@ Two cases, and only two:
 - **Signatures match** — plain assignment, one line per field (`inner.Balance`).
 - **A named type differs** — the embedded field hands back an api struct of its own, so the adapter wraps it in a closure converting the returned struct too (`fromCategory`, `fromTransaction`), recursively for structs those structs return.
 
-The conversion is the price of the wall, paid once per adapter — see [What It Costs](/docs/Development/References/StructContracts.md#consuming-a-library-that-uses-this-pattern) and [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md).
+The conversion is the price of the wall, paid once per adapter — see [What It Costs](/docs/Development/References/StructContracts.md#consuming-a-library-that-uses-this-pattern) and [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md).
 
 ---
 
@@ -126,4 +126,4 @@ To depend on the Agnos tracker (or any Agnos-style library) from a library of yo
 | A plain struct field for it on your `Deps` contract | `TrackerLib` in `bootstrap/sandbox/contracts/deps/deps.go` |
 | A value-returning factory in every adapter, converting where types differ | `TrackerLibFactory` in `bootstrap/adapters/standard/` |
 
-Consumers of *your* library then follow the [Import Aliases rule](/docs/Development/References/RULES.md#import-aliases) with your own prefix (`bootstrapadapter`, `bootstraplib`), exactly as `bootstrap/libraryExamples/Test/test.go` does. For turning this repository into that library in the first place, follow [ForkTemplate.md](/docs/Templating/Protocols/ForkTemplate.md) or [AdaptExistingLib.md](/docs/Templating/Protocols/AdaptExistingLib.md) — [TemplateFileActions.md](/docs/Templating/References/TemplateFileActions.md) lists the fate of every `bootstrap/*` file there.
+Consumers of *your* library then follow the [Import Aliases rule](/docs/Development/References/RULES.md#import-aliases) with your own prefix (`bootstrapadapter`, `bootstraplib`), exactly as `bootstrap/libraryExamples/Test/test.go` does. For turning this repository into that library in the first place, follow [ForkTemplate.md](/docs/Templating/Tutorials/ForkTemplate.md) or [AdaptExistingLib.md](/docs/Templating/Tutorials/AdaptExistingLib.md) — [TemplateFileActions.md](/docs/Templating/References/TemplateFileActions.md) lists the fate of every `bootstrap/*` file there.

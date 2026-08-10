@@ -10,7 +10,7 @@ Defines the required shape of a runnable command-line example in `examples/cliEx
 - It builds the CLI itself with `go build -o "$workdir/agnos" ./cmd/main` into a `mktemp -d` directory removed by a `trap` on exit, and points the binary at a budget of its own by exporting `AGNOS_DATA`. A CLI example never writes to the records in the user's home directory and never requires the CLI to be installed first.
 - Every command it runs goes through the built binary — the example demonstrates the interface, so it must never `go run` a library example or reach into the sandbox.
 - Sections are announced with an `echo "== …"` line saying what the commands below show, so the transcript reads on its own.
-- Adding, renaming, or deleting a CLI example requires updating [SamplesList.md](/docs/CliUsage/References/SamplesList.md) and [Structure.md](/docs/Development/References/Structure.md) — see [HandleCliExamples.md](/docs/Development/Protocols/HandleCliExamples.md).
+- Adding, renaming, or deleting a CLI example requires updating [SamplesList.md](/docs/CliUsage/References/SamplesList.md) and [Structure.md](/docs/Development/References/Structure.md) — see [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md).
 
 ## Structure
 1. **Shebang**: `#!/usr/bin/env bash`.

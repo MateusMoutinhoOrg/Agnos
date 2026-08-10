@@ -43,7 +43,7 @@ The sandbox's **copy** of the embedded Keep schema-database library's public api
 
 Keep is a schema database over a single-key storage backend: a [`Props`](#supporting-types) description declares collections (`Schema`) and their fields (`Item`), `NewDatabase` binds that description, `GetSchema` hands back one collection, and a collection creates, finds, lists and removes records. A field typed `Key` is unique and indexed — that is what `FindByKey` looks through, and inserting a duplicate fails with a `KeyConflict` error. A field typed `Database` is a nested collection, reached through a record's `NewSubItem` and `ListAll`.
 
-Where Verb's fields return plain values, Keep's return further api structs, so this copy restates the whole tree and the adapter's `KeepLibFactory` wraps each such field in a closure that converts what it returns — nothing of the embedded library ever reaches the sandbox. See [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md#injecting-a-whole-library).
+Where Verb's fields return plain values, Keep's return further api structs, so this copy restates the whole tree and the adapter's `KeepLibFactory` wraps each such field in a closure that converts what it returns — nothing of the embedded library ever reaches the sandbox. See [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#injecting-a-whole-library).
 
 The adapter also chooses the backend Keep itself runs on: `standard` wires Keep's filesystem adapter. See [Adapters.md](/docs/LibUsage/References/Adapters.md).
 

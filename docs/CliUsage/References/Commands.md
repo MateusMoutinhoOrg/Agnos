@@ -1,7 +1,7 @@
 # CLI Commands
 
 ## Description
-Every command, flag, and exit code of the `agnos` command-line interface. The interface itself is `api.Lib.Sandboxmain`, a field of the library like any other; the binary in [cmd/main](/cmd/main/) only wires an adapter into it and exits with what it returns. To install it, follow [InstallCli.md](/docs/CliUsage/Protocols/InstallCli.md); to walk through a first budget, follow [UseCli.md](/docs/CliUsage/Protocols/UseCli.md).
+Every command, flag, and exit code of the `agnos` command-line interface. The interface itself is `api.Lib.Sandboxmain`, a field of the library like any other; the binary in [cmd/main](/cmd/main/) only wires an adapter into it and exits with what it returns. To install it, follow [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); to walk through a first budget, follow [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md).
 
 ```bash
 agnos <command> [arguments] [flags]

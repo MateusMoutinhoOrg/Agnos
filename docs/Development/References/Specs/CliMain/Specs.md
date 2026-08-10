@@ -10,7 +10,7 @@ Defines the required shape of the executable entry point in `cmd/main/main.go` �
 - The argument vector passed to `Sandboxmain` must be the same one the adapter wired `deps.Deps.VerbLib` over — `os.Args[1:]` on both sides — or the interface and the parser disagree about the command line.
 - It imports the library under the `agnos`-prefixed aliases every outside consumer uses; see the Import Aliases rule in [RULES.md](/docs/Development/References/RULES.md).
 - The exit code is whatever `Sandboxmain` returns, unmapped: the constants in `sandbox/contracts/api` are the process's contract with its caller.
-- Renaming, moving, or adding an entry point requires updating [Structure.md](/docs/Development/References/Structure.md) and the install command in [QuickStart.md](/docs/CliUsage/Protocols/QuickStart.md).
+- Renaming, moving, or adding an entry point requires updating [Structure.md](/docs/Development/References/Structure.md) and the install command in [QuickStart.md](/docs/CliUsage/Tutorials/QuickStart.md).
 
 ## Structure
 1. **Package clause**: `package main`.

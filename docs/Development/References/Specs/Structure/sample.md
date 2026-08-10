@@ -19,8 +19,8 @@ Documentation of the project, one directory per theme.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Index.md` | The theme's entry point: one table of its Protocols, one of its References | Index |
-| `Protocols/<Goal>.md` | One page per workflow, its title phrased as the action it performs | TutorialDocs |
+| `Index.md` | The theme's entry point: one table of its Tutorials, one of its References | Index |
+| `Tutorials/<Goal>.md` | One page per workflow, its title phrased as the action it performs | TutorialDocs |
 | `References/<Name>.md` | One page per lookup table or explained mechanic | ReferenceDocs |
 
 #### `/docs/Development/References/`

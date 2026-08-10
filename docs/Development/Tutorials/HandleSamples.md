@@ -1,7 +1,7 @@
 # Handle Library Samples
 
 ## Description
-Covers creating and running executable Go samples in [examples/libraryExamples/](/examples/libraryExamples/) that demonstrate library features — typically after adding one through [HandleLibElements.md](/docs/Development/Protocols/HandleLibElements.md). The shell-script counterparts, demonstrating features against the built CLI, are covered by [HandleCliExamples.md](/docs/Development/Protocols/HandleCliExamples.md).
+Covers creating and running executable Go samples in [examples/libraryExamples/](/examples/libraryExamples/) that demonstrate library features — typically after adding one through [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md). The shell-script counterparts, demonstrating features against the built CLI, are covered by [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md).
 
 ---
 

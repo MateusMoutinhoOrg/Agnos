@@ -1,7 +1,7 @@
 # Library Initialization
 
 ## Description
-Covers installing the library and initializing it with the standard adapter in a new program. Creating categories after initialization is covered by [ManageCategories.md](/docs/LibUsage/Protocols/ManageCategories.md), and recording transactions by [TrackTransactions.md](/docs/LibUsage/Protocols/TrackTransactions.md). For other ways to build the dependencies, see [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md).
+Covers installing the library and initializing it with the standard adapter in a new program. Creating categories after initialization is covered by [ManageCategories.md](/docs/LibUsage/Tutorials/ManageCategories.md), and recording transactions by [TrackTransactions.md](/docs/LibUsage/Tutorials/TrackTransactions.md). For other ways to build the dependencies, see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md).
 
 ---
 

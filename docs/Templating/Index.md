@@ -7,13 +7,13 @@ Pick **one** of the two workflows and follow it end to end. Both are phased step
 
 ---
 
-## Protocols
+## Tutorials
 
 | Doc | Description |
 | --- | --- |
-| [ForkTemplate.md](/docs/Templating/Protocols/ForkTemplate.md) | **Start here for a new library**: use this repo as a GitHub template |
-| [AdaptExistingLib.md](/docs/Templating/Protocols/AdaptExistingLib.md) | **Start here for an existing library**: convert it to this DI structure |
-| [RenameModule.md](/docs/Templating/Protocols/RenameModule.md) | Rename the Go module path and update every internal import |
+| [ForkTemplate.md](/docs/Templating/Tutorials/ForkTemplate.md) | **Start here for a new library**: use this repo as a GitHub template |
+| [AdaptExistingLib.md](/docs/Templating/Tutorials/AdaptExistingLib.md) | **Start here for an existing library**: convert it to this DI structure |
+| [RenameModule.md](/docs/Templating/Tutorials/RenameModule.md) | Rename the Go module path and update every internal import |
 
 ---
 

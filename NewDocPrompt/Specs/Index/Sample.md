@@ -5,11 +5,11 @@ These section covers the Cli Usage documentation.
 ... rest of the content
 
 
-### Protocols:
+### Tutorials:
 | Doc | Description |
 | ----| --- |
-| [InstallCli.md](/docs/CliUsage/Protocols/InstallCli.md) | How to install the cli |
-| [UseCli.md](/docs/CliUsage/Protocols/UseCli.md) | How to use the cli |
+| [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md) | How to install the cli |
+| [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md) | How to use the cli |
 | [RunCliSample.md](/docs/CliUsage/References/RunCliSample.md) | How to run a sample with the cli |
 
 ### References:

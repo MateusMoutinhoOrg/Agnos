@@ -36,4 +36,4 @@ if err != nil {
 }
 ```
 
-Adapters receive the resolved values as plain arguments — see [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md).
+Adapters receive the resolved values as plain arguments — see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md).

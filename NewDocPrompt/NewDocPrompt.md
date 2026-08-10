@@ -11,12 +11,12 @@ The documentation will be divided in 3 main directories:
 - Development: for the development process and specifications
 - Templating: for the templating system
 
-each theme will be divided into References,Protocols and Index
+each theme will be divided into References,Tutorials and Index
 - Index: the main index of the theme 
   - [example](./Specs/Index/Sample.md)
 
 - References: explanations about that subject
-- Protocols: workflows steps of how to make something.
+- Tutorials: workflows steps of how to make something.
 
 
 
@@ -32,16 +32,16 @@ each theme will be divided into References,Protocols and Index
   - [modifications](./README.md/modifications.md)
 - docs/CliUsage/Index.md 
 
-- docs/CliUsage/Protocols/ 
-- docs/CliUsage/Protocols/QuickStart.md
+- docs/CliUsage/Tutorials/ 
+- docs/CliUsage/Tutorials/QuickStart.md
 - docs/CliUsage/References/
 - docs/CliUsage/References/Commands.md
 
 
 
 - docs/LibUsage/Index.md
-- docs/LibUsage/Protocols/
-- docs/LibUsage/Protocols/QuickStart.md
+- docs/LibUsage/Tutorials/
+- docs/LibUsage/Tutorials/QuickStart.md
 - docs/LibUsage/References/
 - docs/LibUsage/References/PublicApi/
   - [CurrentDir](/docs/PublicApi/)
@@ -50,7 +50,7 @@ each theme will be divided into References,Protocols and Index
 
 - docs/Development/
 - docs/Development/Index.md
-- docs/Development/Protocols/
+- docs/Development/Tutorials/
 - docs/Development/References/
 - docs/Development/References/Specs/
   - [CurrentDir](/docs/Meta/)
@@ -59,5 +59,5 @@ each theme will be divided into References,Protocols and Index
 
 - docs/Templating/
 - docs/Templating/Index.md
-- docs/Templating/Protocols/
+- docs/Templating/Tutorials/
 - docs/Templating/References/

@@ -5,14 +5,14 @@ Index of the documentation for people who drive the project from a terminal: ins
 
 ---
 
-## Protocols
+## Tutorials
 
 | Doc | Description |
 | --- | --- |
-| [QuickStart.md](/docs/CliUsage/Protocols/QuickStart.md) | Install the binary and run a first command in two steps |
-| [InstallCli.md](/docs/CliUsage/Protocols/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
-| [UseCli.md](/docs/CliUsage/Protocols/UseCli.md) | Drive every operation of the interface from the terminal |
-| [RunCliSample.md](/docs/CliUsage/Protocols/RunCliSample.md) | Run one of the shipped CLI examples from the source tree |
+| [QuickStart.md](/docs/CliUsage/Tutorials/QuickStart.md) | Install the binary and run a first command in two steps |
+| [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
+| [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md) | Drive every operation of the interface from the terminal |
+| [RunCliSample.md](/docs/CliUsage/Tutorials/RunCliSample.md) | Run one of the shipped CLI examples from the source tree |
 
 ---
 

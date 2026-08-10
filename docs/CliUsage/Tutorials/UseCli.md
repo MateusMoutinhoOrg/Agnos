@@ -1,7 +1,7 @@
 # Track a Budget from the Terminal
 
 ## Description
-Covers running the `agnos` CLI end to end: creating categories, recording what comes in and what goes out, and reading the result back. Installing the binary is covered by [InstallCli.md](/docs/CliUsage/Protocols/InstallCli.md); every command and flag is listed in [Commands.md](/docs/CliUsage/References/Commands.md).
+Covers running the `agnos` CLI end to end: creating categories, recording what comes in and what goes out, and reading the result back. Installing the binary is covered by [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); every command and flag is listed in [Commands.md](/docs/CliUsage/References/Commands.md).
 
 ### Rules
 - The commands below assume `agnos` is on your `PATH`. From a checkout, replace `agnos` with `go run ./cmd/main` throughout.
@@ -51,4 +51,4 @@ Covers running the `agnos` CLI end to end: creating categories, recording what c
    ```bash
    agnos balance nosuchcategory || echo "failed with $?"
    ```
-10. Read a worked transcript of all of this in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/Development/Protocols/HandleCliExamples.md).
+10. Read a worked transcript of all of this in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md).

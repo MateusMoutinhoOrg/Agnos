@@ -22,11 +22,11 @@ This index is the **only** place a specification is located from. Never browse `
 | Structure | `docs/Development/References/Structure.md` | [Specs](/docs/Development/References/Specs/Structure/Specs.md) · [sample](/docs/Development/References/Specs/Structure/sample.md) |
 | AdaptersDoc | `docs/LibUsage/References/Adapters.md` | [Specs](/docs/Development/References/Specs/AdaptersDoc/Specs.md) · [sample](/docs/Development/References/Specs/AdaptersDoc/sample.md) |
 | Index | The `Index.md` of each theme — `docs/<Theme>/Index.md` | [Specs](/docs/Development/References/Specs/Index/Specs.md) · [sample](/docs/Development/References/Specs/Index/sample.md) |
-| TutorialDocs | Any page under a `docs/<Theme>/Protocols/` directory — a single-goal workflow guide, e.g. `HandleSamples.md`, `ForkTemplate.md` | [Specs](/docs/Development/References/Specs/TutorialDocs/Specs.md) · [sample](/docs/Development/References/Specs/TutorialDocs/sample.md) |
+| TutorialDocs | Any page under a `docs/<Theme>/Tutorials/` directory — a single-goal workflow guide, e.g. `HandleSamples.md`, `ForkTemplate.md` | [Specs](/docs/Development/References/Specs/TutorialDocs/Specs.md) · [sample](/docs/Development/References/Specs/TutorialDocs/sample.md) |
 | ReferenceDocs | Any other **reference** page under a `docs/<Theme>/References/` directory — listable content: indexes, command lists, and the API detail pages under `docs/LibUsage/References/PublicApi/` — except this index and `docs/Development/References/Specs/` | [Specs](/docs/Development/References/Specs/ReferenceDocs/Specs.md) · [sample](/docs/Development/References/Specs/ReferenceDocs/sample.md) |
 | ExplanationDocs | Any **explanation** page under a `docs/<Theme>/References/` directory — background on one mechanic, e.g. `SandboxIsolation.md` | [Specs](/docs/Development/References/Specs/ExplanationDocs/Specs.md) · [sample](/docs/Development/References/Specs/ExplanationDocs/sample.md) |
 
-GeneralDoc applies on top of the others: a tutorial follows **both** GeneralDoc and TutorialDocs. AdaptersDoc likewise builds on ReferenceDocs — `Adapters.md` follows all three. A theme's `Protocols/` directory holds only tutorials; its `References/` directory holds reference and explanation pages.
+GeneralDoc applies on top of the others: a tutorial follows **both** GeneralDoc and TutorialDocs. AdaptersDoc likewise builds on ReferenceDocs — `Adapters.md` follows all three. A theme's `Tutorials/` directory holds only tutorials; its `References/` directory holds reference and explanation pages.
 
 ---
 

@@ -47,9 +47,9 @@ type Deps struct {
 
 This is what lets the whole command-line interface live inside the wall: `api.Lib.Sandboxmain` reads the command line through `Deps.VerbLib` and prints through `Deps.Printf`, never touching `os.Args` or `os.Stdout`. The binary hands it an argument vector; a test can hand it a fixed vector and a buffer instead.
 
-`VerbLib` and `KeepLib` are the same door in a different shape: both are third-party libraries to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it — see [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md#injecting-a-whole-library).
+`VerbLib` and `KeepLib` are the same door in a different shape: both are third-party libraries to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it — see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#injecting-a-whole-library).
 
-To add a new door, follow [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md#add-a-dependency).
+To add a new door, follow [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#add-a-dependency).
 
 ---
 

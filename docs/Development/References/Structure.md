@@ -174,7 +174,7 @@ The copying lives in the adapter because only code outside the sandbox may impor
 ---
 
 ## `/docs/`
-Documentation of the project, split by **theme** — what the reader wants to accomplish. One top-level directory per theme, each shaped the same way: an `Index.md` listing the theme's pages, a `Protocols/` directory holding its workflows, and a `References/` directory holding its explanations and lookups. The [README](/README.md) links to the four indexes and to nothing else inside `docs/`.
+Documentation of the project, split by **theme** — what the reader wants to accomplish. One top-level directory per theme, each shaped the same way: an `Index.md` listing the theme's pages, a `Tutorials/` directory holding its workflows, and a `References/` directory holding its explanations and lookups. The [README](/README.md) links to the four indexes and to nothing else inside `docs/`.
 
 | Directory | Description |
 |-----------|-------------|
@@ -187,8 +187,8 @@ Every theme directory holds the same three slots:
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Index.md` | The theme's entry point: one table of its Protocols, one of its References | Index |
-| `Protocols/<Goal>.md` | One page per workflow, its title phrased as the action it performs | TutorialDocs |
+| `Index.md` | The theme's entry point: one table of its Tutorials, one of its References | Index |
+| `Tutorials/<Goal>.md` | One page per workflow, its title phrased as the action it performs | TutorialDocs |
 | `References/<Name>.md` | One page per lookup table or explained mechanic | ReferenceDocs / ExplanationDocs |
 
 ### `/docs/CliUsage/`
@@ -196,10 +196,10 @@ The command-line interface, from the reader's side.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Protocols/QuickStart.md` | Install the binary and track a first budget | TutorialDocs |
-| `Protocols/InstallCli.md` | Install the CLI globally, or build it from a checkout | TutorialDocs |
-| `Protocols/UseCli.md` | Drive every operation of the tracker from the terminal | TutorialDocs |
-| `Protocols/RunCliSample.md` | Run a shipped shell example from the source tree | TutorialDocs |
+| `Tutorials/QuickStart.md` | Install the binary and track a first budget | TutorialDocs |
+| `Tutorials/InstallCli.md` | Install the CLI globally, or build it from a checkout | TutorialDocs |
+| `Tutorials/UseCli.md` | Drive every operation of the tracker from the terminal | TutorialDocs |
+| `Tutorials/RunCliSample.md` | Run a shipped shell example from the source tree | TutorialDocs |
 | `References/Commands.md` | Every command, flag, and exit code of the interface | ReferenceDocs |
 | `References/SamplesList.md` | Every example under `examples/cliExamples/` | ReferenceDocs |
 
@@ -208,9 +208,9 @@ The same behavior consumed from Go code.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Protocols/QuickStart.md` | Install the module and run the smallest program using it | TutorialDocs |
-| `Protocols/LibInitialization.md` | Create deps via an adapter and inject them into the lib | TutorialDocs |
-| `Protocols/<Goal>.md` | One page per library workflow — categories, transactions, samples | TutorialDocs |
+| `Tutorials/QuickStart.md` | Install the module and run the smallest program using it | TutorialDocs |
+| `Tutorials/LibInitialization.md` | Create deps via an adapter and inject them into the lib | TutorialDocs |
+| `Tutorials/<Goal>.md` | One page per library workflow — categories, transactions, samples | TutorialDocs |
 | `References/PublicApi.md` | Index of all public-facing components, linking to their detail pages | ReferenceDocs |
 | `References/Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `References/ApiSamplesList.md` | Every example under `examples/libraryExamples/` | ReferenceDocs |
@@ -228,7 +228,7 @@ Everything a contributor must read before changing the repository.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Protocols/Handle<Subject>.md` | One page per maintenance workflow — lib elements, commands, deps, adapters, samples, documents | TutorialDocs |
+| `Tutorials/Handle<Subject>.md` | One page per maintenance workflow — lib elements, commands, deps, adapters, samples, documents | TutorialDocs |
 | `References/RULES.md` | Rules to follow when contributing to this project | Rules |
 | `References/Structure.md` | The project's schema and the purpose of each component | Structure |
 | `References/Specs.md` | Index of every specification and the files each one governs | |
@@ -248,7 +248,7 @@ Turning this repository into another library.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Protocols/ForkTemplate.md` | Use this repo as a GitHub template for a new library | TutorialDocs |
-| `Protocols/AdaptExistingLib.md` | Convert an existing library to this DI structure | TutorialDocs |
-| `Protocols/RenameModule.md` | Rename the module path and update every internal import | TutorialDocs |
+| `Tutorials/ForkTemplate.md` | Use this repo as a GitHub template for a new library | TutorialDocs |
+| `Tutorials/AdaptExistingLib.md` | Convert an existing library to this DI structure | TutorialDocs |
+| `Tutorials/RenameModule.md` | Rename the module path and update every internal import | TutorialDocs |
 | `References/TemplateFileActions.md` | The action each template file takes when forking or adapting | ReferenceDocs |

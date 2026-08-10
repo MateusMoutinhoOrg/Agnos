@@ -1,12 +1,12 @@
 # Manage Categories
 
 ## Description
-Covers creating the categories transactions are tracked under, reading them back, and removing one. Installing and initializing the lib is covered by [LibInitialization.md](/docs/LibUsage/Protocols/LibInitialization.md); recording the transactions themselves is covered by [TrackTransactions.md](/docs/LibUsage/Protocols/TrackTransactions.md).
+Covers creating the categories transactions are tracked under, reading them back, and removing one. Installing and initializing the lib is covered by [LibInitialization.md](/docs/LibUsage/Tutorials/LibInitialization.md); recording the transactions themselves is covered by [TrackTransactions.md](/docs/LibUsage/Tutorials/TrackTransactions.md).
 
 ---
 
 ## Workflow
-1. Initialize the lib as shown in [LibInitialization.md](/docs/LibUsage/Protocols/LibInitialization.md):
+1. Initialize the lib as shown in [LibInitialization.md](/docs/LibUsage/Tutorials/LibInitialization.md):
    ```go
    deps := agnosadapter.New("trackerdata")
    l := agnoslib.New(deps)

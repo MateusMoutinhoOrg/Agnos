@@ -30,7 +30,7 @@ See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md) and 
 
 ## Doc Index
 
-Documentation is split into four themes. Each theme has an `Index.md` listing its **Protocols** — step-by-step workflows — and its **References** — explanations and lookups. Start from the theme index matching what you want to do.
+Documentation is split into four themes. Each theme has an `Index.md` listing its **Tutorials** — step-by-step workflows — and its **References** — explanations and lookups. Start from the theme index matching what you want to do.
 
 | Theme | Description |
 | --- | --- |
@@ -39,7 +39,7 @@ Documentation is split into four themes. Each theme has an `Index.md` listing it
 | [Development](/docs/Development/Index.md) | For contributors: the rules, the mechanics, the per-goal workflows, and the specifications. |
 | [Templating](/docs/Templating/Index.md) | For template users: forking, renaming, and adapting this structure into a new CLI. |
 
-New here? [CLI Usage → QuickStart.md](/docs/CliUsage/Protocols/QuickStart.md) installs the binary and tracks a first budget; [Library Usage → QuickStart.md](/docs/LibUsage/Protocols/QuickStart.md) does the same from Go code.
+New here? [CLI Usage → QuickStart.md](/docs/CliUsage/Tutorials/QuickStart.md) installs the binary and tracks a first budget; [Library Usage → QuickStart.md](/docs/LibUsage/Tutorials/QuickStart.md) does the same from Go code.
 
 ---
 

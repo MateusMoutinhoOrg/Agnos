@@ -1,7 +1,7 @@
 # Handle Dependencies
 
 ## Description
-Explains how the library receives its dependencies — the `Deps` contract in [sandbox/contracts/deps/deps.go](/sandbox/contracts/deps/deps.go), how an injected value propagates through the object graph, and how to add a requirement to the contract. Third stage of the Development learning path: it assumes [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md) and [StructContracts.md](/docs/Development/References/StructContracts.md). Using the dependency from library code is covered by [HandleLibElements.md](/docs/Development/Protocols/HandleLibElements.md).
+Explains how the library receives its dependencies — the `Deps` contract in [sandbox/contracts/deps/deps.go](/sandbox/contracts/deps/deps.go), how an injected value propagates through the object graph, and how to add a requirement to the contract. Third stage of the Development learning path: it assumes [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md) and [StructContracts.md](/docs/Development/References/StructContracts.md). Using the dependency from library code is covered by [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md).
 
 ---
 
@@ -173,7 +173,7 @@ That conversion is the price of the wall, paid once per adapter, outside the san
    ```bash
    grep -rn "Factory(adapter)" adapters/ bootstrap/
    ```
-4. Use the dependency from the library through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Development/Protocols/HandleLibElements.md).
+4. Use the dependency from the library through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md).
 5. Build and run a sample — an unfilled field surfaces at runtime, not at build time:
    ```bash
    go build ./...

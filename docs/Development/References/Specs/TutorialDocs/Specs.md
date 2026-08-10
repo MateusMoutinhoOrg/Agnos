@@ -1,7 +1,7 @@
 # TutorialDocs Specification
 
 ## Description
-Defines the required shape of a **Tutorial** page — any page under a `docs/<Theme>/Protocols/` directory, which guides a workflow. A tutorial covers a single goal (e.g. `HandleSamples.md`, `HandleDependencies.md`), built from actionable numbered steps.
+Defines the required shape of a **Tutorial** page — any page under a `docs/<Theme>/Tutorials/` directory, which guides a workflow. A tutorial covers a single goal (e.g. `HandleSamples.md`, `HandleDependencies.md`), built from actionable numbered steps.
 
 ### Rules
 - Every page must comply with [GeneralDoc](/docs/Development/References/Specs/GeneralDoc/Specs.md).
@@ -20,6 +20,6 @@ Defines the required shape of a **Tutorial** page — any page under a `docs/<Th
 3. **`### Rules`** *(optional)*: constraints for this tutorial.
 4. **`---`**: horizontal rule separating the header from the workflow.
 5. **`## Workflow`**: numbered, actionable steps, with fenced code blocks where a step involves code, and links to other tutorials for any step that is itself a separate goal.
-6. **`## Full Code`** *(required when the workflow assembles a program across steps)*: the complete resulting code in a single fenced block, ready to copy and run — see [TrackTransactions.md](/docs/LibUsage/Protocols/TrackTransactions.md) for a concrete example.
+6. **`## Full Code`** *(required when the workflow assembles a program across steps)*: the complete resulting code in a single fenced block, ready to copy and run — see [TrackTransactions.md](/docs/LibUsage/Tutorials/TrackTransactions.md) for a concrete example.
 
 > **Note**: For a concrete example, refer to [sample.md](/docs/Development/References/Specs/TutorialDocs/sample.md).

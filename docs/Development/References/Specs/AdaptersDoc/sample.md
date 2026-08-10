@@ -1,7 +1,7 @@
 # Adapters
 
 ## Description
-Lists every adapter shipped with the library — the opinionated `deps.Deps` implementations under `adapters/` — and when to use each one. To build a new adapter, follow [HandleAdapters.md](/docs/Development/Protocols/HandleAdapters.md).
+Lists every adapter shipped with the library — the opinionated `deps.Deps` implementations under `adapters/` — and when to use each one. To build a new adapter, follow [HandleAdapters.md](/docs/Development/Tutorials/HandleAdapters.md).
 
 ---
 

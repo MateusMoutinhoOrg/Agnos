@@ -1,7 +1,7 @@
 # Handle CLI Commands
 
 ## Description
-Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Add the *library* function the command calls first, following [HandleLibElements.md](/docs/Development/Protocols/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/Development/Protocols/HandleDependencies.md) before either.
+Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Add the *library* function the command calls first, following [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md) before either.
 
 ### Rules
 - The interface is inside the closed sandbox: it may not import `adapters/`, `cmd/`, a third-party module, or an OS-bound standard-library package. It reads the command line through `l.Deps.VerbLib` and prints through `l.Deps.Printf`, and nothing else. See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md).
@@ -65,4 +65,4 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    go build ./... && go run ./cmd/main largest groceries
    ```
 6. Add the command to the Commands table of [Commands.md](/docs/CliUsage/References/Commands.md), and any flag to its Flags table.
-7. Demonstrate it in a script under [examples/cliExamples/](/examples/cliExamples/) when it is worth showing, following [HandleCliExamples.md](/docs/Development/Protocols/HandleCliExamples.md).
+7. Demonstrate it in a script under [examples/cliExamples/](/examples/cliExamples/) when it is worth showing, following [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md).
