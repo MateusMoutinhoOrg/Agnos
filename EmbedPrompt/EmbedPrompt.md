@@ -32,6 +32,9 @@ The ideia of embed assets its to store text,images,and templates for itens.
 
 ### Sandbox Changes:
 move all hardcoded text  , such as helps,etc, to /assets/ dir
+- setup in assets/version.txt file the version of the binary
+
+
 
 ### Doc Changes
 - add documentations n the lib usage section about these new embed mechanic
