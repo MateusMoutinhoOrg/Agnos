@@ -20,7 +20,8 @@ import (
 
 // assetPath resolves one path the library asked for against the asset root
 // this adapter was pointed at, so "version.txt" under the root "." is
-// "version.txt" and under the root "cli" is "cli/version.txt". path.Join
+// "version.txt" and under the root "messages" is "messages/version.txt".
+// path.Join
 // cleans the result, which is what an embedded filesystem requires: slash
 // separators, no "." element, and no leading slash.
 func assetPath(s *StandardAdapter, requested string) string {

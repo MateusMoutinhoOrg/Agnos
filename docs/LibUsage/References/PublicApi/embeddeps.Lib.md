@@ -53,12 +53,12 @@ func main() {
 	}
 	fmt.Print(string(version)) // v0.1.0
 
-	// One level: the files sitting directly in the cli directory.
-	screens, _ := d.EmbedDeps.ListFiles("cli")
-	fmt.Println(screens) // [usage.txt]
+	// One level: the files sitting directly in the messages directory.
+	lines, _ := d.EmbedDeps.ListFiles("messages")
+	fmt.Println(lines[0]) // amount-invalid.txt
 
 	// The whole subtree, relative to what was asked for.
-	texts, _ := d.EmbedDeps.ListFilesRecursively("cli")
-	fmt.Println(len(texts), texts[0]) // 19 messages/amount-invalid.txt
+	texts, _ := d.EmbedDeps.ListFilesRecursively(".")
+	fmt.Println(len(texts), texts[1]) // 21 messages/amount-invalid.txt
 }
 ```

@@ -29,7 +29,7 @@ Copying these files carries over the template's **generic** guides and specifica
 | `docs/Development/References/SandboxIsolation.md`, `docs/Development/References/StructContracts.md` | The explanations of the structure's mechanics |
 | `docs/Development/Tutorials/HandleDependencies.md`, `docs/Development/Tutorials/HandleLibElements.md`, `docs/Development/Tutorials/HandleCliCommands.md`, `docs/Development/Tutorials/HandleAdapters.md`, `docs/Development/Tutorials/HandleAssets.md`, `docs/Development/Tutorials/HandleSamples.md`, `docs/Development/Tutorials/HandleCliExamples.md`, `docs/Development/Tutorials/HandleDocuments.md` | The generic workflow guides for extending any library built on this structure |
 | `sandbox/new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it |
-| `sandbox/contracts/deps/embeddeps/embeddeps.go`, `adapters/standard/embed.go`, `assets/assets.go` | The asset mechanic: the read-only contract, the factory serving the compiled-in files, and the `//go:embed` directives — generic, whatever the new library displays |
+| `sandbox/contracts/deps/embeddeps/embeddeps.go`, `adapters/standard/embed.go`, `assets/asset.go` | The asset mechanic: the read-only contract, the factory serving the compiled-in files, and the `//go:embed all:*` directive taking the whole asset tree — generic, whatever the new library displays |
 | `docs/LibUsage/References/EmbeddedAssets.md` | The explanation of that mechanic |
 
 ---
@@ -68,7 +68,7 @@ Written from scratch for the library being built or adapted. Nothing of the temp
 | `sandbox/internal/lib/*` | The lib's field factories and the `New` constructor running them all, reaching every dependency through `l.Deps` | LibFunctions |
 | `sandbox/internal/<object>/*` | One package per object the library hands back: its field factories and the `New` constructor running them all | LibObjects |
 | `sandbox/internal/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, the paths of the text it prints, and its operand parsing | |
-| `assets/cli/*` | The new interface's usage screen and one file per line it prints | |
+| `assets/usages.txt`, `assets/messages/*` | The new interface's usage screen and one file per line it prints | |
 | `adapters/<name>/<name>.go` | One adapter per additional opinionated implementation of the `Deps` contract | Adapters |
 | `examples/libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | LibraryExamples |
 | `examples/cliExamples/<Name>.sh` | One shell script per goal demonstrated against the built CLI | CliExamples |
@@ -89,6 +89,6 @@ The template's example content — the financial tracker. Removed once the new l
 | `examples/libraryExamples/*` | The tracker's Go samples |
 | `examples/cliExamples/*` | The tracker's CLI scripts |
 | `docs/LibUsage/References/PublicApi/*` | The tracker's public API detail pages |
-| `assets/cli/*` | The tracker's usage screen and messages — replaced by **[Create](#create)** |
+| `assets/usages.txt`, `assets/messages/*` | The tracker's usage screen and messages — replaced by **[Create](#create)** |
 | `docs/LibUsage/Tutorials/ManageCategories.md`, `docs/LibUsage/Tutorials/TrackTransactions.md` | The tracker's domain tutorials |
 | `bootstrap/*` | The embedded-library demonstration — keep it only as reference while the new library embeds another Agnos-Cli-style library |

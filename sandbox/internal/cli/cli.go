@@ -34,10 +34,10 @@ const (
 	VersionAsset = "version.txt"
 	// UsageAsset holds the help screen, printed for `help`, for `--help`,
 	// and whenever a command line cannot be understood.
-	UsageAsset = "cli/usage.txt"
+	UsageAsset = "usages.txt"
 	// MessagesDir holds one file per line the interface can print, each
 	// named after what it reports and read through message.
-	MessagesDir = "cli/messages/"
+	MessagesDir = "messages/"
 )
 
 // Names of the messages under MessagesDir, one per line the interface can

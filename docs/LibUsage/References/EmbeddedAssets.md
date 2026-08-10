@@ -30,14 +30,14 @@ Every piece of standing text the command-line interface displays, and nothing el
 | Asset | Description |
 |-------|-------------|
 | `version.txt` | The interface version reported by `agnos-cli version` and `--version` |
-| `cli/usage.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line |
-| `cli/messages/<name>.txt` | One file per line the interface can print, named after what it reports |
+| `usages.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line |
+| `messages/<name>.txt` | One file per line the interface can print, named after what it reports |
 
 A message file is a `Printf` format, so the ones naming a value carry the verb — and the quotes — the value is rendered in:
 
 ```text
-cli/messages/unknown-command.txt   →  unknown command "%s"
-cli/messages/category-not-found.txt →  no category named "%s"
+messages/unknown-command.txt    →  unknown command "%s"
+messages/category-not-found.txt →  no category named "%s"
 ```
 
 The result is that `sandbox/internal/cli/` holds no display text at all. Rewording the interface, or translating it, is editing files under `/assets/`; the Go code addresses them by path and never changes. Adding or editing one is [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md).
@@ -69,16 +69,16 @@ func main() {
 	fmt.Print(string(version)) // v0.1.0
 
 	// Every message the interface can print, discovered rather than listed.
-	messages, _ := d.EmbedDeps.ListFiles("cli/messages")
+	messages, _ := d.EmbedDeps.ListFiles("messages")
 	fmt.Println(len(messages), "messages") // 18 messages
 }
 ```
 
-Rooting the adapter at a subdirectory shifts every path with it, so a program interested only in the interface's text can address `usage.txt` directly:
+Rooting the adapter at a subdirectory shifts every path with it, so a program interested only in the printable lines can address them by bare name:
 
 ```go
-d := agnosadapter.New("trackerdata", "cli")
-usage, _ := d.EmbedDeps.ReadFile("usage.txt")
+d := agnosadapter.New("trackerdata", "messages")
+refused, _ := d.EmbedDeps.ReadFile("unknown-command.txt")
 ```
 
 ---
@@ -103,7 +103,7 @@ l := agnoslib.New(d)
 os.Exit(l.Sandboxmain(os.Args[1:]))
 ```
 
-An asset that cannot be read is reported by path — `agnos-cli: missing asset cli/usage.txt` — rather than printed as an empty line, because a missing asset is a packaging mistake and not a user mistake.
+An asset that cannot be read is reported by path — `agnos-cli: missing asset usages.txt` — rather than printed as an empty line, because a missing asset is a packaging mistake and not a user mistake.
 
 ---
 

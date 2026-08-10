@@ -18,13 +18,18 @@ import "embed"
 // Files is every asset shipped with the project, compiled into the binary, so
 // an installed `agnos-cli` finds its help screen and its version with no files on
 // disk next to it. Paths inside it are slash-separated and rooted here:
-// "version.txt", "cli/usage.txt", "cli/messages/<name>.txt".
+// "version.txt", "usages.txt", "messages/<name>.txt".
 //
-// The `all:` prefix on the cli directory embeds everything under it, at any
-// depth, so adding an asset there needs no change to this directive. A new
-// asset **outside** an already-embedded directory does need one — add a
-// pattern for it here, or it will not exist at runtime.
+// The single pattern below takes the whole directory: `*` matches every entry
+// next to this file, the `all:` prefix descends into each directory it
+// matches and keeps the names other patterns would skip. Adding an asset
+// anywhere under /assets/ therefore needs no change here — put the file in
+// the tree and it exists at runtime.
 //
-//go:embed version.txt
-//go:embed all:cli
+// This file matches its own pattern and is embedded along with the assets.
+// That costs a few hundred bytes in the binary and puts "asset.go" in a
+// recursive listing of the asset root; it is the price of a directive that
+// never has to be edited.
+//
+//go:embed all:*
 var Files embed.FS

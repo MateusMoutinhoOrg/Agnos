@@ -120,14 +120,14 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 ## `/assets/`
 Outside the sandbox. The files the library displays instead of holding them as Go strings: the interface's text today, images and item templates as the project grows. They are compiled into the binary, so an installed `agnos-cli` carries its own help screen with no files beside it, and they are reached only through the injected `Deps.EmbedDeps` contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md).
 
-This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets.
+This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets. That single directive is `//go:embed all:*`, which takes **every** file in the tree, so a new asset needs no change to it — put the file here and it exists at runtime.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `assets.go` | Package `assets`: the `//go:embed` directives and the `Files` embedded filesystem the standard adapter serves | |
+| `asset.go` | Package `assets`: the `//go:embed all:*` directive and the `Files` embedded filesystem the standard adapter serves | |
 | `version.txt` | The interface version reported by `agnos-cli version` and `--version` | |
-| `cli/usage.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line | |
-| `cli/messages/<name>.txt` | One file per line the interface can print, named after what it reports; a `Printf` format when it names a value | |
+| `usages.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line | |
+| `messages/<name>.txt` | One file per line the interface can print, named after what it reports; a `Printf` format when it names a value | |
 
 ---
 

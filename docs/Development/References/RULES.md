@@ -120,7 +120,7 @@ When you create, delete, or rename a sample, update the reference page that list
 
 The command-line interface lives **inside** the sandbox, as the `Sandboxmain` field of `api.Lib`, dispatching in [sandbox/internal/cli/](/sandbox/internal/cli/). The binary in [cmd/main/](/cmd/main/) wires an adapter into the library, calls that field, and exits with its return — it must never branch on a command, parse a flag, or print anything of its own, or the behavior stops being reachable from any other front end.
 
-When you add or change a command or a flag, update [Commands.md](/docs/CliUsage/References/Commands.md) and the usage screen in [assets/cli/usage.txt](/assets/cli/usage.txt) in the same commit, following [HandleCliCommands.md](/docs/Development/Tutorials/HandleCliCommands.md).
+When you add or change a command or a flag, update [Commands.md](/docs/CliUsage/References/Commands.md) and the usage screen in [assets/usages.txt](/assets/usages.txt) in the same commit, following [HandleCliCommands.md](/docs/Development/Tutorials/HandleCliCommands.md).
 
 ---
 
@@ -128,4 +128,4 @@ When you add or change a command or a flag, update [Commands.md](/docs/CliUsage/
 
 No text a user reads is written inside [sandbox/](/sandbox/). The usage screen, the version, and every message the interface prints are files under [assets/](/assets/), reached through the injected `Deps.EmbedDeps` contract; the sandbox addresses them by path and holds only format skeletons and diagnostics. The mechanic is explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md).
 
-When you make the library print a line it did not print before, add the file under [assets/](/assets/) and the constant naming it in `sandbox/internal/cli/cli.go`, following [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md). When you add an asset outside a directory already embedded, update the `//go:embed` patterns in [assets/assets.go](/assets/assets.go) and the `/assets/` table in [Structure.md](/docs/Development/References/Structure.md#assets) in the same commit — a missing pattern fails at runtime, never at build time.
+When you make the library print a line it did not print before, add the file under [assets/](/assets/) and the constant naming it in `sandbox/internal/cli/cli.go`, following [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md), and update the `/assets/` table in [Structure.md](/docs/Development/References/Structure.md#assets) in the same commit. The `//go:embed all:*` directive in [assets/asset.go](/assets/asset.go) takes the whole directory, so a new asset never needs a new pattern — but a path the code asks for and no file answers still fails at runtime, never at build time.

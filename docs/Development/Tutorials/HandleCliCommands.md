@@ -8,14 +8,14 @@ Covers adding a command or a flag to the command-line interface — the dispatch
 - No display text is written in the sandbox. Every line a command prints is a file under [assets/](/assets/), added following [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md) and reached by the constant naming it.
 - A command does no work of its own: it parses its operands, calls the library functions on `api.Lib`, and reports. Behavior worth having belongs on `api.Lib`, where a Go caller can reach it too.
 - Every command returns one of `api.ExitOk`, `api.ExitUsage`, or `api.ExitFailure` — a wrong command line is `ExitUsage`, a well-formed command that could not be carried out is `ExitFailure`.
-- Adding a command requires updating the usage screen in `assets/cli/usage.txt` and [Commands.md](/docs/CliUsage/References/Commands.md) in the same commit.
+- Adding a command requires updating the usage screen in `assets/usages.txt` and [Commands.md](/docs/CliUsage/References/Commands.md) in the same commit.
 
 ---
 
 ## Add a CLI Command
 
 ### Workflow
-1. Add the command to the usage screen in [assets/cli/usage.txt](/assets/cli/usage.txt), in the same column layout as the commands already there:
+1. Add the command to the usage screen in [assets/usages.txt](/assets/usages.txt), in the same column layout as the commands already there:
    ```text
    agnos-cli — a financial tracker on the command line
    …
