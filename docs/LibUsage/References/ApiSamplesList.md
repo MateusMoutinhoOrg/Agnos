@@ -1,7 +1,7 @@
 # API Samples List
 
 ## Description
-A reference list of all API examples provided in this repository. These examples demonstrate how to execute different workflows and drive the `agnos` tool in API mode.
+A reference list of all API examples provided in this repository. These examples demonstrate how to execute different workflows and drive the `agnos-cli` tool in API mode.
 
 ## Examples
 

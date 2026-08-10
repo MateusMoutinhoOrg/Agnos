@@ -1,1 +1,1 @@
-no transactions yet — record one with: agnos spend <category> <description> <amount>
+no transactions yet — record one with: agnos-cli spend <category> <description> <amount>

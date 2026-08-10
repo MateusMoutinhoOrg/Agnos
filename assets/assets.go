@@ -16,7 +16,7 @@ package assets
 import "embed"
 
 // Files is every asset shipped with the project, compiled into the binary, so
-// an installed `agnos` finds its help screen and its version with no files on
+// an installed `agnos-cli` finds its help screen and its version with no files on
 // disk next to it. Paths inside it are slash-separated and rooted here:
 // "version.txt", "cli/usage.txt", "cli/messages/<name>.txt".
 //

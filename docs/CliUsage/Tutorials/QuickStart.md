@@ -1,11 +1,11 @@
 # Get Started with the CLI
 
 ## Description
-Installs the `agnos` binary and tracks a first budget with it, in two steps. Troubleshooting the installation is covered by [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); the full command surface is listed in [Commands.md](/docs/CliUsage/References/Commands.md); driving every operation from the terminal is covered by [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md).
+Installs the `agnos-cli` binary and tracks a first budget with it, in two steps. Troubleshooting the installation is covered by [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); the full command surface is listed in [Commands.md](/docs/CliUsage/References/Commands.md); driving every operation from the terminal is covered by [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md).
 
 ### Rules
 - Go ≥ 1.22 must be installed.
-- The binary is built from `cmd/main`, so `go install` names it `main` — rename it to `agnos` before use.
+- The binary is built from `cmd/main`, so `go install` names it `main` — rename it to `agnos-cli` before use.
 - Amounts are typed in major units (`84.50`), and direction comes from the command, never from a sign.
 
 ---
@@ -18,7 +18,7 @@ Installs the `agnos` binary and tracks a first budget with it, in two steps. Tro
 
    ```bash
    go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3 \
-     && mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos" \
+     && mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos-cli" \
      && { \
           case ":$PATH:" in \
             *":$(go env GOPATH)/bin:"*) ;; \
@@ -31,7 +31,7 @@ Installs the `agnos` binary and tracks a first budget with it, in two steps. Tro
               echo "Added GOPATH/bin to $PROF (open a new terminal or run: source $PROF)"; \
           esac; \
         } \
-     && agnos version
+     && agnos-cli version
    ```
 
    **Windows (PowerShell)**
@@ -40,13 +40,13 @@ Installs the `agnos` binary and tracks a first budget with it, in two steps. Tro
    go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3; `
      if ($?) { `
        $gobin = (go env GOPATH) + '\bin'; `
-       Move-Item "$gobin\main.exe" "$gobin\agnos.exe" -Force; `
+       Move-Item "$gobin\main.exe" "$gobin\agnos-cli.exe" -Force; `
        if ($env:PATH -notlike "*$gobin*") { `
          [Environment]::SetEnvironmentVariable('PATH', `
            [Environment]::GetEnvironmentVariable('PATH','User') + ";$gobin", 'User'); `
          $env:PATH += ";$gobin"; `
        }; `
-       agnos version `
+       agnos-cli version `
      }
    ```
 
@@ -55,14 +55,14 @@ Installs the `agnos` binary and tracks a first budget with it, in two steps. Tro
 2. Track your first budget:
 
    ```bash
-   agnos category add groceries
-   agnos category add salary
+   agnos-cli category add groceries
+   agnos-cli category add salary
 
-   agnos received salary "august paycheck" 2500.00
-   agnos spend groceries "weekly shopping" 84.50
+   agnos-cli received salary "august paycheck" 2500.00
+   agnos-cli spend groceries "weekly shopping" 84.50
 
-   agnos transactions
-   agnos balance            # 2415.50
+   agnos-cli transactions
+   agnos-cli balance            # 2415.50
    ```
 
 3. Read [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md) for the rest of the operations, and [Commands.md](/docs/CliUsage/References/Commands.md) for every command, flag, and exit code.

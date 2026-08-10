@@ -7,7 +7,7 @@ How to run the CLI examples provided in the repository to understand the tool's 
 
 ## Run CLI Examples
 
-CLI examples are shell scripts that demonstrate how to use the `agnos` command-line tool. They build the binary dynamically and run in an isolated scratch space, so they won't affect your actual data.
+CLI examples are shell scripts that demonstrate how to use the `agnos-cli` command-line tool. They build the binary dynamically and run in an isolated scratch space, so they won't affect your actual data.
 
 ### Workflow
 

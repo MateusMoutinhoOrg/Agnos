@@ -118,14 +118,14 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 ---
 
 ## `/assets/`
-Outside the sandbox. The files the library displays instead of holding them as Go strings: the interface's text today, images and item templates as the project grows. They are compiled into the binary, so an installed `agnos` carries its own help screen with no files beside it, and they are reached only through the injected `Deps.EmbedDeps` contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md).
+Outside the sandbox. The files the library displays instead of holding them as Go strings: the interface's text today, images and item templates as the project grows. They are compiled into the binary, so an installed `agnos-cli` carries its own help screen with no files beside it, and they are reached only through the injected `Deps.EmbedDeps` contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md).
 
 This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `assets.go` | Package `assets`: the `//go:embed` directives and the `Files` embedded filesystem the standard adapter serves | |
-| `version.txt` | The interface version reported by `agnos version` and `--version` | |
+| `version.txt` | The interface version reported by `agnos-cli version` and `--version` | |
 | `cli/usage.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line | |
 | `cli/messages/<name>.txt` | One file per line the interface can print, named after what it reports; a `Printf` format when it names a value | |
 
@@ -183,7 +183,7 @@ go run ./examples/libraryExamples/<example>/<example>.go
 ---
 
 ## `/bootstrap/`
-A second, self-contained Agnos library — same three trees (`sandbox/`, `adapters/`, `libraryExamples/`) and the same rules — demonstrating how one Agnos-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field. Explained in [Bootstrap.md](/docs/LibUsage/References/Bootstrap.md).
+A second, self-contained Agnos-Cli library — same three trees (`sandbox/`, `adapters/`, `libraryExamples/`) and the same rules — demonstrating how one Agnos-Cli-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field. Explained in [Bootstrap.md](/docs/LibUsage/References/Bootstrap.md).
 
 | Path | Description |
 |------|-------------|

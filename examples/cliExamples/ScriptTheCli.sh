@@ -11,31 +11,31 @@ set -uo pipefail   # no -e here: this example inspects failing exit codes
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
-go build -o "$workdir/agnos" ./cmd/main
+go build -o "$workdir/agnos-cli" ./cmd/main
 export AGNOS_DATA="$workdir/data"
-agnos() { "$workdir/agnos" "$@"; }
+agnos-cli() { "$workdir/agnos-cli" "$@"; }
 
 echo "== --quiet keeps a mutating command silent, so a loop stays readable"
-agnos --quiet category add groceries
+agnos-cli --quiet category add groceries
 for entry in "monday market:21.40" "tuesday bakery:6.25" "friday market:33.10"; do
-    agnos --quiet spend groceries "${entry%%:*}" "${entry##*:}"
+    agnos-cli --quiet spend groceries "${entry%%:*}" "${entry##*:}"
 done
-agnos transactions groceries
+agnos-cli transactions groceries
 
 echo
 echo "== exit codes: 0 ran, 1 the command line was wrong, 2 the command failed"
-agnos balance groceries > /dev/null
+agnos-cli balance groceries > /dev/null
 echo "balance groceries          -> $?"
 
-agnos spend groceries "bad amount" not-a-number > /dev/null
+agnos-cli spend groceries "bad amount" not-a-number > /dev/null
 echo "spend with a bad amount    -> $?"
 
-agnos balance nosuchcategory > /dev/null
+agnos-cli balance nosuchcategory > /dev/null
 echo "balance of a missing one   -> $?"
 
 echo
 echo "== a listing is one record per line, so the usual text tools apply"
-echo "transactions recorded: $(agnos transactions groceries | wc -l | tr -d ' ')"
-echo "most recent one:       $(agnos transactions groceries | tail -1)"
+echo "transactions recorded: $(agnos-cli transactions groceries | wc -l | tr -d ' ')"
+echo "most recent one:       $(agnos-cli transactions groceries | tail -1)"
 echo "everything at a market:"
-agnos transactions groceries | grep market
+agnos-cli transactions groceries | grep market

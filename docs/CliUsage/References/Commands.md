@@ -1,10 +1,10 @@
 # CLI Commands
 
 ## Description
-Every command, flag, and exit code of the `agnos` command-line interface. The interface itself is `api.Lib.Sandboxmain`, a field of the library like any other; the binary in [cmd/main](/cmd/main/) only wires an adapter into it and exits with what it returns. To install it, follow [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); to walk through a first budget, follow [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md).
+Every command, flag, and exit code of the `agnos-cli` command-line interface. The interface itself is `api.Lib.Sandboxmain`, a field of the library like any other; the binary in [cmd/main](/cmd/main/) only wires an adapter into it and exits with what it returns. To install it, follow [InstallCli.md](/docs/CliUsage/Tutorials/InstallCli.md); to walk through a first budget, follow [UseCli.md](/docs/CliUsage/Tutorials/UseCli.md).
 
 ```bash
-agnos <command> [arguments] [flags]
+agnos-cli <command> [arguments] [flags]
 ```
 
 ---
@@ -33,7 +33,7 @@ agnos <command> [arguments] [flags]
 | `-v`, `--version` | Prints the interface version and exits. |
 | `-q`, `--quiet` | Suppresses the confirmation line a mutating command prints, leaving listings and errors. |
 
-Flags are read by the injected [Verb](https://github.com/MateusMoutinhoOrg/Verb) parser before the command words are drained, so a flag may appear anywhere on the command line: `agnos spend groceries lunch 12.00 --quiet` and `agnos --quiet spend groceries lunch 12.00` do the same thing.
+Flags are read by the injected [Verb](https://github.com/MateusMoutinhoOrg/Verb) parser before the command words are drained, so a flag may appear anywhere on the command line: `agnos-cli spend groceries lunch 12.00 --quiet` and `agnos-cli --quiet spend groceries lunch 12.00` do the same thing.
 
 ---
 

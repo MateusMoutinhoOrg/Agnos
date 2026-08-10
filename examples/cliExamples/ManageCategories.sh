@@ -11,24 +11,24 @@ set -euo pipefail
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
-go build -o "$workdir/agnos" ./cmd/main
+go build -o "$workdir/agnos-cli" ./cmd/main
 export AGNOS_DATA="$workdir/data"
-agnos() { "$workdir/agnos" "$@"; }
+agnos-cli() { "$workdir/agnos-cli" "$@"; }
 
 echo "== create the categories"
-agnos category add groceries
-agnos category add salary
-agnos category add rent
+agnos-cli category add groceries
+agnos-cli category add salary
+agnos-cli category add rent
 
 echo
 echo "== creating a category is idempotent: the stored one comes back"
-agnos category add groceries
+agnos-cli category add groceries
 
 echo
 echo "== every category, with its balance and how many transactions it holds"
-agnos category list
+agnos-cli category list
 
 echo
 echo "== remove one, and its transactions with it"
-agnos category remove rent
-agnos category list
+agnos-cli category remove rent
+agnos-cli category list

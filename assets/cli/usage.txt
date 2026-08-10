@@ -1,7 +1,7 @@
-agnos — a financial tracker on the command line
+agnos-cli — a financial tracker on the command line
 
 Usage:
-  agnos <command> [arguments] [flags]
+  agnos-cli <command> [arguments] [flags]
 
 Commands:
   category add <name>                           create a category
@@ -23,7 +23,7 @@ Amounts are decimal, with at most two places: 84.50, 84.5 and 84 are all
 accepted. They are always positive — the command chooses the direction.
 
 Examples:
-  agnos category add groceries
-  agnos spend groceries "weekly shopping" 84.50
-  agnos received salary "august paycheck" 2500.00
-  agnos balance groceries
+  agnos-cli category add groceries
+  agnos-cli spend groceries "weekly shopping" 84.50
+  agnos-cli received salary "august paycheck" 2500.00
+  agnos-cli balance groceries

@@ -91,4 +91,4 @@ The template's example content — the financial tracker. Removed once the new l
 | `docs/LibUsage/References/PublicApi/*` | The tracker's public API detail pages |
 | `assets/cli/*` | The tracker's usage screen and messages — replaced by **[Create](#create)** |
 | `docs/LibUsage/Tutorials/ManageCategories.md`, `docs/LibUsage/Tutorials/TrackTransactions.md` | The tracker's domain tutorials |
-| `bootstrap/*` | The embedded-library demonstration — keep it only as reference while the new library embeds another Agnos-style library |
+| `bootstrap/*` | The embedded-library demonstration — keep it only as reference while the new library embeds another Agnos-Cli-style library |

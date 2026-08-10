@@ -10,7 +10,7 @@ package embeddeps
 // The library asks for an asset the way it would ask a filesystem, by path;
 // where those bytes come from is the adapter's decision. The standard adapter
 // serves them out of the assets compiled into the binary, so an installed
-// `agnos` carries its own text; another adapter could read a directory on
+// `agnos-cli` carries its own text; another adapter could read a directory on
 // disk, an archive, or a network store without the sandbox noticing.
 
 // Lib is the embedded-asset library injected whole as the Deps.EmbedDeps

@@ -1,1 +1,1 @@
-no categories yet — create one with: agnos category add <name>
+no categories yet — create one with: agnos-cli category add <name>

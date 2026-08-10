@@ -1,1 +1,1 @@
-agnos %s
+agnos-cli %s

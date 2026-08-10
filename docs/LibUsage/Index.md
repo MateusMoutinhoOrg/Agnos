@@ -1,7 +1,7 @@
 # Library Usage
 
 ## Description
-Index of the documentation for developers consuming Agnos as a Go library: wiring an adapter into the sandbox, calling the tracker from code, and looking up the public API. Driving the same behavior from a terminal is indexed by [CliUsage/Index.md](/docs/CliUsage/Index.md); changing the library is indexed by [Development/Index.md](/docs/Development/Index.md).
+Index of the documentation for developers consuming Agnos-Cli as a Go library: wiring an adapter into the sandbox, calling the tracker from code, and looking up the public API. Driving the same behavior from a terminal is indexed by [CliUsage/Index.md](/docs/CliUsage/Index.md); changing the library is indexed by [Development/Index.md](/docs/Development/Index.md).
 
 The library is always built the same way: an adapter produces a `deps.Deps`, `lib.New` injects it into the closed sandbox, and the returned `api.Lib` carries every behavior.
 

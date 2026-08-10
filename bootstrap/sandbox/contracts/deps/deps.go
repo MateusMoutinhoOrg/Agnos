@@ -12,7 +12,7 @@ import "github.com/MateusMoutinhoOrg/Agnos-Cli/bootstrap/sandbox/contracts/deps/
 type Deps struct {
 	// Println writes a line to the library's output.
 	Println func(a ...any)
-	// TrackerLib is the embedded Agnos financial-tracker library, already
+	// TrackerLib is the embedded Agnos-Cli financial-tracker library, already
 	// initialized by the adapter.
 	TrackerLib agnosdeps.Lib
 }

@@ -1,13 +1,13 @@
-# Bootstrap: Embedding an Agnos-Style Library
+# Bootstrap: Embedding an Agnos-Cli-Style Library
 
 ## Description
-Explains how a library built with this pattern consumes **another** Agnos-style library as a dependency. The [/bootstrap/](/bootstrap/) tree is the worked example: a second, self-contained Agnos library whose only real dependency is the root financial tracker, injected through its `Deps` like any other behavior.
+Explains how a library built with this pattern consumes **another** Agnos-Cli-style library as a dependency. The [/bootstrap/](/bootstrap/) tree is the worked example: a second, self-contained Agnos-Cli library whose only real dependency is the root financial tracker, injected through its `Deps` like any other behavior.
 
 ---
 
 ## The Bootstrap Tree
 
-`bootstrap/` is a complete Agnos library in miniature — the same trees and the same rules as the root, minus the CLI:
+`bootstrap/` is a complete Agnos-Cli library in miniature — the same trees and the same rules as the root, minus the CLI:
 
 | Path | Description |
 |------|-------------|
@@ -29,7 +29,7 @@ go run ./bootstrap/libraryExamples/Test/test.go   # writes bootstrap-trackerdata
 
 ## The Sandbox Wall Applies to Libraries Too
 
-The [sandbox isolation rule](/docs/Development/References/SandboxIsolation.md) makes no exception for a dependency that happens to be another Agnos-style library: importing it from `bootstrap/sandbox/` would be a third-party import. So the consuming sandbox **restates the shape it needs** as its own contract — the `agnosdeps` package is a field-for-field copy of the embedded library's api, declared inside the consuming sandbox and owned by it:
+The [sandbox isolation rule](/docs/Development/References/SandboxIsolation.md) makes no exception for a dependency that happens to be another Agnos-Cli-style library: importing it from `bootstrap/sandbox/` would be a third-party import. So the consuming sandbox **restates the shape it needs** as its own contract — the `agnosdeps` package is a field-for-field copy of the embedded library's api, declared inside the consuming sandbox and owned by it:
 
 ```go
 // bootstrap/sandbox/contracts/deps/agnosdeps/agnosdeps.go — inside the sandbox
@@ -118,7 +118,7 @@ Swapping the embedded library for a fake in a test is the usual one-line patch o
 
 ## Embedding This Library in Your Own
 
-To depend on the Agnos tracker (or any Agnos-style library) from a library of your own, reproduce the three pieces the bootstrap tree demonstrates:
+To depend on the Agnos-Cli tracker (or any Agnos-Cli-style library) from a library of your own, reproduce the three pieces the bootstrap tree demonstrates:
 
 | Piece | Bootstrap reference |
 |-------|---------------------|

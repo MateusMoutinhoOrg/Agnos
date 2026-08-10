@@ -17,7 +17,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
 ### Workflow
 1. Add the command to the usage screen in [assets/cli/usage.txt](/assets/cli/usage.txt), in the same column layout as the commands already there:
    ```text
-   agnos — a financial tracker on the command line
+   agnos-cli — a financial tracker on the command line
    …
      largest [category]                            print the largest transaction
    ```

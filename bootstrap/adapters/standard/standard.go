@@ -12,7 +12,7 @@ import (
 )
 
 // StandardAdapter fills the bootstrap deps.Deps using the Go standard library
-// for output and the embedded Agnos financial-tracker library — wired with
+// for output and the embedded Agnos-Cli financial-tracker library — wired with
 // its own standard adapter — for storage. Only this file, which lives outside
 // the bootstrap sandbox, may import the embedded library.
 type StandardAdapter struct {

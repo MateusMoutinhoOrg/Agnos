@@ -112,7 +112,7 @@ l := lib.New(myDeps) // everything else keeps the adapter's implementation
 
 ## Consuming a Library That Uses This Pattern
 
-When one Agnos-style library depends on another, the consuming sandbox may not import the embedded library, so it restates the shape it needs as its own contract and the adapter fills it by field assignment:
+When one Agnos-Cli-style library depends on another, the consuming sandbox may not import the embedded library, so it restates the shape it needs as its own contract and the adapter fills it by field assignment:
 
 ```go
 // bootstrap/adapters/standard/standard.go — outside the sandbox

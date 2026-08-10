@@ -12,15 +12,15 @@ set -euo pipefail
 workdir="$(mktemp -d)"
 trap 'rm -rf "$workdir"' EXIT
 
-go build -o "$workdir/agnos" ./cmd/main
+go build -o "$workdir/agnos-cli" ./cmd/main
 export AGNOS_DATA="$workdir/data"
-agnos() { "$workdir/agnos" "$@"; }
+agnos-cli() { "$workdir/agnos-cli" "$@"; }
 
 echo "== what the commands below show"
-agnos category add examplecategory
-agnos spend examplecategory "an example transaction" 12.34
+agnos-cli category add examplecategory
+agnos-cli spend examplecategory "an example transaction" 12.34
 
 echo
 echo "== what the next commands show"
-agnos transactions examplecategory
-agnos balance examplecategory
+agnos-cli transactions examplecategory
+agnos-cli balance examplecategory

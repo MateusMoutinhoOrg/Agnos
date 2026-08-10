@@ -113,7 +113,7 @@ var (
 func asset(l *api.Lib, path string) string {
 	content, err := l.Deps.EmbedDeps.ReadFile(path)
 	if err != nil {
-		return "agnos: missing asset " + path + "\n"
+		return "agnos-cli: missing asset " + path + "\n"
 	}
 	return string(content)
 }

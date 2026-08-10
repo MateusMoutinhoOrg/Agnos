@@ -1,7 +1,7 @@
 # CLI Usage
 
 ## Description
-Index of the documentation for people who drive Agnos from a terminal: installing the binary, recording a budget with it, and looking up what each command does. Consuming the same behavior from Go code is indexed by [LibUsage/Index.md](/docs/LibUsage/Index.md).
+Index of the documentation for people who drive Agnos-Cli from a terminal: installing the binary, recording a budget with it, and looking up what each command does. Consuming the same behavior from Go code is indexed by [LibUsage/Index.md](/docs/LibUsage/Index.md).
 
 The interface itself is `api.Lib.Sandboxmain` — one field of the library like any other — so everything documented here is produced by the same closed sandbox the library exposes.
 

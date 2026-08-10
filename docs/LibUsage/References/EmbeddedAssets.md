@@ -29,7 +29,7 @@ Every piece of standing text the command-line interface displays, and nothing el
 
 | Asset | Description |
 |-------|-------------|
-| `version.txt` | The interface version reported by `agnos version` and `--version` |
+| `version.txt` | The interface version reported by `agnos-cli version` and `--version` |
 | `cli/usage.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line |
 | `cli/messages/<name>.txt` | One file per line the interface can print, named after what it reports |
 
@@ -103,7 +103,7 @@ l := agnoslib.New(d)
 os.Exit(l.Sandboxmain(os.Args[1:]))
 ```
 
-An asset that cannot be read is reported by path — `agnos: missing asset cli/usage.txt` — rather than printed as an empty line, because a missing asset is a packaging mistake and not a user mistake.
+An asset that cannot be read is reported by path — `agnos-cli: missing asset cli/usage.txt` — rather than printed as an empty line, because a missing asset is a packaging mistake and not a user mistake.
 
 ---
 

@@ -2,7 +2,7 @@ package agnosdeps
 
 import "time"
 
-// This package is the bootstrap library's *copy* of the embedded Agnos
+// This package is the bootstrap library's *copy* of the embedded Agnos-Cli
 // financial-tracker library's public api. The sandbox may not import the
 // embedded library — that would be a third-party import — so it restates the
 // shape it needs here, field for field. The adapter, which lives outside the

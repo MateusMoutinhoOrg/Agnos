@@ -8,7 +8,7 @@ import (
 func main() {
 	// 1. Build deps via the bootstrap adapter. The adapter is the only place
 	//    allowed to reach outside the sandbox, so it is what initializes the
-	//    embedded Agnos financial-tracker library (with the embedded library's
+	//    embedded Agnos-Cli financial-tracker library (with the embedded library's
 	//    own adapter).
 	deps := bootstrapadapter.New("bootstrap-trackerdata")
 

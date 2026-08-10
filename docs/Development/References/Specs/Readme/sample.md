@@ -1,4 +1,4 @@
-# Agnos
+# Agnos-Cli
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos-Cli.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos-Cli)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos-Cli)](https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest)
@@ -11,7 +11,7 @@ An OS-independent Go CLI template demonstrating **Dependency Injection** — the
 
 ## Overview
 
-Agnos is a structured Go template that showcases how to build libraries that are fully decoupled from their runtime dependencies. It uses a **Dependency Injection** pattern in which:
+Agnos-Cli is a structured Go template that showcases how to build libraries that are fully decoupled from their runtime dependencies. It uses a **Dependency Injection** pattern in which:
 
 - **`/sandbox/contracts/`** defines the `Deps` contract every adapter must fill and the `api` structs the library hands back.
 - **`/adapters/`** contains opinionated, concrete implementations of the `Deps` contract.

@@ -36,7 +36,7 @@ Covers adding, editing, and reading an asset — a file under [/assets/](/assets
    l.Deps.Printf(message(l, LargestTransactionMessage)+"\n", biggest.String())
    ```
 5. Add the file to the `/assets/` table in [Structure.md](/docs/Development/References/Structure.md#assets).
-6. Build and run the command that prints it — a path typo surfaces at runtime as `agnos: missing asset …`, never at build time:
+6. Build and run the command that prints it — a path typo surfaces at runtime as `agnos-cli: missing asset …`, never at build time:
    ```bash
    go build ./... && AGNOS_DATA=./scratch go run ./cmd/main largest
    ```
@@ -47,7 +47,7 @@ Rewording the interface, or translating it, touches no Go at all: edit the file 
 
 ```bash
 $EDITOR assets/cli/usage.txt          # the help screen
-$EDITOR assets/version.txt            # the version `agnos version` reports
+$EDITOR assets/version.txt            # the version `agnos-cli version` reports
 go build ./... && go run ./cmd/main --help
 ```
 

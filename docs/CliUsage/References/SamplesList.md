@@ -1,7 +1,7 @@
 # CLI Samples List
 
 ## Description
-A reference list of all CLI examples provided in this repository. These examples demonstrate how to execute different workflows and drive the `agnos` tool in CLI mode.
+A reference list of all CLI examples provided in this repository. These examples demonstrate how to execute different workflows and drive the `agnos-cli` tool in CLI mode.
 
 ## Examples
 

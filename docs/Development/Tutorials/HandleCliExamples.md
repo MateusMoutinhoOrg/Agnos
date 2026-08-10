@@ -49,15 +49,15 @@ Covers creating and running shell scripts in [examples/cliExamples/](/examples/c
    workdir="$(mktemp -d)"
    trap 'rm -rf "$workdir"' EXIT
 
-   go build -o "$workdir/agnos" ./cmd/main
+   go build -o "$workdir/agnos-cli" ./cmd/main
    export AGNOS_DATA="$workdir/data"
-   agnos() { "$workdir/agnos" "$@"; }
+   agnos-cli() { "$workdir/agnos-cli" "$@"; }
    ```
 4. Write the demonstration as sections, each announced by an `echo` line saying what the commands below it show:
    ```bash
    echo "== record what came in and what went out"
-   agnos --quiet category add groceries
-   agnos spend groceries "weekly shopping" 84.50
+   agnos-cli --quiet category add groceries
+   agnos-cli spend groceries "weekly shopping" 84.50
    ```
 5. Make it executable and run it:
    ```bash
