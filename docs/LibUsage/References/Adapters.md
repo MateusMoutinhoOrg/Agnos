@@ -9,7 +9,7 @@ Lists every adapter shipped with the library — the opinionated `deps.Deps` imp
 
 | Adapter | Factory | Behavior | Use When |
 |---------|---------|----------|----------|
-| `standard` | [standard.New](/docs/LibUsage/References/PublicApi/standard.New.md) | Real wall clock; `Printf` to standard output; embedded Verb parser over `os.Args[1:]`; embedded Keep database on the filesystem, one file per key under a caller-chosen base path | You want the default, with categories and transactions surviving across runs |
+| `standard` | [standard.New](/docs/LibUsage/References/PublicApi/standard.New.md) | Real wall clock; `Printf` to standard output; embedded Verb parser over `os.Args[1:]`; embedded Keep database on the filesystem, one file per key under a caller-chosen base path; the project's assets compiled into the binary, rooted at a caller-chosen directory | You want the default, with categories and transactions surviving across runs |
 
 An adapter filling `Printf` with a buffer and `VerbLib` with a fixed argument vector is what makes the command-line interface itself — `api.Lib.Sandboxmain` — runnable without a terminal.
 
@@ -17,6 +17,8 @@ An adapter filling `Printf` with a buffer and `VerbLib` with a fixed argument ve
 
 ## Embedded Libraries
 
-`Deps` carries two fields that are not behaviors but whole libraries: [`VerbLib`](/docs/LibUsage/References/PublicApi/verbdeps.Lib.md), the embedded Verb argv parser, and [`KeepLib`](/docs/LibUsage/References/PublicApi/keepdeps.Lib.md), the embedded Keep schema database. Every adapter must fill them, because the sandbox cannot import Verb itself — it holds only a copy of Verb's api in `sandbox/contracts/deps/verbdeps/`. An adapter's `VerbLibFactory` initializes the real library and assigns its fields onto that copy, which is why it returns a **value** rather than a closure. The `standard` adapter reads the process's command line.
+`Deps` carries three fields that are not behaviors but whole libraries: [`VerbLib`](/docs/LibUsage/References/PublicApi/verbdeps.Lib.md), the embedded Verb argv parser, [`KeepLib`](/docs/LibUsage/References/PublicApi/keepdeps.Lib.md), the embedded Keep schema database, and [`EmbedDeps`](/docs/LibUsage/References/PublicApi/embeddeps.Lib.md), the embedded assets the interface reads its text from. Every adapter must fill them, because the sandbox cannot import Verb itself — it holds only a copy of Verb's api in `sandbox/contracts/deps/verbdeps/`. An adapter's `VerbLibFactory` initializes the real library and assigns its fields onto that copy, which is why it returns a **value** rather than a closure. The `standard` adapter reads the process's command line.
 
 `KeepLibFactory` works the same way with one addition: Keep's fields hand back further api structs (`KeepDatabase`, `SchemaInstance`, `SchemaItem`), so instead of assigning them straight across, the factory wraps each in a closure that converts the returned struct into the sandbox's copy — nothing of the embedded library ever crosses the wall. The `standard` adapter wires Keep's filesystem adapter, so the tracker's categories and transactions survive across runs.
+
+`EmbedDepsFactory` fills the third one, in a file of its own — `adapters/standard/embed.go`. The library it stands for is not a module but Go's own `embed` machinery, which the sandbox may not use either: the `standard` adapter compiles the [`/assets/`](/docs/Development/References/Structure.md#assets) tree into the binary and serves it, rooted at the directory passed to `New`. Another adapter could serve the same three functions from a directory on disk or from a translation store, and the library would print different words without changing a line — see [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md).

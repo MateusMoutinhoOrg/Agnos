@@ -60,7 +60,8 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
    }
    ```
    Reading `f.now` inside the closure — instead of capturing it when the factory runs — is what carries the adapter's live state into the library.
-4. Expose the `New` constructor: build the adapter instance, run every field factory over it, assign each return value into its matching field, and return its `Deps`:
+4. Give a factory a file of its own when its body brings conversion helpers with it, named after the field it fills — `adapters/standard/embed.go` holds `EmbedDepsFactory` and the asset walk behind it. The `Factories` specification applies the same way there.
+5. Expose the `New` constructor: build the adapter instance, run every field factory over it, assign each return value into its matching field, and return its `Deps`:
    ```go
    // New creates a deps.Deps whose clock is frozen at the given time.
    func New(now time.Time) deps.Deps {
@@ -68,14 +69,15 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
        adapter.Deps.Now = NowFactory(adapter)
        adapter.Deps.VerbLib = VerbLibFactory(adapter)
        adapter.Deps.KeepLib = KeepLibFactory(adapter)
+       adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
        return adapter.Deps
    }
    ```
-5. Compare the assignments in your `New` against `sandbox/contracts/deps/deps.go` field by field. A missing field will **not** fail the build.
-6. Register the new directory and file in [Structure.md](/docs/Development/References/Structure.md), and add a row for the adapter in [Adapters.md](/docs/LibUsage/References/Adapters.md).
-7. If the adapter is public-facing, expose its `New` factory following [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md#expose-in-the-public-api).
-8. If the adapter needs a runnable demonstration, add one following [HandleSamples.md](/docs/Development/Tutorials/HandleSamples.md).
-9. Build the project and exercise the adapter:
+6. Compare the assignments in your `New` against `sandbox/contracts/deps/deps.go` field by field. A missing field will **not** fail the build.
+7. Register the new directory and file in [Structure.md](/docs/Development/References/Structure.md), and add a row for the adapter in [Adapters.md](/docs/LibUsage/References/Adapters.md).
+8. If the adapter is public-facing, expose its `New` factory following [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md#expose-in-the-public-api).
+9. If the adapter needs a runnable demonstration, add one following [HandleSamples.md](/docs/Development/Tutorials/HandleSamples.md).
+10. Build the project and exercise the adapter:
    ```bash
    go build ./...
    ```

@@ -76,7 +76,7 @@ import (
 func main() {
 	// The adapter initializes the embedded Verb library and hands it back as
 	// one field of the deps contract.
-	d := agnosadapter.New("trackerdata")
+	d := agnosadapter.New("trackerdata", ".")
 
 	quiet := d.VerbLib.IsPresent([]string{"-q", "--quiet"})
 

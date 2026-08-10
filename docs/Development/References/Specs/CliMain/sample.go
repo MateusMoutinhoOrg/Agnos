@@ -17,13 +17,16 @@ const (
 	// dataDirEnv overrides that location, so a script can run against
 	// state of its own.
 	dataDirEnv = "EXAMPLELIB_DATA"
+	// assetRoot is the directory inside the compiled-in assets the library
+	// reads its text from — "." is the whole asset tree.
+	assetRoot = "."
 )
 
 // main is the whole executable: wire, run, exit. No command is branched on
 // here and nothing is printed here — that all lives inside the sandbox.
 func main() {
 	// 1. Build deps through the adapter (the opinionated layer).
-	deps := agnosadapter.New(dataPath())
+	deps := agnosadapter.New(dataPath(), assetRoot)
 
 	// 2. Inject them into the pure library.
 	l := agnoslib.New(deps)

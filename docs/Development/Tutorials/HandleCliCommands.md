@@ -4,24 +4,24 @@
 Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Add the *library* function the command calls first, following [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md) before either.
 
 ### Rules
-- The interface is inside the closed sandbox: it may not import `adapters/`, `cmd/`, a third-party module, or an OS-bound standard-library package. It reads the command line through `l.Deps.VerbLib` and prints through `l.Deps.Printf`, and nothing else. See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md).
+- The interface is inside the closed sandbox: it may not import `adapters/`, `cmd/`, a third-party module, or an OS-bound standard-library package. It reads the command line through `l.Deps.VerbLib`, takes the words it prints from `l.Deps.EmbedDeps`, and prints through `l.Deps.Printf`, and nothing else. See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md).
+- No display text is written in the sandbox. Every line a command prints is a file under [assets/](/assets/), added following [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md) and reached by the constant naming it.
 - A command does no work of its own: it parses its operands, calls the library functions on `api.Lib`, and reports. Behavior worth having belongs on `api.Lib`, where a Go caller can reach it too.
 - Every command returns one of `api.ExitOk`, `api.ExitUsage`, or `api.ExitFailure` — a wrong command line is `ExitUsage`, a well-formed command that could not be carried out is `ExitFailure`.
-- Adding a command requires updating the `Usage` screen in `sandbox/internal/cli/cli.go` and [Commands.md](/docs/CliUsage/References/Commands.md) in the same commit.
+- Adding a command requires updating the usage screen in `assets/cli/usage.txt` and [Commands.md](/docs/CliUsage/References/Commands.md) in the same commit.
 
 ---
 
 ## Add a CLI Command
 
 ### Workflow
-1. Add the command to the `Usage` constant in `sandbox/internal/cli/cli.go`, in the same column layout as the commands already there:
-   ```go
-   const Usage = `agnos — a financial tracker on the command line
+1. Add the command to the usage screen in [assets/cli/usage.txt](/assets/cli/usage.txt), in the same column layout as the commands already there:
+   ```text
+   agnos — a financial tracker on the command line
    …
      largest [category]                            print the largest transaction
-   `
    ```
-2. Write the handler beside the other command helpers, draining its operands from the injected parser and printing through the injected writer:
+2. Write the handler beside the other command helpers, draining its operands from the injected parser and printing the asset-backed messages through the injected writer:
    ```go
    // largest runs the `largest` command, printing the biggest single
    // transaction of the budget or of one category.
@@ -32,13 +32,13 @@ Covers adding a command or a flag to the command-line interface — the dispatch
        if name, err := verb.GetNextStringArg(); err == nil {
            stored, found := l.GetCategory(name)
            if !found {
-               return failure(l, "no category named "+quote(name))
+               return failure(l, CategoryNotFoundMessage, name)
            }
            listed = stored.ListTransactions()
        }
 
        if len(listed) == 0 {
-           l.Deps.Printf("no transactions yet\n")
+           l.Deps.Printf("%s\n", message(l, NoTransactionsMessage))
            return api.ExitOk
        }
        biggest := listed[0]
@@ -60,6 +60,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    ```go
    quiet := verb.IsPresent(QuietFlags)
    ```
+   Any line the command prints that is not already a message asset needs one, added following [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md).
 5. Build and try it:
    ```bash
    go build ./... && go run ./cmd/main largest groceries

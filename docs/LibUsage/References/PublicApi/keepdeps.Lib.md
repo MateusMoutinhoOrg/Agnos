@@ -113,7 +113,7 @@ func main() {
 	// The adapter initializes the embedded Keep library — here over Keep's
 	// own filesystem backend — and hands it back as one field of the deps
 	// contract.
-	d := agnosadapter.New("trackerdata")
+	d := agnosadapter.New("trackerdata", ".")
 
 	db := d.KeepLib.NewDatabase(agnoskeep.Props{
 		Path: "app/",

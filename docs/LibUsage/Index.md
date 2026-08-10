@@ -25,6 +25,7 @@ The library is always built the same way: an adapter produces a `deps.Deps`, `li
 | --- | --- |
 | [PublicApi.md](/docs/LibUsage/References/PublicApi.md) | Index of every public struct, function, and field, with detail pages |
 | [Adapters.md](/docs/LibUsage/References/Adapters.md) | Every shipped adapter you can inject, and when to use each one |
+| [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md) | Where the text the library displays comes from, and how to serve your own |
 | [ApiSamplesList.md](/docs/LibUsage/References/ApiSamplesList.md) | Every Go example shipped in `examples/libraryExamples/` |
 | [Bootstrap.md](/docs/LibUsage/References/Bootstrap.md) | Embed this library as a dependency of another library built the same way |
 

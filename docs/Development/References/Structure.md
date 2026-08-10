@@ -12,6 +12,7 @@ adapters/  ──▶  sandbox/  ◀──  cmd/, examples/libraryExamples/
 - **`/sandbox/`** is a **closed sandbox**: the pure library, and the command-line interface with it. Nothing inside it may import `adapters/`, `cmd/`, `examples/libraryExamples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md).
 - **`/adapters/`** sits outside the sandbox and is the only place OS-bound and third-party code is allowed. Each adapter imports `sandbox/contracts/deps` and nothing else from the sandbox.
 - **`/cmd/`** and **`/examples/libraryExamples/`** sit outside the sandbox too, and are the only places where an adapter and the sandbox meet — `cmd/` for the installable binary, `examples/libraryExamples/` for the runnable Go samples.
+- **`/assets/`** sits outside the sandbox as well: the text the library displays, compiled into the binary and reached only through the injected `Deps.EmbedDeps` contract, so the sandbox holds no display text of its own.
 
 Because the interface is `api.Lib.Sandboxmain` — one field of the library like any other — the binary in `cmd/main/` holds no command, no flag, and no output of its own: it wires, runs, and exits.
 
@@ -57,6 +58,13 @@ The sandbox's copy of the embedded [Keep](https://github.com/MateusMoutinhoOrg/K
 |------|-------------|------|
 | `keepdeps.go` | Copy of the embedded Keep library's api structs and constants, injected whole as the `Deps.KeepLib` field | |
 
+##### `/sandbox/contracts/deps/embeddeps/`
+The sandbox's copy of an embedded-asset library's public api, for the same reason the two above exist: reading a file is an OS-bound effect, and compiling one into a binary needs the `//go:embed` directive, so the sandbox may declare neither. It is how the library reaches the text under [`/assets/`](#assets) — explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md).
+
+| File | Description | Spec |
+|------|-------------|------|
+| `embeddeps.go` | Copy of the asset-reading api — `ReadFile`, `ListFiles`, `ListFilesRecursively` — injected whole as the `Deps.EmbedDeps` field | |
+
 #### `/sandbox/contracts/api/`
 The structs the library hands back to callers.
 
@@ -75,11 +83,11 @@ The entry-point implementation. The `internal/` parent already marks it private,
 | `lib.go` | One `<Field>Factory(l *api.Lib)` per lib function — `Sandboxmain` among them — each returning a closure, plus the `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
 
 #### `/sandbox/internal/cli/`
-The command-line interface itself: the command dispatch `Sandboxmain` delegates to, the usage screen, and the reading of amounts off the command line. It reads the command line through `deps.Deps.VerbLib` and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
+The command-line interface itself: the command dispatch `Sandboxmain` delegates to, the paths of the text it prints, and the reading of amounts off the command line. It reads the command line through `deps.Deps.VerbLib`, takes every word it displays from `deps.Deps.EmbedDeps`, and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox and holds no display text of its own. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `cli.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the usage screen, and the amount parser | |
+| `cli.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the asset paths and message names the interface prints, and the amount parser | |
 
 #### `/sandbox/internal/<object>/`
 One package per object the library creates, named after the object itself — `category/` and `transaction/` for this library.
@@ -105,6 +113,21 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 | File | Description | Spec |
 |------|-------------|------|
 | `<name>.go` | A struct carrying a `Deps` field, one `<Field>Factory(a *<Name>Adapter)` per `Deps` field returning a closure, plus the `New(...) deps.Deps` constructor that assigns every factory's return value and runs them all | Adapters |
+| `<field>.go` | One factory, split out of `<name>.go` when it carries conversion helpers of its own — `embed.go` in `standard/`, which wraps the compiled-in [`/assets/`](#assets) into the `Deps.EmbedDeps` contract. `New` still calls it | Factories |
+
+---
+
+## `/assets/`
+Outside the sandbox. The files the library displays instead of holding them as Go strings: the interface's text today, images and item templates as the project grows. They are compiled into the binary, so an installed `agnos` carries its own help screen with no files beside it, and they are reached only through the injected `Deps.EmbedDeps` contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md).
+
+This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `assets.go` | Package `assets`: the `//go:embed` directives and the `Files` embedded filesystem the standard adapter serves | |
+| `version.txt` | The interface version reported by `agnos version` and `--version` | |
+| `cli/usage.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line | |
+| `cli/messages/<name>.txt` | One file per line the interface can print, named after what it reports; a `Printf` format when it names a value | |
 
 ---
 
@@ -215,6 +238,7 @@ The same behavior consumed from Go code.
 | `References/Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `References/ApiSamplesList.md` | Every example under `examples/libraryExamples/` | ReferenceDocs |
 | `References/Bootstrap.md` | How a library built this way embeds another one | ExplanationDocs |
+| `References/EmbeddedAssets.md` | Where the text the library displays comes from, and how to serve your own | ExplanationDocs |
 
 #### `/docs/LibUsage/References/PublicApi/`
 One detail page per public-facing component, indexed by `PublicApi.md`. Reach a page through that index rather than by browsing the directory.
@@ -228,7 +252,7 @@ Everything a contributor must read before changing the repository.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `Tutorials/Handle<Subject>.md` | One page per maintenance workflow — lib elements, commands, deps, adapters, samples, documents | TutorialDocs |
+| `Tutorials/Handle<Subject>.md` | One page per maintenance workflow — lib elements, commands, deps, adapters, assets, samples, documents | TutorialDocs |
 | `References/RULES.md` | Rules to follow when contributing to this project | Rules |
 | `References/Structure.md` | The project's schema and the purpose of each component | Structure |
 | `References/Specs.md` | Index of every specification and the files each one governs | |

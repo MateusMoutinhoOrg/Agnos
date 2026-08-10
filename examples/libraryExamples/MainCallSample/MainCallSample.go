@@ -11,7 +11,7 @@ func main() {
 	// 1. Build deps via the standard adapter. It picks the argument vector
 	//    for the injected Verb parser — os.Args[1:] — and standard output
 	//    for the injected Printf.
-	deps := agnosadapter.New("trackerdata")
+	deps := agnosadapter.New("trackerdata", ".")
 
 	// 2. Inject deps into the pure library.
 	l := agnoslib.New(deps)

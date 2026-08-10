@@ -1,0 +1,1 @@
+no category named "%s"

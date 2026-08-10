@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// 1. Build deps through an adapter (the opinionated layer).
-	deps := agnosadapter.New("data.json")
+	deps := agnosadapter.New("data.json", ".")
 
 	// 2. Inject deps into the pure library.
 	l := agnoslib.New(deps)

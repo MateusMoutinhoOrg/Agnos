@@ -17,13 +17,16 @@ One bucket transactions are tracked under, with its dependencies already wired i
 A single spend or received record handed back by the library, with its dependencies already wired in.
 
 ### [deps.Deps](/docs/LibUsage/References/PublicApi/deps.Deps.md)
-The dependency contract every adapter must fill: the clock, the writer the interface reports through, the embedded Verb argv parser, and the embedded Keep schema database.
+The dependency contract every adapter must fill: the clock, the writer the interface reports through, the embedded Verb argv parser, the embedded Keep schema database, and the embedded assets the interface reads its text from.
 
 ### [verbdeps.Lib](/docs/LibUsage/References/PublicApi/verbdeps.Lib.md)
 The sandbox's copy of the embedded Verb argv-parser library's api, injected whole as the `deps.Deps.VerbLib` field.
 
 ### [keepdeps.Lib](/docs/LibUsage/References/PublicApi/keepdeps.Lib.md)
 The sandbox's copy of the embedded Keep schema-database library's api, injected whole as the `deps.Deps.KeepLib` field.
+
+### [embeddeps.Lib](/docs/LibUsage/References/PublicApi/embeddeps.Lib.md)
+The sandbox's copy of an embedded-asset library's api, injected whole as the `deps.Deps.EmbedDeps` field: where every word the interface displays is read from.
 
 ---
 
@@ -33,7 +36,7 @@ The sandbox's copy of the embedded Keep schema-database library's api, injected 
 Injects a `deps.Deps` into the library and returns an `api.Lib`.
 
 ### [standard.New](/docs/LibUsage/References/PublicApi/standard.New.md)
-Creates a `deps.Deps` using the standard library adapter (real clock + a Keep database on disk).
+Creates a `deps.Deps` using the standard library adapter (real clock, a Keep database on disk, and the assets compiled into the binary).
 
 ---
 

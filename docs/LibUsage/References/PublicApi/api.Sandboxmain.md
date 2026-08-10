@@ -42,7 +42,7 @@ import (
 
 func main() {
 	// The adapter wires the Verb parser over the same vector handed below.
-	l := agnoslib.New(agnosadapter.New("trackerdata"))
+	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
 
 	os.Exit(l.Sandboxmain(os.Args[1:]))
 }

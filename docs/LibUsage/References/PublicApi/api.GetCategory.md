@@ -42,7 +42,7 @@ import (
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New("trackerdata"))
+	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
 
 	if groceries, ok := l.GetCategory("groceries"); ok {
 		fmt.Println(groceries.String())

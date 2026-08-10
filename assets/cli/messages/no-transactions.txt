@@ -1,0 +1,1 @@
+no transactions yet — record one with: agnos spend <category> <description> <amount>

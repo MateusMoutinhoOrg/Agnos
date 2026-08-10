@@ -1,0 +1,29 @@
+agnos — a financial tracker on the command line
+
+Usage:
+  agnos <command> [arguments] [flags]
+
+Commands:
+  category add <name>                           create a category
+  category list                                 list every category with its balance
+  category remove <name>                        delete a category and its transactions
+  spend <category> <description> <amount>       record money leaving the budget
+  received <category> <description> <amount>    record money entering the budget
+  transactions [category]                       list transactions, all or of one category
+  balance [category]                            print the balance, total or of one category
+  help                                          print this screen
+  version                                       print the interface version
+
+Flags:
+  -h, --help                                    print this screen and exit
+  -v, --version                                 print the interface version and exit
+  -q, --quiet                                   print only listings and errors
+
+Amounts are decimal, with at most two places: 84.50, 84.5 and 84 are all
+accepted. They are always positive — the command chooses the direction.
+
+Examples:
+  agnos category add groceries
+  agnos spend groceries "weekly shopping" 84.50
+  agnos received salary "august paycheck" 2500.00
+  agnos balance groceries

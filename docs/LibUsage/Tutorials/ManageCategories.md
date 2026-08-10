@@ -8,7 +8,7 @@ Covers creating the categories transactions are tracked under, reading them back
 ## Workflow
 1. Initialize the lib as shown in [LibInitialization.md](/docs/LibUsage/Tutorials/LibInitialization.md):
    ```go
-   deps := agnosadapter.New("trackerdata")
+   deps := agnosadapter.New("trackerdata", ".")
    l := agnoslib.New(deps)
    ```
 2. Create a category with `AddCategory`. It returns an `api.Category` and a boolean that is `false` when the name is empty or the record could not be written:
@@ -61,7 +61,7 @@ import (
 )
 
 func main() {
-    deps := agnosadapter.New("trackerdata")
+    deps := agnosadapter.New("trackerdata", ".")
     l := agnoslib.New(deps)
 
     groceries, ok := l.AddCategory("groceries")

@@ -3,6 +3,7 @@ package deps
 import (
 	"time"
 
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/embeddeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 )
@@ -18,12 +19,12 @@ import (
 // command-line interface reports through, and the schema database every
 // category and transaction is persisted in.
 //
-// VerbLib and KeepLib show what changes when the dependency is another
-// library built with this same pattern: the whole library arrives as one
-// struct field, with no getter method and no bridging type around it. The
-// sandbox never imports Verb or Keep — it declares a copy of each api in
-// verbdeps and keepdeps, and the adapter, which lives outside the sandbox,
-// fills it.
+// VerbLib, KeepLib and EmbedDeps show what changes when the dependency is
+// another library built with this same pattern: the whole library arrives as
+// one struct field, with no getter method and no bridging type around it. The
+// sandbox never imports Verb, Keep, or the `embed` machinery — it declares a
+// copy of each api in verbdeps, keepdeps and embeddeps, and the adapter,
+// which lives outside the sandbox, fills it.
 type Deps struct {
 	// Now returns the current time, used to stamp categories and
 	// transactions as they are created.
@@ -41,4 +42,12 @@ type Deps struct {
 	// by the adapter to the storage backend that adapter chose. Every
 	// category and transaction the tracker stores lives in it.
 	KeepLib keepdeps.Lib
+	// EmbedDeps is the embedded-asset library, already rooted by the adapter
+	// at the asset directory that adapter chose. It is where every piece of
+	// standing text the library displays comes from — the usage screen, the
+	// version, and each message the command-line interface prints — so no
+	// display text is written in the sandbox itself. Only Sandboxmain reads
+	// it: a program that calls the library functions directly never touches
+	// an asset.
+	EmbedDeps embeddeps.Lib
 }

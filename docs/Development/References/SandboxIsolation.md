@@ -32,22 +32,26 @@ A file under `sandbox/` may not import:
 | `cmd/…`, `examples/libraryExamples/…` | Consumers of the library are never part of it. |
 | Any third-party module | A dependency the caller cannot replace is one the caller cannot test around. |
 | OS-bound stdlib (`os`, `net`, `os/exec`, `syscall`, …) | The effect belongs in an adapter, reached through a `Deps` field. |
+| `embed`, and the `//go:embed` directive | Compiling a file into the binary is a build-time, filesystem-bound effect; the bytes arrive through a `Deps` field like any other. |
 
 Everything the library needs from the outside world is a function field on `Deps` — the only door in the wall:
 
 ```go
 // sandbox/contracts/deps/deps.go
 type Deps struct {
-	Now     func() time.Time // instead of time.Now()
-	Printf  func(format string, a ...any) (int, error) // instead of fmt.Printf
-	VerbLib verbdeps.Lib     // instead of importing the Verb argv parser
-	KeepLib keepdeps.Lib     // instead of importing the Keep database
+	Now       func() time.Time // instead of time.Now()
+	Printf    func(format string, a ...any) (int, error) // instead of fmt.Printf
+	VerbLib   verbdeps.Lib     // instead of importing the Verb argv parser
+	KeepLib   keepdeps.Lib     // instead of importing the Keep database
+	EmbedDeps embeddeps.Lib    // instead of //go:embed and os.ReadFile
 }
 ```
 
 This is what lets the whole command-line interface live inside the wall: `api.Lib.Sandboxmain` reads the command line through `Deps.VerbLib` and prints through `Deps.Printf`, never touching `os.Args` or `os.Stdout`. The binary hands it an argument vector; a test can hand it a fixed vector and a buffer instead.
 
-`VerbLib` and `KeepLib` are the same door in a different shape: both are third-party libraries to this sandbox, so instead of importing them the sandbox declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `sandbox/contracts/deps/keepdeps/` and lets the adapter fill it — see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#injecting-a-whole-library).
+The wall reaches the interface's *words* too, not only its streams: the usage screen, the version, and every message come from `Deps.EmbedDeps`, so `sandbox/` holds no display text at all — see [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md).
+
+`VerbLib`, `KeepLib` and `EmbedDeps` are the same door in a different shape: each is foreign to this sandbox, so instead of importing it the sandbox declares a copy of its api in `sandbox/contracts/deps/verbdeps/`, `keepdeps/` and `embeddeps/` and lets the adapter fill it — see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#injecting-a-whole-library).
 
 To add a new door, follow [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#add-a-dependency).
 
@@ -82,7 +86,7 @@ The caller decides which implementation fills the fields flowing in:
 
 ```go
 // This line lives outside the wall — the only place an adapter and the sandbox meet.
-l := agnoslib.New(agnosadapter.New("data.json"))
+l := agnoslib.New(agnosadapter.New("data.json", "."))
 ```
 
 For why the contracts are structs rather than interfaces, continue to [StructContracts.md](/docs/Development/References/StructContracts.md).

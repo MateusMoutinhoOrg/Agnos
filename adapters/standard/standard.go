@@ -18,12 +18,13 @@ import (
 
 // StandardAdapter fills deps.Deps using the Go standard library for the
 // clock, the embedded Verb library — wired over the process's own command
-// line — for argument parsing, and the embedded Keep library — wired to
-// Keep's own filesystem adapter — for the schema database every category and
-// transaction is persisted in. Records live on disk under a base directory
-// configured on New, so a tracked budget survives across runs. Only files
-// outside the sandbox, like this one, may import the embedded Verb and Keep
-// libraries.
+// line — for argument parsing, the embedded Keep library — wired to Keep's
+// own filesystem adapter — for the schema database every category and
+// transaction is persisted in, and the project's compiled-in assets for every
+// piece of text the library displays. Records live on disk under a base
+// directory configured on New, so a tracked budget survives across runs. Only
+// files outside the sandbox, like this one, may import the embedded Verb and
+// Keep libraries.
 type StandardAdapter struct {
 	// Deps is the contract this adapter fills; its factories assign into it.
 	Deps deps.Deps
@@ -36,6 +37,10 @@ type StandardAdapter struct {
 	// keepBasePath is the directory the embedded Keep library writes its
 	// records under, one file per key.
 	keepBasePath string
+	// embedDir is the directory inside the compiled-in assets every asset
+	// path the library asks for is resolved against — "." for the whole
+	// asset tree. See EmbedDepsFactory in embed.go.
+	embedDir string
 }
 
 // NowFactory returns the closure that fills deps.Deps.Now, returning the
@@ -284,19 +289,28 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 // the process's standard output — this adapter is the opinionated one, so it
 // picks the argument vector and the stream itself. Handing the same
 // os.Args[1:] to api.Lib.Sandboxmain is what keeps the interface's view of
-// the command line and the parser's in agreement. It builds the adapter
-// instance and runs every field factory over it, so each closure reads the
-// adapter's state at call time. Adding a field to deps.Deps means adding its
-// factory call here.
-func New(basePath string) deps.Deps {
+// the command line and the parser's in agreement.
+//
+// embedDir is the directory inside the project's compiled-in assets that
+// every asset the library asks for is resolved against; pass "." for the
+// whole asset tree, which is what a caller wanting the shipped usage screen
+// and version wants. The assets are compiled into the binary, so nothing has
+// to exist on disk beside it.
+//
+// It builds the adapter instance and runs every field factory over it, so
+// each closure reads the adapter's state at call time. Adding a field to
+// deps.Deps means adding its factory call here.
+func New(basePath string, embedDir string) deps.Deps {
 	adapter := &StandardAdapter{
 		args:         os.Args[1:],
 		output:       os.Stdout,
 		keepBasePath: basePath,
+		embedDir:     embedDir,
 	}
 	adapter.Deps.Now = NowFactory(adapter)
 	adapter.Deps.Printf = PrintfFactory(adapter)
 	adapter.Deps.VerbLib = VerbLibFactory(adapter)
 	adapter.Deps.KeepLib = KeepLibFactory(adapter)
+	adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
 	return adapter.Deps
 }

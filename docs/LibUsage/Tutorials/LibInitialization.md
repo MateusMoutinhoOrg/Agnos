@@ -22,7 +22,7 @@ Covers installing the library and initializing it with the standard adapter in a
 
    func main() {
        // 2. Create deps via an adapter (the "opinionated" part)
-       deps := agnosadapter.New("trackerdata")
+       deps := agnosadapter.New("trackerdata", ".")
 
        // 3. Inject deps into the pure library — a financial tracker
        l := agnoslib.New(deps)

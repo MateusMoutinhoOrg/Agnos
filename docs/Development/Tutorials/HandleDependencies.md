@@ -12,10 +12,11 @@ Explains how the library receives its dependencies — the `Deps` contract in [s
 ```go
 // sandbox/contracts/deps/deps.go — what the library needs
 type Deps struct {
-	Now     func() time.Time
-	Printf  func(format string, a ...any) (int, error)
-	VerbLib verbdeps.Lib
-	KeepLib keepdeps.Lib
+	Now       func() time.Time
+	Printf    func(format string, a ...any) (int, error)
+	VerbLib   verbdeps.Lib
+	KeepLib   keepdeps.Lib
+	EmbedDeps embeddeps.Lib
 }
 ```
 
@@ -51,7 +52,7 @@ standard.New() ──▶ deps.Deps ──▶ lib.New(deps) ──▶ api.Lib
 The simplest setup — an adapter builds a ready-to-use `deps.Deps`:
 
 ```go
-myDeps := agnosadapter.New("trackerdata") // fills every field
+myDeps := agnosadapter.New("trackerdata", ".") // fills every field
 l := agnoslib.New(myDeps)
 ```
 
@@ -62,7 +63,7 @@ l := agnoslib.New(myDeps)
 Take the `deps.Deps` an adapter returns and reassign the field you want; every other field keeps the adapter's implementation:
 
 ```go
-myDeps := agnosadapter.New("trackerdata")
+myDeps := agnosadapter.New("trackerdata", ".")
 
 // Replace only the clock — KeepLib stays as the adapter built it
 now := time.Unix(0, 0)
@@ -89,7 +90,8 @@ For complete control, build the `deps.Deps` as a struct literal — no type to d
 myDeps := agnosdeps.Deps{
 	Now:     func() time.Time { return time.Unix(0, 0) },
 	KeepLib: agnoskeepdeps.Lib{NewDatabase: myOwnDatabase},
-	// Printf and VerbLib left zero: this program never calls Sandboxmain
+	// Printf, VerbLib and EmbedDeps left zero: this program never calls
+	// Sandboxmain, and only Sandboxmain prints or reads an asset
 }
 l := agnoslib.New(myDeps)
 ```
@@ -100,9 +102,9 @@ l := agnoslib.New(myDeps)
 
 ## Injecting a Whole Library
 
-Two fields are not behaviors but other libraries built with this same pattern: [`VerbLib`](/docs/LibUsage/References/PublicApi/verbdeps.Lib.md), the Verb argv parser, and [`KeepLib`](/docs/LibUsage/References/PublicApi/keepdeps.Lib.md), the Keep schema database. Because a contract is a struct of function fields, the whole library fits in one plain field — no getter, no bridging type.
+Three fields are not behaviors but other libraries built with this same pattern: [`VerbLib`](/docs/LibUsage/References/PublicApi/verbdeps.Lib.md), the Verb argv parser, [`KeepLib`](/docs/LibUsage/References/PublicApi/keepdeps.Lib.md), the Keep schema database, and [`EmbedDeps`](/docs/LibUsage/References/PublicApi/embeddeps.Lib.md), the embedded assets every word the interface prints comes from. Because a contract is a struct of function fields, the whole library fits in one plain field — no getter, no bridging type.
 
-The sandbox cannot import Verb or Keep, so it declares a copy of each api in `sandbox/contracts/deps/verbdeps/` and `keepdeps/`. The adapter initializes the real library and assigns its fields onto that copy — the factory returns a **value** instead of a closure, the one shape variation the [factory pattern](/docs/Development/References/RULES.md#factory-pattern) allows:
+The sandbox cannot import Verb or Keep, nor Go's `embed` machinery, so it declares a copy of each api in `sandbox/contracts/deps/verbdeps/`, `keepdeps/` and `embeddeps/`. The adapter initializes the real library and assigns its fields onto that copy — the factory returns a **value** instead of a closure, the one shape variation the [factory pattern](/docs/Development/References/RULES.md#factory-pattern) allows:
 
 ```go
 // adapters/standard/standard.go
@@ -130,6 +132,8 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 }
 ```
 
+A factory whose body needs conversion helpers of its own may live in a file of its own beside the adapter — `EmbedDepsFactory` does, in `adapters/standard/embed.go`, where it wraps the compiled-in assets into [`embeddeps.Lib`](/docs/LibUsage/References/PublicApi/embeddeps.Lib.md). `New` still calls it like any other factory.
+
 That conversion is the price of the wall, paid once per adapter, outside the sandbox. `bootstrap/` demonstrates the same mechanic from the other side: there, *this* library is the one being embedded — see [Bootstrap.md](/docs/LibUsage/References/Bootstrap.md) and [StructContracts.md](/docs/Development/References/StructContracts.md#consuming-a-library-that-uses-this-pattern).
 
 ---
@@ -145,11 +149,12 @@ That conversion is the price of the wall, paid once per adapter, outside the san
 1. Add the field to `Deps` in [sandbox/contracts/deps/deps.go](/sandbox/contracts/deps/deps.go), named after the behavior it provides:
    ```go
    type Deps struct {
-       Now     func() time.Time
-       Printf  func(format string, a ...any) (n int, err error)
-       VerbLib verbdeps.Lib
-       KeepLib keepdeps.Lib
-       Uuid    func() string // new requirement
+       Now       func() time.Time
+       Printf    func(format string, a ...any) (n int, err error)
+       VerbLib   verbdeps.Lib
+       KeepLib   keepdeps.Lib
+       EmbedDeps embeddeps.Lib
+       Uuid      func() string // new requirement
    }
    ```
 2. On every adapter, write a `<Field>Factory` returning the closure and assign it from that adapter's `New`, following the adapter specification located in [Specs.md](/docs/Development/References/Specs.md):
@@ -160,11 +165,12 @@ That conversion is the price of the wall, paid once per adapter, outside the san
        return func() string { return uuid.NewString() }
    }
 
-   func New(basePath string) deps.Deps {
-       adapter := &StandardAdapter{args: os.Args[1:], keepBasePath: basePath}
+   func New(basePath string, embedDir string) deps.Deps {
+       adapter := &StandardAdapter{args: os.Args[1:], keepBasePath: basePath, embedDir: embedDir}
        adapter.Deps.Now = NowFactory(adapter)
        adapter.Deps.VerbLib = VerbLibFactory(adapter)
        adapter.Deps.KeepLib = KeepLibFactory(adapter)
+       adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
        adapter.Deps.Uuid = UuidFactory(adapter) // the new field
        return adapter.Deps
    }

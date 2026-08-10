@@ -16,6 +16,7 @@ Index of the documentation for contributors changing this repository: the bindin
 | [HandleLibElements.md](/docs/Development/Tutorials/HandleLibElements.md) | Add a function or an object: declare, write the factory, register, publish |
 | [HandleCliCommands.md](/docs/Development/Tutorials/HandleCliCommands.md) | Add a command or a flag to the interface behind `api.Lib.Sandboxmain` |
 | [HandleAdapters.md](/docs/Development/Tutorials/HandleAdapters.md) | Create a new opinionated implementation of the `Deps` contract |
+| [HandleAssets.md](/docs/Development/Tutorials/HandleAssets.md) | Add or edit a file under `assets/` the library reads instead of a Go string |
 | [HandleSamples.md](/docs/Development/Tutorials/HandleSamples.md) | Create and run executable Go samples in `examples/libraryExamples/` |
 | [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md) | Create and run shell scripts in `examples/cliExamples/` driving the built CLI |
 | [HandleDocuments.md](/docs/Development/Tutorials/HandleDocuments.md) | Create, rename, move, or delete a `.md` file without leaving broken references |

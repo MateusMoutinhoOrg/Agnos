@@ -44,7 +44,7 @@ import (
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New("trackerdata"))
+	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
 	l.AddCategory("groceries")
 
 	transaction, ok := l.AddSpend("groceries", "weekly shopping", 8450) // 84.50

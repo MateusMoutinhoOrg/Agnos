@@ -1,0 +1,1 @@
+no categories yet — create one with: agnos category add <name>

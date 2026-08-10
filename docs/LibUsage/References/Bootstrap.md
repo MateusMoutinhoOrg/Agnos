@@ -69,7 +69,7 @@ The adapter, outside the sandbox, is the only place allowed to import the embedd
 ```go
 // bootstrap/adapters/standard/standard.go — outside the sandbox
 func TrackerLibFactory(s *StandardAdapter) agnosdeps.Lib {
-	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath))
+	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath, "."))
 	return agnosdeps.Lib{
 		Balance: inner.Balance, // identical signature: assigned straight across
 		AddCategory: func(name string) (agnosdeps.Category, bool) {

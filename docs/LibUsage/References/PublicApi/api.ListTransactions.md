@@ -37,7 +37,7 @@ import (
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New("trackerdata"))
+	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
 
 	for _, transaction := range l.ListTransactions() {
 		fmt.Println(transaction.String())

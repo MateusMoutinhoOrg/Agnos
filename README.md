@@ -23,6 +23,7 @@ The CLI is `api.Lib.Sandboxmain` — one field of the library like any other. Th
 - **`/sandbox/`**: The closed library taking a `Deps` and returning an `api.Lib`.
 - **`/adapters/`**: Concrete implementations of the `Deps` contract.
 - **`/cmd/`** & **`/examples/libraryExamples/`**: Places where an adapter and the library are wired together.
+- **`/assets/`**: The text the interface displays, compiled into the binary and reached only through the injected `Deps` — so even the help screen is not written inside the sandbox.
 
 See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md) and [StructContracts.md](/docs/Development/References/StructContracts.md) for the full mechanic.
 
