@@ -36,7 +36,7 @@ import (
 )
 
 func main() {
-	myDeps := agnosadapter.New("trackerdata", ".")
+	myDeps := agnosadapter.New("trackerdata")
 
 	// Correct: replace the clock while it is still a plain deps value.
 	frozen := time.Unix(0, 0)

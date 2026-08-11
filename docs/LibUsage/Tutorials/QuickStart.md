@@ -31,7 +31,7 @@ Installs the module and runs the smallest program that uses it: an adapter build
    func main() {
        // 1. Create deps via an adapter (the "opinionated" part:
        //    real clock + standard output + a schema database on disk)
-       deps := agnosadapter.New("trackerdata", ".")
+       deps := agnosadapter.New("trackerdata")
 
        // 2. Inject deps into the pure library — a financial tracker
        l := agnoslib.New(deps)
@@ -67,7 +67,7 @@ import (
 )
 
 func main() {
-    deps := agnosadapter.New("trackerdata", ".")
+    deps := agnosadapter.New("trackerdata")
     l := agnoslib.New(deps)
 
     l.AddCategory("groceries")

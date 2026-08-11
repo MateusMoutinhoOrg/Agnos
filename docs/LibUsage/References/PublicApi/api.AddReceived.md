@@ -42,7 +42,7 @@ import (
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
+	l := agnoslib.New(agnosadapter.New("trackerdata"))
 	l.AddCategory("salary")
 
 	transaction, _ := l.AddReceived("salary", "august paycheck", 250000) // 2500.00

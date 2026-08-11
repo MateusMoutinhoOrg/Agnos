@@ -12,7 +12,7 @@ Covers recording spend and received transactions, listing them, and reading a ba
 ## Workflow
 1. Initialize the lib and create the category to record under:
    ```go
-   l := agnoslib.New(agnosadapter.New("trackerdata", "."))
+   l := agnoslib.New(agnosadapter.New("trackerdata"))
    groceries, _ := l.AddCategory("groceries")
    ```
 2. Record money leaving the budget with `AddSpend`. It returns the persisted `api.Transaction` and a boolean that is `false` when the amount is not positive or the record could not be written:
@@ -69,7 +69,7 @@ import (
 )
 
 func main() {
-    l := agnoslib.New(agnosadapter.New("trackerdata", "."))
+    l := agnoslib.New(agnosadapter.New("trackerdata"))
 
     groceries, _ := l.AddCategory("groceries")
 

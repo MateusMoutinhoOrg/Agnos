@@ -18,7 +18,7 @@ The sandbox's **copy** of the api an embedded-asset library exposes, declared in
 
 Assets are how the library holds no display text of its own. Every word the command-line interface prints — the usage screen, the version, and each message — is a file under [`/assets/`](/docs/Development/References/Structure.md#assets) that `Sandboxmain` reads by path. Changing the interface's wording, or translating it, is editing those files; no Go changes and no recompilation of the sandbox are involved. The mechanic is explained in [EmbeddedAssets.md](/docs/LibUsage/References/EmbeddedAssets.md).
 
-The contract is **read-only**: assets ship with the program, and nothing in the library ever writes one back. Paths are slash-separated and relative to the asset root the adapter was pointed at (`embedDir` in `standard.New`), so `"version.txt"` means the same asset whether the adapter serves it out of the binary, out of a directory on disk, or out of a network store. The root itself is addressed as `"."`.
+The contract is **read-only**: assets ship with the program, and nothing in the library ever writes one back. Paths are slash-separated and relative to the root of the asset tree the adapter serves, so `"version.txt"` means the same asset whether the adapter serves it out of the binary, out of a directory on disk, or out of a network store. The root itself is addressed as `"."`.
 
 Only `Sandboxmain` reads assets. A program that calls the library functions directly never touches one, so a hand-built `deps.Deps` can leave this field zero — with the usual caveat that calling into the interface afterwards would then panic on the nil `ReadFile`.
 
@@ -43,8 +43,8 @@ import (
 
 func main() {
 	// The adapter compiles the assets into the binary and hands them back as
-	// one field of the deps contract, rooted at the directory it was given.
-	d := agnosadapter.New("trackerdata", ".")
+	// one field of the deps contract, serving the whole asset tree.
+	d := agnosadapter.New("trackerdata")
 
 	version, err := d.EmbedDeps.ReadFile("version.txt")
 	if err != nil {

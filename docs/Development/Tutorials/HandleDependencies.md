@@ -52,7 +52,7 @@ standard.New() ──▶ deps.Deps ──▶ lib.New(deps) ──▶ api.Lib
 The simplest setup — an adapter builds a ready-to-use `deps.Deps`:
 
 ```go
-myDeps := agnosadapter.New("trackerdata", ".") // fills every field
+myDeps := agnosadapter.New("trackerdata") // fills every field
 l := agnoslib.New(myDeps)
 ```
 
@@ -63,7 +63,7 @@ l := agnoslib.New(myDeps)
 Take the `deps.Deps` an adapter returns and reassign the field you want; every other field keeps the adapter's implementation:
 
 ```go
-myDeps := agnosadapter.New("trackerdata", ".")
+myDeps := agnosadapter.New("trackerdata")
 
 // Replace only the clock — KeepLib stays as the adapter built it
 now := time.Unix(0, 0)
@@ -165,8 +165,8 @@ That conversion is the price of the wall, paid once per adapter, outside the san
        return func() string { return uuid.NewString() }
    }
 
-   func New(basePath string, embedDir string) deps.Deps {
-       adapter := &StandardAdapter{args: os.Args[1:], keepBasePath: basePath, embedDir: embedDir}
+   func New(basePath string) deps.Deps {
+       adapter := &StandardAdapter{args: os.Args[1:], keepBasePath: basePath}
        adapter.Deps.Now = NowFactory(adapter)
        adapter.Deps.VerbLib = VerbLibFactory(adapter)
        adapter.Deps.KeepLib = KeepLibFactory(adapter)

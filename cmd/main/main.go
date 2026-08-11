@@ -16,11 +16,6 @@ const (
 	// dataDirEnv is the environment variable that overrides where the
 	// records live, so a script can run against a budget of its own.
 	dataDirEnv = "AGNOS_DATA"
-	// assetRoot is the directory inside the project's compiled-in assets the
-	// library reads its text from — "." is the whole asset tree, which is
-	// what the shipped binary wants: the usage screen, the version, and
-	// every message of the interface.
-	assetRoot = "."
 )
 
 // main is the whole executable: it wires an adapter into the library, hands
@@ -32,7 +27,7 @@ func main() {
 	// 1. Build deps via the standard adapter: a real clock, standard output,
 	//    the Verb parser over os.Args[1:], a Keep database on disk, and the
 	//    assets compiled into this binary for every line the interface says.
-	deps := agnosadapter.New(dataPath(), assetRoot)
+	deps := agnosadapter.New(dataPath())
 
 	// 2. Inject them into the pure library.
 	l := agnoslib.New(deps)

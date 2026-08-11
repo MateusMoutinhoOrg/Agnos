@@ -10,7 +10,7 @@ import (
 
 func main() {
 	// 1. Build deps via the standard adapter and inject them into the lib.
-	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
+	l := agnoslib.New(agnosadapter.New("trackerdata"))
 
 	// 2. Record a few transactions across two categories.
 	l.AddCategory("salary")

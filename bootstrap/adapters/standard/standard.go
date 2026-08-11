@@ -98,7 +98,7 @@ func fromCategories(categories []agnostypes.Category) []agnosdeps.Category {
 // sandbox's local agnosdeps.Lib. It returns a value rather than a closure
 // because the field is a struct — see the Factories specification.
 func TrackerLibFactory(s *StandardAdapter) agnosdeps.Lib {
-	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath, "."))
+	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath))
 	return agnosdeps.Lib{
 		Sandboxmain: inner.Sandboxmain,
 		AddCategory: func(name string) (agnosdeps.Category, bool) {

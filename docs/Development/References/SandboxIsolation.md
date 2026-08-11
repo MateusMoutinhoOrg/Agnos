@@ -86,7 +86,7 @@ The caller decides which implementation fills the fields flowing in:
 
 ```go
 // This line lives outside the wall — the only place an adapter and the sandbox meet.
-l := agnoslib.New(agnosadapter.New("data.json", "."))
+l := agnoslib.New(agnosadapter.New("data.json"))
 ```
 
 For why the contracts are structs rather than interfaces, continue to [StructContracts.md](/docs/Development/References/StructContracts.md).

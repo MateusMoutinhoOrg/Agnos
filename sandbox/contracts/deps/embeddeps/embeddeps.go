@@ -17,8 +17,8 @@ package embeddeps
 // field. It is read-only by design: assets ship with the program, and nothing
 // in the library ever writes one back.
 //
-// Every path is slash-separated and relative to the asset root the adapter
-// was pointed at — "version.txt", "usages.txt" — never an absolute path
+// Every path is slash-separated and relative to the root of the asset tree
+// the adapter serves — "version.txt", "usages.txt" — never an absolute path
 // and never a path reaching outside that root, so the same call means the
 // same asset whatever the adapter is backed by.
 type Lib struct {

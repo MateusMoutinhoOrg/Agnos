@@ -46,7 +46,7 @@ The result is that `sandbox/internal/cli/` holds no display text at all. Rewordi
 
 ## Reading Assets as a Consumer
 
-The adapter roots the asset tree at the directory passed to [`standard.New`](/docs/LibUsage/References/PublicApi/standard.New.md) — `"."` for everything — and every path is resolved against that root:
+The adapter serves the whole asset tree compiled into the binary, and every path is resolved against its root — [`standard.New`](/docs/LibUsage/References/PublicApi/standard.New.md) takes no configuration for it:
 
 ```go
 package main
@@ -58,7 +58,7 @@ import (
 )
 
 func main() {
-	d := agnosadapter.New("trackerdata", ".")
+	d := agnosadapter.New("trackerdata")
 
 	// One asset, whole.
 	version, err := d.EmbedDeps.ReadFile("version.txt")
@@ -74,10 +74,16 @@ func main() {
 }
 ```
 
-Rooting the adapter at a subdirectory shifts every path with it, so a program interested only in the printable lines can address them by bare name:
+A program interested only in one subtree shifts every path with a wrapper of its own, so the printable lines can be addressed by bare name:
 
 ```go
-d := agnosadapter.New("trackerdata", "messages")
+d := agnosadapter.New("trackerdata")
+
+shipped := d.EmbedDeps.ReadFile
+d.EmbedDeps.ReadFile = func(name string) ([]byte, error) {
+	return shipped(path.Join("messages", name))
+}
+
 refused, _ := d.EmbedDeps.ReadFile("unknown-command.txt")
 ```
 
@@ -88,7 +94,7 @@ refused, _ := d.EmbedDeps.ReadFile("unknown-command.txt")
 Because the contract is three plain function fields, an adapter can back them with anything — a directory on disk that operators may edit, an archive, a translation service — and the library will not notice. Patching the field on a `deps.Deps` an adapter returned is enough, as long as it happens **before** `lib.New`; see [HandleDependencies.md](/docs/Development/Tutorials/HandleDependencies.md#overwriting-a-single-behavior).
 
 ```go
-d := agnosadapter.New("trackerdata", ".")
+d := agnosadapter.New("trackerdata")
 
 // Serve the Portuguese wording, falling back to what ships in the binary.
 shipped := d.EmbedDeps.ReadFile

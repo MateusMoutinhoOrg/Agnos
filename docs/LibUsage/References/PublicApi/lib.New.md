@@ -40,7 +40,7 @@ import (
 
 func main() {
 	// 1. Build the deps through an adapter
-	deps := agnosadapter.New("trackerdata", ".")
+	deps := agnosadapter.New("trackerdata")
 
 	// 2. Inject them into the library
 	l := agnoslib.New(deps)

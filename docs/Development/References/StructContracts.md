@@ -76,7 +76,6 @@ type StandardAdapter struct {
 	Deps         deps.Deps // the contract the factories assign into
 	args         []string  // the state the closures read
 	keepBasePath string
-	embedDir     string
 }
 
 func NowFactory(s *StandardAdapter) func() time.Time {
@@ -84,8 +83,8 @@ func NowFactory(s *StandardAdapter) func() time.Time {
 }
 
 // New returns the contract struct, never the concrete adapter type.
-func New(basePath string, embedDir string) deps.Deps {
-	adapter := &StandardAdapter{args: os.Args[1:], keepBasePath: basePath, embedDir: embedDir}
+func New(basePath string) deps.Deps {
+	adapter := &StandardAdapter{args: os.Args[1:], keepBasePath: basePath}
 	adapter.Deps.Now = NowFactory(adapter)
 	adapter.Deps.VerbLib = VerbLibFactory(adapter)
 	adapter.Deps.KeepLib = KeepLibFactory(adapter)
@@ -103,7 +102,7 @@ Binding a method into a field would work in Go, but the project forbids it: one 
 With an interface, overriding one method means declaring a wrapper type. With a struct, it is an assignment — the everyday testing path:
 
 ```go
-myDeps := standard.New("trackerdata", ".")
+myDeps := standard.New("trackerdata")
 myDeps.Now = func() time.Time { return time.Unix(0, 0) } // control the clock
 l := lib.New(myDeps) // everything else keeps the adapter's implementation
 ```
@@ -117,7 +116,7 @@ When one Agnos-Cli-style library depends on another, the consuming sandbox may n
 ```go
 // bootstrap/adapters/standard/standard.go — outside the sandbox
 func TrackerLibFactory(s *StandardAdapter) agnosdeps.Lib {
-	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath, "."))
+	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath))
 	return agnosdeps.Lib{
 		Balance: inner.Balance, // identical signature: assigned straight across
 		AddCategory: func(name string) (agnosdeps.Category, bool) {

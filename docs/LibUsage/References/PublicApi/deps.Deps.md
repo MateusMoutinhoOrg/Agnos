@@ -51,7 +51,7 @@ func main() {
 	// Start from an adapter — it is what fills KeepLib, the one dependency
 	// the tracker cannot work without — then patch the single behavior this
 	// program wants to control.
-	d := agnosadapter.New("trackerdata", ".")
+	d := agnosadapter.New("trackerdata")
 
 	frozen := time.Unix(0, 0)
 	d.Now = func() time.Time { return frozen }

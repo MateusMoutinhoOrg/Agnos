@@ -39,7 +39,7 @@ import (
 )
 
 func main() {
-	l := agnoslib.New(agnosadapter.New("trackerdata", "."))
+	l := agnoslib.New(agnosadapter.New("trackerdata"))
 
 	for _, category := range l.ListCategories() {
 		fmt.Println(category.String())

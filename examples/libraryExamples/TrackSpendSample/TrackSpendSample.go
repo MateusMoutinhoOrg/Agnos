@@ -10,7 +10,7 @@ import (
 func main() {
 	// 1. Build deps via the standard adapter (real clock + a Keep database
 	//    on disk under "trackerdata").
-	deps := agnosadapter.New("trackerdata", ".")
+	deps := agnosadapter.New("trackerdata")
 
 	// 2. Inject deps into the pure library — a financial tracker.
 	l := agnoslib.New(deps)

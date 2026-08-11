@@ -25,8 +25,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/store"
 )
 
-// Paths of the assets the interface reads, relative to the asset root the
-// adapter rooted deps.Deps.EmbedDeps at.
+// Paths of the assets the interface reads, relative to the root of the asset
+// tree the adapter serves through deps.Deps.EmbedDeps.
 const (
 	// VersionAsset holds the interface version reported by the `version`
 	// command and the `--version` flag — the single place a release bump is

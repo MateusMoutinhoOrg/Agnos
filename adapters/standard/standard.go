@@ -37,10 +37,6 @@ type StandardAdapter struct {
 	// keepBasePath is the directory the embedded Keep library writes its
 	// records under, one file per key.
 	keepBasePath string
-	// embedDir is the directory inside the compiled-in assets every asset
-	// path the library asks for is resolved against — "." for the whole
-	// asset tree. See EmbedDepsFactory in embed.go.
-	embedDir string
 }
 
 // NowFactory returns the closure that fills deps.Deps.Now, returning the
@@ -289,23 +285,19 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 // the process's standard output — this adapter is the opinionated one, so it
 // picks the argument vector and the stream itself. Handing the same
 // os.Args[1:] to api.Lib.Sandboxmain is what keeps the interface's view of
-// the command line and the parser's in agreement.
-//
-// embedDir is the directory inside the project's compiled-in assets that
-// every asset the library asks for is resolved against; pass "." for the
-// whole asset tree, which is what a caller wanting the shipped usage screen
-// and version wants. The assets are compiled into the binary, so nothing has
-// to exist on disk beside it.
+// the command line and the parser's in agreement. Every asset the library
+// asks for is served from the whole compiled-in asset tree, so nothing has to
+// exist on disk beside the binary and nothing about the text has to be
+// configured here.
 //
 // It builds the adapter instance and runs every field factory over it, so
 // each closure reads the adapter's state at call time. Adding a field to
 // deps.Deps means adding its factory call here.
-func New(basePath string, embedDir string) deps.Deps {
+func New(basePath string) deps.Deps {
 	adapter := &StandardAdapter{
 		args:         os.Args[1:],
 		output:       os.Stdout,
 		keepBasePath: basePath,
-		embedDir:     embedDir,
 	}
 	adapter.Deps.Now = NowFactory(adapter)
 	adapter.Deps.Printf = PrintfFactory(adapter)
