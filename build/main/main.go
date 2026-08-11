@@ -65,7 +65,7 @@ func main() {
 		}
 		if len(targets) == 0 {
 			fmt.Fprintln(os.Stderr, "error: build requires at least one target")
-			fmt.Fprintln(os.Stderr, "valid targets: i32, rpm, deb, linux86")
+			fmt.Fprintln(os.Stderr, "valid targets: i32, rpm, deb, linux86, mac-arm64, mac-amd64")
 			os.Exit(1)
 		}
 		if err := buildTargets(targets, provider); err != nil {

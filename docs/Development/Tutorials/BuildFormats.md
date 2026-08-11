@@ -22,6 +22,8 @@ Cross-compile the CLI into platform-specific binaries and packages — Windows `
    | `linux86` | `release/linux86.out` | Linux amd64 binary |
    | `deb` | `release/x86-deb.deb` | Debian/Ubuntu package |
    | `rpm` | `release/x86-rpm.rpm` | Fedora/RHEL package |
+   | `mac-arm64` | `release/mac-arm64.bin` | macOS Apple Silicon binary |
+   | `mac-amd64` | `release/mac-amd64.bin` | macOS Intel binary |
 
 2. Run the build script with that target. The script auto-detects Docker or Podman:
 
@@ -34,7 +36,7 @@ Cross-compile the CLI into platform-specific binaries and packages — Windows `
 3. List every target you want in one command:
 
    ```sh
-   go run ./build/main build rpm deb i32 linux86
+   go run ./build/main build rpm deb i32 linux86 mac-arm64 mac-amd64
    ```
 
 ### Choose a specific container provider

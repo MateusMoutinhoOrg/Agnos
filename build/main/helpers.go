@@ -20,10 +20,12 @@ const releaseDir = "release"
 // targetOutput maps each build target name to the filename it produces under
 // releaseDir.
 var targetOutput = map[string]string{
-	"i32":     "windows-i32.exe",
-	"rpm":     "x86-rpm.rpm",
-	"deb":     "x86-deb.deb",
-	"linux86": "linux86.out",
+	"i32":       "windows-i32.exe",
+	"rpm":       "x86-rpm.rpm",
+	"deb":       "x86-deb.deb",
+	"linux86":   "linux86.out",
+	"mac-arm64": "mac-arm64.bin",
+	"mac-amd64": "mac-amd64.bin",
 }
 
 // detectProvider probes the host for a working container runtime, trying

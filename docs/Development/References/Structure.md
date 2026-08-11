@@ -32,7 +32,7 @@ The cross-platform build tooling. A standalone `package main` that cross-compile
 
 **Run a build from the repository root:**
 ```sh
-go run ./build/main build i32 rpm deb linux86 --provider docker
+go run ./build/main build i32 rpm deb linux86 mac-arm64 mac-amd64 --provider docker
 ```
 
 **Rename the module path across every Go file:**
@@ -56,6 +56,8 @@ One Dockerfile per build target. Each one copies the repository, compiles the CL
 | `linux86.dockerfile` | Compiles for Linux amd64, producing `linux86.out` | |
 | `deb.dockerfile` | Compiles and packages as a `.deb` for Debian/Ubuntu, producing `x86-deb.deb` | |
 | `rpm.dockerfile` | Multi-stage: compiles in golang, packages in Fedora via rpmbuild, producing `x86-rpm.rpm` | |
+| `mac-arm64.dockerfile` | Cross-compiles for macOS Apple Silicon (arm64), producing `mac-arm64.bin` | |
+| `mac-amd64.dockerfile` | Cross-compiles for macOS Intel (amd64), producing `mac-amd64.bin` | |
 
 ---
 
