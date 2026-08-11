@@ -27,37 +27,29 @@ Because the interface is `api.Lib.Sandboxmain` — one field of the library like
 
 ---
 
-## `/build/`
-The cross-platform build tooling. A standalone `package main` that cross-compiles the CLI for multiple OS/architecture targets inside containers (Docker or Podman), plus the Dockerfiles those containers are built from. It lives outside the sandbox and imports the Verb library directly for argument parsing.
-
-**Run a build from the repository root:**
-```sh
-go run ./build/main build i32 rpm deb linux86 mac-arm64 mac-amd64 --provider docker
-```
-
-**Rename the module path across every Go file:**
-```sh
-go run ./build/main rename github.com/MateusMoutinhoOrg/NewName
-```
-
-### `/build/main/`
+## `/scripts/`
+The cross-platform build scripts. One shell script per OS/architecture target, each a thin wrapper over `go build` with the target's `GOOS`/`GOARCH` set — the Go runtime cross-compiles on its own, so nothing here needs a container runtime or a cross-compiler. Every script resolves the repository root from its own path and writes its artifact to `release/`, which is git-ignored. Building is [Build.md](/docs/Development/Tutorials/Build.md).
 
 | File | Description | Spec |
 |------|-------------|------|
-| `main.go` | The `main()` entry point: parses argv via Verb, dispatches to `rename` or `build` | |
-| `helpers.go` | Provider auto-detection, container image build and artifact extraction, and module rename | |
+| `all.sh` | Runs every target script below, in order | |
+| `linux86.sh` | Builds for Linux amd64, producing `release/linux86.out` | |
+| `linuxarm64.sh` | Builds for Linux arm64, producing `release/linuxarm64.out` | |
+| `linuxi32.sh` | Builds for Linux 386, producing `release/linuxi32.out` | |
+| `windows86.sh` | Builds for Windows amd64, producing `release/windows86.exe` | |
+| `windowsi32.sh` | Builds for Windows 386, producing `release/windowsi32.exe` | |
+| `mac86.sh` | Builds for macOS Intel (amd64), producing `release/mac86.bin` | |
+| `macarm64.sh` | Builds for macOS Apple Silicon (arm64), producing `release/macarm64.bin` | |
 
-### `/build/images/`
-One Dockerfile per build target. Each one copies the repository, compiles the CLI, and places the artifact under `/output/` for the build script to copy out.
+**Build one target:**
+```sh
+bash ./scripts/linux86.sh
+```
 
-| File | Description | Spec |
-|------|-------------|------|
-| `i32.dockerfile` | Cross-compiles for Windows 386, producing `windows-i32.exe` | |
-| `linux86.dockerfile` | Compiles for Linux amd64, producing `linux86.out` | |
-| `deb.dockerfile` | Compiles and packages as a `.deb` for Debian/Ubuntu, producing `x86-deb.deb` | |
-| `rpm.dockerfile` | Multi-stage: compiles in golang, packages in Fedora via rpmbuild, producing `x86-rpm.rpm` | |
-| `mac-arm64.dockerfile` | Cross-compiles for macOS Apple Silicon (arm64), producing `mac-arm64.bin` | |
-| `mac-amd64.dockerfile` | Cross-compiles for macOS Intel (amd64), producing `mac-amd64.bin` | |
+**Build every target:**
+```sh
+bash ./scripts/all.sh
+```
 
 ---
 
@@ -287,6 +279,7 @@ Everything a contributor must read before changing the repository.
 | File | Description | Spec |
 |------|-------------|------|
 | `Tutorials/Handle<Subject>.md` | One page per maintenance workflow — lib elements, commands, deps, adapters, assets, samples, documents | TutorialDocs |
+| `Tutorials/Build.md` | Cross-compile the CLI for every target with the scripts in [`/scripts/`](#scripts) | TutorialDocs |
 | `References/RULES.md` | Rules to follow when contributing to this project | Rules |
 | `References/Structure.md` | The project's schema and the purpose of each component | Structure |
 | `References/Specs.md` | Index of every specification and the files each one governs | |

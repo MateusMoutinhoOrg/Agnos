@@ -20,7 +20,7 @@ Index of the documentation for contributors changing this repository: the bindin
 | [HandleSamples.md](/docs/Development/Tutorials/HandleSamples.md) | Create and run executable Go samples in `examples/libraryExamples/` |
 | [HandleCliExamples.md](/docs/Development/Tutorials/HandleCliExamples.md) | Create and run shell scripts in `examples/cliExamples/` driving the built CLI |
 | [HandleDocuments.md](/docs/Development/Tutorials/HandleDocuments.md) | Create, rename, move, or delete a `.md` file without leaving broken references |
-| [BuildFormats.md](/docs/Development/Tutorials/BuildFormats.md) | Cross-compile the CLI into Windows, Linux, `.deb`, and `.rpm` targets |
+| [Build.md](/docs/Development/Tutorials/Build.md) | Cross-compile the CLI into a binary for each supported OS and architecture |
 
 ---
 
