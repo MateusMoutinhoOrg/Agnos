@@ -27,6 +27,38 @@ Because the interface is `api.Lib.Sandboxmain` — one field of the library like
 
 ---
 
+## `/build/`
+The cross-platform build tooling. A standalone `package main` that cross-compiles the CLI for multiple OS/architecture targets inside containers (Docker or Podman), plus the Dockerfiles those containers are built from. It lives outside the sandbox and imports the Verb library directly for argument parsing.
+
+**Run a build from the repository root:**
+```sh
+go run ./build/main build i32 rpm deb linux86 --provider docker
+```
+
+**Rename the module path across every Go file:**
+```sh
+go run ./build/main rename github.com/MateusMoutinhoOrg/NewName
+```
+
+### `/build/main/`
+
+| File | Description | Spec |
+|------|-------------|------|
+| `main.go` | The `main()` entry point: parses argv via Verb, dispatches to `rename` or `build` | |
+| `helpers.go` | Provider auto-detection, container image build and artifact extraction, and module rename | |
+
+### `/build/images/`
+One Dockerfile per build target. Each one copies the repository, compiles the CLI, and places the artifact under `/output/` for the build script to copy out.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `i32.dockerfile` | Cross-compiles for Windows 386, producing `windows-i32.exe` | |
+| `linux86.dockerfile` | Compiles for Linux amd64, producing `linux86.out` | |
+| `deb.dockerfile` | Compiles and packages as a `.deb` for Debian/Ubuntu, producing `x86-deb.deb` | |
+| `rpm.dockerfile` | Multi-stage: compiles in golang, packages in Fedora via rpmbuild, producing `x86-rpm.rpm` | |
+
+---
+
 ## `/sandbox/`
 The closed sandbox — the pure library. It holds its own entry point, the contracts everything is wired through, and the internal implementation. It reaches nothing outside itself: every OS-bound or third-party effect arrives through the injected `Deps`. Its package is named `lib`, so consumers import it as `lib "…/sandbox"` and call `lib.New`.
 
