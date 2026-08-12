@@ -5,7 +5,7 @@ Rules to follow when contributing to this project. Every file must also be shape
 ---
 
 ## Tutorials Guide
-Before making anything, open the theme index matching your goal — [CliUsage](/docs/Index/CliUsage.md), [LibUsage](/docs/Index/LibUsage.md), [Development](/docs/Index/Development.md), or [Templating](/docs/Index/Templating.md), all linked from the [README.md](/README.md) — and search its `Tutorials` table for a tutorial about what you want to do. If there is one, follow it; if there isn't, you need to create one following the spec defined in [TutorialDocs](/docs/References/Specs/TutorialDocs/).
+Before making anything, open the theme index matching your goal — [CliUsage](/docs/Index/CliUsage.md), [LibUsage](/docs/Index/LibUsage.md), [Development](/docs/Index/Development.md), or [Templating](/docs/Index/Templating.md), all linked from the [README.md](/README.md) — and search its `Tutorials` section for a tutorial about what you want to do. Each entry lists the tutorial's own sections, so you can tell what it covers without opening it. If there is one, follow it; if there isn't, you need to create one following the spec defined in [TutorialDocs](/docs/References/Specs/TutorialDocs/).
 
 
 ## Specification Compliance

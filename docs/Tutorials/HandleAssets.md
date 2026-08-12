@@ -35,7 +35,9 @@ Covers adding, editing, and reading an asset — a file under [/assets/](/assets
    go build ./... && AGNOS_DATA=./scratch go run ./cmd/main largest
    ```
 
-### Edit an Existing Asset
+---
+
+## Edit an Existing Asset
 
 Rewording the interface, or translating it, touches no Go at all: edit the file and rebuild, since the assets are compiled into the binary.
 

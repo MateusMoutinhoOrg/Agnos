@@ -7,17 +7,23 @@ Index of the documentation for people who drive the project from a terminal: ins
 
 ## Tutorials
 
-| Doc | Description |
-| --- | --- |
-| [InstallCli.md](/docs/Tutorials/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
-| [UseCli.md](/docs/Tutorials/UseCli.md) | Drive every operation of the interface from the terminal |
-| [RunCliSample.md](/docs/Tutorials/RunCliSample.md) | Run one of the shipped CLI examples from the source tree |
+- [InstallCli.md](/docs/Tutorials/InstallCli.md)
+  - **description:** Install the CLI globally, or build and run it from a checkout
+  - [macOS / Linux](/docs/Tutorials/InstallCli.md#macos--linux)
+  - [Windows (PowerShell)](/docs/Tutorials/InstallCli.md#windows-powershell)
+  - [Troubleshooting](/docs/Tutorials/InstallCli.md#troubleshooting)
+- [UseCli.md](/docs/Tutorials/UseCli.md)
+  - **description:** Drive every operation of the interface from the terminal
 
 ---
 
 ## References
 
-| Doc | Description |
-| --- | --- |
-| [Commands.md](/docs/References/Commands.md) | Every command, flag, argument format, and exit code of the interface |
-| [SamplesList.md](/docs/References/SamplesList.md) | Every shell example shipped in `examples/cliExamples/` |
+- [Commands.md](/docs/References/Commands.md)
+  - **description:** Every command, flag, argument format, and exit code of the interface
+  - [Commands](/docs/References/Commands.md#commands)
+  - [Flags](/docs/References/Commands.md#flags)
+  - [Exit Codes](/docs/References/Commands.md#exit-codes)
+- [SamplesList.md](/docs/References/SamplesList.md)
+  - **description:** Every shell example shipped in `examples/cliExamples/`
+  - [Examples](/docs/References/SamplesList.md#examples)

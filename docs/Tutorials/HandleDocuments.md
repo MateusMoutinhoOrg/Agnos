@@ -9,8 +9,9 @@ Covers creating, renaming, moving, and deleting `.md` files in [docs/](/docs/), 
 - Every page lives in `docs/Tutorials/` if it is a workflow, in `docs/References/` if it is a lookup or an explanation. There are no theme directories: the two directories are flat, and a page's file name must be unique across the one it lands in.
 - Every page belongs to exactly one **theme** — `CliUsage`, `LibUsage`, `Development`, `Templating` — and the theme is expressed by the [theme index](/docs/References/Specs/Index/Specs.md) that lists it, in `docs/Index/<Theme>.md`, never by the page's location.
 - Adding, renaming, or deleting a `.md` file requires updating its theme index in `docs/Index/` and [Structure.md](/docs/References/Structure.md) in the same commit.
+- A theme index entry lists the page's own topic sections, so adding, renaming, or removing a section of an indexed page updates that entry in the same commit.
 - The [README.md](/README.md) links to theme indexes only: it changes when a **theme** is added, renamed, or removed, never for a single page.
-- Moving a document to another theme is a row moving from one index to another; the file itself only moves if it changes between a workflow and a reference.
+- Moving a document to another theme is an entry moving from one index to another; the file itself only moves if it changes between a workflow and a reference.
 - Content still needed elsewhere must be moved before deletion, not lost.
 
 ---
@@ -24,7 +25,7 @@ Covers creating, renaming, moving, and deleting `.md` files in [docs/](/docs/), 
    - **Conciseness** — short, direct sentences.
    - **Heading hierarchy** — never skip heading levels.
 5. Add cross-references using **relative paths**, and add the reverse link in every document that should point back to this one.
-6. Add a row to the theme's index in `docs/Index/`, in the `Tutorials` or the `References` table.
+6. Add an entry to the theme's index in `docs/Index/`, under `Tutorials` or `References`: the page link, a nested `**description:**` line, and one nested link per topic section of the page — see the [Index](/docs/References/Specs/Index/Specs.md) specification.
 7. Register the file in [Structure.md](/docs/References/Structure.md).
 
 ---
@@ -36,7 +37,7 @@ Covers creating, renaming, moving, and deleting `.md` files in [docs/](/docs/), 
    grep -rn "OldName.md" --include="*.md" .
    ```
 3. Update each reference to the new **relative path**, following the cross-reference rules of the GeneralDoc specification.
-4. Update the document's row in the theme's index in `docs/Index/` — link text and link target. When the document changed theme, remove the row from the old index and add it to the new one.
+4. Update the document's entry in the theme's index in `docs/Index/` — link text, link target, and every section link under it. When the document changed theme, remove the entry from the old index and add it to the new one.
 5. Update the file's entry in [Structure.md](/docs/References/Structure.md).
 
 ---
@@ -48,5 +49,5 @@ Covers creating, renaming, moving, and deleting `.md` files in [docs/](/docs/), 
    ```
 2. For each reference, remove it or repoint it to the document that now covers the topic.
 3. Delete the `.md` file.
-4. Remove the document's row from its theme's index in `docs/Index/`.
+4. Remove the document's entry from its theme's index in `docs/Index/`.
 5. Remove the file's entry from [Structure.md](/docs/References/Structure.md).
