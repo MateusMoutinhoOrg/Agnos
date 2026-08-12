@@ -38,4 +38,3 @@ The library is always built the same way: an adapter produces a `deps.Deps`, `li
   - [Examples](/docs/References/ApiSamplesList.md#examples)
 
 
-The `Deps` contract you fill when injecting your own behavior is documented in [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md).
