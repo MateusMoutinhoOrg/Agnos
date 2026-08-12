@@ -223,7 +223,7 @@ The copying lives in the adapter because only code outside the sandbox may impor
 ---
 
 ## `/docs/`
-Documentation of the project, split by **kind of page**: `Index/` holds one entry point per theme, `Tutorials/` holds every workflow, `References/` holds every lookup and explanation. A **theme** — what the reader wants to accomplish — is not a directory: it is the index that lists a page. `Tutorials/` and `References/` are flat, so a page's file name must be unique inside the directory it lands in; when two themes need the same topic, the name carries the subject (`CliQuickStart.md`, `LibQuickStart.md`). The [README](/README.md) links to the four indexes and to nothing else inside `docs/`.
+Documentation of the project, split by **kind of page**: `Index/` holds one entry point per theme, `Tutorials/` holds every workflow, `References/` holds every lookup and explanation. A **theme** — what the reader wants to accomplish — is not a directory: it is the index that lists a page. `Tutorials/` and `References/` are flat, so a page's file name must be unique inside the directory it lands in; when two themes need the same topic, the name carries the subject. The [README](/README.md) links to the four indexes and to nothing else inside `docs/`.
 
 | Directory | Description |
 |-----------|-------------|
@@ -239,7 +239,7 @@ One page per theme. The four themes are `CliUsage` — installing the binary, dr
 | `<Theme>.md` | The theme's entry point: one table of its Tutorials, one of its References | Index |
 
 ### `/docs/Tutorials/`
-One page per workflow, its title phrased as the action it performs. A page belongs to exactly one theme, and the theme's index in [`/docs/Index/`](#docsindex) is what says which — `CliQuickStart.md`, `InstallCli.md`, `UseCli.md` and `RunCliSample.md` under `CliUsage`; `LibQuickStart.md`, `LibInitialization.md` and the domain workflows under `LibUsage`; the `Handle<Subject>.md` guides and `Build.md` under `Development`; `ForkTemplate.md`, `AdaptExistingLib.md` and `RenameModule.md` under `Templating`.
+One page per workflow, its title phrased as the action it performs. A page belongs to exactly one theme, and the theme's index in [`/docs/Index/`](#docsindex) is what says which — `InstallCli.md`, `UseCli.md` and `RunCliSample.md` under `CliUsage`; `LibQuickStart.md`, `LibInitialization.md` and the domain workflows under `LibUsage`; the `Handle<Subject>.md` guides and `Build.md` under `Development`; `ForkTemplate.md`, `AdaptExistingLib.md` and `RenameModule.md` under `Templating`.
 
 | File | Description | Spec |
 |------|-------------|------|

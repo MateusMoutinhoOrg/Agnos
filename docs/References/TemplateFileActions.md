@@ -52,7 +52,7 @@ Kept in place, with their content replaced by the new library's. The file keeps 
 | `docs/References/PublicApi.md` | The index of the new public API entries | ReferenceDocs |
 | `docs/References/Adapters.md` | The adapters the new library ships | AdaptersDoc |
 | `docs/Index/CliUsage.md`, `docs/Index/LibUsage.md`, `docs/Index/Development.md`, `docs/Index/Templating.md` | The new library's page list, one index per theme | Index |
-| `docs/Tutorials/CliQuickStart.md`, `docs/Tutorials/LibQuickStart.md` | The new library's first-run walkthroughs, CLI and Go | TutorialDocs |
+| `docs/Tutorials/LibQuickStart.md` | The new library's first-run walkthrough for Go | TutorialDocs |
 | `docs/Tutorials/InstallCli.md`, `docs/Tutorials/UseCli.md` | Installing and driving the new library's CLI | TutorialDocs |
 | `docs/Tutorials/LibInitialization.md` | Installing the new library and wiring its standard adapter | TutorialDocs |
 | `docs/Tutorials/RunCliSample.md`, `docs/Tutorials/RunApiSample.md` | Running the new library's samples | TutorialDocs |

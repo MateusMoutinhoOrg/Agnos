@@ -18,7 +18,7 @@ Covers creating, renaming, moving, and deleting `.md` files in [docs/](/docs/), 
 ## Add a Document
 1. Identify the theme the document belongs to, and whether it is a **Tutorial** (a workflow) or a **Reference** (a lookup or an explanation).
 2. Check [Specs.md](/docs/References/Specs.md) for the specifications matching the file, and read them before writing.
-3. Create the `.md` file in `docs/Tutorials/` or `docs/References/` with a descriptive, topic-based name unique in that directory (e.g., `HandleSamples.md`, `PublicApi.md`). When two themes need the same topic, prefix the name with the theme's subject — `CliQuickStart.md` and `LibQuickStart.md`.
+3. Create the `.md` file in `docs/Tutorials/` or `docs/References/` with a descriptive, topic-based name unique in that directory (e.g., `HandleSamples.md`, `PublicApi.md`). When two themes need the same topic, prefix the name with the theme's subject.
 4. Write the content following those specifications, paying special attention to:
    - **Topic-driven structure** — one concern per section.
    - **Conciseness** — short, direct sentences.

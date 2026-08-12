@@ -11,7 +11,6 @@ The interface itself is `api.Lib.Sandboxmain` — one field of the library like 
 
 | Doc | Description |
 | --- | --- |
-| [CliQuickStart.md](/docs/Tutorials/CliQuickStart.md) | Install the binary and track a first budget in two steps |
 | [InstallCli.md](/docs/Tutorials/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
 | [UseCli.md](/docs/Tutorials/UseCli.md) | Create categories, record transactions, and read balances from the terminal |
 | [RunCliSample.md](/docs/Tutorials/RunCliSample.md) | Run one of the shipped CLI examples from the source tree |

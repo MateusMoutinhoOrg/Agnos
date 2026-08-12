@@ -9,7 +9,6 @@ Index of the documentation for people who drive the project from a terminal: ins
 
 | Doc | Description |
 | --- | --- |
-| [CliQuickStart.md](/docs/Tutorials/CliQuickStart.md) | Install the binary and run a first command in two steps |
 | [InstallCli.md](/docs/Tutorials/InstallCli.md) | Install the CLI globally, or build and run it from a checkout |
 | [UseCli.md](/docs/Tutorials/UseCli.md) | Drive every operation of the interface from the terminal |
 | [RunCliSample.md](/docs/Tutorials/RunCliSample.md) | Run one of the shipped CLI examples from the source tree |
