@@ -11,7 +11,8 @@ The interface itself is `api.Lib.Sandboxmain` — one field of the library like 
 
 - [InstallCli.md](/docs/Tutorials/InstallCli.md)
   - **description:** Install the CLI globally, or build and run it from a checkout
-  - [macOS / Linux](/docs/Tutorials/InstallCli.md#macos--linux)
+  - [macOS](/docs/Tutorials/InstallCli.md#macos)
+  - [Linux](/docs/Tutorials/InstallCli.md#linux)
   - [Windows (PowerShell)](/docs/Tutorials/InstallCli.md#windows-powershell)
   - [Verify after reboot](/docs/Tutorials/InstallCli.md#verify-after-reboot)
   - [Troubleshooting](/docs/Tutorials/InstallCli.md#troubleshooting)
