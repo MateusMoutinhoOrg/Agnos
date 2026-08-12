@@ -4,85 +4,119 @@
 Covers installing the `agnos-cli` command-line interface globally, so it runs from any directory and survives a terminal restart. To use it once installed, follow [UseCli.md](/docs/Tutorials/UseCli.md); to consume the same behavior as a Go library instead, follow [LibInitialization.md](/docs/Tutorials/LibInitialization.md).
 
 ### Rules
-- Go 1.22 or newer must be installed and available on your `PATH` (`go version` must print a version).
-- The binary is built from [cmd/main](/cmd/main/), so `go install` names it `main` — the install commands below rename it to `agnos-cli`.
-- The install commands detect whether `$(go env GOPATH)/bin` (or `%GOPATH%\bin` on Windows) is on your `PATH` and add it persistently if it is not.
+- You do **not** need Go installed to run `agnos-cli`. You can download the pre-compiled binary for your operating system directly.
+- The installation commands use `curl` to fetch the latest release from the repository.
 
 ---
 
 ## Workflow
 
-### macOS / Linux
+### macOS
 
-1. Copy and paste this entire block into a terminal (bash, zsh, or any POSIX shell):
+1. Copy and paste the command below corresponding to your Mac's processor into your terminal to download and install the binary:
+
+   **Apple Silicon (M1/M2/M3 / arm64)**
    ```bash
-   go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3 \
-     && mv "$(go env GOPATH)/bin/main" "$(go env GOPATH)/bin/agnos-cli" \
-     && { \
-          case ":$PATH:" in \
-            *":$(go env GOPATH)/bin:"*) ;; \
-            *) \
-              PROF="$HOME/.profile"; \
-              [ -n "$ZSH_VERSION" ] && PROF="$HOME/.zshrc"; \
-              [ -n "$BASH_VERSION" ] && [ -f "$HOME/.bashrc" ] && PROF="$HOME/.bashrc"; \
-              echo 'export PATH="$PATH:$(go env GOPATH)/bin"' >> "$PROF"; \
-              export PATH="$PATH:$(go env GOPATH)/bin"; \
-              echo "Added GOPATH/bin to $PROF (open a new terminal or run: source $PROF)"; \
-          esac; \
-        } \
-     && agnos-cli version
+   curl -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/macarm64.bin -o agnos-cli && \
+     chmod +x agnos-cli && \
+     sudo mv agnos-cli /usr/local/bin/ && \
+     agnos-cli version
    ```
-2. If `agnos-cli version` printed the version, the install is complete. Open a **new terminal** to make the PATH change available everywhere.
+
+   **Intel (x86_64)**
+   ```bash
+   curl -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/mac86.bin -o agnos-cli && \
+     chmod +x agnos-cli && \
+     sudo mv agnos-cli /usr/local/bin/ && \
+     agnos-cli version
+   ```
+
+2. Open a **new terminal** to make sure the binary is available everywhere.
+
+### Linux
+
+1. Copy and paste the command below corresponding to your architecture into your terminal to download and install the binary:
+
+   **x86_64 (64-bit)**
+   ```bash
+   curl -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/linux86.out -o agnos-cli && \
+     chmod +x agnos-cli && \
+     sudo mv agnos-cli /usr/local/bin/ && \
+     agnos-cli version
+   ```
+
+   **ARM64**
+   ```bash
+   curl -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/linuxarm64.out -o agnos-cli && \
+     chmod +x agnos-cli && \
+     sudo mv agnos-cli /usr/local/bin/ && \
+     agnos-cli version
+   ```
+
+   **x86 (32-bit)**
+   ```bash
+   curl -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/linuxi32.out -o agnos-cli && \
+     chmod +x agnos-cli && \
+     sudo mv agnos-cli /usr/local/bin/ && \
+     agnos-cli version
+   ```
+
+2. Open a **new terminal** to make sure the binary is available everywhere.
 
 ### Windows (PowerShell)
 
-1. Copy and paste this entire block into PowerShell:
+1. Open PowerShell and copy and paste the command below corresponding to your architecture. It will download the binary, install it to your user profile, and update your `PATH`:
+
+   **x86_64 (64-bit)**
    ```powershell
-   go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3; `
-     if ($?) { `
-       $gobin = (go env GOPATH) + '\bin'; `
-       Move-Item "$gobin\main.exe" "$gobin\agnos-cli.exe" -Force; `
-       if ($env:PATH -notlike "*$gobin*") { `
-         [Environment]::SetEnvironmentVariable('PATH', `
-           [Environment]::GetEnvironmentVariable('PATH','User') + ";$gobin", 'User'); `
-         $env:PATH += ";$gobin"; `
-         Write-Host "Added $gobin to your PATH (restart the terminal for full effect)"; `
-       }; `
-       agnos-cli version `
-     }
+   $dir = "$HOME\.local\bin"; `
+     New-Item -ItemType Directory -Force -Path $dir | Out-Null; `
+     curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/windows86.exe -o "$dir\agnos-cli.exe"; `
+     if ($env:PATH -notlike "*$dir*") { `
+       [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH', 'User') + ";$dir", 'User'); `
+       $env:PATH += ";$dir"; `
+       Write-Host "Added $dir to your PATH (restart the terminal for full effect)"; `
+     }; `
+     agnos-cli.exe version
    ```
-2. If `agnos-cli version` printed the version, the install is complete. Open a **new terminal** to make the PATH change available everywhere.
+
+   **x86 (32-bit)**
+   ```powershell
+   $dir = "$HOME\.local\bin"; `
+     New-Item -ItemType Directory -Force -Path $dir | Out-Null; `
+     curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest/download/windowsi32.exe -o "$dir\agnos-cli.exe"; `
+     if ($env:PATH -notlike "*$dir*") { `
+       [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH', 'User') + ";$dir", 'User'); `
+       $env:PATH += ";$dir"; `
+       Write-Host "Added $dir to your PATH (restart the terminal for full effect)"; `
+     }; `
+     agnos-cli.exe version
+   ```
+
+2. Open a **new terminal** to make sure the binary is available everywhere.
 
 ### Verify after reboot
 
-3. After restarting the machine (or opening a fresh terminal), confirm the binary is still found:
+3. After restarting the machine (or opening a fresh terminal), confirm the binary is still found globally:
    ```bash
+   # On macOS / Linux
    agnos-cli version
+   ```
+   ```powershell
+   # On Windows
+   agnos-cli.exe version
    ```
 
 ### Troubleshooting
 
-4. If `go install` fails with a network error, check your internet connection and that Go's proxy is reachable (`go env GOPROXY`).
-5. If `agnos-cli version` says "command not found" after installing, `GOPATH/bin` is not on your PATH. Run `go env GOPATH` to find the directory, and add its `bin/` subdirectory to your shell profile manually:
-   ```bash
-   # macOS / Linux — replace .zshrc with .bashrc if you use bash
-   echo 'export PATH="$PATH:$(go env GOPATH)/bin"' >> ~/.zshrc
-   source ~/.zshrc
-   ```
-   ```powershell
-   # Windows PowerShell
-   $gobin = (go env GOPATH) + '\bin'
-   [Environment]::SetEnvironmentVariable('PATH',
-     [Environment]::GetEnvironmentVariable('PATH','User') + ";$gobin", 'User')
-   ```
-6. If `mv` (or `Move-Item`) fails because `agnos-cli` already exists from a previous install, delete the old binary first and re-run the install command.
+4. If `curl` fails with a network error, check your internet connection and ensure GitHub is accessible.
+5. If `agnos-cli version` says `command not found` after installing, the directory you moved the binary to (e.g., `/usr/local/bin` ou `$HOME\.local\bin`) is not in your `PATH`. Add it to your shell profile manually.
 
-### Install from a Clone
-Use this instead of the steps above when you are working on the project itself and want the binary built from your checkout:
+### Install from a Clone (Requires Go)
 
-1. Build it into Go's binary directory under the right name:
+1. Use this instead of the steps above when you are working on the project itself and want the binary built from your checkout:
    ```bash
-   go build -o "$(go env GOPATH)/bin/agnos-cli" ./cmd/main
+   go build -o $(go env GOPATH)/bin/agnos-cli ./cmd/main
    ```
 2. Or skip installing entirely and run it straight from source:
    ```bash
