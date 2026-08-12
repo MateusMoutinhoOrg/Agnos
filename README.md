@@ -25,22 +25,22 @@ The CLI is `api.Lib.Sandboxmain` — one field of the library like any other. Th
 - **`/cmd/`** & **`/examples/libraryExamples/`**: Places where an adapter and the library are wired together.
 - **`/assets/`**: The text the interface displays, compiled into the binary and reached only through the injected `Deps` — so even the help screen is not written inside the sandbox.
 
-See [SandboxIsolation.md](/docs/Development/References/SandboxIsolation.md) and [StructContracts.md](/docs/Development/References/StructContracts.md) for the full mechanic.
+See [SandboxIsolation.md](/docs/References/SandboxIsolation.md) and [StructContracts.md](/docs/References/StructContracts.md) for the full mechanic.
 
 ---
 
 ## Doc Index
 
-Documentation is split into four themes. Each theme has an `Index.md` listing its **Tutorials** — step-by-step workflows — and its **References** — explanations and lookups. Start from the theme index matching what you want to do.
+Documentation is split into four themes, one index page each under `docs/Index/`, listing that theme's **Tutorials** — step-by-step workflows — and its **References** — explanations and lookups. Start from the theme index matching what you want to do.
 
 | Theme | Description |
 | --- | --- |
-| [CLI Usage](/docs/CliUsage/Index.md) | For end users: installing the binary, driving it from a terminal, and every command it takes. |
-| [Library Usage](/docs/LibUsage/Index.md) | For library consumers: installing the module, creating deps, and calling the Go API. |
-| [Development](/docs/Development/Index.md) | For contributors: the rules, the mechanics, the per-goal workflows, and the specifications. |
-| [Templating](/docs/Templating/Index.md) | For template users: forking, renaming, and adapting this structure into a new CLI. |
+| [CLI Usage](/docs/Index/CliUsage.md) | For end users: installing the binary, driving it from a terminal, and every command it takes. |
+| [Library Usage](/docs/Index/LibUsage.md) | For library consumers: installing the module, creating deps, and calling the Go API. |
+| [Development](/docs/Index/Development.md) | For contributors: the rules, the mechanics, the per-goal workflows, and the specifications. |
+| [Templating](/docs/Index/Templating.md) | For template users: forking, renaming, and adapting this structure into a new CLI. |
 
-New here? [CLI Usage → QuickStart.md](/docs/CliUsage/Tutorials/QuickStart.md) installs the binary and tracks a first budget; [Library Usage → QuickStart.md](/docs/LibUsage/Tutorials/QuickStart.md) does the same from Go code.
+New here? [CLI Usage → CliQuickStart.md](/docs/Tutorials/CliQuickStart.md) installs the binary and tracks a first budget; [Library Usage → LibQuickStart.md](/docs/Tutorials/LibQuickStart.md) does the same from Go code.
 
 ---
 
