@@ -24,10 +24,11 @@ The library is always built the same way: an adapter produces a `deps.Deps`, `li
 ## References
 
 - [PublicApi.md](/docs/References/PublicApi.md)
-  - **description:** Index of every public struct, function, and field, with detail pages
-  - [Structs](/docs/References/PublicApi.md#structs)
-  - [Functions](/docs/References/PublicApi.md#functions)
-  - [Fields](/docs/References/PublicApi.md#fields)
+  - **description:** Index of every public-facing entry of the library, logically grouped by their role in the system
+  - [Entry Points](/docs/References/PublicApi.md#entry-points)
+  - [Core Interface](/docs/References/PublicApi.md#core-interface)
+  - [Data Models](/docs/References/PublicApi.md#data-models)
+  - [Dependency Contracts](/docs/References/PublicApi.md#dependency-contracts)
 - [Adapters.md](/docs/References/Adapters.md)
   - **description:** Every shipped adapter you can inject, and when to use each one
   - [Available Adapters](/docs/References/Adapters.md#available-adapters)
