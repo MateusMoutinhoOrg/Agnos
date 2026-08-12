@@ -9,8 +9,6 @@ The library is always built the same way: an adapter produces a `deps.Deps`, `li
 
 ## Tutorials
 
-- [LibQuickStart.md](/docs/Tutorials/LibQuickStart.md)
-  - **description:** Install the module and run the smallest program that uses it
 - [LibInitialization.md](/docs/Tutorials/LibInitialization.md)
   - **description:** Install the lib, create deps via an adapter, and run a first program
 - [ManageCategories.md](/docs/Tutorials/ManageCategories.md)

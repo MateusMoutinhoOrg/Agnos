@@ -40,7 +40,7 @@ Documentation is split into four themes, one index page each under `docs/Index/`
 | [Development](/docs/Index/Development.md) | For contributors: the rules, the mechanics, the per-goal workflows, and the specifications. |
 | [Templating](/docs/Index/Templating.md) | For template users: forking, renaming, and adapting this structure into a new CLI. |
 
-New here? [CLI Usage → InstallCli.md](/docs/Tutorials/InstallCli.md) installs the binary; [Library Usage → LibQuickStart.md](/docs/Tutorials/LibQuickStart.md) sets up a budget from Go code.
+New here? [CLI Usage → InstallCli.md](/docs/Tutorials/InstallCli.md) installs the binary; [Library Usage → LibInitialization.md](/docs/Tutorials/LibInitialization.md) initializes the library.
 
 ---
 
