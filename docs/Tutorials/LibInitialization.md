@@ -8,7 +8,7 @@ Covers installing the library and initializing it with the standard adapter in a
 ## Workflow
 1. Install the lib:
    ```bash
-   go get github.com/MateusMoutinhoOrg/Agnos-Cli@v0.0.3
+   go get github.com/MateusMoutinhoOrg/Agnos-Cli@latest
    ```
 2. Create a file called `main.go` with the following code:
    ```go

@@ -47,4 +47,4 @@ $EDITOR assets/version.txt            # the version `agnos-cli version` reports
 go build ./... && go run ./cmd/main --help
 ```
 
-A release bump is `assets/version.txt` plus the `@v0.0.3` install tag pinned in the tutorials that document installing — see the version note in [Structure.md](/docs/References/Structure.md#cmd).
+A release bump requires updating `assets/version.txt`.

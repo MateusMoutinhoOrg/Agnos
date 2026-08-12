@@ -173,7 +173,7 @@ go run ./cmd/main <command> [arguments]
 
 **Install it globally:**
 ```sh
-go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@v0.0.3
+go install github.com/MateusMoutinhoOrg/Agnos-Cli/cmd/main@latest
 ```
 
 ---
