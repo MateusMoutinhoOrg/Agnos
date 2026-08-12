@@ -7,7 +7,7 @@ Defines the required shape of the dependency contract in `sandbox/contracts/deps
 - `deps.go` must declare a single `Deps` **struct** — the one contract every adapter fills. Contracts are structs, never interfaces; see [StructContracts.md](/docs/References/StructContracts.md).
 - Every dependency must be a **function field** on that struct, so adapters inject behavior rather than data.
 - Field names must be descriptive and exported; an unexported field cannot be filled by an adapter in another package.
-- A dependency that is itself a library built with this pattern is declared as a **copy of that library's api struct** and injected as a plain field — never as a getter function. See `bootstrap/sandbox/contracts/deps/` for a worked case.
+- A dependency that is itself a library built with this pattern is declared as a **copy of that library's api struct** and injected as a plain field — never as a getter function.
 - `deps.go` must not import anything from `adapters/`, `examples/libraryExamples/`, `sandbox/internal/`, or `sandbox` (the entry point) — the contract stays free of implementations.
 
 ## Structure

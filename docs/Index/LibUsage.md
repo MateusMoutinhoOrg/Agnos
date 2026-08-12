@@ -36,13 +36,6 @@ The library is always built the same way: an adapter produces a `deps.Deps`, `li
 - [ApiSamplesList.md](/docs/References/ApiSamplesList.md)
   - **description:** Every Go example shipped in `examples/libraryExamples/`
   - [Examples](/docs/References/ApiSamplesList.md#examples)
-- [Bootstrap.md](/docs/References/Bootstrap.md)
-  - **description:** Embed this library as a dependency of another library built the same way
-  - [The Bootstrap Tree](/docs/References/Bootstrap.md#the-bootstrap-tree)
-  - [The Sandbox Wall Applies to Libraries Too](/docs/References/Bootstrap.md#the-sandbox-wall-applies-to-libraries-too)
-  - [Declaring the Dependency](/docs/References/Bootstrap.md#declaring-the-dependency)
-  - [Filling It from the Adapter](/docs/References/Bootstrap.md#filling-it-from-the-adapter)
-  - [Reaching It from the Sandbox](/docs/References/Bootstrap.md#reaching-it-from-the-sandbox)
-  - [Embedding This Library in Your Own](/docs/References/Bootstrap.md#embedding-this-library-in-your-own)
+
 
 The `Deps` contract you fill when injecting your own behavior is documented in [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md).

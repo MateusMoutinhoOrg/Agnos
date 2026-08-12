@@ -18,7 +18,6 @@ go test ./...                                    # run tests (none exist yet)
 AGNOS_DATA=./scratch go run ./cmd/main <command> [args]           # run the CLI from source
 go run ./examples/libraryExamples/TrackSpendSample/TrackSpendSample.go # run a library example
 bash ./examples/cliExamples/ManageCategories.sh                   # run a CLI example
-go run ./bootstrap/libraryExamples/Test/test.go                   # run the embedding lib's example
 ```
 
 There is no lint config, CI, or test suite in the repo yet. When adding adapters or lib functions, `go build ./...` is the primary verification step, and `go vet ./...` must stay silent.
@@ -26,7 +25,7 @@ There is no lint config, CI, or test suite in the repo yet. When adding adapters
 **Where each entry point writes its records** — none of this is decided inside the sandbox; `cmd/main/main.go:43` and every example pick the path themselves:
 
 - `go run ./cmd/main` writes to `~/.agnos` unless `AGNOS_DATA` is set. Always export `AGNOS_DATA` when driving the CLI from source, or you edit the user's real budget.
-- Library examples write `trackerdata/` in the working directory, `bootstrap/` writes `bootstrap-trackerdata/`; both are gitignored.
+- Library examples write `trackerdata/` in the working directory; it is gitignored.
 - CLI examples build the binary into a `mktemp -d` dir and point `AGNOS_DATA` at it, so they touch nothing else — required by the `CliExamples` spec.
 
 ## Architecture
@@ -51,7 +50,7 @@ Two trade-offs, neither caught by the compiler: **completeness is unchecked** �
 
 - **`sandbox/new.go`** — package `lib`, the only wiring point consumers touch: `New(deps.Deps) api.Lib`. Never imports `adapters/`. Importers alias it: `agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"`.
 - **`sandbox/contracts/deps/deps.go`** — the `Deps` **struct**. Adding a requirement = adding a function field here. This is the contract every adapter must fill. Three fields are not functions: `VerbLib` (the embedded Verb argv-parser library), `KeepLib` (the embedded Keep schema-database library) and `EmbedDeps` (the embedded assets), each injected whole.
-- **`sandbox/contracts/deps/verbdeps/verbdeps.go`** — the sandbox's *copy* of the embedded Verb library's `api.Lib`, declared here because the sandbox may not import Verb. Each adapter's `VerbLibFactory` initializes the real library and assigns its fields onto this copy — the same mechanic `bootstrap/` uses for `agnosdeps`, with the roles reversed.
+- **`sandbox/contracts/deps/verbdeps/verbdeps.go`** — the sandbox's *copy* of the embedded Verb library's `api.Lib`, declared here because the sandbox may not import Verb. Each adapter's `VerbLibFactory` initializes the real library and assigns its fields onto this copy.
 - **`sandbox/contracts/deps/embeddeps/embeddeps.go`** — the same thing again for the embedded assets: a read-only copy of an asset-reading api (`ReadFile`, `ListFiles`, `ListFilesRecursively`), filled by each adapter's `EmbedDepsFactory`. The sandbox may not use `//go:embed` or touch a file, so every word the interface displays arrives through this field.
 - **`sandbox/contracts/deps/keepdeps/keepdeps.go`** — the same thing for the embedded Keep schema-database library: a copy of its whole api (`Lib`, `KeepDatabase`, `SchemaInstance`, `SchemaItem`, `Props`, `Schema`, `Item`, `Error` and the constants), filled by each adapter's `KeepLibFactory`. Because Keep's fields hand back further api structs, the factory wraps them in closures that convert each returned struct too.
 - **`sandbox/contracts/api/api.go`** — the output structs the lib hands back (`Lib`, `Category`, `Transaction`) plus the `Spend`/`Received` kind constants and the `ExitOk`/`ExitUsage`/`ExitFailure` codes `Sandboxmain` returns, each struct leading with a `Deps deps.Deps` field. Every field must be exported, or `sandbox/internal/` cannot fill it. **Every type in the project is declared here**, never in `internal/`. Types only — no function bodies.
@@ -64,8 +63,6 @@ Two trade-offs, neither caught by the compiler: **completeness is unchecked** �
 - **`cmd/main/main.go`** — outside the sandbox; the installed binary. Wires the standard adapter into the lib — `agnosadapter.New(dataPath())` — calls `l.Sandboxmain(os.Args[1:])`, and `os.Exit`s with its return. The argument vector must be the same one the adapter wired `Deps.VerbLib` over. Governed by the `CliMain` spec.
 - **`examples/cliExamples/<Name>.sh`** — outside the sandbox; shell scripts that build the CLI into a scratch dir, point it at `AGNOS_DATA` of their own, and drive it as a user would. Governed by the `CliExamples` spec.
 - **`examples/libraryExamples/<name>/<name>.go`** — outside the sandbox; self-contained `package main` programs wiring an adapter into the lib.
-- **`bootstrap/`** — a second Agnos-Cli library embedding the root one, demonstrating the pattern when a lib's dependency is another lib built the same way: its sandbox declares a *copy* of the embedded api structs (`sandbox/contracts/deps/agnosdeps/`) and its adapter's `TrackerLibFactory` fills them by field assignment — the case where a factory assigns a value rather than a closure, because the field is a struct.
-
 Every object propagates `Deps` to the objects it creates: a lib factory's closure calls `<object>.New(l.Deps, …)`, which stores the deps on the new api struct before running that object's factories — see `GetCategoryFactory` in `sandbox/internal/lib/lib.go`. Objects hold no database handle: `Category` and `Transaction` carry only their identifying data and re-find their record through `store.FindCategory` on every call, so a value never goes stale.
 
 ## Critical: this repo is documentation-driven
@@ -78,7 +75,7 @@ Changes are governed by required-reading docs, and several actions **must** upda
 | add/rename/delete any file or dir | `docs/References/Structure.md` | `docs/References/Structure.md` |
 | add/rename/delete a `.md` file | `docs/Tutorials/HandleDocuments.md` | the theme's index in `docs/Index/` + `docs/References/Structure.md` |
 | add a lib function/object | `docs/Tutorials/HandleLibElements.md` | `docs/References/PublicApi.md` (+ detail page `docs/References/PublicApi/<pkg>.<Symbol>.md`) |
-| add a `Deps` field | `docs/Tutorials/HandleDependencies.md` | **every** adapter in `adapters/` (and `bootstrap/adapters/`) |
+| add a `Deps` field | `docs/Tutorials/HandleDependencies.md` | **every** adapter in `adapters/` |
 | add an adapter | `docs/Tutorials/HandleAdapters.md` | `docs/References/Structure.md`, `docs/References/Adapters.md` |
 | need an OS/third-party call inside `sandbox/` | `docs/References/SandboxIsolation.md`, `docs/Tutorials/HandleDependencies.md` | `sandbox/contracts/deps/deps.go` + **every** adapter |
 | add/rename/delete a library sample | `docs/Tutorials/HandleSamples.md` | `docs/References/ApiSamplesList.md` |
@@ -91,7 +88,7 @@ Changes are governed by required-reading docs, and several actions **must** upda
 
 ## Conventions
 
-- Code that consumes the library from outside it (`cmd/`, `examples/libraryExamples/`, the `bootstrap/` adapter, third-party callers) aliases every import with the `agnos` prefix: `agnosadapter` (`adapters/<name>`), `agnoslib` (`sandbox`), `agnostypes` (`sandbox/contracts/api`), `agnosdeps` (`sandbox/contracts/deps`). Files belonging to the library itself — `sandbox/` and `adapters/` — keep the plain package names. See the Import Aliases rule in `docs/References/RULES.md`.
+- Code that consumes the library from outside it (`cmd/`, `examples/libraryExamples/`, third-party callers) aliases every import with the `agnos` prefix: `agnosadapter` (`adapters/<name>`), `agnoslib` (`sandbox`), `agnostypes` (`sandbox/contracts/api`), `agnosdeps` (`sandbox/contracts/deps`). Files belonging to the library itself — `sandbox/` and `adapters/` — keep the plain package names. See the Import Aliases rule in `docs/References/RULES.md`.
 - **Money is always an `int64` in the smallest currency unit (cents), never a float.** `84.50` is `8450` across the whole library. Only two places convert: `cli.ParseAmount` turns the typed `84.50` into cents, and `store.Money` renders cents back for display. `Transaction.Amount` is always positive — direction lives in `Kind` (`Spend`/`Received`), and `Transaction.SignedAmount()` applies the sign, so balances are a plain sum.
 - The CLI version reported by `agnos-cli version` and `--version` is the content of `assets/version.txt`, read through `Deps.EmbedDeps`; it is independent of the `@latest` install tag used in `docs/Tutorials/LibInitialization.md` and `docs/References/Structure.md`. Bumping a release only requires updating `assets/version.txt`.
 - Module path is `github.com/MateusMoutinhoOrg/Agnos-Cli`; renaming it is a documented procedure — see `docs/Tutorials/RenameModule.md`.

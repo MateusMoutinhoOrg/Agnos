@@ -71,7 +71,7 @@ The contract every adapter must fill.
 | `deps.go` | The `Deps` struct, one function field per injectable behavior, plus one plain field per embedded library | Deps |
 
 ##### `/sandbox/contracts/deps/verbdeps/`
-The sandbox's copy of the embedded [Verb](https://github.com/MateusMoutinhoOrg/Verb) argv-parser library's public api. The sandbox may not import Verb — that would be a third-party import — so it restates the shape it needs, field for field; the adapter, outside the sandbox, is what fills it. Same mechanic as `bootstrap/sandbox/contracts/deps/agnosdeps/`.
+The sandbox's copy of the embedded [Verb](https://github.com/MateusMoutinhoOrg/Verb) argv-parser library's public api. The sandbox may not import Verb — that would be a third-party import — so it restates the shape it needs, field for field; the adapter, outside the sandbox, is what fills it.
 
 | File | Description | Spec |
 |------|-------------|------|
@@ -208,19 +208,6 @@ go run ./examples/libraryExamples/<example>/<example>.go
 
 ---
 
-## `/bootstrap/`
-A second, self-contained Agnos-Cli library — same three trees (`sandbox/`, `adapters/`, `libraryExamples/`) and the same rules — demonstrating how one Agnos-Cli-compliant library **embeds** another. Its sandbox reaches nothing outside itself, so it never imports the root library: the embedded library arrives as one plain `Deps` field. Explained in [Bootstrap.md](/docs/References/Bootstrap.md).
-
-| Path | Description |
-|------|-------------|
-| `sandbox/contracts/deps/deps.go` | The `Deps` struct, including `TrackerLib` — the embedded library, held as a locally declared contract struct |
-| `sandbox/contracts/deps/agnosdeps/agnosdeps.go` | Copy of the embedded library's `api` structs, declared inside the sandbox so the sandbox never imports the embedded library |
-| `adapters/<name>/<name>.go` | Its `TrackerLibFactory` initializes the embedded library with the embedded library's own adapter, and copies its `api` fields onto the local `agnosdeps` ones |
-| `libraryExamples/<example>/<example>.go` | Self-contained `package main` wiring a bootstrap adapter into the bootstrap lib |
-
-The copying lives in the adapter because only code outside the sandbox may import the embedded library. Because both sides are structs of function fields, the copy is field assignment: a wrapper is needed only where a named type differs between the two declarations. See [StructContracts.md](/docs/References/StructContracts.md).
-
----
 
 ## `/docs/`
 Documentation of the project, split by **kind of page**: `Index/` holds one entry point per theme, `Tutorials/` holds every workflow, `References/` holds every lookup and explanation. A **theme** — what the reader wants to accomplish — is not a directory: it is the index that lists a page. `Tutorials/` and `References/` are flat, so a page's file name must be unique inside the directory it lands in; when two themes need the same topic, the name carries the subject. The [README](/README.md) links to the four indexes and to nothing else inside `docs/`.
@@ -256,7 +243,7 @@ One page per lookup table or explained mechanic, plus the two directories the pr
 | `PublicApi.md` | Index of all public-facing components, linking to their detail pages | ReferenceDocs |
 | `Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `ApiSamplesList.md` | Every example under `examples/libraryExamples/` | ReferenceDocs |
-| `Bootstrap.md` | How a library built this way embeds another one | ExplanationDocs |
+
 | `EmbeddedAssets.md` | Where the text the library displays comes from, and how to serve your own | ExplanationDocs |
 | `RULES.md` | Rules to follow when contributing to this project | Rules |
 | `Structure.md` | The project's schema and the purpose of each component | Structure |

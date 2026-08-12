@@ -37,4 +37,3 @@ Pick **one** of the two workflows and follow it end to end. Both are phased step
   - [Create](/docs/References/TemplateFileActions.md#create)
   - [Delete](/docs/References/TemplateFileActions.md#delete)
 
-The `bootstrap/` tree — a library built from this template embedding another one — is explained in [Bootstrap.md](/docs/References/Bootstrap.md).

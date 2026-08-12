@@ -134,7 +134,7 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 
 A factory whose body needs conversion helpers of its own may live in a file of its own beside the adapter — `EmbedDepsFactory` does, in `adapters/standard/embed.go`, where it wraps the compiled-in assets into [`embeddeps.Lib`](/docs/References/PublicApi/embeddeps.Lib.md). `New` still calls it like any other factory.
 
-That conversion is the price of the wall, paid once per adapter, outside the sandbox. `bootstrap/` demonstrates the same mechanic from the other side: there, *this* library is the one being embedded — see [Bootstrap.md](/docs/References/Bootstrap.md) and [StructContracts.md](/docs/References/StructContracts.md#consuming-a-library-that-uses-this-pattern).
+That conversion is the price of the wall, paid once per adapter, outside the sandbox.
 
 ---
 
@@ -142,7 +142,7 @@ That conversion is the price of the wall, paid once per adapter, outside the san
 
 ### Rules
 - A requirement is a **function field** declaring behavior, never a concrete implementation.
-- A new field must be filled by **every** adapter in [adapters/](/adapters/) (and `bootstrap/adapters/`) in the same commit. The compiler will **not** catch a missing one: the field stays nil and panics on first call.
+- A new field must be filled by **every** adapter in [adapters/](/adapters/) in the same commit. The compiler will **not** catch a missing one: the field stays nil and panics on first call.
 - The `Deps` struct must follow its specification — locate it in [Specs.md](/docs/References/Specs.md).
 
 ### Workflow
@@ -177,7 +177,7 @@ That conversion is the price of the wall, paid once per adapter, outside the san
    ```
 3. Grep every adapter's `New` for the new assignment — this step replaces the compiler check:
    ```bash
-   grep -rn "Factory(adapter)" adapters/ bootstrap/
+   grep -rn "Factory(adapter)" adapters/
    ```
 4. Use the dependency from the library through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
 5. Build and run a sample — an unfilled field surfaces at runtime, not at build time:

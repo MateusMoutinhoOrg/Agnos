@@ -109,27 +109,6 @@ l := lib.New(myDeps) // everything else keeps the adapter's implementation
 
 ---
 
-## Consuming a Library That Uses This Pattern
-
-When one Agnos-Cli-style library depends on another, the consuming sandbox may not import the embedded library, so it restates the shape it needs as its own contract and the adapter fills it by field assignment:
-
-```go
-// bootstrap/adapters/standard/standard.go — outside the sandbox
-func TrackerLibFactory(s *StandardAdapter) agnosdeps.Lib {
-	inner := agnoslib.New(agnosadapter.New(s.trackerBasePath))
-	return agnosdeps.Lib{
-		Balance: inner.Balance, // identical signature: assigned straight across
-		AddCategory: func(name string) (agnosdeps.Category, bool) {
-			category, ok := inner.AddCategory(name) // wrapper only where a
-			return fromCategory(category), ok       // named type differs
-		},
-	}
-}
-```
-
-Every field whose signature matches is one line; an interface would need a bridging type declaring every method. The `bootstrap/` tree is the worked example, explained end to end in [Bootstrap.md](/docs/References/Bootstrap.md) — see also [Structure.md](/docs/References/Structure.md#bootstrap).
-
----
 
 ## What It Costs
 

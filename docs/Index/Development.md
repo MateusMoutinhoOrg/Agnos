@@ -80,7 +80,6 @@ Index of the documentation for contributors changing this repository: the bindin
   - [`/cmd/`](/docs/References/Structure.md#cmd)
   - [`/examples/cliExamples/`](/docs/References/Structure.md#examplescliexamples)
   - [`/examples/libraryExamples/`](/docs/References/Structure.md#exampleslibraryexamples)
-  - [`/bootstrap/`](/docs/References/Structure.md#bootstrap)
   - [`/docs/`](/docs/References/Structure.md#docs)
 - [Specs.md](/docs/References/Specs.md)
   - **description:** Index of every specification and the files each one governs

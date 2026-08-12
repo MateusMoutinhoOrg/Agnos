@@ -71,7 +71,7 @@ Conversely, nothing outside the sandbox may reach into it beyond its three publi
 
 ## Import Aliases
 
-Any file that **consumes** the library from outside it — [examples/libraryExamples/](/examples/libraryExamples/), the adapter in `bootstrap/` that wires the embedded lib, and third-party consumers — imports it under `agnos`-prefixed aliases, so each call site says which layer it belongs to:
+Any file that **consumes** the library from outside it — [examples/libraryExamples/](/examples/libraryExamples/) and third-party consumers — imports it under `agnos`-prefixed aliases, so each call site says which layer it belongs to:
 
 | Import | Alias |
 |--------|-------|
@@ -88,7 +88,7 @@ import (
 )
 ```
 
-An embedding library follows the same shape with its own prefix (`bootstrapadapter`, `bootstraplib`) when it is itself consumed. Files that belong to the library — everything under `sandbox/` and its own [adapters/](/adapters/) — keep the plain package names (`api`, `deps`): there the prefix would be noise, since the import is already local.
+Files that belong to the library — everything under `sandbox/` and its own [adapters/](/adapters/) — keep the plain package names (`api`, `deps`): there the prefix would be noise, since the import is already local.
 
 ---
 
