@@ -1,5 +1,5 @@
 
-- revsiar a sessao de ApiUsage
+- revsiar a sessao de Libusage
 - revisar a sessao de Development
 - Revisar a sessao de Templating
 
