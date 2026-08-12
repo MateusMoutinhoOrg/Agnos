@@ -36,5 +36,7 @@ The library is always built the same way: an adapter produces a `deps.Deps`, `li
 - [ApiSamplesList.md](/docs/References/ApiSamplesList.md)
   - **description:** Every Go example shipped in `examples/libraryExamples/`
   - [Examples](/docs/References/ApiSamplesList.md#examples)
-
-
+- [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md)
+  - **description:** Explains how the library receives its dependencies, and how you can map your own adapters to the library
+  - [The Contract](/docs/Tutorials/HandleDependencies.md#the-contract)
+  - [Writing Custom Deps](/docs/Tutorials/HandleDependencies.md#writing-custom-deps)
