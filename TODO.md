@@ -1,2 +1,0 @@
-- revisar a doc de Development 
-- revisar a doc de Templating
