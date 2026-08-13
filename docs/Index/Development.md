@@ -28,7 +28,8 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Creating a adapter in your project](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-your-project)
 - [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md)
   - **description:** Add a command or a flag to the interface behind `api.Lib.Sandboxmain`
-  - [Add a CLI Command](/docs/Tutorials/HandleCliCommands.md#add-a-cli-command)
+  - [Add CLI Command](/docs/Tutorials/HandleCliCommands.md#add-cli-command)
+  - [Remove CLI Command](/docs/Tutorials/HandleCliCommands.md#remove-cli-command)
 - [HandleAssets.md](/docs/Tutorials/HandleAssets.md)
   - **description:** Add or edit a file under `assets/` the library reads instead of a Go string
   - [Add an Asset](/docs/Tutorials/HandleAssets.md#add-an-asset)
@@ -56,6 +57,7 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Tutorials Guide](/docs/References/RULES.md#tutorials-guide)
   - [Specification Compliance](/docs/References/RULES.md#specification-compliance)
   - [Sandbox Isolation](/docs/References/RULES.md#sandbox-isolation)
+  - [Lib Organization](/docs/References/RULES.md#lib-organization)
   - [Factory Pattern](/docs/References/RULES.md#factory-pattern)
   - [Import Aliases](/docs/References/RULES.md#import-aliases)
   - [File Changes](/docs/References/RULES.md#file-changes)
