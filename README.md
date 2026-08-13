@@ -11,7 +11,9 @@ An OS-independent Go **CLI template** — a command-line financial tracker whose
 
 ## Overview
 
-Agnos-Cli is a financial tracker you drive from the terminal. It is built as a structured Go template demonstrating how to build a **CLI** whose behavior is fully decoupled from the process hosting it. The program itself lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`.
+Agnos-Cli is a **full CLI template** designed to be completely independent of the underlying operating system. It provides a complete harness and architectural foundation for building command-line applications whose behavior is fully decoupled from the hosting environment. Furthermore, the repository is designed to be self-teaching, providing **comprehensive tutorials for every kind of usecase** directly within its own documentation.
+
+The core of the application lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/, examples/libraryExamples/
