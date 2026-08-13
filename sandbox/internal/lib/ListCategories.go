@@ -2,8 +2,8 @@ package lib
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/category"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/store"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/category"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
 )
 
 // ListCategoriesFactory fills api.Lib.ListCategories with a closure that

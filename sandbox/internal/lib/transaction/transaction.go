@@ -7,7 +7,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/store"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
 )
 
 // SignedAmountFactory returns the closure that fills

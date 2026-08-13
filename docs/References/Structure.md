@@ -123,7 +123,7 @@ One package per object the library creates, named after the object itself — `c
 |------|-------------|------|
 | `<object>.go` | The object's `<Field>Factory` functions, each returning a closure, plus the `New(d deps.Deps, …) api.<Object>` constructor that propagates `Deps` and assigns every factory's return value | LibObjects |
 
-#### `/sandbox/internal/store/`
+#### `/sandbox/internal/lib/store/`
 Shared helpers over the injected database, used by `internal/lib/` and by every object package: the schema the tracker's records are persisted under, the lookups that reach it, and the encoding of a transaction's reference. It declares **no types and no factories** — it is the one internal package that is neither an object nor the entry point, so no specification governs it.
 
 | File | Description | Spec |

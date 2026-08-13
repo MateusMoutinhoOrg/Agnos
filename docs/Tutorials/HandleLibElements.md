@@ -84,7 +84,7 @@ Covers adding new elements — functions and objects — to the library's public
    import (
        "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
        "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
-       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/store"
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
    )
 
    // ExceededFactory returns the closure that fills api.Budget.Exceeded...

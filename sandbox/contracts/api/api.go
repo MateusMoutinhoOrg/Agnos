@@ -20,7 +20,7 @@ const (
 // library, already persisted in the injected database. Deps is the injected
 // dependency set the transaction was built with; the plain data fields carry
 // the record itself; the function fields are filled by factories in
-// sandbox/internal/transaction, each closing over this struct so it reads
+// sandbox/internal/lib/transaction, each closing over this struct so it reads
 // Deps and the record's data at call time.
 type Transaction struct {
 	// Deps is the dependency set injected into the library, carried here so
@@ -56,7 +56,7 @@ type Transaction struct {
 
 // Category is one bucket transactions are tracked under — "groceries",
 // "salary" — already persisted in the injected database. Its function fields
-// are filled by factories in sandbox/internal/category, each closing over
+// are filled by factories in sandbox/internal/lib/category, each closing over
 // this struct so every call re-reads the stored record through Deps.
 type Category struct {
 	// Deps is the dependency set injected into the library, carried here so

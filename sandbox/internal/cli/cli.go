@@ -13,7 +13,7 @@ package cli
 // by path. Changing what the interface says is editing an asset, not editing
 // Go.
 //
-// Like sandbox/internal/store, this package is neither an object package nor
+// Like sandbox/internal/lib/store, this package is neither an object package nor
 // the entry point: it declares no types and no factories, and is called by
 // SandboxmainFactory in sandbox/internal/lib.
 

@@ -3,7 +3,7 @@ package commands
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/store"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
 )
 
 // Balance runs the `balance` command, printing the total across every

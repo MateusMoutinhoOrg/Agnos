@@ -22,6 +22,12 @@ Contracts are **structs of function fields**, never interfaces — in [sandbox/c
 
 ---
 
+## Lib Organization
+
+Tudo que e relacionado a lib deve estar em `sandbox/internal/lib`, assim os modulos ficam mais organizados.
+
+---
+
 ## Factory Pattern
 
 Every object this project hands out — an `api` struct built inside the sandbox, a `deps.Deps` filled by an adapter outside it — is built by its package's `New(...)` constructor running **factories**, never by methods bound into fields, never by an internal mirror type, and never by filling a struct literal at the call site. When you write or edit any file holding `<Field>Factory` functions, follow the [Factories](/docs/References/Specs/Factories/Specs.md) specification on top of the one governing that file's tree.
