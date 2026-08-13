@@ -16,9 +16,9 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Build every target at once](/docs/Tutorials/Build.md#build-every-target-at-once)
   - [Add a new target](/docs/Tutorials/Build.md#add-a-new-target)
 - [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md)
-  - **description:** Add a function or an object: declare, write the factory, register, publish
-  - [Add a Library Function](/docs/Tutorials/HandleLibElements.md#add-a-library-function)
-  - [Add a Library Object](/docs/Tutorials/HandleLibElements.md#add-a-library-object)
+  - **description:** Add a function to the internal logic or public API: declare, write the factory, register, publish
+  - [AddLibFunction](/docs/Tutorials/HandleLibElements.md#addlibfunction)
+  - [AddPublicLibFunction](/docs/Tutorials/HandleLibElements.md#addpubliclibfunction)
 - [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md)
   - **description:** How injected deps travel the object graph, and how to add a `Deps` field
   - [Find Dependencies Functions you can use](/docs/Tutorials/HandleDependencies.md#find-dependencies-functions-you-can-use)
