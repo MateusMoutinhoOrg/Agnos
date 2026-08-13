@@ -1,1 +1,0 @@
-%s needs a category, a description and an amount

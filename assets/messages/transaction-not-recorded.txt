@@ -1,1 +1,0 @@
-could not record the transaction under "%s" — is the category created?

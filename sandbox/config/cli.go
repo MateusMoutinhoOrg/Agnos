@@ -1,4 +1,7 @@
-agnos-cli — a financial tracker on the command line
+package config
+
+const (
+	Usages = `agnos-cli — a financial tracker on the command line
 
 Usage:
   agnos-cli <command> [arguments] [flags]
@@ -27,3 +30,23 @@ Examples:
   agnos-cli spend groceries "weekly shopping" 84.50
   agnos-cli received salary "august paycheck" 2500.00
   agnos-cli balance groceries
+`
+	CategoryActionUnknown = `unknown category action "%s"`
+	CategoryAdded = `category %s`
+	CategoryNotFound = `no category named "%s"`
+	UnknownCommand = `unknown command "%s"`
+	CategoryRemoveNameMissing = `category remove needs a name`
+	TransactionNotRecorded = `could not record the transaction under "%s" — is the category created?`
+	NoCategories = `no categories yet — create one with: agnos-cli category add <name>`
+	CategoryRemoved = `removed category %s`
+	NoTransactions = `no transactions yet — record one with: agnos-cli spend <category> <description> <amount>`
+	CategoryAddNameMissing = `category add needs a name`
+	CategoryNotCreated = `could not create the category "%s"`
+	RecordOperandsMissing = `%s needs a category, a description and an amount`
+	AmountInvalid = `invalid amount "%s" — expected a positive decimal like 84.50`
+	CategoryActionMissing = `category needs an action: add, list or remove`
+	ErrorPrefix = `agnos-cli:`
+	CategoryNotRemoved = `could not remove the category "%s"`
+	VersionMessage = `agnos-cli %s`
+	NoCommand = `no command given`
+)

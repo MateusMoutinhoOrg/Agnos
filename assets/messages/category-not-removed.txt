@@ -1,1 +1,0 @@
-could not remove the category "%s"
