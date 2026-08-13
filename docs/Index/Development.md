@@ -21,16 +21,11 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Add a Library Object](/docs/Tutorials/HandleLibElements.md#add-a-library-object)
 - [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md)
   - **description:** How injected deps travel the object graph, and how to add a `Deps` field
-  - [The Contract](/docs/Tutorials/HandleDependencies.md#the-contract)
-  - [Propagation](/docs/Tutorials/HandleDependencies.md#propagation)
-  - [Using an Adapter](/docs/Tutorials/HandleDependencies.md#using-an-adapter)
-  - [Overwriting a Single Behavior](/docs/Tutorials/HandleDependencies.md#overwriting-a-single-behavior)
-  - [Writing Custom Deps](/docs/Tutorials/HandleDependencies.md#writing-custom-deps)
-  - [Injecting a Whole Library](/docs/Tutorials/HandleDependencies.md#injecting-a-whole-library)
-  - [Add a Dependency](/docs/Tutorials/HandleDependencies.md#add-a-dependency)
-- [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md)
-  - **description:** Create a new opinionated implementation of the `Deps` contract
-  - [Add an Adapter](/docs/Tutorials/HandleAdapters.md#add-an-adapter)
+  - [Find Dependencies Functions you can use](/docs/Tutorials/HandleDependencies.md#find-dependencies-functions-you-can-use)
+  - [Add New Dependencie](/docs/Tutorials/HandleDependencies.md#add-new-dependencie)
+  - [Overwrinting a adapter function](/docs/Tutorials/HandleDependencies.md#overwrinting-a-adapter-function)
+  - [Creating a adapter in repo](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-repo)
+  - [Creating a adapter in your project](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-your-project)
 - [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md)
   - **description:** Add a command or a flag to the interface behind `api.Lib.Sandboxmain`
   - [Add a CLI Command](/docs/Tutorials/HandleCliCommands.md#add-a-cli-command)

@@ -5,7 +5,7 @@ Explains how the library receives its dependencies — the `Deps` contract in [s
 
 ---
 
-## The Contract
+## Find Dependencies Functions you can use
 
 `sandbox/contracts/deps` declares what the library needs; `sandbox/contracts/api` declares what it hands back. Nothing else crosses the boundary, and `lib.New(deps.Deps) api.Lib` is the single wiring point.
 
@@ -22,123 +22,11 @@ type Deps struct {
 
 `Deps` is the *only* door in the sandbox wall: since nothing under `sandbox/` may import an adapter, a third-party module, or an OS-bound stdlib package, every effect the library performs has to be a field on this struct.
 
----
-
-## Propagation
-
-`lib.New` stores the `Deps` on the `api.Lib` struct and runs the factories over it; each closure reads `l.Deps` when the field is *called*, not when the factory ran. Every object the lib creates receives the same `Deps`, passed into the object package's `New` constructor:
-
-```go
-// sandbox/internal/lib/lib.go — inside GetCategoryFactory's closure
-c := category.New(l.Deps, record) // the object stores Deps on its own api struct
-```
-
-So a dependency injected once is reachable from anywhere in the object graph:
-
-```
-standard.New() ──▶ deps.Deps ──▶ lib.New(deps) ──▶ api.Lib
-                                                     │ GetCategory()
-                                                     ▼
-                                               api.Category
-                                                     │ ListTransactions()
-                                                     ▼
-                                             api.Transaction
-```
+`lib.New` stores the `Deps` on the `api.Lib` struct and runs the factories over it; each closure reads `l.Deps` when the field is *called*, not when the factory ran. Every object the lib creates receives the same `Deps`, passed into the object package's `New` constructor. So a dependency injected once is reachable from anywhere in the object graph.
 
 ---
 
-## Using an Adapter
-
-The simplest setup — an adapter builds a ready-to-use `deps.Deps`:
-
-```go
-myDeps := agnosadapter.New("trackerdata") // fills every field
-l := agnoslib.New(myDeps)
-```
-
----
-
-## Overwriting a Single Behavior
-
-Take the `deps.Deps` an adapter returns and reassign the field you want; every other field keeps the adapter's implementation:
-
-```go
-myDeps := agnosadapter.New("trackerdata")
-
-// Replace only the clock — KeepLib stays as the adapter built it
-now := time.Unix(0, 0)
-myDeps.Now = func() time.Time { return now }
-
-l := agnoslib.New(myDeps)
-l.AddCategory("groceries")
-
-// Moving the captured variable moves the clock the lib sees
-now = time.Unix(120, 0)
-transaction, _ := l.AddSpend("groceries", "weekly shopping", 8450)
-println(transaction.OccurredAt.Unix()) // 120
-```
-
-> **Careful:** patch the `deps.Deps` value **before** calling `lib.New`. The factories close over the `api.Lib` they ran on, so assigning to `l.Deps.Now` afterwards changes nothing — see [StructContracts.md](/docs/References/StructContracts.md#what-it-costs).
-
----
-
-## Writing Custom Deps
-
-For complete control, build the `deps.Deps` as a struct literal — no type to declare, no method set to satisfy:
-
-```go
-myDeps := agnosdeps.Deps{
-	Now:     func() time.Time { return time.Unix(0, 0) },
-	KeepLib: agnoskeepdeps.Lib{NewDatabase: myOwnDatabase},
-	// Printf, VerbLib and EmbedDeps left zero: this program never calls
-	// Sandboxmain, and only Sandboxmain prints or reads an asset
-}
-l := agnoslib.New(myDeps)
-```
-
-> **Careful:** the compiler cannot tell you a field is missing — an unfilled field panics on first call. In practice, start from an adapter and patch what you need: `KeepLib` is a whole database api, and no program should reimplement it just to change the clock.
-
----
-
-## Injecting a Whole Library
-
-Three fields are not behaviors but other libraries built with this same pattern: [`VerbLib`](/docs/References/PublicApi/verbdeps.Lib.md), the Verb argv parser, [`KeepLib`](/docs/References/PublicApi/keepdeps.Lib.md), the Keep schema database, and [`EmbedDeps`](/docs/References/PublicApi/embeddeps.Lib.md), the embedded assets every word the interface prints comes from. Because a contract is a struct of function fields, the whole library fits in one plain field — no getter, no bridging type.
-
-The sandbox cannot import Verb or Keep, nor Go's `embed` machinery, so it declares a copy of each api in `sandbox/contracts/deps/verbdeps/`, `keepdeps/` and `embeddeps/`. The adapter initializes the real library and assigns its fields onto that copy — the factory returns a **value** instead of a closure, the one shape variation the [factory pattern](/docs/References/RULES.md#factory-pattern) allows:
-
-```go
-// adapters/standard/standard.go
-func VerbLibFactory(s *StandardAdapter) verbdeps.Lib {
-	inner := verblib.New(s.args)
-	return verbdeps.Lib{
-		Args:      inner.Args,
-		IsPresent: inner.IsPresent,
-		// ... one assignment per field
-	}
-}
-```
-
-When the embedded library hands back structs of its own — Keep's `NewDatabase` returns a `KeepDatabase`, whose `GetSchema` returns a `SchemaInstance` — assigning straight across would leak the embedded types into the sandbox. The factory wraps each such function in a closure that converts what it returns, recursing as far as the api tree goes:
-
-```go
-// adapters/standard/standard.go
-func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
-	inner := keeplib.New(keepadapter.NewWithBase(s.keepBasePath))
-	return keepdeps.Lib{
-		NewDatabase: func(props keepdeps.Props) keepdeps.KeepDatabase {
-			return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))
-		},
-	}
-}
-```
-
-A factory whose body needs conversion helpers of its own may live in a file of its own beside the adapter — `EmbedDepsFactory` does, in `adapters/standard/embed.go`, where it wraps the compiled-in assets into [`embeddeps.Lib`](/docs/References/PublicApi/embeddeps.Lib.md). `New` still calls it like any other factory.
-
-That conversion is the price of the wall, paid once per adapter, outside the sandbox.
-
----
-
-## Add a Dependency
+## Add New Dependencie
 
 ### Rules
 - A requirement is a **function field** declaring behavior, never a concrete implementation.
@@ -180,8 +68,131 @@ That conversion is the price of the wall, paid once per adapter, outside the san
    grep -rn "Factory(adapter)" adapters/
    ```
 4. Use the dependency from the library through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
-5. Build and run a sample — an unfilled field surfaces at runtime, not at build time:
+5. Build and run a sample — an unfilled field surfaces at runtime, not at build time.
+
+Three fields are not behaviors but other libraries built with this same pattern: `VerbLib`, `KeepLib`, and `EmbedDeps`. Because a contract is a struct of function fields, the whole library fits in one plain field. The sandbox cannot import Verb or Keep, nor Go's `embed` machinery, so it declares a copy of each api in `sandbox/contracts/deps/verbdeps/`, `keepdeps/` and `embeddeps/`. The adapter initializes the real library and assigns its fields onto that copy — the factory returns a **value** instead of a closure.
+
+---
+
+## Overwrinting a adapter function
+
+Take the `deps.Deps` an adapter returns and reassign the field you want; every other field keeps the adapter's implementation:
+
+```go
+myDeps := agnosadapter.New("trackerdata")
+
+// Replace only the clock — KeepLib stays as the adapter built it
+now := time.Unix(0, 0)
+myDeps.Now = func() time.Time { return now }
+
+l := agnoslib.New(myDeps)
+l.AddCategory("groceries")
+
+// Moving the captured variable moves the clock the lib sees
+now = time.Unix(120, 0)
+transaction, _ := l.AddSpend("groceries", "weekly shopping", 8450)
+println(transaction.OccurredAt.Unix()) // 120
+```
+
+> **Careful:** patch the `deps.Deps` value **before** calling `lib.New`. The factories close over the `api.Lib` they ran on, so assigning to `l.Deps.Now` afterwards changes nothing — see [StructContracts.md](/docs/References/StructContracts.md#what-it-costs).
+
+---
+
+## Creating a adapter in repo
+
+Covers creating a new opinionated implementation of the `Deps` contract under [adapters/](/adapters/). Assumes the mechanics in [StructContracts.md](/docs/References/StructContracts.md); the shipped adapters are listed in [Adapters.md](/docs/References/Adapters.md).
+
+### Rules
+- Each adapter lives in its own directory under [adapters/](/adapters/) and uses a package named after that directory.
+- The adapter is a struct carrying a `Deps deps.Deps` field, filled by one **factory** per field of the contract — the same factory pattern `sandbox/internal/` uses, and a binding rule of the project. See [RULES.md](/docs/References/RULES.md#factory-pattern).
+- Fields are never filled by binding methods of the adapter. Methods may exist only as unexported helpers a closure calls.
+- A single `New(...) deps.Deps` constructor calls **every** field factory, assigns its return value into the matching field, and returns the `deps.Deps` contract struct, never the concrete adapter type.
+- Filling every field is the author's job — an unassigned field compiles and panics on first call. See [StructContracts.md](/docs/References/StructContracts.md).
+- An adapter lives outside the sandbox and is the only place OS-bound and third-party code is allowed. It may import [sandbox/contracts/deps](/sandbox/contracts/deps/), but never [sandbox/internal/](/sandbox/internal/) — see [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
+- The adapter file must follow its specification — locate it in [Specs.md](/docs/References/Specs.md).
+
+### Workflow
+1. Create the adapter directory and its file, both named after the adapter (e.g., `adapters/frozen/frozen.go`).
+2. Declare the package and the adapter struct — the **carrier**, leading with the `Deps` field its factories fill, followed by its configuration and state:
+   ```go
+   package frozen
+
+   import (
+       "time"
+
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
+   )
+
+   // FrozenAdapter fills deps.Deps with a fixed clock, so every category
+   // and transaction is stamped with a known time. The database and the argv
+   // parser come from the embedded libraries, as in every other adapter.
+   type FrozenAdapter struct {
+       // Deps is the contract this adapter fills; its factories assign into it.
+       Deps deps.Deps
+       now  time.Time
+       args []string
+   }
+   ```
+3. Write one `<Field>Factory` per field of the `Deps` contract, each returning a single closure that reads the adapter's state through the pointer:
+   ```go
+   // NowFactory returns the closure that fills deps.Deps.Now, returning the
+   // adapter's fixed clock.
+   func NowFactory(f *FrozenAdapter) func() time.Time {
+       return func() time.Time { return f.now }
+   }
+
+   // KeepLibFactory returns the value that fills deps.Deps.KeepLib: the
+   // embedded Keep schema-database library, wired to Keep's in-memory
+   // adapter and copied onto the sandbox's local keepdeps.Lib. A field that
+   // is not a function has its factory return a value, not a closure.
+   func KeepLibFactory(f *FrozenAdapter) keepdeps.Lib {
+       inner := keeplib.New(keepadapter.New())
+       return keepdeps.Lib{
+           NewDatabase: func(props keepdeps.Props) keepdeps.KeepDatabase {
+               return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))
+           },
+       }
+   }
+   ```
+   Reading `f.now` inside the closure — instead of capturing it when the factory runs — is what carries the adapter's live state into the library.
+4. Give a factory a file of its own when its body brings conversion helpers with it, named after the field it fills — `adapters/standard/embed.go` holds `EmbedDepsFactory` and the asset walk behind it. The `Factories` specification applies the same way there.
+5. Expose the `New` constructor: build the adapter instance, run every field factory over it, assign each return value into its matching field, and return its `Deps`:
+   ```go
+   // New creates a deps.Deps whose clock is frozen at the given time.
+   func New(now time.Time) deps.Deps {
+       adapter := &FrozenAdapter{now: now}
+       adapter.Deps.Now = NowFactory(adapter)
+       adapter.Deps.VerbLib = VerbLibFactory(adapter)
+       adapter.Deps.KeepLib = KeepLibFactory(adapter)
+       adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
+       return adapter.Deps
+   }
+   ```
+6. Compare the assignments in your `New` against `sandbox/contracts/deps/deps.go` field by field. A missing field will **not** fail the build.
+7. Register the new directory and file in [Structure.md](/docs/References/Structure.md), and add a row for the adapter in [Adapters.md](/docs/References/Adapters.md).
+8. If the adapter is public-facing, expose its `New` factory following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
+9. If the adapter needs a runnable demonstration, add one following [HandleSamples.md](/docs/Tutorials/HandleSamples.md).
+10. Build the project and exercise the adapter:
    ```bash
    go build ./...
-   go run ./examples/libraryExamples/TrackSpendSample/TrackSpendSample.go
    ```
+
+---
+
+## Creating a adapter in your project
+
+For complete control, build the `deps.Deps` as a struct literal — no type to declare, no method set to satisfy:
+
+```go
+myDeps := agnosdeps.Deps{
+	Now:     func() time.Time { return time.Unix(0, 0) },
+	KeepLib: agnoskeepdeps.Lib{NewDatabase: myOwnDatabase},
+	// Printf, VerbLib and EmbedDeps left zero: this program never calls
+	// Sandboxmain, and only Sandboxmain prints or reads an asset
+}
+l := agnoslib.New(myDeps)
+```
+
+> **Careful:** the compiler cannot tell you a field is missing — an unfilled field panics on first call. In practice, start from an adapter and patch what you need: `KeepLib` is a whole database api, and no program should reimplement it just to change the clock.
+
+If your project requires setting up everything from scratch, simply provide a factory or a function literal for each required field in `deps.Deps`.
