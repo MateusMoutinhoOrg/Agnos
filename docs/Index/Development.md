@@ -15,6 +15,11 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Build a single target](/docs/Tutorials/Build.md#build-a-single-target)
   - [Build every target at once](/docs/Tutorials/Build.md#build-every-target-at-once)
   - [Add a new target](/docs/Tutorials/Build.md#add-a-new-target)
+- [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md)
+  - **description:** Add a function or an object: declare, write the factory, register, publish
+  - [Add a Library Function](/docs/Tutorials/HandleLibElements.md#add-a-library-function)
+  - [Add a Library Object](/docs/Tutorials/HandleLibElements.md#add-a-library-object)
+  - [Expose in the Public API](/docs/Tutorials/HandleLibElements.md#expose-in-the-public-api)
 - [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md)
   - **description:** How injected deps travel the object graph, and how to add a `Deps` field
   - [The Contract](/docs/Tutorials/HandleDependencies.md#the-contract)
@@ -27,11 +32,6 @@ Index of the documentation for contributors changing this repository: the bindin
 - [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md)
   - **description:** Create a new opinionated implementation of the `Deps` contract
   - [Add an Adapter](/docs/Tutorials/HandleAdapters.md#add-an-adapter)
-- [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md)
-  - **description:** Add a function or an object: declare, write the factory, register, publish
-  - [Add a Library Function](/docs/Tutorials/HandleLibElements.md#add-a-library-function)
-  - [Add a Library Object](/docs/Tutorials/HandleLibElements.md#add-a-library-object)
-  - [Expose in the Public API](/docs/Tutorials/HandleLibElements.md#expose-in-the-public-api)
 - [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md)
   - **description:** Add a command or a flag to the interface behind `api.Lib.Sandboxmain`
   - [Add a CLI Command](/docs/Tutorials/HandleCliCommands.md#add-a-cli-command)
