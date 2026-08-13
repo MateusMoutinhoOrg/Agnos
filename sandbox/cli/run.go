@@ -13,14 +13,14 @@ package cli
 // by path. Changing what the interface says is editing an asset, not editing
 // Go.
 //
-// Like sandbox/internal/lib/store, this package is neither an object package nor
+// Like sandbox/lib/store, this package is neither an object package nor
 // the entry point: it declares no types and no factories, and is called by
-// SandboxmainFactory in sandbox/internal/lib.
+// SandboxmainFactory in sandbox/lib.
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/cli/commands"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands"
 )
 
 // Run is the body of api.Lib.Sandboxmain: it dispatches one command line and

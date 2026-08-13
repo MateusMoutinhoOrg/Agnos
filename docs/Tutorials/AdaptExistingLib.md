@@ -5,9 +5,9 @@ Covers converting a library that already exists into this project's dependency-i
 
 ### Rules
 - Read [RULES.md](/docs/References/RULES.md) and [Structure.md](/docs/References/Structure.md) before starting.
-- Keep the separation defined in [Structure.md](/docs/References/Structure.md): public contract structs in `sandbox/contracts/`, internal factories in `sandbox/internal/`, concrete dependencies in `adapters/`, the entry point in `sandbox/`, and the installed binary in `cmd/main/`. The command-line interface belongs to the library, as the `Sandboxmain` field of `api.Lib`, never to the binary. Contracts are structs of function fields, never interfaces — see [StructContracts.md](/docs/References/StructContracts.md).
-- The pre-existing package layout does **not** survive: all library logic ends up in `sandbox/internal/`, calling every OS-bound and third-party dependency through `l.Deps`. Code left in its original packages, or still calling `os`/`net`/third-party APIs directly, is not adapted.
-- Every public type the library returns becomes a contract struct in `sandbox/contracts/api`, whose function fields are filled by factories in `sandbox/internal/`. A type still declared in `sandbox/internal/` and handed back to callers is not adapted.
+- Keep the separation defined in [Structure.md](/docs/References/Structure.md): public contract structs in `sandbox/contracts/`, internal factories in `sandbox/`, concrete dependencies in `adapters/`, the entry point in `sandbox/`, and the installed binary in `cmd/main/`. The command-line interface belongs to the library, as the `Sandboxmain` field of `api.Lib`, never to the binary. Contracts are structs of function fields, never interfaces — see [StructContracts.md](/docs/References/StructContracts.md).
+- The pre-existing package layout does **not** survive: all library logic ends up in `sandbox/`, calling every OS-bound and third-party dependency through `l.Deps`. Code left in its original packages, or still calling `os`/`net`/third-party APIs directly, is not adapted.
+- Every public type the library returns becomes a contract struct in `sandbox/contracts/api`, whose function fields are filled by factories in `sandbox/`. A type still declared in `sandbox/` and handed back to callers is not adapted.
 - Every file created or rewritten — code and `.md` alike — must follow its specification, located through [Specs.md](/docs/References/Specs.md). A file that ignores its specification is not adapted.
 - The adaptation is not complete until the final checklist in the last workflow step passes.
 
@@ -25,8 +25,8 @@ Covers converting a library that already exists into this project's dependency-i
 5. Rewrite `adapters/standard/standard.go` so the default adapter fills every field of that contract with the library's current behavior, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
 
 ### Phase 3 — Move the code into the sandbox
-6. Rewrite the existing library code into `sandbox/internal/`: move each source file in, turn each public function into a `<Field>Factory(l *api.Lib)` that returns a closure for the matching api field, assign every factory's return value from the package's `New` constructor, and replace **every** OS-bound or third-party call with a call through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md). Do not keep the code in its original packages, leave methods on internal types, or leave direct calls in place.
-7. Create the command dispatch behind `Sandboxmain` in `sandbox/internal/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
+6. Rewrite the existing library code into `sandbox/`: move each source file in, turn each public function into a `<Field>Factory(l *api.Lib)` that returns a closure for the matching api field, assign every factory's return value from the package's `New` constructor, and replace **every** OS-bound or third-party call with a call through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md). Do not keep the code in its original packages, leave methods on internal types, or leave direct calls in place.
+7. Create the command dispatch behind `Sandboxmain` in `sandbox/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 8. Create any additional adapter in `adapters/`, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
 9. Create the samples demonstrating the converted entry points: the Go programs in `examples/libraryExamples/`, following [HandleSamples.md](/docs/Tutorials/HandleSamples.md), and the shell scripts in `examples/cliExamples/`, following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
 
@@ -44,7 +44,7 @@ Covers converting a library that already exists into this project's dependency-i
 go build ./...
 ```
 Then confirm every item below — the adaptation is only done when all pass:
-- All library logic lives in `sandbox/internal/`; no file there imports `os`, `net`, or a third-party implementation directly — every such call goes through `l.Deps`.
+- All library logic lives in `sandbox/`; no file there imports `os`, `net`, or a third-party implementation directly — every such call goes through `l.Deps`.
 - `sandbox/contracts/deps/deps.go` declares one function field per injected call, and **every** adapter in `adapters/` fills all of them — the compiler does not check this.
 - `sandbox/contracts/api/api.go` declares every public object as a struct with a `Deps` field, and every one of its function fields is filled by a factory registered in that package's `New` constructor.
 - `sandbox/new.go` is the only wiring point, and it imports no adapter.

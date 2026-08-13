@@ -6,7 +6,7 @@ Defines the **factory pattern**, the single way any struct of function fields is
 ### Rules
 
 #### Carrier and Target
-- Every factory takes **one** parameter: a pointer to the **carrier** — the struct holding the state the closure needs. Inside `sandbox/internal/`, the carrier is the api struct being filled (`*api.Lib`, `*api.<Object>`). Inside `adapters/`, the carrier is the adapter struct, which declares a `Deps deps.Deps` field `New` assigns the factory's return value into.
+- Every factory takes **one** parameter: a pointer to the **carrier** — the struct holding the state the closure needs. Inside `sandbox/`, the carrier is the api struct being filled (`*api.Lib`, `*api.<Object>`). Inside `adapters/`, the carrier is the adapter struct, which declares a `Deps deps.Deps` field `New` assigns the factory's return value into.
 - A factory returns the field's type. Its only job is to build and return that value; assignment happens at the call site in `New`.
 
 #### One Field, One Factory

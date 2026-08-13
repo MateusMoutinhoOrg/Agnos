@@ -1,14 +1,14 @@
 # Handle Library Elements
 
 ## Description
-Covers adding new elements — functions and objects — to the library's public API: declare the struct/field in [sandbox/contracts/api/api.go](/sandbox/contracts/api/api.go), write the factory under [sandbox/internal/](/sandbox/internal/), register it in the package's `New` constructor, and publish it in [PublicApi.md](/docs/References/PublicApi.md). Assumes the mechanics in [StructContracts.md](/docs/References/StructContracts.md). The CLI command calling the new element is a separate goal — [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
+Covers adding new elements — functions and objects — to the library's public API: declare the struct/field in [sandbox/contracts/api/api.go](/sandbox/contracts/api/api.go), write the factory under [sandbox/](/sandbox/), register it in the package's `New` constructor, and publish it in [PublicApi.md](/docs/References/PublicApi.md). Assumes the mechanics in [StructContracts.md](/docs/References/StructContracts.md). The CLI command calling the new element is a separate goal — [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 
 ### Rules
 - A function or object field is only usable once its factory's return value is assigned from the package's `New(d deps.Deps, …)` constructor, which doubles as the factory aggregate — an unassigned field stays nil and panics on first call. The compiler does not catch this.
 - One factory per field, named `<Field>Factory`, returning one closure.
 - Dependencies are reached as `l.Deps.<Field>(...)` or `b.Deps.<Field>(...)` **inside** the closure, never captured at factory time — that is what keeps the injected value authoritative.
 - `sandbox/` is a closed sandbox: library code must never import [adapters/](/adapters/), [examples/libraryExamples/](/examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `Deps`. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
-- Adding a directory or file to [sandbox/internal/](/sandbox/internal/) requires updating [Structure.md](/docs/References/Structure.md).
+- Adding a directory or file to [sandbox/](/sandbox/) requires updating [Structure.md](/docs/References/Structure.md).
 - Every public-facing entry must be listed in [PublicApi.md](/docs/References/PublicApi.md) with a detail page under [docs/References/PublicApi/](/docs/References/PublicApi/) named `<pkg>.<Symbol>.md`.
 - Detail pages are indexed by [PublicApi.md](/docs/References/PublicApi.md), so they take no row of their own in [LibUsage.md](/docs/Index/LibUsage.md); adding one requires updating [Structure.md](/docs/References/Structure.md).
 
@@ -26,7 +26,7 @@ Covers adding new elements — functions and objects — to the library's public
        HasCategory    func(name string) bool // new function
    }
    ```
-2. Write its factory in a new or existing file in [sandbox/internal/lib/](/sandbox/internal/lib/), with the identical signature, returning the closure:
+2. Write its factory in a new or existing file in [sandbox/lib/](/sandbox/lib/), with the identical signature, returning the closure:
    ```go
    // HasCategoryFactory returns the closure that fills api.Lib.HasCategory,
    // reporting whether a category is stored under that name.
@@ -63,7 +63,7 @@ Covers adding new elements — functions and objects — to the library's public
 ## Add a Library Object
 
 ### Rules
-- The object handed to callers **is** its api struct — never an internal mirror of it. [sandbox/internal/](/sandbox/internal/) may declare internal types for its own private plumbing, as long as nothing public ever uses them: every type, field, or constant the public API exposes is declared in [sandbox/contracts/](/sandbox/contracts/).
+- The object handed to callers **is** its api struct — never an internal mirror of it. [sandbox/](/sandbox/) may declare internal types for its own private plumbing, as long as nothing public ever uses them: every type, field, or constant the public API exposes is declared in [sandbox/contracts/](/sandbox/contracts/).
 - An object that needs dependencies declares a `Deps deps.Deps` field, filled by its `New` constructor from the parent lib's `l.Deps`. Its factories read that field inside their closures.
 - Every api field must be exported: the factories fill them from another package, and consumers read them.
 
@@ -77,14 +77,14 @@ Covers adding new elements — functions and objects — to the library's public
        Exceeded func() bool
    }
    ```
-2. Create the object's package and file, both named after the object (e.g. `sandbox/internal/budget/budget.go`) — no `internal_` prefix, the `internal/` parent already marks it private:
+2. Create the object's package and file, both named after the object (e.g. `sandbox/budget/budget.go`) — no `internal_` prefix, the `internal/` parent already marks it private:
    ```go
    package budget
 
    import (
        "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
        "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
-       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib/store"
    )
 
    // ExceededFactory returns the closure that fills api.Budget.Exceeded...
@@ -119,7 +119,7 @@ Covers adding new elements — functions and objects — to the library's public
        NewBudget func(category string, limit int64) Budget
    }
    ```
-4. Write the constructor's factory in [sandbox/internal/lib/](/sandbox/internal/lib/), propagating `l.Deps` into the new object:
+4. Write the constructor's factory in [sandbox/lib/](/sandbox/lib/), propagating `l.Deps` into the new object:
    ```go
    // NewBudgetFactory returns the closure that fills api.Lib.NewBudget...
    func NewBudgetFactory(l *api.Lib) func(category string, limit int64) api.Budget {
@@ -131,7 +131,7 @@ Covers adding new elements — functions and objects — to the library's public
 5. Assign `NewBudgetFactory`'s return value in the lib package's `New` constructor (Step 3 of "Add a Library Function").
 6. Register the new directory and file in [Structure.md](/docs/References/Structure.md).
 7. Expose the object, its constructor, and its fields in the public API:
-   - Add the struct, constructor, and fields to the sections matching their kind in [PublicApi.md](/docs/References/PublicApi.md), with a one-line description. Document only `sandbox/contracts/api` structs — never document `sandbox/internal/` types as public entries.
+   - Add the struct, constructor, and fields to the sections matching their kind in [PublicApi.md](/docs/References/PublicApi.md), with a one-line description. Document only `sandbox/contracts/api` structs — never document `sandbox/` types as public entries.
    - Create detail pages under [docs/References/PublicApi/](/docs/References/PublicApi/), named `<pkg>.<Symbol>.md` after the package the symbol is declared in (e.g., `api.Budget.md`), following [HandleDocuments.md](/docs/Tutorials/HandleDocuments.md).
    - Link detail pages from their entries in [PublicApi.md](/docs/References/PublicApi.md).
    - Register detail pages in [Structure.md](/docs/References/Structure.md).

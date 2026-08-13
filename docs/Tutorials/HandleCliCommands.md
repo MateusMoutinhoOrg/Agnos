@@ -1,7 +1,7 @@
 # Handle CLI Commands
 
 ## Description
-Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/internal/cli/](/sandbox/internal/cli/). Add the *library* function the command calls first, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md) before either.
+Covers adding a command or a flag to the command-line interface — the dispatch behind `api.Lib.Sandboxmain`, which lives in [sandbox/cli/](/sandbox/cli/). Add the *library* function the command calls first, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md); a command that needs a new OS-bound effect needs [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md) before either.
 
 ### Rules
 - The interface is inside the closed sandbox: it may not import `adapters/`, `cmd/`, a third-party module, or an OS-bound standard-library package. It reads the command line through `l.Deps.VerbLib`, takes the words it prints from `l.Deps.EmbedDeps`, and prints through `l.Deps.Printf`, and nothing else. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
@@ -21,7 +21,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    …
      largest [category]                            print the largest transaction
    ```
-2. Create the command file in [sandbox/internal/cli/commands/](/sandbox/internal/cli/commands/), draining its operands from the injected parser and printing the asset-backed messages through the injected writer:
+2. Create the command file in [sandbox/cli/commands/](/sandbox/cli/commands/), draining its operands from the injected parser and printing the asset-backed messages through the injected writer:
    ```go
    package commands
    
@@ -58,7 +58,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
        return api.ExitOk
    }
    ```
-3. Dispatch to it from `Run` in [sandbox/internal/cli/run.go](/sandbox/internal/cli/run.go), in the `switch` over the command word:
+3. Dispatch to it from `Run` in [sandbox/cli/run.go](/sandbox/cli/run.go), in the `switch` over the command word:
    ```go
    case "largest":
        return commands.Largest(l)
@@ -80,8 +80,8 @@ Covers adding a command or a flag to the command-line interface — the dispatch
 ## Remove CLI Command
 
 ### Workflow
-1. Remove the command file from [sandbox/internal/cli/commands/](/sandbox/internal/cli/commands/).
-2. Remove the dispatch case for the command from `Run` in [sandbox/internal/cli/run.go](/sandbox/internal/cli/run.go).
+1. Remove the command file from [sandbox/cli/commands/](/sandbox/cli/commands/).
+2. Remove the dispatch case for the command from `Run` in [sandbox/cli/run.go](/sandbox/cli/run.go).
 3. Remove the command from the usage screen in [assets/usages.txt](/assets/usages.txt).
 4. Remove any message assets exclusively used by this command from [sandbox/config/](/sandbox/config/) and [assets/](/assets/), following [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
 5. Remove the command from the Commands table of [Commands.md](/docs/References/Commands.md).

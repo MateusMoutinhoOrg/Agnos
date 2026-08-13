@@ -15,7 +15,7 @@ Agnos-Cli is a structured Go template that showcases how to build libraries that
 
 - **`/sandbox/contracts/`** defines the `Deps` contract every adapter must fill and the `api` structs the library hands back.
 - **`/adapters/`** contains opinionated, concrete implementations of the `Deps` contract.
-- **`/sandbox/internal/`** contains the pure library logic as factories filling the `api` contract structs — it never imports concrete implementations.
+- **`/sandbox/`** contains the pure library logic as factories filling the `api` contract structs — it never imports concrete implementations.
 - **`/sandbox/`** is the entry point: it takes a `Deps` and returns an `api.Lib`, whose `Sandboxmain` field is the command-line interface itself.
 - **`/cmd/main/`** is the installed binary: it wires an adapter into the lib, calls `Sandboxmain`, and exits with its return.
 

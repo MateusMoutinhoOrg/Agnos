@@ -5,7 +5,7 @@ Covers using this repository as a GitHub template to start a **new** dependency-
 
 ### Rules
 - Read [RULES.md](/docs/References/RULES.md) and [Structure.md](/docs/References/Structure.md) before starting.
-- Keep the separation defined in [Structure.md](/docs/References/Structure.md): public contract structs in `sandbox/contracts/`, internal factories in `sandbox/internal/`, concrete dependencies in `adapters/`, the entry point in `sandbox/`, and the installed binary in `cmd/main/`. The command-line interface belongs to the library, as the `Sandboxmain` field of `api.Lib`, never to the binary. Contracts are structs of function fields, never interfaces — see [StructContracts.md](/docs/References/StructContracts.md).
+- Keep the separation defined in [Structure.md](/docs/References/Structure.md): public contract structs in `sandbox/contracts/`, internal factories in `sandbox/`, concrete dependencies in `adapters/`, the entry point in `sandbox/`, and the installed binary in `cmd/main/`. The command-line interface belongs to the library, as the `Sandboxmain` field of `api.Lib`, never to the binary. Contracts are structs of function fields, never interfaces — see [StructContracts.md](/docs/References/StructContracts.md).
 - Every file created or rewritten — code and `.md` alike — must follow its specification, located through [Specs.md](/docs/References/Specs.md).
 - The fork is not complete until the final checklist in the last workflow step passes.
 
@@ -24,8 +24,8 @@ Covers using this repository as a GitHub template to start a **new** dependency-
 6. Rewrite [adapters/standard/standard.go](/adapters/standard/standard.go) so the default adapter fills every field of the new contract, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
 
 ### Phase 3 — Create the implementation
-7. Create the new library logic in [sandbox/internal/](/sandbox/internal/) — the lib's factories plus one package per object — following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
-8. Create the command dispatch behind `Sandboxmain` in `sandbox/internal/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
+7. Create the new library logic in [sandbox/](/sandbox/) — the lib's factories plus one package per object — following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
+8. Create the command dispatch behind `Sandboxmain` in `sandbox/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 9. Create any additional adapter in [adapters/](/adapters/), following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
 10. Create the new samples: the Go programs in [examples/libraryExamples/](/examples/libraryExamples/), following [HandleSamples.md](/docs/Tutorials/HandleSamples.md), and the shell scripts in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
 
@@ -43,7 +43,7 @@ Covers using this repository as a GitHub template to start a **new** dependency-
 go build ./...
 ```
 Then confirm every item below — the fork is only done when all pass:
-- All library logic lives in `sandbox/internal/`; no file there imports `os`, `net`, or a third-party implementation directly — every such call goes through `l.Deps`.
+- All library logic lives in `sandbox/`; no file there imports `os`, `net`, or a third-party implementation directly — every such call goes through `l.Deps`.
 - `sandbox/contracts/deps/deps.go` declares one function field per injected call, and **every** adapter in `adapters/` fills all of them — the compiler does not check this.
 - `sandbox/contracts/api/api.go` declares every public object as a struct with a `Deps` field, and every one of its function fields is filled by a factory registered in that package's `New` constructor.
 - `sandbox/new.go` is the only wiring point, and it imports no adapter.

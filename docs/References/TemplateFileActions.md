@@ -65,9 +65,9 @@ Written from scratch for the library being built or adapted. Nothing of the temp
 
 | Path | Description | Specification |
 |------|-------------|---------------|
-| `sandbox/internal/lib/*` | The lib's field factories and the `New` constructor running them all, reaching every dependency through `l.Deps` | LibFunctions |
-| `sandbox/internal/<object>/*` | One package per object the library hands back: its field factories and the `New` constructor running them all | LibObjects |
-| `sandbox/internal/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, the paths of the text it prints, and its operand parsing | |
+| `sandbox/lib/*` | The lib's field factories and the `New` constructor running them all, reaching every dependency through `l.Deps` | LibFunctions |
+| `sandbox/<object>/*` | One package per object the library hands back: its field factories and the `New` constructor running them all | LibObjects |
+| `sandbox/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, the paths of the text it prints, and its operand parsing | |
 | `assets/usages.txt`, `assets/messages/*` | The new interface's usage screen and one file per line it prints | |
 | `adapters/<name>/<name>.go` | One adapter per additional opinionated implementation of the `Deps` contract | Adapters |
 | `examples/libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | LibraryExamples |
@@ -84,7 +84,7 @@ The template's example content — the financial tracker. Removed once the new l
 
 | Path | Description |
 |------|-------------|
-| `sandbox/internal/*` | The tracker's lib factories, object packages, CLI dispatch, and store helpers — replaced by **[Create](#create)** |
+| `sandbox/*` | The tracker's lib factories, object packages, CLI dispatch, and store helpers — replaced by **[Create](#create)** |
 | `sandbox/contracts/deps/verbdeps/`, `sandbox/contracts/deps/keepdeps/` | The sandbox copies of the embedded Verb and Keep libraries — keep one only if the new library embeds the same library |
 | `examples/libraryExamples/*` | The tracker's Go samples |
 | `examples/cliExamples/*` | The tracker's CLI scripts |

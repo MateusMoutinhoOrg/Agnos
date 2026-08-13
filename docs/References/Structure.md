@@ -61,7 +61,7 @@ The closed sandbox — the pure library. It holds its own entry point, the contr
 | `new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it | |
 
 ### `/sandbox/contracts/`
-The structs the rest of the project is wired through — the only part of the sandbox anything outside it may import. Contracts hold the project's **public types** and are structs of function fields, never interfaces; see [StructContracts.md](/docs/References/StructContracts.md). Contracts import nothing from `adapters/` or `sandbox/internal/`.
+The structs the rest of the project is wired through — the only part of the sandbox anything outside it may import. Contracts hold the project's **public types** and are structs of function fields, never interfaces; see [StructContracts.md](/docs/References/StructContracts.md). Contracts import nothing from `adapters/` or `sandbox/`.
 
 #### `/sandbox/contracts/deps/`
 The contract every adapter must fill.
@@ -98,10 +98,10 @@ The structs the library hands back to callers.
 |------|-------------|------|
 | `api.go` | The `Lib` entry-point struct plus one struct per object the lib creates, each carrying a `Deps` field | Outputs |
 
-### `/sandbox/internal/`
+### `/sandbox/`
 **Factories only** — no types. Each package here holds the functions that take a pointer to an [`api`](#sandboxcontractsapi) struct and return closures reading that struct's `Deps`, which the package's `New` constructor assigns into the matching function fields. Types never live here; they stay in `contracts/`. Go's `internal/` rule makes this tree unreachable from outside `sandbox/`, so neither consumers nor `adapters/` can reach in — the sandbox wall is enforced by the compiler, not by convention alone.
 
-#### `/sandbox/internal/lib/`
+#### `/sandbox/lib/`
 The entry-point implementation. The `internal/` parent already marks it private, so the package carries no `internal_` prefix.
 
 | File | Description | Spec |
@@ -109,21 +109,21 @@ The entry-point implementation. The `internal/` parent already marks it private,
 | `new.go` | The `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
 | `<Function>.go` | One file per lib function, holding its `<Field>Factory(l *api.Lib)` that returns a closure | LibFunctions |
 
-#### `/sandbox/internal/cli/`
+#### `/sandbox/cli/`
 The command-line interface itself: the command dispatch `Sandboxmain` delegates to, the paths of the text it prints, and the reading of amounts off the command line. It reads the command line through `deps.Deps.VerbLib`, takes every word it displays from `deps.Deps.EmbedDeps`, and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox and holds no display text of its own. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `run.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the asset paths and message names the interface prints, and the amount parser | |
 
-#### `/sandbox/internal/<object>/`
+#### `/sandbox/<object>/`
 One package per object the library creates, named after the object itself — `category/` and `transaction/` for this library.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `<object>.go` | The object's `<Field>Factory` functions, each returning a closure, plus the `New(d deps.Deps, …) api.<Object>` constructor that propagates `Deps` and assigns every factory's return value | LibObjects |
 
-#### `/sandbox/internal/lib/store/`
+#### `/sandbox/lib/store/`
 Shared helpers over the injected database, used by `internal/lib/` and by every object package: the schema the tracker's records are persisted under, the lookups that reach it, and the encoding of a transaction's reference. It declares **no types and no factories** — it is the one internal package that is neither an object nor the entry point, so no specification governs it.
 
 | File | Description | Spec |
@@ -133,7 +133,7 @@ Shared helpers over the injected database, used by `internal/lib/` and by every 
 ---
 
 ## `/adapters/`
-Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontractsdeps) contract, each providing a distinct concrete behavior. This is where OS-bound and third-party code lives; an adapter imports `sandbox/contracts/deps` and nothing else from `sandbox/`. An adapter fills its contract with the same **factories** [`sandbox/internal/`](#sandboxinternal) uses — the carrier is the adapter struct, which declares the `Deps` field the factories' return values are assigned into.
+Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontractsdeps) contract, each providing a distinct concrete behavior. This is where OS-bound and third-party code lives; an adapter imports `sandbox/contracts/deps` and nothing else from `sandbox/`. An adapter fills its contract with the same **factories** [`sandbox/`](#sandboxinternal) uses — the carrier is the adapter struct, which declares the `Deps` field the factories' return values are assigned into.
 
 ### `/adapters/<name>/`
 

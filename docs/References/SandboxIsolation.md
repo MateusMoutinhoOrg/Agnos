@@ -59,7 +59,7 @@ To add a new door, follow [HandleDependencies.md](/docs/Tutorials/HandleDependen
 
 ## What the Wall Forbids in the Other Direction
 
-`sandbox/internal/` holds the factories that fill the contract structs, and Go's `internal/` rule makes it unreachable from outside `sandbox/` — an adapter or consumer that tries gets a compile error. The outside world sees exactly three packages:
+`sandbox/` holds the factories that fill the contract structs, and Go's `internal/` rule makes it unreachable from outside `sandbox/` — an adapter or consumer that tries gets a compile error. The outside world sees exactly three packages:
 
 | Package | Who imports it | For what |
 |---------|----------------|----------|

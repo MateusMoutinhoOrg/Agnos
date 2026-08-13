@@ -3,8 +3,8 @@ package lib
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/category"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib/category"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib/store"
 )
 
 // AddCategoryFactory fills api.Lib.AddCategory with a closure that creates

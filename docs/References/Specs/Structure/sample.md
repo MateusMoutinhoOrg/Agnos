@@ -54,7 +54,7 @@ The public contract structs the project is wired through — the only part of th
 | `deps/deps.go` | The `Deps` struct, one function field per injectable behavior | Deps |
 | `api/api.go` | The structs the library hands back to callers | Outputs |
 
-### `/sandbox/internal/`
+### `/sandbox/`
 The factories filling the `api` structs' function fields, unreachable from outside `sandbox/`. Declares no types.
 
 | File | Description | Spec |

@@ -2,7 +2,7 @@
 
 // This file is an illustrative sample, not part of the build.
 // It shows the same factory pattern on both sides of the sandbox wall:
-// inside sandbox/internal/, where the carrier is an api struct, and inside
+// inside sandbox/, where the carrier is an api struct, and inside
 // adapters/, where the carrier is the adapter struct.
 package example_factories
 

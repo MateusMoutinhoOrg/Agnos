@@ -7,8 +7,8 @@ package store
 // closed — no adapter, no third-party module, no OS-bound package.
 //
 // This package declares no types; the object packages
-// (sandbox/internal/lib/category, sandbox/internal/lib/transaction) and
-// sandbox/internal/lib call into it.
+// (sandbox/lib/category, sandbox/lib/transaction) and
+// sandbox/lib call into it.
 
 import (
 	"strconv"

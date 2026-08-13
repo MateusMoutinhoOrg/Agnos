@@ -69,7 +69,7 @@ Defines the baseline shape every `.md` file in this project must have, whatever 
 | A contract struct the library hands back to callers | **output** |
 | An output struct the library creates and propagates `Deps` into | **library object** |
 | A function filling one field of a struct contract, taking a pointer to the struct that carries the state | **factory** |
-| The struct a factory takes a pointer to — an output struct in `/sandbox/internal/`, the adapter struct in `/adapters/` | **carrier** |
+| The struct a factory takes a pointer to — an output struct in `/sandbox/`, the adapter struct in `/adapters/` | **carrier** |
 | The `New` function that builds one carrier, runs every factory of its package over it, and returns the filled contract struct | **constructor** |
 | A runnable example in `/examples/libraryExamples/` or `/examples/cliExamples/` | **sample** |
 | The `api.Lib.Sandboxmain` field and the dispatch behind it | **command-line interface** |

@@ -18,13 +18,13 @@ Before creating or editing any file, read [Specs.md](/docs/References/Specs.md) 
 
 [sandbox/](/sandbox/) is a closed sandbox. No file inside it may import [adapters/](/adapters/), [examples/libraryExamples/](/examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `os/exec`, `syscall`, …). Every such effect must be declared as a function field on the `Deps` contract and reached through `l.Deps`, following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md). The mechanic is explained in [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
 
-Contracts are **structs of function fields**, never interfaces — in [sandbox/contracts/deps](/sandbox/contracts/deps/) and [sandbox/contracts/api](/sandbox/contracts/api/) alike. Every type in the project is declared in `sandbox/contracts/`; [sandbox/internal/](/sandbox/internal/) declares no types at all. See [StructContracts.md](/docs/References/StructContracts.md).
+Contracts are **structs of function fields**, never interfaces — in [sandbox/contracts/deps](/sandbox/contracts/deps/) and [sandbox/contracts/api](/sandbox/contracts/api/) alike. Every type in the project is declared in `sandbox/contracts/`; [sandbox/](/sandbox/) declares no types at all. See [StructContracts.md](/docs/References/StructContracts.md).
 
 ---
 
 ## Lib Organization
 
-Tudo que e relacionado a lib deve estar em `sandbox/internal/lib`, assim os modulos ficam mais organizados.
+Tudo que e relacionado a lib deve estar em `sandbox/lib`, assim os modulos ficam mais organizados.
 
 ---
 
@@ -35,7 +35,7 @@ Every object this project hands out — an `api` struct built inside the sandbox
 A factory takes a pointer to the **carrier** — the struct holding the state the closure reads — and returns exactly one field's value; the caller assigns it:
 
 ```go
-// sandbox/internal/lib/ — the carrier is the api struct being filled
+// sandbox/lib/ — the carrier is the api struct being filled
 func GetCategoryFactory(l *api.Lib) func(name string) (api.Category, bool) {
 	return func(name string) (api.Category, bool) {
 		record, ok := store.FindCategory(l.Deps, name)
@@ -124,7 +124,7 @@ When you create, delete, or rename a sample, update the reference page that list
 
 ## Interface Changes
 
-The command-line interface lives **inside** the sandbox, as the `Sandboxmain` field of `api.Lib`, dispatching in [sandbox/internal/cli/](/sandbox/internal/cli/). The binary in [cmd/main/](/cmd/main/) wires an adapter into the library, calls that field, and exits with its return — it must never branch on a command, parse a flag, or print anything of its own, or the behavior stops being reachable from any other front end.
+The command-line interface lives **inside** the sandbox, as the `Sandboxmain` field of `api.Lib`, dispatching in [sandbox/cli/](/sandbox/cli/). The binary in [cmd/main/](/cmd/main/) wires an adapter into the library, calls that field, and exits with its return — it must never branch on a command, parse a flag, or print anything of its own, or the behavior stops being reachable from any other front end.
 
 When you add or change a command or a flag, update [Commands.md](/docs/References/Commands.md) and the usage screen in [assets/usages.txt](/assets/usages.txt) in the same commit, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 

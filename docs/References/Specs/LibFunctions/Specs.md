@@ -1,7 +1,7 @@
 # LibFunctions Specification
 
 ## Description
-Defines the required shape of a library function — a **factory** in `sandbox/internal/lib/` that returns the closure for one function field of the `Lib` struct declared in `sandbox/contracts/api/api.go`. A factory takes a pointer to the api struct and returns a closure; the caller (the package's `New` constructor) assigns it into the field, and the closure reaches dependencies only through that struct's `Deps`.
+Defines the required shape of a library function — a **factory** in `sandbox/lib/` that returns the closure for one function field of the `Lib` struct declared in `sandbox/contracts/api/api.go`. A factory takes a pointer to the api struct and returns a closure; the caller (the package's `New` constructor) assigns it into the field, and the closure reaches dependencies only through that struct's `Deps`.
 
 ### Rules
 - One factory per function field, named `<Field>Factory` and taking a single `*api.Lib` parameter: `func GetCategoryFactory(l *api.Lib) func(...)`. Its only job is to build and return the closure.

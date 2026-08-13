@@ -40,7 +40,7 @@ messages/unknown-command.txt    →  unknown command "%s"
 messages/category-not-found.txt →  no category named "%s"
 ```
 
-The result is that `sandbox/internal/cli/` holds no display text at all. Rewording the interface, or translating it, is editing files under `/assets/`; the Go code addresses them by path and never changes. Adding or editing one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
+The result is that `sandbox/cli/` holds no display text at all. Rewording the interface, or translating it, is editing files under `/assets/`; the Go code addresses them by path and never changes. Adding or editing one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
 
 ---
 

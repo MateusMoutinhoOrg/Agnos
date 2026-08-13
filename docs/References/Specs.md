@@ -34,12 +34,12 @@ GeneralDoc applies on top of the others: a tutorial follows **both** GeneralDoc 
 
 | Spec | Applies To | Links |
 |------|------------|-------|
-| Factories | **Every** file declaring `<Field>Factory` functions — `sandbox/internal/` and `adapters/` alike | [Specs](/docs/References/Specs/Factories/Specs.md) · [sample](/docs/References/Specs/Factories/sample.go) |
+| Factories | **Every** file declaring `<Field>Factory` functions — `sandbox/` and `adapters/` alike | [Specs](/docs/References/Specs/Factories/Specs.md) · [sample](/docs/References/Specs/Factories/sample.go) |
 | Deps | `sandbox/contracts/deps/deps.go` | [Specs](/docs/References/Specs/Deps/Specs.md) · [sample](/docs/References/Specs/Deps/sample.go) |
 | Outputs | `sandbox/contracts/api/api.go` | [Specs](/docs/References/Specs/Outputs/Specs.md) · [sample](/docs/References/Specs/Outputs/sample.go) |
 | Adapters | `adapters/<name>/<name>.go` | [Specs](/docs/References/Specs/Adapters/Specs.md) · [sample](/docs/References/Specs/Adapters/sample.go) |
-| LibFunctions | Factories filling `api.Lib` fields, in `sandbox/internal/lib/` | [Specs](/docs/References/Specs/LibFunctions/Specs.md) · [sample](/docs/References/Specs/LibFunctions/sample.go) |
-| LibObjects | Factories and constructors for objects the lib creates, in `sandbox/internal/<object>/` | [Specs](/docs/References/Specs/LibObjects/Specs.md) · [sample](/docs/References/Specs/LibObjects/sample.go) |
+| LibFunctions | Factories filling `api.Lib` fields, in `sandbox/lib/` | [Specs](/docs/References/Specs/LibFunctions/Specs.md) · [sample](/docs/References/Specs/LibFunctions/sample.go) |
+| LibObjects | Factories and constructors for objects the lib creates, in `sandbox/<object>/` | [Specs](/docs/References/Specs/LibObjects/Specs.md) · [sample](/docs/References/Specs/LibObjects/sample.go) |
 | CliMain | `cmd/main/main.go` | [Specs](/docs/References/Specs/CliMain/Specs.md) · [sample](/docs/References/Specs/CliMain/sample.go) |
 | LibraryExamples | `examples/libraryExamples/<example>/<example>.go` | [Specs](/docs/References/Specs/LibraryExamples/Specs.md) · [sample](/docs/References/Specs/LibraryExamples/sample.go) |
 | CliExamples | `examples/cliExamples/<Name>.sh` | [Specs](/docs/References/Specs/CliExamples/Specs.md) · [sample](/docs/References/Specs/CliExamples/sample.sh) |

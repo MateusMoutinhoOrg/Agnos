@@ -35,7 +35,7 @@ func New(d deps.Deps, firstProp int, secondProp string) api.ExampleLibObject {
 }
 
 // ---------------------------------------------------------------
-// The constructor factory below lives in sandbox/internal/lib/, where
+// The constructor factory below lives in sandbox/lib/, where
 // the object is created with the parent lib's Deps propagated into it.
 // ---------------------------------------------------------------
 

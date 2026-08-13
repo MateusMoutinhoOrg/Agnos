@@ -8,8 +8,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/store"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/lib/transaction"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib/store"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib/transaction"
 )
 
 // referenceAttempts bounds how many sequence numbers a new transaction may

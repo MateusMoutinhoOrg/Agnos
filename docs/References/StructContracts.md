@@ -33,10 +33,10 @@ Callers use both exactly as they would an interface — `l.AddCategory("grocerie
 
 ## Factories Fill the Fields
 
-`sandbox/internal/` holds **factories**: functions taking a pointer to an api struct and returning a closure for one of its fields. The package's `New` constructor assigns them all:
+`sandbox/` holds **factories**: functions taking a pointer to an api struct and returning a closure for one of its fields. The package's `New` constructor assigns them all:
 
 ```go
-// sandbox/internal/lib/lib.go
+// sandbox/lib/lib.go
 func GetCategoryFactory(l *api.Lib) func(name string) (api.Category, bool) {
 	return func(name string) (api.Category, bool) {
 		record, ok := store.FindCategory(l.Deps, name) // l.Deps read at call time

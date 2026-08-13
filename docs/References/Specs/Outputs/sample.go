@@ -8,7 +8,7 @@ import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 // ExampleLibObject is an object handed back by the library, created
 // through Lib.NewExampleObject with the deps already wired in. Its
 // function fields are filled by the factories in
-// sandbox/internal/example_object/.
+// sandbox/example_object/.
 type ExampleLibObject struct {
 	// Deps is the dependency set propagated from the lib that created
 	// this object, carried here so its factories can reach it.
