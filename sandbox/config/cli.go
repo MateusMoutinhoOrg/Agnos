@@ -50,3 +50,16 @@ Examples:
 	VersionMessage            = `agnos-cli %s`
 	NoCommand                 = `no command given`
 )
+
+// Flag spellings the interface understands, in the shape Verb's IsPresent
+// takes: every spelling of one flag in a single slice.
+var (
+	// HelpFlags asks for the usage screen instead of running a command.
+	HelpFlags = []string{"-h", "--help"}
+	// VersionFlags asks for the interface version instead of running a
+	// command.
+	VersionFlags = []string{"-v", "--version"}
+	// QuietFlags suppress the confirmation lines a mutating command prints,
+	// leaving only listings and errors.
+	QuietFlags = []string{"-q", "--quiet"}
+)

@@ -23,19 +23,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/cli/commands"
 )
 
-// Flag spellings the interface understands, in the shape Verb's IsPresent
-// takes: every spelling of one flag in a single slice.
-var (
-	// HelpFlags asks for the usage screen instead of running a command.
-	HelpFlags = []string{"-h", "--help"}
-	// VersionFlags asks for the interface version instead of running a
-	// command.
-	VersionFlags = []string{"-v", "--version"}
-	// QuietFlags suppress the confirmation lines a mutating command prints,
-	// leaving only listings and errors.
-	QuietFlags = []string{"-q", "--quiet"}
-)
-
 // Run is the body of api.Lib.Sandboxmain: it dispatches one command line and
 // returns the process exit code. args is only read to detect an empty
 // command line; the arguments themselves are drained through the injected
@@ -47,16 +34,16 @@ func Run(l *api.Lib, args []string) int {
 	}
 
 	verb := l.Deps.VerbLib
-	if verb.IsPresent(HelpFlags) {
+	if verb.IsPresent(config.HelpFlags) {
 		l.Deps.Printf("%s", config.Usages)
 		return api.ExitOk
 	}
-	if verb.IsPresent(VersionFlags) {
+	if verb.IsPresent(config.VersionFlags) {
 		return commands.VersionCommand(l)
 	}
 	// Read the flag before the positional arguments: Verb marks a matched
 	// flag used, so draining what is left hands back only the command words.
-	quiet := verb.IsPresent(QuietFlags)
+	quiet := verb.IsPresent(config.QuietFlags)
 
 	command, err := verb.GetNextStringArg()
 	if err != nil {
