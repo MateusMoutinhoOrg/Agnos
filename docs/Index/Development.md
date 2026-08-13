@@ -34,10 +34,10 @@ Index of the documentation for contributors changing this repository: the bindin
   - **description:** Add or edit a file under `assets/` the library reads instead of a Go string
   - [Add an Asset](/docs/Tutorials/HandleAssets.md#add-an-asset)
   - [Edit an Existing Asset](/docs/Tutorials/HandleAssets.md#edit-an-existing-asset)
-- [HandleSamples.md](/docs/Tutorials/HandleSamples.md)
-  - **description:** Create and run executable Go samples in `examples/libraryExamples/`
-  - [Run a Library Sample](/docs/Tutorials/HandleSamples.md#run-a-library-sample)
-  - [Add a Library Sample](/docs/Tutorials/HandleSamples.md#add-a-library-sample)
+- [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md)
+  - **description:** Create and run executable Go samples
+  - [Run a Library Sample](/docs/Tutorials/HandleLibrarySamples.md#run-a-library-sample)
+  - [Add a Library Sample](/docs/Tutorials/HandleLibrarySamples.md#add-a-library-sample)
 - [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md)
   - **description:** Create and run shell scripts in `examples/cliExamples/` driving the built CLI
   - [Run a CLI Example](/docs/Tutorials/HandleCliExamples.md#run-a-cli-example)

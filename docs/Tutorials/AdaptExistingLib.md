@@ -28,7 +28,7 @@ Covers converting a library that already exists into this project's dependency-i
 6. Rewrite the existing library code into `sandbox/`: move each source file in, turn each public function into a `<Field>Factory(l *api.Lib)` that returns a closure for the matching api field, assign every factory's return value from the package's `New` constructor, and replace **every** OS-bound or third-party call with a call through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md). Do not keep the code in its original packages, leave methods on internal types, or leave direct calls in place.
 7. Create the command dispatch behind `Sandboxmain` in `sandbox/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 8. Create any additional adapter in `adapters/`, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
-9. Create the samples demonstrating the converted entry points: the Go programs in `examples/libraryExamples/`, following [HandleSamples.md](/docs/Tutorials/HandleSamples.md), and the shell scripts in `examples/cliExamples/`, following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
+9. Create the samples demonstrating the converted entry points: the Go programs in `examples/libraryExamples/`, following [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md), and the shell scripts in `examples/cliExamples/`, following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
 
 ### Phase 4 — Rewrite the documentation
 10. Create the API detail pages (`docs/References/PublicApi/<pkg>.<Symbol>.md`) and rewrite `docs/References/PublicApi.md`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).

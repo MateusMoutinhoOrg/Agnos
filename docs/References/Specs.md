@@ -22,7 +22,7 @@ This index is the **only** place a specification is located from. Never browse `
 | Structure | `docs/References/Structure.md` | [Specs](/docs/References/Specs/Structure/Specs.md) · [sample](/docs/References/Specs/Structure/sample.md) |
 | AdaptersDoc | `docs/References/Adapters.md` | [Specs](/docs/References/Specs/AdaptersDoc/Specs.md) · [sample](/docs/References/Specs/AdaptersDoc/sample.md) |
 | Index | The index page of each theme — `docs/Index/<Theme>.md` | [Specs](/docs/References/Specs/Index/Specs.md) · [sample](/docs/References/Specs/Index/sample.md) |
-| TutorialDocs | Any page under `docs/Tutorials/` — a single-goal workflow guide, e.g. `HandleSamples.md`, `ForkTemplate.md` | [Specs](/docs/References/Specs/TutorialDocs/Specs.md) · [sample](/docs/References/Specs/TutorialDocs/sample.md) |
+| TutorialDocs | Any page under `docs/Tutorials/` — a single-goal workflow guide, e.g. `HandleLibrarySamples.md`, `ForkTemplate.md` | [Specs](/docs/References/Specs/TutorialDocs/Specs.md) · [sample](/docs/References/Specs/TutorialDocs/sample.md) |
 | ReferenceDocs | Any other **reference** page under `docs/References/` — listable content: indexes, command lists, and the API detail pages under `docs/References/PublicApi/` — except this index and `docs/References/Specs/` | [Specs](/docs/References/Specs/ReferenceDocs/Specs.md) · [sample](/docs/References/Specs/ReferenceDocs/sample.md) |
 | ExplanationDocs | Any **explanation** page under `docs/References/` — background on one mechanic, e.g. `SandboxIsolation.md` | [Specs](/docs/References/Specs/ExplanationDocs/Specs.md) · [sample](/docs/References/Specs/ExplanationDocs/sample.md) |
 

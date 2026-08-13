@@ -27,7 +27,7 @@ Covers using this repository as a GitHub template to start a **new** dependency-
 7. Create the new library logic in [sandbox/](/sandbox/) — the lib's factories plus one package per object — following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
 8. Create the command dispatch behind `Sandboxmain` in `sandbox/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 9. Create any additional adapter in [adapters/](/adapters/), following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
-10. Create the new samples: the Go programs in [examples/libraryExamples/](/examples/libraryExamples/), following [HandleSamples.md](/docs/Tutorials/HandleSamples.md), and the shell scripts in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
+10. Create the new samples: the Go programs in [examples/libraryExamples/](/examples/libraryExamples/), following [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md), and the shell scripts in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
 
 ### Phase 4 — Rewrite the documentation
 11. Create the new API detail pages (`docs/References/PublicApi/<pkg>.<Symbol>.md`) and rewrite [PublicApi.md](/docs/References/PublicApi.md), following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).

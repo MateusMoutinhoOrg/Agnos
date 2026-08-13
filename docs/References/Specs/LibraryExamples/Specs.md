@@ -10,7 +10,7 @@ Defines the required shape of a runnable library example in `examples/libraryExa
 - An example may import `adapters/<name>` (aliased `agnosadapter`), `sandbox` (aliased `agnoslib`), and `sandbox/contracts/api` (aliased `agnostypes`); it must never import `sandbox/` — Go's `internal/` rule rejects it — nor reconstruct dependencies by hand, which is the adapter's job.
 - Examples live outside the sandbox and are the only place an adapter and the library are named in the same file.
 - Keep examples minimal and runnable via `go run ./examples/libraryExamples/<example>/<example>.go`; add explanatory comments on the key wiring steps.
-- Adding, renaming, or deleting an example requires updating [ApiSamplesList.md](/docs/References/ApiSamplesList.md) — see [HandleSamples.md](/docs/Tutorials/HandleSamples.md).
+- Adding, renaming, or deleting an example requires updating [ApiSamplesList.md](/docs/References/ApiSamplesList.md) — see [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md).
 
 ## Structure
 1. **Package clause**: `package main`.
