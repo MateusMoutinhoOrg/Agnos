@@ -57,7 +57,7 @@ The library lists embedded assets through `l.Deps.EmbedDeps.ListFiles` or `l.Dep
 
 ---
 
-## Retrive Asset in Runtime
+## Retrieve Asset in Runtime
 
 The library retrieves the contents of an embedded asset using `l.Deps.EmbedDeps.ReadFile`.
 

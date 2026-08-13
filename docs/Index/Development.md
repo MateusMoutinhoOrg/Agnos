@@ -32,8 +32,9 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Remove CLI Command](/docs/Tutorials/HandleCliCommands.md#remove-cli-command)
 - [HandleAssets.md](/docs/Tutorials/HandleAssets.md)
   - **description:** Add or edit a file under `assets/` the library reads instead of a Go string
-  - [Add an Asset](/docs/Tutorials/HandleAssets.md#add-an-asset)
-  - [Edit an Existing Asset](/docs/Tutorials/HandleAssets.md#edit-an-existing-asset)
+  - [Add Asset](/docs/Tutorials/HandleAssets.md#add-asset)
+  - [ListAssets in Runtime](/docs/Tutorials/HandleAssets.md#listassets-in-runtime)
+  - [Retrieve Asset in Runtime](/docs/Tutorials/HandleAssets.md#retrieve-asset-in-runtime)
 - [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md)
   - **description:** Create and run executable Go samples
   - [Run a Library Sample](/docs/Tutorials/HandleLibrarySamples.md#run-a-library-sample)
