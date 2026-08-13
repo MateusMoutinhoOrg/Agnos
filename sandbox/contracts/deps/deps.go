@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/embeddeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/iodeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 )
@@ -50,4 +51,6 @@ type Deps struct {
 	// it: a program that calls the library functions directly never touches
 	// an asset.
 	EmbedDeps embeddeps.Lib
+	// IoLib is the io dependency
+	IoLib iodeps.Lib
 }

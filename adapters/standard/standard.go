@@ -304,5 +304,6 @@ func New(basePath string) deps.Deps {
 	adapter.Deps.VerbLib = VerbLibFactory(adapter)
 	adapter.Deps.KeepLib = KeepLibFactory(adapter)
 	adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
+	adapter.Deps.IoLib = IoLibFactory(adapter)
 	return adapter.Deps
 }
