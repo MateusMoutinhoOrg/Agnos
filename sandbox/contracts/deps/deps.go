@@ -6,6 +6,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/embeddeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/iodeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serverdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 )
 
@@ -53,4 +54,6 @@ type Deps struct {
 	EmbedDeps embeddeps.Lib
 	// IoLib is the io dependency
 	IoLib iodeps.Lib
+	// NewRequest creates a new HTTP/HTTPS request
+	NewRequest func(url string) serverdeps.Request
 }
