@@ -85,7 +85,7 @@ The sandbox's copy of the embedded [Keep](https://github.com/MateusMoutinhoOrg/K
 | `keepdeps.go` | Copy of the embedded Keep library's api structs and constants, injected whole as the `Deps.KeepLib` field | |
 
 ##### `/sandbox/contracts/deps/embeddeps/`
-The sandbox's copy of an embedded-asset library's public api, for the same reason the two above exist: reading a file is an OS-bound effect, and compiling one into a binary needs the `//go:embed` directive, so the sandbox may declare neither. It is how the library reaches the assets under [`/assets/`](#assets) — explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md).
+The sandbox's copy of an embedded-asset library's public api, for the same reason the two above exist: reading a file is an OS-bound effect, and compiling one into a binary needs the `//go:embed` directive, so the sandbox may declare neither. It is how the library reaches the assets under [`/assets/`](#assets).
 
 | File | Description | Spec |
 |------|-------------|------|
@@ -177,7 +177,7 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 ---
 
 ## `/assets/`
-Outside the sandbox. The files the library serves through the injected `Deps.EmbedDeps` contract: assets compiled into the binary, so an installed `agnos-cli` carries them with no files beside it, and they are reached only through the injected contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
+Outside the sandbox. The files the library serves through the injected `Deps.EmbedDeps` contract: assets compiled into the binary, so an installed `agnos-cli` carries them with no files beside it, and they are reached only through the injected contract — never imported by the sandbox. Adding one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
 
 This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets. That single directive is `//go:embed all:*`, which takes **every** file in the tree, so a new asset needs no change to it — put the file here and it exists at runtime.
 
@@ -274,7 +274,6 @@ One page per lookup table or explained mechanic, plus the two directories the pr
 | `Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `ApiSamplesList.md` | Every example under `examples/libraryExamples/` | ReferenceDocs |
 
-| `EmbeddedAssets.md` | Where the text the library displays comes from, and how to serve your own | ExplanationDocs |
 | `Structure.md` | The project's schema and the purpose of each component | Structure |
 | `Specs.md` | Index of every specification and the files each one governs | |
 | `SandboxIsolation.md` | What the sandbox may not import, and why every effect is a dep | ExplanationDocs |

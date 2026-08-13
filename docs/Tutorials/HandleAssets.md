@@ -1,7 +1,7 @@
 # Handle Assets
 
 ## Description
-Covers adding, editing, and reading an asset — a file under [/assets/](/assets/) that the library reads through the injected [`EmbedDeps`](/docs/References/PublicApi/embeddeps.Lib.md) contract instead of holding as a Go string. Every word the command-line interface prints is one. Why the mechanic exists is explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md); adding the command that prints a new message is [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
+Covers adding, editing, and reading an asset — a file under [/assets/](/assets/) that the library reads through the injected [`EmbedDeps`](/docs/References/PublicApi/embeddeps.Lib.md) contract instead of holding as a Go string. Every word the command-line interface prints is one. Adding the command that prints a new message is [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
 
 ### Rules
 - Display text is **never** written in `sandbox/`. A string literal in the sandbox is a format skeleton (`"%s\n"`) or a diagnostic, never a sentence shown to a user.

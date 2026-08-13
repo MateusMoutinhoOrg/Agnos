@@ -30,7 +30,6 @@ Copying these files carries over the template's **generic** guides and specifica
 | `scripts/*`, `docs/Tutorials/Build.md` | The cross-compilation scripts and their guide — they build `./cmd/main`, whatever it wires |
 | `sandbox/new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it |
 | `sandbox/contracts/deps/embeddeps/embeddeps.go`, `adapters/standard/embed.go`, `assets/asset.go` | The asset mechanic: the read-only contract, the factory serving the compiled-in files, and the `//go:embed all:*` directive taking the whole asset tree — generic, whatever the new library displays |
-| `docs/References/EmbeddedAssets.md` | The explanation of that mechanic |
 
 ---
 
