@@ -106,7 +106,8 @@ The entry-point implementation. The `internal/` parent already marks it private,
 
 | File | Description | Spec |
 |------|-------------|------|
-| `lib.go` | One `<Field>Factory(l *api.Lib)` per lib function — `Sandboxmain` among them — each returning a closure, plus the `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
+| `new.go` | The `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
+| `<Function>.go` | One file per lib function, holding its `<Field>Factory(l *api.Lib)` that returns a closure | LibFunctions |
 
 #### `/sandbox/internal/cli/`
 The command-line interface itself: the command dispatch `Sandboxmain` delegates to, the paths of the text it prints, and the reading of amounts off the command line. It reads the command line through `deps.Deps.VerbLib`, takes every word it displays from `deps.Deps.EmbedDeps`, and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox and holds no display text of its own. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
