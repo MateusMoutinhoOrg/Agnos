@@ -10,6 +10,11 @@ Index of the documentation for contributors changing this repository: the bindin
 
 ## Tutorials
 
+- [Build.md](/docs/Tutorials/Build.md)
+  - **description:** Cross-compile the CLI into a binary for each supported OS and architecture
+  - [Build a single target](/docs/Tutorials/Build.md#build-a-single-target)
+  - [Build every target at once](/docs/Tutorials/Build.md#build-every-target-at-once)
+  - [Add a new target](/docs/Tutorials/Build.md#add-a-new-target)
 - [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md)
   - **description:** How injected deps travel the object graph, and how to add a `Deps` field
   - [The Contract](/docs/Tutorials/HandleDependencies.md#the-contract)
@@ -47,11 +52,6 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Add a Document](/docs/Tutorials/HandleDocuments.md#add-a-document)
   - [Rename or Move a Document](/docs/Tutorials/HandleDocuments.md#rename-or-move-a-document)
   - [Delete a Document](/docs/Tutorials/HandleDocuments.md#delete-a-document)
-- [Build.md](/docs/Tutorials/Build.md)
-  - **description:** Cross-compile the CLI into a binary for each supported OS and architecture
-  - [Build a single target](/docs/Tutorials/Build.md#build-a-single-target)
-  - [Build every target at once](/docs/Tutorials/Build.md#build-every-target-at-once)
-  - [Add a new target](/docs/Tutorials/Build.md#add-a-new-target)
 
 ---
 
