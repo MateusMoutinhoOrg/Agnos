@@ -7,11 +7,11 @@ Covers creating, renaming, moving, and deleting `.md` files in [docs/](/docs/), 
 - Every `.md` file must comply with the specifications that govern it — locate them in [Specs.md](/docs/References/Specs.md).
 - A file governed by a specification must reproduce the shape that specification requires.
 - Workflow pages live in `docs/Tutorials/`. Lookups and explanations live in `docs/References/`. While `Tutorials/` is strictly flat, `References/` contains two subdirectories for specific listings: `PublicApi/` for API symbols and `Specs/` for specifications. A page's file name must be unique inside the directory it lands in.
-- Every page belongs to exactly one **theme** — `CliUsage`, `LibUsage`, `Development`, `Templating` — and the theme is expressed by the index that lists it, never by the page's location.
+- A page can belong to one or more **themes** — `CliUsage`, `LibUsage`, `Development`, `Templating` — and its themes are expressed by the indexes that list it, never by the page's location.
 - Adding, renaming, or deleting a `.md` file requires updating its index in the same commit. For flat pages, update the theme index in `docs/Index/` and [Structure.md](/docs/References/Structure.md). For subdirectory pages, update their specific index instead ([PublicApi.md](/docs/References/PublicApi.md) or [Specs.md](/docs/References/Specs.md)).
 - An index entry lists the page's own topic sections, so adding, renaming, or removing a section of an indexed page updates that entry in the same commit.
 - The [README.md](/README.md) links to theme indexes only: it changes when a **theme** is added, renamed, or removed, never for a single page.
-- Moving a document to another theme is an entry moving from one index to another; the file itself only moves if it changes between a workflow and a reference.
+- Adding a document to another theme means adding its entry to another index; the file itself only moves if it changes between a workflow and a reference.
 - Content still needed elsewhere must be moved before deletion, not lost.
 
 ---

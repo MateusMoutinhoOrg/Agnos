@@ -227,7 +227,7 @@ One page per theme. The four themes are `CliUsage` — installing the binary, dr
 | `<Theme>.md` | The theme's entry point: its Tutorials and its References, each entry listing that page's sections | Index |
 
 ### `/docs/Tutorials/`
-One page per workflow, its title phrased as the action it performs. A page belongs to exactly one theme, and the theme's index in [`/docs/Index/`](#docsindex) is what says which — `InstallCli.md`, `UseCli.md` and `RunCliSample.md` under `CliUsage`; `LibInitialization.md` and the domain workflows under `LibUsage`; the `Handle<Subject>.md` guides and `Build.md` under `Development`; `ForkTemplate.md`, `AdaptExistingLib.md` and `RenameModule.md` under `Templating`.
+One page per workflow, its title phrased as the action it performs. A page can belong to one or more themes, and the theme indexes in [`/docs/Index/`](#docsindex) are what say which — `InstallCli.md`, `UseCli.md` and `RunCliSample.md` under `CliUsage`; `LibInitialization.md` and the domain workflows under `LibUsage`; the `Handle<Subject>.md` guides and `Build.md` under `Development`; `ForkTemplate.md`, `AdaptExistingLib.md` and `RenameModule.md` under `Templating`.
 
 | File | Description | Spec |
 |------|-------------|------|
