@@ -2,16 +2,17 @@ package cli
 
 // The command-line interface of the tracker, written entirely inside the
 // sandbox. It reads the command line through the injected Verb argv parser
-// (deps.Deps.VerbLib), takes every word it displays from the injected
-// embedded assets (deps.Deps.EmbedDeps), and writes every line through the
-// injected formatted writer (deps.Deps.Printf), so the whole program stays
-// free of OS-bound and third-party imports — the process only hands it an
-// argument vector and exits with the code it returns.
+// (deps.Deps.VerbLib), takes every word it displays from sandbox/config, and
+// writes every line through the injected formatted writer (deps.Deps.Printf),
+// so the whole program stays free of OS-bound and third-party imports — the
+// process only hands it an argument vector and exits with the code it
+// returns.
 //
 // No display text is written here: the usage screen, the version, and each
-// message below live in files under /assets/, and this package addresses them
-// by path. Changing what the interface says is editing an asset, not editing
-// Go.
+// message below are constants in sandbox/config, and this package addresses
+// them by name. Changing what the interface says is editing that package —
+// which keeps every message under the compiler's eye, so a renamed constant
+// is a build failure rather than a blank line at runtime.
 //
 // Like sandbox/lib/store, this package is neither an object package nor
 // the entry point: it declares no types and no factories, and is called by

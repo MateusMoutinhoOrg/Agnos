@@ -15,7 +15,7 @@ Defines the required structure and layout for the project's root `README.md` fil
 ```markdown
 | Theme | Description |
 | --- | --- |
-| [<Theme Name>](/docs/Index/<Theme>.md) | Who the theme is for and what it covers |
+| `[<Theme Name>](/docs/Index/<Theme>.md)` | Who the theme is for and what it covers |
 ```
 
 - **Theme ordering follows user need**: the CLI comes first, because that is how most readers meet the project; then the library behind it; then contributing to it; and finally adapting it as a template. A new reader must hit what they need without scrolling past maintainer-only content.

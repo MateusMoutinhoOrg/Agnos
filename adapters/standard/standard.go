@@ -18,13 +18,19 @@ import (
 
 // StandardAdapter fills deps.Deps using the Go standard library for the
 // clock, the embedded Verb library — wired over the process's own command
-// line — for argument parsing, the embedded Keep library — wired to Keep's
-// own filesystem adapter — for the schema database every category and
-// transaction is persisted in, and the project's compiled-in assets for every
-// piece of text the library displays. Records live on disk under a base
-// directory configured on New, so a tracked budget survives across runs. Only
-// files outside the sandbox, like this one, may import the embedded Verb and
-// Keep libraries.
+// line — for argument parsing, and the embedded Keep library — wired to
+// Keep's own filesystem adapter — for the schema database every category and
+// transaction is persisted in. Records live on disk under a base directory
+// configured on New, so a tracked budget survives across runs. Only files
+// outside the sandbox, like this one, may import the embedded Verb and Keep
+// libraries.
+//
+// It also fills the three fields the tracker itself never calls — EmbedDeps
+// from the project's compiled-in assets, IoLib from `os` and `path/filepath`,
+// and NewRequest from `net/http`. They are capabilities the template offers a
+// derived library, and an adapter must fill every field of the contract
+// whether the current library exercises it or not: an unfilled field is a nil
+// function the compiler will not catch.
 type StandardAdapter struct {
 	// Deps is the contract this adapter fills; its factories assign into it.
 	Deps deps.Deps
@@ -287,8 +293,7 @@ func KeepLibFactory(s *StandardAdapter) keepdeps.Lib {
 // os.Args[1:] to api.Lib.Sandboxmain is what keeps the interface's view of
 // the command line and the parser's in agreement. Every asset the library
 // asks for is served from the whole compiled-in asset tree, so nothing has to
-// exist on disk beside the binary and nothing about the text has to be
-// configured here.
+// exist on disk beside the binary.
 //
 // It builds the adapter instance and runs every field factory over it, so
 // each closure reads the adapter's state at call time. Adding a field to

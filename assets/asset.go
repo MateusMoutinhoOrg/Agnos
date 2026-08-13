@@ -1,10 +1,17 @@
 package assets
 
-// The project's embedded assets: the text, and later the images and item
-// templates, the library serves through the injected embed contract
-// (deps.Deps.EmbedDeps). Keeping them in files instead of in Go string
-// constants is what lets the sandbox hold no display text of its own — it
-// asks for an asset by path and prints whatever comes back.
+// The project's embedded assets: the files the library serves through the
+// injected embed contract (deps.Deps.EmbedDeps). An asset is a payload better
+// kept as a file than as a Go constant — a template, a long-form document, an
+// image — reached by path at runtime and shipped inside the binary.
+//
+// The tree is empty in this repository, and deliberately so. The tracker's
+// display text is short and fixed, so it lives in sandbox/config as
+// compile-time constants, where the compiler checks every reference. What
+// remains here is the mechanic itself, wired end to end and ready for a
+// library derived from this template to drop files into. Adding one is
+// docs/Tutorials/HandleAssets.md; nothing about the directive below has to
+// change when you do.
 //
 // This package exists for one reason: a //go:embed directive can only reach
 // files inside its own package directory, so the directive has to live next
@@ -16,9 +23,9 @@ package assets
 import "embed"
 
 // Files is every asset shipped with the project, compiled into the binary, so
-// an installed `agnos-cli` finds its help screen and its version with no files on
-// disk next to it. Paths inside it are slash-separated and rooted here:
-// "version.txt", "usages.txt", "messages/<name>.txt".
+// an installed `agnos-cli` carries them with no files on disk next to it.
+// Paths inside it are slash-separated and rooted here: an asset written to
+// assets/templates/report.tmpl is read as "templates/report.tmpl".
 //
 // The single pattern below takes the whole directory: `*` matches every entry
 // next to this file, the `all:` prefix descends into each directory it

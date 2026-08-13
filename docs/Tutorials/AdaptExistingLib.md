@@ -22,12 +22,12 @@ Covers converting a library that already exists into this project's dependency-i
 ### Phase 2 — Rewrite the contracts
 3. Rewrite `sandbox/contracts/deps/deps.go` with the OS-bound and third-party calls the library must receive as dependencies, one function field each, following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md).
 4. Rewrite `sandbox/contracts/api/api.go` with the `Lib` struct and one struct per type the library hands back, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
-5. Rewrite `adapters/standard/standard.go` so the default adapter fills every field of that contract with the library's current behavior, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
+5. Rewrite `adapters/standard/standard.go` so the default adapter fills every field of that contract with the library's current behavior, following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-repo).
 
 ### Phase 3 — Move the code into the sandbox
 6. Rewrite the existing library code into `sandbox/`: move each source file in, turn each public function into a `<Field>Factory(l *api.Lib)` that returns a closure for the matching api field, assign every factory's return value from the package's `New` constructor, and replace **every** OS-bound or third-party call with a call through `l.Deps.<Field>(...)`, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md). Do not keep the code in its original packages, leave methods on internal types, or leave direct calls in place.
 7. Create the command dispatch behind `Sandboxmain` in `sandbox/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
-8. Create any additional adapter in `adapters/`, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
+8. Create any additional adapter in `adapters/`, following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-repo).
 9. Create the samples demonstrating the converted entry points: the Go programs in `examples/libraryExamples/`, following [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md), and the shell scripts in `examples/cliExamples/`, following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
 
 ### Phase 4 — Rewrite the documentation

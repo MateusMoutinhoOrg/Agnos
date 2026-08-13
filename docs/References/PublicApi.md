@@ -62,7 +62,7 @@ The injected dependency set the struct was built with; read-only after construct
 ## Dependency Contracts
 
 ### [deps.Deps](/docs/References/PublicApi/deps.Deps.md)
-The dependency contract every adapter must fill: the clock, the writer the interface reports through, the embedded Verb argv parser, the embedded Keep schema database, and the embedded assets the interface reads its text from.
+The dependency contract every adapter must fill: the clock, the writer the interface reports through, the embedded Verb argv parser, the embedded Keep schema database, the embedded assets, the filesystem, and the HTTP client.
 
 ### [verbdeps.Lib](/docs/References/PublicApi/verbdeps.Lib.md)
 The sandbox's copy of the embedded Verb argv-parser library's api, injected whole as the `deps.Deps.VerbLib` field.
@@ -70,5 +70,20 @@ The sandbox's copy of the embedded Verb argv-parser library's api, injected whol
 ### [keepdeps.Lib](/docs/References/PublicApi/keepdeps.Lib.md)
 The sandbox's copy of the embedded Keep schema-database library's api, injected whole as the `deps.Deps.KeepLib` field.
 
+---
+
+## Standing Capabilities
+
+The three contracts below are declared and filled like any other dependency, but the financial tracker never calls them. They ship as capabilities a library derived from this template gets already wired — see [`deps.Deps`](/docs/References/PublicApi/deps.Deps.md).
+
 ### [embeddeps.Lib](/docs/References/PublicApi/embeddeps.Lib.md)
-The sandbox's copy of an embedded-asset library's api, injected whole as the `deps.Deps.EmbedDeps` field: where every word the interface displays is read from.
+The sandbox's copy of an embedded-asset library's api, injected whole as the `deps.Deps.EmbedDeps` field: reads the files shipped under `/assets/`.
+
+### [iodeps.Lib](/docs/References/PublicApi/iodeps.Lib.md)
+The sandbox's copy of a filesystem library's api, injected whole as the `deps.Deps.IoLib` field: reads, writes, and lists paths on disk.
+
+### [serverdeps.Request](/docs/References/PublicApi/serverdeps.Request.md)
+One HTTP request under construction, handed back by the `deps.Deps.NewRequest` field already bound to a url.
+
+### [serverdeps.Response](/docs/References/PublicApi/serverdeps.Response.md)
+One HTTP response, handed back by `serverdeps.Request.Fetch` with its body still open.

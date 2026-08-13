@@ -26,10 +26,12 @@ Copying these files carries over the template's **generic** guides and specifica
 | `docs/References/Specs.md` | The index locating each specification |
 | `docs/Tutorials/ForkTemplate.md`, `docs/Tutorials/AdaptExistingLib.md`, `docs/Tutorials/RenameModule.md`, `docs/References/TemplateFileActions.md` | The template workflows and this page |
 | `docs/References/SandboxIsolation.md`, `docs/References/StructContracts.md` | The explanations of the structure's mechanics |
-| `docs/Tutorials/HandleDependencies.md`, `docs/Tutorials/HandleLibElements.md`, `docs/Tutorials/HandleCliCommands.md`, `docs/Tutorials/HandleAdapters.md`, `docs/Tutorials/HandleAssets.md`, `docs/Tutorials/HandleLibrarySamples.md`, `docs/Tutorials/HandleCliExamples.md`, `docs/Tutorials/HandleDocuments.md` | The generic workflow guides for extending any library built on this structure |
+| `docs/Tutorials/HandleDependencies.md`, `docs/Tutorials/HandleLibElements.md`, `docs/Tutorials/HandleCliCommands.md`, `docs/Tutorials/HandleAssets.md`, `docs/Tutorials/HandleLibrarySamples.md`, `docs/Tutorials/HandleCliExamples.md`, `docs/Tutorials/HandleDocuments.md` | The generic workflow guides for extending any library built on this structure |
 | `scripts/*`, `docs/Tutorials/Build.md` | The cross-compilation scripts and their guide — they build `./cmd/main`, whatever it wires |
 | `sandbox/new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it |
-| `sandbox/contracts/deps/embeddeps/embeddeps.go`, `adapters/standard/embed.go`, `assets/asset.go` | The asset mechanic: the read-only contract, the factory serving the compiled-in files, and the `//go:embed all:*` directive taking the whole asset tree — generic, whatever the new library displays |
+| `sandbox/contracts/deps/embeddeps/embeddeps.go`, `adapters/standard/embed.go`, `assets/asset.go` | The asset mechanic: the read-only contract, the factory serving the compiled-in files, and the `//go:embed all:*` directive taking the whole asset tree — generic, whatever the new library reads |
+| `sandbox/contracts/deps/iodeps/iodeps.go`, `adapters/standard/io.go` | The filesystem mechanic: the contract and the factory filling it over `os` and `path/filepath` — generic, whatever the new library writes |
+| `sandbox/contracts/deps/serverdeps/serverdeps.go`, `adapters/standard/server.go` | The HTTP mechanic: the request/response contracts and the factory filling them over `net/http` — generic, whatever the new library fetches |
 
 ---
 
@@ -43,7 +45,7 @@ Kept in place, with their content replaced by the new library's. The file keeps 
 | `sandbox/contracts/deps/deps.go` | The `Deps` function fields the new library requires | Deps |
 | `sandbox/contracts/api/api.go` | The `Lib` struct and one struct per object the new library hands back | Outputs |
 | `adapters/standard/standard.go` | The default adapter, filling the new `Deps` contract | Adapters |
-| `assets/version.txt` | The new library's version, as its interface reports it | |
+| `sandbox/config/version.go` | The new library's version, as its interface reports it | |
 | `cmd/main/main.go` | The new library's entry point: wire, call `Sandboxmain`, exit | CliMain |
 | `docs/References/Structure.md` | The layout of the new library | Structure |
 | `docs/References/Commands.md` | The commands, flags, and exit codes of the new library's interface | ReferenceDocs |
@@ -65,8 +67,9 @@ Written from scratch for the library being built or adapted. Nothing of the temp
 |------|-------------|---------------|
 | `sandbox/lib/*` | The lib's field factories and the `New` constructor running them all, reaching every dependency through `l.Deps` | LibFunctions |
 | `sandbox/<object>/*` | One package per object the library hands back: its field factories and the `New` constructor running them all | LibObjects |
-| `sandbox/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, the paths of the text it prints, and its operand parsing | |
-| `assets/usages.txt`, `assets/messages/*` | The new interface's usage screen and one file per line it prints | |
+| `sandbox/cli/*` | The command dispatch behind `api.Lib.Sandboxmain`, and its operand parsing | |
+| `sandbox/config/*` | The new interface's usage screen, one constant per line it prints, its flag spellings, and its version | |
+| `assets/*` | Any template, long-form document, or image the new library reads at runtime — optional, and empty in the template | |
 | `adapters/<name>/<name>.go` | One adapter per additional opinionated implementation of the `Deps` contract | Adapters |
 | `examples/libraryExamples/<example>/<example>.go` | One runnable Go sample per demonstrated use case | LibraryExamples |
 | `examples/cliExamples/<Name>.sh` | One shell script per goal demonstrated against the built CLI | CliExamples |
@@ -87,5 +90,5 @@ The template's example content — the financial tracker. Removed once the new l
 | `examples/libraryExamples/*` | The tracker's Go samples |
 | `examples/cliExamples/*` | The tracker's CLI scripts |
 | `docs/References/PublicApi/*` | The tracker's public API detail pages |
-| `assets/usages.txt`, `assets/messages/*` | The tracker's usage screen and messages — replaced by **[Create](#create)** |
+| `sandbox/config/*` | The tracker's usage screen, messages, flag spellings, and version — replaced by **[Create](#create)** |
 | `docs/Tutorials/ManageCategories.md`, `docs/Tutorials/TrackTransactions.md` | The tracker's domain tutorials |

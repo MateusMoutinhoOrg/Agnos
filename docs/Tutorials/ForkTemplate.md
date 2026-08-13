@@ -21,12 +21,12 @@ Covers using this repository as a GitHub template to start a **new** dependency-
 ### Phase 2 — Rewrite the contracts
 4. Rewrite [sandbox/contracts/deps/deps.go](/sandbox/contracts/deps/deps.go) with the dependencies the new library requires, following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md).
 5. Rewrite [sandbox/contracts/api/api.go](/sandbox/contracts/api/api.go) with the `Lib` struct and one struct per object the new library hands back, following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
-6. Rewrite [adapters/standard/standard.go](/adapters/standard/standard.go) so the default adapter fills every field of the new contract, following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
+6. Rewrite [adapters/standard/standard.go](/adapters/standard/standard.go) so the default adapter fills every field of the new contract, following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-repo).
 
 ### Phase 3 — Create the implementation
 7. Create the new library logic in [sandbox/](/sandbox/) — the lib's factories plus one package per object — following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
 8. Create the command dispatch behind `Sandboxmain` in `sandbox/cli/`, following [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md).
-9. Create any additional adapter in [adapters/](/adapters/), following [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
+9. Create any additional adapter in [adapters/](/adapters/), following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md#creating-a-adapter-in-repo).
 10. Create the new samples: the Go programs in [examples/libraryExamples/](/examples/libraryExamples/), following [HandleLibrarySamples.md](/docs/Tutorials/HandleLibrarySamples.md), and the shell scripts in [examples/cliExamples/](/examples/cliExamples/), following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
 
 ### Phase 4 — Rewrite the documentation

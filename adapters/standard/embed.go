@@ -19,7 +19,7 @@ import (
 )
 
 // assetPath resolves one path the library asked for against the root of the
-// asset tree, so "version.txt" is "version.txt" and "" is the root itself.
+// asset tree, so "report.tmpl" is "report.tmpl" and "" is the root itself.
 // path.Join cleans the result, which is what an embedded filesystem requires:
 // slash separators, no "." element, and no leading slash.
 func assetPath(requested string) string {

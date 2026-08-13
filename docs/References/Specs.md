@@ -18,7 +18,6 @@ This index is the **only** place a specification is located from. Never browse `
 |------|------------|-------|
 | GeneralDoc | **Every** `.md` file in the project | [Specs](/docs/References/Specs/GeneralDoc/Specs.md) · [sample](/docs/References/Specs/GeneralDoc/sample.md) |
 | Readme | Root `README.md` | [Specs](/docs/References/Specs/Readme/Specs.md) · [sample](/docs/References/Specs/Readme/sample.md) |
-
 | Structure | `docs/References/Structure.md` | [Specs](/docs/References/Specs/Structure/Specs.md) · [sample](/docs/References/Specs/Structure/sample.md) |
 | AdaptersDoc | `docs/References/Adapters.md` | [Specs](/docs/References/Specs/AdaptersDoc/Specs.md) · [sample](/docs/References/Specs/AdaptersDoc/sample.md) |
 | Index | The index page of each theme — `docs/Index/<Theme>.md` | [Specs](/docs/References/Specs/Index/Specs.md) · [sample](/docs/References/Specs/Index/sample.md) |

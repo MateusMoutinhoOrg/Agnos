@@ -10,7 +10,7 @@ An index entry is a **nested list**, not a table row: the page, its one-line des
 - One index per theme, named `<Theme>.md`, living directly inside `docs/Index/`.
 - The index lists **every** `.md` file of its theme: one entry per page of the theme in `docs/Tutorials/`, one entry per page of the theme in `docs/References/`. No orphans. Pages already indexed by another page — the API details under `PublicApi/`, the specifications under `Specs/` — are covered through that page's entry.
 - A page is listed by the index of **its own** themes, and can be listed in multiple indexes if it spans multiple themes.
-- Each entry is a top-level list item `[FileName.md](/docs/<Tutorials|References>/<FileName>.md)`, holding one nested `- **description:** …` line of 50–100 characters saying what the reader gets, followed by one nested link per topic section of that page.
+- Each entry is a top-level list item shaped `[FileName.md](/docs/Tutorials/FileName.md)` — or `/docs/References/` for a reference page — holding one nested `- **description:** …` line of 50–100 characters saying what the reader gets, followed by one nested link per topic section of that page.
 - **Topic sections only.** The skeleton headings every page shares are never listed: `Description`, `Rules`, `Workflow`, `Full Code`. An entry lists the headings that name a subject *inside* the page, and nothing else.
 - Topics are the page's `##` headings. When a page's only body section is `## Workflow` and that workflow is split into named `###` subsections, those subsections are the topics instead.
 - A page with no topic section — a single linear workflow — carries its `**description:**` line alone.

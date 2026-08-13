@@ -49,7 +49,7 @@ type Deps struct {
 
 This is what lets the whole command-line interface live inside the wall: `api.Lib.Sandboxmain` reads the command line through `Deps.VerbLib` and prints through `Deps.Printf`, never touching `os.Args` or `os.Stdout`. The binary hands it an argument vector; a test can hand it a fixed vector and a buffer instead.
 
-The wall reaches the interface's *words* too, not only its streams: the usage screen, the version, and every message come from `Deps.EmbedDeps`, so `sandbox/` holds no display text at all.
+The wall does not reach the interface's *words*: the usage screen, the version, and every message are compile-time constants in `sandbox/config`, which is inside the sandbox. Text is data, not an effect — writing it out is the effect, and that goes through `Deps.Printf`. A file the program must read at runtime is a different matter, and goes through `Deps.EmbedDeps`.
 
 `VerbLib`, `KeepLib` and `EmbedDeps` are the same door in a different shape: each is foreign to this sandbox, so instead of importing it the sandbox declares a copy of its api in `sandbox/contracts/deps/verbdeps/`, `keepdeps/` and `embeddeps/` and lets the adapter fill it — see [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md#injecting-a-whole-library).
 

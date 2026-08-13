@@ -4,9 +4,16 @@ import (
 	"bytes"
 	"io"
 	"net/http"
+	"time"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serverdeps"
 )
+
+// requestTimeout bounds one whole round trip — connect, send, and read the
+// response. Without it net/http waits forever, so a hung server would hang
+// the calling program with no way for the sandbox to intervene: the contract
+// exposes no cancellation, which makes the bound this adapter's job.
+const requestTimeout = 30 * time.Second
 
 // NewRequestFactory returns the value that fills deps.Deps.NewRequest: the implementation
 // of the HTTP request dependency using the standard library's net/http package.
@@ -41,7 +48,7 @@ func NewRequestFactory(s *StandardAdapter) func(url string) serverdeps.Request {
 					req.Header.Add(k, v)
 				}
 
-				client := &http.Client{}
+				client := &http.Client{Timeout: requestTimeout}
 				resp, err := client.Do(req)
 				if err != nil {
 					return serverdeps.Response{}, err
@@ -60,13 +67,14 @@ func NewRequestFactory(s *StandardAdapter) func(url string) serverdeps.Request {
 						}
 						buf := make([]byte, size)
 						n, err := io.ReadFull(resp.Body, buf)
-						if err != nil && err != io.ErrUnexpectedEOF && err != io.EOF {
-							return buf[:n], err
-						}
-						if err == io.ErrUnexpectedEOF || err == io.EOF {
+						// A body shorter than size is the contract's normal
+						// case, not a failure: io.ReadFull reports it as EOF
+						// or ErrUnexpectedEOF, and both mean "that was all
+						// of it".
+						if err == io.EOF || err == io.ErrUnexpectedEOF {
 							return buf[:n], nil
 						}
-						return buf[:n], nil
+						return buf[:n], err
 					},
 					Close: func() error {
 						return resp.Body.Close()

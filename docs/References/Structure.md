@@ -12,7 +12,7 @@ adapters/  ──▶  sandbox/  ◀──  cmd/, examples/libraryExamples/
 - **`/sandbox/`** is a **closed sandbox**: the pure library, and the command-line interface with it. Nothing inside it may import `adapters/`, `cmd/`, `examples/libraryExamples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
 - **`/adapters/`** sits outside the sandbox and is the only place OS-bound and third-party code is allowed. Each adapter imports `sandbox/contracts/deps` and nothing else from the sandbox.
 - **`/cmd/`** and **`/examples/libraryExamples/`** sit outside the sandbox too, and are the only places where an adapter and the sandbox meet — `cmd/` for the installable binary, `examples/libraryExamples/` for the runnable Go samples.
-- **`/assets/`** sits outside the sandbox as well: assets compiled into the binary and reached only through the injected `Deps.EmbedDeps` contract, so the sandbox holds no asset files of its own.
+- **`/assets/`** sits outside the sandbox as well: files compiled into the binary and reached only through the injected `Deps.EmbedDeps` contract, so the sandbox holds no asset files of its own. The tree ships empty — see [`/assets/`](#assets).
 
 Because the interface is `api.Lib.Sandboxmain` — one field of the library like any other — the binary in `cmd/main/` holds no command, no flag, and no output of its own: it wires, runs, and exits.
 
@@ -113,7 +113,7 @@ The structs the library hands back to callers.
 | `api.go` | The `Lib` entry-point struct plus one struct per object the lib creates, each carrying a `Deps` field | Outputs |
 
 ### `/sandbox/config/`
-Static configuration the sandbox reads at compile time: the text every command prints, the flag spellings the interface understands, and the version string. Moving these out of the asset files and into Go constants keeps them type-checked and eliminates asset reads for standing text. Nothing outside the sandbox imports this package.
+Static configuration the sandbox reads at compile time: the text every command prints, the flag spellings the interface understands, and the version string. Holding them as Go constants rather than as files keeps every reference under the compiler's eye — a renamed constant is a build failure rather than a blank line at runtime — and costs no read at all. Text long enough to be edited as a document, or shaped as a template, belongs in [`/assets/`](#assets) instead. Nothing outside the sandbox imports this package.
 
 | File | Description | Spec |
 |------|-------------|------|
@@ -177,7 +177,9 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 ---
 
 ## `/assets/`
-Outside the sandbox. The files the library serves through the injected `Deps.EmbedDeps` contract: assets compiled into the binary, so an installed `agnos-cli` carries them with no files beside it, and they are reached only through the injected contract — never imported by the sandbox. Adding one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
+Outside the sandbox. The files the library serves through the injected `Deps.EmbedDeps` contract: compiled into the binary, so an installed `agnos-cli` carries them with no files beside it, and reached only through the injected contract — never imported by the sandbox. An asset is a payload better kept as a file than as a Go constant: a template, a long-form document, an image. Adding one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
+
+The tree holds **no assets**, by design. The tracker's display text is short and fixed, so it lives in [`/sandbox/config/`](#sandboxconfig) as compile-time constants; what ships here is the mechanic — contract, adapter, and directive — wired end to end and ready for a library derived from this template. A derived project adds files under this directory and needs no other change.
 
 This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets. That single directive is `//go:embed all:*`, which takes **every** file in the tree, so a new asset needs no change to it — put the file here and it exists at runtime.
 
@@ -273,7 +275,6 @@ One page per lookup table or explained mechanic, plus the two directories the pr
 | `PublicApi.md` | Index of all public-facing components, linking to their detail pages | ReferenceDocs |
 | `Adapters.md` | Lists every shipped adapter and when to use each one | AdaptersDoc |
 | `ApiSamplesList.md` | Every example under `examples/libraryExamples/` | ReferenceDocs |
-
 | `Structure.md` | The project's schema and the purpose of each component | Structure |
 | `Specs.md` | Index of every specification and the files each one governs | |
 | `SandboxIsolation.md` | What the sandbox may not import, and why every effect is a dep | ExplanationDocs |

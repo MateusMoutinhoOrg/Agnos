@@ -25,7 +25,9 @@ The CLI is `api.Lib.Sandboxmain` — one field of the library like any other. Th
 - **`/sandbox/`**: The closed library taking a `Deps` and returning an `api.Lib`.
 - **`/adapters/`**: Concrete implementations of the `Deps` contract.
 - **`/cmd/`** & **`/examples/libraryExamples/`**: Places where an adapter and the library are wired together.
-- **`/assets/`**: The text the interface displays, compiled into the binary and reached only through the injected `Deps` — so even the help screen is not written inside the sandbox.
+- **`/assets/`**: Files compiled into the binary and reached only through the injected `Deps` — templates, long-form text, images. Empty here by design, and wired end to end for a derived library to fill.
+
+The `Deps` contract is wider than this tracker uses. Reading embedded assets, touching the filesystem, and speaking HTTP are declared and filled by the standard adapter even though the demonstration never calls them: they are capabilities a derived library gets for free. See [PublicApi.md](/docs/References/PublicApi.md) for every field.
 
 See [SandboxIsolation.md](/docs/References/SandboxIsolation.md) and [StructContracts.md](/docs/References/StructContracts.md) for the full mechanic.
 

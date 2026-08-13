@@ -12,13 +12,17 @@ Explains how the library receives its dependencies — the `Deps` contract in [s
 ```go
 // sandbox/contracts/deps/deps.go — what the library needs
 type Deps struct {
-	Now       func() time.Time
-	Printf    func(format string, a ...any) (int, error)
-	VerbLib   verbdeps.Lib
-	KeepLib   keepdeps.Lib
-	EmbedDeps embeddeps.Lib
+	Now        func() time.Time
+	Printf     func(format string, a ...any) (int, error)
+	VerbLib    verbdeps.Lib
+	KeepLib    keepdeps.Lib
+	EmbedDeps  embeddeps.Lib
+	IoLib      iodeps.Lib
+	NewRequest func(url string) serverdeps.Request
 }
 ```
+
+The last three are **standing capabilities**: the tracker never calls them, and the contract carries them because this repository is a template — see [`deps.Deps`](/docs/References/PublicApi/deps.Deps.md). Every adapter fills them anyway.
 
 `Deps` is the *only* door in the sandbox wall: since nothing under `sandbox/` may import an adapter, a third-party module, or an OS-bound stdlib package, every effect the library performs has to be a field on this struct.
 
@@ -37,12 +41,14 @@ type Deps struct {
 1. Add the field to `Deps` in [sandbox/contracts/deps/deps.go](/sandbox/contracts/deps/deps.go), named after the behavior it provides:
    ```go
    type Deps struct {
-       Now       func() time.Time
-       Printf    func(format string, a ...any) (n int, err error)
-       VerbLib   verbdeps.Lib
-       KeepLib   keepdeps.Lib
-       EmbedDeps embeddeps.Lib
-       Uuid      func() string // new requirement
+       Now        func() time.Time
+       Printf     func(format string, a ...any) (n int, err error)
+       VerbLib    verbdeps.Lib
+       KeepLib    keepdeps.Lib
+       EmbedDeps  embeddeps.Lib
+       IoLib      iodeps.Lib
+       NewRequest func(url string) serverdeps.Request
+       Uuid       func() string // new requirement
    }
    ```
 2. On every adapter, write a `<Field>Factory` returning the closure and assign it from that adapter's `New`, following the adapter specification located in [Specs.md](/docs/References/Specs.md):
@@ -162,12 +168,16 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
    func New(now time.Time) deps.Deps {
        adapter := &FrozenAdapter{now: now}
        adapter.Deps.Now = NowFactory(adapter)
+       adapter.Deps.Printf = PrintfFactory(adapter)
        adapter.Deps.VerbLib = VerbLibFactory(adapter)
        adapter.Deps.KeepLib = KeepLibFactory(adapter)
        adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
+       adapter.Deps.IoLib = IoLibFactory(adapter)
+       adapter.Deps.NewRequest = NewRequestFactory(adapter)
        return adapter.Deps
    }
    ```
+   Every field is assigned, including the standing capabilities this adapter's library never calls — leaving one out compiles fine and panics on first use.
 6. Compare the assignments in your `New` against `sandbox/contracts/deps/deps.go` field by field. A missing field will **not** fail the build.
 7. Register the new directory and file in [Structure.md](/docs/References/Structure.md), and add a row for the adapter in [Adapters.md](/docs/References/Adapters.md).
 8. If the adapter is public-facing, expose its `New` factory following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).

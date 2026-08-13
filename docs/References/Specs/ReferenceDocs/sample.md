@@ -10,8 +10,8 @@ Index of all public-facing components of the library, grouped by kind, with link
 ### [api.Lib](/docs/References/PublicApi/api.Lib.md)
 The library entry point. Returned by `lib.New`; exposes all library methods.
 
-### [api.ExampleLibObject](/docs/References/PublicApi/api.ExampleLibObject.md)
-An object created by the library with its dependencies automatically wired in.
+### `api.ExampleLibObject`
+An object created by the library with its dependencies automatically wired in. Shown unlinked because this sample's library is hypothetical and no detail page exists — an entry links to its page only when that page is real.
 
 ---
 

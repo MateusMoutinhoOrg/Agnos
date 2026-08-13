@@ -31,7 +31,7 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Add CLI Command](/docs/Tutorials/HandleCliCommands.md#add-cli-command)
   - [Remove CLI Command](/docs/Tutorials/HandleCliCommands.md#remove-cli-command)
 - [HandleAssets.md](/docs/Tutorials/HandleAssets.md)
-  - **description:** Add or edit a file under `assets/` the library reads instead of a Go string
+  - **description:** Add a template, long-form document, or image under `assets/`, and read it at runtime
   - [Add Asset](/docs/Tutorials/HandleAssets.md#add-asset)
   - [ListAssets in Runtime](/docs/Tutorials/HandleAssets.md#listassets-in-runtime)
   - [Retrieve Asset in Runtime](/docs/Tutorials/HandleAssets.md#retrieve-asset-in-runtime)
