@@ -4,7 +4,7 @@
 Covers converting a library that already exists into this project's dependency-injected structure. To start a new library from scratch, follow [ForkTemplate.md](/docs/Tutorials/ForkTemplate.md) instead. The steps are grouped into phases so progress is easy to track; every phase takes each file's action — **Copy**, **Create**, **Rewrite**, or **Delete** — from [TemplateFileActions.md](/docs/References/TemplateFileActions.md).
 
 ### Rules
-- Read [RULES.md](/docs/References/RULES.md) and [Structure.md](/docs/References/Structure.md) before starting.
+- Read [Structure.md](/docs/References/Structure.md) before starting.
 - Keep the separation defined in [Structure.md](/docs/References/Structure.md): public contract structs in `sandbox/contracts/`, internal factories in `sandbox/`, concrete dependencies in `adapters/`, the entry point in `sandbox/`, and the installed binary in `cmd/main/`. The command-line interface belongs to the library, as the `Sandboxmain` field of `api.Lib`, never to the binary. Contracts are structs of function fields, never interfaces — see [StructContracts.md](/docs/References/StructContracts.md).
 - The pre-existing package layout does **not** survive: all library logic ends up in `sandbox/`, calling every OS-bound and third-party dependency through `l.Deps`. Code left in its original packages, or still calling `os`/`net`/third-party APIs directly, is not adapted.
 - Every public type the library returns becomes a contract struct in `sandbox/contracts/api`, whose function fields are filled by factories in `sandbox/`. A type still declared in `sandbox/` and handed back to callers is not adapted.

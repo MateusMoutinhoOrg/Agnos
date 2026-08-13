@@ -23,7 +23,6 @@ Copying these files carries over the template's **generic** guides and specifica
 | Path | Description |
 |------|-------------|
 | `docs/References/Specs/*` | The specifications every file of the new library must be shaped by |
-| `docs/References/RULES.md` | The binding contribution rules |
 | `docs/References/Specs.md` | The index locating each specification |
 | `docs/Tutorials/ForkTemplate.md`, `docs/Tutorials/AdaptExistingLib.md`, `docs/Tutorials/RenameModule.md`, `docs/References/TemplateFileActions.md` | The template workflows and this page |
 | `docs/References/SandboxIsolation.md`, `docs/References/StructContracts.md` | The explanations of the structure's mechanics |

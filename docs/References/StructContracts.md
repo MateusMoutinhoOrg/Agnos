@@ -93,7 +93,7 @@ func New(basePath string) deps.Deps {
 }
 ```
 
-Binding a method into a field would work in Go, but the project forbids it: one shape for filling contracts means one place to check completeness — the `New` at the bottom of the file — on both sides of the wall. The rule is binding; see [RULES.md](/docs/References/RULES.md#factory-pattern) and the [Factories](/docs/References/Specs/Factories/Specs.md) specification. A field that is not a function has its factory return a value rather than a closure.
+Binding a method into a field would work in Go, but the project forbids it: one shape for filling contracts means one place to check completeness — the `New` at the bottom of the file — on both sides of the wall. The rule is binding; see the [Factories](/docs/References/Specs/Factories/Specs.md) specification. A field that is not a function has its factory return a value rather than a closure.
 
 ---
 

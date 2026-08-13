@@ -246,7 +246,6 @@ One page per lookup table or explained mechanic, plus the two directories the pr
 | `ApiSamplesList.md` | Every example under `examples/libraryExamples/` | ReferenceDocs |
 
 | `EmbeddedAssets.md` | Where the text the library displays comes from, and how to serve your own | ExplanationDocs |
-| `RULES.md` | Rules to follow when contributing to this project | Rules |
 | `Structure.md` | The project's schema and the purpose of each component | Structure |
 | `Specs.md` | Index of every specification and the files each one governs | |
 | `SandboxIsolation.md` | What the sandbox may not import, and why every effect is a dep | ExplanationDocs |

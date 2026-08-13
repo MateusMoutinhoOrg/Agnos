@@ -8,7 +8,7 @@ Covers adding, editing, and reading an asset — a file under [/assets/](/assets
 - An asset is reached by path through `l.Deps.EmbedDeps`, never by importing the `assets` package — that package may only be imported from outside the sandbox, by an adapter.
 - Every file under `assets/` is embedded by the single `//go:embed all:*` directive in `assets/asset.go`, wherever in the tree it sits. There is no pattern to keep in sync, and no way to add an asset the binary then cannot find.
 - A message file is a `Printf` format read through `message`: it carries the verbs, and the quotes, its values are rendered with. It must not end in a newline the caller also adds — `message` trims the trailing one.
-- Adding, renaming, or deleting an asset changes the project structure — update [Structure.md](/docs/References/Structure.md) in the same commit, per [RULES.md](/docs/References/RULES.md#file-changes).
+- Adding, renaming, or deleting an asset changes the project structure — update [Structure.md](/docs/References/Structure.md) in the same commit.
 
 ---
 

@@ -1,7 +1,7 @@
 # Adapters
 
 ## Description
-Lists every adapter shipped with the library — the opinionated `deps.Deps` implementations under `adapters/` — and when to use each one. Every adapter exposes a `New(...) deps.Deps` factory that runs one `<Field>Factory` per field of the contract and returns the filled contract struct, ready to be passed to [`lib.New`](/docs/References/PublicApi/lib.New.md) — the same [factory pattern](/docs/References/RULES.md#factory-pattern) the sandbox uses. Any single field can be replaced before injection — see [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md). To build a new adapter, follow [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
+Lists every adapter shipped with the library — the opinionated `deps.Deps` implementations under `adapters/` — and when to use each one. Every adapter exposes a `New(...) deps.Deps` factory that runs one `<Field>Factory` per field of the contract and returns the filled contract struct, ready to be passed to [`lib.New`](/docs/References/PublicApi/lib.New.md) — the same [factory pattern](/docs/References/StructContracts.md#factories-fill-the-fields) the sandbox uses. Any single field can be replaced before injection — see [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md). To build a new adapter, follow [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md).
 
 ---
 

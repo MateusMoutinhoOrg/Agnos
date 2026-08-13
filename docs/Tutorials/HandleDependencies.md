@@ -104,7 +104,7 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
 
 ### Rules
 - Each adapter lives in its own directory under [adapters/](/adapters/) and uses a package named after that directory.
-- The adapter is a struct carrying a `Deps deps.Deps` field, filled by one **factory** per field of the contract — the same factory pattern `sandbox/` uses, and a binding rule of the project. See [RULES.md](/docs/References/RULES.md#factory-pattern).
+- The adapter is a struct carrying a `Deps deps.Deps` field, filled by one **factory** per field of the contract — the same factory pattern `sandbox/` uses. See [StructContracts.md](/docs/References/StructContracts.md#factories-fill-the-fields).
 - Fields are never filled by binding methods of the adapter. Methods may exist only as unexported helpers a closure calls.
 - A single `New(...) deps.Deps` constructor calls **every** field factory, assigns its return value into the matching field, and returns the `deps.Deps` contract struct, never the concrete adapter type.
 - Filling every field is the author's job — an unassigned field compiles and panics on first call. See [StructContracts.md](/docs/References/StructContracts.md).

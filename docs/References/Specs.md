@@ -6,7 +6,7 @@ Entry point for every specification in this project. A specification is a **desc
 This index is the **only** place a specification is located from. Never browse `docs/References/Specs/` looking for one: find the file you are about to touch in an **Applies To** column below and follow the link.
 
 ### Rules
-- Before creating or editing a file, look it up in the **Applies To** columns below. If a row matches, the file must follow that specification — see [RULES.md](/docs/References/RULES.md#specification-compliance).
+- Before creating or editing a file, look it up in the **Applies To** columns below. If a row matches, the file must follow that specification.
 - Every specification lives in its own directory under `docs/References/Specs/`, containing a `Specs.md` and a `sample` file.
 - Creating, renaming, or deleting a specification requires updating this index in the same commit.
 
@@ -18,7 +18,7 @@ This index is the **only** place a specification is located from. Never browse `
 |------|------------|-------|
 | GeneralDoc | **Every** `.md` file in the project | [Specs](/docs/References/Specs/GeneralDoc/Specs.md) · [sample](/docs/References/Specs/GeneralDoc/sample.md) |
 | Readme | Root `README.md` | [Specs](/docs/References/Specs/Readme/Specs.md) · [sample](/docs/References/Specs/Readme/sample.md) |
-| Rules | `docs/References/RULES.md` | [Specs](/docs/References/Specs/Rules/Specs.md) · [sample](/docs/References/Specs/Rules/sample.md) |
+
 | Structure | `docs/References/Structure.md` | [Specs](/docs/References/Specs/Structure/Specs.md) · [sample](/docs/References/Specs/Structure/sample.md) |
 | AdaptersDoc | `docs/References/Adapters.md` | [Specs](/docs/References/Specs/AdaptersDoc/Specs.md) · [sample](/docs/References/Specs/AdaptersDoc/sample.md) |
 | Index | The index page of each theme — `docs/Index/<Theme>.md` | [Specs](/docs/References/Specs/Index/Specs.md) · [sample](/docs/References/Specs/Index/sample.md) |
@@ -54,4 +54,4 @@ Factories applies on top of the others, as GeneralDoc does for documentation: an
 2. If no row matches, no specification governs the file — follow [Structure.md](/docs/References/Structure.md) and, for `.md` files, [GeneralDoc](/docs/References/Specs/GeneralDoc/Specs.md).
 3. If a row matches, read its `Specs.md` and reproduce the required **Structure** section by section.
 4. Use the linked `sample` as the reference implementation.
-5. Apply the companion updates required by [RULES.md](/docs/References/RULES.md).
+5. Apply the companion updates described in the relevant tutorial.

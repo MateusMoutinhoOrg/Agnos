@@ -79,7 +79,7 @@ Defines the baseline shape every `.md` file in this project must have, whatever 
 
 #### Keep Documentation in Sync
 - Documentation must reflect the current state of the code.
-- When a change affects documentation, update every impacted file in the **same commit** — see [RULES.md](/docs/References/RULES.md).
+- When a change affects documentation, update every impacted file in the **same commit**.
 
 ## Structure
 1. **Title** (H1): the subject of the document, one per file.
