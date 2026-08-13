@@ -1,4 +1,4 @@
-package lib
+package publicfunctions
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"

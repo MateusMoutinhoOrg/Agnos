@@ -3,6 +3,7 @@ package lib
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib/publicfunctions"
 )
 
 // New builds the api.Lib entry point, storing the injected deps on it and
@@ -10,13 +11,13 @@ import (
 // function field to api.Lib means adding its factory call here.
 func New(d deps.Deps) api.Lib {
 	l := api.Lib{Deps: d}
-	l.Sandboxmain = SandboxmainFactory(&l)
-	l.AddCategory = AddCategoryFactory(&l)
-	l.GetCategory = GetCategoryFactory(&l)
-	l.ListCategories = ListCategoriesFactory(&l)
-	l.AddSpend = AddSpendFactory(&l)
-	l.AddReceived = AddReceivedFactory(&l)
-	l.ListTransactions = ListTransactionsFactory(&l)
-	l.Balance = BalanceFactory(&l)
+	l.Sandboxmain = publicfunctions.SandboxmainFactory(&l)
+	l.AddCategory = publicfunctions.AddCategoryFactory(&l)
+	l.GetCategory = publicfunctions.GetCategoryFactory(&l)
+	l.ListCategories = publicfunctions.ListCategoriesFactory(&l)
+	l.AddSpend = publicfunctions.AddSpendFactory(&l)
+	l.AddReceived = publicfunctions.AddReceivedFactory(&l)
+	l.ListTransactions = publicfunctions.ListTransactionsFactory(&l)
+	l.Balance = publicfunctions.BalanceFactory(&l)
 	return l
 }
