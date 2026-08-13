@@ -75,7 +75,7 @@ Covers creating a new opinionated implementation of the `Deps` contract under [a
    ```
 6. Compare the assignments in your `New` against `sandbox/contracts/deps/deps.go` field by field. A missing field will **not** fail the build.
 7. Register the new directory and file in [Structure.md](/docs/References/Structure.md), and add a row for the adapter in [Adapters.md](/docs/References/Adapters.md).
-8. If the adapter is public-facing, expose its `New` factory following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md#expose-in-the-public-api).
+8. If the adapter is public-facing, expose its `New` factory following [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md).
 9. If the adapter needs a runnable demonstration, add one following [HandleSamples.md](/docs/Tutorials/HandleSamples.md).
 10. Build the project and exercise the adapter:
    ```bash

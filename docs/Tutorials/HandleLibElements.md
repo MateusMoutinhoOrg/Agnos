@@ -9,6 +9,8 @@ Covers adding new elements — functions and objects — to the library's public
 - Dependencies are reached as `l.Deps.<Field>(...)` or `b.Deps.<Field>(...)` **inside** the closure, never captured at factory time — that is what keeps the injected value authoritative.
 - `sandbox/` is a closed sandbox: library code must never import [adapters/](/adapters/), [examples/libraryExamples/](/examples/libraryExamples/), a third-party module, or an OS-bound standard-library package (`os`, `net`, `syscall`, …) — reach every such effect through `Deps`. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
 - Adding a directory or file to [sandbox/internal/](/sandbox/internal/) requires updating [Structure.md](/docs/References/Structure.md).
+- Every public-facing entry must be listed in [PublicApi.md](/docs/References/PublicApi.md) with a detail page under [docs/References/PublicApi/](/docs/References/PublicApi/) named `<pkg>.<Symbol>.md`.
+- Detail pages are indexed by [PublicApi.md](/docs/References/PublicApi.md), so they take no row of their own in [LibUsage.md](/docs/Index/LibUsage.md); adding one requires updating [Structure.md](/docs/References/Structure.md).
 
 ---
 
@@ -47,10 +49,14 @@ Covers adding new elements — functions and objects — to the library's public
    }
    ```
 4. If the function needs a dependency that is not yet in the contract, add it following [HandleDependencies.md](/docs/Tutorials/HandleDependencies.md).
-5. Expose the function following [Expose in the Public API](#expose-in-the-public-api) below.
-6. If a new file was created, register it in [Structure.md](/docs/References/Structure.md).
-7. If the function needs a runnable demonstration, add one following [HandleSamples.md](/docs/Tutorials/HandleSamples.md).
-8. Build the project and call the new field once to confirm it is not nil.
+5. If a new file was created, register it in [Structure.md](/docs/References/Structure.md).
+6. If the function needs a runnable demonstration, add one following [HandleSamples.md](/docs/Tutorials/HandleSamples.md).
+7. Build the project and call the new field once to confirm it is not nil.
+8. If the function is public, expose it in the public API:
+   - Add the function to the section matching its kind in [PublicApi.md](/docs/References/PublicApi.md) with a one-line description.
+   - Create its detail page under [docs/References/PublicApi/](/docs/References/PublicApi/), named `<pkg>.<Symbol>.md` (e.g. `api.HasCategory.md`), following [HandleDocuments.md](/docs/Tutorials/HandleDocuments.md).
+   - Link the new detail page from its entry in [PublicApi.md](/docs/References/PublicApi.md).
+   - Register the detail page in [Structure.md](/docs/References/Structure.md).
 
 ---
 
@@ -123,21 +129,9 @@ Covers adding new elements — functions and objects — to the library's public
    }
    ```
 5. Assign `NewBudgetFactory`'s return value in the lib package's `New` constructor (Step 3 of "Add a Library Function").
-6. Expose the object, its constructor, and its fields following [Expose in the Public API](#expose-in-the-public-api) below.
-7. Register the new directory and file in [Structure.md](/docs/References/Structure.md).
-
----
-
-## Expose in the Public API
-
-### Rules
-- Every public-facing entry must be listed in [PublicApi.md](/docs/References/PublicApi.md).
-- Detail pages live in [docs/References/PublicApi/](/docs/References/PublicApi/) and are named `<pkg>.<Symbol>.md`.
-- Detail pages are indexed by `PublicApi.md`, so they take no row of their own in [LibUsage.md](/docs/Index/LibUsage.md); adding one requires updating [Structure.md](/docs/References/Structure.md).
-
-### Workflow
-1. Open [PublicApi.md](/docs/References/PublicApi.md).
-2. Add the struct, function, or field to the section matching its kind, with a one-line description. An object is public only through its `sandbox/contracts/api` struct — never document the `sandbox/internal/` type as the entry.
-3. Create the detail page under [docs/References/PublicApi/](/docs/References/PublicApi/), named `<pkg>.<Symbol>.md` after the package the symbol is declared in (e.g., `api.GetCategory.md`), following [HandleDocuments.md](/docs/Tutorials/HandleDocuments.md).
-4. Link the new detail page from its entry in [PublicApi.md](/docs/References/PublicApi.md).
-5. Register the detail page in [Structure.md](/docs/References/Structure.md).
+6. Register the new directory and file in [Structure.md](/docs/References/Structure.md).
+7. Expose the object, its constructor, and its fields in the public API:
+   - Add the struct, constructor, and fields to the sections matching their kind in [PublicApi.md](/docs/References/PublicApi.md), with a one-line description. Document only `sandbox/contracts/api` structs — never document `sandbox/internal/` types as public entries.
+   - Create detail pages under [docs/References/PublicApi/](/docs/References/PublicApi/), named `<pkg>.<Symbol>.md` after the package the symbol is declared in (e.g., `api.Budget.md`), following [HandleDocuments.md](/docs/Tutorials/HandleDocuments.md).
+   - Link detail pages from their entries in [PublicApi.md](/docs/References/PublicApi.md).
+   - Register detail pages in [Structure.md](/docs/References/Structure.md).
