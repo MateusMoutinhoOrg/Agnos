@@ -19,6 +19,9 @@ Index of the documentation for contributors changing this repository: the bindin
   - [Writing Custom Deps](/docs/Tutorials/HandleDependencies.md#writing-custom-deps)
   - [Injecting a Whole Library](/docs/Tutorials/HandleDependencies.md#injecting-a-whole-library)
   - [Add a Dependency](/docs/Tutorials/HandleDependencies.md#add-a-dependency)
+- [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md)
+  - **description:** Create a new opinionated implementation of the `Deps` contract
+  - [Add an Adapter](/docs/Tutorials/HandleAdapters.md#add-an-adapter)
 - [HandleLibElements.md](/docs/Tutorials/HandleLibElements.md)
   - **description:** Add a function or an object: declare, write the factory, register, publish
   - [Add a Library Function](/docs/Tutorials/HandleLibElements.md#add-a-library-function)
@@ -27,9 +30,6 @@ Index of the documentation for contributors changing this repository: the bindin
 - [HandleCliCommands.md](/docs/Tutorials/HandleCliCommands.md)
   - **description:** Add a command or a flag to the interface behind `api.Lib.Sandboxmain`
   - [Add a CLI Command](/docs/Tutorials/HandleCliCommands.md#add-a-cli-command)
-- [HandleAdapters.md](/docs/Tutorials/HandleAdapters.md)
-  - **description:** Create a new opinionated implementation of the `Deps` contract
-  - [Add an Adapter](/docs/Tutorials/HandleAdapters.md#add-an-adapter)
 - [HandleAssets.md](/docs/Tutorials/HandleAssets.md)
   - **description:** Add or edit a file under `assets/` the library reads instead of a Go string
   - [Add an Asset](/docs/Tutorials/HandleAssets.md#add-an-asset)
