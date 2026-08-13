@@ -58,7 +58,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
        return api.ExitOk
    }
    ```
-3. Dispatch to it from `Run` in [sandbox/internal/cli/cli.go](/sandbox/internal/cli/cli.go), in the `switch` over the command word:
+3. Dispatch to it from `Run` in [sandbox/internal/cli/run.go](/sandbox/internal/cli/run.go), in the `switch` over the command word:
    ```go
    case "largest":
        return commands.Largest(l)
@@ -81,7 +81,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
 
 ### Workflow
 1. Remove the command file from [sandbox/internal/cli/commands/](/sandbox/internal/cli/commands/).
-2. Remove the dispatch case for the command from `Run` in [sandbox/internal/cli/cli.go](/sandbox/internal/cli/cli.go).
+2. Remove the dispatch case for the command from `Run` in [sandbox/internal/cli/run.go](/sandbox/internal/cli/run.go).
 3. Remove the command from the usage screen in [assets/usages.txt](/assets/usages.txt).
 4. Remove any message assets exclusively used by this command from [sandbox/config/](/sandbox/config/) and [assets/](/assets/), following [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
 5. Remove the command from the Commands table of [Commands.md](/docs/References/Commands.md).

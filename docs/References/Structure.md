@@ -114,7 +114,7 @@ The command-line interface itself: the command dispatch `Sandboxmain` delegates 
 
 | File | Description | Spec |
 |------|-------------|------|
-| `cli.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the asset paths and message names the interface prints, and the amount parser | |
+| `run.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the asset paths and message names the interface prints, and the amount parser | |
 
 #### `/sandbox/internal/<object>/`
 One package per object the library creates, named after the object itself — `category/` and `transaction/` for this library.

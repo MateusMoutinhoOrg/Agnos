@@ -20,7 +20,7 @@ Covers adding, editing, and reading an asset — a file under [/assets/](/assets
    echo 'largest transaction: %s' > assets/messages/largest-transaction.txt
    ```
    Nothing else has to be embedded: `//go:embed all:*` in `assets/asset.go` already covers the whole directory.
-2. Name it in `sandbox/internal/cli/cli.go`, beside the other message constants, so call sites reference the constant rather than the path:
+2. Name it in `sandbox/config/cli.go`, beside the other message constants, so call sites reference the constant rather than the path:
    ```go
    // LargestTransactionMessage reports the biggest single transaction.
    LargestTransactionMessage = "largest-transaction"
