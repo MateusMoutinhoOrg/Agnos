@@ -12,7 +12,7 @@ Covers adding a command or a flag to the command-line interface — the dispatch
 
 ---
 
-## Add a CLI Command
+## Add CLI Command
 
 ### Workflow
 1. Add the command to the usage screen in [assets/usages.txt](/assets/usages.txt), in the same column layout as the commands already there:
@@ -21,24 +21,31 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    …
      largest [category]                            print the largest transaction
    ```
-2. Write the handler beside the other command helpers, draining its operands from the injected parser and printing the asset-backed messages through the injected writer:
+2. Create the command file in [sandbox/internal/cli/commands/](/sandbox/internal/cli/commands/), draining its operands from the injected parser and printing the asset-backed messages through the injected writer:
    ```go
-   // largest runs the `largest` command, printing the biggest single
+   package commands
+   
+   import (
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/config"
+   )
+   
+   // Largest runs the `largest` command, printing the biggest single
    // transaction of the budget or of one category.
-   func largest(l *api.Lib) int {
+   func Largest(l *api.Lib) int {
        verb := l.Deps.VerbLib
 
        listed := l.ListTransactions()
        if name, err := verb.GetNextStringArg(); err == nil {
            stored, found := l.GetCategory(name)
            if !found {
-               return failure(l, CategoryNotFoundMessage, name)
+               return Failure(l, config.CategoryNotFoundMessage, name)
            }
            listed = stored.ListTransactions()
        }
 
        if len(listed) == 0 {
-           l.Deps.Printf("%s\n", message(l, NoTransactionsMessage))
+           l.Deps.Printf("%s\n", config.NoTransactionsMessage)
            return api.ExitOk
        }
        biggest := listed[0]
@@ -51,10 +58,10 @@ Covers adding a command or a flag to the command-line interface — the dispatch
        return api.ExitOk
    }
    ```
-3. Dispatch to it from `Run`, in the `switch` over the command word:
+3. Dispatch to it from `Run` in [sandbox/internal/cli/cli.go](/sandbox/internal/cli/cli.go), in the `switch` over the command word:
    ```go
    case "largest":
-       return largest(l)
+       return commands.Largest(l)
    ```
 4. Read any flag the command adds **before** the positional arguments are drained, in `Run` — Verb marks a matched flag used, so reading flags first is what leaves only the command words behind:
    ```go
@@ -67,3 +74,15 @@ Covers adding a command or a flag to the command-line interface — the dispatch
    ```
 6. Add the command to the Commands table of [Commands.md](/docs/References/Commands.md), and any flag to its Flags table.
 7. Demonstrate it in a script under [examples/cliExamples/](/examples/cliExamples/) when it is worth showing, following [HandleCliExamples.md](/docs/Tutorials/HandleCliExamples.md).
+
+---
+
+## Remove CLI Command
+
+### Workflow
+1. Remove the command file from [sandbox/internal/cli/commands/](/sandbox/internal/cli/commands/).
+2. Remove the dispatch case for the command from `Run` in [sandbox/internal/cli/cli.go](/sandbox/internal/cli/cli.go).
+3. Remove the command from the usage screen in [assets/usages.txt](/assets/usages.txt).
+4. Remove any message assets exclusively used by this command from [sandbox/config/](/sandbox/config/) and [assets/](/assets/), following [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
+5. Remove the command from the Commands table of [Commands.md](/docs/References/Commands.md).
+6. Update any CLI examples in [examples/cliExamples/](/examples/cliExamples/) that were demonstrating the command.
