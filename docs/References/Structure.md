@@ -12,7 +12,7 @@ adapters/  ──▶  sandbox/  ◀──  cmd/, examples/libraryExamples/
 - **`/sandbox/`** is a **closed sandbox**: the pure library, and the command-line interface with it. Nothing inside it may import `adapters/`, `cmd/`, `examples/libraryExamples/`, a third-party module, or any OS-bound standard-library package. Every effect it needs arrives through the injected `Deps`. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md).
 - **`/adapters/`** sits outside the sandbox and is the only place OS-bound and third-party code is allowed. Each adapter imports `sandbox/contracts/deps` and nothing else from the sandbox.
 - **`/cmd/`** and **`/examples/libraryExamples/`** sit outside the sandbox too, and are the only places where an adapter and the sandbox meet — `cmd/` for the installable binary, `examples/libraryExamples/` for the runnable Go samples.
-- **`/assets/`** sits outside the sandbox as well: the text the library displays, compiled into the binary and reached only through the injected `Deps.EmbedDeps` contract, so the sandbox holds no display text of its own.
+- **`/assets/`** sits outside the sandbox as well: assets compiled into the binary and reached only through the injected `Deps.EmbedDeps` contract, so the sandbox holds no asset files of its own.
 
 Because the interface is `api.Lib.Sandboxmain` — one field of the library like any other — the binary in `cmd/main/` holds no command, no flag, and no output of its own: it wires, runs, and exits.
 
@@ -54,11 +54,11 @@ bash ./scripts/all.sh
 ---
 
 ## `/sandbox/`
-The closed sandbox — the pure library. It holds its own entry point, the contracts everything is wired through, and the internal implementation. It reaches nothing outside itself: every OS-bound or third-party effect arrives through the injected `Deps`. Its package is named `lib`, so consumers import it as `lib "…/sandbox"` and call `lib.New`.
+The closed sandbox — the pure library. It holds its own entry point, the contracts everything is wired through, the configuration constants, and the internal implementation. It reaches nothing outside itself: every OS-bound or third-party effect arrives through the injected `Deps`. Its package is named `lib`, so consumers import it as `lib "…/sandbox"` and call `lib.New`.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it | |
+| `new.go` | The `New` constructor storing `Deps` on `api.Lib` and delegating to the internal lib constructor | |
 
 ### `/sandbox/contracts/`
 The structs the rest of the project is wired through — the only part of the sandbox anything outside it may import. Contracts hold the project's **public types** and are structs of function fields, never interfaces; see [StructContracts.md](/docs/References/StructContracts.md). Contracts import nothing from `adapters/` or `sandbox/`.
@@ -85,11 +85,25 @@ The sandbox's copy of the embedded [Keep](https://github.com/MateusMoutinhoOrg/K
 | `keepdeps.go` | Copy of the embedded Keep library's api structs and constants, injected whole as the `Deps.KeepLib` field | |
 
 ##### `/sandbox/contracts/deps/embeddeps/`
-The sandbox's copy of an embedded-asset library's public api, for the same reason the two above exist: reading a file is an OS-bound effect, and compiling one into a binary needs the `//go:embed` directive, so the sandbox may declare neither. It is how the library reaches the text under [`/assets/`](#assets) — explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md).
+The sandbox's copy of an embedded-asset library's public api, for the same reason the two above exist: reading a file is an OS-bound effect, and compiling one into a binary needs the `//go:embed` directive, so the sandbox may declare neither. It is how the library reaches the assets under [`/assets/`](#assets) — explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md).
 
 | File | Description | Spec |
 |------|-------------|------|
 | `embeddeps.go` | Copy of the asset-reading api — `ReadFile`, `ListFiles`, `ListFilesRecursively` — injected whole as the `Deps.EmbedDeps` field | |
+
+##### `/sandbox/contracts/deps/iodeps/`
+The sandbox's copy of a filesystem IO library's public api. The sandbox may not import `os` or any OS-bound package, so it declares the shape it needs — file read/write, directory creation, existence checks, and listing — and the adapter, outside the sandbox, fills it.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `iodeps.go` | The `Lib` struct declaring every filesystem operation the sandbox requires, injected whole as the `Deps.IoLib` field | |
+
+##### `/sandbox/contracts/deps/serverdeps/`
+The sandbox's copy of an HTTP client library's public api. The sandbox may not import `net/http`, so it declares the request/response shape it needs, and the adapter fills it.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `serverdeps.go` | The `Request` and `Response` structs for HTTP communication, used by the `Deps.NewRequest` function field | |
 
 #### `/sandbox/contracts/api/`
 The structs the library hands back to callers.
@@ -98,25 +112,29 @@ The structs the library hands back to callers.
 |------|-------------|------|
 | `api.go` | The `Lib` entry-point struct plus one struct per object the lib creates, each carrying a `Deps` field | Outputs |
 
-### `/sandbox/`
-**Factories only** — no types. Each package here holds the functions that take a pointer to an [`api`](#sandboxcontractsapi) struct and return closures reading that struct's `Deps`, which the package's `New` constructor assigns into the matching function fields. Types never live here; they stay in `contracts/`. Go's `internal/` rule makes this tree unreachable from outside `sandbox/`, so neither consumers nor `adapters/` can reach in — the sandbox wall is enforced by the compiler, not by convention alone.
+### `/sandbox/config/`
+Static configuration the sandbox reads at compile time: the text every command prints, the flag spellings the interface understands, and the version string. Moving these out of the asset files and into Go constants keeps them type-checked and eliminates asset reads for standing text. Nothing outside the sandbox imports this package.
 
-#### `/sandbox/lib/`
-The entry-point implementation. The `internal/` parent already marks it private, so the package carries no `internal_` prefix.
+| File | Description | Spec |
+|------|-------------|------|
+| `cli.go` | The `Usages` help screen, every message constant the CLI prints, and the `HelpFlags`, `VersionFlags`, `QuietFlags` slices | |
+| `version.go` | The `Version` constant reported by `agnos-cli version` and `--version` | |
+
+### `/sandbox/lib/`
+The entry-point implementation and every internal package the library is built from. Each package here holds the functions that take a pointer to an [`api`](#sandboxcontractsapi) struct and return closures reading that struct's `Deps`, which the package's constructor assigns into the matching function fields. Types never live here; they stay in `contracts/`.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `new.go` | The `New(d deps.Deps) api.Lib` constructor that assigns every factory's return value and runs them all | LibFunctions |
-| `<Function>.go` | One file per lib function, holding its `<Field>Factory(l *api.Lib)` that returns a closure | LibFunctions |
 
-#### `/sandbox/cli/`
-The command-line interface itself: the command dispatch `Sandboxmain` delegates to, the paths of the text it prints, and the reading of amounts off the command line. It reads the command line through `deps.Deps.VerbLib`, takes every word it displays from `deps.Deps.EmbedDeps`, and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox and holds no display text of its own. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
+#### `/sandbox/lib/publicfunctions/`
+One file per public function field of `api.Lib`. Each file holds its `<Field>Factory(l *api.Lib)` that returns a closure. The `New` constructor in `sandbox/lib/new.go` calls every factory here to fill `api.Lib`.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `run.go` | The `Run(l *api.Lib, args []string) int` dispatch, one helper per command group, the asset paths and message names the interface prints, and the amount parser | |
+| `<Function>.go` | One file per lib function, holding its `<Field>Factory(l *api.Lib)` that returns a closure | LibFunctions |
 
-#### `/sandbox/<object>/`
+#### `/sandbox/lib/<object>/`
 One package per object the library creates, named after the object itself — `category/` and `transaction/` for this library.
 
 | File | Description | Spec |
@@ -124,37 +142,48 @@ One package per object the library creates, named after the object itself — `c
 | `<object>.go` | The object's `<Field>Factory` functions, each returning a closure, plus the `New(d deps.Deps, …) api.<Object>` constructor that propagates `Deps` and assigns every factory's return value | LibObjects |
 
 #### `/sandbox/lib/store/`
-Shared helpers over the injected database, used by `internal/lib/` and by every object package: the schema the tracker's records are persisted under, the lookups that reach it, and the encoding of a transaction's reference. It declares **no types and no factories** — it is the one internal package that is neither an object nor the entry point, so no specification governs it.
+Shared helpers over the injected database, used by `lib/` and by every object package: the schema the tracker's records are persisted under, the lookups that reach it, and the encoding of a transaction's reference. It declares **no types and no factories** — it is the one internal package that is neither an object nor the entry point, so no specification governs it.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `store.go` | The database `Props`, the field-name constants, and the helpers that read a stored record through `deps.Deps.KeepLib` | |
 
+### `/sandbox/cli/`
+The command-line interface itself: the command dispatch `Sandboxmain` delegates to. It reads the command line through `deps.Deps.VerbLib`, takes the text it prints from `sandbox/config`, and writes every line through `deps.Deps.Printf`, so the whole interface stays inside the closed sandbox. Like `store/`, it is neither an object nor the entry point, so no specification governs it, and it declares **no types and no factories**.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `run.go` | The `Run(l *api.Lib, args []string) int` dispatch: flag handling, command matching, and delegation to `commands/` | |
+
+#### `/sandbox/cli/commands/`
+One file per command or command group the interface supports. Each file holds the handler function the `Run` dispatch delegates to. Like `cli/` itself, this package declares **no types and no factories**.
+
+| File | Description | Spec |
+|------|-------------|------|
+| `<command>.go` | One file per command or command group, holding the handler function that `Run` dispatches to | |
+
 ---
 
 ## `/adapters/`
-Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontractsdeps) contract, each providing a distinct concrete behavior. This is where OS-bound and third-party code lives; an adapter imports `sandbox/contracts/deps` and nothing else from `sandbox/`. An adapter fills its contract with the same **factories** [`sandbox/`](#sandboxinternal) uses — the carrier is the adapter struct, which declares the `Deps` field the factories' return values are assigned into.
+Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontractsdeps) contract, each providing a distinct concrete behavior. This is where OS-bound and third-party code lives; an adapter imports `sandbox/contracts/deps` and nothing else from `sandbox/`. An adapter fills its contract with the same **factories** [`sandbox/`](#sandboxlib) uses — the carrier is the adapter struct, which declares the `Deps` field the factories' return values are assigned into.
 
 ### `/adapters/<name>/`
 
 | File | Description | Spec |
 |------|-------------|------|
-| `<name>.go` | A struct carrying a `Deps` field, one `<Field>Factory(a *<Name>Adapter)` per `Deps` field returning a closure, plus the `New(...) deps.Deps` constructor that assigns every factory's return value and runs them all | Adapters |
-| `<field>.go` | One factory, split out of `<name>.go` when it carries conversion helpers of its own — `embed.go` in `standard/`, which wraps the compiled-in [`/assets/`](#assets) into the `Deps.EmbedDeps` contract. `New` still calls it | Factories |
+| `<name>.go` | A struct carrying a `Deps` field, one `<Field>Factory` per `Deps` field returning a closure, plus the `New(...) deps.Deps` constructor that assigns every factory's return value and runs them all | Adapters |
+| `<field>.go` | One factory, split out of `<name>.go` when it carries conversion helpers of its own — `embed.go` wraps the compiled-in [`/assets/`](#assets) into the `Deps.EmbedDeps` contract, `io.go` fills `Deps.IoLib` with `os`/`filepath` calls, `server.go` fills `Deps.NewRequest` with `net/http` calls. `New` still calls each one | Factories |
 
 ---
 
 ## `/assets/`
-Outside the sandbox. The files the library displays instead of holding them as Go strings: the interface's text today, images and item templates as the project grows. They are compiled into the binary, so an installed `agnos-cli` carries its own help screen with no files beside it, and they are reached only through the injected `Deps.EmbedDeps` contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
+Outside the sandbox. The files the library serves through the injected `Deps.EmbedDeps` contract: assets compiled into the binary, so an installed `agnos-cli` carries them with no files beside it, and they are reached only through the injected contract — never imported by the sandbox. The mechanic is explained in [EmbeddedAssets.md](/docs/References/EmbeddedAssets.md); adding one is [HandleAssets.md](/docs/Tutorials/HandleAssets.md).
 
 This directory is a Go package for one reason: a `//go:embed` directive can only reach files inside its own package directory, so the directive has to sit next to the assets. That single directive is `//go:embed all:*`, which takes **every** file in the tree, so a new asset needs no change to it — put the file here and it exists at runtime.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `asset.go` | Package `assets`: the `//go:embed all:*` directive and the `Files` embedded filesystem the standard adapter serves | |
-| `version.txt` | The interface version reported by `agnos-cli version` and `--version` | |
-| `usages.txt` | The help screen, printed for `help`, for `--help`, and after any refused command line | |
-| `messages/<name>.txt` | One file per line the interface can print, named after what it reports; a `Printf` format when it names a value | |
 
 ---
 
@@ -220,14 +249,14 @@ Documentation of the project, split by **kind of page**: `Index/` holds one entr
 | `References/` | Every lookup and explanation page, whatever theme it belongs to |
 
 ### `/docs/Index/`
-One page per theme. The four themes are `CliUsage` — installing the binary, driving it from a terminal, and the command surface; `LibUsage` — consuming the same behavior as a Go library, and the public API; `Development` — contributing: the rules, the mechanics, the workflows, the specifications; and `Templating` — turning this repository into another library.
+One page per theme. The four themes are `CliUsage` — installing the binary, driving it from a terminal, and the command surface; `LibUsage` — consuming the same behavior as a Go library, and the public API; `Development` — contributing: the mechanics, the workflows, the specifications; and `Templating` — turning this repository into another library.
 
 | File | Description | Spec |
 |------|-------------|------|
 | `<Theme>.md` | The theme's entry point: its Tutorials and its References, each entry listing that page's sections | Index |
 
 ### `/docs/Tutorials/`
-One page per workflow, its title phrased as the action it performs. A page can belong to one or more themes, and the theme indexes in [`/docs/Index/`](#docsindex) are what say which — `InstallCli.md`, `UseCli.md` and `RunCliSample.md` under `CliUsage`; `LibInitialization.md` and the domain workflows under `LibUsage`; the `Handle<Subject>.md` guides and `Build.md` under `Development`; `ForkTemplate.md`, `AdaptExistingLib.md` and `RenameModule.md` under `Templating`.
+One page per workflow, its title phrased as the action it performs. A page can belong to one or more themes, and the theme indexes in [`/docs/Index/`](#docsindex) are what say which.
 
 | File | Description | Spec |
 |------|-------------|------|
