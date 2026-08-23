@@ -18,7 +18,7 @@ const (
 	ExitFailure = 2
 )
 
-type Lib struct {
+type SandBox struct {
 	// Deps is the dependency set injected by lib.New, carried here so every
 	// factory-built function field can reach it.
 	Deps deps.Deps

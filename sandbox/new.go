@@ -1,15 +1,15 @@
-package lib
+package sandbox
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/lib"
 )
 
-// New injects a Deps struct into the library and returns the api.Lib entry
-// point. It delegates to the internal lib constructor, which stores the deps
-// on the struct and runs the factories over it, each of which fills one
-// function field with a closure reading those deps.
+// New builds the api.Lib entry point, storing the injected deps on it and
+// running every lib factory over it to fill its function fields. Adding a
+// function field to api.Lib means adding its factory call here.
 func New(d deps.Deps) api.Lib {
-	return lib.New(d)
+	l := api.Lib{Deps: d}
+	l.Sandboxmain = publicfunctions.SandboxmainFactory(&l)
+	return l
 }

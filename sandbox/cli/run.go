@@ -19,9 +19,9 @@ package cli
 // SandboxmainFactory in sandbox/lib.
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands"
 )
 
 // Run is the body of api.Lib.Sandboxmain: it dispatches one command line and
@@ -44,7 +44,7 @@ func Run(l *api.Lib, args []string) int {
 	}
 	// Read the flag before the positional arguments: Verb marks a matched
 	// flag used, so draining what is left hands back only the command words.
-	quiet := verb.IsPresent(config.QuietFlags)
+	//quiet := verb.IsPresent(config.QuietFlags)
 
 	command, err := verb.GetNextStringArg()
 	if err != nil {
@@ -57,16 +57,6 @@ func Run(l *api.Lib, args []string) int {
 		return api.ExitOk
 	case "version":
 		return commands.VersionCommand(l)
-	case "category":
-		return commands.Category(l, quiet)
-	case "spend":
-		return commands.Record(l, api.Spend, quiet)
-	case "received":
-		return commands.Record(l, api.Received, quiet)
-	case "transactions":
-		return commands.Transactions(l)
-	case "balance":
-		return commands.Balance(l)
 	}
 	return commands.UsageError(l, config.UnknownCommand, command)
 }
