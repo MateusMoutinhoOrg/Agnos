@@ -30,7 +30,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 func CommandHandler(d deps.Deps, entries api.CliEntrys) int {
 
 	if entries.Exist("command") {
-		command := entries.GetValue("command")
+		command := entries.GetValue("command", 0)
 		d.Printf("Command %s not found\n", command.String())
 	}
 

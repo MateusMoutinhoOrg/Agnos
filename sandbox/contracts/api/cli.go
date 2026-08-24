@@ -43,7 +43,7 @@ type CliArg struct {
 }
 
 type CliEntrys struct {
-	GetValue func(id string) CliValue
+	GetValue func(id string, index int) CliValue
 	Exist    func(id string) bool
 	Size     func(id string) int
 }
