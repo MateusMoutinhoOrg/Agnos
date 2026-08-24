@@ -16,19 +16,34 @@ const (
 	FlagTypeBool
 )
 
-type CliFlag struct {
+type Cliflag struct {
+	Name        string
+	Description string
+	Examples    []string
+
 	ValidIdentifiers []string
 	Values           []FlagValue
 	Type             int
+	MinSize          int
+	MaxSize          int
 	Required         bool
+}
+
+// it will never have errors here, since the validation steps will ensure
+// the flags its correct.
+type FlagsRetriver struct {
+	GetIntFlag    func(name string, index int) int
+	GetStringFlag func(name string, index int) string
+	GetFloatFlag  func(name string, index int) float64
+	GetBoolFlag   func(name string, index int) bool
 }
 
 type CliCommand struct {
 	ValidStartIdentifiers []string
+	Flags                 []Cliflag
 	Description           string
 	Examples              []string
-	Flags                 []CliFlag
-	Handler               func(deps deps.Deps) int
+	Handler               func(deps deps.Deps, fr FlagsRetriver) int
 }
 
 const (
