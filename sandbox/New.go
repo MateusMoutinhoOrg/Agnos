@@ -1,7 +1,6 @@
 package sandbox
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
@@ -9,8 +8,8 @@ import (
 // New builds the api.Lib entry point, storing the injected deps on it and
 // running every lib factory over it to fill its function fields. Adding a
 // function field to api.Lib means adding its factory call here.
-func New(d deps.Deps) api.SandBox {
-	l := api.SandBox{Deps: d}
-	l.CliMain = cli.CliMainFactory(&l)
-	return l
+func New(deps deps.Deps) api.SandBox {
+	sandbox := api.SandBox{Deps: depss}
+	SetCliProps(&sandbox)
+	return sandbox
 }
