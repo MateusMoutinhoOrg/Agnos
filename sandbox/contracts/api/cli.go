@@ -17,7 +17,7 @@ const (
 )
 
 type Cliflag struct {
-	Name             string
+	Id               string
 	ValidIdentifiers []string
 
 	Description string
@@ -33,7 +33,7 @@ type Cliflag struct {
 }
 
 type CliArg struct {
-	Name        string
+	Id          string
 	Description string
 	Examples    []string
 	Values      []CliValue
@@ -43,8 +43,9 @@ type CliArg struct {
 }
 
 type CliEntrys struct {
-	GetArgByName  func(name string) *CliArg
-	GetFlagByName func(name string) *Cliflag
+	GetValue func(id string) CliValue
+	Exist    func(id string) bool
+	Size     func(id string) int
 }
 
 type CliCommand struct {
