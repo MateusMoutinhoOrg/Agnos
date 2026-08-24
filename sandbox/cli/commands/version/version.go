@@ -12,11 +12,13 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand{
 			sandbox.Deps.ProjectName + " --version",
 			sandbox.Deps.ProjectName + " version"
 		}, 
-		Handler:               Command,
+
+
+		Handler:               CommandHandler,
 	}
 }
 
-func Command(sandbox *api.SandBox, fr api.FlagsRetriver) int {
+func CommandHandler(sandbox *api.SandBox, fr api.FlagsRetriver) int {
 	sandbox.Deps.Printf("%s\n")
 	return api.ExitOk
 }
