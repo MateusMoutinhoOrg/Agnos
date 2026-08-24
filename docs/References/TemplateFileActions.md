@@ -31,7 +31,7 @@ Copying these files carries over the template's **generic** guides and specifica
 | `sandbox/new.go` | The `New` constructor storing `Deps` on `api.Lib` and running the internal factories over it |
 | `sandbox/contracts/deps/embeddeps/embeddeps.go`, `adapters/standard/embed.go`, `assets/asset.go` | The asset mechanic: the read-only contract, the factory serving the compiled-in files, and the `//go:embed all:*` directive taking the whole asset tree — generic, whatever the new library reads |
 | `sandbox/contracts/deps/iodeps/iodeps.go`, `adapters/standard/io.go` | The filesystem mechanic: the contract and the factory filling it over `os` and `path/filepath` — generic, whatever the new library writes |
-| `sandbox/contracts/deps/serverdeps/serverdeps.go`, `adapters/standard/server.go` | The HTTP mechanic: the request/response contracts and the factory filling them over `net/http` — generic, whatever the new library fetches |
+| `sandbox/contracts/deps/requestdeps/requestdeps.go`, `adapters/standard/request.go` | The HTTP mechanic: the request/response contracts and the factory filling them over `net/http` — generic, whatever the new library fetches |
 
 ---
 

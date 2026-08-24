@@ -6,7 +6,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/embeddeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/iodeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serverdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/requestdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 )
 
@@ -35,7 +35,7 @@ import (
 // library arrives as one struct field, with no getter method and no bridging
 // type around it. The sandbox never imports Verb, Keep, the `embed`
 // machinery, os, or net/http — it declares a copy of each api in verbdeps,
-// keepdeps, embeddeps, iodeps and serverdeps, and the adapter, which lives
+// keepdeps, embeddeps, iodeps and requestdeps, and the adapter, which lives
 // outside the sandbox, fills it.
 type Deps struct {
 	// Now returns the current time, used to stamp categories and
@@ -81,5 +81,5 @@ type Deps struct {
 	// The tracker does not use it: nothing it does leaves the machine. A
 	// derived library that must speak HTTP has the contract ready, filled by
 	// the standard adapter over net/http.
-	NewRequest func(url string) serverdeps.Request
+	NewRequest func(url string) requestdeps.Request
 }

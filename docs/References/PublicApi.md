@@ -82,8 +82,8 @@ The sandbox's copy of an embedded-asset library's api, injected whole as the `de
 ### [iodeps.Lib](/docs/References/PublicApi/iodeps.Lib.md)
 The sandbox's copy of a filesystem library's api, injected whole as the `deps.Deps.IoLib` field: reads, writes, and lists paths on disk.
 
-### [serverdeps.Request](/docs/References/PublicApi/serverdeps.Request.md)
+### [requestdeps.Request](/docs/References/PublicApi/requestdeps.Request.md)
 One HTTP request under construction, handed back by the `deps.Deps.NewRequest` field already bound to a url.
 
-### [serverdeps.Response](/docs/References/PublicApi/serverdeps.Response.md)
-One HTTP response, handed back by `serverdeps.Request.Fetch` with its body still open.
+### [requestdeps.Response](/docs/References/PublicApi/requestdeps.Response.md)
+One HTTP response, handed back by `requestdeps.Request.Fetch` with its body still open.

@@ -27,7 +27,7 @@ An adapter filling `Printf` with a buffer and `VerbLib` with a fixed argument ve
 
 ## Standing Capabilities
 
-Three fields are declared and filled like any other dependency, but the financial tracker never calls them: [`EmbedDeps`](/docs/References/PublicApi/embeddeps.Lib.md), [`IoLib`](/docs/References/PublicApi/iodeps.Lib.md), and [`NewRequest`](/docs/References/PublicApi/serverdeps.Request.md). They ship because this repository is a template — a derived library reads embedded assets, touches the filesystem, or speaks HTTP without designing a contract for it first.
+Three fields are declared and filled like any other dependency, but the financial tracker never calls them: [`EmbedDeps`](/docs/References/PublicApi/embeddeps.Lib.md), [`IoLib`](/docs/References/PublicApi/iodeps.Lib.md), and [`NewRequest`](/docs/References/PublicApi/requestdeps.Request.md). They ship because this repository is a template — a derived library reads embedded assets, touches the filesystem, or speaks HTTP without designing a contract for it first.
 
 An adapter must fill them regardless. An unfilled field is a nil function the compiler does not catch, and it panics on first use, so "the current library does not call it" is not a reason to skip one.
 
@@ -35,4 +35,4 @@ An adapter must fill them regardless. An unfilled field is a nil function the co
 |-------|-----------|------------|
 | `EmbedDeps` | `EmbedDepsFactory` in `adapters/standard/embed.go` | The [`/assets/`](/docs/References/Structure.md#assets) tree compiled into the binary, served from its root |
 | `IoLib` | `IoLibFactory` in `adapters/standard/io.go` | `os` and `path/filepath`, resolving whatever path the caller passes |
-| `NewRequest` | `NewRequestFactory` in `adapters/standard/server.go` | `net/http`, with every round trip bounded by a timeout the sandbox cannot set for itself |
+| `NewRequest` | `NewRequestFactory` in `adapters/standard/request.go` | `net/http`, with every round trip bounded by a timeout the sandbox cannot set for itself |

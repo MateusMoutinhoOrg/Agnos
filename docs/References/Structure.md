@@ -98,12 +98,12 @@ The sandbox's copy of a filesystem IO library's public api. The sandbox may not 
 |------|-------------|------|
 | `iodeps.go` | The `Lib` struct declaring every filesystem operation the sandbox requires, injected whole as the `Deps.IoLib` field | |
 
-##### `/sandbox/contracts/deps/serverdeps/`
+##### `/sandbox/contracts/deps/requestdeps/`
 The sandbox's copy of an HTTP client library's public api. The sandbox may not import `net/http`, so it declares the request/response shape it needs, and the adapter fills it.
 
 | File | Description | Spec |
 |------|-------------|------|
-| `serverdeps.go` | The `Request` and `Response` structs for HTTP communication, used by the `Deps.NewRequest` function field | |
+| `requestdeps.go` | The `Request` and `Response` structs for HTTP communication, used by the `Deps.NewRequest` function field | |
 
 #### `/sandbox/contracts/api/`
 The structs the library hands back to callers.
@@ -172,7 +172,7 @@ Outside the sandbox. Opinionated implementations of the [`Deps`](#sandboxcontrac
 | File | Description | Spec |
 |------|-------------|------|
 | `<name>.go` | A struct carrying a `Deps` field, one `<Field>Factory` per `Deps` field returning a closure, plus the `New(...) deps.Deps` constructor that assigns every factory's return value and runs them all | Adapters |
-| `<field>.go` | One factory, split out of `<name>.go` when it carries conversion helpers of its own — `embed.go` wraps the compiled-in [`/assets/`](#assets) into the `Deps.EmbedDeps` contract, `io.go` fills `Deps.IoLib` with `os`/`filepath` calls, `server.go` fills `Deps.NewRequest` with `net/http` calls. `New` still calls each one | Factories |
+| `<field>.go` | One factory, split out of `<name>.go` when it carries conversion helpers of its own — `embed.go` wraps the compiled-in [`/assets/`](#assets) into the `Deps.EmbedDeps` contract, `io.go` fills `Deps.IoLib` with `os`/`filepath` calls, `request.go` fills `Deps.NewRequest` with `net/http` calls. `New` still calls each one | Factories |
 
 ---
 

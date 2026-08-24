@@ -18,7 +18,7 @@ type Deps struct {
 	KeepLib    keepdeps.Lib
 	EmbedDeps  embeddeps.Lib
 	IoLib      iodeps.Lib
-	NewRequest func(url string) serverdeps.Request
+	NewRequest func(url string) requestdeps.Request
 }
 ```
 
@@ -47,7 +47,7 @@ The last three are **standing capabilities**: the tracker never calls them, and 
        KeepLib    keepdeps.Lib
        EmbedDeps  embeddeps.Lib
        IoLib      iodeps.Lib
-       NewRequest func(url string) serverdeps.Request
+       NewRequest func(url string) requestdeps.Request
        Uuid       func() string // new requirement
    }
    ```

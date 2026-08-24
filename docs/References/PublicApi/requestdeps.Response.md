@@ -1,4 +1,4 @@
-# `serverdeps.Response`
+# `requestdeps.Response`
 
 **Type:** Struct
 
@@ -15,11 +15,11 @@ type Response struct {
 
 ## Description
 
-One HTTP response, declared in `sandbox/contracts/deps/serverdeps/` and handed back by [`serverdeps.Request.Fetch`](/docs/References/PublicApi/serverdeps.Request.md) with its body still open. Like the request it came from, it is the sandbox's **copy** of an HTTP client api: the sandbox may not import `net/http`, so the adapter fills these four fields — see [`standard.New`](/docs/References/PublicApi/standard.New.md).
+One HTTP response, declared in `sandbox/contracts/deps/requestdeps/` and handed back by [`requestdeps.Request.Fetch`](/docs/References/PublicApi/requestdeps.Request.md) with its body still open. Like the request it came from, it is the sandbox's **copy** of an HTTP client api: the sandbox may not import `net/http`, so the adapter fills these four fields — see [`standard.New`](/docs/References/PublicApi/standard.New.md).
 
 An HTTP error **status** is not a transport error. `Fetch` returns no error for a `404` or a `500`; the status arrives through `GetStatusCode`, and the caller decides what it means.
 
-The caller **must** `Close` every response returned without an error, whether or not the body is read, or the underlying connection leaks. The financial tracker never creates one — see [`serverdeps.Request`](/docs/References/PublicApi/serverdeps.Request.md) for why the contract ships anyway.
+The caller **must** `Close` every response returned without an error, whether or not the body is read, or the underlying connection leaks. The financial tracker never creates one — see [`requestdeps.Request`](/docs/References/PublicApi/requestdeps.Request.md) for why the contract ships anyway.
 
 ## Fields
 

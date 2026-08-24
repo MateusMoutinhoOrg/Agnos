@@ -1,4 +1,4 @@
-# `serverdeps.Request`
+# `requestdeps.Request`
 
 **Type:** Struct
 
@@ -15,7 +15,7 @@ type Request struct {
 
 ## Description
 
-One HTTP request under construction, declared in `sandbox/contracts/deps/serverdeps/` and handed back by the [`deps.Deps.NewRequest`](/docs/References/PublicApi/deps.Deps.md) field already bound to a url. It is the sandbox's **copy** of the api an HTTP client library exposes, for the same reason [`iodeps.Lib`](/docs/References/PublicApi/iodeps.Lib.md) exists: opening a socket is an OS-bound effect, so `net/http` may not appear inside the sandbox. The adapter, which lives outside it, fills every field — see [`standard.New`](/docs/References/PublicApi/standard.New.md).
+One HTTP request under construction, declared in `sandbox/contracts/deps/requestdeps/` and handed back by the [`deps.Deps.NewRequest`](/docs/References/PublicApi/deps.Deps.md) field already bound to a url. It is the sandbox's **copy** of the api an HTTP client library exposes, for the same reason [`iodeps.Lib`](/docs/References/PublicApi/iodeps.Lib.md) exists: opening a socket is an OS-bound effect, so `net/http` may not appear inside the sandbox. The adapter, which lives outside it, fills every field — see [`standard.New`](/docs/References/PublicApi/standard.New.md).
 
 It differs from the other injected libraries in one way: a request is created **per call** rather than injected once, so the entry point is a function field on `Deps` rather than a library struct. Everything here is what that function hands back.
 
@@ -30,7 +30,7 @@ The setters mutate the pending request and may be called in any order; nothing l
 | `AddHeader func(key string, value string)` | Sets one header on the pending request, replacing whatever value that key carried before. |
 | `SetMethod func(method string)` | Sets the HTTP method the request is sent with — `"POST"`, `"PUT"`, `"DELETE"`. Defaults to `"GET"`. |
 | `SetBody func(body []byte)` | Sets the bytes sent as the request body. Defaults to none. |
-| `Fetch func() (Response, error)` | Sends the request and returns the [`Response`](/docs/References/PublicApi/serverdeps.Response.md). The error reports a request that could not be built or a round trip that failed; an HTTP error **status** is not an error here. A `Response` returned without an error holds an open body the caller must `Close`. |
+| `Fetch func() (Response, error)` | Sends the request and returns the [`Response`](/docs/References/PublicApi/requestdeps.Response.md). The error reports a request that could not be built or a round trip that failed; an HTTP error **status** is not an error here. A `Response` returned without an error holds an open body the caller must `Close`. |
 
 ## Examples
 

@@ -6,7 +6,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serverdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/requestdeps"
 )
 
 // requestTimeout bounds one whole round trip — connect, send, and read the
@@ -17,13 +17,13 @@ const requestTimeout = 30 * time.Second
 
 // NewRequestFactory returns the value that fills deps.Deps.NewRequest: the implementation
 // of the HTTP request dependency using the standard library's net/http package.
-func NewRequestFactory(s *StandardAdapter) func(url string) serverdeps.Request {
-	return func(url string) serverdeps.Request {
+func NewRequestFactory(s *StandardAdapter) func(url string) requestdeps.Request {
+	return func(url string) requestdeps.Request {
 		headers := make(map[string]string)
 		method := "GET"
 		var reqBody []byte
 
-		return serverdeps.Request{
+		return requestdeps.Request{
 			AddHeader: func(key string, value string) {
 				headers[key] = value
 			},
@@ -33,7 +33,7 @@ func NewRequestFactory(s *StandardAdapter) func(url string) serverdeps.Request {
 			SetBody: func(body []byte) {
 				reqBody = body
 			},
-			Fetch: func() (serverdeps.Response, error) {
+			Fetch: func() (requestdeps.Response, error) {
 				var bodyReader io.Reader
 				if reqBody != nil {
 					bodyReader = bytes.NewReader(reqBody)
@@ -41,7 +41,7 @@ func NewRequestFactory(s *StandardAdapter) func(url string) serverdeps.Request {
 
 				req, err := http.NewRequest(method, url, bodyReader)
 				if err != nil {
-					return serverdeps.Response{}, err
+					return requestdeps.Response{}, err
 				}
 
 				for k, v := range headers {
@@ -51,10 +51,10 @@ func NewRequestFactory(s *StandardAdapter) func(url string) serverdeps.Request {
 				client := &http.Client{Timeout: requestTimeout}
 				resp, err := client.Do(req)
 				if err != nil {
-					return serverdeps.Response{}, err
+					return requestdeps.Response{}, err
 				}
 
-				return serverdeps.Response{
+				return requestdeps.Response{
 					GetStatusCode: func() int {
 						return resp.StatusCode
 					},

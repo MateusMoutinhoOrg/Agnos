@@ -1,4 +1,4 @@
-package serverdeps
+package requestdeps
 
 // This package is the sandbox's *copy* of the api an HTTP client library
 // exposes — the same mechanic as verbdeps, keepdeps, embeddeps and iodeps,
