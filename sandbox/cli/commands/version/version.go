@@ -2,7 +2,6 @@ package version
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 func NewCommand(sandbox *api.SandBox) api.CliCommand {
@@ -17,7 +16,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(d deps.Deps, entries api.CliEntrys) int {
-	d.Printf("%s\n", "version")
+func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+	sandbox.Deps.Printf("%s\n", "version")
 	return api.ExitOk
 }

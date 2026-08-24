@@ -1,7 +1,5 @@
 package api
 
-import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
-
 type CliValue interface {
 	String() string
 	Int() int
@@ -43,9 +41,8 @@ type CliArg struct {
 }
 
 type CliEntrys struct {
-	GetValue func(id string, index int) CliValue
-	Exist    func(id string) bool
-	Size     func(id string) int
+	GetArgById  func(id string) *CliArg
+	GetFlagById func(id string) *Cliflag
 }
 
 type CliCommand struct {
@@ -54,7 +51,7 @@ type CliCommand struct {
 	Flags                 []Cliflag
 	Description           string
 	Examples              []string
-	Handler               func(deps deps.Deps, entries CliEntrys) int
+	Handler               func(sandbox *SandBox, entries CliEntrys) int
 }
 
 const (

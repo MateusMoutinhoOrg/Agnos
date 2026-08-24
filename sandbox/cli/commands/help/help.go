@@ -1,8 +1,9 @@
 package help
 
 import (
+	"slices"
+
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
 func NewCommand(sandbox *api.SandBox) api.CliCommand {
@@ -27,12 +28,17 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(d deps.Deps, entries api.CliEntrys) int {
-
-	if entries.Exist("command") {
-		command := entries.GetValue("command", 0)
-		d.Printf("Command %s not found\n", command.String())
+func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+	command := entries.GetArgById("command")
+	if len(command.Values) == 0 {
+		sandbox.Deps.Printf("average  help here ")
 	}
-
+	chosen := command.Values[0].String()
+	for _, c := range sandbox.Commands {
+		if slices.Contains(c.ValidStartIdentifiers, chosen) {
+			sandbox.Deps.Printf("%s\n", c.Description)
+			return api.ExitOk
+		}
+	}
 	return api.ExitOk
 }
