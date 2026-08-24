@@ -2,7 +2,7 @@ package api
 
 import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 
-type FlagValue interface {
+type CliValue interface {
 	String() string
 	Int() int
 	Float() float64
@@ -10,10 +10,10 @@ type FlagValue interface {
 }
 
 const (
-	FlagTypeString = iota
-	FlagTypeInt
-	FlagTypeFloat
-	FlagTypeBool
+	CliTypeString = iota
+	CliTypeInt
+	CliTypeFloat
+	CliTypeBool
 )
 
 type Cliflag struct {
@@ -22,7 +22,7 @@ type Cliflag struct {
 	Examples    []string
 
 	ValidIdentifiers []string
-	Values           []FlagValue
+	Values           []CliValue
 	Type             int
 	MinSize          int
 	MaxSize          int
@@ -31,7 +31,10 @@ type Cliflag struct {
 type CliArg struct {
 	Name        string
 	Description string
+	Values      []CliValue
 	Required    bool
+	Type        int
+	Size        int
 }
 
 // it will never have errors here, since the validation steps will ensure
