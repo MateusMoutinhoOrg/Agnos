@@ -11,5 +11,6 @@ import (
 func New(deps deps.Deps) api.SandBox {
 	sandbox := api.SandBox{Deps: depss}
 	NewCli(&sandbox)
+	Config(&sandbox)
 	return sandbox
 }

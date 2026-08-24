@@ -6,7 +6,7 @@ import (
 
 type SandBox struct {
 	CliApi //embedding:
-
+	Config
 	// Deps is the dependency set injected by lib.New, carried here so every
 	// factory-built function field can reach it.
 	Deps deps.Deps
