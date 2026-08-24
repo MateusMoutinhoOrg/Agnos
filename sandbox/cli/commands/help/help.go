@@ -32,6 +32,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 	command := entries.GetArgById("command")
 	if len(command.Values) == 0 {
 		sandbox.Deps.Printf("average  help here ")
+		return api.ExitOk
 	}
 	chosen := command.Values[0].String()
 	for _, c := range sandbox.Commands {
@@ -40,5 +41,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 			return api.ExitOk
 		}
 	}
+
+	sandbox.Deps.Printf("Unknow Command: %s\n", chosen)
 	return api.ExitOk
 }

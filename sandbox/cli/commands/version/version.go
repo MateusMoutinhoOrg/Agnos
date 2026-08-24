@@ -17,6 +17,6 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 }
 
 func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
-	sandbox.Deps.Printf("%s\n", "version")
+	sandbox.Deps.Printf("Version:%s\n", sandbox.Version)
 	return api.ExitOk
 }

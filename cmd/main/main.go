@@ -34,7 +34,7 @@ func main() {
 
 	// 3. Run the interface and exit with its return — the same os.Args[1:]
 	//    the adapter wired the parser over.
-	os.Exit(l.Sandboxmain(os.Args[1:]))
+	os.Exit(l.CliMain(os.Args[1:]))
 }
 
 // dataPath returns the directory the tracker persists its records under: the

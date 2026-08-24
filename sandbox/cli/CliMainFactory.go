@@ -21,6 +21,7 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 		}
 
 		verb := sandbox.Deps.VerbLib
+
 		action, err := verb.GetNextStringArg()
 		if err != nil {
 			printUsage(sandbox)
@@ -35,8 +36,8 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 			}
 
 			// ── Collect flags ──────────────────────────────────────
-			for j := range command.FlagsList {
-				flag := &command.FlagsList[j]
+			for j := range command.Flags {
+				flag := &command.Flags[j]
 
 				if flag.Type == api.CliTypeBool {
 					if err := collectBoolFlag(flag, verb); err != nil {
@@ -53,18 +54,17 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 			}
 
 			// ── Collect args (positional, after flags are consumed) ─
-			for j := range command.ArgsList {
-				arg := &command.ArgsList[j]
+			for j := range command.Args {
+				arg := &command.Args[j]
 				if err := collectArg(arg, verb); err != nil {
 					sandbox.Deps.Printf("%s\n", err.Error())
 					return api.ExitUsage
 				}
 			}
 
-			flagsRetriver := buildFlagsRetriver(command)
-			argsRetriver := buildArgsRetriver(command)
+			entries := buildCliEntrys(command)
 
-			return command.Handler(sandbox.Deps, &argsRetriver, &flagsRetriver)
+			return command.Handler(sandbox, entries)
 		}
 
 		sandbox.Deps.Printf("Unknown Command!\n")
@@ -88,44 +88,47 @@ func printUsage(sandbox *api.SandBox) {
 // cliValue holding the result.
 func collectBoolFlag(flag *api.Cliflag, verb verbdeps.Lib) error {
 	present := verb.IsPresent(flag.ValidIdentifiers)
-	if flag.Required && !present {
-		return fmt.Errorf("required flag '%s' not provided", flag.Name)
+	if flag.RequiredPresence && !present {
+		return fmt.Errorf("required flag '%s' not provided", flag.Id)
 	}
 	flag.Values = []api.CliValue{boolValue(present)}
+	flag.Exist = present
 	return nil
 }
 
 // collectValueFlag reads the occurrences of a non-bool flag from the argument
 // vector. It validates that the number of provided values falls within
-// [MinSize, MaxSize] and that required flags have at least one value.
+// [RequiredMinSize, RequiredMaxSize] and that required flags have at least one value.
 func collectValueFlag(flag *api.Cliflag, verb verbdeps.Lib) error {
 	size := verb.GetOptionsSize(flag.ValidIdentifiers)
 
-	if flag.Required && size == 0 {
-		return fmt.Errorf("required flag '%s' not provided", flag.Name)
+	if flag.RequiredPresence && size == 0 {
+		return fmt.Errorf("required flag '%s' not provided", flag.Id)
 	}
 
 	if size == 0 {
 		return nil
 	}
 
-	if flag.MinSize > 0 && size < flag.MinSize {
-		return fmt.Errorf("flag '%s' requires at least %d value(s), got %d", flag.Name, flag.MinSize, size)
+	flag.Exist = true
+
+	if flag.RequiredMinSize > 0 && size < flag.RequiredMinSize {
+		return fmt.Errorf("flag '%s' requires at least %d value(s), got %d", flag.Id, flag.RequiredMinSize, size)
 	}
 
-	maxSize := flag.MaxSize
+	maxSize := flag.RequiredMaxSize
 	if maxSize <= 0 {
 		maxSize = size
 	}
 	if size > maxSize {
-		return fmt.Errorf("flag '%s' accepts at most %d value(s), got %d", flag.Name, maxSize, size)
+		return fmt.Errorf("flag '%s' accepts at most %d value(s), got %d", flag.Id, maxSize, size)
 	}
 
 	flag.Values = make([]api.CliValue, 0, size)
 	for i := 0; i < size; i++ {
 		val, err := readFlagValue(flag, verb, i)
 		if err != nil {
-			return fmt.Errorf("flag '%s': %w", flag.Name, err)
+			return fmt.Errorf("flag '%s': %w", flag.Id, err)
 		}
 		flag.Values = append(flag.Values, val)
 	}
@@ -160,7 +163,7 @@ func readFlagValue(flag *api.Cliflag, verb verbdeps.Lib, occurrence int) (api.Cl
 // collectArg reads a positional arg from the unused portion of the argument
 // vector (via GetNext*Arg). Required args that cannot be read produce an error.
 func collectArg(arg *api.CliArg, verb verbdeps.Lib) error {
-	size := arg.Size
+	size := arg.RequiredSize
 	if size <= 0 {
 		size = 1
 	}
@@ -169,23 +172,23 @@ func collectArg(arg *api.CliArg, verb verbdeps.Lib) error {
 	for i := 0; i < size; i++ {
 		val, err := readArgValue(arg, verb)
 		if err != nil {
-			if arg.Required {
-				return fmt.Errorf("required arg '%s': %w", arg.Name, err)
+			if arg.RequiredSize > 0 {
+				return fmt.Errorf("required arg '%s': %w", arg.Id, err)
 			}
 			break
 		}
 		arg.Values = append(arg.Values, val)
 	}
 
-	if arg.Required && len(arg.Values) == 0 {
-		return fmt.Errorf("required arg '%s' not provided", arg.Name)
+	if arg.RequiredSize > 0 && len(arg.Values) == 0 {
+		return fmt.Errorf("required arg '%s' not provided", arg.Id)
 	}
 	return nil
 }
 
 // readArgValue reads one positional value from the next unused argv slot.
 func readArgValue(arg *api.CliArg, verb verbdeps.Lib) (api.CliValue, error) {
-	switch arg.Type {
+	switch arg.RequiredType {
 	case api.CliTypeInt:
 		v, err := verb.GetNextIntArg()
 		if err != nil {
@@ -213,82 +216,25 @@ func readArgValue(arg *api.CliArg, verb verbdeps.Lib) (api.CliValue, error) {
 	}
 }
 
-// buildFlagsRetriver builds a FlagsRetriver from the already-parsed flag
-// values stored in each Cliflag's Values slice.
-func buildFlagsRetriver(command *api.CliCommand) api.FlagsRetriver {
-	flagsByName := make(map[string]*api.Cliflag, len(command.FlagsList))
-	for i := range command.FlagsList {
-		flagsByName[command.FlagsList[i].Name] = &command.FlagsList[i]
+// buildCliEntrys builds a CliEntrys from the already-parsed flag and arg
+// values stored in each Cliflag/CliArg's Values slice.
+func buildCliEntrys(command *api.CliCommand) api.CliEntrys {
+	flagsById := make(map[string]*api.Cliflag, len(command.Flags))
+	for i := range command.Flags {
+		flagsById[command.Flags[i].Id] = &command.Flags[i]
 	}
 
-	return api.FlagsRetriver{
-		GetStringFlag: func(name string, index int) string {
-			f := flagsByName[name]
-			if f == nil || index >= len(f.Values) {
-				return ""
-			}
-			return f.Values[index].String()
-		},
-		GetIntFlag: func(name string, index int) int {
-			f := flagsByName[name]
-			if f == nil || index >= len(f.Values) {
-				return 0
-			}
-			return f.Values[index].Int()
-		},
-		GetFloatFlag: func(name string, index int) float64 {
-			f := flagsByName[name]
-			if f == nil || index >= len(f.Values) {
-				return 0
-			}
-			return f.Values[index].Float()
-		},
-		GetBoolFlag: func(name string, index int) bool {
-			f := flagsByName[name]
-			if f == nil || index >= len(f.Values) {
-				return false
-			}
-			return f.Values[index].Bool()
-		},
-	}
-}
-
-// buildArgsRetriver builds an ArgsRetriver from the already-parsed arg values
-// stored in each CliArg's Values slice.
-func buildArgsRetriver(command *api.CliCommand) api.ArgsRetriver {
-	argsByName := make(map[string]*api.CliArg, len(command.ArgsList))
-	for i := range command.ArgsList {
-		argsByName[command.ArgsList[i].Name] = &command.ArgsList[i]
+	argsById := make(map[string]*api.CliArg, len(command.Args))
+	for i := range command.Args {
+		argsById[command.Args[i].Id] = &command.Args[i]
 	}
 
-	return api.ArgsRetriver{
-		GetStringArg: func(name string, index int) string {
-			a := argsByName[name]
-			if a == nil || index >= len(a.Values) {
-				return ""
-			}
-			return a.Values[index].String()
+	return api.CliEntrys{
+		GetFlagById: func(id string) *api.Cliflag {
+			return flagsById[id]
 		},
-		GetIntArg: func(name string, index int) int {
-			a := argsByName[name]
-			if a == nil || index >= len(a.Values) {
-				return 0
-			}
-			return a.Values[index].Int()
-		},
-		GetFloatArg: func(name string, index int) float64 {
-			a := argsByName[name]
-			if a == nil || index >= len(a.Values) {
-				return 0
-			}
-			return a.Values[index].Float()
-		},
-		GetBoolArg: func(name string, index int) bool {
-			a := argsByName[name]
-			if a == nil || index >= len(a.Values) {
-				return false
-			}
-			return a.Values[index].Bool()
+		GetArgById: func(id string) *api.CliArg {
+			return argsById[id]
 		},
 	}
 }
