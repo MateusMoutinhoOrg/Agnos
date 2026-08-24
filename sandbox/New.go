@@ -10,6 +10,6 @@ import (
 // function field to api.Lib means adding its factory call here.
 func New(deps deps.Deps) api.SandBox {
 	sandbox := api.SandBox{Deps: depss}
-	SetCliProps(&sandbox)
+	NewCli(&sandbox)
 	return sandbox
 }
