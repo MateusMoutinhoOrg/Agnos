@@ -5,7 +5,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
-func SandBoxMainFactory(l *api.SandBox) func(args []string) int {
+func CliMainFactory(l *api.SandBox) func(args []string) int {
 
 	return func(args []string) int {
 		if len(args) == 0 {
