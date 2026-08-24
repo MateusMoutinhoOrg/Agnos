@@ -16,8 +16,11 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 		verb := sandbox.Deps.VerbLib
 		action, error := verb.GetNextStringArg()
 
-		for _, cmd := range sandbox.Commands {
+		for _, command := range sandbox.Commands {
+			if contains(command.ValidStartIdentifiers, action) {
 
+				return command.Handler(sandbox.Deps)
+			}
 		}
 
 		sandbox.Deps.Printf("Unknown Command!")

@@ -31,6 +31,7 @@ type Cliflag struct {
 type CliArg struct {
 	Name        string
 	Description string
+	Required    bool
 }
 
 // it will never have errors here, since the validation steps will ensure
