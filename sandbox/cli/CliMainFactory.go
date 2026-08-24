@@ -14,14 +14,6 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 		}
 
 		verb := sandbox.Deps.VerbLib
-		if verb.IsPresent(config.HelpFlags) {
-			sandbox.Deps.Printf("%s\n", config.Usages)
-			return api.ExitOk
-		}
-		if verb.IsPresent(config.VersionFlags) {
-			sandbox.Deps.Printf("%s\n", config.Version)
-			return api.ExitOk
-		}
 
 		sandbox.Deps.Printf("Unknown Command!")
 		return api.ExitUsage
