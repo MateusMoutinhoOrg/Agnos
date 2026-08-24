@@ -28,6 +28,10 @@ type Cliflag struct {
 	MaxSize          int
 	Required         bool
 }
+type CliArg struct {
+	Name        string
+	Description string
+}
 
 // it will never have errors here, since the validation steps will ensure
 // the flags its correct.
@@ -37,13 +41,20 @@ type FlagsRetriver struct {
 	GetFloatFlag  func(name string, index int) float64
 	GetBoolFlag   func(name string, index int) bool
 }
+type ArgsRetriver struct {
+	GetIntArg    func(name string, index int) int
+	GetStringArg func(name string, index int) string
+	GetFloatArg  func(name string, index int) float64
+	GetBoolArg   func(name string, index int) bool
+}
 
 type CliCommand struct {
 	ValidStartIdentifiers []string
-	Flags                 []Cliflag
+	ArgsList              []CliArg
+	FlagsList             []Cliflag
 	Description           string
 	Examples              []string
-	Handler               func(deps deps.Deps, fr FlagsRetriver) int
+	Handler               func(deps deps.Deps, argsRetriver *ArgsRetriver, flagsRetriver *FlagsRetriver) int
 }
 
 const (

@@ -6,19 +6,18 @@ import (
 func NewCommand(sandbox *api.SandBox) api.CliCommand{
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"version", "--version"},
-		Flags:                 []api.Cliflag{},              // TODO: flags
-		Description:           "Returns version of program", // TODO: description
+		ArgsList: []api.CliArg{},
+		FlagsList:                 []api.Cliflag{},             
+		Description:           "Returns version of program", 
 		Examples:              []string{
 			sandbox.Deps.ProjectName + " --version",
 			sandbox.Deps.ProjectName + " version"
 		}, 
-
-
 		Handler:               CommandHandler,
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, fr api.FlagsRetriver) int {
+func CommandHandler(sandbox *api.SandBox, argsRetriver api.ArgsRetriver, flagsRetriver api.FlagsRetriver) int {
 	sandbox.Deps.Printf("%s\n")
 	return api.ExitOk
 }

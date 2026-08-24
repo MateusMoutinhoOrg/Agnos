@@ -14,6 +14,11 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 		}
 
 		verb := sandbox.Deps.VerbLib
+		action, error := verb.GetNextStringArg()
+
+		for _, cmd := range sandbox.Commands {
+
+		}
 
 		sandbox.Deps.Printf("Unknown Command!")
 		return api.ExitUsage
