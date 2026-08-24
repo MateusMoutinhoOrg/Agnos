@@ -8,8 +8,6 @@ import (
 func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"version", "--version"},
-		ArgsList:              []api.CliArg{},
-		FlagsList:             []api.Cliflag{},
 		Description:           "Returns version of program",
 		Examples: []string{
 			sandbox.ProjectName + " --version",
@@ -19,7 +17,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(d deps.Deps, argsRetriver *api.ArgsRetriver, flagsRetriver *api.FlagsRetriver) int {
+func CommandHandler(d deps.Deps, entries api.CliEntrys) int {
 	d.Printf("%s\n", "version")
 	return api.ExitOk
 }

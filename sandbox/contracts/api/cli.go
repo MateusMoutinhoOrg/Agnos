@@ -17,48 +17,43 @@ const (
 )
 
 type Cliflag struct {
-	Name        string
+	Name             string
+	ValidIdentifiers []string
+
 	Description string
 	Examples    []string
 
-	ValidIdentifiers []string
-	Values           []CliValue
+	Values []CliValue
+	Exist  bool
+
 	Type             int
-	MinSize          int
-	MaxSize          int
-	Required         bool
+	RequiredMinSize  int
+	RequiredMaxSize  int
+	RequiredPresence bool
 }
+
 type CliArg struct {
 	Name        string
 	Description string
+	Examples    []string
 	Values      []CliValue
-	Required    bool
-	Type        int
-	Size        int
+
+	RequiredType int
+	RequiredSize int
 }
 
-// it will never have errors here, since the validation steps will ensure
-// the flags its correct.
-type FlagsRetriver struct {
-	GetIntFlag    func(name string, index int) int
-	GetStringFlag func(name string, index int) string
-	GetFloatFlag  func(name string, index int) float64
-	GetBoolFlag   func(name string, index int) bool
-}
-type ArgsRetriver struct {
-	GetIntArg    func(name string, index int) int
-	GetStringArg func(name string, index int) string
-	GetFloatArg  func(name string, index int) float64
-	GetBoolArg   func(name string, index int) bool
+type CliEntrys struct {
+	GetArgByName  func(name string) *CliArg
+	GetFlagByName func(name string) *Cliflag
 }
 
 type CliCommand struct {
 	ValidStartIdentifiers []string
-	ArgsList              []CliArg
-	FlagsList             []Cliflag
+	Args                  []CliArg
+	Flags                 []Cliflag
 	Description           string
 	Examples              []string
-	Handler               func(deps deps.Deps, argsRetriver *ArgsRetriver, flagsRetriver *FlagsRetriver) int
+	Handler               func(deps deps.Deps, entries CliEntrys) int
 }
 
 const (

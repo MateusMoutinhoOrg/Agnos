@@ -8,16 +8,15 @@ import (
 func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"help", "--help"},
-		ArgsList: []api.CliArg{
+		Args: []api.CliArg{
 			api.CliArg{
-				Name:        "command",
-				Description: "The command to get help for",
-				Required:    false,
-				Type:        api.CliTypeString,
-				Size:        1,
+				Name:         "command",
+				Description:  "The command to get help for",
+				RequiredType: api.CliTypeString,
+				RequiredSize: 1,
 			},
 		},
-		FlagsList:   []api.Cliflag{},
+
 		Description: "Shows Help of a command",
 		Examples: []string{
 			sandbox.ProjectName + " --help",
@@ -28,9 +27,14 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(d deps.Deps, argsRetriver *api.ArgsRetriver, flagsRetriver *api.FlagsRetriver) int {
-	command := argsRetriver.GetStringArg("command", 0)
+func CommandHandler(d deps.Deps, entries api.CliEntrys) int {
+	command := entries.GetArgByName("command")
 
-	d.Printf("%s\n", command)
+	if len(command.Values) == 0 {
+		d.Printf("No command provided\n")
+		return api.ExitUsage
+	}
+	user_command := command.Values[0].String()
+
 	return api.ExitOk
 }
