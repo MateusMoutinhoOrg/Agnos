@@ -6,4 +6,5 @@ import (
 
 func SetMemoryMethods(sandbox *api.SandBox) {
 	sandbox.NewMemory = NewMemoryFactory(sandbox)
+
 }

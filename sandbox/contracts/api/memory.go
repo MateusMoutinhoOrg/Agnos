@@ -30,7 +30,6 @@ type MemoryCliCommand struct {
 }
 
 type Memory struct {
-	Path        string
 	ProjectName string
 	Version     func() string
 	Commands    []MemoryCliCommand
