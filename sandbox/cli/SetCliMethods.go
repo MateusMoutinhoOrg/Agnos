@@ -7,7 +7,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
-func NewCliPackage(sandbox *api.SandBox) {
+func SetCliMethods(sandbox *api.SandBox) {
 
 	sandbox.Commands = []api.CliCommand{
 		version.NewCommand(sandbox),
