@@ -7,7 +7,9 @@ import (
 func NewMemoryFactory(sandbox *api.SandBox) func(path string) api.Memory {
 	return func(path string) api.Memory {
 
-		memory := api.Memory{}
+		memory := api.Memory{
+			Path: path,
+		}
 
 		return memory
 	}
