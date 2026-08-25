@@ -4,7 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/memory"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/project_config"
 )
 
 // New builds the api.Lib entry point, storing the injected deps on it and
@@ -13,7 +13,7 @@ import (
 func New(d deps.Deps) api.SandBox {
 	sandbox := api.SandBox{Deps: d}
 	cli.SetCliMethods(&sandbox)
-	memory.SetMemoryMethods(&sandbox)
+	project_config.SetProjectConfigMethods(&sandbox)
 	Config(&sandbox)
 	return sandbox
 }
