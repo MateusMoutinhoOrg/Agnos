@@ -5,10 +5,10 @@ import (
 )
 
 // BuildFactory returns the closure that fills api.CoreApi.Build.
-func BuildFactory(sandbox *api.SandBox) func(path string) error {
-	return func(path string) error {
+func BuildFactory(sandbox *api.SandBox) func(props api.BuildProps) error {
+	return func(props api.BuildProps) error {
 
-		sandbox.Deps.Printf("build started with path %s \n", path)
+		sandbox.Deps.Printf("build started with path %s \n", props.Path)
 		return nil
 	}
 }

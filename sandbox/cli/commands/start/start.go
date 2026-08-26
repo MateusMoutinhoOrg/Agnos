@@ -36,6 +36,30 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
 			},
+			api.Cliflag{
+				Id:               "force",
+				ValidIdentifiers: []string{"--force", "-f"},
+				Description:      "Forces the creation of the project, overwriting existing files",
+				Examples: []string{
+					sandbox.ProjectName + " start -f",
+				},
+				Type:             api.CliTypeBool,
+				RequiredMinSize:  0,
+				RequiredMaxSize:  0,
+				RequiredPresence: false,
+			},
+			api.Cliflag{
+				Id:               "module",
+				ValidIdentifiers: []string{"--module", "-m"},
+				Description:      "Module name for go.mod",
+				Examples: []string{
+					sandbox.ProjectName + " start -m github.com/user/project",
+				},
+				Type:             api.CliTypeString,
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: false,
+			},
 		},
 
 		Description:     "Initialize a new project in a directory",
@@ -53,10 +77,23 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 
 	quietFlag := entries.GetFlagById("quiet")
+	forceFlag := entries.GetFlagById("force")
+	moduleFlag := entries.GetFlagById("module")
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
 
-	start_error := sandbox.Start(path, sandbox.ProjectName, "default/module")
+	var module *string
+	if moduleFlag.Exist && len(moduleFlag.Values) > 0 {
+		modVal := moduleFlag.Values[0].String()
+		module = &modVal
+	}
+
+	start_error := sandbox.Start(api.StartProps{
+		Path:        path,
+		ProjectName: sandbox.ProjectName,
+		Module:      module,
+		Force:       forceFlag.Exist,
+	})
 
 	if !quietFlag.Exist && start_error != nil {
 		sandbox.Deps.Error(start_error.Error())

@@ -56,7 +56,10 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
 
-	build_error := sandbox.Build(path)
+	build_error := sandbox.Build(api.BuildProps{
+		Path:    path,
+		Project: sandbox.ProjectName,
+	})
 
 	if !quietFlag.Exist && build_error != nil {
 		sandbox.Deps.Error(build_error.Error())
