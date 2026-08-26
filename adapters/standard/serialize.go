@@ -192,13 +192,16 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			return false, fmt.Errorf("not a bool")
 		},
 
-		GetObjectItem: func(key string) (serializibles.SerializibleObject, error) {
+		GetObjectItem: func(key string) serializibles.SerializibleObject {
+			var nullVal any = nil
+			nullObj := wrapValue(&nullVal)
+
 			if val == nil || *val == nil {
-				return serializibles.SerializibleObject{}, fmt.Errorf("not an object")
+				return nullObj
 			}
 			m, ok := (*val).(map[string]any)
 			if !ok {
-				return serializibles.SerializibleObject{}, fmt.Errorf("not an object")
+				return nullObj
 			}
 			if v, exists := m[key]; exists {
 				// We create a new pointer to the map's value. 
@@ -206,9 +209,9 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 				// You must use ReplaceItemInObject if you want to mutate and persist the change.
 				ptr := new(any)
 				*ptr = v
-				return wrapValue(ptr), nil
+				return wrapValue(ptr)
 			}
-			return serializibles.SerializibleObject{}, fmt.Errorf("key not found")
+			return nullObj
 		},
 		HasKey: func(key string) bool {
 			if val == nil || *val == nil {
@@ -236,21 +239,24 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			return keys, nil
 		},
 
-		GetArrayItem: func(index int) (serializibles.SerializibleObject, error) {
+		GetArrayItem: func(index int) serializibles.SerializibleObject {
+			var nullVal any = nil
+			nullObj := wrapValue(&nullVal)
+
 			if val == nil || *val == nil {
-				return serializibles.SerializibleObject{}, fmt.Errorf("not an array")
+				return nullObj
 			}
 			arr, ok := (*val).([]any)
 			if !ok {
-				return serializibles.SerializibleObject{}, fmt.Errorf("not an array")
+				return nullObj
 			}
 			if index < 0 || index >= len(arr) {
-				return serializibles.SerializibleObject{}, fmt.Errorf("index out of bounds")
+				return nullObj
 			}
 			v := arr[index]
 			ptr := new(any)
 			*ptr = v
-			return wrapValue(ptr), nil
+			return wrapValue(ptr)
 		},
 		GetArraySize: func() (int, error) {
 			if val == nil || *val == nil {
@@ -369,7 +375,7 @@ func reconstruct(item serializibles.SerializibleObject) any {
 		size, _ := item.GetArraySize()
 		arr := make([]any, size)
 		for i := 0; i < size; i++ {
-			child, _ := item.GetArrayItem(i)
+			child := item.GetArrayItem(i)
 			arr[i] = reconstruct(child)
 		}
 		return arr
@@ -378,7 +384,7 @@ func reconstruct(item serializibles.SerializibleObject) any {
 		keys, _ := item.GetKeys()
 		m := make(map[string]any)
 		for _, k := range keys {
-			child, _ := item.GetObjectItem(k)
+			child := item.GetObjectItem(k)
 			m[k] = reconstruct(child)
 		}
 		return m

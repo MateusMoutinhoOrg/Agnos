@@ -14,11 +14,11 @@ type SerializibleObject struct {
 	GetString func() (string, error)
 	GetBool   func() (bool, error)
 
-	GetObjectItem func(key string) (SerializibleObject, error)
+	GetObjectItem func(key string) SerializibleObject
 	HasKey        func(key string) bool
 	GetKeys       func() ([]string, error)
 
-	GetArrayItem func(index int) (SerializibleObject, error)
+	GetArrayItem func(index int) SerializibleObject
 	GetArraySize func() (int, error)
 
 	AddItemToObject      func(key string, item any) error
