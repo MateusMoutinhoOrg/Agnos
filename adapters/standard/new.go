@@ -29,6 +29,7 @@ func New(basePath string) deps.Deps {
 	adapter.Deps.Now = NowFactory(adapter)
 	adapter.Deps.Printf = PrintfFactory(adapter)
 	adapter.Deps.Error = ErrorFactory(adapter)
+	adapter.Deps.Errorf = ErrorfFactory(adapter)
 	adapter.Deps.VerbLib = VerbLibFactory(adapter)
 	adapter.Deps.KeepLib = KeepLibFactory(adapter)
 	adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)

@@ -63,3 +63,11 @@ func ErrorFactory(s *StandardAdapter) func(format string, a ...any) (int, error)
 	}
 }
 
+// ErrorfFactory returns the closure that fills deps.Deps.Errorf, formatting
+// an error message and returning it as an error.
+func ErrorfFactory(s *StandardAdapter) func(format string, a ...any) error {
+	return func(format string, a ...any) error {
+		return fmt.Errorf(format, a...)
+	}
+}
+

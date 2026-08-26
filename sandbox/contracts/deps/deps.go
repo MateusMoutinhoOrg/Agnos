@@ -50,6 +50,8 @@ type Deps struct {
 	Printf func(format string, a ...any) (n int, err error)
 	// Error writes one formatted error message to the interface's error output.
 	Error func(format string, a ...any) (n int, err error)
+	// Errorf formats an error message and returns it as an error.
+	Errorf func(format string, a ...any) error
 	// VerbLib is the embedded Verb argv-parser library, already initialized
 	// by the adapter over the argument vector that adapter chose.
 	VerbLib verbdeps.Lib
