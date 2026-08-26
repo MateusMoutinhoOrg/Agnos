@@ -42,7 +42,7 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		return nil, sandbox.Deps.Errorf("project_specs is not an object")
 	}
 
-	project_conf := &ProjectConf{}
+	project_conf := ProjectConf{}
 	project_conf.Name, _ = name_item.GetString()
 	project_conf.Module, _ = module_item.GetString()
 	project_conf.Description, _ = description_item.GetString()
@@ -52,5 +52,5 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		return sandbox.Deps.IoLib.WriteFile(path, []byte(bytes))
 	}
 
-	return project_conf
+	return &project_conf, nil
 }
