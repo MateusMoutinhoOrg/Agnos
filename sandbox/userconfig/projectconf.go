@@ -21,10 +21,11 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		if fileerror != nil {
 			return nil, fileerror
 		}
-		project_specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(string(content_bytes))
+		specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(string(content_bytes))
 		if parse_error != nil {
 			return nil, parse_error
 		}
+		project_specs = specs
 
 	} else {
 		project_specs = sandbox.Deps.SerializeLib.CreateObject()
