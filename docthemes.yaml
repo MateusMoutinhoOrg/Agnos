@@ -1,0 +1,7 @@
+- 
+  name: CliUsage
+  description: Documentation explaning how to use the cli 
+
+- name: LibUsage
+  description: Documentation explaning how to use the lib
+
