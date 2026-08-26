@@ -21,11 +21,11 @@ type SerializibleObject struct {
 	GetArrayItem func(index int) (SerializibleObject, error)
 	GetArraySize func() (int, error)
 
-	AddItemToObject      func(key string, item SerializibleObject) error
-	ReplaceItemInObject  func(key string, item SerializibleObject) error
+	AddItemToObject      func(key string, item any) error
+	ReplaceItemInObject  func(key string, item any) error
 	DeleteItemFromObject func(key string) error
 
-	AddItemToArray      func(item SerializibleObject) error
+	AddItemToArray      func(item any) error
 	DeleteItemFromArray func(index int) error
 }
 
@@ -41,6 +41,6 @@ type Lib struct {
 	ParseJson func(data string) (SerializibleObject, error)
 	ParseYaml func(data string) (SerializibleObject, error)
 
-	SerializeToJson func(data SerializibleObject) (string, error)
-	SerializeToYaml func(data SerializibleObject) (string, error)
+	SerializeToJson func(data SerializibleObject) string
+	SerializeToYaml func(data SerializibleObject) string
 }

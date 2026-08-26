@@ -56,7 +56,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
 
-	start_error := sandbox.Start(path)
+	start_error := sandbox.Start(path, sandbox.ProjectName, "default/module")
 
 	if !quietFlag.Exist && start_error != nil {
 		sandbox.Deps.Error(start_error.Error())

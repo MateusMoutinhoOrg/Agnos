@@ -58,21 +58,21 @@ func SerializeLibFactory(s *StandardAdapter) serializibles.Lib {
 			return wrapValue(&v), nil
 		},
 
-		SerializeToJson: func(data serializibles.SerializibleObject) (string, error) {
+		SerializeToJson: func(data serializibles.SerializibleObject) string {
 			raw := reconstruct(data)
 			bytes, err := json.Marshal(raw)
 			if err != nil {
-				return "", err
+				return ""
 			}
-			return string(bytes), nil
+			return string(bytes)
 		},
-		SerializeToYaml: func(data serializibles.SerializibleObject) (string, error) {
+		SerializeToYaml: func(data serializibles.SerializibleObject) string {
 			raw := reconstruct(data)
 			bytes, err := yaml.Marshal(raw)
 			if err != nil {
-				return "", err
+				return ""
 			}
-			return string(bytes), nil
+			return string(bytes)
 		},
 	}
 }
@@ -263,7 +263,7 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			return len(arr), nil
 		},
 
-		AddItemToObject: func(key string, item serializibles.SerializibleObject) error {
+		AddItemToObject: func(key string, item any) error {
 			if val == nil || *val == nil {
 				return fmt.Errorf("not an object")
 			}
@@ -271,10 +271,14 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			if !ok {
 				return fmt.Errorf("not an object")
 			}
-			m[key] = reconstruct(item)
+			if obj, isObj := item.(serializibles.SerializibleObject); isObj {
+				m[key] = reconstruct(obj)
+			} else {
+				m[key] = item
+			}
 			return nil
 		},
-		ReplaceItemInObject: func(key string, item serializibles.SerializibleObject) error {
+		ReplaceItemInObject: func(key string, item any) error {
 			if val == nil || *val == nil {
 				return fmt.Errorf("not an object")
 			}
@@ -285,7 +289,11 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			if _, exists := m[key]; !exists {
 				return fmt.Errorf("key not found")
 			}
-			m[key] = reconstruct(item)
+			if obj, isObj := item.(serializibles.SerializibleObject); isObj {
+				m[key] = reconstruct(obj)
+			} else {
+				m[key] = item
+			}
 			return nil
 		},
 		DeleteItemFromObject: func(key string) error {
@@ -300,7 +308,7 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			return nil
 		},
 
-		AddItemToArray: func(item serializibles.SerializibleObject) error {
+		AddItemToArray: func(item any) error {
 			if val == nil || *val == nil {
 				return fmt.Errorf("not an array")
 			}
@@ -308,7 +316,13 @@ func wrapValue(val *any) serializibles.SerializibleObject {
 			if !ok {
 				return fmt.Errorf("not an array")
 			}
-			arr = append(arr, reconstruct(item))
+			var actualItem any
+			if obj, isObj := item.(serializibles.SerializibleObject); isObj {
+				actualItem = reconstruct(obj)
+			} else {
+				actualItem = item
+			}
+			arr = append(arr, actualItem)
 			*val = arr
 			return nil
 		},
