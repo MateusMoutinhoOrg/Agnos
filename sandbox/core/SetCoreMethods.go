@@ -6,4 +6,5 @@ import (
 
 func SetCoreMethods(sandbox *api.SandBox) {
 	sandbox.Start = StartFactory(sandbox)
+	sandbox.Build = BuildFactory(sandbox)
 }

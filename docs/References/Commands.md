@@ -20,6 +20,8 @@ agnos-cli <command> [arguments] [flags]
 | `received <category> <description> <amount>` | Records money entering the budget under an existing category. |
 | `transactions [category]` | Prints every transaction, or only the given category's when a name follows. |
 | `balance [category]` | Prints the total balance, or the given category's when a name follows. |
+| `start [path]` | Initializes a new project in the given directory. Defaults to the current directory when no path is given. |
+| `build [path]` | Builds the project in the given directory. Defaults to the current directory when no path is given. |
 | `help` | Prints the usage screen. |
 | `version` | Prints the interface version. |
 

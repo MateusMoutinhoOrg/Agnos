@@ -1,6 +1,7 @@
 package cli
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/help"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/start"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/version"
@@ -13,7 +14,9 @@ func SetCliMethods(sandbox *api.SandBox) {
 		version.NewCommand(sandbox),
 		help.NewCommand(sandbox),
 		start.NewCommand(sandbox),
+		build.NewCommand(sandbox),
 	}
 
 	sandbox.CliMain = CliMainFactory(sandbox)
 }
+
