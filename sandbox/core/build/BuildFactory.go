@@ -1,4 +1,4 @@
-package core
+package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
