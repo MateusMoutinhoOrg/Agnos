@@ -1,6 +1,19 @@
 package api
 
+type StartProps struct {
+	Path        string
+	ProjectName string
+	Module      *string
+	Force       bool
+}
+
+type BuildProps struct {
+	Path    string
+	Project string
+	Force   bool
+}
+
 type CoreApi struct {
-	Start func(path string, project_name string, module *string, force bool) error
-	Build func(path string) error
+	Start func(props StartProps) error
+	Build func(props BuildProps) error
 }
