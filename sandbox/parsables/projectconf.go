@@ -1,4 +1,4 @@
-package userconfig
+package parsables
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"

@@ -2,12 +2,12 @@ package start
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/userconfig"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/parsables"
 )
 
 func createThemes(sandbox *api.SandBox, props api.StartProps, configDir string) error {
 	themes_dest := configDir + "/themes.yaml"
-	themes_conf, err := userconfig.NewThemesConf(sandbox, themes_dest)
+	themes_conf, err := parsables.NewThemesConf(sandbox, themes_dest)
 	if err != nil {
 		return err
 	}

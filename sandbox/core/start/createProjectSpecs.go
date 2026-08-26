@@ -2,13 +2,13 @@ package start
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/userconfig"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/parsables"
 )
 
 func createProjectSpecs(sandbox *api.SandBox, props api.StartProps, configDir string) error {
 
 	project_specs_dest := configDir + "/project.yaml"
-	project_conf, err := userconfig.NewProjectConf(sandbox, project_specs_dest)
+	project_conf, err := parsables.NewProjectConf(sandbox, project_specs_dest)
 	if err != nil {
 		return err
 	}
@@ -25,7 +25,7 @@ func createProjectSpecs(sandbox *api.SandBox, props api.StartProps, configDir st
 				return sandbox.Deps.Errorf("the %s file already exists", "go.mod")
 			}
 		}
-		module_conf, err := userconfig.NewModuleConf(sandbox, module_path)
+		module_conf, err := parsables.NewModuleConf(sandbox, module_path)
 		if err != nil {
 			return err
 		}
