@@ -54,7 +54,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 	start_error := sandbox.Start(path)
 
 	if !quietFlag.Exist && start_error != nil {
-		sandbox.Deps.Printf(start_error.Error())
+		sandbox.Deps.Error(start_error.Error())
 	}
 	if start_error != nil {
 		return api.ExitFailure

@@ -3,6 +3,7 @@ package standard
 import (
 	"fmt"
 	"io"
+	"os"
 	"time"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
@@ -51,6 +52,14 @@ func NowFactory(s *StandardAdapter) func() time.Time {
 func PrintfFactory(s *StandardAdapter) func(format string, a ...any) (int, error) {
 	return func(format string, a ...any) (int, error) {
 		return fmt.Fprintf(s.output, format, a...)
+	}
+}
+
+// ErrorFactory returns the closure that fills deps.Deps.Error, writing one
+// formatted message to the process's standard error.
+func ErrorFactory(s *StandardAdapter) func(format string, a ...any) (int, error) {
+	return func(format string, a ...any) (int, error) {
+		return fmt.Fprintf(os.Stderr, format, a...)
 	}
 }
 

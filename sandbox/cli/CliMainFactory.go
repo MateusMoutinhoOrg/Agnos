@@ -163,26 +163,34 @@ func readFlagValue(flag *api.Cliflag, verb verbdeps.Lib, occurrence int) (api.Cl
 // collectArg reads a positional arg from the unused portion of the argument
 // vector (via GetNext*Arg). Required args that cannot be read produce an error.
 func collectArg(arg *api.CliArg, verb verbdeps.Lib) error {
-	size := arg.RequiredSize
-	if size <= 0 {
-		size = 1
+	minSize := arg.RequiredMinSize
+	maxSize := arg.RequiredMaxSize
+	if maxSize <= 0 {
+		if minSize > 0 {
+			maxSize = minSize
+		} else {
+			maxSize = 1
+		}
 	}
 
-	arg.Values = make([]api.CliValue, 0, size)
-	for i := 0; i < size; i++ {
+	arg.Values = make([]api.CliValue, 0, maxSize)
+	for i := 0; i < maxSize; i++ {
 		val, err := readArgValue(arg, verb)
 		if err != nil {
-			if arg.RequiredSize > 0 {
-				return fmt.Errorf("required arg '%s': %w", arg.Id, err)
+			if i < minSize {
+				return fmt.Errorf("required arg '%s': requires at least %d values, got %d", arg.Id, minSize, i)
 			}
 			break
 		}
 		arg.Values = append(arg.Values, val)
 	}
 
-	if arg.RequiredSize > 0 && len(arg.Values) == 0 {
-		return fmt.Errorf("required arg '%s' not provided", arg.Id)
+	if len(arg.Values) == 0 && len(arg.Defaults) > 0 {
+		for _, d := range arg.Defaults {
+			arg.Values = append(arg.Values, stringValue(d))
+		}
 	}
+
 	return nil
 }
 

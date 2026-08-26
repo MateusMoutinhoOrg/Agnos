@@ -47,6 +47,8 @@ type Deps struct {
 	// command-line interface — reports every result, every error, and its
 	// usage screen through it, so the sandbox never touches a stream itself.
 	Printf func(format string, a ...any) (n int, err error)
+	// Error writes one formatted error message to the interface's error output.
+	Error func(format string, a ...any) (n int, err error)
 	// VerbLib is the embedded Verb argv-parser library, already initialized
 	// by the adapter over the argument vector that adapter chose.
 	VerbLib verbdeps.Lib
