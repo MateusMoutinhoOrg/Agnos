@@ -41,20 +41,32 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 	project_conf := ProjectConf{}
 	var err error
 
-	project_conf.Name, err = name_item.GetString()
-	if err != nil {
-		return nil, sandbox.Deps.Errorf("name is not a string")
+	if name_item != nil && !name_item.IsNull() {
+		project_conf.Name, err = name_item.GetString()
+		if err != nil {
+			return nil, sandbox.Deps.Errorf("name is not a string")
+		}
 	}
-	project_conf.Module, err = module_item.GetString()
-	if err != nil {
-		return nil, sandbox.Deps.Errorf("module is not a string")
+	
+	if module_item != nil && !module_item.IsNull() {
+		project_conf.Module, err = module_item.GetString()
+		if err != nil {
+			return nil, sandbox.Deps.Errorf("module is not a string")
+		}
 	}
-	project_conf.Description, err = description_item.GetString()
-	if err != nil {
-		return nil, sandbox.Deps.Errorf("description is not a string")
+	
+	if description_item != nil && !description_item.IsNull() {
+		project_conf.Description, err = description_item.GetString()
+		if err != nil {
+			return nil, sandbox.Deps.Errorf("description is not a string")
+		}
 	}
 
 	project_conf.Persist = func() error {
+		project_specs.AddItemToObject("name", project_conf.Name)
+		project_specs.AddItemToObject("module", project_conf.Module)
+		project_specs.AddItemToObject("description", project_conf.Description)
+
 		bytes := sandbox.Deps.SerializeLib.SerializeToYaml(project_specs)
 		return sandbox.Deps.IoLib.WriteFile(path, []byte(bytes))
 	}
