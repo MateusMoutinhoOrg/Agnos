@@ -7,6 +7,7 @@ import (
 
 type ProjectConf struct {
 	Name        string
+	Version     string
 	Description string
 
 	Persist func() error
@@ -34,9 +35,12 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		return nil, sandbox.Deps.Errorf("project_specs is not an object")
 	}
 	name_item, _ := project_specs.GetObjectItem("name")
+	version_item, _ := project_specs.GetObjectItem("version")
 	description_item, _ := project_specs.GetObjectItem("description")
 
-	project_conf := ProjectConf{}
+	project_conf := ProjectConf{
+		Version: "v0.0.0",
+	}
 	var err error
 
 	if name_item != nil && !name_item.IsNull() {
@@ -53,8 +57,16 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		}
 	}
 
+	if version_item != nil && !version_item.IsNull() {
+		project_conf.Version, err = version_item.GetString()
+		if err != nil {
+			return nil, sandbox.Deps.Errorf("version is not a string")
+		}
+	}
+
 	project_conf.Persist = func() error {
 		project_specs.AddItemToObject("name", project_conf.Name)
+		project_specs.AddItemToObject("version", project_conf.Version)
 		project_specs.AddItemToObject("description", project_conf.Description)
 
 		bytes := sandbox.Deps.SerializeLib.SerializeToYaml(project_specs)
