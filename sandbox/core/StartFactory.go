@@ -27,7 +27,7 @@ func StartFactory(sandbox *api.SandBox) func(props api.StartProps) error {
 
 		if props.Module != nil {
 
-			module_path := props.Path + "go.mod"
+			module_path := props.Path + "/go.mod"
 
 			if !props.Force {
 				if sandbox.Deps.IoLib.IsFile(module_path) {
