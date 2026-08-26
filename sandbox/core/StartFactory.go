@@ -21,13 +21,12 @@ func StartFactory(sandbox *api.SandBox) func(path string, project_name string, m
 		}
 
 		project_conf.Name = project_name
-		project_conf.Module = module
 		project_conf.Description = "Place the Project Description in " + project_specs_dest
+
 		err = project_conf.Persist()
 		if err != nil {
 			return err
 		}
-
 
 		sandbox.Deps.Printf("started with path %s \n", path)
 		return nil

@@ -7,7 +7,6 @@ import (
 
 type ProjectConf struct {
 	Name        string
-	Module      string
 	Description string
 
 	Persist func() error
@@ -35,7 +34,6 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		return nil, sandbox.Deps.Errorf("project_specs is not an object")
 	}
 	name_item, _ := project_specs.GetObjectItem("name")
-	module_item, _ := project_specs.GetObjectItem("module")
 	description_item, _ := project_specs.GetObjectItem("description")
 
 	project_conf := ProjectConf{}
@@ -47,14 +45,7 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 			return nil, sandbox.Deps.Errorf("name is not a string")
 		}
 	}
-	
-	if module_item != nil && !module_item.IsNull() {
-		project_conf.Module, err = module_item.GetString()
-		if err != nil {
-			return nil, sandbox.Deps.Errorf("module is not a string")
-		}
-	}
-	
+
 	if description_item != nil && !description_item.IsNull() {
 		project_conf.Description, err = description_item.GetString()
 		if err != nil {
