@@ -8,6 +8,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	return api.CliCommand{
 
 		ValidStartIdentifiers: []string{"start"},
+		Category:              "Core Commands",
 
 		Args: []api.CliArg{
 			api.CliArg{
@@ -37,9 +38,13 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 			},
 		},
 
-		Description: "Starts the agnos cli",
+		Description:     "Initialize a new project in a directory",
+		LongDescription: "Scaffolds a new Agnos project in the given directory, creating\nthe required configuration files and folder structure. If no\npath is provided, the current directory is used.",
 		Examples: []string{
 			sandbox.ProjectName + " start",
+			sandbox.ProjectName + " start .",
+			sandbox.ProjectName + " start ./my-project",
+			sandbox.ProjectName + " start -q",
 		},
 		Handler: CommandHandler,
 	}

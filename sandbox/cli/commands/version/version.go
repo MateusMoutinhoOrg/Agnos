@@ -7,7 +7,9 @@ import (
 func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"version", "--version"},
-		Description:           "Returns version of program",
+		Category:              "Info",
+		Description:           "Print the installed version",
+		LongDescription:       "Prints the current version of the installed binary and exits.",
 		Examples: []string{
 			sandbox.ProjectName + " --version",
 			sandbox.ProjectName + " version",

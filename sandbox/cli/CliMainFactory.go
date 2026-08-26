@@ -72,15 +72,17 @@ func CliMainFactory(sandbox *api.SandBox) func(args []string) int {
 	}
 }
 
-// printUsage shows all commands and their descriptions.
+// printUsage triggers the help command so the user sees the full
+// professional help screen when they run the binary with no arguments.
 func printUsage(sandbox *api.SandBox) {
-	sandbox.Deps.Printf("Usage: %s <command> [flags] [args]\n\n", sandbox.ProjectName)
-	sandbox.Deps.Printf("Commands:\n")
 	for _, cmd := range sandbox.Commands {
-		if len(cmd.ValidStartIdentifiers) > 0 {
-			sandbox.Deps.Printf("  %-20s %s\n", cmd.ValidStartIdentifiers[0], cmd.Description)
+		if slices.Contains(cmd.ValidStartIdentifiers, "help") {
+			cmd.Handler(sandbox, buildCliEntrys(&cmd))
+			return
 		}
 	}
+	// Fallback — should never happen if help is registered.
+	sandbox.Deps.Printf("Usage: %s <command> [flags] [args]\n", sandbox.ProjectName)
 }
 
 // collectBoolFlag checks whether a boolean flag is present. If required and

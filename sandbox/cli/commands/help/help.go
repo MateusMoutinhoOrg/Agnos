@@ -8,11 +8,29 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
+// ─── ANSI escape sequences ──────────────────────────────────────────────────
+
+const (
+	bold    = "\033[1m"
+	dim     = "\033[2m"
+	italic  = "\033[3m"
+	underln = "\033[4m"
+	reset   = "\033[0m"
+	cyan    = "\033[36m"
+	green   = "\033[32m"
+	yellow  = "\033[33m"
+	magenta = "\033[35m"
+	white   = "\033[97m"
+	gray    = "\033[90m"
+	red     = "\033[31m"
+)
+
 func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"help", "--help"},
+		Category:              "Info",
 		Args: []api.CliArg{
-			api.CliArg{
+			{
 				Id:              "command",
 				Description:     "The command to get help for",
 				RequiredType:    api.CliTypeString,
@@ -21,11 +39,12 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 			},
 		},
 
-		Description: "Shows Help of a command",
+		Description:     "Display help for a command",
+		LongDescription: "When called without arguments, lists every available command\ngrouped by category. When called with a command name, shows\ndetailed usage, arguments, flags, and examples for that command.",
 		Examples: []string{
 			sandbox.ProjectName + " --help",
 			sandbox.ProjectName + " help",
-			sandbox.ProjectName + " help <command>",
+			sandbox.ProjectName + " help start",
 		},
 		Handler: CommandHandler,
 	}
@@ -45,139 +64,319 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		}
 	}
 
-	sandbox.Deps.Printf("Unknown command: %s\n", chosen)
-	sandbox.Deps.Printf("Run '%s help' to see available commands.\n", sandbox.ProjectName)
+	p := sandbox.Deps.Printf
+	p("\n")
+	p("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, chosen, reset)
+	p("  %sRun '%s help' to see available commands.%s\n", dim, sandbox.ProjectName, reset)
+	p("\n")
 	return api.ExitUsage
 }
 
-// ─── General help ────────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+//  General help
+// ═════════════════════════════════════════════════════════════════════════════
 
 func printGeneralHelp(sandbox *api.SandBox) {
 	p := sandbox.Deps.Printf
 
-	p("%s %s\n", sandbox.ProjectName, sandbox.Version)
-	p("\n")
-	p("Usage:\n")
-	p("  %s <command> [flags] [args]\n", sandbox.ProjectName)
-	p("\n")
-	p("Available Commands:\n")
+	// ── Banner ───────────────────────────────────────────────────────
+	printBanner(sandbox)
 
-	// Measure longest command name for alignment.
-	maxLen := 0
+	// ── Usage ────────────────────────────────────────────────────────
+	p("  %s%sUSAGE%s\n", bold, cyan, reset)
+	p("  %s│%s\n", gray, reset)
+	p("  %s│%s  %s$%s %s %s<command>%s %s[flags]%s %s[args]%s\n",
+		gray, reset,
+		dim, reset,
+		sandbox.ProjectName,
+		green, reset,
+		yellow, reset,
+		dim, reset,
+	)
+	p("  %s│%s\n", gray, reset)
+	p("\n")
+
+	// ── Collect categories ───────────────────────────────────────────
+	categoryOrder := []string{}
+	categorized := map[string][]api.CliCommand{}
 	for _, cmd := range sandbox.Commands {
+		if cmd.Hidden {
+			continue
+		}
+		cat := cmd.Category
+		if cat == "" {
+			cat = "Other"
+		}
+		if _, exists := categorized[cat]; !exists {
+			categoryOrder = append(categoryOrder, cat)
+		}
+		categorized[cat] = append(categorized[cat], cmd)
+	}
+
+	// ── Measure widths ───────────────────────────────────────────────
+	maxNameLen := 0
+	for _, cmd := range sandbox.Commands {
+		if cmd.Hidden {
+			continue
+		}
 		if len(cmd.ValidStartIdentifiers) > 0 {
-			name := cmd.ValidStartIdentifiers[0]
-			if len(name) > maxLen {
-				maxLen = len(name)
+			n := len(cmd.ValidStartIdentifiers[0])
+			if n > maxNameLen {
+				maxNameLen = n
 			}
 		}
 	}
 
-	for _, cmd := range sandbox.Commands {
-		if len(cmd.ValidStartIdentifiers) == 0 {
-			continue
+	// ── Render categories ────────────────────────────────────────────
+	for _, cat := range categoryOrder {
+		cmds := categorized[cat]
+		p("  %s%s%s%s\n", bold, cyan, strings.ToUpper(cat), reset)
+		p("  %s│%s\n", gray, reset)
+		for _, cmd := range cmds {
+			if len(cmd.ValidStartIdentifiers) == 0 {
+				continue
+			}
+			name := cmd.ValidStartIdentifiers[0]
+
+			aliasTag := ""
+			if len(cmd.ValidStartIdentifiers) > 1 {
+				aliasTag = fmt.Sprintf("  %s[%s]%s",
+					dim,
+					strings.Join(cmd.ValidStartIdentifiers[1:], ", "),
+					reset,
+				)
+			}
+
+			// Dotted leader
+			dotsNeeded := (maxNameLen + 20) - len(name)
+			if dotsNeeded < 4 {
+				dotsNeeded = 4
+			}
+			dots := " " + strings.Repeat("·", dotsNeeded-2) + " "
+
+			p("  %s│%s  %s%s%s%s%s%s%s%s\n",
+				gray, reset,
+				green+bold, name, reset,
+				gray, dots, reset,
+				cmd.Description,
+				aliasTag,
+			)
 		}
-		name := cmd.ValidStartIdentifiers[0]
-		aliases := ""
-		if len(cmd.ValidStartIdentifiers) > 1 {
-			aliases = " (" + strings.Join(cmd.ValidStartIdentifiers[1:], ", ") + ")"
-		}
-		p("  %-*s  %s%s\n", maxLen, name, cmd.Description, aliases)
+		p("  %s│%s\n", gray, reset)
+		p("\n")
 	}
 
+	// ── Footer ───────────────────────────────────────────────────────
+	p("  %s%s─── %sTip%s%s ──────────────────────────────────────────────────%s\n",
+		dim, gray, italic, reset+dim+gray, gray, reset,
+	)
+	p("  %sRun %s%s help <command>%s%s for detailed info on any command.%s\n",
+		dim, reset+cyan, sandbox.ProjectName, reset, dim, reset,
+	)
 	p("\n")
-	p("Use \"%s help <command>\" for more information about a command.\n", sandbox.ProjectName)
 }
 
-// ─── Per-command help ────────────────────────────────────────────────────────
+// ═════════════════════════════════════════════════════════════════════════════
+//  Per-command help
+// ═════════════════════════════════════════════════════════════════════════════
 
 func printCommandHelp(sandbox *api.SandBox, cmd *api.CliCommand) {
 	p := sandbox.Deps.Printf
 
-	// ── Header ───────────────────────────────────────────────────────
-	p("%s\n", cmd.Description)
+	name := cmd.ValidStartIdentifiers[0]
+
+	// ── Header box ───────────────────────────────────────────────────
+	titleLine := fmt.Sprintf("%s %s", sandbox.ProjectName, name)
+	boxW := len(titleLine) + 6
+	if boxW < 44 {
+		boxW = 44
+	}
+	innerW := boxW - 2 // inside the box walls
+
+	p("\n")
+	p("  %s╭%s╮%s\n", cyan, strings.Repeat("─", innerW), reset)
+	p("  %s│%s  %s%s%s%s%s│%s\n",
+		cyan, reset,
+		bold+white, titleLine,
+		reset, strings.Repeat(" ", innerW-2-len(titleLine)),
+		cyan, reset,
+	)
+	p("  %s│%s  %s%s%s%s%s│%s\n",
+		cyan, reset,
+		dim, cmd.Description,
+		reset, strings.Repeat(" ", innerW-2-len(cmd.Description)),
+		cyan, reset,
+	)
+	p("  %s╰%s╯%s\n", cyan, strings.Repeat("─", innerW), reset)
 	p("\n")
 
-	// ── Usage line ───────────────────────────────────────────────────
-	p("Usage:\n")
-	usage := fmt.Sprintf("  %s %s", sandbox.ProjectName, cmd.ValidStartIdentifiers[0])
-	if len(cmd.Flags) > 0 {
-		usage += " [flags]"
+	// ── Long description ─────────────────────────────────────────────
+	if cmd.LongDescription != "" {
+		for _, line := range strings.Split(cmd.LongDescription, "\n") {
+			p("  %s%s%s\n", dim, line, reset)
+		}
+		p("\n")
 	}
+
+	// ── Usage ────────────────────────────────────────────────────────
+	printSection(p, "USAGE")
+	usage := fmt.Sprintf("  %s$%s %s %s",
+		dim, reset, sandbox.ProjectName, name,
+	)
+	flagPart := ""
+	if len(cmd.Flags) > 0 {
+		flagPart = fmt.Sprintf(" %s[flags]%s", yellow, reset)
+	}
+	argPart := ""
 	for _, arg := range cmd.Args {
 		if arg.RequiredMinSize > 0 {
-			usage += fmt.Sprintf(" <%s>", arg.Id)
+			argPart += fmt.Sprintf(" %s%s<%s>%s", bold, green, arg.Id, reset)
 		} else {
-			usage += fmt.Sprintf(" [%s]", arg.Id)
+			argPart += fmt.Sprintf(" %s[%s]%s", dim, arg.Id, reset)
 		}
 	}
-	p("%s\n", usage)
+	p("  %s│%s%s%s%s\n", gray, reset, usage, flagPart, argPart)
+	p("  %s│%s\n", gray, reset)
 	p("\n")
 
 	// ── Aliases ──────────────────────────────────────────────────────
 	if len(cmd.ValidStartIdentifiers) > 1 {
-		p("Aliases:\n")
-		p("  %s\n", strings.Join(cmd.ValidStartIdentifiers, ", "))
+		printSection(p, "ALIASES")
+		for _, alias := range cmd.ValidStartIdentifiers {
+			bullet := gray + "◦" + reset
+			if alias == name {
+				bullet = green + "●" + reset
+			}
+			p("  %s│%s  %s %s%s%s\n", gray, reset, bullet, cyan, alias, reset)
+		}
+		p("  %s│%s\n", gray, reset)
 		p("\n")
 	}
 
 	// ── Arguments ────────────────────────────────────────────────────
 	if len(cmd.Args) > 0 {
-		p("Arguments:\n")
-		maxArgLen := 0
-		for _, arg := range cmd.Args {
-			if len(arg.Id) > maxArgLen {
-				maxArgLen = len(arg.Id)
-			}
-		}
-		for _, arg := range cmd.Args {
-			req := "optional"
+		printSection(p, "ARGUMENTS")
+		for i, arg := range cmd.Args {
+			reqLabel := dim + "optional" + reset
 			if arg.RequiredMinSize > 0 {
-				req = "required"
+				reqLabel = yellow + bold + "required" + reset
 			}
 			typeName := cliTypeName(arg.RequiredType)
-			p("  %-*s  %s  (%s, %s)\n", maxArgLen, arg.Id, arg.Description, typeName, req)
+
+			p("  %s│%s  %s%s%s\n",
+				gray, reset,
+				green+bold, arg.Id, reset,
+			)
+			p("  %s│%s    %s\n", gray, reset, arg.Description)
+			p("  %s│%s    %s%s%s %s│%s %s\n",
+				gray, reset,
+				magenta, typeName, reset,
+				gray, reset,
+				reqLabel,
+			)
 			if len(arg.Defaults) > 0 {
-				p("  %-*s  default: %s\n", maxArgLen, "", strings.Join(arg.Defaults, ", "))
+				p("  %s│%s    %sdefault:%s %s%s%s\n",
+					gray, reset,
+					dim, reset,
+					white+bold, strings.Join(arg.Defaults, ", "), reset,
+				)
+			}
+			if len(arg.Examples) > 0 {
+				for _, ex := range arg.Examples {
+					p("  %s│%s    %s$ %s%s\n", gray, reset, dim, ex, reset)
+				}
+			}
+			if i < len(cmd.Args)-1 {
+				p("  %s│%s\n", gray, reset)
 			}
 		}
+		p("  %s│%s\n", gray, reset)
 		p("\n")
 	}
 
 	// ── Flags ────────────────────────────────────────────────────────
 	if len(cmd.Flags) > 0 {
-		p("Flags:\n")
-		// Build the display identifiers, measure max width.
-		flagLabels := make([]string, len(cmd.Flags))
-		maxFlagLen := 0
+		printSection(p, "FLAGS")
 		for i, flag := range cmd.Flags {
-			flagLabels[i] = strings.Join(flag.ValidIdentifiers, ", ")
-			if len(flagLabels[i]) > maxFlagLen {
-				maxFlagLen = len(flagLabels[i])
-			}
-		}
-		for i, flag := range cmd.Flags {
-			req := "optional"
+			ids := strings.Join(flag.ValidIdentifiers, gray+", "+reset+yellow+bold)
+			reqLabel := dim + "optional" + reset
 			if flag.RequiredPresence {
-				req = "required"
+				reqLabel = yellow + bold + "required" + reset
 			}
 			typeName := cliTypeName(flag.Type)
-			p("  %-*s  %s  (%s, %s)\n", maxFlagLen, flagLabels[i], flag.Description, typeName, req)
+
+			p("  %s│%s  %s%s%s\n",
+				gray, reset,
+				yellow+bold, ids, reset,
+			)
+			p("  %s│%s    %s\n", gray, reset, flag.Description)
+			p("  %s│%s    %s%s%s %s│%s %s\n",
+				gray, reset,
+				magenta, typeName, reset,
+				gray, reset,
+				reqLabel,
+			)
 			if len(flag.Defaults) > 0 {
-				p("  %-*s  default: %s\n", maxFlagLen, "", strings.Join(flag.Defaults, ", "))
+				p("  %s│%s    %sdefault:%s %s%s%s\n",
+					gray, reset,
+					dim, reset,
+					white+bold, strings.Join(flag.Defaults, ", "), reset,
+				)
+			}
+			if len(flag.Examples) > 0 {
+				for _, ex := range flag.Examples {
+					p("  %s│%s    %s$ %s%s\n", gray, reset, dim, ex, reset)
+				}
+			}
+			if i < len(cmd.Flags)-1 {
+				p("  %s│%s\n", gray, reset)
 			}
 		}
+		p("  %s│%s\n", gray, reset)
 		p("\n")
 	}
 
 	// ── Examples ─────────────────────────────────────────────────────
 	if len(cmd.Examples) > 0 {
-		p("Examples:\n")
+		printSection(p, "EXAMPLES")
 		for _, ex := range cmd.Examples {
-			p("  $ %s\n", ex)
+			p("  %s│%s  %s$%s %s\n", gray, reset, dim, reset, ex)
 		}
+		p("  %s│%s\n", gray, reset)
 		p("\n")
 	}
+}
+
+// ─── Helpers ─────────────────────────────────────────────────────────────────
+
+// printBanner renders the top box with project name and version.
+func printBanner(sandbox *api.SandBox) {
+	p := sandbox.Deps.Printf
+
+	titleLine := fmt.Sprintf("%s  %s", sandbox.ProjectName, sandbox.Version)
+	boxW := len(titleLine) + 6
+	if boxW < 44 {
+		boxW = 44
+	}
+	innerW := boxW - 2
+
+	p("\n")
+	p("  %s╭%s╮%s\n", cyan, strings.Repeat("─", innerW), reset)
+	p("  %s│%s  %s%s%s%s%s│%s\n",
+		cyan, reset,
+		bold+white, titleLine,
+		reset, strings.Repeat(" ", innerW-2-len(titleLine)),
+		cyan, reset,
+	)
+	p("  %s╰%s╯%s\n", cyan, strings.Repeat("─", innerW), reset)
+	p("\n")
+}
+
+// printSection renders a colored section header with a connecting vertical
+// bar below it.
+func printSection(p func(string, ...any) (int, error), title string) {
+	p("  %s%s%s%s\n", bold+cyan, title, reset, "")
+	p("  %s│%s\n", gray, reset)
 }
 
 // cliTypeName returns a human-readable label for a CLI type constant.

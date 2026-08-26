@@ -48,11 +48,21 @@ type CliEntrys struct {
 	GetFlagById func(id string) *Cliflag
 }
 
+// CliCommand describes one top-level command the CLI dispatches to.
+// ValidStartIdentifiers lists every verb the user may type to reach
+// it; Description is the one-line summary shown in the command list;
+// LongDescription is an optional multi-line explanation shown in
+// per-command help; Category groups the command under a heading in the
+// general help screen; Hidden, when true, omits the command from help
+// output entirely.
 type CliCommand struct {
 	ValidStartIdentifiers []string
 	Args                  []CliArg
 	Flags                 []Cliflag
 	Description           string
+	LongDescription       string
+	Category              string
+	Hidden                bool
 	Examples              []string
 	Handler               func(sandbox *SandBox, entries CliEntrys) int
 }
