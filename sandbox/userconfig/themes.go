@@ -11,8 +11,11 @@ type Theme struct {
 }
 
 type ThemesConf struct {
-	Themes  []Theme
-	Persist func() error
+	Themes []Theme
+
+	AddTheme func(name string, description string) error
+	GetTheme func(name string) (*Theme, error)
+	Persist  func() error
 }
 
 func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
@@ -71,6 +74,29 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 		}
 
 		themes_conf.Themes = append(themes_conf.Themes, theme)
+	}
+
+	themes_conf.GetTheme = func(name string) (*Theme, error) {
+		for i, theme := range themes_conf.Themes {
+			if theme.Name == name {
+				return &themes_conf.Themes[i], nil
+			}
+		}
+		return nil, sandbox.Deps.Errorf("theme not found")
+	}
+
+	themes_conf.AddTheme = func(name string, description string) error {
+		_, err := themes_conf.GetTheme(name)
+		if err == nil {
+			return sandbox.Deps.Errorf("theme already exists")
+		}
+
+		themes_conf.Themes = append(themes_conf.Themes, Theme{
+			Name:        name,
+			Description: description,
+		})
+
+		return nil
 	}
 
 	themes_conf.Persist = func() error {
