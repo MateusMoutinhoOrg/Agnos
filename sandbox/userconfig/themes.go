@@ -7,13 +7,14 @@ import (
 
 type Theme struct {
 	Name        string
+	Id          string
 	Description string
 }
 
 type ThemesConf struct {
 	Themes []Theme
 
-	AddTheme func(name string, description string) error
+	AddTheme func(name string, id string, description string) error
 	GetTheme func(name string) (*Theme, error)
 	Persist  func() error
 }
@@ -57,6 +58,7 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 
 		theme := Theme{}
 		name_item, _ := item.GetObjectItem("name")
+		id_item, _ := item.GetObjectItem("id")
 		description_item, _ := item.GetObjectItem("description")
 
 		if name_item != nil && !name_item.IsNull() {
@@ -73,6 +75,13 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 			}
 		}
 
+		if id_item != nil && !id_item.IsNull() {
+			theme.Id, err = id_item.GetString()
+			if err != nil {
+				return nil, sandbox.Deps.Errorf("id is not a string")
+			}
+		}
+
 		themes_conf.Themes = append(themes_conf.Themes, theme)
 	}
 
@@ -85,7 +94,7 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 		return nil, sandbox.Deps.Errorf("theme not found")
 	}
 
-	themes_conf.AddTheme = func(name string, description string) error {
+	themes_conf.AddTheme = func(name string, id string, description string) error {
 		_, err := themes_conf.GetTheme(name)
 		if err == nil {
 			return sandbox.Deps.Errorf("theme already exists")
@@ -93,6 +102,7 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 
 		themes_conf.Themes = append(themes_conf.Themes, Theme{
 			Name:        name,
+			Id:          id,
 			Description: description,
 		})
 
@@ -105,6 +115,7 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 		for _, theme := range themes_conf.Themes {
 			theme_obj := sandbox.Deps.SerializeLib.CreateObject()
 			theme_obj.AddItemToObject("name", theme.Name)
+			theme_obj.AddItemToObject("id", theme.Id)
 			theme_obj.AddItemToObject("description", theme.Description)
 
 			new_themes_specs.AddItemToArray(theme_obj)

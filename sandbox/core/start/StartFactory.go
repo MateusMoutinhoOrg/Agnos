@@ -19,6 +19,11 @@ func StartFactory(sandbox *api.SandBox) func(props api.StartProps) error {
 			return err
 		}
 
+		err = createThemes(sandbox, props, configDir)
+		if err != nil {
+			return err
+		}
+
 		sandbox.Deps.Printf("started with path %s \n", props.Path)
 		return nil
 	}
