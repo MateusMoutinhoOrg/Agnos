@@ -19,7 +19,7 @@ type ProjectConf struct {
 
 func NewProjectConf(sandbox *api.SandBox, path string) ProjectConf {
 
-	var project_specs serializibles.SerializibleObject
+	var project_specs *serializibles.SerializibleObject
 	if sandbox.Deps.IoLib.IsFile(path) {
 		content_bytes, _ := sandbox.Deps.IoLib.ReadFile(path)
 		project_specs, _ = sandbox.Deps.SerializeLib.ParseYaml(string(content_bytes))
