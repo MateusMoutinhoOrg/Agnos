@@ -7,6 +7,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/iodeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/requestdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serializebles"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
 )
 
@@ -84,4 +85,7 @@ type Deps struct {
 	// derived library that must speak HTTP has the contract ready, filled by
 	// the standard adapter over net/http.
 	NewRequest func(url string) requestdeps.Request
+	// SerializeLib is the serialization library, handling creation, parsing
+	// and serialization of generic JSON/YAML structures without strong typing.
+	SerializeLib serializibles.Lib
 }

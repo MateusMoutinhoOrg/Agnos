@@ -34,5 +34,6 @@ func New(basePath string) deps.Deps {
 	adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
 	adapter.Deps.IoLib = IoLibFactory(adapter)
 	adapter.Deps.NewRequest = NewRequestFactory(adapter)
+	adapter.Deps.SerializeLib = SerializeLibFactory(adapter)
 	return adapter.Deps
 }
