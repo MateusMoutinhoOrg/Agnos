@@ -55,7 +55,6 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 
 	project_conf.Persist = func() error {
 		project_specs.AddItemToObject("name", project_conf.Name)
-		project_specs.AddItemToObject("module", project_conf.Module)
 		project_specs.AddItemToObject("description", project_conf.Description)
 
 		bytes := sandbox.Deps.SerializeLib.SerializeToYaml(project_specs)
