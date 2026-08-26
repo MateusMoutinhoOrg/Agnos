@@ -14,7 +14,7 @@ type SerializibleObject struct {
 	GetString func() (string, error)
 	GetBool   func() (bool, error)
 
-	GetObjectItem func(key string) *SerializibleObject
+	GetObjectItem func(key string) (*SerializibleObject, error)
 	HasKey        func(key string) bool
 	GetKeys       func() ([]string, error)
 

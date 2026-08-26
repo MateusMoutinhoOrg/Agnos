@@ -34,18 +34,25 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 	if !project_specs.IsObject() {
 		return nil, sandbox.Deps.Errorf("project_specs is not an object")
 	}
-	name_item := project_specs.GetObjectItem("name")
-	module_item := project_specs.GetObjectItem("module")
-	description_item := project_specs.GetObjectItem("description")
-
-	if !name_item.IsString() || !module_item.IsString() || !description_item.IsString() {
-		return nil, sandbox.Deps.Errorf("project_specs is not an object")
-	}
+	name_item, _ := project_specs.GetObjectItem("name")
+	module_item, _ := project_specs.GetObjectItem("module")
+	description_item, _ := project_specs.GetObjectItem("description")
 
 	project_conf := ProjectConf{}
-	project_conf.Name, _ = name_item.GetString()
-	project_conf.Module, _ = module_item.GetString()
-	project_conf.Description, _ = description_item.GetString()
+	var err error
+
+	project_conf.Name, err = name_item.GetString()
+	if err != nil {
+		return nil, sandbox.Deps.Errorf("name is not a string")
+	}
+	project_conf.Module, err = module_item.GetString()
+	if err != nil {
+		return nil, sandbox.Deps.Errorf("module is not a string")
+	}
+	project_conf.Description, err = description_item.GetString()
+	if err != nil {
+		return nil, sandbox.Deps.Errorf("description is not a string")
+	}
 
 	project_conf.Persist = func() error {
 		bytes := sandbox.Deps.SerializeLib.SerializeToYaml(project_specs)

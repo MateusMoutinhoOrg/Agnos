@@ -192,16 +192,16 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 			return false, fmt.Errorf("not a bool")
 		},
 
-		GetObjectItem: func(key string) *serializibles.SerializibleObject {
+		GetObjectItem: func(key string) (*serializibles.SerializibleObject, error) {
 			var nullVal any = nil
 			nullObj := wrapValue(&nullVal)
 
 			if val == nil || *val == nil {
-				return nullObj
+				return nil, fmt.Errorf("not an object")
 			}
 			m, ok := (*val).(map[string]any)
 			if !ok {
-				return nullObj
+				return nil, fmt.Errorf("not an object")
 			}
 			if v, exists := m[key]; exists {
 				// We create a new pointer to the map's value. 
@@ -209,9 +209,9 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 				// You must use ReplaceItemInObject if you want to mutate and persist the change.
 				ptr := new(any)
 				*ptr = v
-				return wrapValue(ptr)
+				return wrapValue(ptr), nil
 			}
-			return nullObj
+			return nullObj, nil
 		},
 		HasKey: func(key string) bool {
 			if val == nil || *val == nil {
@@ -384,7 +384,7 @@ func reconstruct(item *serializibles.SerializibleObject) any {
 		keys, _ := item.GetKeys()
 		m := make(map[string]any)
 		for _, k := range keys {
-			child := item.GetObjectItem(k)
+			child, _ := item.GetObjectItem(k)
 			m[k] = reconstruct(child)
 		}
 		return m
