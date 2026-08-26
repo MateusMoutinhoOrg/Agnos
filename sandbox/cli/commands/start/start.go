@@ -8,6 +8,20 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	return api.CliCommand{
 
 		ValidStartIdentifiers: []string{"start"},
+
+		Args: []api.CliArg{
+			api.CliArg{
+				Id:          "path",
+				Description: "the dir to start the project",
+				Examples: []string{
+					sandbox.ProjectName + " start . ",
+				},
+				Defaults:        []string{"."},
+				RequiredType:    api.CliTypeString,
+				RequiredMinSize: 0,
+				RequiredMaxSize: 1,
+			},
+		},
 		Flags: []api.Cliflag{
 			api.Cliflag{
 				Id:               "quiet",
@@ -32,6 +46,18 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 }
 
 func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
-	sandbox.Deps.Printf("started ")
+
+	quietFlag := entries.GetFlagById("quiet")
+	pathArg := entries.GetArgById("path")
+	path := pathArg.Values[0].String()
+
+	start_error := sandbox.Start(path)
+
+	if !quietFlag.Exist && start_error != nil {
+		sandbox.Deps.Err(start_error.Error())
+	}
+	if start_error != nil {
+		return api.ExitFailure
+	}
 	return api.ExitOk
 }

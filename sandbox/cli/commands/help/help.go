@@ -11,10 +11,11 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 		ValidStartIdentifiers: []string{"help", "--help"},
 		Args: []api.CliArg{
 			api.CliArg{
-				Id:           "command",
-				Description:  "The command to get help for",
-				RequiredType: api.CliTypeString,
-				RequiredSize: 1,
+				Id:              "command",
+				Description:     "The command to get help for",
+				RequiredType:    api.CliTypeString,
+				RequiredMinSize: 0,
+				RequiredMaxSize: 1,
 			},
 		},
 

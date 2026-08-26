@@ -21,8 +21,9 @@ type Cliflag struct {
 	Description string
 	Examples    []string
 
-	Values []CliValue
-	Exist  bool
+	Values   []CliValue
+	Defaults []string
+	Exist    bool
 
 	Type             int
 	RequiredMinSize  int
@@ -35,9 +36,11 @@ type CliArg struct {
 	Description string
 	Examples    []string
 	Values      []CliValue
+	Defaults    []string
 
-	RequiredType int
-	RequiredSize int
+	RequiredType    int
+	RequiredMinSize int
+	RequiredMaxSize int
 }
 
 type CliEntrys struct {
