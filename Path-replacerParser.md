@@ -16,7 +16,7 @@ docs/index/cliUsage/: docs/cli
 the parser must have the following assignature:
 
 ~~~go
-type PathReplacer interface {
+type PathReplacerConf interface {
 
     // recives a path, iterate over the elements, and returns a formated string apllying the replacment the user wants.
     Format func (path string) string
