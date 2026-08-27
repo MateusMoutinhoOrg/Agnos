@@ -8,9 +8,21 @@ import (
 func createProjectSpecs(sandbox *api.SandBox, props api.StartProps, configDir string) error {
 
 	project_specs_dest := configDir + "/project.yaml"
-	project_conf, err := parsables.NewProjectConf(sandbox, project_specs_dest)
-	if err != nil {
-		return err
+
+	var project_conf *parsables.ProjectConf
+	var err error
+
+	if sandbox.Deps.IoLib.IsFile(project_specs_dest) {
+		content_bytes, fileerror := sandbox.Deps.IoLib.ReadFile(project_specs_dest)
+		if fileerror != nil {
+			return fileerror
+		}
+		project_conf, err = parsables.NewProjectConf(sandbox, string(content_bytes))
+		if err != nil {
+			return err
+		}
+	} else {
+		project_conf = parsables.NewProjectConfEmpty(sandbox)
 	}
 
 	project_conf.Name = props.ProjectName
@@ -25,18 +37,32 @@ func createProjectSpecs(sandbox *api.SandBox, props api.StartProps, configDir st
 				return sandbox.Deps.Errorf("the %s file already exists", "go.mod")
 			}
 		}
-		module_conf, err := parsables.NewModuleConf(sandbox, module_path)
-		if err != nil {
-			return err
+
+		var module_conf *parsables.ModuleConf
+
+		if sandbox.Deps.IoLib.IsFile(module_path) {
+			content_bytes, fileerror := sandbox.Deps.IoLib.ReadFile(module_path)
+			if fileerror != nil {
+				return fileerror
+			}
+			module_conf, err = parsables.NewModuleConf(sandbox, string(content_bytes))
+			if err != nil {
+				return err
+			}
+		} else {
+			module_conf = parsables.NewModuleConfEmpty(sandbox)
 		}
+
 		module_conf.Module = *props.Module
-		err = module_conf.Persist()
+		rendered := module_conf.Render()
+		err = sandbox.Deps.IoLib.WriteFile(module_path, []byte(rendered))
 		if err != nil {
 			return err
 		}
 	}
 
-	err = project_conf.Persist()
+	rendered := project_conf.Render()
+	err = sandbox.Deps.IoLib.WriteFile(project_specs_dest, []byte(rendered))
 	if err != nil {
 		return err
 	}

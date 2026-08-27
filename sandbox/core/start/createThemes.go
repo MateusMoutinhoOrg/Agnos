@@ -7,9 +7,21 @@ import (
 
 func createThemes(sandbox *api.SandBox, props api.StartProps, configDir string) error {
 	themes_dest := configDir + "/themes.yaml"
-	themes_conf, err := parsables.NewThemesConf(sandbox, themes_dest)
-	if err != nil {
-		return err
+
+	var themes_conf *parsables.ThemesConf
+	var err error
+
+	if sandbox.Deps.IoLib.IsFile(themes_dest) {
+		content_bytes, fileerror := sandbox.Deps.IoLib.ReadFile(themes_dest)
+		if fileerror != nil {
+			return fileerror
+		}
+		themes_conf, err = parsables.NewThemesConf(sandbox, string(content_bytes))
+		if err != nil {
+			return err
+		}
+	} else {
+		themes_conf = parsables.NewThemesConfEmpty(sandbox)
 	}
 
 	err = themes_conf.AddTheme("LibUsage", "lib-usage", "Documentation explaning how to use the lib")
@@ -22,7 +34,8 @@ func createThemes(sandbox *api.SandBox, props api.StartProps, configDir string) 
 		return err
 	}
 
-	err = themes_conf.Persist()
+	rendered := themes_conf.Render()
+	err = sandbox.Deps.IoLib.WriteFile(themes_dest, []byte(rendered))
 	if err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package parsables
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serializebles"
 )
 
 type ProjectConf struct {
@@ -10,26 +9,31 @@ type ProjectConf struct {
 	Version     string
 	Description string
 
-	Persist func() error
+	Render func() string
 }
 
-func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
+func addProjectConfMethods(sandbox *api.SandBox, project_conf *ProjectConf) {
+	project_conf.Render = func() string {
+		obj := sandbox.Deps.SerializeLib.CreateObject()
+		obj.AddItemToObject("name", project_conf.Name)
+		obj.AddItemToObject("version", project_conf.Version)
+		obj.AddItemToObject("description", project_conf.Description)
 
-	var project_specs *serializibles.SerializibleObject
-	if sandbox.Deps.IoLib.IsFile(path) {
-		content_bytes, fileerror := sandbox.Deps.IoLib.ReadFile(path)
-		if fileerror != nil {
-			return nil, fileerror
-		}
-		specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(string(content_bytes))
-		if parse_error != nil {
-			return nil, parse_error
-		}
-		project_specs = specs
-
-	} else {
-		project_specs = sandbox.Deps.SerializeLib.CreateObject()
+		return sandbox.Deps.SerializeLib.SerializeToYaml(obj)
 	}
+}
+
+func NewProjectConf(sandbox *api.SandBox, content string) (*ProjectConf, error) {
+
+	if content == "" {
+		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewProjectConfEmpty instead")
+	}
+
+	specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(content)
+	if parse_error != nil {
+		return nil, parse_error
+	}
+	project_specs := specs
 
 	if !project_specs.IsObject() {
 		return nil, sandbox.Deps.Errorf("project_specs is not an object")
@@ -38,7 +42,7 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 	version_item, _ := project_specs.GetObjectItem("version")
 	description_item, _ := project_specs.GetObjectItem("description")
 
-	project_conf := ProjectConf{
+	project_conf := &ProjectConf{
 		Version: "v0.0.0",
 	}
 	var err error
@@ -64,14 +68,14 @@ func NewProjectConf(sandbox *api.SandBox, path string) (*ProjectConf, error) {
 		}
 	}
 
-	project_conf.Persist = func() error {
-		project_specs.AddItemToObject("name", project_conf.Name)
-		project_specs.AddItemToObject("version", project_conf.Version)
-		project_specs.AddItemToObject("description", project_conf.Description)
+	addProjectConfMethods(sandbox, project_conf)
+	return project_conf, nil
+}
 
-		bytes := sandbox.Deps.SerializeLib.SerializeToYaml(project_specs)
-		return sandbox.Deps.IoLib.WriteFile(path, []byte(bytes))
+func NewProjectConfEmpty(sandbox *api.SandBox) *ProjectConf {
+	project_conf := &ProjectConf{
+		Version: "v0.0.0",
 	}
-
-	return &project_conf, nil
+	addProjectConfMethods(sandbox, project_conf)
+	return project_conf
 }

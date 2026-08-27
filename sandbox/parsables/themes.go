@@ -2,7 +2,6 @@ package parsables
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serializebles"
 )
 
 type Theme struct {
@@ -16,32 +15,68 @@ type ThemesConf struct {
 
 	AddTheme func(name string, id string, description string) error
 	GetTheme func(name string) (*Theme, error)
-	Persist  func() error
+	Render   func() string
 }
 
-func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
+func addThemesConfMethods(sandbox *api.SandBox, themes_conf *ThemesConf) {
 
-	var themes_specs *serializibles.SerializibleObject
-	if sandbox.Deps.IoLib.IsFile(path) {
-		content_bytes, fileerror := sandbox.Deps.IoLib.ReadFile(path)
-		if fileerror != nil {
-			return nil, fileerror
+	themes_conf.GetTheme = func(name string) (*Theme, error) {
+		for i, theme := range themes_conf.Themes {
+			if theme.Name == name {
+				return &themes_conf.Themes[i], nil
+			}
 		}
-		specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(string(content_bytes))
-		if parse_error != nil {
-			return nil, parse_error
-		}
-		themes_specs = specs
-
-	} else {
-		themes_specs = sandbox.Deps.SerializeLib.CreateArray()
+		return nil, sandbox.Deps.Errorf("theme not found")
 	}
+
+	themes_conf.AddTheme = func(name string, id string, description string) error {
+		_, err := themes_conf.GetTheme(name)
+		if err == nil {
+			return sandbox.Deps.Errorf("theme already exists")
+		}
+
+		themes_conf.Themes = append(themes_conf.Themes, Theme{
+			Name:        name,
+			Id:          id,
+			Description: description,
+		})
+
+		return nil
+	}
+
+	themes_conf.Render = func() string {
+		new_themes_specs := sandbox.Deps.SerializeLib.CreateArray()
+
+		for _, theme := range themes_conf.Themes {
+			theme_obj := sandbox.Deps.SerializeLib.CreateObject()
+			theme_obj.AddItemToObject("name", theme.Name)
+			theme_obj.AddItemToObject("id", theme.Id)
+			theme_obj.AddItemToObject("description", theme.Description)
+
+			new_themes_specs.AddItemToArray(theme_obj)
+		}
+
+		return sandbox.Deps.SerializeLib.SerializeToYaml(new_themes_specs)
+	}
+}
+
+func NewThemesConf(sandbox *api.SandBox, content string) (*ThemesConf, error) {
+
+	if content == "" {
+		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewThemesConfEmpty instead")
+	}
+
+	specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(content)
+	if parse_error != nil {
+		return nil, parse_error
+	}
+	themes_specs := specs
 
 	if !themes_specs.IsArray() {
 		return nil, sandbox.Deps.Errorf("themes_specs is not an array")
 	}
 
-	themes_conf := ThemesConf{
+	themes_conf := &ThemesConf{
 		Themes: make([]Theme, 0),
 	}
 
@@ -85,45 +120,14 @@ func NewThemesConf(sandbox *api.SandBox, path string) (*ThemesConf, error) {
 		themes_conf.Themes = append(themes_conf.Themes, theme)
 	}
 
-	themes_conf.GetTheme = func(name string) (*Theme, error) {
-		for i, theme := range themes_conf.Themes {
-			if theme.Name == name {
-				return &themes_conf.Themes[i], nil
-			}
-		}
-		return nil, sandbox.Deps.Errorf("theme not found")
+	addThemesConfMethods(sandbox, themes_conf)
+	return themes_conf, nil
+}
+
+func NewThemesConfEmpty(sandbox *api.SandBox) *ThemesConf {
+	themes_conf := &ThemesConf{
+		Themes: make([]Theme, 0),
 	}
-
-	themes_conf.AddTheme = func(name string, id string, description string) error {
-		_, err := themes_conf.GetTheme(name)
-		if err == nil {
-			return sandbox.Deps.Errorf("theme already exists")
-		}
-
-		themes_conf.Themes = append(themes_conf.Themes, Theme{
-			Name:        name,
-			Id:          id,
-			Description: description,
-		})
-
-		return nil
-	}
-
-	themes_conf.Persist = func() error {
-		new_themes_specs := sandbox.Deps.SerializeLib.CreateArray()
-
-		for _, theme := range themes_conf.Themes {
-			theme_obj := sandbox.Deps.SerializeLib.CreateObject()
-			theme_obj.AddItemToObject("name", theme.Name)
-			theme_obj.AddItemToObject("id", theme.Id)
-			theme_obj.AddItemToObject("description", theme.Description)
-
-			new_themes_specs.AddItemToArray(theme_obj)
-		}
-
-		bytes := sandbox.Deps.SerializeLib.SerializeToYaml(new_themes_specs)
-		return sandbox.Deps.IoLib.WriteFile(path, []byte(bytes))
-	}
-
-	return &themes_conf, nil
+	addThemesConfMethods(sandbox, themes_conf)
+	return themes_conf
 }

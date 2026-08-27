@@ -24,9 +24,6 @@ type IgnorableItens interface {
 	IsIgnorable func (path string)bool 
 }
 
-func NewIgnorableItens(content []string) (*IgnorableItens, error){
-    
-}
 ~~~
 
 
