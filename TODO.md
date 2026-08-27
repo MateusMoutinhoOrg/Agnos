@@ -5,11 +5,9 @@
 description: a custom class responsable to write , read, list, itens, that will aply replacers, and ignorable itens:
 requires: Ignorable-parser, replacer-parser
 
-### Ignorable Parser: 
-a parser for the ignore.yaml item 
 
-### Replacer Parser: 
-a parser for the replace.yaml item 
+### Paths Parser: 
+a parser for the paths.yaml item 
 
 ### Template Deps
 a dep that will allow to render embed templates
