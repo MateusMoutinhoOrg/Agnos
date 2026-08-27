@@ -6,9 +6,6 @@ description: a custom class responsable to write , read, list, itens, that will 
 requires: Ignorable-parser, replacer-parser
 
 
-### Paths Parser: 
-a parser for the paths.yaml item 
-
 ### Template Deps
 a dep that will allow to render embed templates
 
