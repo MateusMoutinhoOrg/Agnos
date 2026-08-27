@@ -4,7 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
 )
 
-type IgnorableItens struct {
+type IgnorableConf struct {
 	Paths []string
 
 	AddPath     func(path string)
@@ -12,7 +12,7 @@ type IgnorableItens struct {
 	Render      func() string
 }
 
-func addIgnorableItensMethods(sandbox *api.SandBox, items *IgnorableItens) {
+func addIgnorableConfMethods(sandbox *api.SandBox, items *IgnorableConf) {
 
 	items.AddPath = func(path string) {
 		items.Paths = append(items.Paths, path)
@@ -38,10 +38,10 @@ func addIgnorableItensMethods(sandbox *api.SandBox, items *IgnorableItens) {
 	}
 }
 
-func NewIgnorableItens(sandbox *api.SandBox, content string) (*IgnorableItens, error) {
+func NewIgnorableConf(sandbox *api.SandBox, content string) (*IgnorableConf, error) {
 
 	if content == "" {
-		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewIgnorableItensEmpty instead")
+		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewIgnorableConfEmpty instead")
 	}
 
 	specs, parse_error := sandbox.Deps.SerializeLib.ParseYaml(content)
@@ -53,7 +53,7 @@ func NewIgnorableItens(sandbox *api.SandBox, content string) (*IgnorableItens, e
 		return nil, sandbox.Deps.Errorf("ignore config is not an array")
 	}
 
-	items := &IgnorableItens{
+	items := &IgnorableConf{
 		Paths: make([]string, 0),
 	}
 
@@ -76,14 +76,14 @@ func NewIgnorableItens(sandbox *api.SandBox, content string) (*IgnorableItens, e
 		items.Paths = append(items.Paths, path)
 	}
 
-	addIgnorableItensMethods(sandbox, items)
+	addIgnorableConfMethods(sandbox, items)
 	return items, nil
 }
 
-func NewIgnorableItensEmpty(sandbox *api.SandBox) *IgnorableItens {
-	items := &IgnorableItens{
+func NewIgnorableConfEmpty(sandbox *api.SandBox) *IgnorableConf {
+	items := &IgnorableConf{
 		Paths: make([]string, 0),
 	}
-	addIgnorableItensMethods(sandbox, items)
+	addIgnorableConfMethods(sandbox, items)
 	return items
 }

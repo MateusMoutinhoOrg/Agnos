@@ -16,7 +16,7 @@ its a document, similar to project.yaml and themes.yaml, that contains only a li
 the parser must have the following assignature:
 
 ~~~go
-type IgnorableItens interface {
+type IgnorableConf interface {
 
 
     AddPath func (path string)
