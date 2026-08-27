@@ -19,12 +19,12 @@ the parser must have the following assignature:
 type IgnorableItens interface {
 
 
-    AddPath(path string)
+    AddPath func (path string)
     // returns true if eleent its on ignorable list
-	IsIgnorable(path string)bool 
+	IsIgnorable func (path string)bool 
 }
 
-func NewIgnorableItens(content []string) (IgnorableItens, error){
+func NewIgnorableItens(content []string) (*IgnorableItens, error){
     
 }
 ~~~
