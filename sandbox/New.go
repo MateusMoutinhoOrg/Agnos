@@ -12,8 +12,10 @@ import (
 // function field to api.Lib means adding its factory call here.
 func New(d deps.Deps) api.SandBox {
 	sandbox := api.SandBox{Deps: d}
+	// Config runs first: the command definitions interpolate ProjectName
+	// into their examples when they are built.
+	Config(&sandbox)
 	cli.SetCliMethods(&sandbox)
 	core.SetCoreMethods(&sandbox)
-	Config(&sandbox)
 	return sandbox
 }
