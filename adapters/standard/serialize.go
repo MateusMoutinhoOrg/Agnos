@@ -72,7 +72,13 @@ func SerializeLibFactory(s *StandardAdapter) serializibles.Lib {
 			if err != nil {
 				return ""
 			}
-			return string(bytes)
+			
+			result := string(bytes)
+			if result == "{}\n" || result == "[]\n" {
+				return ""
+			}
+			
+			return result
 		},
 	}
 }
