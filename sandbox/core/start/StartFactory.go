@@ -31,6 +31,8 @@ func StartFactory(sandbox *api.SandBox) func(props api.StartProps) error {
 		project_conf.Name = props.ProjectName
 
 		themes_conf := parsables.NewThemesConfEmpty(sandbox)
+		themes_conf.AddTheme("LibUsage", "lib-usage", "Documentation explaning how to use the lib")
+		themes_conf.AddTheme("Development", "development", "Documentation explaning how to to. build the project, and how to modify the project ")
 		ignorable_conf := parsables.NewIgnorableConfEmpty(sandbox)
 		path_replacer_conf := parsables.NewPathReplacerConfEmpty(sandbox)
 
