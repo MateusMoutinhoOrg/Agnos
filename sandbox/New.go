@@ -1,6 +1,19 @@
 package sandbox
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
+	sandbox "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
+
+	// CORE
+	start "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/start"
+
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/build"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/extensionhelp"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/install"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/list"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/uninstall"
+
+	// CMD RELATED
 	cliMain "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli"
 	cmdBuild "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/build"
 	cmdExtensionhelp "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/extensionhelp"
@@ -12,13 +25,6 @@ import (
 	cmdVersion "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/version"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 	cliApi "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/build"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/extensionhelp"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/install"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/list"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/start"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/uninstall"
 )
 
 func New(d deps.Deps) sandbox.SandBox {
@@ -40,12 +46,24 @@ func New(d deps.Deps) sandbox.SandBox {
 
 	sandbox.Cli.CliMain = cliMain.CliMainFactory(&sandbox)
 
-	sandbox.Core.Start = start.StartFactory(&sandbox)
-	sandbox.Core.Build = build.BuildFactory(&sandbox)
-	sandbox.Core.Install = install.InstallFactory(&sandbox)
-	sandbox.Core.Uninstall = uninstall.UninstallFactory(&sandbox)
-	sandbox.Core.List = list.ListFactory(&sandbox)
-	sandbox.Core.ExtensionHelp = extensionhelp.ExtensionHelpFactory(&sandbox)
+	sandbox.Core.Start = func(props core.StartProps) error {
+		return start.Start(&sandbox, props)
+	}
+	sandbox.Core.Build = func(props core.BuildProps) error {
+		return build.Build(&sandbox, props)
+	}
+	sandbox.Core.Install = func(props core.InstallProps) error {
+		return install.Install(&sandbox, props)
+	}
+	sandbox.Core.Uninstall = func(props core.UninstallProps) error {
+		return uninstall.Uninstall(&sandbox, props)
+	}
+	sandbox.Core.List = func(props core.ListProps) error {
+		return list.List(&sandbox, props)
+	}
+	sandbox.Core.ExtensionHelp = func(props core.ExtensionHelpProps) error {
+		return extensionhelp.ExtensionHelp(&sandbox, props)
+	}
 
 	return sandbox
 }
