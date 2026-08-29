@@ -14,7 +14,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/uninstall"
 
 	// CMD RELATED
-	cliMain "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli"
+
+	climain "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/climain"
 	cmdBuild "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/build"
 	cmdExtensionhelp "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/extensionhelp"
 	cmdHelp "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/help"
@@ -44,8 +45,9 @@ func New(d deps.Deps) sandbox.SandBox {
 		cmdExtensionhelp.NewCommand(&sandbox),
 	}
 
-	sandbox.Cli.CliMain = cliMain.CliMainFactory(&sandbox)
-
+	sandbox.Cli.CliMain = func(args []string) int {
+		return climain.CliMain(&sandbox, args)
+	}
 	sandbox.Core.Start = func(props core.StartProps) error {
 		return start.Start(&sandbox, props)
 	}

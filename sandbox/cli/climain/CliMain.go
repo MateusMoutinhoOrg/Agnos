@@ -1,4 +1,4 @@
-package cli
+package climain
 
 import (
 	"fmt"
@@ -14,64 +14,63 @@ import (
 // match a command, collect its declared flags and args from the argument
 // vector, validate required fields, and hand the parsed retrivers to the
 // command handler.
-func CliMainFactory(sandbox *sandbox.SandBox) func(args []string) int {
+func CliMain(sandbox *sandbox.SandBox, args []string) int {
 
-	return func(args []string) int {
-		if len(args) == 0 {
-			printUsage(sandbox)
-			return cli.ExitUsage
+	if len(args) == 0 {
+		printUsage(sandbox)
+		return cli.ExitUsage
+	}
+
+	verb := sandbox.Deps.VerbLib
+
+	action, err := verb.GetNextStringArg()
+	if err != nil {
+		printUsage(sandbox)
+		return cli.ExitUsage
+	}
+
+	for i := range sandbox.Cli.Commands {
+		command := &sandbox.Cli.Commands[i]
+
+		if !slices.Contains(command.ValidStartIdentifiers, action) {
+			continue
 		}
 
-		verb := sandbox.Deps.VerbLib
+		// ── Collect flags ──────────────────────────────────────
+		for j := range command.Flags {
+			flag := &command.Flags[j]
 
-		action, err := verb.GetNextStringArg()
-		if err != nil {
-			printUsage(sandbox)
-			return cli.ExitUsage
-		}
-
-		for i := range sandbox.Cli.Commands {
-			command := &sandbox.Cli.Commands[i]
-
-			if !slices.Contains(command.ValidStartIdentifiers, action) {
+			if flag.Type == cli.CliTypeBool {
+				if err := collectBoolFlag(flag, verb); err != nil {
+					sandbox.Deps.Printf("%s\n", err.Error())
+					return cli.ExitUsage
+				}
 				continue
 			}
 
-			// ── Collect flags ──────────────────────────────────────
-			for j := range command.Flags {
-				flag := &command.Flags[j]
-
-				if flag.Type == cli.CliTypeBool {
-					if err := collectBoolFlag(flag, verb); err != nil {
-						sandbox.Deps.Printf("%s\n", err.Error())
-						return cli.ExitUsage
-					}
-					continue
-				}
-
-				if err := collectValueFlag(flag, verb); err != nil {
-					sandbox.Deps.Printf("%s\n", err.Error())
-					return cli.ExitUsage
-				}
+			if err := collectValueFlag(flag, verb); err != nil {
+				sandbox.Deps.Printf("%s\n", err.Error())
+				return cli.ExitUsage
 			}
-
-			// ── Collect args (positional, after flags are consumed) ─
-			for j := range command.Args {
-				arg := &command.Args[j]
-				if err := collectArg(arg, verb); err != nil {
-					sandbox.Deps.Printf("%s\n", err.Error())
-					return cli.ExitUsage
-				}
-			}
-
-			entries := buildCliEntrys(command)
-
-			return command.Handler(sandbox, entries)
 		}
 
-		sandbox.Deps.Printf("Unknown Command!\n")
-		return cli.ExitUsage
+		// ── Collect args (positional, after flags are consumed) ─
+		for j := range command.Args {
+			arg := &command.Args[j]
+			if err := collectArg(arg, verb); err != nil {
+				sandbox.Deps.Printf("%s\n", err.Error())
+				return cli.ExitUsage
+			}
+		}
+
+		entries := buildCliEntrys(command)
+
+		return command.Handler(sandbox, entries)
 	}
+
+	sandbox.Deps.Printf("Unknown Command!\n")
+	return cli.ExitUsage
+
 }
 
 // printUsage triggers the help command so the user sees the full
