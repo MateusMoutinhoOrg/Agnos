@@ -1,7 +1,7 @@
 package parsables
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
 type Theme struct {
@@ -18,7 +18,7 @@ type ThemesConf struct {
 	Render   func() string
 }
 
-func addThemesConfMethods(sandbox *lib.SandBox, themes_conf *ThemesConf) {
+func addThemesConfMethods(sandbox *sandbox.SandBox, themes_conf *ThemesConf) {
 
 	themes_conf.GetTheme = func(name string) (*Theme, error) {
 		for i, theme := range themes_conf.Themes {
@@ -60,7 +60,7 @@ func addThemesConfMethods(sandbox *lib.SandBox, themes_conf *ThemesConf) {
 	}
 }
 
-func NewThemesConf(sandbox *lib.SandBox, content string) (*ThemesConf, error) {
+func NewThemesConf(sandbox *sandbox.SandBox, content string) (*ThemesConf, error) {
 
 	if content == "" {
 		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewThemesConfEmpty instead")
@@ -124,7 +124,7 @@ func NewThemesConf(sandbox *lib.SandBox, content string) (*ThemesConf, error) {
 	return themes_conf, nil
 }
 
-func NewThemesConfEmpty(sandbox *lib.SandBox) *ThemesConf {
+func NewThemesConfEmpty(sandbox *sandbox.SandBox) *ThemesConf {
 	themes_conf := &ThemesConf{
 		Themes: make([]Theme, 0),
 	}

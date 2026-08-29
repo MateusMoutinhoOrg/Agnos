@@ -70,4 +70,3 @@ func ErrorfFactory(s *StandardAdapter) func(format string, a ...any) error {
 		return fmt.Errorf(format, a...)
 	}
 }
-

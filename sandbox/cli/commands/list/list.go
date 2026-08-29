@@ -1,37 +1,39 @@
 package list
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
-	return lib.CliCommand{
+func NewCommand(sandbox *sandbox.SandBox) cli.CliCommand {
+	return cli.CliCommand{
 
 		ValidStartIdentifiers: []string{"list"},
 		Category:              "Extensions",
 
-		Args: []lib.CliArg{
-			lib.CliArg{
+		Args: []cli.CliArg{
+			cli.CliArg{
 				Id:          "path",
 				Description: "the dir of the project to list the extensions of",
 				Examples: []string{
 					sandbox.Config.ProjectName + " list . ",
 				},
 				Defaults:        []string{"."},
-				RequiredType:    lib.CliTypeString,
+				RequiredType:    cli.CliTypeString,
 				RequiredMinSize: 0,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []lib.Cliflag{
-			lib.Cliflag{
+		Flags: []cli.Cliflag{
+			cli.Cliflag{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
 					sandbox.Config.ProjectName + " list -q",
 				},
-				Type:             lib.CliTypeBool,
+				Type:             cli.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
@@ -49,12 +51,13 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
+func CommandHandler(sb any, entries cli.CliEntrys) int {
+	sandbox := sb.(*sandbox.SandBox)
 
 	quietFlag := entries.GetFlagById("quiet")
 	pathArg := entries.GetArgById("path")
 
-	list_error := sandbox.Core.List(lib.ListProps{
+	list_error := sandbox.Core.List(core.ListProps{
 		Path: pathArg.Values[0].String(),
 	})
 
@@ -62,7 +65,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		sandbox.Deps.Error(list_error.Error())
 	}
 	if list_error != nil {
-		return lib.ExitFailure
+		return cli.ExitFailure
 	}
-	return lib.ExitOk
+	return cli.ExitOk
 }

@@ -1,61 +1,63 @@
 package start
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
-	return lib.CliCommand{
+func NewCommand(sandbox *sandbox.SandBox) cli.CliCommand {
+	return cli.CliCommand{
 
 		ValidStartIdentifiers: []string{"start"},
 		Category:              "Core Commands",
 
-		Args: []lib.CliArg{
-			lib.CliArg{
+		Args: []cli.CliArg{
+			cli.CliArg{
 				Id:          "path",
 				Description: "the dir to start the project",
 				Examples: []string{
 					sandbox.Config.ProjectName + " start . ",
 				},
 				Defaults:        []string{"."},
-				RequiredType:    lib.CliTypeString,
+				RequiredType:    cli.CliTypeString,
 				RequiredMinSize: 0,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []lib.Cliflag{
-			lib.Cliflag{
+		Flags: []cli.Cliflag{
+			cli.Cliflag{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
 					sandbox.Config.ProjectName + " start -q",
 				},
-				Type:             lib.CliTypeBool,
+				Type:             cli.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
 			},
-			lib.Cliflag{
+			cli.Cliflag{
 				Id:               "force",
 				ValidIdentifiers: []string{"--force", "-f"},
 				Description:      "Forces the creation of the project, overwriting existing files",
 				Examples: []string{
 					sandbox.Config.ProjectName + " start -f",
 				},
-				Type:             lib.CliTypeBool,
+				Type:             cli.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
 			},
-			lib.Cliflag{
+			cli.Cliflag{
 				Id:               "module",
 				ValidIdentifiers: []string{"--module", "-m"},
 				Description:      "Module name for go.mod",
 				Examples: []string{
 					sandbox.Config.ProjectName + " start -m github.com/user/project",
 				},
-				Type:             lib.CliTypeString,
+				Type:             cli.CliTypeString,
 				RequiredMinSize:  1,
 				RequiredMaxSize:  1,
 				RequiredPresence: false,
@@ -74,7 +76,8 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
+func CommandHandler(sb any, entries cli.CliEntrys) int {
+	sandbox := sb.(*sandbox.SandBox)
 
 	quietFlag := entries.GetFlagById("quiet")
 	forceFlag := entries.GetFlagById("force")
@@ -88,7 +91,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		module = &modVal
 	}
 
-	start_error := sandbox.Core.Start(lib.StartProps{
+	start_error := sandbox.Core.Start(core.StartProps{
 		Path:        path,
 		ProjectName: sandbox.Config.ProjectName,
 		Module:      module,
@@ -99,7 +102,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		sandbox.Deps.Error(start_error.Error())
 	}
 	if start_error != nil {
-		return lib.ExitFailure
+		return cli.ExitFailure
 	}
-	return lib.ExitOk
+	return cli.ExitOk
 }

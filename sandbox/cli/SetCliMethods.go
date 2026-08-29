@@ -9,12 +9,14 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/start"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/uninstall"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/cli/commands/version"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-func SetCliMethods(sandbox *lib.SandBox) {
+func SetCliMethods(sandbox *sandbox.SandBox) {
 
-	sandbox.Cli.Commands = []lib.CliCommand{
+	sandbox.Cli.Commands = []cli.CliCommand{
 		version.NewCommand(sandbox),
 		help.NewCommand(sandbox),
 		start.NewCommand(sandbox),

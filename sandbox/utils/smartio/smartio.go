@@ -3,8 +3,9 @@ package smartio
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables"
+
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
 type SmartIO struct {
@@ -36,7 +37,7 @@ func joinPath(base string, name string) string {
 	return base + "/" + name
 }
 
-func addSmartIOMethods(sandbox *lib.SandBox, io *SmartIO) {
+func addSmartIOMethods(sandbox *sandbox.SandBox, io *SmartIO) {
 
 	// Helper to apply replacer and check ignore for input paths
 	processInputPath := func(path string) (string, error) {
@@ -179,7 +180,7 @@ func addSmartIOMethods(sandbox *lib.SandBox, io *SmartIO) {
 	}
 }
 
-func NewSmartIO(sandbox *lib.SandBox, path string) *SmartIO {
+func NewSmartIO(sandbox *sandbox.SandBox, path string) *SmartIO {
 	io := &SmartIO{
 		Transactions: make(map[string][]byte),
 	}

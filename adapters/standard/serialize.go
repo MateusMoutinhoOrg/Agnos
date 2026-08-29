@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serializebles"
+	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serializebles"
 	"gopkg.in/yaml.v3"
 )
 
@@ -72,12 +72,12 @@ func SerializeLibFactory(s *StandardAdapter) serializibles.Lib {
 			if err != nil {
 				return ""
 			}
-			
+
 			result := string(bytes)
 			if result == "{}\n" || result == "[]\n" {
 				return ""
 			}
-			
+
 			return result
 		},
 	}
@@ -210,7 +210,7 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 				return nil, fmt.Errorf("not an object")
 			}
 			if v, exists := m[key]; exists {
-				// We create a new pointer to the map's value. 
+				// We create a new pointer to the map's value.
 				// NOTE: modifying the returned child won't automatically update the map!
 				// You must use ReplaceItemInObject if you want to mutate and persist the change.
 				ptr := new(any)

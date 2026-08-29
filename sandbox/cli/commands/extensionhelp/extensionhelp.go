@@ -1,29 +1,31 @@
 package extensionhelp
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
-	return lib.CliCommand{
+func NewCommand(sandbox *sandbox.SandBox) cli.CliCommand {
+	return cli.CliCommand{
 
 		ValidStartIdentifiers: []string{"extension-help"},
 		Category:              "Extensions",
 
-		Args: []lib.CliArg{
-			lib.CliArg{
+		Args: []cli.CliArg{
+			cli.CliArg{
 				Id:          "extension",
 				Description: "the extension to show the help of",
 				Examples: []string{
 					sandbox.Config.ProjectName + " extension-help my-extension",
 				},
-				RequiredType:    lib.CliTypeString,
+				RequiredType:    cli.CliTypeString,
 				RequiredMinSize: 1,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []lib.Cliflag{
-			lib.Cliflag{
+		Flags: []cli.Cliflag{
+			cli.Cliflag{
 				Id:               "path",
 				ValidIdentifiers: []string{"--path", "-p"},
 				Description:      "the dir of the project the extension belongs to",
@@ -31,7 +33,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 					sandbox.Config.ProjectName + " extension-help my-extension -p ./my-project",
 				},
 				Defaults:         []string{"."},
-				Type:             lib.CliTypeString,
+				Type:             cli.CliTypeString,
 				RequiredMinSize:  1,
 				RequiredMaxSize:  1,
 				RequiredPresence: false,
@@ -48,7 +50,8 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
+func CommandHandler(sb any, entries cli.CliEntrys) int {
+	sandbox := sb.(*sandbox.SandBox)
 
 	pathFlag := entries.GetFlagById("path")
 	extensionArg := entries.GetArgById("extension")
@@ -58,14 +61,14 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		path = pathFlag.Values[0].String()
 	}
 
-	help_error := sandbox.Core.ExtensionHelp(lib.ExtensionHelpProps{
+	help_error := sandbox.Core.ExtensionHelp(core.ExtensionHelpProps{
 		Path:      path,
 		Extension: extensionArg.Values[0].String(),
 	})
 
 	if help_error != nil {
 		sandbox.Deps.Error(help_error.Error())
-		return lib.ExitFailure
+		return cli.ExitFailure
 	}
-	return lib.ExitOk
+	return cli.ExitOk
 }

@@ -1,4 +1,6 @@
-package lib
+package cli
+
+
 
 type CliValue interface {
 	String() string
@@ -64,7 +66,7 @@ type CliCommand struct {
 	Category              string
 	Hidden                bool
 	Examples              []string
-	Handler               func(sandbox *SandBox, entries CliEntrys) int
+	Handler               func(sandbox any, entries CliEntrys) int
 }
 
 const (

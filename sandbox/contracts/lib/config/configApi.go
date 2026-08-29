@@ -1,4 +1,4 @@
-package lib
+package config
 
 type Config struct {
 	Version     string

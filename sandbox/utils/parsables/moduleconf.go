@@ -3,7 +3,7 @@ package parsables
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
 type ModuleConf struct {
@@ -14,7 +14,7 @@ type ModuleConf struct {
 	Render func() string
 }
 
-func addModuleConfMethods(sandbox *lib.SandBox, conf *ModuleConf) {
+func addModuleConfMethods(sandbox *sandbox.SandBox, conf *ModuleConf) {
 	conf.Render = func() string {
 		var builder strings.Builder
 		if conf.Module != "" {
@@ -36,7 +36,7 @@ func addModuleConfMethods(sandbox *lib.SandBox, conf *ModuleConf) {
 	}
 }
 
-func NewModuleConf(sandbox *lib.SandBox, content string) (*ModuleConf, error) {
+func NewModuleConf(sandbox *sandbox.SandBox, content string) (*ModuleConf, error) {
 	var module string
 	var goversion string
 	var requires []string
@@ -79,7 +79,7 @@ func NewModuleConf(sandbox *lib.SandBox, content string) (*ModuleConf, error) {
 	return conf, nil
 }
 
-func NewModuleConfEmpty(sandbox *lib.SandBox) *ModuleConf {
+func NewModuleConfEmpty(sandbox *sandbox.SandBox) *ModuleConf {
 	conf := &ModuleConf{
 		Requires: []string{},
 	}

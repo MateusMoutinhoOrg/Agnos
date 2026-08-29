@@ -12,7 +12,7 @@ import (
 // parses the process's own command line, os.Args[1:]; and Printf writes to
 // the process's standard output — this adapter is the opinionated one, so it
 // picks the argument vector and the stream itself. Handing the same
-// os.Args[1:] to lib.SandBox.Sandboxmain is what keeps the interface's view of
+// os.Args[1:] to sandbox.SandBox.Sandboxmain is what keeps the interface's view of
 // the command line and the parser's in agreement. Every asset the library
 // asks for is served from the whole compiled-in asset tree, so nothing has to
 // exist on disk beside the binary.

@@ -1,11 +1,12 @@
 package version
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
-	return lib.CliCommand{
+func NewCommand(sandbox *sandbox.SandBox) cli.CliCommand {
+	return cli.CliCommand{
 		ValidStartIdentifiers: []string{"version", "--version"},
 		Category:              "Info",
 		Description:           "Print the installed version",
@@ -18,7 +19,8 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
+func CommandHandler(sb any, entries cli.CliEntrys) int {
+	sandbox := sb.(*sandbox.SandBox)
 	sandbox.Deps.Printf("Version:%s\n", sandbox.Config.Version)
-	return lib.ExitOk
+	return cli.ExitOk
 }

@@ -5,19 +5,21 @@ import (
 	"slices"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
+
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/cli"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-// CliMainFactory fills lib.CliApi.CliMain with the dispatch-and-parse loop:
+// CliMainFactory fills cli.CliApi.CliMain with the dispatch-and-parse loop:
 // match a command, collect its declared flags and args from the argument
 // vector, validate required fields, and hand the parsed retrivers to the
 // command handler.
-func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
+func CliMainFactory(sandbox *sandbox.SandBox) func(args []string) int {
 
 	return func(args []string) int {
 		if len(args) == 0 {
 			printUsage(sandbox)
-			return lib.ExitUsage
+			return cli.ExitUsage
 		}
 
 		verb := sandbox.Deps.VerbLib
@@ -25,7 +27,7 @@ func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
 		action, err := verb.GetNextStringArg()
 		if err != nil {
 			printUsage(sandbox)
-			return lib.ExitUsage
+			return cli.ExitUsage
 		}
 
 		for i := range sandbox.Cli.Commands {
@@ -39,17 +41,17 @@ func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
 			for j := range command.Flags {
 				flag := &command.Flags[j]
 
-				if flag.Type == lib.CliTypeBool {
+				if flag.Type == cli.CliTypeBool {
 					if err := collectBoolFlag(flag, verb); err != nil {
 						sandbox.Deps.Printf("%s\n", err.Error())
-						return lib.ExitUsage
+						return cli.ExitUsage
 					}
 					continue
 				}
 
 				if err := collectValueFlag(flag, verb); err != nil {
 					sandbox.Deps.Printf("%s\n", err.Error())
-					return lib.ExitUsage
+					return cli.ExitUsage
 				}
 			}
 
@@ -58,7 +60,7 @@ func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
 				arg := &command.Args[j]
 				if err := collectArg(arg, verb); err != nil {
 					sandbox.Deps.Printf("%s\n", err.Error())
-					return lib.ExitUsage
+					return cli.ExitUsage
 				}
 			}
 
@@ -68,13 +70,13 @@ func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
 		}
 
 		sandbox.Deps.Printf("Unknown Command!\n")
-		return lib.ExitUsage
+		return cli.ExitUsage
 	}
 }
 
 // printUsage triggers the help command so the user sees the full
 // professional help screen when they run the binary with no arguments.
-func printUsage(sandbox *lib.SandBox) {
+func printUsage(sandbox *sandbox.SandBox) {
 	for _, cmd := range sandbox.Cli.Commands {
 		if slices.Contains(cmd.ValidStartIdentifiers, "help") {
 			cmd.Handler(sandbox, buildCliEntrys(&cmd))
@@ -88,12 +90,12 @@ func printUsage(sandbox *lib.SandBox) {
 // collectBoolFlag checks whether a boolean flag is present. If required and
 // absent, it returns an error. The flag's Values slice is filled with one
 // cliValue holding the result.
-func collectBoolFlag(flag *lib.Cliflag, verb verbdeps.Lib) error {
+func collectBoolFlag(flag *cli.Cliflag, verb verbdeps.Lib) error {
 	present := verb.IsPresent(flag.ValidIdentifiers)
 	if flag.RequiredPresence && !present {
 		return fmt.Errorf("required flag '%s' not provided", flag.Id)
 	}
-	flag.Values = []lib.CliValue{boolValue(present)}
+	flag.Values = []cli.CliValue{boolValue(present)}
 	flag.Exist = present
 	return nil
 }
@@ -101,7 +103,7 @@ func collectBoolFlag(flag *lib.Cliflag, verb verbdeps.Lib) error {
 // collectValueFlag reads the occurrences of a non-bool flag from the argument
 // vector. It validates that the number of provided values falls within
 // [RequiredMinSize, RequiredMaxSize] and that required flags have at least one value.
-func collectValueFlag(flag *lib.Cliflag, verb verbdeps.Lib) error {
+func collectValueFlag(flag *cli.Cliflag, verb verbdeps.Lib) error {
 	size := verb.GetOptionsSize(flag.ValidIdentifiers)
 
 	if flag.RequiredPresence && size == 0 {
@@ -126,7 +128,7 @@ func collectValueFlag(flag *lib.Cliflag, verb verbdeps.Lib) error {
 		return fmt.Errorf("flag '%s' accepts at most %d value(s), got %d", flag.Id, maxSize, size)
 	}
 
-	flag.Values = make([]lib.CliValue, 0, size)
+	flag.Values = make([]cli.CliValue, 0, size)
 	for i := 0; i < size; i++ {
 		val, err := readFlagValue(flag, verb, i)
 		if err != nil {
@@ -139,15 +141,15 @@ func collectValueFlag(flag *lib.Cliflag, verb verbdeps.Lib) error {
 
 // readFlagValue reads one flag occurrence and returns it as a cliValue of the
 // appropriate type.
-func readFlagValue(flag *lib.Cliflag, verb verbdeps.Lib, occurrence int) (lib.CliValue, error) {
+func readFlagValue(flag *cli.Cliflag, verb verbdeps.Lib, occurrence int) (cli.CliValue, error) {
 	switch flag.Type {
-	case lib.CliTypeInt:
+	case cli.CliTypeInt:
 		v, err := verb.GetIntOption(flag.ValidIdentifiers, occurrence)
 		if err != nil {
 			return nil, err
 		}
 		return intValue(v), nil
-	case lib.CliTypeFloat:
+	case cli.CliTypeFloat:
 		v, err := verb.GetDoubleOption(flag.ValidIdentifiers, occurrence)
 		if err != nil {
 			return nil, err
@@ -164,7 +166,7 @@ func readFlagValue(flag *lib.Cliflag, verb verbdeps.Lib, occurrence int) (lib.Cl
 
 // collectArg reads a positional arg from the unused portion of the argument
 // vector (via GetNext*Arg). Required args that cannot be read produce an error.
-func collectArg(arg *lib.CliArg, verb verbdeps.Lib) error {
+func collectArg(arg *cli.CliArg, verb verbdeps.Lib) error {
 	minSize := arg.RequiredMinSize
 	maxSize := arg.RequiredMaxSize
 	if maxSize <= 0 {
@@ -175,7 +177,7 @@ func collectArg(arg *lib.CliArg, verb verbdeps.Lib) error {
 		}
 	}
 
-	arg.Values = make([]lib.CliValue, 0, maxSize)
+	arg.Values = make([]cli.CliValue, 0, maxSize)
 	for i := 0; i < maxSize; i++ {
 		val, err := readArgValue(arg, verb)
 		if err != nil {
@@ -197,21 +199,21 @@ func collectArg(arg *lib.CliArg, verb verbdeps.Lib) error {
 }
 
 // readArgValue reads one positional value from the next unused argv slot.
-func readArgValue(arg *lib.CliArg, verb verbdeps.Lib) (lib.CliValue, error) {
+func readArgValue(arg *cli.CliArg, verb verbdeps.Lib) (cli.CliValue, error) {
 	switch arg.RequiredType {
-	case lib.CliTypeInt:
+	case cli.CliTypeInt:
 		v, err := verb.GetNextIntArg()
 		if err != nil {
 			return nil, err
 		}
 		return intValue(v), nil
-	case lib.CliTypeFloat:
+	case cli.CliTypeFloat:
 		v, err := verb.GetNextDoubleArg()
 		if err != nil {
 			return nil, err
 		}
 		return floatValue(v), nil
-	case lib.CliTypeBool:
+	case cli.CliTypeBool:
 		v, err := verb.GetNextStringArg()
 		if err != nil {
 			return nil, err
@@ -228,22 +230,22 @@ func readArgValue(arg *lib.CliArg, verb verbdeps.Lib) (lib.CliValue, error) {
 
 // buildCliEntrys builds a CliEntrys from the already-parsed flag and arg
 // values stored in each Cliflag/CliArg's Values slice.
-func buildCliEntrys(command *lib.CliCommand) lib.CliEntrys {
-	flagsById := make(map[string]*lib.Cliflag, len(command.Flags))
+func buildCliEntrys(command *cli.CliCommand) cli.CliEntrys {
+	flagsById := make(map[string]*cli.Cliflag, len(command.Flags))
 	for i := range command.Flags {
 		flagsById[command.Flags[i].Id] = &command.Flags[i]
 	}
 
-	argsById := make(map[string]*lib.CliArg, len(command.Args))
+	argsById := make(map[string]*cli.CliArg, len(command.Args))
 	for i := range command.Args {
 		argsById[command.Args[i].Id] = &command.Args[i]
 	}
 
-	return lib.CliEntrys{
-		GetFlagById: func(id string) *lib.Cliflag {
+	return cli.CliEntrys{
+		GetFlagById: func(id string) *cli.Cliflag {
 			return flagsById[id]
 		},
-		GetArgById: func(id string) *lib.CliArg {
+		GetArgById: func(id string) *cli.CliArg {
 			return argsById[id]
 		},
 	}
