@@ -1,6 +1,6 @@
 package config
 
-type Config struct {
+type ConfigApi struct {
 	Version     string
 	ProjectName string
 }

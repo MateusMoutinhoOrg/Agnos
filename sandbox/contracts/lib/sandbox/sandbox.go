@@ -9,7 +9,7 @@ import (
 
 type SandBox struct {
 	Cli    cli.CliApi
-	Config config.Config
+	Config config.ConfigApi
 	Core   core.CoreApi
 	Deps   deps.Deps
 }
