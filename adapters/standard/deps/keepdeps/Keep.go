@@ -1,4 +1,4 @@
-package keep
+package keepdeps
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"

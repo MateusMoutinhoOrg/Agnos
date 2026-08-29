@@ -1,4 +1,4 @@
-package io
+package iodeps
 
 import (
 	"io/fs"

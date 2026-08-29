@@ -1,4 +1,4 @@
-package verb
+package verbdeps
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
