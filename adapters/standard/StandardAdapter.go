@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
-	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/embeddeps"
-	iolib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/io"
-	keeplib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/keep"
-	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/request"
-	serializelib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/serialize"
-	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/verb"
+	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/embeddeps"
+	iolib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/io"
+	keeplib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/keep"
+	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/request"
+	serializelib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/serialize"
+	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/verb"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
