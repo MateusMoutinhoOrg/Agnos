@@ -1,4 +1,4 @@
-package standard
+package serialize
 
 import (
 	"encoding/json"
@@ -8,9 +8,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// SerializeLibFactory returns the closure that fills deps.Deps.SerializeLib,
+// NewSerializeLib returns the closure that fills deps.Deps.SerializeLib,
 // providing the capability to create, parse, and serialize generic JSON/YAML structures.
-func SerializeLibFactory(s *StandardAdapter) serializibles.Lib {
+func NewSerializeLib() serializibles.Lib {
 	return serializibles.Lib{
 		CreateString: func(value string) *serializibles.SerializibleObject {
 			var v any = value

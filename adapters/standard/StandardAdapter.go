@@ -7,6 +7,11 @@ import (
 	"time"
 
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/embeddeps"
+	iolib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/io"
+	keeplib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/keep"
+	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/request"
+	serializelib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/serialize"
+	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/verb"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
@@ -67,11 +72,11 @@ func New(basePath string) deps.Deps {
 	adapter.Deps.Errorf = func(format string, a ...any) error {
 		return Errorf(adapter, format, a...)
 	}
-	adapter.Deps.VerbLib = VerbLibFactory(adapter)
-	adapter.Deps.KeepLib = KeepLibFactory(adapter)
+	adapter.Deps.VerbLib = verblib.NewVerbLib(adapter.args)
+	adapter.Deps.KeepLib = keeplib.NewKeepLib(adapter.keepBasePath)
 	adapter.Deps.EmbedDeps = embeddeps.NewEmbedDeps()
-	adapter.Deps.IoLib = IoLibFactory(adapter)
-	adapter.Deps.NewRequest = NewRequestFactory(adapter)
-	adapter.Deps.SerializeLib = SerializeLibFactory(adapter)
+	adapter.Deps.IoLib = iolib.NewIoLib()
+	adapter.Deps.NewRequest = requestlib.NewRequestFactory()
+	adapter.Deps.SerializeLib = serializelib.NewSerializeLib()
 	return adapter.Deps
 }

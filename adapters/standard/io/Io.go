@@ -1,4 +1,4 @@
-package standard
+package io
 
 import (
 	"io/fs"
@@ -8,9 +8,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/iodeps"
 )
 
-// IoLibFactory returns the value that fills deps.Deps.IoLib: the implementation
+// NewIoLib returns the value that fills deps.Deps.IoLib: the implementation
 // of the Io dependency using the standard library's os and filepath packages.
-func IoLibFactory(s *StandardAdapter) iodeps.Lib {
+func NewIoLib() iodeps.Lib {
 	return iodeps.Lib{
 		ReadFile: func(path string) ([]byte, error) {
 			return os.ReadFile(path)

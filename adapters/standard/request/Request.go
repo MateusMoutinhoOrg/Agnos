@@ -1,4 +1,4 @@
-package standard
+package request
 
 import (
 	"bytes"
@@ -17,7 +17,7 @@ const requestTimeout = 30 * time.Second
 
 // NewRequestFactory returns the value that fills deps.Deps.NewRequest: the implementation
 // of the HTTP request dependency using the standard library's net/http package.
-func NewRequestFactory(s *StandardAdapter) func(url string) requestdeps.Request {
+func NewRequestFactory() func(url string) requestdeps.Request {
 	return func(url string) requestdeps.Request {
 		headers := make(map[string]string)
 		method := "GET"

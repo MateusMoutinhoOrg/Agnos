@@ -1,4 +1,4 @@
-package standard
+package embeddeps
 
 // The standard adapter's embedded-asset implementation: the factory filling
 // deps.Deps.EmbedDeps out of the assets compiled into the binary. It lives in
