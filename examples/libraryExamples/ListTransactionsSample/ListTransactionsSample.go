@@ -5,7 +5,7 @@ import (
 
 	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
-	agnostypes "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	agnostypes "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
 func main() {

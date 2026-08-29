@@ -1,37 +1,37 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-func NewCommand(sandbox *api.SandBox) api.CliCommand {
-	return api.CliCommand{
+func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
+	return lib.CliCommand{
 
 		ValidStartIdentifiers: []string{"build"},
 		Category:              "Core Commands",
 
-		Args: []api.CliArg{
-			api.CliArg{
+		Args: []lib.CliArg{
+			lib.CliArg{
 				Id:          "path",
 				Description: "the dir to build the project",
 				Examples: []string{
 					sandbox.ProjectName + " build . ",
 				},
 				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
+				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 0,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []api.Cliflag{
-			api.Cliflag{
+		Flags: []lib.Cliflag{
+			lib.Cliflag{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
 					sandbox.ProjectName + " build -q",
 				},
-				Type:             api.CliTypeBool,
+				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
@@ -50,13 +50,13 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 
 	quietFlag := entries.GetFlagById("quiet")
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
 
-	build_error := sandbox.Build(api.BuildProps{
+	build_error := sandbox.Build(lib.BuildProps{
 		Path:    path,
 		Project: sandbox.ProjectName,
 	})
@@ -65,7 +65,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		sandbox.Deps.Error(build_error.Error())
 	}
 	if build_error != nil {
-		return api.ExitFailure
+		return lib.ExitFailure
 	}
-	return api.ExitOk
+	return lib.ExitOk
 }

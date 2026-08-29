@@ -1,7 +1,7 @@
 package parsables
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
 type IgnorableConf struct {
@@ -12,7 +12,7 @@ type IgnorableConf struct {
 	Render      func() string
 }
 
-func addIgnorableConfMethods(sandbox *api.SandBox, items *IgnorableConf) {
+func addIgnorableConfMethods(sandbox *lib.SandBox, items *IgnorableConf) {
 
 	items.AddPath = func(path string) {
 		items.Paths = append(items.Paths, path)
@@ -38,7 +38,7 @@ func addIgnorableConfMethods(sandbox *api.SandBox, items *IgnorableConf) {
 	}
 }
 
-func NewIgnorableConf(sandbox *api.SandBox, content string) (*IgnorableConf, error) {
+func NewIgnorableConf(sandbox *lib.SandBox, content string) (*IgnorableConf, error) {
 
 	if content == "" {
 		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewIgnorableConfEmpty instead")
@@ -80,7 +80,7 @@ func NewIgnorableConf(sandbox *api.SandBox, content string) (*IgnorableConf, err
 	return items, nil
 }
 
-func NewIgnorableConfEmpty(sandbox *api.SandBox) *IgnorableConf {
+func NewIgnorableConfEmpty(sandbox *lib.SandBox) *IgnorableConf {
 	items := &IgnorableConf{
 		Paths: make([]string, 0),
 	}

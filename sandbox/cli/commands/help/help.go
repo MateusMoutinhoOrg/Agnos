@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
@@ -25,15 +25,15 @@ const (
 	red     = "\033[31m"
 )
 
-func NewCommand(sandbox *api.SandBox) api.CliCommand {
-	return api.CliCommand{
+func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
+	return lib.CliCommand{
 		ValidStartIdentifiers: []string{"help", "--help"},
 		Category:              "Info",
-		Args: []api.CliArg{
+		Args: []lib.CliArg{
 			{
 				Id:              "command",
 				Description:     "The command to get help for",
-				RequiredType:    api.CliTypeString,
+				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 0,
 				RequiredMaxSize: 1,
 			},
@@ -50,17 +50,17 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 	command := entries.GetArgById("command")
 	if len(command.Values) == 0 {
 		printGeneralHelp(sandbox)
-		return api.ExitOk
+		return lib.ExitOk
 	}
 	chosen := command.Values[0].String()
 	for _, c := range sandbox.Commands {
 		if slices.Contains(c.ValidStartIdentifiers, chosen) {
 			printCommandHelp(sandbox, &c)
-			return api.ExitOk
+			return lib.ExitOk
 		}
 	}
 
@@ -69,14 +69,14 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 	p("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, chosen, reset)
 	p("  %sRun '%s help' to see available commands.%s\n", dim, sandbox.ProjectName, reset)
 	p("\n")
-	return api.ExitUsage
+	return lib.ExitUsage
 }
 
 // ═════════════════════════════════════════════════════════════════════════════
 //  General help
 // ═════════════════════════════════════════════════════════════════════════════
 
-func printGeneralHelp(sandbox *api.SandBox) {
+func printGeneralHelp(sandbox *lib.SandBox) {
 	p := sandbox.Deps.Printf
 
 	// ── Banner ───────────────────────────────────────────────────────
@@ -98,7 +98,7 @@ func printGeneralHelp(sandbox *api.SandBox) {
 
 	// ── Collect categories ───────────────────────────────────────────
 	categoryOrder := []string{}
-	categorized := map[string][]api.CliCommand{}
+	categorized := map[string][]lib.CliCommand{}
 	for _, cmd := range sandbox.Commands {
 		if cmd.Hidden {
 			continue
@@ -180,7 +180,7 @@ func printGeneralHelp(sandbox *api.SandBox) {
 //  Per-command help
 // ═════════════════════════════════════════════════════════════════════════════
 
-func printCommandHelp(sandbox *api.SandBox, cmd *api.CliCommand) {
+func printCommandHelp(sandbox *lib.SandBox, cmd *lib.CliCommand) {
 	p := sandbox.Deps.Printf
 
 	name := cmd.ValidStartIdentifiers[0]
@@ -350,7 +350,7 @@ func printCommandHelp(sandbox *api.SandBox, cmd *api.CliCommand) {
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 
 // printBanner renders the top box with project name and version.
-func printBanner(sandbox *api.SandBox) {
+func printBanner(sandbox *lib.SandBox) {
 	p := sandbox.Deps.Printf
 
 	titleLine := fmt.Sprintf("%s  %s", sandbox.ProjectName, sandbox.Version)
@@ -382,11 +382,11 @@ func printSection(p func(string, ...any) (int, error), title string) {
 // cliTypeName returns a human-readable label for a CLI type constant.
 func cliTypeName(t int) string {
 	switch t {
-	case api.CliTypeInt:
+	case lib.CliTypeInt:
 		return "int"
-	case api.CliTypeFloat:
+	case lib.CliTypeFloat:
 		return "float"
-	case api.CliTypeBool:
+	case lib.CliTypeBool:
 		return "bool"
 	default:
 		return "string"

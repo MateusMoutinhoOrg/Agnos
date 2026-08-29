@@ -1,7 +1,7 @@
 package parsables
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
 type ProjectConf struct {
@@ -12,7 +12,7 @@ type ProjectConf struct {
 	Render func() string
 }
 
-func addProjectConfMethods(sandbox *api.SandBox, project_conf *ProjectConf) {
+func addProjectConfMethods(sandbox *lib.SandBox, project_conf *ProjectConf) {
 	project_conf.Render = func() string {
 		obj := sandbox.Deps.SerializeLib.CreateObject()
 		obj.AddItemToObject("name", project_conf.Name)
@@ -23,7 +23,7 @@ func addProjectConfMethods(sandbox *api.SandBox, project_conf *ProjectConf) {
 	}
 }
 
-func NewProjectConf(sandbox *api.SandBox, content string) (*ProjectConf, error) {
+func NewProjectConf(sandbox *lib.SandBox, content string) (*ProjectConf, error) {
 
 	if content == "" {
 		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewProjectConfEmpty instead")
@@ -72,7 +72,7 @@ func NewProjectConf(sandbox *api.SandBox, content string) (*ProjectConf, error) 
 	return project_conf, nil
 }
 
-func NewProjectConfEmpty(sandbox *api.SandBox) *ProjectConf {
+func NewProjectConfEmpty(sandbox *lib.SandBox) *ProjectConf {
 	project_conf := &ProjectConf{
 		Version: "v0.0.0",
 	}

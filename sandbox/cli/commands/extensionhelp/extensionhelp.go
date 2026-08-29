@@ -1,29 +1,29 @@
 package extensionhelp
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-func NewCommand(sandbox *api.SandBox) api.CliCommand {
-	return api.CliCommand{
+func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
+	return lib.CliCommand{
 
 		ValidStartIdentifiers: []string{"extension-help"},
 		Category:              "Extensions",
 
-		Args: []api.CliArg{
-			api.CliArg{
+		Args: []lib.CliArg{
+			lib.CliArg{
 				Id:          "extension",
 				Description: "the extension to show the help of",
 				Examples: []string{
 					sandbox.ProjectName + " extension-help my-extension",
 				},
-				RequiredType:    api.CliTypeString,
+				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 1,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []api.Cliflag{
-			api.Cliflag{
+		Flags: []lib.Cliflag{
+			lib.Cliflag{
 				Id:               "path",
 				ValidIdentifiers: []string{"--path", "-p"},
 				Description:      "the dir of the project the extension belongs to",
@@ -31,7 +31,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 					sandbox.ProjectName + " extension-help my-extension -p ./my-project",
 				},
 				Defaults:         []string{"."},
-				Type:             api.CliTypeString,
+				Type:             lib.CliTypeString,
 				RequiredMinSize:  1,
 				RequiredMaxSize:  1,
 				RequiredPresence: false,
@@ -48,7 +48,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 
 	pathFlag := entries.GetFlagById("path")
 	extensionArg := entries.GetArgById("extension")
@@ -58,14 +58,14 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		path = pathFlag.Values[0].String()
 	}
 
-	help_error := sandbox.ExtensionHelp(api.ExtensionHelpProps{
+	help_error := sandbox.ExtensionHelp(lib.ExtensionHelpProps{
 		Path:      path,
 		Extension: extensionArg.Values[0].String(),
 	})
 
 	if help_error != nil {
 		sandbox.Deps.Error(help_error.Error())
-		return api.ExitFailure
+		return lib.ExitFailure
 	}
-	return api.ExitOk
+	return lib.ExitOk
 }

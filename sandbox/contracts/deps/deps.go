@@ -44,7 +44,7 @@ type Deps struct {
 	Now func() time.Time
 	// Printf writes one formatted message to the interface's output,
 	// returning the number of bytes written and the write failure, if any.
-	// It is the only way the library emits text: api.Lib.Sandboxmain — the
+	// It is the only way the library emits text: lib.SandBox.Sandboxmain — the
 	// command-line interface — reports every result, every error, and its
 	// usage screen through it, so the sandbox never touches a stream itself.
 	Printf func(format string, a ...any) (n int, err error)

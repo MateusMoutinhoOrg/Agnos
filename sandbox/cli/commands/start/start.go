@@ -1,61 +1,61 @@
 package start
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-func NewCommand(sandbox *api.SandBox) api.CliCommand {
-	return api.CliCommand{
+func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
+	return lib.CliCommand{
 
 		ValidStartIdentifiers: []string{"start"},
 		Category:              "Core Commands",
 
-		Args: []api.CliArg{
-			api.CliArg{
+		Args: []lib.CliArg{
+			lib.CliArg{
 				Id:          "path",
 				Description: "the dir to start the project",
 				Examples: []string{
 					sandbox.ProjectName + " start . ",
 				},
 				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
+				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 0,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []api.Cliflag{
-			api.Cliflag{
+		Flags: []lib.Cliflag{
+			lib.Cliflag{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
 					sandbox.ProjectName + " start -q",
 				},
-				Type:             api.CliTypeBool,
+				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
 			},
-			api.Cliflag{
+			lib.Cliflag{
 				Id:               "force",
 				ValidIdentifiers: []string{"--force", "-f"},
 				Description:      "Forces the creation of the project, overwriting existing files",
 				Examples: []string{
 					sandbox.ProjectName + " start -f",
 				},
-				Type:             api.CliTypeBool,
+				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
 			},
-			api.Cliflag{
+			lib.Cliflag{
 				Id:               "module",
 				ValidIdentifiers: []string{"--module", "-m"},
 				Description:      "Module name for go.mod",
 				Examples: []string{
 					sandbox.ProjectName + " start -m github.com/user/project",
 				},
-				Type:             api.CliTypeString,
+				Type:             lib.CliTypeString,
 				RequiredMinSize:  1,
 				RequiredMaxSize:  1,
 				RequiredPresence: false,
@@ -74,7 +74,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 
 	quietFlag := entries.GetFlagById("quiet")
 	forceFlag := entries.GetFlagById("force")
@@ -88,7 +88,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		module = &modVal
 	}
 
-	start_error := sandbox.Start(api.StartProps{
+	start_error := sandbox.Start(lib.StartProps{
 		Path:        path,
 		ProjectName: sandbox.ProjectName,
 		Module:      module,
@@ -99,7 +99,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		sandbox.Deps.Error(start_error.Error())
 	}
 	if start_error != nil {
-		return api.ExitFailure
+		return lib.ExitFailure
 	}
-	return api.ExitOk
+	return lib.ExitOk
 }

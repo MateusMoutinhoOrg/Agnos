@@ -1,4 +1,4 @@
-package api
+package lib
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"

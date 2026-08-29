@@ -1,7 +1,7 @@
 package core
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/extensionhelp"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/install"
@@ -10,7 +10,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/core/uninstall"
 )
 
-func SetCoreMethods(sandbox *api.SandBox) {
+func SetCoreMethods(sandbox *lib.SandBox) {
 	sandbox.Start = start.StartFactory(sandbox)
 	sandbox.Build = build.BuildFactory(sandbox)
 	sandbox.Install = install.InstallFactory(sandbox)

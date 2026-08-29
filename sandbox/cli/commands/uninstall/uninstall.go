@@ -1,41 +1,41 @@
 package uninstall
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-func NewCommand(sandbox *api.SandBox) api.CliCommand {
-	return api.CliCommand{
+func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
+	return lib.CliCommand{
 
 		ValidStartIdentifiers: []string{"uninstall"},
 		Category:              "Extensions",
 
-		Args: []api.CliArg{
-			api.CliArg{
+		Args: []lib.CliArg{
+			lib.CliArg{
 				Id:          "item",
 				Description: "the extension to uninstall from the project",
 				Examples: []string{
 					sandbox.ProjectName + " uninstall my-extension",
 				},
-				RequiredType:    api.CliTypeString,
+				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 1,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []api.Cliflag{
-			api.Cliflag{
+		Flags: []lib.Cliflag{
+			lib.Cliflag{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
 					sandbox.ProjectName + " uninstall my-extension -q",
 				},
-				Type:             api.CliTypeBool,
+				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
 			},
-			api.Cliflag{
+			lib.Cliflag{
 				Id:               "path",
 				ValidIdentifiers: []string{"--path", "-p"},
 				Description:      "the dir of the project to uninstall the extension from",
@@ -43,7 +43,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 					sandbox.ProjectName + " uninstall my-extension -p ./my-project",
 				},
 				Defaults:         []string{"."},
-				Type:             api.CliTypeString,
+				Type:             lib.CliTypeString,
 				RequiredMinSize:  1,
 				RequiredMaxSize:  1,
 				RequiredPresence: false,
@@ -61,7 +61,7 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 
 	quietFlag := entries.GetFlagById("quiet")
 	pathFlag := entries.GetFlagById("path")
@@ -72,7 +72,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		path = pathFlag.Values[0].String()
 	}
 
-	uninstall_error := sandbox.Uninstall(api.UninstallProps{
+	uninstall_error := sandbox.Uninstall(lib.UninstallProps{
 		Path: path,
 		Item: itemArg.Values[0].String(),
 	})
@@ -81,7 +81,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		sandbox.Deps.Error(uninstall_error.Error())
 	}
 	if uninstall_error != nil {
-		return api.ExitFailure
+		return lib.ExitFailure
 	}
-	return api.ExitOk
+	return lib.ExitOk
 }

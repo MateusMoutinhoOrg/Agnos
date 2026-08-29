@@ -1,13 +1,13 @@
 package uninstall
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-// UninstallFactory returns the closure that fills api.CoreApi.Uninstall,
+// UninstallFactory returns the closure that fills lib.CoreApi.Uninstall,
 // removing the requested extension from the project in props.Path.
-func UninstallFactory(sandbox *api.SandBox) func(props api.UninstallProps) error {
-	return func(props api.UninstallProps) error {
+func UninstallFactory(sandbox *lib.SandBox) func(props lib.UninstallProps) error {
+	return func(props lib.UninstallProps) error {
 		return nil
 	}
 }

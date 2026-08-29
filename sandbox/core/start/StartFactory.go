@@ -1,7 +1,7 @@
 package start
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/smartio"
 )
@@ -9,13 +9,13 @@ import (
 // goVersion is the go directive written into a generated go.mod.
 const goVersion = "1.25.0"
 
-// StartFactory returns the closure that fills api.CoreApi.Start, scaffolding the
+// StartFactory returns the closure that fills lib.CoreApi.Start, scaffolding the
 // project config directory with one empty yaml per parsable and, when a module
 // is given, a go.mod at the project root. Every write goes through a SmartIO
 // transaction, so nothing touches the disk unless all of them succeed.
-func StartFactory(sandbox *api.SandBox) func(props api.StartProps) error {
+func StartFactory(sandbox *lib.SandBox) func(props lib.StartProps) error {
 
-	return func(props api.StartProps) error {
+	return func(props lib.StartProps) error {
 
 		io := smartio.NewSmartIO(sandbox, props.Path)
 

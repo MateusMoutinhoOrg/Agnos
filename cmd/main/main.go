@@ -19,7 +19,7 @@ const (
 )
 
 // main is the whole executable: it wires an adapter into the library, hands
-// the command line to api.Lib.Sandboxmain — the interface itself, which lives
+// the command line to lib.SandBox.Sandboxmain — the interface itself, which lives
 // inside the sandbox — and exits with the code it returns. Choosing where the
 // records live is an OS-bound decision, so it is made here, outside the
 // sandbox, and never inside it.

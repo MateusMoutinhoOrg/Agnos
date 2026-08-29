@@ -1,4 +1,4 @@
-package api
+package lib
 
 type Config struct {
 	Version     string

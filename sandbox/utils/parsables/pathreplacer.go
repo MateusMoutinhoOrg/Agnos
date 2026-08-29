@@ -3,7 +3,7 @@ package parsables
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
 type PathReplacerEntry struct {
@@ -19,7 +19,7 @@ type PathReplacerConf struct {
 	Render   func() string
 }
 
-func addPathReplacerConfMethods(sandbox *api.SandBox, conf *PathReplacerConf) {
+func addPathReplacerConfMethods(sandbox *lib.SandBox, conf *PathReplacerConf) {
 
 	conf.AddEntry = func(original string, replacement string) {
 		conf.Entries = append(conf.Entries, PathReplacerEntry{
@@ -47,7 +47,7 @@ func addPathReplacerConfMethods(sandbox *api.SandBox, conf *PathReplacerConf) {
 	}
 }
 
-func NewPathReplacerConf(sandbox *api.SandBox, content string) (*PathReplacerConf, error) {
+func NewPathReplacerConf(sandbox *lib.SandBox, content string) (*PathReplacerConf, error) {
 
 	if content == "" {
 		return nil, sandbox.Deps.Errorf("content cannot be empty, use NewPathReplacerConfEmpty instead")
@@ -92,7 +92,7 @@ func NewPathReplacerConf(sandbox *api.SandBox, content string) (*PathReplacerCon
 	return conf, nil
 }
 
-func NewPathReplacerConfEmpty(sandbox *api.SandBox) *PathReplacerConf {
+func NewPathReplacerConfEmpty(sandbox *lib.SandBox) *PathReplacerConf {
 	conf := &PathReplacerConf{
 		Entries: make([]PathReplacerEntry, 0),
 	}

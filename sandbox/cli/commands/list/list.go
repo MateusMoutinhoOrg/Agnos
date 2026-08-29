@@ -1,37 +1,37 @@
 package list
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-func NewCommand(sandbox *api.SandBox) api.CliCommand {
-	return api.CliCommand{
+func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
+	return lib.CliCommand{
 
 		ValidStartIdentifiers: []string{"list"},
 		Category:              "Extensions",
 
-		Args: []api.CliArg{
-			api.CliArg{
+		Args: []lib.CliArg{
+			lib.CliArg{
 				Id:          "path",
 				Description: "the dir of the project to list the extensions of",
 				Examples: []string{
 					sandbox.ProjectName + " list . ",
 				},
 				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
+				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 0,
 				RequiredMaxSize: 1,
 			},
 		},
-		Flags: []api.Cliflag{
-			api.Cliflag{
+		Flags: []lib.Cliflag{
+			lib.Cliflag{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
 					sandbox.ProjectName + " list -q",
 				},
-				Type:             api.CliTypeBool,
+				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
 				RequiredMaxSize:  0,
 				RequiredPresence: false,
@@ -49,12 +49,12 @@ func NewCommand(sandbox *api.SandBox) api.CliCommand {
 	}
 }
 
-func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
+func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 
 	quietFlag := entries.GetFlagById("quiet")
 	pathArg := entries.GetArgById("path")
 
-	list_error := sandbox.List(api.ListProps{
+	list_error := sandbox.List(lib.ListProps{
 		Path: pathArg.Values[0].String(),
 	})
 
@@ -62,7 +62,7 @@ func CommandHandler(sandbox *api.SandBox, entries api.CliEntrys) int {
 		sandbox.Deps.Error(list_error.Error())
 	}
 	if list_error != nil {
-		return api.ExitFailure
+		return lib.ExitFailure
 	}
-	return api.ExitOk
+	return lib.ExitOk
 }

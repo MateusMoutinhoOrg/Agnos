@@ -1,13 +1,13 @@
 package list
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/api"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib"
 )
 
-// ListFactory returns the closure that fills api.CoreApi.List, printing every
+// ListFactory returns the closure that fills lib.CoreApi.List, printing every
 // extension available to the project in props.Path.
-func ListFactory(sandbox *api.SandBox) func(props api.ListProps) error {
-	return func(props api.ListProps) error {
+func ListFactory(sandbox *lib.SandBox) func(props lib.ListProps) error {
+	return func(props lib.ListProps) error {
 		return nil
 	}
 }
