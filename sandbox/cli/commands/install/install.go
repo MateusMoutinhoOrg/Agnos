@@ -15,7 +15,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				Id:          "item",
 				Description: "the extension to install in the project",
 				Examples: []string{
-					sandbox.ProjectName + " install my-extension",
+					sandbox.Config.ProjectName + " install my-extension",
 				},
 				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 1,
@@ -28,7 +28,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
-					sandbox.ProjectName + " install my-extension -q",
+					sandbox.Config.ProjectName + " install my-extension -q",
 				},
 				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
@@ -40,7 +40,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--path", "-p"},
 				Description:      "the dir of the project to install the extension into",
 				Examples: []string{
-					sandbox.ProjectName + " install my-extension -p ./my-project",
+					sandbox.Config.ProjectName + " install my-extension -p ./my-project",
 				},
 				Defaults:         []string{"."},
 				Type:             lib.CliTypeString,
@@ -53,9 +53,9 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "Install an extension in the project",
 		LongDescription: "Installs the given extension in the project, adding the files\nand configuration it needs. If no path is provided, the current\ndirectory is used.",
 		Examples: []string{
-			sandbox.ProjectName + " install my-extension",
-			sandbox.ProjectName + " install my-extension -p ./my-project",
-			sandbox.ProjectName + " install my-extension -q",
+			sandbox.Config.ProjectName + " install my-extension",
+			sandbox.Config.ProjectName + " install my-extension -p ./my-project",
+			sandbox.Config.ProjectName + " install my-extension -q",
 		},
 		Handler: CommandHandler,
 	}
@@ -72,7 +72,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		path = pathFlag.Values[0].String()
 	}
 
-	install_error := sandbox.Install(lib.InstallProps{
+	install_error := sandbox.Core.Install(lib.InstallProps{
 		Path: path,
 		Item: itemArg.Values[0].String(),
 	})

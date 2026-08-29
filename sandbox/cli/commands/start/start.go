@@ -15,7 +15,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				Id:          "path",
 				Description: "the dir to start the project",
 				Examples: []string{
-					sandbox.ProjectName + " start . ",
+					sandbox.Config.ProjectName + " start . ",
 				},
 				Defaults:        []string{"."},
 				RequiredType:    lib.CliTypeString,
@@ -29,7 +29,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
-					sandbox.ProjectName + " start -q",
+					sandbox.Config.ProjectName + " start -q",
 				},
 				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
@@ -41,7 +41,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--force", "-f"},
 				Description:      "Forces the creation of the project, overwriting existing files",
 				Examples: []string{
-					sandbox.ProjectName + " start -f",
+					sandbox.Config.ProjectName + " start -f",
 				},
 				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
@@ -53,7 +53,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--module", "-m"},
 				Description:      "Module name for go.mod",
 				Examples: []string{
-					sandbox.ProjectName + " start -m github.com/user/project",
+					sandbox.Config.ProjectName + " start -m github.com/user/project",
 				},
 				Type:             lib.CliTypeString,
 				RequiredMinSize:  1,
@@ -65,10 +65,10 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "Initialize a new project in a directory",
 		LongDescription: "Scaffolds a new Agnos project in the given directory, creating\nthe required configuration files and folder structure. If no\npath is provided, the current directory is used.",
 		Examples: []string{
-			sandbox.ProjectName + " start",
-			sandbox.ProjectName + " start .",
-			sandbox.ProjectName + " start ./my-project",
-			sandbox.ProjectName + " start -q",
+			sandbox.Config.ProjectName + " start",
+			sandbox.Config.ProjectName + " start .",
+			sandbox.Config.ProjectName + " start ./my-project",
+			sandbox.Config.ProjectName + " start -q",
 		},
 		Handler: CommandHandler,
 	}
@@ -88,9 +88,9 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		module = &modVal
 	}
 
-	start_error := sandbox.Start(lib.StartProps{
+	start_error := sandbox.Core.Start(lib.StartProps{
 		Path:        path,
-		ProjectName: sandbox.ProjectName,
+		ProjectName: sandbox.Config.ProjectName,
 		Module:      module,
 		Force:       forceFlag.Exist,
 	})

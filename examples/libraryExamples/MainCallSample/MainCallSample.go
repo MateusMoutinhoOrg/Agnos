@@ -16,7 +16,7 @@ func main() {
 	// 2. Inject deps into the pure library.
 	l := agnoslib.New(deps)
 
-	// 3. Sandboxmain is the whole command-line interface, and it is just
+	// 3. Cli.CliMain is the whole command-line interface, and it is just
 	//    another field of the lib: it reads the command line through the
 	//    injected parser, prints through the injected Printf, and returns
 	//    the process exit code. This is the entire body of cmd/main.
@@ -25,5 +25,5 @@ func main() {
 	//      go run ./examples/libraryExamples/MainCallSample/MainCallSample.go category add groceries
 	//      go run ./examples/libraryExamples/MainCallSample/MainCallSample.go spend groceries "weekly shopping" 84.50
 	//      go run ./examples/libraryExamples/MainCallSample/MainCallSample.go balance
-	os.Exit(l.Sandboxmain(os.Args[1:]))
+	os.Exit(l.Cli.CliMain(os.Args[1:]))
 }

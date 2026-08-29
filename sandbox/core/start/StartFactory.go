@@ -24,7 +24,7 @@ func StartFactory(sandbox *lib.SandBox) func(props lib.StartProps) error {
 			write = io.WriteFileOverwrite
 		}
 
-		configDir := props.Path + "/" + sandbox.ProjectName + "Config"
+		configDir := props.Path + "/" + sandbox.Config.ProjectName + "Config"
 		io.CreateDir(configDir)
 
 		project_conf := parsables.NewProjectConfEmpty(sandbox)

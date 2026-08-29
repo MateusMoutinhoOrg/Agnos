@@ -42,9 +42,9 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "Display help for a command",
 		LongDescription: "When called without arguments, lists every available command\ngrouped by category. When called with a command name, shows\ndetailed usage, arguments, flags, and examples for that command.",
 		Examples: []string{
-			sandbox.ProjectName + " --help",
-			sandbox.ProjectName + " help",
-			sandbox.ProjectName + " help start",
+			sandbox.Config.ProjectName + " --help",
+			sandbox.Config.ProjectName + " help",
+			sandbox.Config.ProjectName + " help start",
 		},
 		Handler: CommandHandler,
 	}
@@ -57,7 +57,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		return lib.ExitOk
 	}
 	chosen := command.Values[0].String()
-	for _, c := range sandbox.Commands {
+	for _, c := range sandbox.Cli.Commands {
 		if slices.Contains(c.ValidStartIdentifiers, chosen) {
 			printCommandHelp(sandbox, &c)
 			return lib.ExitOk
@@ -67,7 +67,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 	p := sandbox.Deps.Printf
 	p("\n")
 	p("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, chosen, reset)
-	p("  %sRun '%s help' to see available commands.%s\n", dim, sandbox.ProjectName, reset)
+	p("  %sRun '%s help' to see available commands.%s\n", dim, sandbox.Config.ProjectName, reset)
 	p("\n")
 	return lib.ExitUsage
 }
@@ -88,7 +88,7 @@ func printGeneralHelp(sandbox *lib.SandBox) {
 	p("  %s│%s  %s$%s %s %s<command>%s %s[flags]%s %s[args]%s\n",
 		gray, reset,
 		dim, reset,
-		sandbox.ProjectName,
+		sandbox.Config.ProjectName,
 		green, reset,
 		yellow, reset,
 		dim, reset,
@@ -99,7 +99,7 @@ func printGeneralHelp(sandbox *lib.SandBox) {
 	// ── Collect categories ───────────────────────────────────────────
 	categoryOrder := []string{}
 	categorized := map[string][]lib.CliCommand{}
-	for _, cmd := range sandbox.Commands {
+	for _, cmd := range sandbox.Cli.Commands {
 		if cmd.Hidden {
 			continue
 		}
@@ -115,7 +115,7 @@ func printGeneralHelp(sandbox *lib.SandBox) {
 
 	// ── Measure widths ───────────────────────────────────────────────
 	maxNameLen := 0
-	for _, cmd := range sandbox.Commands {
+	for _, cmd := range sandbox.Cli.Commands {
 		if cmd.Hidden {
 			continue
 		}
@@ -171,7 +171,7 @@ func printGeneralHelp(sandbox *lib.SandBox) {
 		dim, gray, italic, reset+dim+gray, gray, reset,
 	)
 	p("  %sRun %s%s help <command>%s%s for detailed info on any command.%s\n",
-		dim, reset+cyan, sandbox.ProjectName, reset, dim, reset,
+		dim, reset+cyan, sandbox.Config.ProjectName, reset, dim, reset,
 	)
 	p("\n")
 }
@@ -186,7 +186,7 @@ func printCommandHelp(sandbox *lib.SandBox, cmd *lib.CliCommand) {
 	name := cmd.ValidStartIdentifiers[0]
 
 	// ── Header box ───────────────────────────────────────────────────
-	titleLine := fmt.Sprintf("%s %s", sandbox.ProjectName, name)
+	titleLine := fmt.Sprintf("%s %s", sandbox.Config.ProjectName, name)
 	boxW := len(titleLine) + 6
 	if boxW < 44 {
 		boxW = 44
@@ -221,7 +221,7 @@ func printCommandHelp(sandbox *lib.SandBox, cmd *lib.CliCommand) {
 	// ── Usage ────────────────────────────────────────────────────────
 	printSection(p, "USAGE")
 	usage := fmt.Sprintf("  %s$%s %s %s",
-		dim, reset, sandbox.ProjectName, name,
+		dim, reset, sandbox.Config.ProjectName, name,
 	)
 	flagPart := ""
 	if len(cmd.Flags) > 0 {
@@ -353,7 +353,7 @@ func printCommandHelp(sandbox *lib.SandBox, cmd *lib.CliCommand) {
 func printBanner(sandbox *lib.SandBox) {
 	p := sandbox.Deps.Printf
 
-	titleLine := fmt.Sprintf("%s  %s", sandbox.ProjectName, sandbox.Version)
+	titleLine := fmt.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
 	boxW := len(titleLine) + 6
 	if boxW < 44 {
 		boxW = 44

@@ -15,7 +15,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				Id:          "extension",
 				Description: "the extension to show the help of",
 				Examples: []string{
-					sandbox.ProjectName + " extension-help my-extension",
+					sandbox.Config.ProjectName + " extension-help my-extension",
 				},
 				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 1,
@@ -28,7 +28,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--path", "-p"},
 				Description:      "the dir of the project the extension belongs to",
 				Examples: []string{
-					sandbox.ProjectName + " extension-help my-extension -p ./my-project",
+					sandbox.Config.ProjectName + " extension-help my-extension -p ./my-project",
 				},
 				Defaults:         []string{"."},
 				Type:             lib.CliTypeString,
@@ -41,8 +41,8 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "Show the help of an extension",
 		LongDescription: "Prints the help of the given extension: what it does, what it\ninstalls, and how it is used. If no path is provided, the current\ndirectory is used.",
 		Examples: []string{
-			sandbox.ProjectName + " extension-help my-extension",
-			sandbox.ProjectName + " extension-help my-extension -p ./my-project",
+			sandbox.Config.ProjectName + " extension-help my-extension",
+			sandbox.Config.ProjectName + " extension-help my-extension -p ./my-project",
 		},
 		Handler: CommandHandler,
 	}
@@ -58,7 +58,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		path = pathFlag.Values[0].String()
 	}
 
-	help_error := sandbox.ExtensionHelp(lib.ExtensionHelpProps{
+	help_error := sandbox.Core.ExtensionHelp(lib.ExtensionHelpProps{
 		Path:      path,
 		Extension: extensionArg.Values[0].String(),
 	})

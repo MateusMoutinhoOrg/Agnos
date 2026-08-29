@@ -11,10 +11,10 @@ import (
 )
 
 func SetCoreMethods(sandbox *lib.SandBox) {
-	sandbox.Start = start.StartFactory(sandbox)
-	sandbox.Build = build.BuildFactory(sandbox)
-	sandbox.Install = install.InstallFactory(sandbox)
-	sandbox.Uninstall = uninstall.UninstallFactory(sandbox)
-	sandbox.List = list.ListFactory(sandbox)
-	sandbox.ExtensionHelp = extensionhelp.ExtensionHelpFactory(sandbox)
+	sandbox.Core.Start = start.StartFactory(sandbox)
+	sandbox.Core.Build = build.BuildFactory(sandbox)
+	sandbox.Core.Install = install.InstallFactory(sandbox)
+	sandbox.Core.Uninstall = uninstall.UninstallFactory(sandbox)
+	sandbox.Core.List = list.ListFactory(sandbox)
+	sandbox.Core.ExtensionHelp = extensionhelp.ExtensionHelpFactory(sandbox)
 }

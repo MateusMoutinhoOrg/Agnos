@@ -14,7 +14,7 @@ import (
 
 func SetCliMethods(sandbox *lib.SandBox) {
 
-	sandbox.Commands = []lib.CliCommand{
+	sandbox.Cli.Commands = []lib.CliCommand{
 		version.NewCommand(sandbox),
 		help.NewCommand(sandbox),
 		start.NewCommand(sandbox),
@@ -25,5 +25,5 @@ func SetCliMethods(sandbox *lib.SandBox) {
 		extensionhelp.NewCommand(sandbox),
 	}
 
-	sandbox.CliMain = CliMainFactory(sandbox)
+	sandbox.Cli.CliMain = CliMainFactory(sandbox)
 }

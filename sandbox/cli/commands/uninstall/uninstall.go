@@ -15,7 +15,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				Id:          "item",
 				Description: "the extension to uninstall from the project",
 				Examples: []string{
-					sandbox.ProjectName + " uninstall my-extension",
+					sandbox.Config.ProjectName + " uninstall my-extension",
 				},
 				RequiredType:    lib.CliTypeString,
 				RequiredMinSize: 1,
@@ -28,7 +28,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
-					sandbox.ProjectName + " uninstall my-extension -q",
+					sandbox.Config.ProjectName + " uninstall my-extension -q",
 				},
 				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
@@ -40,7 +40,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--path", "-p"},
 				Description:      "the dir of the project to uninstall the extension from",
 				Examples: []string{
-					sandbox.ProjectName + " uninstall my-extension -p ./my-project",
+					sandbox.Config.ProjectName + " uninstall my-extension -p ./my-project",
 				},
 				Defaults:         []string{"."},
 				Type:             lib.CliTypeString,
@@ -53,9 +53,9 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "Uninstall an extension from the project",
 		LongDescription: "Removes the given extension from the project, deleting the files\nand configuration it added. If no path is provided, the current\ndirectory is used.",
 		Examples: []string{
-			sandbox.ProjectName + " uninstall my-extension",
-			sandbox.ProjectName + " uninstall my-extension -p ./my-project",
-			sandbox.ProjectName + " uninstall my-extension -q",
+			sandbox.Config.ProjectName + " uninstall my-extension",
+			sandbox.Config.ProjectName + " uninstall my-extension -p ./my-project",
+			sandbox.Config.ProjectName + " uninstall my-extension -q",
 		},
 		Handler: CommandHandler,
 	}
@@ -72,7 +72,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 		path = pathFlag.Values[0].String()
 	}
 
-	uninstall_error := sandbox.Uninstall(lib.UninstallProps{
+	uninstall_error := sandbox.Core.Uninstall(lib.UninstallProps{
 		Path: path,
 		Item: itemArg.Values[0].String(),
 	})

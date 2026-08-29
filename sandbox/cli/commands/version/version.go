@@ -11,14 +11,14 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:           "Print the installed version",
 		LongDescription:       "Prints the current version of the installed binary and exits.",
 		Examples: []string{
-			sandbox.ProjectName + " --version",
-			sandbox.ProjectName + " version",
+			sandbox.Config.ProjectName + " --version",
+			sandbox.Config.ProjectName + " version",
 		},
 		Handler: CommandHandler,
 	}
 }
 
 func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
-	sandbox.Deps.Printf("Version:%s\n", sandbox.Version)
+	sandbox.Deps.Printf("Version:%s\n", sandbox.Config.Version)
 	return lib.ExitOk
 }

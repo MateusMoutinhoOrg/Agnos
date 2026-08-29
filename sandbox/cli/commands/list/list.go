@@ -15,7 +15,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				Id:          "path",
 				Description: "the dir of the project to list the extensions of",
 				Examples: []string{
-					sandbox.ProjectName + " list . ",
+					sandbox.Config.ProjectName + " list . ",
 				},
 				Defaults:        []string{"."},
 				RequiredType:    lib.CliTypeString,
@@ -29,7 +29,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
-					sandbox.ProjectName + " list -q",
+					sandbox.Config.ProjectName + " list -q",
 				},
 				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
@@ -41,9 +41,9 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "List all available extensions",
 		LongDescription: "Lists every extension available to the project, showing the ones\nalready installed. If no path is provided, the current directory\nis used.",
 		Examples: []string{
-			sandbox.ProjectName + " list",
-			sandbox.ProjectName + " list .",
-			sandbox.ProjectName + " list ./my-project",
+			sandbox.Config.ProjectName + " list",
+			sandbox.Config.ProjectName + " list .",
+			sandbox.Config.ProjectName + " list ./my-project",
 		},
 		Handler: CommandHandler,
 	}
@@ -54,7 +54,7 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 	quietFlag := entries.GetFlagById("quiet")
 	pathArg := entries.GetArgById("path")
 
-	list_error := sandbox.List(lib.ListProps{
+	list_error := sandbox.Core.List(lib.ListProps{
 		Path: pathArg.Values[0].String(),
 	})
 

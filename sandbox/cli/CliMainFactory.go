@@ -28,8 +28,8 @@ func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
 			return lib.ExitUsage
 		}
 
-		for i := range sandbox.Commands {
-			command := &sandbox.Commands[i]
+		for i := range sandbox.Cli.Commands {
+			command := &sandbox.Cli.Commands[i]
 
 			if !slices.Contains(command.ValidStartIdentifiers, action) {
 				continue
@@ -75,14 +75,14 @@ func CliMainFactory(sandbox *lib.SandBox) func(args []string) int {
 // printUsage triggers the help command so the user sees the full
 // professional help screen when they run the binary with no arguments.
 func printUsage(sandbox *lib.SandBox) {
-	for _, cmd := range sandbox.Commands {
+	for _, cmd := range sandbox.Cli.Commands {
 		if slices.Contains(cmd.ValidStartIdentifiers, "help") {
 			cmd.Handler(sandbox, buildCliEntrys(&cmd))
 			return
 		}
 	}
 	// Fallback — should never happen if help is registered.
-	sandbox.Deps.Printf("Usage: %s <command> [flags] [args]\n", sandbox.ProjectName)
+	sandbox.Deps.Printf("Usage: %s <command> [flags] [args]\n", sandbox.Config.ProjectName)
 }
 
 // collectBoolFlag checks whether a boolean flag is present. If required and

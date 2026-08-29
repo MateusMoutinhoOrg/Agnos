@@ -15,7 +15,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				Id:          "path",
 				Description: "the dir to build the project",
 				Examples: []string{
-					sandbox.ProjectName + " build . ",
+					sandbox.Config.ProjectName + " build . ",
 				},
 				Defaults:        []string{"."},
 				RequiredType:    lib.CliTypeString,
@@ -29,7 +29,7 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 				ValidIdentifiers: []string{"--quiet", "-q"},
 				Description:      "Quiets the cli output",
 				Examples: []string{
-					sandbox.ProjectName + " build -q",
+					sandbox.Config.ProjectName + " build -q",
 				},
 				Type:             lib.CliTypeBool,
 				RequiredMinSize:  0,
@@ -41,10 +41,10 @@ func NewCommand(sandbox *lib.SandBox) lib.CliCommand {
 		Description:     "Build the project in a directory",
 		LongDescription: "Builds the project in the given directory, compiling\nthe source code into the output artifacts. If no\npath is provided, the current directory is used.",
 		Examples: []string{
-			sandbox.ProjectName + " build",
-			sandbox.ProjectName + " build .",
-			sandbox.ProjectName + " build ./my-project",
-			sandbox.ProjectName + " build -q",
+			sandbox.Config.ProjectName + " build",
+			sandbox.Config.ProjectName + " build .",
+			sandbox.Config.ProjectName + " build ./my-project",
+			sandbox.Config.ProjectName + " build -q",
 		},
 		Handler: CommandHandler,
 	}
@@ -56,9 +56,9 @@ func CommandHandler(sandbox *lib.SandBox, entries lib.CliEntrys) int {
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
 
-	build_error := sandbox.Build(lib.BuildProps{
+	build_error := sandbox.Core.Build(lib.BuildProps{
 		Path:    path,
-		Project: sandbox.ProjectName,
+		Project: sandbox.Config.ProjectName,
 	})
 
 	if !quietFlag.Exist && build_error != nil {

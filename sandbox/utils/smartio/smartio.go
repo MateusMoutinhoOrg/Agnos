@@ -184,7 +184,7 @@ func NewSmartIO(sandbox *lib.SandBox, path string) *SmartIO {
 		Transactions: make(map[string][]byte),
 	}
 
-	configDir := joinPath(path, sandbox.ProjectName+"Config")
+	configDir := joinPath(path, sandbox.Config.ProjectName+"Config")
 
 	ignorePath := joinPath(configDir, "ignore.yaml")
 	if sandbox.Deps.IoLib.Exist(ignorePath) && sandbox.Deps.IoLib.IsFile(ignorePath) {
