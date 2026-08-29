@@ -6,6 +6,7 @@ import (
 	"os"
 	"time"
 
+	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/embeddeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
 )
 
@@ -68,7 +69,7 @@ func New(basePath string) deps.Deps {
 	}
 	adapter.Deps.VerbLib = VerbLibFactory(adapter)
 	adapter.Deps.KeepLib = KeepLibFactory(adapter)
-	adapter.Deps.EmbedDeps = EmbedDepsFactory(adapter)
+	adapter.Deps.EmbedDeps = embeddeps.NewEmbedDeps()
 	adapter.Deps.IoLib = IoLibFactory(adapter)
 	adapter.Deps.NewRequest = NewRequestFactory(adapter)
 	adapter.Deps.SerializeLib = SerializeLibFactory(adapter)

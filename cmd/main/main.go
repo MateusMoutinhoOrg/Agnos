@@ -9,20 +9,11 @@ import (
 )
 
 const (
-	// dataDirName is the directory the tracker's records live in, created
-	// under the user's home directory so an installed binary tracks one
-	// budget from wherever it is run.
 	dataDirName = ".agnos"
-	// dataDirEnv is the environment variable that overrides where the
-	// records live, so a script can run against a budget of its own.
+
 	dataDirEnv = "AGNOS_DATA"
 )
 
-// main is the whole executable: it wires an adapter into the library, hands
-// the command line to sandbox.SandBox.Sandboxmain — the interface itself, which lives
-// inside the sandbox — and exits with the code it returns. Choosing where the
-// records live is an OS-bound decision, so it is made here, outside the
-// sandbox, and never inside it.
 func main() {
 	// 1. Build deps via the standard adapter: a real clock, standard output,
 	//    the Verb parser over os.Args[1:], a Keep database on disk, and the

@@ -66,13 +66,13 @@ func relativeTo(root string, current string) string {
 	return current[len(root)+1:]
 }
 
-// EmbedDepsFactory returns the value that fills deps.Deps.EmbedDeps: the
+// NewEmbedDeps returns the value that fills deps.Deps.EmbedDeps: the
 // project's assets, compiled into the binary by the assets package, served
 // from the root of that tree. It returns a value rather than a closure
 // because the field is a struct — see the Factories specification — and each
 // of that struct's own fields is a closure reading the embedded filesystem at
 // call time.
-func EmbedDepsFactory(s *StandardAdapter) embeddeps.Lib {
+func NewEmbedDeps() embeddeps.Lib {
 	return embeddeps.Lib{
 		ReadFile: func(requested string) ([]byte, error) {
 			return assets.Files.ReadFile(assetPath(requested))
