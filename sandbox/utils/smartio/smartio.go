@@ -3,14 +3,15 @@ package smartio
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/ignorableconf"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/pathreplacerconf"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
 type SmartIO struct {
-	Ignore       *parsables.IgnorableConf
-	Replacers    *parsables.PathReplacerConf
+	Ignore       *ignorableconf.IgnorableConf
+	Replacers    *pathreplacerconf.PathReplacerConf
 	Transactions map[string][]byte
 
 	ReadFile             func(path string) ([]byte, error)
@@ -191,34 +192,34 @@ func NewSmartIO(sandbox *sandbox.SandBox, path string) *SmartIO {
 	if sandbox.Deps.IoLib.Exist(ignorePath) && sandbox.Deps.IoLib.IsFile(ignorePath) {
 		content, err := sandbox.Deps.IoLib.ReadFile(ignorePath)
 		if err == nil {
-			conf, err := parsables.NewIgnorableConf(sandbox, string(content))
+			conf, err := ignorableconf.NewIgnorableConf(sandbox, string(content))
 			if err == nil {
 				io.Ignore = conf
 			} else {
-				io.Ignore = parsables.NewIgnorableConfEmpty(sandbox)
+				io.Ignore = ignorableconf.NewIgnorableConfEmpty(sandbox)
 			}
 		} else {
-			io.Ignore = parsables.NewIgnorableConfEmpty(sandbox)
+			io.Ignore = ignorableconf.NewIgnorableConfEmpty(sandbox)
 		}
 	} else {
-		io.Ignore = parsables.NewIgnorableConfEmpty(sandbox)
+		io.Ignore = ignorableconf.NewIgnorableConfEmpty(sandbox)
 	}
 
 	replacersPath := joinPath(configDir, "paths.yaml")
 	if sandbox.Deps.IoLib.Exist(replacersPath) && sandbox.Deps.IoLib.IsFile(replacersPath) {
 		content, err := sandbox.Deps.IoLib.ReadFile(replacersPath)
 		if err == nil {
-			conf, err := parsables.NewPathReplacerConf(sandbox, string(content))
+			conf, err := pathreplacerconf.NewPathReplacerConf(sandbox, string(content))
 			if err == nil {
 				io.Replacers = conf
 			} else {
-				io.Replacers = parsables.NewPathReplacerConfEmpty(sandbox)
+				io.Replacers = pathreplacerconf.NewPathReplacerConfEmpty(sandbox)
 			}
 		} else {
-			io.Replacers = parsables.NewPathReplacerConfEmpty(sandbox)
+			io.Replacers = pathreplacerconf.NewPathReplacerConfEmpty(sandbox)
 		}
 	} else {
-		io.Replacers = parsables.NewPathReplacerConfEmpty(sandbox)
+		io.Replacers = pathreplacerconf.NewPathReplacerConfEmpty(sandbox)
 	}
 
 	addSmartIOMethods(sandbox, io)

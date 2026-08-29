@@ -1,7 +1,11 @@
 package start
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/ignorableconf"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/moduleconf"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/pathreplacerconf"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/projectconf"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/smartio"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
@@ -27,14 +31,14 @@ func Start(sandbox *sandbox.SandBox, props core.StartProps) error {
 	configDir := props.Path + "/" + sandbox.Config.ProjectName + "Config"
 	io.CreateDir(configDir)
 
-	project_conf := parsables.NewProjectConfEmpty(sandbox)
+	project_conf := projectconf.NewProjectConfEmpty(sandbox)
 	project_conf.Name = props.ProjectName
 
-	themes_conf := parsables.NewThemesConfEmpty(sandbox)
+	themes_conf := themesconf.NewThemesConfEmpty(sandbox)
 	themes_conf.AddTheme("LibUsage", "lib-usage", "Documentation explaning how to use the lib")
 	themes_conf.AddTheme("Development", "development", "Documentation explaning how to to. build the project, and how to modify the project ")
-	ignorable_conf := parsables.NewIgnorableConfEmpty(sandbox)
-	path_replacer_conf := parsables.NewPathReplacerConfEmpty(sandbox)
+	ignorable_conf := ignorableconf.NewIgnorableConfEmpty(sandbox)
+	path_replacer_conf := pathreplacerconf.NewPathReplacerConfEmpty(sandbox)
 
 	parsable_files := []struct {
 		path    string
@@ -54,7 +58,7 @@ func Start(sandbox *sandbox.SandBox, props core.StartProps) error {
 	}
 
 	if props.Module != nil {
-		module_conf := parsables.NewModuleConfEmpty(sandbox)
+		module_conf := moduleconf.NewModuleConfEmpty(sandbox)
 		module_conf.Module = *props.Module
 		module_conf.GoVersion = goVersion
 

@@ -1,4 +1,4 @@
-package parsables
+package ignorableconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"

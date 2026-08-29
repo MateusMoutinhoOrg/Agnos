@@ -1,4 +1,4 @@
-package parsables
+package pathreplacerconf
 
 import (
 	"strings"
