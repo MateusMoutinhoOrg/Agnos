@@ -1,4 +1,4 @@
-package core
+package coremethods
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/utils/parsables/ignorableconf"
