@@ -1,11 +1,11 @@
-package uninstall
+package core
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
 )
 
-// Uninstall ...
-func Uninstall(sandbox *sandbox.SandBox, props core.UninstallProps) error {
+// Install ...
+func Install(sandbox *sandbox.SandBox, props core.InstallProps) error {
 	return nil
 }

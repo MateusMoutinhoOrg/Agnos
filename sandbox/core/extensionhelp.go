@@ -1,4 +1,4 @@
-package extensionhelp
+package core
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
