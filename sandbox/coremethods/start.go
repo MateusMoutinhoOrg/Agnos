@@ -19,9 +19,9 @@ const goVersion = "1.25.0"
 // project config directory with one empty yaml per parsable and, when a module
 // is given, a go.mod at the project root. Every write goes through a SmartIO
 // transaction, so nothing touches the disk unless all of them succeed.
-func Start(sandbox *sandbox.SandBox, props core.StartProps) error {
+func (self *CoreMethods) Start(props core.StartProps) error {
 
-	io := smartio.NewSmartIO(sandbox, props.Path)
+	io := smartio.NewSmartIO(self.Sandbox, props.Path)
 
 	write := io.WriteFile
 	if props.Force {

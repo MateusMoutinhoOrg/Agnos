@@ -1,12 +1,8 @@
 package coremethods
 
-import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/sandbox"
-)
+import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/lib/core"
 
-// Build ...
-func Build(sandbox *sandbox.SandBox, props core.BuildProps) error {
-	sandbox.Deps.Printf("build started with path %s \n", props.Path)
+func (self *CoreMethods) Build(props core.BuildProps) error {
+	self.Sandbox.Deps.Printf("build started with path %s \n", props.Path)
 	return nil
 }
