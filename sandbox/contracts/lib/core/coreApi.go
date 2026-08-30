@@ -7,12 +7,6 @@ type StartProps struct {
 	Force       bool
 }
 
-type BuildProps struct {
-	Path    string
-	Project string
-	Force   bool
-}
-
 // InstallProps carries the operands of the install command: the project
 // directory the extension is installed into, and the item to install.
 type InstallProps struct {
