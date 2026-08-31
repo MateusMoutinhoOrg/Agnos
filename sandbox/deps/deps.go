@@ -3,9 +3,10 @@ package deps
 import (
 	"time"
 
+	keepdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/keepdeps"
+
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/embeddeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
-	keepdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/keepdeps"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
 	verbdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/verbdeps"
@@ -14,15 +15,12 @@ import (
 type Deps struct {
 	Now func() time.Time
 
-	Printf func(format string, a ...any) (n int, err error)
-	Error  func(format string, a ...any) (n int, err error)
-	Errorf func(format string, a ...any) error
-
-	VerbLib verbdeps.Lib
-
-	KeepLib keepdeps.Lib
-
-	EmbedDeps embeddeps.Lib
+	Printf     func(format string, a ...any) (n int, err error)
+	Error      func(format string, a ...any) (n int, err error)
+	Errorf     func(format string, a ...any) error
+	NewVerbLib func(args []string) verbdeps.Lib
+	NewKeepLib func(basePath string) keepdeps.Lib
+	EmbedDeps  embeddeps.Lib
 
 	IoLib iodeps.Lib
 
