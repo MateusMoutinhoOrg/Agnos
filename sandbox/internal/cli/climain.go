@@ -5,6 +5,11 @@ import (
 )
 
 func CliMain(deps *deps.Deps, args []string) int {
-	deps.Printf("started the cli main")
+
+	verblib := deps.NewVerbLib(args)
+
+	value, _ := verblib.GetNextStringArg()
+	println(value)
+
 	return 0
 }
