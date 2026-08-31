@@ -9,9 +9,9 @@ import (
 )
 
 func New(deps *deps.Deps) *api.Sandbox {
-	api := api.Sandbox{}
-	api.Build = func(props api.BuildProps) error {
+	self := api.Sandbox{}
+	self.Build = func(props api.BuildProps) error {
 		return actions.Build(*deps, props)
 	}
-	return &api
+	return &self
 }
