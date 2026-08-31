@@ -27,7 +27,10 @@ const (
 	red     = "\033[31m"
 )
 
+var cmdSandbox *api.Sandbox
+
 func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
+	cmdSandbox = sandbox
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"help", "--help"},
 		Category:              "Info",
@@ -48,22 +51,20 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " help",
 			config.ProjectName + " help start",
 		},
-		Handler: func(sb any, entries api.CliEntrys) int {
-			return commandHandler(deps, sandbox, entries)
-		},
+		Handler: CommandHandler,
 	}
 }
 
-func commandHandler(deps *deps.Deps, sandbox *api.Sandbox, entries api.CliEntrys) int {
+func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 	command := entries.GetArgById("command")
 	if len(command.Values) == 0 {
-		printGeneralHelp(deps, sandbox)
+		printGeneralHelp(deps, cmdSandbox)
 		return api.ExitOk
 	}
 	chosen := command.Values[0].String()
-	for _, c := range sandbox.Cli.Commands {
+	for _, c := range cmdSandbox.Cli.Commands {
 		if slices.Contains(c.ValidStartIdentifiers, chosen) {
-			printCommandHelp(deps, sandbox, &c)
+			printCommandHelp(deps, cmdSandbox, &c)
 			return api.ExitOk
 		}
 	}

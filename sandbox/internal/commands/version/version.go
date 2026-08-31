@@ -16,9 +16,11 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " --version",
 			config.ProjectName + " version",
 		},
-		Handler: func(sb any, entries api.CliEntrys) int {
-			deps.Printf("Version:%s\n", config.Version)
-			return api.ExitOk
-		},
+		Handler: CommandHandler,
 	}
+}
+
+func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
+	deps.Printf("Version:%s\n", config.Version)
+	return api.ExitOk
 }
