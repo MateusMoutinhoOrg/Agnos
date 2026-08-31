@@ -3,7 +3,7 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 )
 
@@ -54,7 +54,7 @@ func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
 
-	build_error := actions.Build(deps, path)
+	build_error := buildAction.Build(deps, path)
 
 	if !quietFlag.Exist && build_error != nil {
 		deps.Error(build_error.Error())

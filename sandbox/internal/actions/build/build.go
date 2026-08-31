@@ -1,4 +1,4 @@
-package actions
+package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
