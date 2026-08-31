@@ -1,7 +1,7 @@
 package keepdeps
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/keepdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/keepdeps"
 
 	keepadapter "github.com/MateusMoutinhoOrg/Keep/adapters/standard"
 	keeplib "github.com/MateusMoutinhoOrg/Keep/sandbox"

@@ -1,7 +1,7 @@
 package verbdeps
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/verbdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/verbdeps"
 	verblib "github.com/MateusMoutinhoOrg/Verb/sandbox"
 )
 

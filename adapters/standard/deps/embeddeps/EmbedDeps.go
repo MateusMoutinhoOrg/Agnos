@@ -15,7 +15,7 @@ import (
 	"path"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/assets"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/embeddeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/embeddeps"
 )
 
 // assetPath resolves one path the library asked for against the root of the

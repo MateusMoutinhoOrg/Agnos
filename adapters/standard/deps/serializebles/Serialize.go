@@ -4,7 +4,7 @@ import (
 	"encoding/json"
 	"fmt"
 
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps/serializebles"
+	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
 	"gopkg.in/yaml.v3"
 )
 
