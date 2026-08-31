@@ -5,10 +5,12 @@ import (
 	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 
 	actions "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions"
+	cli "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/cli"
 )
 
 func New(deps *deps.Deps) *api.Sandbox {
 	self := api.Sandbox{}
-	actions.ExportMethods(&self, *deps)
+	actions.ExportItens(&self, *deps)
+	cli.ExportItens(&self, *deps)
 	return &self
 }
