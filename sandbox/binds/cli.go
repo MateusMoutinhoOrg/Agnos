@@ -18,6 +18,6 @@ func CliBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	)
 
 	sandbox.Cli.CliMain = func(args []string) int {
-		return cli.CliMain(deps, args)
+		return cli.CliMain(deps, sandbox, args)
 	}
 }
