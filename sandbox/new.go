@@ -9,6 +9,6 @@ import (
 
 func New(deps *deps.Deps) *api.Sandbox {
 	self := api.Sandbox{}
-	actions.BindMethods(&self, *deps)
+	actions.ExportMethods(&self, *deps)
 	return &self
 }
