@@ -13,10 +13,20 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		Category:              "Core Commands",
 		Args: []api.CliArg{
 			{
+				Id:          "project-name",
+				Description: "the name of the project",
+				Examples: []string{
+					"my-project",
+				},
+				RequiredType:    api.CliTypeString,
+				RequiredMinSize: 1,
+				RequiredMaxSize: 1,
+			},
+			{
 				Id:          "path",
 				Description: "the dir to start the project",
 				Examples: []string{
-					config.ProjectName + " start . ",
+					".",
 				},
 				Defaults:        []string{"."},
 				RequiredType:    api.CliTypeString,
@@ -65,10 +75,10 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		Description:     "Initialize a new project in a directory",
 		LongDescription: "Scaffolds a new Agnos project in the given directory, creating\nthe required configuration files and folder structure. If no\npath is provided, the current directory is used.",
 		Examples: []string{
-			config.ProjectName + " start",
-			config.ProjectName + " start .",
-			config.ProjectName + " start ./my-project",
-			config.ProjectName + " start -q",
+			config.ProjectName + " start my-project",
+			config.ProjectName + " start my-project .",
+			config.ProjectName + " start my-project ./my-project-dir",
+			config.ProjectName + " start my-project -q",
 		},
 		Handler: CommandHandler,
 	}
@@ -80,6 +90,8 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 	moduleFlag := entries.GetFlagById("module")
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
+	projectNameArg := entries.GetArgById("project-name")
+	projectName := projectNameArg.Values[0].String()
 
 	var module *string
 	if moduleFlag.Exist && len(moduleFlag.Values) > 0 {
@@ -87,9 +99,16 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 		module = &modVal
 	}
 
+	if !deps.IoLib.Exist(path + "/go.mod") && module == nil {
+		if !quietFlag.Exist {
+			deps.Error("the module flag (--module) is required when there is no go.mod in the path\n")
+		}
+		return api.ExitFailure
+	}
+
 	start_error := startAction.Start(deps, api.StartProps{
 		Path:        path,
-		ProjectName: config.ProjectName,
+		ProjectName: projectName,
 		Module:      module,
 		Force:       forceFlag.Exist,
 	})
