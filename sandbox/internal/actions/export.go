@@ -5,7 +5,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
-func Export(deps deps.Deps, sandbox *api.Sandbox) {
+func Export(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.Build = func(props api.BuildProps) error {
 		return Build(deps, props)
 	}

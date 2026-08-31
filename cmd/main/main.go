@@ -1,8 +1,9 @@
 package main
 
 import (
+	"os"
+
 	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard"
-	agnosapi "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
 )
@@ -11,9 +12,8 @@ func main() {
 
 	deps := agnosadapter.New(".agnos")
 
-	l := agnoslib.New(&deps)
-	l.Build(agnosapi.BuildProps{
-		Path: ".",
-	})
-
+	lib := agnoslib.New(&deps)
+	argslist := os.Args[1:]
+	result := lib.Cli.CliMain(argslist)
+	os.Exit(result)
 }
