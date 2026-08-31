@@ -7,7 +7,7 @@ import (
 )
 
 func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
-	sandbox.Actions.Build = func(props api.BuildProps) error {
-		return actions.Build(deps, props)
+	sandbox.Actions.Build = func(path string) error {
+		return actions.Build(deps, path)
 	}
 }

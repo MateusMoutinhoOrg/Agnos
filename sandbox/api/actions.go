@@ -1,10 +1,5 @@
 package api
 
-type BuildProps struct {
-	Path  string
-	Force bool
-}
-
 type InstallProps struct {
 	Path string
 	Item string
@@ -20,5 +15,5 @@ type ListAvailableExtensionsProps struct {
 }
 
 type Actions struct {
-	Build func(props BuildProps) error
+	Build func(path string) error
 }

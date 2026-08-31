@@ -3,6 +3,7 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 )
 
@@ -45,22 +46,21 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " build ./my-project",
 			config.ProjectName + " build -q",
 		},
-		Handler: func(sb any, entries api.CliEntrys) int {
-			quietFlag := entries.GetFlagById("quiet")
-			pathArg := entries.GetArgById("path")
-			path := pathArg.Values[0].String()
-
-			build_error := sandbox.Actions.Build(api.BuildProps{
-				Path: path,
-			})
-
-			if !quietFlag.Exist && build_error != nil {
-				deps.Error(build_error.Error())
-			}
-			if build_error != nil {
-				return api.ExitFailure
-			}
-			return api.ExitOk
-		},
+		Handler: CommandHander,
 	}
+}
+func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
+	quietFlag := entries.GetFlagById("quiet")
+	pathArg := entries.GetArgById("path")
+	path := pathArg.Values[0].String()
+
+	build_error := actions.Build(deps, path)
+
+	if !quietFlag.Exist && build_error != nil {
+		deps.Error(build_error.Error())
+	}
+	if build_error != nil {
+		return api.ExitFailure
+	}
+	return api.ExitOk
 }
