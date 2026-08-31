@@ -1,6 +1,6 @@
 package api
 
 type Sandbox struct {
-	Actions
-	Cli Cli
+	Actions Actions
+	Cli     Cli
 }
