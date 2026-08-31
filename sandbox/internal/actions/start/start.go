@@ -64,6 +64,9 @@ func Start(deps *deps.Deps, props api.StartProps) error {
 		}
 	}
 
+	io.CreateDir("sandbox/api")
+	io.CreateDir("sandbox/binds")
+
 	persist_error := io.Persist()
 	if persist_error != nil {
 		return persist_error
