@@ -12,7 +12,7 @@ import (
 	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/requestdeps"
 	serializelib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/serializebles"
 	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/verbdeps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/contracts/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
 type StandardAdapter struct {
