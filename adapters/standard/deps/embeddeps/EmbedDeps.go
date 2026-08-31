@@ -11,8 +11,10 @@ package embeddeps
 // function fields of embeddeps.Lib.
 
 import (
+	"bytes"
 	"io/fs"
 	"path"
+	"text/template"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/assets"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/embeddeps"
@@ -82,6 +84,21 @@ func NewEmbedDeps() embeddeps.Lib {
 		},
 		ListFilesRecursively: func(requested string) ([]string, error) {
 			return assetFiles(assetPath(requested), true)
+		},
+		RenderTemplate: func(requested string, vars interface{}) ([]byte, error) {
+			content, err := assets.Files.ReadFile(assetPath(requested))
+			if err != nil {
+				return nil, err
+			}
+			t, err := template.New(path.Base(requested)).Parse(string(content))
+			if err != nil {
+				return nil, err
+			}
+			var buf bytes.Buffer
+			if err := t.Execute(&buf, vars); err != nil {
+				return nil, err
+			}
+			return buf.Bytes(), nil
 		},
 	}
 }

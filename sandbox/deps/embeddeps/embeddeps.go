@@ -45,4 +45,8 @@ type Lib struct {
 	// directory — "templates/invoice.tmpl" and not just "invoice.tmpl".
 	// Directories are never reported, only the files inside them.
 	ListFilesRecursively func(path string) ([]string, error)
+
+	// RenderTemplate reads the template from path, renders it using the given variables,
+	// and returns the resulting byte slice.
+	RenderTemplate func(path string, vars interface{}) ([]byte, error)
 }
