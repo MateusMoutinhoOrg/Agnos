@@ -20,8 +20,5 @@ type ListAvailableExtensionsProps struct {
 }
 
 type Actions struct {
-	Build                   func(props BuildProps) error
-	InstallExtension        func(props InstallProps) error
-	RemoveExtension         func(props UninstallProps) error
-	ListAvaliableExtensions func(props ListAvailableExtensionsProps) ([]string, error)
+	Build func(props BuildProps) error
 }
