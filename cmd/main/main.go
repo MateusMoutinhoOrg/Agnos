@@ -10,7 +10,7 @@ import (
 
 func main() {
 
-	deps := agnosadapter.New(".agnos")
+	deps := agnosadapter.New()
 
 	lib := agnoslib.New(&deps)
 	argslist := os.Args[1:]

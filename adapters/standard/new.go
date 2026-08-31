@@ -46,7 +46,7 @@ func Errorf(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
 }
 
-func New(basePath string) deps.Deps {
+func New() deps.Deps {
 	deps := deps.Deps{}
 	deps.Now = func() time.Time {
 		return Now()
