@@ -3,6 +3,7 @@ package start
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/pathreplacerconf"
@@ -23,7 +24,7 @@ func Start(deps *deps.Deps, props api.StartProps) error {
 		write = io.WriteFileOverwrite
 	}
 
-	configDir := props.Path + "/" + props.ProjectName + "Config"
+	configDir := props.Path + "/" + config.ProjectName + "Config"
 	io.CreateDir(configDir)
 
 	project_conf := projectconf.NewEmpty(deps)

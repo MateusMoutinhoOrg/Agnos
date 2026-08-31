@@ -1,6 +1,6 @@
 package config
 
 const (
-	ProjectName = "Agnos-Cli"
+	ProjectName = "Agnos"
 	Version     = "0.0.1"
 )
