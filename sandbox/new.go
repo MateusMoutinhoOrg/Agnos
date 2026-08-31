@@ -10,7 +10,7 @@ import (
 
 func New(deps *deps.Deps) *api.Sandbox {
 	self := api.Sandbox{}
-	actions.ExportItens(&self, *deps)
-	cli.ExportItens(&self, *deps)
+	actions.Export(&self, *deps)
+	cli.Export(&self, *deps)
 	return &self
 }
