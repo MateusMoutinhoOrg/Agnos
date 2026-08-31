@@ -6,5 +6,7 @@ import (
 )
 
 func New(deps *deps.Deps) *api.Api {
-	return &api.Api{}
+	api := api.Api{}
+
+	return &api
 }
