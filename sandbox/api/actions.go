@@ -1,16 +1,8 @@
 package api
 
-type StartProps struct {
-	Path        string
-	ProjectName string
-	Module      *string
-	Force       bool
-}
-
 type BuildProps struct {
-	Path    string
-	Project string
-	Force   bool
+	Path  string
+	Force bool
 }
 
 type InstallProps struct {
@@ -23,18 +15,13 @@ type UninstallProps struct {
 	Item string
 }
 
-type ListProps struct {
+type ListAvailableExtensionsProps struct {
 	Path string
-}
-
-type ExtensionHelpProps struct {
-	Path      string
-	Extension string
 }
 
 type Actions struct {
 	Build                   func(props BuildProps) error
 	InstallExtension        func(props InstallProps) error
 	RemoveExtension         func(props UninstallProps) error
-	ListAvaliableExtensions func(props ListProps) ([]string, error)
+	ListAvaliableExtensions func(props ListAvailableExtensionsProps) ([]string, error)
 }
