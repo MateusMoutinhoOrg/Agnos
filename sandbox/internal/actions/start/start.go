@@ -3,6 +3,7 @@ package start
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
@@ -71,7 +72,7 @@ func Start(deps *deps.Deps, props api.StartProps) error {
 	if persist_error != nil {
 		return persist_error
 	}
-
+	build.Build(deps, props.Path)
 	deps.Printf("started with path %s \n", props.Path)
 	return nil
 }
