@@ -33,10 +33,8 @@ type ExtensionHelpProps struct {
 }
 
 type Actions struct {
-	Start         func(props StartProps) error
-	Build         func(props BuildProps) error
-	Install       func(props InstallProps) error
-	Uninstall     func(props UninstallProps) error
-	List          func(props ListProps) error
-	ExtensionHelp func(props ExtensionHelpProps) error
+	Build                   func(props BuildProps) error
+	InstallExtension        func(props InstallProps) error
+	RemoveExtension         func(props UninstallProps) error
+	ListAvaliableExtensions func(props ListProps) ([]string, error)
 }
