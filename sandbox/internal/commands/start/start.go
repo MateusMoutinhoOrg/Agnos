@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	startAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/start"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
@@ -117,6 +118,14 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 		Module:      module,
 		Force:       forceFlag.Exist,
 	})
+
+	if start_error == nil {
+		start_error = io.Persist()
+	}
+
+	if start_error == nil {
+		start_error = buildAction.Build(deps, io, path)
+	}
 
 	if start_error == nil {
 		start_error = io.Persist()

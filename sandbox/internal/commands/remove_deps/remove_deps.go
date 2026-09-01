@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	removeDepsAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/remove_deps"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
@@ -57,6 +58,14 @@ func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	io := smartio.New(deps, path, config.ProjectName)
 	
 	build_error := removeDepsAction.RemoveDeps(deps, io, path)
+
+	if build_error == nil {
+		build_error = io.Persist()
+	}
+
+	if build_error == nil {
+		build_error = buildAction.Build(deps, io, path)
+	}
 
 	if build_error == nil {
 		build_error = io.Persist()
