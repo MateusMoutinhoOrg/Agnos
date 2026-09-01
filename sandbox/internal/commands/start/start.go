@@ -4,9 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	startAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/start"
-	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
 func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
@@ -111,25 +109,12 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 		return api.ExitFailure
 	}
 
-	io := smartio.New(deps, path, projectName)
-	start_error := startAction.Start(deps, io, api.StartProps{
+	start_error := startAction.Start(deps, api.StartProps{
 		Path:        path,
 		ProjectName: projectName,
 		Module:      module,
 		Force:       forceFlag.Exist,
 	})
-
-	if start_error == nil {
-		start_error = io.Persist()
-	}
-
-	if start_error == nil {
-		start_error = buildAction.Build(deps, io, path)
-	}
-
-	if start_error == nil {
-		start_error = io.Persist()
-	}
 
 	if !quietFlag.Exist && start_error != nil {
 		deps.Error(start_error.Error())

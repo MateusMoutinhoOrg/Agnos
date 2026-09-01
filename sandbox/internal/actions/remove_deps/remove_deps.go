@@ -2,14 +2,18 @@ package remove_deps
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func RemoveDeps(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Printf("remove-deps started with path %s \n", path)
-
-	io.RemoveDir("sandbox/deps")
-	io.RemoveDir("adapters")
-
-	return nil
+func RemoveDeps(deps *deps.Deps, path string) error {
+	io := smartio.New(deps, path, config.ProjectName)
+	if err := RemoveDepsInternal(deps, io, path); err != nil {
+		return err
+	}
+	if err := buildAction.BuildInternal(deps, io, path); err != nil {
+		return err
+	}
+	return io.Persist()
 }

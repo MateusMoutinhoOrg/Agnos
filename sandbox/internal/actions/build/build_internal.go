@@ -18,7 +18,11 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 			return err
 		}
 	*/
-	module_conf, err := moduleconf.NewFromPath(deps, path+"/go.mod")
+	gomod, err := io.ReadFile(path + "/go.mod")
+	if err != nil {
+		return err
+	}
+	module_conf, err := moduleconf.New(deps, string(gomod))
 	if err != nil {
 		return err
 	}

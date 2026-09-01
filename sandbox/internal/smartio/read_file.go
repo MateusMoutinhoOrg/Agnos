@@ -7,5 +7,14 @@ func ReadFile(deps *deps.Deps, io *SmartIO, path string) ([]byte, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	if isPendingRemoval(io, p) {
+		return nil, deps.Errorf("file %q does not exist", p)
+	}
+
+	if content, ok := io.Transactions[p]; ok {
+		return content, nil
+	}
+
 	return deps.IoLib.ReadFile(p)
 }

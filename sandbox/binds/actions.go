@@ -7,8 +7,6 @@ import (
 	enableDepsAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/enable_deps"
 	removeDepsAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/remove_deps"
 	startAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/start"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
 func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
@@ -16,45 +14,12 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 		return buildAction.Build(deps, path)
 	}
 	sandbox.Actions.Start = func(props api.StartProps) error {
-		io := smartio.New(deps, props.Path, props.ProjectName)
-		err := startAction.Start(deps, io, props)
-		if err == nil {
-			err = io.Persist()
-		}
-		if err == nil {
-			err = buildAction.Build(deps, io, props.Path)
-		}
-		if err != nil {
-			return err
-		}
-		return io.Persist()
+		return startAction.Start(deps, props)
 	}
 	sandbox.Actions.EnableDeps = func(path string) error {
-		io := smartio.New(deps, path, config.ProjectName)
-		err := enableDepsAction.EnableDeps(deps, io, path)
-		if err == nil {
-			err = io.Persist()
-		}
-		if err == nil {
-			err = buildAction.Build(deps, io, path)
-		}
-		if err != nil {
-			return err
-		}
-		return io.Persist()
+		return enableDepsAction.EnableDeps(deps, path)
 	}
 	sandbox.Actions.RemoveDeps = func(path string) error {
-		io := smartio.New(deps, path, config.ProjectName)
-		err := removeDepsAction.RemoveDeps(deps, io, path)
-		if err == nil {
-			err = io.Persist()
-		}
-		if err == nil {
-			err = buildAction.Build(deps, io, path)
-		}
-		if err != nil {
-			return err
-		}
-		return io.Persist()
+		return removeDepsAction.RemoveDeps(deps, path)
 	}
 }
