@@ -115,6 +115,14 @@ call the action package directly (e.g. `start` calls `startAction.Start` then
 `buildAction.Build`); `binds/actions.go` also exposes the same actions as library API.
 Note `build` runs as a follow-up step after `start`/`enable-deps`/`remove-deps`.
 
+**Renderers (`internal/actions/build/render_*.go`)** all follow one shape: list a directory
+with `io.List*`, derive names from the last path segment, title-case them, hand the slice to
+a template via `utils.RenderTemplateToDest`. `render_new.go` iterates `sandbox/binds` into
+`{{range .Binds}}`; `render_api.go` iterates `sandbox/api` into `{{range .Constructors}}`;
+`render_deps.go` iterates the `sandbox/deps/<x>/` sub-contract dirs, emitting one
+`{{.Title}} {{.Name}}.Lib` field (and its import) per dir in `sandbox/deps/deps.go` — the
+same iterate-a-dir-into-a-template pattern as `sandbox/new.go`.
+
 ### SmartIO — transactional filesystem
 
 `sandbox/internal/smartio` wraps `deps.IoLib` with an in-memory transaction layer. Actions
