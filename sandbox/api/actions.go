@@ -11,4 +11,5 @@ type Actions struct {
 	Build      func(path string) error
 	Start      func(props StartProps) error
 	EnableDeps func(path string) error
+	RemoveDeps func(path string) error
 }

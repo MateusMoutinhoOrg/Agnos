@@ -36,6 +36,9 @@ func NewIoLib() iodeps.Lib {
 		CreateDir: func(path string) {
 			_ = os.MkdirAll(path, 0755)
 		},
+		RemoveDir: func(path string) {
+			_ = os.RemoveAll(path)
+		},
 		ListDirs: func(path string) []string {
 			var dirs []string
 			entries, err := os.ReadDir(path)

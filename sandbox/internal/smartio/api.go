@@ -18,6 +18,7 @@ type SmartIO struct {
 	IsFile               func(path string) bool
 	Exist                func(path string) bool
 	CreateDir            func(path string)
+	RemoveDir            func(path string)
 	ListDirs             func(path string) []string
 	ListFiles            func(path string) []string
 	ListAll              func(path string) []string

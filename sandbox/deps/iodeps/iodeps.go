@@ -46,6 +46,10 @@ type Lib struct {
 	// directory just created are the same outcome to the caller.
 	CreateDir func(path string)
 
+	// RemoveDir removes the directory or file at path and any children it contains.
+	// It reports nothing: a missing path and a path just removed are the same outcome.
+	RemoveDir func(path string)
+
 	// ListDirs returns the directories directly inside path. Nested
 	// directories are not descended into.
 	ListDirs func(path string) []string

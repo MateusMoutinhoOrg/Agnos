@@ -11,6 +11,7 @@ func BindMethods(deps *deps.Deps, io *SmartIO) {
 	io.IsFile = func(path string) bool { return IsFile(deps, io, path) }
 	io.Exist = func(path string) bool { return Exist(deps, io, path) }
 	io.CreateDir = func(path string) { CreateDir(deps, io, path) }
+	io.RemoveDir = func(path string) { RemoveDir(deps, io, path) }
 	io.ListDirs = func(path string) []string { return ListDirs(deps, io, path) }
 	io.ListFiles = func(path string) []string { return ListFiles(deps, io, path) }
 	io.ListAll = func(path string) []string { return ListAll(deps, io, path) }
