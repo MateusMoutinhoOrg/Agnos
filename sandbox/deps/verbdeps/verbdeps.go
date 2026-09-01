@@ -2,6 +2,16 @@ package verbdeps
 
 import "time"
 
+// Factory is the argv-parser constructor injected whole as the Deps.VerbLib
+// field — the same mechanic as iodeps.Lib. A parser is created per call
+// rather than injected once, so what the sandbox holds is this one-field
+// struct; the adapter, which lives outside the sandbox, fills New over the
+// embedded Verb library.
+type Factory struct {
+	// New builds an argv parser bound to the given arguments.
+	New func(args []string) Lib
+}
+
 // This package is this library's *copy* of the embedded Verb argv-parser
 // library's public api. The sandbox may not import the embedded library —
 // that would be a third-party import — so it restates the shape it needs

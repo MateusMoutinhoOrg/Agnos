@@ -60,11 +60,11 @@ func New() deps.Deps {
 	deps.Std.Errorf = func(format string, a ...any) error {
 		return Errorf(format, a...)
 	}
-	deps.Std.NewVerbLib = verblib.NewVerbLib
-	deps.Std.NewKeepLib = keeplib.NewKeepLib
+	deps.VerbLib.New = verblib.NewVerbLib
+	deps.KeepLib.New = keeplib.NewKeepLib
 	deps.EmbedDeps = embeddeps.NewEmbedDeps()
 	deps.IoLib = iolib.NewIoLib()
-	deps.Std.NewRequest = requestlib.NewRequestFactory()
+	deps.RequestLib.New = requestlib.NewRequestFactory()
 	deps.SerializeLib = serializelib.NewSerializeLib()
 	return deps
 }

@@ -144,3 +144,13 @@ type Lib struct {
 	// NewDatabase creates a database from a Props description.
 	NewDatabase func(props Props) KeepDatabase
 }
+
+// Factory is the Keep-library constructor injected whole as the
+// Deps.KeepLib field — the same mechanic as iodeps.Lib. A library is
+// created per base path rather than injected once, so what the sandbox
+// holds is this one-field struct; the adapter, which lives outside the
+// sandbox, fills New over the embedded Keep library.
+type Factory struct {
+	// New builds a schema-database library rooted at the given path.
+	New func(basePath string) Lib
+}
