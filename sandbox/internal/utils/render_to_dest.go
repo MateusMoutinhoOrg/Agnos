@@ -12,7 +12,7 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 		return err
 	}
 
-	err = io.WriteFile(dest_path, content)
+	err = io.WriteFileOverwrite(dest_path, content)
 	if err != nil {
 		return err
 	}
