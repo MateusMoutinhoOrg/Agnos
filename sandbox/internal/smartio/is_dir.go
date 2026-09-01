@@ -7,5 +7,11 @@ func IsDir(deps *deps.Deps, io *SmartIO, path string) bool {
 	if err != nil {
 		return false
 	}
+	if isPendingRemoval(io, p) {
+		return false
+	}
+	if isPendingCreate(io, p) {
+		return true
+	}
 	return deps.IoLib.IsDir(p)
 }
