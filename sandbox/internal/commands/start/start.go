@@ -13,16 +13,6 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		Category:              "Core Commands",
 		Args: []api.CliArg{
 			{
-				Id:          "project-name",
-				Description: "the name of the project",
-				Examples: []string{
-					"my-project",
-				},
-				RequiredType:    api.CliTypeString,
-				RequiredMinSize: 1,
-				RequiredMaxSize: 1,
-			},
-			{
 				Id:          "path",
 				Description: "the dir to start the project",
 				Examples: []string{
@@ -35,6 +25,18 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			},
 		},
 		Flags: []api.Cliflag{
+			{
+				Id:               "project-name",
+				ValidIdentifiers: []string{"--project-name", "-p"},
+				Description:      "the name of the project",
+				Examples: []string{
+					config.ProjectName + " start -p my-project",
+				},
+				Type:             api.CliTypeString,
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: true,
+			},
 			{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
@@ -75,10 +77,10 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		Description:     "Initialize a new project in a directory",
 		LongDescription: "Scaffolds a new Agnos project in the given directory, creating\nthe required configuration files and folder structure. If no\npath is provided, the current directory is used.",
 		Examples: []string{
-			config.ProjectName + " start my-project",
-			config.ProjectName + " start my-project .",
-			config.ProjectName + " start my-project ./my-project-dir",
-			config.ProjectName + " start my-project -q",
+			config.ProjectName + " start -p my-project",
+			config.ProjectName + " start . -p my-project",
+			config.ProjectName + " start ./my-project-dir -p my-project",
+			config.ProjectName + " start -p my-project -q",
 		},
 		Handler: CommandHandler,
 	}
@@ -88,10 +90,11 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 	quietFlag := entries.GetFlagById("quiet")
 	forceFlag := entries.GetFlagById("force")
 	moduleFlag := entries.GetFlagById("module")
+	projectNameFlag := entries.GetFlagById("project-name")
+	projectName := projectNameFlag.Values[0].String()
+	
 	pathArg := entries.GetArgById("path")
 	path := pathArg.Values[0].String()
-	projectNameArg := entries.GetArgById("project-name")
-	projectName := projectNameArg.Values[0].String()
 
 	var module *string
 	if moduleFlag.Exist && len(moduleFlag.Values) > 0 {
