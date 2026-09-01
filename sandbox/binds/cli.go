@@ -9,6 +9,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/help"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/start"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/version"
+	enable_deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/enable_deps"
 )
 
 func CliBind(deps *deps.Deps, sandbox *api.Sandbox) {
@@ -17,6 +18,7 @@ func CliBind(deps *deps.Deps, sandbox *api.Sandbox) {
 		version.NewCommand(deps, sandbox),
 		help.NewCommand(deps, sandbox),
 		start.NewCommand(deps, sandbox),
+		enable_deps.NewCommand(deps, sandbox),
 	)
 
 	sandbox.Cli.CliMain = func(args []string) int {
