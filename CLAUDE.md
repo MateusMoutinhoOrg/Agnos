@@ -83,8 +83,13 @@ agnos help | version
   `Deps.RequestLib` / `Deps.DatabaseLib` / `Deps.ArgvLib`, exactly like `IoLib` and
   `SerializeLib`. There is no separate `Factory` struct: `deps.Deps` references each
   `<x>.Lib` directly.
-- **`adapters/standard/`** — fills `Deps` with real implementations (`standard.New()`).
-  The only place `os`, `embed`, `net/http` etc. are touched.
+- **`adapters/`** — the only place `os`, `embed`, `net/http` etc. are touched. Split in two:
+  - **`adapters/libs/<x>deps/`** — one isolated real implementation per sub-contract
+    (`argvdeps`, `dbdeps`, `embeddeps`, `iodeps`, `requestdeps`, `serializebles`, `std`),
+    each a package exporting a `New…` constructor for that one `deps` sub-contract.
+  - **`adapters/availables/<name>/new.go`** — a ready-made `Deps` assembly wiring the libs
+    together; `adapters/availables/standard` (`standard.New()`) is the default. A user who
+    wants a different mix composes their own `Deps` from `adapters/libs` directly.
 - **`assets/`** — files embedded into the binary via `//go:embed all:*` in `assets/asset.go`.
   The embed directive must live in this package. Reached only through `deps.EmbedDeps`.
   `assets/sandbox/**` are Go **text/templates** (`{{.Module}}`, `{{if .HasDeps}}`) that
