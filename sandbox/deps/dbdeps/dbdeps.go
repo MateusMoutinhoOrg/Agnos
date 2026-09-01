@@ -1,20 +1,20 @@
-package keepdeps
+package dbdeps
 
-// This package is this library's *copy* of the embedded Keep schema
-// database library's public api. The sandbox may not import the embedded
-// library — that would be a third-party import — so it restates the shape
-// it needs here, field for field. The adapter, which lives outside the
-// sandbox, is what fills these structs from the real library.
+// This package is the sandbox's *copy* of the api a schema-database library
+// exposes. The sandbox may not import the concrete library — that would be a
+// third-party import — so it restates the shape it needs here, field for
+// field. The adapter, which lives outside the sandbox, is what fills these
+// structs from the real library.
 //
-// Copying is cheap precisely because the embedded library exposes structs
+// Copying is cheap precisely because the concrete library exposes structs
 // of function fields instead of interfaces: an adapter assigns the real
 // library's fields straight into the copy. Where a field hands back
-// another api struct — Lib.NewDatabase, KeepDatabase.GetSchema,
+// another api struct — Lib.NewDatabase, DatabaseHandle.GetSchema,
 // SchemaInstance.NewItem — the adapter wraps it in a closure that copies
-// the returned struct too, so nothing of the embedded library ever reaches
+// the returned struct too, so nothing of the concrete library ever reaches
 // the sandbox.
 
-// Field types, reported by Item.Type. The values mirror the embedded
+// Field types, reported by Item.Type. The values mirror the concrete
 // library's constants, so they can be assigned across without mapping.
 const (
 	// Key is a unique, indexed string field.
@@ -25,7 +25,7 @@ const (
 	Database
 )
 
-// Failure causes, reported by Error.Type. The values mirror the embedded
+// Failure causes, reported by Error.Type. The values mirror the concrete
 // library's constants.
 const (
 	KeyConflict = iota
@@ -35,7 +35,7 @@ const (
 	Internal
 )
 
-// Item mirrors the embedded library's api.Item — one field of a schema.
+// Item mirrors the concrete library's api.Item — one field of a schema.
 // It carries no behavior, so it is plain data on both sides.
 type Item struct {
 	// Name is the field's name, as used in the fields map.
@@ -48,16 +48,16 @@ type Item struct {
 	Itens []Item
 }
 
-// Schema mirrors the embedded library's api.Schema — one collection of
+// Schema mirrors the concrete library's api.Schema — one collection of
 // records and its fields.
 type Schema struct {
-	// Name is the collection's name, as used in KeepDatabase.GetSchema.
+	// Name is the collection's name, as used in DatabaseHandle.GetSchema.
 	Name string
 	// Itens are the fields each record of the collection can hold.
 	Itens []Item
 }
 
-// Props mirrors the embedded library's api.Props — the declarative
+// Props mirrors the concrete library's api.Props — the declarative
 // description a database is created from.
 type Props struct {
 	// Path is the prefix every key of the database is written under.
@@ -66,7 +66,7 @@ type Props struct {
 	Schemas []Schema
 }
 
-// Error mirrors the embedded library's api.Error — one failure reported
+// Error mirrors the concrete library's api.Error — one failure reported
 // by a database operation. A nil *Error means success.
 type Error struct {
 	// Type is one of KeyConflict, NotFound, MissingField, InvalidField,
@@ -80,10 +80,10 @@ type Error struct {
 	Message string
 }
 
-// SchemaItem mirrors the embedded library's api.SchemaItem — one record
-// of a collection. The embedded library's Deps field is deliberately not
+// SchemaItem mirrors the concrete library's api.SchemaItem — one record
+// of a collection. The concrete library's Deps field is deliberately not
 // copied: the sandbox has no business reading the dependencies the
-// embedded library was wired with.
+// concrete library was wired with.
 type SchemaItem struct {
 	// Items are the schema fields this record's collection declares.
 	Items []Item
@@ -110,7 +110,7 @@ type SchemaItem struct {
 	String func() string
 }
 
-// SchemaInstance mirrors the embedded library's api.SchemaInstance — one
+// SchemaInstance mirrors the concrete library's api.SchemaInstance — one
 // collection of records.
 type SchemaInstance struct {
 	// Items are the fields each record of the collection can hold.
@@ -128,9 +128,9 @@ type SchemaInstance struct {
 	List func(position int, chunk int) ([]SchemaItem, *Error)
 }
 
-// KeepDatabase mirrors the embedded library's api.KeepDatabase — a
+// DatabaseHandle mirrors the concrete library's api database-handle type — a
 // database bound to a Props description.
-type KeepDatabase struct {
+type DatabaseHandle struct {
 	// Props is the description the database was created from.
 	Props Props
 	// GetSchema returns the collection with the given name. ok is false
@@ -138,14 +138,14 @@ type KeepDatabase struct {
 	GetSchema func(name string) (SchemaInstance, bool)
 }
 
-// Lib mirrors the embedded Keep library's api.Lib — a schema database over
-// an injected single-key storage backend. It is injected whole as the
-// Deps.KeepLib field — the same mechanic as requestdeps.Lib — and the
-// adapter, which lives outside the sandbox, fills it over the embedded Keep
+// Lib mirrors the concrete schema-database library's api.Lib — a schema
+// database over an injected single-key storage backend. It is injected whole
+// as the Deps.DatabaseLib field — the same mechanic as requestdeps.Lib — and
+// the adapter, which lives outside the sandbox, fills it over the concrete
 // library. A database is rooted at Props.Path, so no per-base-path
 // constructor is needed.
 type Lib struct {
 	// NewDatabase creates a database from a Props description, rooted at
 	// Props.Path.
-	NewDatabase func(props Props) KeepDatabase
+	NewDatabase func(props Props) DatabaseHandle
 }

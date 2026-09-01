@@ -1,7 +1,7 @@
-package keepdeps
+package dbdeps
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/keepdeps"
+	dbdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/dbdeps"
 
 	keepadapter "github.com/MateusMoutinhoOrg/Keep/adapters/standard"
 	keeplib "github.com/MateusMoutinhoOrg/Keep/sandbox"
@@ -12,7 +12,7 @@ import (
 // embedded Keep library's own type, recursing into nested (Database)
 // fields. The constants of both sides carry the same values, so Type
 // crosses over unmapped.
-func toKeepItems(items []keepdeps.Item) []keepapi.Item {
+func toKeepItems(items []dbdeps.Item) []keepapi.Item {
 	if items == nil {
 		return nil
 	}
@@ -30,7 +30,7 @@ func toKeepItems(items []keepdeps.Item) []keepapi.Item {
 
 // toKeepProps converts a database description from the sandbox's copy into
 // the embedded Keep library's own type.
-func toKeepProps(props keepdeps.Props) keepapi.Props {
+func toKeepProps(props dbdeps.Props) keepapi.Props {
 	schemas := make([]keepapi.Schema, 0, len(props.Schemas))
 	for _, schema := range props.Schemas {
 		schemas = append(schemas, keepapi.Schema{
@@ -43,13 +43,13 @@ func toKeepProps(props keepdeps.Props) keepapi.Props {
 
 // fromKeepItems converts schema fields the embedded Keep library handed
 // back into the sandbox's copy, recursing into nested fields.
-func fromKeepItems(items []keepapi.Item) []keepdeps.Item {
+func fromKeepItems(items []keepapi.Item) []dbdeps.Item {
 	if items == nil {
 		return nil
 	}
-	converted := make([]keepdeps.Item, 0, len(items))
+	converted := make([]dbdeps.Item, 0, len(items))
 	for _, item := range items {
-		converted = append(converted, keepdeps.Item{
+		converted = append(converted, dbdeps.Item{
 			Name:     item.Name,
 			Type:     item.Type,
 			Required: item.Required,
@@ -62,11 +62,11 @@ func fromKeepItems(items []keepapi.Item) []keepdeps.Item {
 // fromKeepError converts a failure the embedded Keep library reported into
 // the sandbox's copy. A nil error stays nil — that is how success is
 // reported on both sides.
-func fromKeepError(err *keepapi.Error) *keepdeps.Error {
+func fromKeepError(err *keepapi.Error) *dbdeps.Error {
 	if err == nil {
 		return nil
 	}
-	return &keepdeps.Error{
+	return &dbdeps.Error{
 		Type:     err.Type,
 		Key:      err.Key,
 		KeyValue: err.KeyValue,
@@ -77,26 +77,26 @@ func fromKeepError(err *keepapi.Error) *keepdeps.Error {
 // fromKeepSchemaItem converts one record the embedded Keep library handed
 // back into the sandbox's copy, wrapping every field that returns another
 // api struct so nothing of the embedded library reaches the sandbox.
-func fromKeepSchemaItem(item keepapi.SchemaItem) keepdeps.SchemaItem {
-	return keepdeps.SchemaItem{
+func fromKeepSchemaItem(item keepapi.SchemaItem) dbdeps.SchemaItem {
+	return dbdeps.SchemaItem{
 		Items:  fromKeepItems(item.Items),
 		Prefix: item.Prefix,
 		Id:     item.Id,
-		Get: func(fieldName string) (any, *keepdeps.Error) {
+		Get: func(fieldName string) (any, *dbdeps.Error) {
 			value, err := item.Get(fieldName)
 			return value, fromKeepError(err)
 		},
-		Update: func(fieldName string, value any) *keepdeps.Error {
+		Update: func(fieldName string, value any) *dbdeps.Error {
 			return fromKeepError(item.Update(fieldName, value))
 		},
-		Remove: func() *keepdeps.Error {
+		Remove: func() *dbdeps.Error {
 			return fromKeepError(item.Remove())
 		},
 		CheckKeysPresence: item.CheckKeysPresence,
-		ListAll: func(fieldName string) []keepdeps.SchemaItem {
+		ListAll: func(fieldName string) []dbdeps.SchemaItem {
 			return fromKeepSchemaItems(item.ListAll(fieldName))
 		},
-		NewSubItem: func(fieldName string, fields map[string]any) (keepdeps.SchemaItem, *keepdeps.Error) {
+		NewSubItem: func(fieldName string, fields map[string]any) (dbdeps.SchemaItem, *dbdeps.Error) {
 			sub, err := item.NewSubItem(fieldName, fields)
 			return fromKeepSchemaItem(sub), fromKeepError(err)
 		},
@@ -105,11 +105,11 @@ func fromKeepSchemaItem(item keepapi.SchemaItem) keepdeps.SchemaItem {
 }
 
 // fromKeepSchemaItems converts a slice of records into the sandbox's copy.
-func fromKeepSchemaItems(items []keepapi.SchemaItem) []keepdeps.SchemaItem {
+func fromKeepSchemaItems(items []keepapi.SchemaItem) []dbdeps.SchemaItem {
 	if items == nil {
 		return nil
 	}
-	converted := make([]keepdeps.SchemaItem, 0, len(items))
+	converted := make([]dbdeps.SchemaItem, 0, len(items))
 	for _, item := range items {
 		converted = append(converted, fromKeepSchemaItem(item))
 	}
@@ -118,26 +118,26 @@ func fromKeepSchemaItems(items []keepapi.SchemaItem) []keepdeps.SchemaItem {
 
 // fromKeepSchemaInstance converts one collection the embedded Keep library
 // handed back into the sandbox's copy.
-func fromKeepSchemaInstance(instance keepapi.SchemaInstance) keepdeps.SchemaInstance {
-	return keepdeps.SchemaInstance{
+func fromKeepSchemaInstance(instance keepapi.SchemaInstance) dbdeps.SchemaInstance {
+	return dbdeps.SchemaInstance{
 		Items:  fromKeepItems(instance.Items),
 		Prefix: instance.Prefix,
-		NewItem: func(fields map[string]any) (keepdeps.SchemaItem, *keepdeps.Error) {
+		NewItem: func(fields map[string]any) (dbdeps.SchemaItem, *dbdeps.Error) {
 			item, err := instance.NewItem(fields)
 			return fromKeepSchemaItem(item), fromKeepError(err)
 		},
-		FindByKey: func(key string, keyValue any) (keepdeps.SchemaItem, bool) {
+		FindByKey: func(key string, keyValue any) (dbdeps.SchemaItem, bool) {
 			item, found := instance.FindByKey(key, keyValue)
 			if !found {
-				return keepdeps.SchemaItem{}, false
+				return dbdeps.SchemaItem{}, false
 			}
 			return fromKeepSchemaItem(item), true
 		},
-		ListAll: func() ([]keepdeps.SchemaItem, *keepdeps.Error) {
+		ListAll: func() ([]dbdeps.SchemaItem, *dbdeps.Error) {
 			items, err := instance.ListAll()
 			return fromKeepSchemaItems(items), fromKeepError(err)
 		},
-		List: func(position int, chunk int) ([]keepdeps.SchemaItem, *keepdeps.Error) {
+		List: func(position int, chunk int) ([]dbdeps.SchemaItem, *dbdeps.Error) {
 			items, err := instance.List(position, chunk)
 			return fromKeepSchemaItems(items), fromKeepError(err)
 		},
@@ -146,16 +146,16 @@ func fromKeepSchemaInstance(instance keepapi.SchemaInstance) keepdeps.SchemaInst
 
 // fromKeepDatabase converts one database the embedded Keep library handed
 // back into the sandbox's copy.
-func fromKeepDatabase(database keepapi.KeepDatabase) keepdeps.KeepDatabase {
-	return keepdeps.KeepDatabase{
-		Props: keepdeps.Props{
+func fromKeepDatabase(database keepapi.KeepDatabase) dbdeps.DatabaseHandle {
+	return dbdeps.DatabaseHandle{
+		Props: dbdeps.Props{
 			Path:    database.Props.Path,
 			Schemas: fromKeepSchemas(database.Props.Schemas),
 		},
-		GetSchema: func(name string) (keepdeps.SchemaInstance, bool) {
+		GetSchema: func(name string) (dbdeps.SchemaInstance, bool) {
 			instance, found := database.GetSchema(name)
 			if !found {
-				return keepdeps.SchemaInstance{}, false
+				return dbdeps.SchemaInstance{}, false
 			}
 			return fromKeepSchemaInstance(instance), true
 		},
@@ -164,13 +164,13 @@ func fromKeepDatabase(database keepapi.KeepDatabase) keepdeps.KeepDatabase {
 
 // fromKeepSchemas converts the collections of a database description into
 // the sandbox's copy.
-func fromKeepSchemas(schemas []keepapi.Schema) []keepdeps.Schema {
+func fromKeepSchemas(schemas []keepapi.Schema) []dbdeps.Schema {
 	if schemas == nil {
 		return nil
 	}
-	converted := make([]keepdeps.Schema, 0, len(schemas))
+	converted := make([]dbdeps.Schema, 0, len(schemas))
 	for _, schema := range schemas {
-		converted = append(converted, keepdeps.Schema{
+		converted = append(converted, dbdeps.Schema{
 			Name:  schema.Name,
 			Itens: fromKeepItems(schema.Itens),
 		})
@@ -178,13 +178,13 @@ func fromKeepSchemas(schemas []keepapi.Schema) []keepdeps.Schema {
 	return converted
 }
 
-// NewKeepLib returns the value that fills deps.Deps.KeepLib: the embedded
-// Keep schema-database library, copied onto the sandbox's local keepdeps.Lib.
+// NewDatabaseLib returns the value that fills deps.Deps.DatabaseLib: the Keep
+// schema-database library, copied onto the sandbox's local dbdeps.Lib.
 // Each database is wired with Keep's own filesystem adapter rooted at its
 // Props.Path, so the library itself needs no base directory.
-func NewKeepLib() keepdeps.Lib {
-	return keepdeps.Lib{
-		NewDatabase: func(props keepdeps.Props) keepdeps.KeepDatabase {
+func NewDatabaseLib() dbdeps.Lib {
+	return dbdeps.Lib{
+		NewDatabase: func(props dbdeps.Props) dbdeps.DatabaseHandle {
 			inner := keeplib.New(keepadapter.NewWithBase(props.Path))
 			return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))
 		},

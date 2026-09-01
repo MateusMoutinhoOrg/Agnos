@@ -1,7 +1,7 @@
 package requestdeps
 
 // This package is the sandbox's *copy* of the api an HTTP client library
-// exposes — the same mechanic as verbdeps, keepdeps, embeddeps and iodeps,
+// exposes — the same mechanic as argvdeps, dbdeps, embeddeps and iodeps,
 // for the same reason: opening a socket is an OS-bound effect, so `net/http`
 // may not appear inside the sandbox. The contract is restated here, and the
 // adapter — which lives outside the sandbox — is what fills it.

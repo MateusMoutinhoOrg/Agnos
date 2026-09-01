@@ -5,7 +5,7 @@ import (
 )
 
 // This package is the sandbox's *copy* of the api the process runtime
-// exposes — the same mechanic as verbdeps, keepdeps, embeddeps, iodeps and
+// exposes — the same mechanic as argvdeps, dbdeps, embeddeps, iodeps and
 // requestdeps, for the same reason: reading the clock and writing to stdout
 // or stderr are OS-bound effects, so `time`, `fmt` and `os` may not appear
 // inside the sandbox. The contract is restated here, and the adapter —

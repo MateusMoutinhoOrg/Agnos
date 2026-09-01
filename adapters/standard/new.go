@@ -6,12 +6,12 @@ import (
 	"os"
 	"time"
 
+	argvlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/argvdeps"
+	dblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/dbdeps"
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/embeddeps"
 	iolib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/iodeps"
-	keeplib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/keepdeps"
 	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/requestdeps"
 	serializelib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/serializebles"
-	verblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/standard/deps/verbdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
@@ -60,8 +60,8 @@ func New() deps.Deps {
 	deps.Std.Errorf = func(format string, a ...any) error {
 		return Errorf(format, a...)
 	}
-	deps.VerbLib.New = verblib.NewVerbLib
-	deps.KeepLib = keeplib.NewKeepLib()
+	deps.ArgvLib.New = argvlib.NewArgvLib
+	deps.DatabaseLib = dblib.NewDatabaseLib()
 	deps.EmbedDeps = embeddeps.NewEmbedDeps()
 	deps.IoLib = iolib.NewIoLib()
 	deps.RequestLib.NewRequest = requestlib.NewRequestFactory()

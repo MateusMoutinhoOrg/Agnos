@@ -1,7 +1,7 @@
 package embeddeps
 
 // This package is the sandbox's *copy* of the api an embedded-asset library
-// exposes — the same mechanic as verbdeps and keepdeps, for the same reason:
+// exposes — the same mechanic as argvdeps and dbdeps, for the same reason:
 // reading a file is an OS-bound effect, and compiling one into a binary needs
 // the `embed` directive, so neither may appear inside the sandbox. The
 // contract is restated here, and the adapter — which lives outside the

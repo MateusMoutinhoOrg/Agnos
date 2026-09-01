@@ -1,28 +1,28 @@
-package verbdeps
+package argvdeps
 
 import "time"
 
-// Lib is the argv-parser constructor injected whole as the Deps.VerbLib
+// Lib is the argv-parser constructor injected whole as the Deps.ArgvLib
 // field — the same mechanic as requestdeps.Lib. A parser is bound to one
 // argument vector, so it is created per call rather than injected once: what
 // the sandbox holds is this one-field struct, and the adapter — which lives
-// outside the sandbox — fills New over the embedded Verb library.
+// outside the sandbox — fills New over a concrete argv-parser library.
 type Lib struct {
 	// New builds an argv parser bound to the given arguments.
 	New func(args []string) Parser
 }
 
-// This package is this library's *copy* of the embedded Verb argv-parser
-// library's public api. The sandbox may not import the embedded library —
-// that would be a third-party import — so it restates the shape it needs
-// here, field for field. The adapter, which lives outside the sandbox, is
-// what fills these structs from the real library.
+// This package is the sandbox's *copy* of the api an argv-parser library
+// exposes. The sandbox may not import the concrete library — that would be a
+// third-party import — so it restates the shape it needs here, field for
+// field. The adapter, which lives outside the sandbox, is what fills these
+// structs from the real library.
 //
 // Copying is cheap precisely because the embedded library exposes structs
 // of function fields instead of interfaces: an adapter assigns the real
 // library's fields straight into the copy.
 
-// Parser mirrors the embedded Verb library's api.Lib — an argument-vector
+// Parser mirrors the concrete argv-parser library's api.Lib — an argument-vector
 // (argv) parser. Every argument starts out unread; calling any Get* field
 // or IsPresent marks the argument(s) it matched as used, so whatever is
 // left over in Args is exactly the positional arguments nothing asked for.

@@ -1,13 +1,13 @@
 package deps
 
 import (
+	argvdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
+	dbdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/dbdeps"
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/embeddeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
-	keepdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/keepdeps"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
 	std "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
-	verbdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/verbdeps"
 )
 
 type Deps struct {
@@ -19,9 +19,9 @@ type Deps struct {
 
 	SerializeLib serializibles.Lib
 
-	VerbLib verbdeps.Lib
+	ArgvLib argvdeps.Lib
 
-	KeepLib keepdeps.Lib
+	DatabaseLib dbdeps.Lib
 
 	RequestLib requestdeps.Lib
 }

@@ -1,13 +1,13 @@
 package iodeps
 
 // This package is the sandbox's *copy* of the api a filesystem library
-// exposes — the same mechanic as verbdeps, keepdeps and embeddeps, for the
+// exposes — the same mechanic as argvdeps, dbdeps and embeddeps, for the
 // same reason: touching a file is an OS-bound effect, so `os` and
 // `path/filepath` may not appear inside the sandbox. The contract is restated
 // here, and the adapter — which lives outside the sandbox — is what fills it.
 //
 // The tracker in sandbox/ never calls it: every record it keeps is persisted
-// through Deps.KeepLib. It is carried as a standing capability of the
+// through Deps.DatabaseLib. It is carried as a standing capability of the
 // template, filled by the standard adapter over `os` and `path/filepath`, so
 // a derived library that must touch the filesystem directly finds the
 // contract already declared and already wired. See the Deps.IoLib field.

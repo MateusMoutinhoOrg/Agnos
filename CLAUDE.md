@@ -72,15 +72,15 @@ agnos help | version
 - **`sandbox/`** — the closed core. It performs **no OS effects directly**. Everything
   external (filesystem, time, stdout/stderr, HTTP, embedded assets, YAML) arrives through
   `sandbox/deps.Deps`, a struct of **only** sub-contract structs — no bare function
-  fields (`std`, `iodeps`, `verbdeps`, `keepdeps`, `embeddeps`, `requestdeps`,
+  fields (`std`, `iodeps`, `argvdeps`, `dbdeps`, `embeddeps`, `requestdeps`,
   `serializebles`). Each sub-contract is *restated* inside `sandbox/deps/<x>/` precisely
   because its real implementation must live outside the sandbox. The loose runtime
   functions (`Now`, `Printf`, `Error`, `Errorf`) are gathered into `sandbox/deps/std.Lib`,
   injected as `Deps.Std`. Sub-contracts whose real object is created per call expose that
   constructor as a field on their own `Lib` struct — `requestdeps.Lib.NewRequest(url)`,
-  `keepdeps.Lib.NewDatabase(props)` (rooted at `props.Path`), `verbdeps.Lib.New(args)`
-  (which hands back a `verbdeps.Parser` bound to that argv) — injected whole as
-  `Deps.RequestLib` / `Deps.KeepLib` / `Deps.VerbLib`, exactly like `IoLib` and
+  `dbdeps.Lib.NewDatabase(props)` (rooted at `props.Path`), `argvdeps.Lib.New(args)`
+  (which hands back an `argvdeps.Parser` bound to that argv) — injected whole as
+  `Deps.RequestLib` / `Deps.DatabaseLib` / `Deps.ArgvLib`, exactly like `IoLib` and
   `SerializeLib`. There is no separate `Factory` struct: `deps.Deps` references each
   `<x>.Lib` directly.
 - **`adapters/standard/`** — fills `Deps` with real implementations (`standard.New()`).
@@ -99,7 +99,7 @@ agnos help | version
 - **`binds/cli.go`** registers `api.CliCommand` values from `sandbox/internal/commands/<name>/`
   and sets `Cli.CliMain` to `sandbox/internal/cli.CliMain` — a declarative parser: each
   command declares `Args`/`Flags` (`api.CliArg`/`api.Cliflag`), the parser collects and
-  validates them from the argv via `verbdeps`, then calls `Handler(deps, entries)` which
+  validates them from the argv via `argvdeps`, then calls `Handler(deps, entries)` which
   returns an exit code (`api.ExitOk` / `ExitUsage` / `ExitFailure`).
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
   (`Build`, `Start`, `EnableDeps`, `RemoveDeps`), each from `sandbox/internal/actions/<name>/`.
