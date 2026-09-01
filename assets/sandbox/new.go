@@ -1,7 +1,7 @@
 package sandbox
 
 import (
-	api "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
+	api "{{.Module}}/sandbox/api"
 )
 
 func New() *api.Sandbox {
