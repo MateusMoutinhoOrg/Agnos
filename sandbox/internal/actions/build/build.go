@@ -2,15 +2,13 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func Build(deps *deps.Deps, path string) error {
+func Build(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	deps.Printf("build started with path %s \n", path)
 
-	io := smartio.New(deps, path, config.ProjectName)
 	//Creating the basic dir struct
 	io.CreateDir("sandbox/api")
 	io.CreateDir("sandbox/internal")
@@ -30,11 +28,6 @@ func Build(deps *deps.Deps, path string) error {
 	}
 
 	err = Render_sandbox_api_sandbox_go(deps, io)
-	if err != nil {
-		return err
-	}
-
-	err = io.Persist()
 	if err != nil {
 		return err
 	}

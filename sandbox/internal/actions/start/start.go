@@ -16,9 +16,7 @@ import (
 // goVersion is the go directive written into a generated go.mod.
 const goVersion = "1.25.0"
 
-func Start(deps *deps.Deps, props api.StartProps) error {
-
-	io := smartio.New(deps, props.Path, props.ProjectName)
+func Start(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) error {
 
 	write := io.WriteFile
 	if props.Force {
@@ -65,11 +63,7 @@ func Start(deps *deps.Deps, props api.StartProps) error {
 		}
 	}
 
-	persist_error := io.Persist()
-	if persist_error != nil {
-		return persist_error
-	}
-	build.Build(deps, props.Path)
+	build.Build(deps, io, props.Path)
 	deps.Printf("started with path %s \n", props.Path)
 	return nil
 }
