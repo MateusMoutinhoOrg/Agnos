@@ -5,7 +5,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
 )
 
 func Build(deps *deps.Deps, path string) error {
@@ -25,11 +24,12 @@ func Build(deps *deps.Deps, path string) error {
 	if err != nil {
 		return err
 	}
-	vars := map[string]string{
-		"Module": module_conf.Module,
+	err = Render_sandbox_new_go(deps, io, module_conf.Module)
+	if err != nil {
+		return err
 	}
 
-	err = utils.RenderTemplateToDest(deps, io, "sandbox/new.go", vars, "sandbox/new.go")
+	err = Render_sandbox_api_sandbox_go(deps, io)
 	if err != nil {
 		return err
 	}
