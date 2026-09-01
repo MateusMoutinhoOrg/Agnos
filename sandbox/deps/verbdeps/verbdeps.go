@@ -2,14 +2,14 @@ package verbdeps
 
 import "time"
 
-// Factory is the argv-parser constructor injected whole as the Deps.VerbLib
-// field — the same mechanic as iodeps.Lib. A parser is created per call
-// rather than injected once, so what the sandbox holds is this one-field
-// struct; the adapter, which lives outside the sandbox, fills New over the
-// embedded Verb library.
-type Factory struct {
+// Lib is the argv-parser constructor injected whole as the Deps.VerbLib
+// field — the same mechanic as requestdeps.Lib. A parser is bound to one
+// argument vector, so it is created per call rather than injected once: what
+// the sandbox holds is this one-field struct, and the adapter — which lives
+// outside the sandbox — fills New over the embedded Verb library.
+type Lib struct {
 	// New builds an argv parser bound to the given arguments.
-	New func(args []string) Lib
+	New func(args []string) Parser
 }
 
 // This package is this library's *copy* of the embedded Verb argv-parser
@@ -22,7 +22,7 @@ type Factory struct {
 // of function fields instead of interfaces: an adapter assigns the real
 // library's fields straight into the copy.
 
-// Lib mirrors the embedded Verb library's api.Lib — an argument-vector
+// Parser mirrors the embedded Verb library's api.Lib — an argument-vector
 // (argv) parser. Every argument starts out unread; calling any Get* field
 // or IsPresent marks the argument(s) it matched as used, so whatever is
 // left over in Args is exactly the positional arguments nothing asked for.
@@ -33,7 +33,7 @@ type Factory struct {
 // supported value type: String (raw text), Int (base-10), Double (float64),
 // and Timestamp (RFC 3339). A typed getter marks its match as used even
 // when parsing then fails.
-type Lib struct {
+type Parser struct {
 	// Args is the argument vector being parsed. Every index-based field
 	// refers to positions in this slice. Treat it as read-only: mutating it
 	// leaves Used out of sync.

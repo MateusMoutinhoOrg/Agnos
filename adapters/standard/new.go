@@ -61,7 +61,7 @@ func New() deps.Deps {
 		return Errorf(format, a...)
 	}
 	deps.VerbLib.New = verblib.NewVerbLib
-	deps.KeepLib.New = keeplib.NewKeepLib
+	deps.KeepLib = keeplib.NewKeepLib()
 	deps.EmbedDeps = embeddeps.NewEmbedDeps()
 	deps.IoLib = iolib.NewIoLib()
 	deps.RequestLib.NewRequest = requestlib.NewRequestFactory()

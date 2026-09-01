@@ -76,10 +76,13 @@ agnos help | version
   `serializebles`). Each sub-contract is *restated* inside `sandbox/deps/<x>/` precisely
   because its real implementation must live outside the sandbox. The loose runtime
   functions (`Now`, `Printf`, `Error`, `Errorf`) are gathered into `sandbox/deps/std.Lib`,
-  injected as `Deps.Std`. Each per-call constructor lives in its own sub-contract package
-  as a one-field `Factory` struct — `verbdeps.Factory.New`, `keepdeps.Factory.New`,
-  `requestdeps.Factory.New` — injected as `Deps.VerbLib` / `Deps.KeepLib` / `Deps.RequestLib`,
-  exactly like `IoLib` and `SerializeLib`.
+  injected as `Deps.Std`. Sub-contracts whose real object is created per call expose that
+  constructor as a field on their own `Lib` struct — `requestdeps.Lib.NewRequest(url)`,
+  `keepdeps.Lib.NewDatabase(props)` (rooted at `props.Path`), `verbdeps.Lib.New(args)`
+  (which hands back a `verbdeps.Parser` bound to that argv) — injected whole as
+  `Deps.RequestLib` / `Deps.KeepLib` / `Deps.VerbLib`, exactly like `IoLib` and
+  `SerializeLib`. There is no separate `Factory` struct: `deps.Deps` references each
+  `<x>.Lib` directly.
 - **`adapters/standard/`** — fills `Deps` with real implementations (`standard.New()`).
   The only place `os`, `embed`, `net/http` etc. are touched.
 - **`assets/`** — files embedded into the binary via `//go:embed all:*` in `assets/asset.go`.

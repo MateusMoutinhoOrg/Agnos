@@ -138,7 +138,7 @@ func printUsage(deps *deps.Deps, sandbox *api.Sandbox) {
 // collectBoolFlag checks whether a boolean flag is present. If required and
 // absent, it returns an error. The flag's Values slice is filled with one
 // cliValue holding the result.
-func collectBoolFlag(flag *api.Cliflag, verb verbdeps.Lib) error {
+func collectBoolFlag(flag *api.Cliflag, verb verbdeps.Parser) error {
 	present := verb.IsPresent(flag.ValidIdentifiers)
 	if flag.RequiredPresence && !present {
 		return fmt.Errorf("required flag '%s' not provided", flag.Id)
@@ -151,7 +151,7 @@ func collectBoolFlag(flag *api.Cliflag, verb verbdeps.Lib) error {
 // collectValueFlag reads the occurrences of a non-bool flag from the argument
 // vector. It validates that the number of provided values falls within
 // [RequiredMinSize, RequiredMaxSize] and that required flags have at least one value.
-func collectValueFlag(flag *api.Cliflag, verb verbdeps.Lib) error {
+func collectValueFlag(flag *api.Cliflag, verb verbdeps.Parser) error {
 	size := verb.GetOptionsSize(flag.ValidIdentifiers)
 
 	if flag.RequiredPresence && size == 0 {
@@ -189,7 +189,7 @@ func collectValueFlag(flag *api.Cliflag, verb verbdeps.Lib) error {
 
 // readFlagValue reads one flag occurrence and returns it as a cliValue of the
 // appropriate type.
-func readFlagValue(flag *api.Cliflag, verb verbdeps.Lib, occurrence int) (api.CliValue, error) {
+func readFlagValue(flag *api.Cliflag, verb verbdeps.Parser, occurrence int) (api.CliValue, error) {
 	switch flag.Type {
 	case api.CliTypeInt:
 		v, err := verb.GetIntOption(flag.ValidIdentifiers, occurrence)
@@ -214,7 +214,7 @@ func readFlagValue(flag *api.Cliflag, verb verbdeps.Lib, occurrence int) (api.Cl
 
 // collectArg reads a positional arg from the unused portion of the argument
 // vector (via GetNext*Arg). Required args that cannot be read produce an error.
-func collectArg(arg *api.CliArg, verb verbdeps.Lib) error {
+func collectArg(arg *api.CliArg, verb verbdeps.Parser) error {
 	minSize := arg.RequiredMinSize
 	maxSize := arg.RequiredMaxSize
 	if maxSize <= 0 {
@@ -247,7 +247,7 @@ func collectArg(arg *api.CliArg, verb verbdeps.Lib) error {
 }
 
 // readArgValue reads one positional value from the next unused argv slot.
-func readArgValue(arg *api.CliArg, verb verbdeps.Lib) (api.CliValue, error) {
+func readArgValue(arg *api.CliArg, verb verbdeps.Parser) (api.CliValue, error) {
 	switch arg.RequiredType {
 	case api.CliTypeInt:
 		v, err := verb.GetNextIntArg()

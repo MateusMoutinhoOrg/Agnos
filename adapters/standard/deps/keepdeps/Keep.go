@@ -179,14 +179,13 @@ func fromKeepSchemas(schemas []keepapi.Schema) []keepdeps.Schema {
 }
 
 // NewKeepLib returns the value that fills deps.Deps.KeepLib: the embedded
-// Keep schema-database library, wired with Keep's own filesystem adapter over
-// the adapter's base directory, copied onto the sandbox's local keepdeps.Lib.
-// It returns a value rather than a closure because the field is a struct —
-// see the Factories specification.
-func NewKeepLib(keepBasePath string) keepdeps.Lib {
-	inner := keeplib.New(keepadapter.NewWithBase(keepBasePath))
+// Keep schema-database library, copied onto the sandbox's local keepdeps.Lib.
+// Each database is wired with Keep's own filesystem adapter rooted at its
+// Props.Path, so the library itself needs no base directory.
+func NewKeepLib() keepdeps.Lib {
 	return keepdeps.Lib{
 		NewDatabase: func(props keepdeps.Props) keepdeps.KeepDatabase {
+			inner := keeplib.New(keepadapter.NewWithBase(props.Path))
 			return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))
 		},
 	}

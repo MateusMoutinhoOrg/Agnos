@@ -19,9 +19,9 @@ type Deps struct {
 
 	SerializeLib serializibles.Lib
 
-	VerbLib verbdeps.Factory
+	VerbLib verbdeps.Lib
 
-	KeepLib keepdeps.Factory
+	KeepLib keepdeps.Lib
 
 	RequestLib requestdeps.Lib
 }

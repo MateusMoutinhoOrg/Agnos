@@ -5,14 +5,12 @@ import (
 	verblib "github.com/MateusMoutinhoOrg/Verb/sandbox"
 )
 
-// NewVerbLib returns the value that fills deps.Deps.VerbLib: the embedded
-// Verb argv-parser library, initialized over the adapter's argument vector,
-// copied field by field onto the sandbox's local verbdeps.Lib. It returns a
-// value rather than a closure because the field is a struct — see the
-// Factories specification.
-func NewVerbLib(args []string) verbdeps.Lib {
+// NewVerbLib fills deps.Deps.VerbLib.New: the embedded Verb argv-parser
+// library, initialized over the given argument vector and copied field by
+// field onto the sandbox's local verbdeps.Parser.
+func NewVerbLib(args []string) verbdeps.Parser {
 	inner := verblib.New(args)
-	return verbdeps.Lib{
+	return verbdeps.Parser{
 		Args: inner.Args,
 		Used: inner.Used,
 
