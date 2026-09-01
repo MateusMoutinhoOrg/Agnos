@@ -31,6 +31,13 @@ func Build(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	if err != nil {
 		return err
 	}
+	if io.IsDir("sandbox/deps") {
+		err = Render_sandbox_deps_deps_go(deps, io, module_conf.Module)
+		if err != nil {
+			return err
+		}
+
+	}
 
 	deps.Printf("successfully rendered template")
 	return nil
