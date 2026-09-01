@@ -7,5 +7,5 @@ func RemoveDir(deps *deps.Deps, io *SmartIO, path string) {
 	if err != nil {
 		return
 	}
-	deps.IoLib.RemoveDir(p)
+	io.PendingRemoveDirs = append(io.PendingRemoveDirs, p)
 }

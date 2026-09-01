@@ -10,6 +10,9 @@ type SmartIO struct {
 	Replacers    *pathreplacerconf.PathReplacerConf
 	Transactions map[string][]byte
 
+	PendingCreateDirs []string
+	PendingRemoveDirs []string
+
 	ReadFile             func(path string) ([]byte, error)
 	WriteFile            func(path string, content []byte) error
 	WriteFileOverwrite   func(path string, content []byte) error

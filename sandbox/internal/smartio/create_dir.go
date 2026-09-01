@@ -7,5 +7,5 @@ func CreateDir(deps *deps.Deps, io *SmartIO, path string) {
 	if err != nil {
 		return
 	}
-	deps.IoLib.CreateDir(p)
+	io.PendingCreateDirs = append(io.PendingCreateDirs, p)
 }
