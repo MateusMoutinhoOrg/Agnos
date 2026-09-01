@@ -8,8 +8,9 @@ import (
 
 func Render_sandbox_new_go(deps *deps.Deps, io *smartio.SmartIO, module string) error {
 
-	vars := map[string]string{
-		"Module": module,
+	vars := map[string]interface{}{
+		"Module":  module,
+		"HasDeps": smartio.IsDir(deps, io, "sandbox/deps"),
 	}
 	err := utils.RenderTemplateToDest(deps, io, "sandbox/new.go", vars, "sandbox/new.go")
 	if err != nil {
