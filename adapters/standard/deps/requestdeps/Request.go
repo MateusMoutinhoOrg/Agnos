@@ -15,7 +15,7 @@ import (
 // exposes no cancellation, which makes the bound this adapter's job.
 const requestTimeout = 30 * time.Second
 
-// NewRequestFactory returns the value that fills deps.Deps.NewRequest: the implementation
+// NewRequestFactory returns the value that fills deps.Deps.RequestLib.NewRequest: the implementation
 // of the HTTP request dependency using the standard library's net/http package.
 func NewRequestFactory() func(url string) requestdeps.Request {
 	return func(url string) requestdeps.Request {

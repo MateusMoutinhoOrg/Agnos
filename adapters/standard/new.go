@@ -64,7 +64,7 @@ func New() deps.Deps {
 	deps.KeepLib.New = keeplib.NewKeepLib
 	deps.EmbedDeps = embeddeps.NewEmbedDeps()
 	deps.IoLib = iolib.NewIoLib()
-	deps.RequestLib.New = requestlib.NewRequestFactory()
+	deps.RequestLib.NewRequest = requestlib.NewRequestFactory()
 	deps.SerializeLib = serializelib.NewSerializeLib()
 	return deps
 }

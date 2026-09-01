@@ -23,5 +23,5 @@ type Deps struct {
 
 	KeepLib keepdeps.Factory
 
-	RequestLib requestdeps.Factory
+	RequestLib requestdeps.Lib
 }
