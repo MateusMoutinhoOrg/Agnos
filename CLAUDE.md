@@ -14,6 +14,30 @@ templates according to the project's `*Config/` files. See `AGENTS.md` for the i
 sample project) are reference material, not part of the build. `main` is a committed
 prebuilt binary.
 
+## North star: self-hosting / bootstrap
+
+The long-term goal is for **`agnos` to build `agnos` itself** — this repo becomes one of
+the projects that `agnos start` scaffolds and `agnos build` regenerates. Treat that as the
+design constraint behind every change, even while it is still aspirational:
+
+- **Everything is a pattern.** Any new file, package, or operation must follow an existing
+  repeatable shape (see the "fixed shape" of `parsables/`, the two-layer
+  command/action split, the `NewCommand` contract). If no pattern fits, first define the
+  pattern — document it here — *then* implement against it. Never add a one-off.
+- **Uniformity over cleverness.** When two packages do a similar job they should be
+  structurally identical (same filenames, same function names, same ordering). A reader or
+  a template renderer should be able to predict a package's contents from its role.
+- **Anything hand-written today is a template tomorrow.** Prefer mechanical, regular code
+  that a Go `text/template` in `assets/sandbox/**` could emit. Avoid constructs that would
+  be awkward to generate (irregular formatting, ad-hoc special cases, hidden state).
+- **The sandbox rule is absolute.** No OS effects outside `adapters/`. Self-hosting depends
+  on the core staying pure so it can be rendered and re-rendered safely.
+- **Keep this file and `AGENTS.md` current.** They are the harness's spec. When you
+  establish or change a pattern, update the relevant section in the same change.
+
+This is a harness: consistency, predictability, and documented conventions matter more than
+any individual feature.
+
 ## Commands
 
 ```bash
