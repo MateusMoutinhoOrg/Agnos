@@ -6,5 +6,7 @@ PROMPT.md
 
 PROMPT.md
 Prompttree
+local_test/
 release/
 local_install.sh
+local_test.sh
