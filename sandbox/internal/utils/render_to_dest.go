@@ -2,16 +2,17 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func RenderTemplateToDest(deps *deps.Deps, template_path string, vars interface{}, dest_path string) error {
+func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path string, vars interface{}, dest_path string) error {
 
 	content, err := deps.EmbedDeps.RenderTemplate(template_path, vars)
 	if err != nil {
 		return err
 	}
 
-	err = deps.IoLib.WriteFile(dest_path, content)
+	err = io.WriteFile(dest_path, content)
 	if err != nil {
 		return err
 	}
