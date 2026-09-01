@@ -69,7 +69,7 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 		}
 	}
 
-	p := deps.Printf
+	p := deps.Std.Printf
 	p("\n")
 	p("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, chosen, reset)
 	p("  %sRun '%s help' to see available commands.%s\n", dim, config.ProjectName, reset)
@@ -82,7 +82,7 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 // ═════════════════════════════════════════════════════════════════════════════
 
 func printGeneralHelp(deps *deps.Deps, sandbox *api.Sandbox) {
-	p := deps.Printf
+	p := deps.Std.Printf
 
 	// ── Banner ───────────────────────────────────────────────────────
 	printBanner(deps, sandbox)
@@ -186,7 +186,7 @@ func printGeneralHelp(deps *deps.Deps, sandbox *api.Sandbox) {
 // ═════════════════════════════════════════════════════════════════════════════
 
 func printCommandHelp(deps *deps.Deps, sandbox *api.Sandbox, cmd *api.CliCommand) {
-	p := deps.Printf
+	p := deps.Std.Printf
 
 	name := cmd.ValidStartIdentifiers[0]
 
@@ -356,7 +356,7 @@ func printCommandHelp(deps *deps.Deps, sandbox *api.Sandbox, cmd *api.CliCommand
 
 // printBanner renders the top box with project name and version.
 func printBanner(deps *deps.Deps, sandbox *api.Sandbox) {
-	p := deps.Printf
+	p := deps.Std.Printf
 
 	titleLine := fmt.Sprintf("%s  %s", config.ProjectName, config.Version)
 	boxW := len(titleLine) + 6

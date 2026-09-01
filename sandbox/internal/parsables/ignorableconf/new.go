@@ -7,7 +7,7 @@ import (
 func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
 
 	if content == "" {
-		return nil, deps.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
 	specs, parse_error := deps.SerializeLib.ParseYaml(content)
@@ -16,7 +16,7 @@ func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
 	}
 
 	if !specs.IsArray() {
-		return nil, deps.Errorf("ignore config is not an array")
+		return nil, deps.Std.Errorf("ignore config is not an array")
 	}
 
 	items := &IgnorableConf{
@@ -25,7 +25,7 @@ func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
 
 	size, err := specs.GetArraySize()
 	if err != nil {
-		return nil, deps.Errorf("could not get ignore array size")
+		return nil, deps.Std.Errorf("could not get ignore array size")
 	}
 
 	for i := 0; i < size; i++ {
@@ -36,7 +36,7 @@ func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
 
 		path, str_err := item.GetString()
 		if str_err != nil {
-			return nil, deps.Errorf("ignore item at index %d is not a string", i)
+			return nil, deps.Std.Errorf("ignore item at index %d is not a string", i)
 		}
 
 		items.Paths = append(items.Paths, path)

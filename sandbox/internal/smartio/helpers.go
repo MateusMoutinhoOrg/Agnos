@@ -9,7 +9,7 @@ import (
 func processInputPath(deps *deps.Deps, io *SmartIO, path string) (string, error) {
 	p := io.Replacers.Format(path)
 	if io.Ignore.IsIgnorable(p) {
-		return p, deps.Errorf("path %q is ignorable", p)
+		return p, deps.Std.Errorf("path %q is ignorable", p)
 	}
 	return p, nil
 }

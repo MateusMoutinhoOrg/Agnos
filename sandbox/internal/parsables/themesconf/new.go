@@ -7,7 +7,7 @@ import (
 func New(deps *deps.Deps, content string) (*ThemesConf, error) {
 
 	if content == "" {
-		return nil, deps.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
 	specs, parse_error := deps.SerializeLib.ParseYaml(content)
@@ -17,7 +17,7 @@ func New(deps *deps.Deps, content string) (*ThemesConf, error) {
 	themes_specs := specs
 
 	if !themes_specs.IsArray() {
-		return nil, deps.Errorf("themes_specs is not an array")
+		return nil, deps.Std.Errorf("themes_specs is not an array")
 	}
 
 	themes_conf := &ThemesConf{
@@ -26,7 +26,7 @@ func New(deps *deps.Deps, content string) (*ThemesConf, error) {
 
 	size, err := themes_specs.GetArraySize()
 	if err != nil {
-		return nil, deps.Errorf("could not get themes array size")
+		return nil, deps.Std.Errorf("could not get themes array size")
 	}
 
 	for i := 0; i < size; i++ {
@@ -43,21 +43,21 @@ func New(deps *deps.Deps, content string) (*ThemesConf, error) {
 		if name_item != nil && !name_item.IsNull() {
 			theme.Name, err = name_item.GetString()
 			if err != nil {
-				return nil, deps.Errorf("name is not a string")
+				return nil, deps.Std.Errorf("name is not a string")
 			}
 		}
 
 		if description_item != nil && !description_item.IsNull() {
 			theme.Description, err = description_item.GetString()
 			if err != nil {
-				return nil, deps.Errorf("description is not a string")
+				return nil, deps.Std.Errorf("description is not a string")
 			}
 		}
 
 		if id_item != nil && !id_item.IsNull() {
 			theme.Id, err = id_item.GetString()
 			if err != nil {
-				return nil, deps.Errorf("id is not a string")
+				return nil, deps.Std.Errorf("id is not a string")
 			}
 		}
 

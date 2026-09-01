@@ -71,10 +71,13 @@ agnos help | version
 
 - **`sandbox/`** — the closed core. It performs **no OS effects directly**. Everything
   external (filesystem, time, stdout/stderr, HTTP, embedded assets, YAML) arrives through
-  `sandbox/deps.Deps`, a struct of function fields and sub-contract structs
-  (`iodeps`, `verbdeps`, `keepdeps`, `embeddeps`, `requestdeps`, `serializebles`). Each
-  sub-contract is *restated* inside `sandbox/deps/<x>/` precisely because its real
-  implementation must live outside the sandbox.
+  `sandbox/deps.Deps`, a struct of **only** sub-contract structs — no bare function
+  fields (`std`, `iodeps`, `verbdeps`, `keepdeps`, `embeddeps`, `requestdeps`,
+  `serializebles`). Each sub-contract is *restated* inside `sandbox/deps/<x>/` precisely
+  because its real implementation must live outside the sandbox. The loose runtime
+  functions (`Now`, `Printf`, `Error`, `Errorf`, and the `NewVerbLib`/`NewKeepLib`/
+  `NewRequest` constructors) are gathered into `sandbox/deps/std.Lib`, injected as
+  `Deps.Std`.
 - **`adapters/standard/`** — fills `Deps` with real implementations (`standard.New()`).
   The only place `os`, `embed`, `net/http` etc. are touched.
 - **`assets/`** — files embedded into the binary via `//go:embed all:*` in `assets/asset.go`.

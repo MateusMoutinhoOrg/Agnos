@@ -7,7 +7,7 @@ import (
 )
 
 func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Printf("build started with path %s \n", path)
+	deps.Std.Printf("build started with path %s \n", path)
 
 	//Creating the basic dir struct
 	io.CreateDir("sandbox/api")
@@ -48,6 +48,6 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 
 	}
 
-	deps.Printf("successfully rendered template")
+	deps.Std.Printf("successfully rendered template")
 	return nil
 }

@@ -6,7 +6,7 @@ import (
 )
 
 func RemoveDepsInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Printf("remove-deps started with path %s \n", path)
+	deps.Std.Printf("remove-deps started with path %s \n", path)
 
 	io.RemoveDir("sandbox/deps")
 	io.RemoveDir("adapters")

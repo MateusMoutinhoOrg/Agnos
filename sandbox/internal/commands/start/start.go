@@ -104,7 +104,7 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 
 	if !deps.IoLib.Exist(path + "/go.mod") && module == nil {
 		if !quietFlag.Exist {
-			deps.Error("the module flag (--module) is required when there is no go.mod in the path\n")
+			deps.Std.Error("the module flag (--module) is required when there is no go.mod in the path\n")
 		}
 		return api.ExitFailure
 	}
@@ -117,7 +117,7 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 	})
 
 	if !quietFlag.Exist && start_error != nil {
-		deps.Error(start_error.Error())
+		deps.Std.Error(start_error.Error())
 	}
 	if start_error != nil {
 		return api.ExitFailure

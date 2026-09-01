@@ -7,7 +7,7 @@ import (
 func New(deps *deps.Deps, content string) (*PathReplacerConf, error) {
 
 	if content == "" {
-		return nil, deps.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
 	specs, parse_error := deps.SerializeLib.ParseYaml(content)
@@ -16,7 +16,7 @@ func New(deps *deps.Deps, content string) (*PathReplacerConf, error) {
 	}
 
 	if !specs.IsObject() {
-		return nil, deps.Errorf("paths config is not an object")
+		return nil, deps.Std.Errorf("paths config is not an object")
 	}
 
 	conf := &PathReplacerConf{
@@ -25,7 +25,7 @@ func New(deps *deps.Deps, content string) (*PathReplacerConf, error) {
 
 	keys, keys_err := specs.GetKeys()
 	if keys_err != nil {
-		return nil, deps.Errorf("could not get paths keys")
+		return nil, deps.Std.Errorf("could not get paths keys")
 	}
 
 	for _, key := range keys {
@@ -36,7 +36,7 @@ func New(deps *deps.Deps, content string) (*PathReplacerConf, error) {
 
 		value, str_err := value_item.GetString()
 		if str_err != nil {
-			return nil, deps.Errorf("path replacement for key %q is not a string", key)
+			return nil, deps.Std.Errorf("path replacement for key %q is not a string", key)
 		}
 
 		conf.Entries = append(conf.Entries, PathReplacerEntry{

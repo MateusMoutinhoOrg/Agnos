@@ -62,6 +62,6 @@ func StartInternal(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) e
 		}
 	}
 
-	deps.Printf("started with path %s \n", props.Path)
+	deps.Std.Printf("started with path %s \n", props.Path)
 	return nil
 }

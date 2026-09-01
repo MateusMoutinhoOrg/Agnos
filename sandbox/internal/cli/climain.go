@@ -70,7 +70,7 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 		return api.ExitUsage
 	}
 
-	verb := deps.NewVerbLib(args)
+	verb := deps.Std.NewVerbLib(args)
 
 	action, err := verb.GetNextStringArg()
 	if err != nil {
@@ -91,14 +91,14 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 
 			if flag.Type == api.CliTypeBool {
 				if err := collectBoolFlag(flag, verb); err != nil {
-					deps.Printf("%s\n", err.Error())
+					deps.Std.Printf("%s\n", err.Error())
 					return api.ExitUsage
 				}
 				continue
 			}
 
 			if err := collectValueFlag(flag, verb); err != nil {
-				deps.Printf("%s\n", err.Error())
+				deps.Std.Printf("%s\n", err.Error())
 				return api.ExitUsage
 			}
 		}
@@ -107,7 +107,7 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 		for j := range command.Args {
 			arg := &command.Args[j]
 			if err := collectArg(arg, verb); err != nil {
-				deps.Printf("%s\n", err.Error())
+				deps.Std.Printf("%s\n", err.Error())
 				return api.ExitUsage
 			}
 		}
@@ -117,7 +117,7 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 		return command.Handler(deps, entries)
 	}
 
-	deps.Printf("Unknown Command!\n")
+	deps.Std.Printf("Unknown Command!\n")
 	return api.ExitUsage
 
 }
@@ -132,7 +132,7 @@ func printUsage(deps *deps.Deps, sandbox *api.Sandbox) {
 		}
 	}
 	// Fallback — should never happen if help is registered.
-	deps.Printf("Usage: agnos <command> [flags] [args]\n")
+	deps.Std.Printf("Usage: agnos <command> [flags] [args]\n")
 }
 
 // collectBoolFlag checks whether a boolean flag is present. If required and

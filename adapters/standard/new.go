@@ -48,23 +48,23 @@ func Errorf(format string, a ...any) error {
 
 func New() deps.Deps {
 	deps := deps.Deps{}
-	deps.Now = func() time.Time {
+	deps.Std.Now = func() time.Time {
 		return Now()
 	}
-	deps.Printf = func(format string, a ...any) (n int, err error) {
+	deps.Std.Printf = func(format string, a ...any) (n int, err error) {
 		return Printf(os.Stdout, format, a...)
 	}
-	deps.Error = func(format string, a ...any) (n int, err error) {
+	deps.Std.Error = func(format string, a ...any) (n int, err error) {
 		return Error(os.Stderr, format, a...)
 	}
-	deps.Errorf = func(format string, a ...any) error {
+	deps.Std.Errorf = func(format string, a ...any) error {
 		return Errorf(format, a...)
 	}
-	deps.NewVerbLib = verblib.NewVerbLib
-	deps.NewKeepLib = keeplib.NewKeepLib
+	deps.Std.NewVerbLib = verblib.NewVerbLib
+	deps.Std.NewKeepLib = keeplib.NewKeepLib
 	deps.EmbedDeps = embeddeps.NewEmbedDeps()
 	deps.IoLib = iolib.NewIoLib()
-	deps.NewRequest = requestlib.NewRequestFactory()
+	deps.Std.NewRequest = requestlib.NewRequestFactory()
 	deps.SerializeLib = serializelib.NewSerializeLib()
 	return deps
 }

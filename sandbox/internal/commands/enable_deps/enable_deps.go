@@ -56,7 +56,7 @@ func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	build_error := enableDepsAction.EnableDeps(deps, path)
 
 	if !quietFlag.Exist && build_error != nil {
-		deps.Error(build_error.Error())
+		deps.Std.Error(build_error.Error())
 	}
 	if build_error != nil {
 		return api.ExitFailure

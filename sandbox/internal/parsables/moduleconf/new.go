@@ -12,7 +12,7 @@ func New(deps *deps.Deps, content string) (*ModuleConf, error) {
 	var requires []string
 
 	if content == "" {
-		return nil, deps.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
 	lines := strings.Split(content, "\n")
