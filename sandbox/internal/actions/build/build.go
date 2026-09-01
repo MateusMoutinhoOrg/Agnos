@@ -12,12 +12,15 @@ func Build(deps *deps.Deps, path string) error {
 	deps.Printf("build started with path %s \n", path)
 
 	io := smartio.New(deps, path, config.ProjectName)
-	
+	//Creating the basic dir struct
+	io.CreateDir("sandbox/api")
+	io.CreateDir("sandbox/cmd")
+	io.CreateDir("sandbox/internal")
 	/*
-	project_conf, err := projectconf.New(deps, path)
-	if err != nil {
-		return err
-	}
+		project_conf, err := projectconf.New(deps, path)
+		if err != nil {
+			return err
+		}
 	*/
 	module_conf, err := moduleconf.NewFromPath(deps, path+"/go.mod")
 	if err != nil {
