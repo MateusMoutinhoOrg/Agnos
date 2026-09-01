@@ -14,7 +14,6 @@ func Build(deps *deps.Deps, path string) error {
 	io := smartio.New(deps, path, config.ProjectName)
 	//Creating the basic dir struct
 	io.CreateDir("sandbox/api")
-	io.CreateDir("sandbox/cmd")
 	io.CreateDir("sandbox/internal")
 	/*
 		project_conf, err := projectconf.New(deps, path)
