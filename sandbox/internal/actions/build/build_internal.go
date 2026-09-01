@@ -41,6 +41,11 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 			return err
 		}
 
+		err = Render_adapters_standard_new_go(deps, io, module_conf.Module)
+		if err != nil {
+			return err
+		}
+
 	}
 
 	deps.Printf("successfully rendered template")
