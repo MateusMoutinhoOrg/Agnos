@@ -19,3 +19,7 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 
 	return nil
 }
+func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, path string, vars interface{}) error {
+
+	return nil
+}
