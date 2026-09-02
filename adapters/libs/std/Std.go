@@ -6,7 +6,9 @@ import (
 	"os"
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
+	std "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
+
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
 // now fills std.Lib.Now, returning the real current time.
@@ -33,11 +35,8 @@ func errorf(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
 }
 
-// NewStdLib returns the value that fills deps.Deps.Std: the loose runtime
-// functions the sandbox needs, implemented over the standard library's time,
-// fmt and os packages. Printf writes to os.Stdout and Error to os.Stderr.
-func NewStdLib() std.Lib {
-	return std.Lib{
+func BindStdLib(deps *deps.Deps) {
+	deps.Std = std.Lib{
 		Now: func() time.Time {
 			return now()
 		},
