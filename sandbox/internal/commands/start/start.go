@@ -102,7 +102,7 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 		module = &modVal
 	}
 
-	if !deps.IoLib.Exist(path + "/go.mod") && module == nil {
+	if !deps.Iodeps.Exist(path + "/go.mod") && module == nil {
 		if !quietFlag.Exist {
 			deps.Std.Error("the module flag (--module) is required when there is no go.mod in the path\n")
 		}

@@ -10,7 +10,7 @@ func New(deps *deps.Deps, content string) (*PathReplacerConf, error) {
 		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.SerializeLib.ParseYaml(content)
+	specs, parse_error := deps.Serializebles.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}

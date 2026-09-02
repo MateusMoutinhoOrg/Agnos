@@ -80,9 +80,12 @@ agnos help | version
   constructor as a field on their own `Lib` struct — `requestdeps.Lib.NewRequest(url)`,
   `dbdeps.Lib.NewDatabase(props)` (rooted at `props.Path`), `argvdeps.Lib.New(args)`
   (which hands back an `argvdeps.Parser` bound to that argv) — injected whole as
-  `Deps.RequestLib` / `Deps.DatabaseLib` / `Deps.ArgvLib`, exactly like `IoLib` and
-  `SerializeLib`. There is no separate `Factory` struct: `deps.Deps` references each
-  `<x>.Lib` directly.
+  `Deps.Requestdeps` / `Deps.Dbdeps` / `Deps.Argvdeps`, exactly like `Deps.Iodeps` and
+  `Deps.Serializebles`. **Every `Deps` field name is mechanical: it is the title-cased
+  sub-contract directory name** (`sandbox/deps/iodeps/` → `Deps.Iodeps`,
+  `sandbox/deps/serializebles/` → `Deps.Serializebles`, …) — never a hand-picked alias —
+  because `render_deps.go` regenerates `sandbox/deps/deps.go` by iterating those dirs. There
+  is no separate `Factory` struct: `deps.Deps` references each `<x>.Lib` directly.
 - **`adapters/`** — the only place `os`, `embed`, `net/http` etc. are touched. Split in two:
   - **`adapters/libs/<x>deps/`** — one isolated real implementation per sub-contract
     (`argvdeps`, `dbdeps`, `embeddeps`, `iodeps`, `requestdeps`, `serializebles`, `std`),
@@ -92,7 +95,7 @@ agnos help | version
     together; `adapters/availables/standard` (`standard.New()`) is the default. A user who
     wants a different mix composes their own `Deps` from `adapters/libs` directly.
 - **`assets/`** — files embedded into the binary via `//go:embed all:*` in `assets/asset.go`.
-  The embed directive must live in this package. Reached only through `deps.EmbedDeps`.
+  The embed directive must live in this package. Reached only through `deps.Embeddeps`.
   `assets/sandbox/**` are Go **text/templates** (`{{.Module}}`, `{{if .HasDeps}}`) that
   `agnos build` renders into a target project.
 - **`cmd/main/main.go`** — wires `standard.New()` into `sandbox.New(&deps)` and calls
@@ -127,9 +130,20 @@ the `adapters/libs/<x>/` dirs the same way, emitting one `{{.Name}}.Bind(&deps)`
 its import) per lib in `adapters/availables/standard/new.go`. Every `adapters/libs/<x>`
 package therefore exposes its binder under the single uniform name `Bind(deps *deps.Deps)`.
 
+**This repo bootstraps itself.** `agnos build .` runs against Agnos-Cli's own tree
+(`AgnosConfig/` holds its `project.yaml` / `themes.yaml` / `ignore.yaml` / `paths.yaml`) and
+regenerates `sandbox/deps/deps.go` and `adapters/availables/standard/new.go` in place, and
+the result still compiles (`go build ./cmd/... ./sandbox/... ./adapters/...`). Keep it that
+way: `agnos build .` must stay idempotent and compilable. In particular, all sandbox and
+adapter code must reference `Deps` fields by their mechanical names (`deps.Iodeps`,
+`deps.Serializebles`, `deps.Argvdeps`, `deps.Dbdeps`, `deps.Requestdeps`, `deps.Embeddeps`,
+`deps.Std`) so the regenerated struct keeps matching its callers. After changing anything
+under `sandbox/deps/<x>/`, `adapters/libs/<x>/`, `sandbox/binds/`, or `sandbox/api/`, run
+`agnos build .` and rebuild.
+
 ### SmartIO — transactional filesystem
 
-`sandbox/internal/smartio` wraps `deps.IoLib` with an in-memory transaction layer. Actions
+`sandbox/internal/smartio` wraps `deps.Iodeps` with an in-memory transaction layer. Actions
 call `io.WriteFile` / `io.CreateDir` / `io.RemoveDir` etc.; nothing hits disk until
 `io.Persist()` (removes pending dirs, then creates pending dirs, then flushes buffered file
 writes). Reads and existence checks are transaction-aware (pending creations count as

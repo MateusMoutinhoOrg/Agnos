@@ -10,5 +10,5 @@ func IsFile(deps *deps.Deps, io *SmartIO, path string) bool {
 	if isPendingRemoval(io, p) {
 		return false
 	}
-	return deps.IoLib.IsFile(p)
+	return deps.Iodeps.IsFile(p)
 }

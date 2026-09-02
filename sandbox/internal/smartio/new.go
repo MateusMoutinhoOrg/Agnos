@@ -23,8 +23,8 @@ func New(deps *deps.Deps, path string, projectName string) *SmartIO {
 	configDir := joinPath(path, projectName+"Config")
 
 	ignorePath := joinPath(configDir, "ignore.yaml")
-	if deps.IoLib.Exist(ignorePath) && deps.IoLib.IsFile(ignorePath) {
-		content, err := deps.IoLib.ReadFile(ignorePath)
+	if deps.Iodeps.Exist(ignorePath) && deps.Iodeps.IsFile(ignorePath) {
+		content, err := deps.Iodeps.ReadFile(ignorePath)
 		if err == nil {
 			conf, err := ignorableconf.New(deps, string(content))
 			if err == nil {
@@ -40,8 +40,8 @@ func New(deps *deps.Deps, path string, projectName string) *SmartIO {
 	}
 
 	replacersPath := joinPath(configDir, "paths.yaml")
-	if deps.IoLib.Exist(replacersPath) && deps.IoLib.IsFile(replacersPath) {
-		content, err := deps.IoLib.ReadFile(replacersPath)
+	if deps.Iodeps.Exist(replacersPath) && deps.Iodeps.IsFile(replacersPath) {
+		content, err := deps.Iodeps.ReadFile(replacersPath)
 		if err == nil {
 			conf, err := pathreplacerconf.New(deps, string(content))
 			if err == nil {

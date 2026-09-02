@@ -8,7 +8,7 @@ import (
 	serializebles "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializebles"
 	std "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
 	verb "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
 func New() deps.Deps {

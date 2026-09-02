@@ -19,7 +19,7 @@ const requestTimeout = 30 * time.Second
 // Bind fills deps.Deps.RequestLib.NewRequest with the HTTP request
 // implementation built on the standard library's net/http package.
 func Bind(deps *deps.Deps) {
-	deps.RequestLib.NewRequest = newRequest
+	deps.Requestdeps.NewRequest = newRequest
 }
 
 // newRequest builds one HTTP request bound to url.

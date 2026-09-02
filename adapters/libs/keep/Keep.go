@@ -184,7 +184,7 @@ func fromKeepSchemas(schemas []keepapi.Schema) []dbdeps.Schema {
 // with Keep's own filesystem adapter rooted at its Props.Path, so the library
 // itself needs no base directory.
 func Bind(deps *deps.Deps) {
-	deps.DatabaseLib = dbdeps.Lib{
+	deps.Dbdeps = dbdeps.Lib{
 		NewDatabase: func(props dbdeps.Props) dbdeps.DatabaseHandle {
 			inner := keeplib.New(keepadapter.NewWithBase(props.Path))
 			return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))

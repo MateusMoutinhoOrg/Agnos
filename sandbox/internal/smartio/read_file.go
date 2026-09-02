@@ -16,5 +16,5 @@ func ReadFile(deps *deps.Deps, io *SmartIO, path string) ([]byte, error) {
 		return content, nil
 	}
 
-	return deps.IoLib.ReadFile(p)
+	return deps.Iodeps.ReadFile(p)
 }

@@ -5,7 +5,7 @@ import (
 )
 
 func NewFromPath(deps *deps.Deps, path string) (*ModuleConf, error) {
-	bytes, err := deps.IoLib.ReadFile(path)
+	bytes, err := deps.Iodeps.ReadFile(path)
 	if err != nil {
 		return nil, deps.Std.Errorf("failed to read module file at %s: %v", path, err)
 	}

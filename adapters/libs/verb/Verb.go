@@ -9,7 +9,7 @@ import (
 // Bind fills deps.Deps.ArgvLib.New with the Verb argv-parser library's
 // per-call constructor.
 func Bind(deps *deps.Deps) {
-	deps.ArgvLib.New = newArgvParser
+	deps.Argvdeps.New = newArgvParser
 }
 
 // newArgvParser initializes the Verb argv-parser library over the given

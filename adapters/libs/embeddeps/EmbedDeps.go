@@ -74,7 +74,7 @@ func relativeTo(root string, current string) string {
 // Each field of the assigned struct is a closure reading the embedded
 // filesystem at call time.
 func Bind(deps *deps.Deps) {
-	deps.EmbedDeps = embeddeps.Lib{
+	deps.Embeddeps = embeddeps.Lib{
 		ReadFile: func(requested string) ([]byte, error) {
 			return assets.Files.ReadFile(assetPath(requested))
 		},

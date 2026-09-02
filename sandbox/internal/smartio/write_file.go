@@ -7,7 +7,7 @@ func WriteFile(deps *deps.Deps, io *SmartIO, path string, content []byte) error 
 	if err != nil {
 		return err
 	}
-	if deps.IoLib.Exist(p) {
+	if deps.Iodeps.Exist(p) {
 		return deps.Std.Errorf("file %q already exists", p)
 	}
 	io.Transactions[p] = content

@@ -5,11 +5,11 @@ import (
 )
 
 func Render(deps *deps.Deps, conf *PathReplacerConf) string {
-	obj := deps.SerializeLib.CreateObject()
+	obj := deps.Serializebles.CreateObject()
 
 	for _, entry := range conf.Entries {
 		obj.AddItemToObject(entry.Original, entry.Replacement)
 	}
 
-	return deps.SerializeLib.SerializeToYaml(obj)
+	return deps.Serializebles.SerializeToYaml(obj)
 }

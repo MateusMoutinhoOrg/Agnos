@@ -70,7 +70,7 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 		return api.ExitUsage
 	}
 
-	verb := deps.ArgvLib.New(args)
+	verb := deps.Argvdeps.New(args)
 
 	action, err := verb.GetNextStringArg()
 	if err != nil {

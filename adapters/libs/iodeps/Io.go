@@ -12,7 +12,7 @@ import (
 // Bind fills deps.Deps.IoLib with the implementation of the Io dependency
 // using the standard library's os and filepath packages.
 func Bind(deps *deps.Deps) {
-	deps.IoLib = iodeps.Lib{
+	deps.Iodeps = iodeps.Lib{
 		ReadFile: func(path string) ([]byte, error) {
 			return os.ReadFile(path)
 		},

@@ -6,22 +6,16 @@ import (
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/embeddeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
+	serializebles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
 	std "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
 )
 
 type Deps struct {
+	Argvdeps argvdeps.Lib
+	Dbdeps dbdeps.Lib
+	Embeddeps embeddeps.Lib
+	Iodeps iodeps.Lib
+	Requestdeps requestdeps.Lib
+	Serializebles serializebles.Lib
 	Std std.Lib
-
-	EmbedDeps embeddeps.Lib
-
-	IoLib iodeps.Lib
-
-	SerializeLib serializibles.Lib
-
-	ArgvLib argvdeps.Lib
-
-	DatabaseLib dbdeps.Lib
-
-	RequestLib requestdeps.Lib
 }

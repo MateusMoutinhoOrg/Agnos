@@ -5,11 +5,11 @@ import (
 )
 
 func Render(deps *deps.Deps, items *IgnorableConf) string {
-	arr := deps.SerializeLib.CreateArray()
+	arr := deps.Serializebles.CreateArray()
 
 	for _, p := range items.Paths {
-		arr.AddItemToArray(deps.SerializeLib.CreateString(p))
+		arr.AddItemToArray(deps.Serializebles.CreateString(p))
 	}
 
-	return deps.SerializeLib.SerializeToYaml(arr)
+	return deps.Serializebles.SerializeToYaml(arr)
 }

@@ -7,7 +7,7 @@ import (
 
 func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path string, vars interface{}, dest_path string) error {
 
-	content, err := deps.EmbedDeps.RenderTemplate(template_path, vars)
+	content, err := deps.Embeddeps.RenderTemplate(template_path, vars)
 	if err != nil {
 		return err
 	}
