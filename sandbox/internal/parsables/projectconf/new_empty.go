@@ -6,9 +6,8 @@ import (
 
 func NewEmpty(deps *deps.Deps) *ProjectConf {
 
-	project_conf := &ProjectConf{
-		Version: "v0.0.0",
-	}
+	// Version is left empty: a freshly started project has no version yet.
+	project_conf := &ProjectConf{}
 	BindMethods(deps, project_conf)
 	return project_conf
 }

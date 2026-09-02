@@ -7,7 +7,11 @@ import (
 func Render(deps *deps.Deps, project_conf *ProjectConf) string {
 	obj := deps.Serializebles.CreateObject()
 	obj.AddItemToObject("name", project_conf.Name)
-	obj.AddItemToObject("version", project_conf.Version)
+	if project_conf.Version == "" {
+		obj.AddItemToObject("version", nil)
+	} else {
+		obj.AddItemToObject("version", project_conf.Version)
+	}
 	obj.AddItemToObject("description", project_conf.Description)
 
 	return deps.Serializebles.SerializeToYaml(obj)

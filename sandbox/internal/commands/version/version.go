@@ -21,6 +21,10 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 }
 
 func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
+	if config.Version == "" {
+		deps.Std.Printf("no version set yet\n")
+		return api.ExitOk
+	}
 	deps.Std.Printf("Version:%s\n", config.Version)
 	return api.ExitOk
 }

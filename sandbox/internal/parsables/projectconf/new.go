@@ -23,9 +23,8 @@ func New(deps *deps.Deps, content string) (*ProjectConf, error) {
 	version_item, _ := project_specs.GetObjectItem("version")
 	description_item, _ := project_specs.GetObjectItem("description")
 
-	project_conf := &ProjectConf{
-		Version: "v0.0.0",
-	}
+	// Version defaults to empty: `version: null` (or absent) means "no version yet".
+	project_conf := &ProjectConf{}
 	var err error
 
 	if name_item != nil && !name_item.IsNull() {
