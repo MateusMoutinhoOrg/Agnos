@@ -1,0 +1,3 @@
+description: "{{.Description}}"
+name: "{{.Name}}"
+version: "{{.Version}}"
