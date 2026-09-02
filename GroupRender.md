@@ -16,7 +16,7 @@ a ideia da funcao rnder group, e renderizar um grupo de arquivos todos de uma ve
 ~~~go 
  RenderGroup(deps,io,"all",vars) 
 ~~~
-vai renderizar todos os arquivos de assets/groups/all  e salvar em seus respectivos paths .
+vai renderizar todos os arquivos de assets/all  e salvar em seus respectivos paths .
 
 ### Refatoracao de Actions:
 refatore a action start para renderizar o grupo start. 

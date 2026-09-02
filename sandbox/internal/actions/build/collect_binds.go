@@ -3,12 +3,12 @@ package build
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
 )
 
-func Render_sandbox_new_go(deps *deps.Deps, io *smartio.SmartIO, module string) error {
+// CollectBinds lists sandbox/binds and returns one "<Title>Bind" entry per
+// .go file, for the {{range .Binds}} loop in sandbox/new.go.
+func CollectBinds(io *smartio.SmartIO) []string {
 
 	files := io.ListFiles("sandbox/binds")
 
@@ -30,14 +30,5 @@ func Render_sandbox_new_go(deps *deps.Deps, io *smartio.SmartIO, module string) 
 		binds = append(binds, title+"Bind")
 	}
 
-	vars := map[string]interface{}{
-		"Module":  module,
-		"HasDeps": smartio.IsDir(deps, io, "sandbox/deps"),
-		"Binds":   binds,
-	}
-	err := utils.RenderTemplateToDest(deps, io, "sandbox/new.go", vars, "sandbox/new.go")
-	if err != nil {
-		return err
-	}
-	return nil
+	return binds
 }

@@ -19,7 +19,29 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 
 	return nil
 }
-func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, path string, vars interface{}) error {
+// RenderGroup renders every asset under assets/<group> as a Go text/template
+// and writes each result to the path it holds inside the group. An asset at
+// assets/all/sandbox/new.go rendered with RenderGroup(deps, io, "all", vars)
+// is written to sandbox/new.go. Every file in the group is rendered with the
+// same vars.
+func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interface{}) error {
+
+	files, err := deps.Embeddeps.ListFilesRecursively(group)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range files {
+		content, err := deps.Embeddeps.RenderTemplate(group+"/"+file, vars)
+		if err != nil {
+			return err
+		}
+
+		err = io.WriteFileOverwrite(file, content)
+		if err != nil {
+			return err
+		}
+	}
 
 	return nil
 }

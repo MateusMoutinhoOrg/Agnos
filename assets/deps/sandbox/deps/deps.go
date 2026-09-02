@@ -1,11 +1,11 @@
 package deps
-{{if .Libs}}
-import ({{range .Libs}}
+{{if .DepsLibs}}
+import ({{range .DepsLibs}}
 	{{.Name}} "{{$.Module}}/sandbox/deps/{{.Name}}"{{end}}
 )
 {{end}}
 type Deps struct {
-{{- range .Libs}}
+{{- range .DepsLibs}}
 	{{.Title}} {{.Name}}.Lib
 {{- end}}
 }

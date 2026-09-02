@@ -119,15 +119,25 @@ call the action package directly (e.g. `start` calls `startAction.Start` then
 `buildAction.Build`); `binds/actions.go` also exposes the same actions as library API.
 Note `build` runs as a follow-up step after `start`/`enable-deps`/`remove-deps`.
 
-**Renderers (`internal/actions/build/render_*.go`)** all follow one shape: list a directory
-with `io.List*`, derive names from the last path segment, title-case them, hand the slice to
-a template via `utils.RenderTemplateToDest`. `render_new.go` iterates `sandbox/binds` into
-`{{range .Binds}}`; `render_api.go` iterates `sandbox/api` into `{{range .Constructors}}`;
-`render_deps.go` iterates the `sandbox/deps/<x>/` sub-contract dirs, emitting one
-`{{.Title}} {{.Name}}.Lib` field (and its import) per dir in `sandbox/deps/deps.go` — the
-same iterate-a-dir-into-a-template pattern as `sandbox/new.go`. `render_adapter.go` iterates
-the `adapters/libs/<x>/` dirs the same way, emitting one `{{.Name}}.Bind(&deps)` call (and
-its import) per lib in `adapters/availables/standard/new.go`. Every `adapters/libs/<x>`
+**Asset groups.** Templates live under `assets/<group>/**`, each file at the path it will be
+written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new.go`).
+`utils.RenderGroup(deps, io, "<group>", vars)` renders every file in one group as a Go
+`text/template` with the same `vars` and writes each to its stripped path (via
+`io.WriteFileOverwrite`). The groups: `start` (config skeleton written by `agnos start`),
+`all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
+`sandbox/deps` exists). `utils.RenderTemplateToDest` still renders one file to one dest for
+callers that need it.
+
+**Collectors (`internal/actions/build/collect_*.go`)** all follow one shape: list a directory
+with `io.List*`, derive names from the last path segment, title-case them, return the slice.
+`BuildInternal` gathers them into one `vars` map handed to both `RenderGroup` calls:
+`CollectBinds` iterates `sandbox/binds` into `{{range .Binds}}` (`sandbox/new.go`);
+`CollectConstructors` iterates `sandbox/api` into `{{range .Constructors}}`
+(`sandbox/api/sandbox.go`); `CollectDepsLibs` iterates the `sandbox/deps/<x>/` sub-contract
+dirs, emitting one `{{.Title}} {{.Name}}.Lib` field (and its import) per dir in
+`{{range .DepsLibs}}` (`sandbox/deps/deps.go`); `CollectAdapterLibs` iterates the
+`adapters/libs/<x>/` dirs, emitting one `{{.Name}}.Bind(&deps)` call (and its import) per lib
+in `{{range .AdapterLibs}}` (`adapters/availables/standard/new.go`). Every `adapters/libs/<x>`
 package therefore exposes its binder under the single uniform name `Bind(deps *deps.Deps)`.
 
 **This repo bootstraps itself.** `agnos build .` runs against Agnos-Cli's own tree
@@ -156,8 +166,8 @@ filter/rewrite paths during listing.
 Each `sandbox/internal/parsables/<name>conf/` package is a small YAML-or-gomod parser with a
 fixed shape: `api.go` (struct + `Render func() string`), `new.go` (parse from string),
 `new_empty.go` (defaults), `bind_methods.go`, `render.go`. `moduleconf` parses `go.mod`
-directly. `agnos start` writes `project.yaml`, `themes.yaml`, `ignore.yaml`, `paths.yaml`
-into `<ProjectName>Config/`; `agnos build` reads them back.
+directly. `agnos start` renders the `start` asset group (`project.yaml`, `themes.yaml`, `ignore.yaml`,
+`paths.yaml`) into `AgnosConfig/`; `agnos build` reads them back.
 
 `sandbox/internal/config/config.go` holds the CLI's own constants: `ProjectName = "Agnos"`
 (used to name the generated `AgnosConfig/` dir) and `Version`.
