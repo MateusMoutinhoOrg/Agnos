@@ -4,14 +4,15 @@ import (
 	"encoding/json"
 	"fmt"
 
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
 	"gopkg.in/yaml.v3"
 )
 
-// NewSerializeLib returns the closure that fills deps.Deps.SerializeLib,
-// providing the capability to create, parse, and serialize generic JSON/YAML structures.
-func NewSerializeLib() serializibles.Lib {
-	return serializibles.Lib{
+// BindSerializeLib fills deps.Deps.SerializeLib, providing the capability to
+// create, parse, and serialize generic JSON/YAML structures.
+func BindSerializeLib(deps *deps.Deps) {
+	deps.SerializeLib = serializibles.Lib{
 		CreateString: func(value string) *serializibles.SerializibleObject {
 			var v any = value
 			return wrapValue(&v)

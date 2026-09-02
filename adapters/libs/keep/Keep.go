@@ -1,6 +1,7 @@
 package keep
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	dbdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/dbdeps"
 
 	keepadapter "github.com/MateusMoutinhoOrg/Keep/adapters/standard"
@@ -178,12 +179,12 @@ func fromKeepSchemas(schemas []keepapi.Schema) []dbdeps.Schema {
 	return converted
 }
 
-// NewDatabaseLib returns the value that fills deps.Deps.DatabaseLib: the Keep
-// schema-database library, copied onto the sandbox's local dbdeps.Lib.
-// Each database is wired with Keep's own filesystem adapter rooted at its
-// Props.Path, so the library itself needs no base directory.
-func NewDatabaseLib() dbdeps.Lib {
-	return dbdeps.Lib{
+// BindDatabaseLib fills deps.Deps.DatabaseLib with the Keep schema-database
+// library, copied onto the sandbox's local dbdeps.Lib. Each database is wired
+// with Keep's own filesystem adapter rooted at its Props.Path, so the library
+// itself needs no base directory.
+func BindDatabaseLib(deps *deps.Deps) {
+	deps.DatabaseLib = dbdeps.Lib{
 		NewDatabase: func(props dbdeps.Props) dbdeps.DatabaseHandle {
 			inner := keeplib.New(keepadapter.NewWithBase(props.Path))
 			return fromKeepDatabase(inner.NewDatabase(toKeepProps(props)))

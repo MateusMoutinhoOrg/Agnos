@@ -6,7 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
 )
 
 // requestTimeout bounds one whole round trip — connect, send, and read the
@@ -15,72 +16,75 @@ import (
 // exposes no cancellation, which makes the bound this adapter's job.
 const requestTimeout = 30 * time.Second
 
-// NewRequestFactory returns the value that fills deps.Deps.RequestLib.NewRequest: the implementation
-// of the HTTP request dependency using the standard library's net/http package.
-func NewRequestFactory() func(url string) requestdeps.Request {
-	return func(url string) requestdeps.Request {
-		headers := make(map[string]string)
-		method := "GET"
-		var reqBody []byte
+// BindRequestLib fills deps.Deps.RequestLib.NewRequest with the HTTP request
+// implementation built on the standard library's net/http package.
+func BindRequestLib(deps *deps.Deps) {
+	deps.RequestLib.NewRequest = newRequest
+}
 
-		return requestdeps.Request{
-			AddHeader: func(key string, value string) {
-				headers[key] = value
-			},
-			SetMethod: func(m string) {
-				method = m
-			},
-			SetBody: func(body []byte) {
-				reqBody = body
-			},
-			Fetch: func() (requestdeps.Response, error) {
-				var bodyReader io.Reader
-				if reqBody != nil {
-					bodyReader = bytes.NewReader(reqBody)
-				}
+// newRequest builds one HTTP request bound to url.
+func newRequest(url string) requestdeps.Request {
+	headers := make(map[string]string)
+	method := "GET"
+	var reqBody []byte
 
-				req, err := http.NewRequest(method, url, bodyReader)
-				if err != nil {
-					return requestdeps.Response{}, err
-				}
+	return requestdeps.Request{
+		AddHeader: func(key string, value string) {
+			headers[key] = value
+		},
+		SetMethod: func(m string) {
+			method = m
+		},
+		SetBody: func(body []byte) {
+			reqBody = body
+		},
+		Fetch: func() (requestdeps.Response, error) {
+			var bodyReader io.Reader
+			if reqBody != nil {
+				bodyReader = bytes.NewReader(reqBody)
+			}
 
-				for k, v := range headers {
-					req.Header.Add(k, v)
-				}
+			req, err := http.NewRequest(method, url, bodyReader)
+			if err != nil {
+				return requestdeps.Response{}, err
+			}
 
-				client := &http.Client{Timeout: requestTimeout}
-				resp, err := client.Do(req)
-				if err != nil {
-					return requestdeps.Response{}, err
-				}
+			for k, v := range headers {
+				req.Header.Add(k, v)
+			}
 
-				return requestdeps.Response{
-					GetStatusCode: func() int {
-						return resp.StatusCode
-					},
-					GetHeader: func(key string) string {
-						return resp.Header.Get(key)
-					},
-					ReadBody: func(size int) ([]byte, error) {
-						if size == -1 {
-							return io.ReadAll(resp.Body)
-						}
-						buf := make([]byte, size)
-						n, err := io.ReadFull(resp.Body, buf)
-						// A body shorter than size is the contract's normal
-						// case, not a failure: io.ReadFull reports it as EOF
-						// or ErrUnexpectedEOF, and both mean "that was all
-						// of it".
-						if err == io.EOF || err == io.ErrUnexpectedEOF {
-							return buf[:n], nil
-						}
-						return buf[:n], err
-					},
-					Close: func() error {
-						return resp.Body.Close()
-					},
-				}, nil
-			},
-		}
+			client := &http.Client{Timeout: requestTimeout}
+			resp, err := client.Do(req)
+			if err != nil {
+				return requestdeps.Response{}, err
+			}
+
+			return requestdeps.Response{
+				GetStatusCode: func() int {
+					return resp.StatusCode
+				},
+				GetHeader: func(key string) string {
+					return resp.Header.Get(key)
+				},
+				ReadBody: func(size int) ([]byte, error) {
+					if size == -1 {
+						return io.ReadAll(resp.Body)
+					}
+					buf := make([]byte, size)
+					n, err := io.ReadFull(resp.Body, buf)
+					// A body shorter than size is the contract's normal
+					// case, not a failure: io.ReadFull reports it as EOF
+					// or ErrUnexpectedEOF, and both mean "that was all
+					// of it".
+					if err == io.EOF || err == io.ErrUnexpectedEOF {
+						return buf[:n], nil
+					}
+					return buf[:n], err
+				},
+				Close: func() error {
+					return resp.Body.Close()
+				},
+			}, nil
+		},
 	}
 }

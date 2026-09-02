@@ -14,11 +14,11 @@ import (
 func New() deps.Deps {
 	deps := deps.Deps{}
 	stdlib.BindStdLib(&deps)
-	deps.ArgvLib.New = argvlib.NewArgvLib
-	deps.DatabaseLib = dblib.NewDatabaseLib()
-	deps.EmbedDeps = embeddeps.NewEmbedDeps()
-	deps.IoLib = iolib.NewIoLib()
-	deps.RequestLib.NewRequest = requestlib.NewRequestFactory()
-	deps.SerializeLib = serializelib.NewSerializeLib()
+	argvlib.BindArgvLib(&deps)
+	dblib.BindDatabaseLib(&deps)
+	embeddeps.BindEmbedDeps(&deps)
+	iolib.BindIoLib(&deps)
+	requestlib.BindRequestLib(&deps)
+	serializelib.BindSerializeLib(&deps)
 	return deps
 }

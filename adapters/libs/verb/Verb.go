@@ -1,14 +1,21 @@
 package verb
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	argvdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
 	verblib "github.com/MateusMoutinhoOrg/Verb/sandbox"
 )
 
-// NewArgvLib fills deps.Deps.ArgvLib.New: the Verb argv-parser library,
-// initialized over the given argument vector and copied field by field onto
-// the sandbox's local argvdeps.Parser.
-func NewArgvLib(args []string) argvdeps.Parser {
+// BindArgvLib fills deps.Deps.ArgvLib.New with the Verb argv-parser library's
+// per-call constructor.
+func BindArgvLib(deps *deps.Deps) {
+	deps.ArgvLib.New = newArgvParser
+}
+
+// newArgvParser initializes the Verb argv-parser library over the given
+// argument vector and copies it field by field onto the sandbox's local
+// argvdeps.Parser.
+func newArgvParser(args []string) argvdeps.Parser {
 	inner := verblib.New(args)
 	return argvdeps.Parser{
 		Args: inner.Args,
