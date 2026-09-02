@@ -22,19 +22,21 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 				RequiredMinSize: 1,
 				RequiredMaxSize: 1,
 			},
-			{
-				Id:          "path",
-				Description: "the dir to build the project",
-				Examples: []string{
-					config.ProjectName + " dep-remove embed .",
-				},
-				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
-				RequiredMinSize: 0,
-				RequiredMaxSize: 1,
-			},
 		},
 		Flags: []api.Cliflag{
+			{
+				Id:               "path",
+				ValidIdentifiers: []string{"--path"},
+				Description:      "the dir holding the project (defaults to the current directory)",
+				Examples: []string{
+					config.ProjectName + " dep-remove --path ./my-project",
+				},
+				Type:             api.CliTypeString,
+				Defaults:         []string{"."},
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: false,
+			},
 			{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
@@ -52,7 +54,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		LongDescription: "Removes every file that assets/deplist/<dep> installs into the\nproject, then calls build.",
 		Examples: []string{
 			config.ProjectName + " dep-remove embed",
-			config.ProjectName + " dep-remove embed .",
+			config.ProjectName + " dep-remove embed --path ./my-project",
 		},
 		Handler: func(entries api.CliEntrys) int { return CommandHander(deps, entries) },
 	}
@@ -62,8 +64,8 @@ func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	quietFlag := entries.GetFlagById("quiet")
 	depArg := entries.GetArgById("dep")
 	dep := depArg.Values[0].String()
-	pathArg := entries.GetArgById("path")
-	path := pathArg.Values[0].String()
+	pathFlag := entries.GetFlagById("path")
+	path := pathFlag.Values[0].String()
 
 	remove_error := depRemoveAction.DepRemove(deps, path, dep)
 

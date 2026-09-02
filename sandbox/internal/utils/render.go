@@ -19,6 +19,7 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 
 	return nil
 }
+
 // RenderGroup renders every asset under assets/<group> as a Go text/template
 // and writes each result to the path it holds inside the group. An asset at
 // assets/all/sandbox/new.go rendered with RenderGroup(deps, io, "all", vars)

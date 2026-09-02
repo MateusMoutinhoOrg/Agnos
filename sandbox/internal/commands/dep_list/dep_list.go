@@ -11,20 +11,21 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"dep-list"},
 		Category:              "Dependencies",
-		Args: []api.CliArg{
-			{
-				Id:          "path",
-				Description: "the dir to build the project",
-				Examples: []string{
-					config.ProjectName + " dep-list .",
-				},
-				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
-				RequiredMinSize: 0,
-				RequiredMaxSize: 1,
-			},
-		},
+		Args:                  []api.CliArg{},
 		Flags: []api.Cliflag{
+			{
+				Id:               "path",
+				ValidIdentifiers: []string{"--path"},
+				Description:      "the dir holding the project (defaults to the current directory)",
+				Examples: []string{
+					config.ProjectName + " dep-list --path ./my-project",
+				},
+				Type:             api.CliTypeString,
+				Defaults:         []string{"."},
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: false,
+			},
 			{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
@@ -49,8 +50,8 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 
 func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	quietFlag := entries.GetFlagById("quiet")
-	pathArg := entries.GetArgById("path")
-	path := pathArg.Values[0].String()
+	pathFlag := entries.GetFlagById("path")
+	path := pathFlag.Values[0].String()
 
 	deplist, list_error := depListAction.DepList(deps, path)
 

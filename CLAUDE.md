@@ -58,18 +58,23 @@ There is currently **no test suite** (`*_test.go` files) and no lint config beyo
 ### Running the CLI
 
 ```bash
-agnos start --project-name <name> --module <go-module-path> [path]   # scaffold; path defaults to "."
-agnos deps-init [path]        # dependency subsystem: add sandbox/deps + adapters, then rebuild
-agnos deps-purge [path]       # dependency subsystem: remove them, then rebuild
-agnos dep-install <dep> [path]  # render assets/deplist/<dep>/** into the project, then rebuild
-agnos dep-remove <dep> [path]   # remove what that dep installed (and now-empty dirs), then rebuild
-agnos dep-list                # list the dep names available under assets/deplist
-agnos cli-init [path]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
-agnos cli-purge [path]        # cli subsystem: remove every file the cli asset group installs, then rebuild
-agnos verify [path]          # check the project keeps the sandbox/adapter schema (no writes)
-agnos build [path] [--unsafe] # run verify (unless --unsafe), then re-render generated files from templates
+agnos start --project-name <name> --module <go-module-path> [--path <dir>]   # scaffold; --path defaults to "."
+agnos deps-init [--path <dir>]        # dependency subsystem: add sandbox/deps + adapters, then rebuild
+agnos deps-purge [--path <dir>]       # dependency subsystem: remove them, then rebuild
+agnos dep-install <dep> [--path <dir>]  # render assets/deplist/<dep>/** into the project, then rebuild
+agnos dep-remove <dep> [--path <dir>]   # remove what that dep installed (and now-empty dirs), then rebuild
+agnos dep-list [--path <dir>]         # list the dep names available under assets/deplist
+agnos cli-init [--path <dir>]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
+agnos cli-purge [--path <dir>]        # cli subsystem: remove every file the cli asset group installs, then rebuild
+agnos verify [--path <dir>]           # check the project keeps the sandbox/adapter schema (no writes)
+agnos build [--path <dir>] [--unsafe] # run verify (unless --unsafe), then re-render generated files from templates
 agnos help | version
 ```
+
+Every command that operates on a target project takes the target directory as the
+**`--path` flag** (never a positional arg), defaulting to `.`. Non-bool flag `Defaults`
+are materialised by the parser (`collectValueFlag` in `sandbox/internal/cli/climain.go`)
+when the flag is absent, so `entries.GetFlagById("path").Values[0]` is always populated.
 
 ## Architecture
 

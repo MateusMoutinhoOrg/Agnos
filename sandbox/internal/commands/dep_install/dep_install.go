@@ -22,19 +22,21 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 				RequiredMinSize: 1,
 				RequiredMaxSize: 1,
 			},
-			{
-				Id:          "path",
-				Description: "the dir to build the project",
-				Examples: []string{
-					config.ProjectName + " dep-install embed .",
-				},
-				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
-				RequiredMinSize: 0,
-				RequiredMaxSize: 1,
-			},
 		},
 		Flags: []api.Cliflag{
+			{
+				Id:               "path",
+				ValidIdentifiers: []string{"--path"},
+				Description:      "the dir holding the project (defaults to the current directory)",
+				Examples: []string{
+					config.ProjectName + " dep-install --path ./my-project",
+				},
+				Type:             api.CliTypeString,
+				Defaults:         []string{"."},
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: false,
+			},
 			{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
@@ -52,7 +54,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		LongDescription: "Renders every file under assets/deplist/<dep> into the project\nat the path it holds inside that dep, then calls build.",
 		Examples: []string{
 			config.ProjectName + " dep-install embed",
-			config.ProjectName + " dep-install embed .",
+			config.ProjectName + " dep-install embed --path ./my-project",
 		},
 		Handler: func(entries api.CliEntrys) int { return CommandHander(deps, entries) },
 	}
@@ -62,8 +64,8 @@ func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	quietFlag := entries.GetFlagById("quiet")
 	depArg := entries.GetArgById("dep")
 	dep := depArg.Values[0].String()
-	pathArg := entries.GetArgById("path")
-	path := pathArg.Values[0].String()
+	pathFlag := entries.GetFlagById("path")
+	path := pathFlag.Values[0].String()
 
 	install_error := depInstallAction.DepInstall(deps, path, dep)
 

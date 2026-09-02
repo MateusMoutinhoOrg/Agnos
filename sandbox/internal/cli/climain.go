@@ -159,6 +159,12 @@ func collectValueFlag(flag *api.Cliflag, verb argvdeps.Parser) error {
 	}
 
 	if size == 0 {
+		if len(flag.Defaults) > 0 {
+			flag.Values = make([]api.CliValue, 0, len(flag.Defaults))
+			for _, d := range flag.Defaults {
+				flag.Values = append(flag.Values, stringValue(d))
+			}
+		}
 		return nil
 	}
 

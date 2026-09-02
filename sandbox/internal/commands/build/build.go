@@ -12,20 +12,21 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"build"},
 		Category:              "Core Commands",
-		Args: []api.CliArg{
-			{
-				Id:          "path",
-				Description: "the dir to build the project",
-				Examples: []string{
-					config.ProjectName + " build . ",
-				},
-				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
-				RequiredMinSize: 0,
-				RequiredMaxSize: 1,
-			},
-		},
+		Args:                  []api.CliArg{},
 		Flags: []api.Cliflag{
+			{
+				Id:               "path",
+				ValidIdentifiers: []string{"--path"},
+				Description:      "the dir holding the project (defaults to the current directory)",
+				Examples: []string{
+					config.ProjectName + " build --path ./my-project",
+				},
+				Type:             api.CliTypeString,
+				Defaults:         []string{"."},
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: false,
+			},
 			{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
@@ -55,8 +56,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		LongDescription: "Builds the project in the given directory, compiling\nthe source code into the output artifacts. If no\npath is provided, the current directory is used.",
 		Examples: []string{
 			config.ProjectName + " build",
-			config.ProjectName + " build .",
-			config.ProjectName + " build ./my-project",
+			config.ProjectName + " build --path ./my-project",
 			config.ProjectName + " build -q",
 		},
 		Handler: func(entries api.CliEntrys) int { return CommandHander(deps, entries) },
@@ -65,8 +65,8 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
 	quietFlag := entries.GetFlagById("quiet")
 	unsafeFlag := entries.GetFlagById("unsafe")
-	pathArg := entries.GetArgById("path")
-	path := pathArg.Values[0].String()
+	pathFlag := entries.GetFlagById("path")
+	path := pathFlag.Values[0].String()
 
 	if !unsafeFlag.Exist {
 		if verify_error := verifyAction.Verify(deps, path); verify_error != nil {

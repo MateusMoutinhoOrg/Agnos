@@ -11,20 +11,21 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"start"},
 		Category:              "Core Commands",
-		Args: []api.CliArg{
-			{
-				Id:          "path",
-				Description: "the dir to start the project",
-				Examples: []string{
-					".",
-				},
-				Defaults:        []string{"."},
-				RequiredType:    api.CliTypeString,
-				RequiredMinSize: 0,
-				RequiredMaxSize: 1,
-			},
-		},
+		Args:                  []api.CliArg{},
 		Flags: []api.Cliflag{
+			{
+				Id:               "path",
+				ValidIdentifiers: []string{"--path"},
+				Description:      "the dir holding the project (defaults to the current directory)",
+				Examples: []string{
+					config.ProjectName + " start --path ./my-project",
+				},
+				Type:             api.CliTypeString,
+				Defaults:         []string{"."},
+				RequiredMinSize:  1,
+				RequiredMaxSize:  1,
+				RequiredPresence: false,
+			},
 			{
 				Id:               "project-name",
 				ValidIdentifiers: []string{"--project-name", "-p"},
@@ -78,8 +79,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 		LongDescription: "Scaffolds a new Agnos project in the given directory, creating\nthe required configuration files and folder structure. If no\npath is provided, the current directory is used.",
 		Examples: []string{
 			config.ProjectName + " start -p my-project",
-			config.ProjectName + " start . -p my-project",
-			config.ProjectName + " start ./my-project-dir -p my-project",
+			config.ProjectName + " start -p my-project --path ./my-project-dir",
 			config.ProjectName + " start -p my-project -q",
 		},
 		Handler: func(entries api.CliEntrys) int { return CommandHandler(deps, entries) },
@@ -92,9 +92,9 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 	moduleFlag := entries.GetFlagById("module")
 	projectNameFlag := entries.GetFlagById("project-name")
 	projectName := projectNameFlag.Values[0].String()
-	
-	pathArg := entries.GetArgById("path")
-	path := pathArg.Values[0].String()
+
+	pathFlag := entries.GetFlagById("path")
+	path := pathFlag.Values[0].String()
 
 	var module *string
 	if moduleFlag.Exist && len(moduleFlag.Values) > 0 {
@@ -102,7 +102,7 @@ func CommandHandler(deps *deps.Deps, entries api.CliEntrys) int {
 		module = &modVal
 	}
 
-	if !deps.Iodeps.Exist(path + "/go.mod") && module == nil {
+	if !deps.Iodeps.Exist(path+"/go.mod") && module == nil {
 		if !quietFlag.Exist {
 			deps.Std.Error("the module flag (--module) is required when there is no go.mod in the path\n")
 		}
