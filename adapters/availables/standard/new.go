@@ -2,23 +2,23 @@ package standard
 
 import (
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/embeddeps"
-	iolib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
-	dblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/keep"
-	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"
-	serializelib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializebles"
-	stdlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
-	argvlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
+	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
+	keep "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/keep"
+	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"
+	serializes "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializebles"
+	std "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
+	verb "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
 func New() deps.Deps {
 	deps := deps.Deps{}
-	stdlib.BindStdLib(&deps)
-	argvlib.BindArgvLib(&deps)
-	dblib.BindDatabaseLib(&deps)
+	std.BindStdLib(&deps)
+	verb.BindArgvLib(&deps)
+	keep.BindDatabaseLib(&deps)
 	embeddeps.BindEmbedDeps(&deps)
-	iolib.BindIoLib(&deps)
-	requestlib.BindRequestLib(&deps)
-	serializelib.BindSerializeLib(&deps)
+	iodeps.BindIoLib(&deps)
+	requestdeps.BindRequestLib(&deps)
+	serializes.BindSerializeLib(&deps)
 	return deps
 }
