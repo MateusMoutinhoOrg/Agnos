@@ -24,14 +24,17 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	hasDeps := io.IsDir("sandbox/deps")
+	hasCli := io.IsDir("sandbox/internal/cli")
 
 	vars := map[string]interface{}{
 		"Module":       module_conf.Module,
 		"HasDeps":      hasDeps,
+		"HasCli":       hasCli,
 		"Binds":        CollectBinds(io),
 		"Constructors": CollectConstructors(io),
 		"DepsLibs":     CollectDepsLibs(io),
 		"AdapterLibs":  CollectAdapterLibs(io),
+		"Commands":     CollectCommands(io),
 	}
 
 	if err := utils.RenderGroup(deps, io, "all", vars); err != nil {
@@ -40,6 +43,12 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 
 	if hasDeps {
 		if err := utils.RenderGroup(deps, io, "deps", vars); err != nil {
+			return err
+		}
+	}
+
+	if hasCli {
+		if err := utils.RenderGroup(deps, io, "cli", vars); err != nil {
 			return err
 		}
 	}

@@ -1,7 +1,7 @@
 package version
 
 import (
-	api "{{.Module}}/sandbox/api"
+	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps"
 	"{{.Module}}/sandbox/internal/config"
 )

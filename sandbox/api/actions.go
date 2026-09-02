@@ -15,4 +15,6 @@ type Actions struct {
 	DepInstall func(path string, dep string) error
 	DepRemove  func(path string, dep string) error
 	DepList    func(path string) ([]string, error)
+	CliInit    func(path string) error
+	CliPurge   func(path string) error
 }

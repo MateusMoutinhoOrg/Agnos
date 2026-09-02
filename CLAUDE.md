@@ -64,6 +64,8 @@ agnos deps-purge [path]       # dependency subsystem: remove them, then rebuild
 agnos dep-install <dep> [path]  # render assets/deplist/<dep>/** into the project, then rebuild
 agnos dep-remove <dep> [path]   # remove what that dep installed (and now-empty dirs), then rebuild
 agnos dep-list                # list the dep names available under assets/deplist
+agnos cli-init [path]         # cli subsystem: install the verb dep, render the cli asset group, then rebuild
+agnos cli-purge [path]        # cli subsystem: remove every file the cli asset group installs, then rebuild
 agnos build [path]            # re-render generated files from templates
 agnos help | version
 ```
@@ -114,7 +116,8 @@ agnos help | version
   validates them from the argv via `argvdeps`, then calls `Handler(deps, entries)` which
   returns an exit code (`api.ExitOk` / `ExitUsage` / `ExitFailure`).
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
-  (`Build`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`), each from
+  (`Build`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`, `CliInit`,
+  `CliPurge`), each from
   `sandbox/internal/actions/<name>/`.
 
 **Two layers per operation:** `internal/commands/<name>` is the CLI surface (flag/arg
@@ -129,8 +132,10 @@ written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new
 `text/template` with the same `vars` and writes each to its stripped path (via
 `io.WriteFileOverwrite`). The groups: `start` (config skeleton written by `agnos start`),
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
-`sandbox/deps` exists). `utils.RenderTemplateToDest` still renders one file to one dest for
-callers that need it.
+`sandbox/deps` exists), `cli` (the CLI layer — `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`,
+`sandbox/internal/cli/**`, the `help`/`version` commands — rendered by `agnos cli-init` and
+deleted by `agnos cli-purge`). `utils.RenderTemplateToDest` still renders one file to one
+dest for callers that need it.
 
 **Deps (`assets/deplist/<dep>/**`).** Each sub-directory of `assets/deplist/` is one
 installable dep; the tree under it mirrors the target-project layout (an asset at
@@ -162,11 +167,19 @@ dirs, emitting one `{{.Title}} {{.Name}}.Lib` field (and its import) per dir in
 `adapters/libs/<x>/` dirs, emitting one `{{.Name}}.Bind(&deps)` call (and its import) per lib
 in `{{range .AdapterLibs}}` (`adapters/availables/standard/new.go`). Every `adapters/libs/<x>`
 package therefore exposes its binder under the single uniform name `Bind(deps *deps.Deps)`.
+`CollectCommands` iterates the `sandbox/internal/commands/<x>/` dirs, emitting one
+`{{.Name}}.NewCommand(deps, sandbox)` call (and its import) per dir in `{{range .Commands}}`
+(`sandbox/binds/cli.go`, in the `cli` group). Every command package therefore exposes its
+constructor under the single uniform name `NewCommand(deps, sandbox)`.
+
+`BuildInternal` also sets `HasCli` (`sandbox/internal/cli` exists) alongside `HasDeps`, and
+renders the `cli` group only when it is true — so once `cli-init` has run, every later
+`agnos build` regenerates `sandbox/binds/cli.go` from the current command listing.
 
 **This repo bootstraps itself.** `agnos build .` runs against Agnos-Cli's own tree
 (`AgnosConfig/` holds its `project.yaml` / `themes.yaml` / `ignore.yaml` / `paths.yaml`) and
-regenerates `sandbox/deps/deps.go` and `adapters/availables/standard/new.go` in place, and
-the result still compiles (`go build ./cmd/... ./sandbox/... ./adapters/...`). Keep it that
+regenerates `sandbox/deps/deps.go`, `adapters/availables/standard/new.go` and
+`sandbox/binds/cli.go` in place, and the result still compiles (`go build ./cmd/... ./sandbox/... ./adapters/...`). Keep it that
 way: `agnos build .` must stay idempotent and compilable. In particular, all sandbox and
 adapter code must reference `Deps` fields by their mechanical names (`deps.Iodeps`,
 `deps.Serializebles`, `deps.Argvdeps`, `deps.Dbdeps`, `deps.Requestdeps`, `deps.Embeddeps`,

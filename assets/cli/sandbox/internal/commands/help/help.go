@@ -5,7 +5,7 @@ import (
 	"slices"
 	"strings"
 
-	api "{{.Module}}/sandbox/api"
+	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps"
 	"{{.Module}}/sandbox/internal/config"
 )
