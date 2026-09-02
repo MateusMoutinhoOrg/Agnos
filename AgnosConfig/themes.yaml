@@ -1,0 +1,6 @@
+- description: Documentation explaning how to use the lib
+  id: lib-usage
+  name: LibUsage
+- description: 'Documentation explaning how to to. build the project, and how to modify the project '
+  id: development
+  name: Development
