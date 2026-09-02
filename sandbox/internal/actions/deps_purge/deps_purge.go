@@ -1,4 +1,4 @@
-package enable_deps
+package deps_purge
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
@@ -7,9 +7,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func EnableDeps(deps *deps.Deps, path string) error {
+func DepsPurge(deps *deps.Deps, path string) error {
 	io := smartio.New(deps, path, config.ProjectName)
-	if err := EnableDepsInternal(deps, io, path); err != nil {
+	if err := DepsPurgeInternal(deps, io, path); err != nil {
 		return err
 	}
 	if err := buildAction.BuildInternal(deps, io, path); err != nil {

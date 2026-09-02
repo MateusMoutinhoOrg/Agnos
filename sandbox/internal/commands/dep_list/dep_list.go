@@ -10,7 +10,7 @@ import (
 func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 	return api.CliCommand{
 		ValidStartIdentifiers: []string{"dep-list"},
-		Category:              "Core Commands",
+		Category:              "Dependencies",
 		Args: []api.CliArg{
 			{
 				Id:          "path",

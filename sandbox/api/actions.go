@@ -10,8 +10,8 @@ type StartProps struct {
 type Actions struct {
 	Build      func(path string) error
 	Start      func(props StartProps) error
-	EnableDeps func(path string) error
-	RemoveDeps func(path string) error
+	DepsInit   func(path string) error
+	DepsPurge  func(path string) error
 	DepInstall func(path string, dep string) error
 	DepRemove  func(path string, dep string) error
 	DepList    func(path string) ([]string, error)

@@ -1,12 +1,12 @@
-package remove_deps
+package deps_purge
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func RemoveDepsInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Printf("remove-deps started with path %s \n", path)
+func DepsPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
+	deps.Std.Printf("deps-purge started with path %s \n", path)
 
 	io.RemoveDir("sandbox/deps")
 	io.RemoveDir("adapters")

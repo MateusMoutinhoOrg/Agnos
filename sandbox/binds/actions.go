@@ -7,8 +7,8 @@ import (
 	depInstallAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_install"
 	depListAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_list"
 	depRemoveAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_remove"
-	enableDepsAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/enable_deps"
-	removeDepsAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/remove_deps"
+	depsInitAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/deps_init"
+	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/deps_purge"
 	startAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/start"
 )
 
@@ -19,11 +19,11 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.Start = func(props api.StartProps) error {
 		return startAction.Start(deps, props)
 	}
-	sandbox.Actions.EnableDeps = func(path string) error {
-		return enableDepsAction.EnableDeps(deps, path)
+	sandbox.Actions.DepsInit = func(path string) error {
+		return depsInitAction.DepsInit(deps, path)
 	}
-	sandbox.Actions.RemoveDeps = func(path string) error {
-		return removeDepsAction.RemoveDeps(deps, path)
+	sandbox.Actions.DepsPurge = func(path string) error {
+		return depsPurgeAction.DepsPurge(deps, path)
 	}
 	sandbox.Actions.DepInstall = func(path string, dep string) error {
 		return depInstallAction.DepInstall(deps, path, dep)

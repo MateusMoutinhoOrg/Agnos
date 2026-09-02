@@ -59,8 +59,8 @@ There is currently **no test suite** (`*_test.go` files) and no lint config beyo
 
 ```bash
 agnos start --project-name <name> --module <go-module-path> [path]   # scaffold; path defaults to "."
-agnos enable-deps [path]      # add sandbox/deps + adapters, then rebuild
-agnos remove-deps [path]      # remove them, then rebuild
+agnos deps-init [path]        # dependency subsystem: add sandbox/deps + adapters, then rebuild
+agnos deps-purge [path]       # dependency subsystem: remove them, then rebuild
 agnos dep-install <dep> [path]  # render assets/deplist/<dep>/** into the project, then rebuild
 agnos dep-remove <dep> [path]   # remove what that dep installed (and now-empty dirs), then rebuild
 agnos dep-list                # list the dep names available under assets/deplist
@@ -114,13 +114,14 @@ agnos help | version
   validates them from the argv via `argvdeps`, then calls `Handler(deps, entries)` which
   returns an exit code (`api.ExitOk` / `ExitUsage` / `ExitFailure`).
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
-  (`Build`, `Start`, `EnableDeps`, `RemoveDeps`), each from `sandbox/internal/actions/<name>/`.
+  (`Build`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`), each from
+  `sandbox/internal/actions/<name>/`.
 
 **Two layers per operation:** `internal/commands/<name>` is the CLI surface (flag/arg
 declaration + handler); `internal/actions/<name>` is the logic. Command handlers currently
 call the action package directly (e.g. `start` calls `startAction.Start` then
 `buildAction.Build`); `binds/actions.go` also exposes the same actions as library API.
-Note `build` runs as a follow-up step after `start`/`enable-deps`/`remove-deps`.
+Note `build` runs as a follow-up step after `start`/`deps-init`/`deps-purge`.
 
 **Asset groups.** Templates live under `assets/<group>/**`, each file at the path it will be
 written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new.go`).

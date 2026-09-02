@@ -1,4 +1,4 @@
-package remove_deps
+package deps_init
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
@@ -7,9 +7,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func RemoveDeps(deps *deps.Deps, path string) error {
+func DepsInit(deps *deps.Deps, path string) error {
 	io := smartio.New(deps, path, config.ProjectName)
-	if err := RemoveDepsInternal(deps, io, path); err != nil {
+	if err := DepsInitInternal(deps, io, path); err != nil {
 		return err
 	}
 	if err := buildAction.BuildInternal(deps, io, path); err != nil {

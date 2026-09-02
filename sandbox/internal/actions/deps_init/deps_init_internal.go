@@ -1,12 +1,12 @@
-package enable_deps
+package deps_init
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-func EnableDepsInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Printf("enable-deps started with path %s \n", path)
+func DepsInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
+	deps.Std.Printf("deps-init started with path %s \n", path)
 
 	io.CreateDir("sandbox/deps")
 	io.CreateDir("adapters")

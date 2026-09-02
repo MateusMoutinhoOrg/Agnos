@@ -196,6 +196,10 @@ func printCommandHelp(deps *deps.Deps, sandbox *api.Sandbox, cmd *api.CliCommand
 	if boxW < 44 {
 		boxW = 44
 	}
+	// widen so the longest line (title or description) always fits
+	if w := len(cmd.Description) + 6; w > boxW {
+		boxW = w
+	}
 	innerW := boxW - 2 // inside the box walls
 
 	p("\n")
