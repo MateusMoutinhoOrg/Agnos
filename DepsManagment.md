@@ -5,6 +5,9 @@ create a mechanic for auto installed embed deps in the project
 ## Assets structs:
 all the deps , must be retrived from assets/deplist/ 
 each dir inside assets/deplist its a dep. 
+for exemplo assets/deplist/embed  , embed its a dep 
+assets/deplist/std ,  std its a dep 
+
 
 ## dep-install
 
