@@ -39,7 +39,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			},
 		},
 		Description:     "Initializes the CLI layer for the project",
-		LongDescription: "Installs the argv dep the CLI layer depends on, renders the\n\"cli\" asset group into the project, and calls build.",
+		LongDescription: "Installs the std and argv deps the CLI layer depends on, renders the\n\"cli\" asset group into the project, and calls build.",
 		Examples: []string{
 			config.ProjectName + " cli-init",
 			config.ProjectName + " cli-init .",

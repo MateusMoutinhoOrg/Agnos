@@ -64,7 +64,7 @@ agnos deps-purge [path]       # dependency subsystem: remove them, then rebuild
 agnos dep-install <dep> [path]  # render assets/deplist/<dep>/** into the project, then rebuild
 agnos dep-remove <dep> [path]   # remove what that dep installed (and now-empty dirs), then rebuild
 agnos dep-list                # list the dep names available under assets/deplist
-agnos cli-init [path]         # cli subsystem: install the verb dep, render the cli asset group, then rebuild
+agnos cli-init [path]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
 agnos cli-purge [path]        # cli subsystem: remove every file the cli asset group installs, then rebuild
 agnos build [path]            # re-render generated files from templates
 agnos help | version
