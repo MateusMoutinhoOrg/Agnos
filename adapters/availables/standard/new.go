@@ -1,8 +1,8 @@
 package standard
 
 import (
-	argvlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/argvdeps"
-	dblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/dbdeps"
+	argvlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
+	dblib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/keep"
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/embeddeps"
 	iolib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
 	requestlib "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"

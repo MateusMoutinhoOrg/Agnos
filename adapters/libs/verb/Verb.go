@@ -1,4 +1,4 @@
-package argvdeps
+package verb
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
