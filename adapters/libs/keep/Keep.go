@@ -179,11 +179,11 @@ func fromKeepSchemas(schemas []keepapi.Schema) []dbdeps.Schema {
 	return converted
 }
 
-// BindDatabaseLib fills deps.Deps.DatabaseLib with the Keep schema-database
+// Bind fills deps.Deps.DatabaseLib with the Keep schema-database
 // library, copied onto the sandbox's local dbdeps.Lib. Each database is wired
 // with Keep's own filesystem adapter rooted at its Props.Path, so the library
 // itself needs no base directory.
-func BindDatabaseLib(deps *deps.Deps) {
+func Bind(deps *deps.Deps) {
 	deps.DatabaseLib = dbdeps.Lib{
 		NewDatabase: func(props dbdeps.Props) dbdeps.DatabaseHandle {
 			inner := keeplib.New(keepadapter.NewWithBase(props.Path))

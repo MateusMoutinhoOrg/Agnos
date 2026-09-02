@@ -35,7 +35,7 @@ func errorf(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
 }
 
-func BindStdLib(deps *deps.Deps) {
+func Bind(deps *deps.Deps) {
 	deps.Std = std.Lib{
 		Now: func() time.Time {
 			return now()

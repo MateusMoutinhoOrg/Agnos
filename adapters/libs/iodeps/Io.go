@@ -9,9 +9,9 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
 )
 
-// BindIoLib fills deps.Deps.IoLib with the implementation of the Io dependency
+// Bind fills deps.Deps.IoLib with the implementation of the Io dependency
 // using the standard library's os and filepath packages.
-func BindIoLib(deps *deps.Deps) {
+func Bind(deps *deps.Deps) {
 	deps.IoLib = iodeps.Lib{
 		ReadFile: func(path string) ([]byte, error) {
 			return os.ReadFile(path)

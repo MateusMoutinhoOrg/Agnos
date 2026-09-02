@@ -69,11 +69,11 @@ func relativeTo(root string, current string) string {
 	return current[len(root)+1:]
 }
 
-// BindEmbedDeps fills deps.Deps.EmbedDeps with the project's assets, compiled
+// Bind fills deps.Deps.EmbedDeps with the project's assets, compiled
 // into the binary by the assets package and served from the root of that tree.
 // Each field of the assigned struct is a closure reading the embedded
 // filesystem at call time.
-func BindEmbedDeps(deps *deps.Deps) {
+func Bind(deps *deps.Deps) {
 	deps.EmbedDeps = embeddeps.Lib{
 		ReadFile: func(requested string) ([]byte, error) {
 			return assets.Files.ReadFile(assetPath(requested))

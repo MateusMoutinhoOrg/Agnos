@@ -6,9 +6,9 @@ import (
 	verblib "github.com/MateusMoutinhoOrg/Verb/sandbox"
 )
 
-// BindArgvLib fills deps.Deps.ArgvLib.New with the Verb argv-parser library's
+// Bind fills deps.Deps.ArgvLib.New with the Verb argv-parser library's
 // per-call constructor.
-func BindArgvLib(deps *deps.Deps) {
+func Bind(deps *deps.Deps) {
 	deps.ArgvLib.New = newArgvParser
 }
 

@@ -9,9 +9,9 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// BindSerializeLib fills deps.Deps.SerializeLib, providing the capability to
+// Bind fills deps.Deps.SerializeLib, providing the capability to
 // create, parse, and serialize generic JSON/YAML structures.
-func BindSerializeLib(deps *deps.Deps) {
+func Bind(deps *deps.Deps) {
 	deps.SerializeLib = serializibles.Lib{
 		CreateString: func(value string) *serializibles.SerializibleObject {
 			var v any = value

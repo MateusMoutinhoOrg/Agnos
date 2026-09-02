@@ -5,7 +5,7 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
 	keep "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/keep"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"
-	serializes "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializebles"
+	serializebles "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializebles"
 	std "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
 	verb "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
@@ -13,12 +13,12 @@ import (
 
 func New() deps.Deps {
 	deps := deps.Deps{}
-	std.BindStdLib(&deps)
-	verb.BindArgvLib(&deps)
-	keep.BindDatabaseLib(&deps)
-	embeddeps.BindEmbedDeps(&deps)
-	iodeps.BindIoLib(&deps)
-	requestdeps.BindRequestLib(&deps)
-	serializes.BindSerializeLib(&deps)
+	embeddeps.Bind(&deps)
+	iodeps.Bind(&deps)
+	keep.Bind(&deps)
+	requestdeps.Bind(&deps)
+	serializebles.Bind(&deps)
+	std.Bind(&deps)
+	verb.Bind(&deps)
 	return deps
 }

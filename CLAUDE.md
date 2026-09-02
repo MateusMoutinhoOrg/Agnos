@@ -86,7 +86,8 @@ agnos help | version
 - **`adapters/`** — the only place `os`, `embed`, `net/http` etc. are touched. Split in two:
   - **`adapters/libs/<x>deps/`** — one isolated real implementation per sub-contract
     (`argvdeps`, `dbdeps`, `embeddeps`, `iodeps`, `requestdeps`, `serializebles`, `std`),
-    each a package exporting a `New…` constructor for that one `deps` sub-contract.
+    each a package exporting a uniform `Bind(deps *deps.Deps)` that fills that one `deps`
+    sub-contract field.
   - **`adapters/availables/<name>/new.go`** — a ready-made `Deps` assembly wiring the libs
     together; `adapters/availables/standard` (`standard.New()`) is the default. A user who
     wants a different mix composes their own `Deps` from `adapters/libs` directly.
@@ -121,7 +122,10 @@ a template via `utils.RenderTemplateToDest`. `render_new.go` iterates `sandbox/b
 `{{range .Binds}}`; `render_api.go` iterates `sandbox/api` into `{{range .Constructors}}`;
 `render_deps.go` iterates the `sandbox/deps/<x>/` sub-contract dirs, emitting one
 `{{.Title}} {{.Name}}.Lib` field (and its import) per dir in `sandbox/deps/deps.go` — the
-same iterate-a-dir-into-a-template pattern as `sandbox/new.go`.
+same iterate-a-dir-into-a-template pattern as `sandbox/new.go`. `render_adapter.go` iterates
+the `adapters/libs/<x>/` dirs the same way, emitting one `{{.Name}}.Bind(&deps)` call (and
+its import) per lib in `adapters/availables/standard/new.go`. Every `adapters/libs/<x>`
+package therefore exposes its binder under the single uniform name `Bind(deps *deps.Deps)`.
 
 ### SmartIO — transactional filesystem
 
