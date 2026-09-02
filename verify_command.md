@@ -4,7 +4,12 @@ add the command **agnos verify**
 ideia:
 the ideia of agnos project,  its to provide a full factory with harness generation for go language , so it must garantee schematization. conssistency.
 
-Command workflow:
+
+### Important: 
+the build comman, must call the verify action before the build, unless the --unsafe flag is passed.
+
+
+### Command workflow:
 
 1. Sandbox Verification:
 
