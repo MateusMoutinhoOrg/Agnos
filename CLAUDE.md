@@ -206,7 +206,13 @@ directly. `agnos start` renders the `start` asset group (`project.yaml`, `themes
 `paths.yaml`) into `AgnosConfig/`; `agnos build` reads them back.
 
 `sandbox/internal/config/config.go` holds the CLI's own constants: `ProjectName = "Agnos"`
-(used to name the generated `AgnosConfig/` dir) and `Version`.
+(used to name the generated `AgnosConfig/` dir) and `Version`. It is itself part of the
+`all` asset group (`assets/all/sandbox/internal/config/config.go`): every `agnos build`
+reads `<ProjectName>Config/project.yaml` back through `projectconf` and regenerates it, with
+`ProjectName` set to the title-cased `name` and `Version` to the config's `version`. A
+missing/unparsable `project.yaml` is a hard error — `agnos start` is a prerequisite for
+`agnos build`, so `loadProjectConf` never falls back to defaults. For this repo the
+rendered result is unchanged (`Agnos` / `0.0.1`), keeping `agnos build .` idempotent.
 
 ## Adding a command
 
