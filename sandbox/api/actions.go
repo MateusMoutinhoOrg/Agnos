@@ -9,6 +9,7 @@ type StartProps struct {
 
 type Actions struct {
 	Build      func(path string) error
+	Verify     func(path string) error
 	Start      func(props StartProps) error
 	DepsInit   func(path string) error
 	DepsPurge  func(path string) error

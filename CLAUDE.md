@@ -66,7 +66,8 @@ agnos dep-remove <dep> [path]   # remove what that dep installed (and now-empty 
 agnos dep-list                # list the dep names available under assets/deplist
 agnos cli-init [path]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
 agnos cli-purge [path]        # cli subsystem: remove every file the cli asset group installs, then rebuild
-agnos build [path]            # re-render generated files from templates
+agnos verify [path]          # check the project keeps the sandbox/adapter schema (no writes)
+agnos build [path] [--unsafe] # run verify (unless --unsafe), then re-render generated files from templates
 agnos help | version
 ```
 
@@ -116,8 +117,8 @@ agnos help | version
   validates them from the argv via `argvdeps`, then calls `Handler(deps, entries)` which
   returns an exit code (`api.ExitOk` / `ExitUsage` / `ExitFailure`).
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
-  (`Build`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`, `CliInit`,
-  `CliPurge`), each from
+  (`Build`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
+  `CliInit`, `CliPurge`), each from
   `sandbox/internal/actions/<name>/`.
 
 **Two layers per operation:** `internal/commands/<name>` is the CLI surface (flag/arg
@@ -125,6 +126,25 @@ declaration + handler); `internal/actions/<name>` is the logic. Command handlers
 call the action package directly (e.g. `start` calls `startAction.Start` then
 `buildAction.Build`); `binds/actions.go` also exposes the same actions as library API.
 Note `build` runs as a follow-up step after `start`/`deps-init`/`deps-purge`.
+
+**The verify gate.** `internal/actions/verify` reads the target tree through `smartio` and
+performs **no writes** (it never calls `io.Persist`). It enforces the harness schema and
+returns one error listing every violation:
+
+- `sandbox/` holds only the `api`, `binds`, `deps`, `internal` directories plus a loose
+  `new.go`.
+- No file under `sandbox/` imports a module-internal package outside `sandbox/`.
+- `sandbox/api/*` imports nothing outside `sandbox/` (no stdlib, no external modules);
+  `sandbox/deps/*` imports only the standard library and other `sandbox/deps` packages.
+- Every file in `sandbox/binds/` mirrors a file of the same name in `sandbox/api/` and
+  declares only functions (no top-level types/consts/vars).
+- `adapters/` holds only the `availables` and `libs` directories.
+
+The `build` **command** handler runs `verifyAction.Verify` before `buildAction.Build` unless
+`--unsafe` is passed; the `build` **action** (and the follow-up `build` after
+`start`/`deps-*`/`cli-*`) does not, so mid-refactor states can still regenerate. Checks live
+in `check_sandbox.go` / `check_adapters.go`, each returning `[]string` violations; add new
+rules as sibling `check_*.go` files.
 
 **Asset groups.** Templates live under `assets/<group>/**`, each file at the path it will be
 written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new.go`).

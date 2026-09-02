@@ -12,11 +12,15 @@ import (
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/deps_purge"
 	startAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/start"
+	verifyAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/verify"
 )
 
 func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.Build = func(path string) error {
 		return buildAction.Build(deps, path)
+	}
+	sandbox.Actions.Verify = func(path string) error {
+		return verifyAction.Verify(deps, path)
 	}
 	sandbox.Actions.Start = func(props api.StartProps) error {
 		return startAction.Start(deps, props)

@@ -15,6 +15,7 @@ import (
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/deps_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/help"
 	start "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/start"
+	verify "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/verify"
 	version "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/version"
 )
 
@@ -30,6 +31,7 @@ func CliBind(deps *deps.Deps, sandbox *api.Sandbox) {
 		deps_purge.NewCommand(deps, sandbox),
 		help.NewCommand(deps, sandbox),
 		start.NewCommand(deps, sandbox),
+		verify.NewCommand(deps, sandbox),
 		version.NewCommand(deps, sandbox),
 	)
 
