@@ -1,7 +1,5 @@
 package api
 
-import "{{.Module}}/sandbox/deps"
-
 type CliValue interface {
 	String() string
 	Int() int
@@ -66,7 +64,7 @@ type CliCommand struct {
 	Category              string
 	Hidden                bool
 	Examples              []string
-	Handler               func(deps *deps.Deps, entries CliEntrys) int
+	Handler               func(entries CliEntrys) int
 }
 
 const (

@@ -114,7 +114,7 @@ agnos help | version
 - **`binds/cli.go`** registers `api.CliCommand` values from `sandbox/internal/commands/<name>/`
   and sets `Cli.CliMain` to `sandbox/internal/cli.CliMain` — a declarative parser: each
   command declares `Args`/`Flags` (`api.CliArg`/`api.Cliflag`), the parser collects and
-  validates them from the argv via `argvdeps`, then calls `Handler(deps, entries)` which
+  validates them from the argv via `argvdeps`, then calls `Handler(entries)` (which closes over `deps`) and
   returns an exit code (`api.ExitOk` / `ExitUsage` / `ExitFailure`).
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
   (`Build`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
@@ -134,7 +134,10 @@ returns one error listing every violation:
 - `sandbox/` holds only the `api`, `binds`, `deps`, `internal` directories plus a loose
   `new.go`.
 - No file under `sandbox/` imports a module-internal package outside `sandbox/`.
-- `sandbox/api/*` imports nothing outside `sandbox/` (no stdlib, no external modules);
+- `sandbox/api/*` imports only other `sandbox/api` packages — nothing else at all (no
+  stdlib, no external modules, not even `sandbox/deps`: api is pure contract, so
+  `CliCommand.Handler` is `func(entries CliEntrys) int` and each command's `NewCommand`
+  closes over `deps` in a one-line wrapper);
   `sandbox/deps/*` imports only the standard library and other `sandbox/deps` packages.
 - Every file in `sandbox/binds/` mirrors a file of the same name in `sandbox/api/` and
   declares only functions (no top-level types/consts/vars).

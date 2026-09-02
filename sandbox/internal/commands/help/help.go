@@ -51,7 +51,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " help",
 			config.ProjectName + " help start",
 		},
-		Handler: CommandHandler,
+		Handler: func(entries api.CliEntrys) int { return CommandHandler(deps, entries) },
 	}
 }
 

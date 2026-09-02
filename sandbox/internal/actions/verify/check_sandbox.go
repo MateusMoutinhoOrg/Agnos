@@ -75,16 +75,17 @@ func checkSandboxImports(deps *deps.Deps, io *smartio.SmartIO, module string) []
 	return violations
 }
 
-// checkSandboxApi enforces that sandbox/api/* imports nothing but other
-// sandbox packages (no stdlib, no external modules).
+// checkSandboxApi enforces that sandbox/api/* imports nothing at all beyond
+// other sandbox/api packages (no stdlib, no external modules, and in
+// particular not sandbox/deps — api is pure contract).
 func checkSandboxApi(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(io, "sandbox/api") {
 		for _, imp := range fileImports(deps, io, file) {
-			if !isUnder(imp, module+"/sandbox") {
+			if !isUnder(imp, module+"/sandbox/api") {
 				violations = append(violations,
-					file+" imports "+imp+"; sandbox/api/* may not import anything outside sandbox/")
+					file+" imports "+imp+"; sandbox/api/* may import only other sandbox/api packages")
 			}
 		}
 	}

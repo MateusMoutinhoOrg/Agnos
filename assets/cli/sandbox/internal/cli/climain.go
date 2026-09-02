@@ -114,7 +114,7 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 
 		entries := buildCliEntrys(command)
 
-		return command.Handler(deps, entries)
+		return command.Handler(entries)
 	}
 
 	deps.Std.Printf("Unknown Command!\n")
@@ -127,7 +127,7 @@ func CliMain(deps *deps.Deps, sandbox *api.Sandbox, args []string) int {
 func printUsage(deps *deps.Deps, sandbox *api.Sandbox) {
 	for _, cmd := range sandbox.Cli.Commands {
 		if slices.Contains(cmd.ValidStartIdentifiers, "help") {
-			cmd.Handler(deps, buildCliEntrys(&cmd))
+			cmd.Handler(buildCliEntrys(&cmd))
 			return
 		}
 	}

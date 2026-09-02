@@ -44,7 +44,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " deps-purge",
 			config.ProjectName + " deps-purge .",
 		},
-		Handler: CommandHander,
+		Handler: func(entries api.CliEntrys) int { return CommandHander(deps, entries) },
 	}
 }
 

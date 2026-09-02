@@ -54,7 +54,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " dep-install embed",
 			config.ProjectName + " dep-install embed .",
 		},
-		Handler: CommandHander,
+		Handler: func(entries api.CliEntrys) int { return CommandHander(deps, entries) },
 	}
 }
 

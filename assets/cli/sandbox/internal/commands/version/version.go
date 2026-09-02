@@ -16,7 +16,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " --version",
 			config.ProjectName + " version",
 		},
-		Handler: CommandHandler,
+		Handler: func(entries api.CliEntrys) int { return CommandHandler(deps, entries) },
 	}
 }
 

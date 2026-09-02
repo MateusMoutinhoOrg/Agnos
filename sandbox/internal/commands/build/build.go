@@ -59,7 +59,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 			config.ProjectName + " build ./my-project",
 			config.ProjectName + " build -q",
 		},
-		Handler: CommandHander,
+		Handler: func(entries api.CliEntrys) int { return CommandHander(deps, entries) },
 	}
 }
 func CommandHander(deps *deps.Deps, entries api.CliEntrys) int {
