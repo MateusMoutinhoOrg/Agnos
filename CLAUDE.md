@@ -61,6 +61,9 @@ There is currently **no test suite** (`*_test.go` files) and no lint config beyo
 agnos start --project-name <name> --module <go-module-path> [path]   # scaffold; path defaults to "."
 agnos enable-deps [path]      # add sandbox/deps + adapters, then rebuild
 agnos remove-deps [path]      # remove them, then rebuild
+agnos dep-install <dep> [path]  # render assets/deplist/<dep>/** into the project, then rebuild
+agnos dep-remove <dep> [path]   # remove what that dep installed (and now-empty dirs), then rebuild
+agnos dep-list                # list the dep names available under assets/deplist
 agnos build [path]            # re-render generated files from templates
 agnos help | version
 ```
@@ -127,6 +130,25 @@ written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
 `sandbox/deps` exists). `utils.RenderTemplateToDest` still renders one file to one dest for
 callers that need it.
+
+**Deps (`assets/deplist/<dep>/**`).** Each sub-directory of `assets/deplist/` is one
+installable dep; the tree under it mirrors the target-project layout (an asset at
+`assets/deplist/embed/sandbox/deps/embeddeps/embeddeps.go` installs to
+`sandbox/deps/embeddeps/embeddeps.go`). `dep-install` renders that subtree as one asset
+group via `utils.RenderGroup(deps, io, "deplist/"+dep, {"Module": …})`, then runs `build`
+as a follow-up step so the collectors pick up the new sub-contract dirs; `dep-remove`
+deletes those files plus any directory the removal emptied, then runs `build`. Both persist
+their own filesystem changes *before* invoking `buildAction.Build` (a fresh transaction),
+because `build`'s collectors list dirs from disk and would not see pending writes.
+`dep-list` reads `deplist/` and returns one entry per first path segment.
+
+Every lib this repo ships is mirrored there as a dep, each bundling its
+`sandbox/deps/<contract>/` copy with its `adapters/libs/<lib>/` implementation and
+`{{.Module}}` substituted for the import path: `embed` (embeddeps + `assets/asset.go`),
+`iodeps`, `keep` (dbdeps), `requestdeps`, `serializebles`, `std`, `verb` (argvdeps). After
+`dep-install`, `build`'s collectors regenerate `sandbox/deps/deps.go` and
+`adapters/availables/standard/new.go` to include the new sub-contract; `keep` and `verb`
+also need `go mod tidy` in the target project to pull their external modules.
 
 **Collectors (`internal/actions/build/collect_*.go`)** all follow one shape: list a directory
 with `io.List*`, derive names from the last path segment, title-case them, return the slice.

@@ -12,4 +12,7 @@ type Actions struct {
 	Start      func(props StartProps) error
 	EnableDeps func(path string) error
 	RemoveDeps func(path string) error
+	DepInstall func(path string, dep string) error
+	DepRemove  func(path string, dep string) error
+	DepList    func(path string) ([]string, error)
 }
