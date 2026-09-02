@@ -143,7 +143,13 @@ installable dep; the tree under it mirrors the target-project layout (an asset a
 `sandbox/deps/embeddeps/embeddeps.go`). `dep-install` renders that subtree as one asset
 group via `utils.RenderGroup(deps, io, "deplist/"+dep, {"Module": …})`, then runs `build`
 as a follow-up step so the collectors pick up the new sub-contract dirs; `dep-remove`
-deletes those files plus any directory the removal emptied, then runs `build`. Both persist
+deletes those files plus any directory the removal emptied, then runs `build`. Both also
+sync the target project's `go.mod`: `assets/depsversion.yaml` (parsed by
+`parsables/depsversionconf`) maps a dep name to the `<module>@<version>` it needs, and if
+the dep is listed there `dep-install` adds/updates that `require` entry (via
+`moduleconf.AddRequire` + `moduleconf.Render`, written back to `<path>/go.mod`) while
+`dep-remove` strips it (`moduleconf.RemoveRequire`). Deps that bundle only sandbox-copy
+code are absent from `depsversion.yaml` and leave `go.mod` untouched. Both persist
 their own filesystem changes *before* invoking `buildAction.Build` (a fresh transaction),
 because `build`'s collectors list dirs from disk and would not see pending writes.
 `dep-list` reads `deplist/` and returns one entry per first path segment.
@@ -154,7 +160,9 @@ Every lib this repo ships is mirrored there as a dep, each bundling its
 `iodeps`, `keep` (dbdeps), `requestdeps`, `serializebles`, `std`, `verb` (argvdeps). After
 `dep-install`, `build`'s collectors regenerate `sandbox/deps/deps.go` and
 `adapters/availables/standard/new.go` to include the new sub-contract; `keep` and `verb`
-also need `go mod tidy` in the target project to pull their external modules.
+pull external modules, so `dep-install` writes their pinned `require` into the target
+`go.mod` (from `assets/depsversion.yaml`) and the user still runs `go mod tidy` there to
+download them.
 
 **Collectors (`internal/actions/build/collect_*.go`)** all follow one shape: list a directory
 with `io.List*`, derive names from the last path segment, title-case them, return the slice.
