@@ -77,8 +77,6 @@ func CliMain(deps *deps.Deps, args []string) int {
 
 func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &build.Entries{}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
-	entries.Unsafe = verb.IsPresent([]string{ "--unsafe" })
 	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
 		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
 		if valueErr != nil {
@@ -89,6 +87,8 @@ func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Unsafe = verb.IsPresent([]string{ "--unsafe" })
 	return build.CommandHander(deps, entries)
 }
 
@@ -218,6 +218,14 @@ func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &start.Entries{}
+	if verb.GetOptionsSize([]string{ "--module", "-m" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--module", "-m" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'module': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Module = value
+	}
 	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
 		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
 		if valueErr != nil {
@@ -241,14 +249,6 @@ func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 	}
 	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	entries.Force = verb.IsPresent([]string{ "--force", "-f" })
-	if verb.GetOptionsSize([]string{ "--module", "-m" }) > 0 {
-		value, valueErr := verb.GetStringOption([]string{ "--module", "-m" }, 0)
-		if valueErr != nil {
-			deps.Std.Printf("flag 'module': %s\n", valueErr.Error())
-			return ExitUsage
-		}
-		entries.Module = value
-	}
 	return start.CommandHander(deps, entries)
 }
 

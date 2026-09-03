@@ -67,9 +67,9 @@ var helpCommands = []helpCommand{
 		Examples:        []string{ "build", "build --path ./my-project", "build -q",  },
 		Hidden:          false,
 		Flags: []helpField{
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "build --path ./my-project",  }, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "build -q",  }, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{ "--unsafe" }, Description: "Skips the verify schema gate before building", Examples: []string{ "build --unsafe",  }, Type: "boolean", Default: "", Required: false},
-			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "build --path ./my-project",  }, Type: "string", Default: ".", Required: false},
 		},
 		Args: []helpField{
 		},
@@ -182,11 +182,11 @@ var helpCommands = []helpCommand{
 		Examples:        []string{ "start -p my-project", "start -p my-project --path ./my-project-dir", "start -p my-project -q",  },
 		Hidden:          false,
 		Flags: []helpField{
+			{Identifiers: []string{ "--module", "-m" }, Description: "Module name for go.mod", Examples: []string{ "start -m github.com/user/project",  }, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "start --path ./my-project",  }, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{ "--project-name", "-p" }, Description: "the name of the project", Examples: []string{ "start -p my-project",  }, Type: "string", Default: "", Required: true},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "start -q",  }, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{ "--force", "-f" }, Description: "Forces the creation of the project, overwriting existing files", Examples: []string{ "start -f",  }, Type: "boolean", Default: "", Required: false},
-			{Identifiers: []string{ "--module", "-m" }, Description: "Module name for go.mod", Examples: []string{ "start -m github.com/user/project",  }, Type: "string", Default: "", Required: false},
 		},
 		Args: []helpField{
 		},

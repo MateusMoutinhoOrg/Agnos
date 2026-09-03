@@ -4,7 +4,7 @@ package build
 // It is the typed view of the parsed command line handed to CommandHander.
 // Do not edit by hand — put your logic in handler.go.
 type Entries struct {
+	Path string
 	Quiet bool
 	Unsafe bool
-	Path string
 }
