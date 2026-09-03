@@ -14,7 +14,7 @@ import (
 func VerifyInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	deps.Std.Printf("verify started with path %s \n", path)
 
-	gomod, err := io.ReadFile(path + "/go.mod")
+	gomod, err := io.ReadFile("go.mod")
 	if err != nil {
 		return err
 	}

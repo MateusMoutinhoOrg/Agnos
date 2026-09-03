@@ -77,6 +77,9 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 			return ExitUsage
 		}
 		entries.{{.GoField}} = value
+{{- if .RangeCheck}}
+{{.RangeCheck}}
+{{- end}}
 {{- if .Required}}
 	} else {
 		deps.Std.Printf("required flag '{{.Key}}' not provided\n")
@@ -109,6 +112,9 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 {{- else}}
 	if value, valueErr := verb.GetNext{{.ArgGetter}}Arg(); valueErr == nil {
 		entries.{{.GoField}} = value
+{{- if .RangeCheck}}
+{{.RangeCheck}}
+{{- end}}
 {{- if .Required}}
 	} else {
 		deps.Std.Printf("required arg '{{.Key}}' not provided\n")

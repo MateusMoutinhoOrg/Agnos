@@ -15,8 +15,22 @@ func joinPath(base string, name string) string {
 	return base + "/" + name
 }
 
+// normalizeRoot collapses the spellings of "the current directory" ("", ".",
+// "./") to "" so rootedPath adds no prefix, and strips a trailing slash from
+// every other value so joins are uniform.
+func normalizeRoot(path string) string {
+	if path == "" || path == "." || path == "./" {
+		return ""
+	}
+	for strings.HasSuffix(path, "/") {
+		path = path[:len(path)-1]
+	}
+	return path
+}
+
 func New(deps *deps.Deps, path string, projectName string) *SmartIO {
 	io := &SmartIO{
+		Root:         normalizeRoot(path),
 		Transactions: make(map[string][]byte),
 	}
 

@@ -18,4 +18,5 @@ type Actions struct {
 	DepList    func(path string) ([]string, error)
 	CliInit    func(path string) error
 	CliPurge   func(path string) error
+	AddCommand func(path string, name string) error
 }

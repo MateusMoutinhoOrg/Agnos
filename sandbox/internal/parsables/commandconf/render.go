@@ -22,19 +22,21 @@ func Render(deps *deps.Deps, conf *CommandConf) string {
 		obj.AddItemToObject("hidden", true)
 	}
 	if len(conf.Flags) > 0 {
-		obj.AddItemToObject("flags", fieldsObject(deps, conf.Flags))
+		obj.AddItemToObject("flags", fieldsArray(deps, conf.Flags))
 	}
 	if len(conf.Args) > 0 {
-		obj.AddItemToObject("args", fieldsObject(deps, conf.Args))
+		obj.AddItemToObject("args", fieldsArray(deps, conf.Args))
 	}
 
 	return deps.Serializebles.SerializeToYaml(obj)
 }
 
-func fieldsObject(deps *deps.Deps, fields []Field) *serializibles.SerializibleObject {
-	obj := deps.Serializebles.CreateObject()
+// fieldsArray renders flags/args in the canonical ordered sequence shape.
+func fieldsArray(deps *deps.Deps, fields []Field) *serializibles.SerializibleObject {
+	arr := deps.Serializebles.CreateArray()
 	for _, field := range fields {
 		entry := deps.Serializebles.CreateObject()
+		entry.AddItemToObject("name", field.Key)
 		if len(field.Identifiers) > 0 {
 			entry.AddItemToObject("identifiers", stringArray(deps, field.Identifiers))
 		}
@@ -52,9 +54,15 @@ func fieldsObject(deps *deps.Deps, fields []Field) *serializibles.SerializibleOb
 		if field.Array {
 			entry.AddItemToObject("array", true)
 		}
-		obj.AddItemToObject(field.Key, entry)
+		if field.HasMin {
+			entry.AddItemToObject("min", field.Min)
+		}
+		if field.HasMax {
+			entry.AddItemToObject("max", field.Max)
+		}
+		arr.AddItemToArray(entry)
 	}
-	return obj
+	return arr
 }
 
 func stringArray(deps *deps.Deps, values []string) *serializibles.SerializibleObject {

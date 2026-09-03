@@ -1,6 +1,7 @@
 package build
 
 import (
+	"fmt"
 	"strconv"
 	"strings"
 
@@ -83,7 +84,60 @@ func fieldData(field commandconf.Field) map[string]any {
 		"Examples":       field.Examples,
 		"Type":           field.Type,
 		"Default":        field.Default,
+		"MinLabel":       numberLabel(field, field.Min, field.HasMin),
+		"MaxLabel":       numberLabel(field, field.Max, field.HasMax),
+		"RangeCheck":     rangeCheck(field),
 	}
+}
+
+// numberLabel renders a min/max bound as the literal it has in entries.yaml
+// ("" when the bound is unset), for help display.
+func numberLabel(field commandconf.Field, value float64, has bool) string {
+	if !has {
+		return ""
+	}
+	if field.Type == "int" {
+		return strconv.FormatInt(int64(value), 10)
+	}
+	return strconv.FormatFloat(value, 'g', -1, 64)
+}
+
+// rangeCheck emits the Go statements the generated dispatch runs, after a
+// numeric flag/arg has been bound, to enforce its min/max bounds. It returns
+// "" for fields that carry no bound (or are not int/float scalars). The body
+// is indented two tabs — the depth of the block it is spliced into.
+func rangeCheck(field commandconf.Field) string {
+	if field.Array || (field.Type != "int" && field.Type != "float") {
+		return ""
+	}
+	if !field.HasMin && !field.HasMax {
+		return ""
+	}
+
+	subject := "flag"
+	if len(field.Identifiers) == 0 {
+		subject = "arg"
+	}
+	goField := exportedName(field.Key)
+
+	var b strings.Builder
+	// failOp is the comparison that means "out of range"; wantOp is what the
+	// message tells the user to satisfy.
+	guard := func(failOp, wantOp, bound string) {
+		fmt.Fprintf(&b,
+			"\t\tif entries.%s %s %s {\n"+
+				"\t\t\tdeps.Std.Printf(\"%s '%s' must be %s %s\\n\")\n"+
+				"\t\t\treturn ExitUsage\n"+
+				"\t\t}\n",
+			goField, failOp, bound, subject, field.Key, wantOp, bound)
+	}
+	if field.HasMin {
+		guard("<", ">=", numberLabel(field, field.Min, true))
+	}
+	if field.HasMax {
+		guard(">", "<=", numberLabel(field, field.Max, true))
+	}
+	return strings.TrimRight(b.String(), "\n")
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────────

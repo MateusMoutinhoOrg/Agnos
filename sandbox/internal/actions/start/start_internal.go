@@ -37,7 +37,7 @@ func StartInternal(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) e
 		module_conf.Module = *props.Module
 		module_conf.GoVersion = goVersion
 
-		if err := write(props.Path+"/go.mod", []byte(module_conf.Render())); err != nil {
+		if err := write("go.mod", []byte(module_conf.Render())); err != nil {
 			return err
 		}
 	}

@@ -1,0 +1,32 @@
+identifiers: ["add-command"]
+category: Cli System
+help: Scaffold a new command package in the project
+long-description: |
+  Creates sandbox/internal/commands/<name>/ with a hand-written
+  entries.yaml and a stub handler.go, then runs build so entries.go
+  and the dispatch layer are generated for it. Refuses to overwrite
+  an existing command.
+examples:
+  - "add-command my-feature"
+  - "add-command my-feature --path ./my-project"
+args:
+  - name: name
+    description: the name of the new command (e.g. my-feature)
+    examples:
+      - "add-command my-feature"
+    type: string
+    required: true
+flags:
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "add-command my-feature --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "add-command my-feature -q"
+    type: boolean

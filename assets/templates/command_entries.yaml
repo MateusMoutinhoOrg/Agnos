@@ -1,0 +1,17 @@
+identifiers: ["{{.Identifier}}"]
+category: Commands
+help: TODO — one line describing {{.Identifier}}
+long-description: |
+  TODO — the full help text for {{.Identifier}}, shown by
+  `{{.ProjectName}} help {{.Identifier}}`.
+examples:
+  - "{{.Identifier}}"
+flags:
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "{{.Identifier}} --path ./my-project"
+    type: string
+    default: "."
+args: []

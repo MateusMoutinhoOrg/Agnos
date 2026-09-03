@@ -8,21 +8,21 @@ examples:
   - "dep-install embed"
   - "dep-install embed --path ./my-project"
 args:
-  dep:
+  - name: dep
     description: the dep to install from assets/deplist
     examples:
       - "dep-install embed"
     type: string
     required: true
 flags:
-  path:
+  - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)
     examples:
       - "dep-install --path ./my-project"
     type: string
     default: "."
-  quiet:
+  - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:

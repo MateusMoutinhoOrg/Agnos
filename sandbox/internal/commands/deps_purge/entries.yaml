@@ -7,14 +7,14 @@ examples:
   - "deps-purge"
   - "deps-purge --path ./my-project"
 flags:
-  path:
+  - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)
     examples:
       - "deps-purge --path ./my-project"
     type: string
     default: "."
-  quiet:
+  - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:

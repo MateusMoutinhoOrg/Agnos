@@ -7,5 +7,5 @@ func ListFilesRecursively(deps *deps.Deps, io *SmartIO, path string) []string {
 	if err != nil {
 		return nil
 	}
-	return filterPendingRemoved(io, filterIgnored(io, deps.Iodeps.ListFilesRecursively(p)))
+	return filterPendingRemoved(io, filterIgnored(io, unrootedPaths(io, deps.Iodeps.ListFilesRecursively(rootedPath(io, p)))))
 }

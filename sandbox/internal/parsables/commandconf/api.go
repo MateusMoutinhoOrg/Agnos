@@ -14,8 +14,10 @@ type Field struct {
 	HasDefault  bool
 	Required    bool
 	Array       bool
-	Min         int
-	Max         int
+	Min         float64
+	HasMin      bool
+	Max         float64
+	HasMax      bool
 }
 
 // CommandConf is the parsed form of sandbox/internal/commands/<name>/entries.yaml

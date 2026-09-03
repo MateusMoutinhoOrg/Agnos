@@ -8,21 +8,21 @@ examples:
   - "dep-remove embed"
   - "dep-remove embed --path ./my-project"
 args:
-  dep:
+  - name: dep
     description: the dep to remove from the project
     examples:
       - "dep-remove embed"
     type: string
     required: true
 flags:
-  path:
+  - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)
     examples:
       - "dep-remove --path ./my-project"
     type: string
     default: "."
-  quiet:
+  - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:

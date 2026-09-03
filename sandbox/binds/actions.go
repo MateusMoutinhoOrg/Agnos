@@ -5,6 +5,7 @@ import (
 	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/cli_init"
+	addCommandAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/add_command"
 	cliPurgeAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/cli_purge"
 	depInstallAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_install"
 	depListAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_list"
@@ -45,5 +46,8 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	}
 	sandbox.Actions.CliPurge = func(path string) error {
 		return cliPurgeAction.CliPurge(deps, path)
+	}
+	sandbox.Actions.AddCommand = func(path string, name string) error {
+		return addCommandAction.AddCommand(deps, path, name)
 	}
 }

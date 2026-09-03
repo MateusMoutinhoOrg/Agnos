@@ -7,5 +7,5 @@ func ListFiles(deps *deps.Deps, io *SmartIO, path string) []string {
 	if err != nil {
 		return nil
 	}
-	return filterPendingRemoved(io, filterIgnored(io, deps.Iodeps.ListFiles(p)))
+	return filterPendingRemoved(io, filterIgnored(io, unrootedPaths(io, deps.Iodeps.ListFiles(rootedPath(io, p)))))
 }

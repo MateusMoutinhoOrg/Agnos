@@ -58,7 +58,7 @@ func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) er
 		return nil
 	}
 
-	gomod, err := io.ReadFile(path + "/go.mod")
+	gomod, err := io.ReadFile("go.mod")
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) er
 	}
 
 	module_conf.RemoveRequire(module)
-	return io.WriteFileOverwrite(path+"/go.mod", []byte(module_conf.Render()))
+	return io.WriteFileOverwrite("go.mod", []byte(module_conf.Render()))
 }
 
 // ancestorDirs returns every directory that contains one of the given files,

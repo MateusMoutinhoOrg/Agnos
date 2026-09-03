@@ -6,6 +6,45 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 )
 
+// rootedPath joins io.Root onto a project-relative path, right before the
+// value is handed to the real filesystem. It is idempotent: a path that is
+// already under Root is returned unchanged, so a listing result fed back into
+// another SmartIO call is never prefixed twice.
+func rootedPath(io *SmartIO, path string) string {
+	if io.Root == "" {
+		return path
+	}
+	if path == io.Root || strings.HasPrefix(path, io.Root+"/") {
+		return path
+	}
+	return io.Root + "/" + path
+}
+
+// unrootedPath is the inverse of rootedPath: it strips io.Root back off a
+// path the filesystem returned, so callers only ever see project-relative
+// paths.
+func unrootedPath(io *SmartIO, path string) string {
+	if io.Root == "" {
+		return path
+	}
+	if path == io.Root {
+		return ""
+	}
+	if strings.HasPrefix(path, io.Root+"/") {
+		return path[len(io.Root)+1:]
+	}
+	return path
+}
+
+// unrootedPaths maps unrootedPath over a slice.
+func unrootedPaths(io *SmartIO, paths []string) []string {
+	out := make([]string, 0, len(paths))
+	for _, p := range paths {
+		out = append(out, unrootedPath(io, p))
+	}
+	return out
+}
+
 func processInputPath(deps *deps.Deps, io *SmartIO, path string) (string, error) {
 	p := io.Replacers.Format(path)
 	if io.Ignore.IsIgnorable(p) {

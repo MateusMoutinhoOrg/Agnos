@@ -66,13 +66,19 @@ agnos dep-remove <dep> [--path <dir>]   # remove what that dep installed (and no
 agnos dep-list [--path <dir>]         # list the dep names available under assets/deplist
 agnos cli-init [--path <dir>]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
 agnos cli-purge [--path <dir>]        # cli subsystem: remove every file the cli asset group installs, then rebuild
+agnos add-command <name> [--path <dir>]  # scaffold sandbox/internal/commands/<name>/ (entries.yaml + stub handler.go), then rebuild
 agnos verify [--path <dir>]           # check the project keeps the sandbox/adapter schema (no writes)
 agnos build [--path <dir>] [--unsafe] # run verify (unless --unsafe), then re-render generated files from templates
 agnos help | version
 ```
 
 Every command that operates on a target project takes the target directory as the
-**`--path` flag** (never a positional arg), defaulting to `.`. In the generated dispatch a
+**`--path` flag** (never a positional arg), defaulting to `.`. `--path` is an absolute
+boundary: `smartio.SmartIO` is rooted at that directory (`SmartIO.Root`, normalized so
+`""`/`"."`/`"./"` mean "no prefix") and joins it on only where it touches the real
+filesystem, so every read, write, listing and directory op is scoped to the target and no
+generation ever escapes it. Actions pass SmartIO **project-relative** paths (`"go.mod"`,
+`"sandbox/api"`), never `path + "/..."`. In the generated dispatch a
 value flag with a `default:` is assigned that literal when absent, so the corresponding
 `entries.Path` field is always populated — including for Agnos-Cli's own commands, now
 that its CLI layer is bootstrapped onto this shape (see the self-hosting status note below).
@@ -126,13 +132,21 @@ that its CLI layer is bootstrapped onto this shape (see the self-hosting status 
   `func CommandHander(deps *deps.Deps, entries *Entries) int`). `agnos build` parses every
   `entries.yaml` (`parsables/commandconf`), regenerates each `entries.go`, then regenerates
   `sandbox/internal/cli/climain.go` with one `dispatch<Name>` arm per command that reads the
-  argv via `argvdeps`, fills that command's `Entries`, and calls its `CommandHander`. A flag
-  or arg with `array: true` becomes a `[]T` field collecting every occurrence. Exit codes
+  argv via `argvdeps`, fills that command's `Entries`, and calls its `CommandHander`.
+  **`flags:` and `args:` are YAML sequences** — each entry an object with a `name` (for
+  flags, derived from the first `--identifier` when omitted). Sequences are ordered, so a
+  positional `arg` binds by its written position; the generated `Entries` fields follow
+  declaration order. A legacy mapping form is still parsed (keys sorted for determinism) but
+  never write positional args that way. A flag
+  or arg with `array: true` becomes a `[]T` field collecting every occurrence. `int`/`float`
+  fields honor `min:` / `max:` — the dispatch converts the raw string to the typed value
+  (a bad value is a clean `ExitUsage` error) and rejects an out-of-range one before the
+  handler runs. Exit codes
   (`ExitOk`/`ExitUsage`/`ExitFailure`) are consts in both `sandbox/api` and the generated
   `cli` package.
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
   (`Build`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
-  `CliInit`, `CliPurge`), each from
+  `CliInit`, `CliPurge`, `AddCommand`), each from
   `sandbox/internal/actions/<name>/`.
 
 > **Self-hosting status:** Agnos-Cli's own CLI layer has been bootstrapped onto this
@@ -183,7 +197,10 @@ generated `help` command, and the `version` command as `entries.yaml` + `handler
 rendered by `agnos cli-init` and every later `agnos build` when `sandbox/internal/cli`
 exists, deleted by `agnos cli-purge`). `utils.RenderTemplateToDest` renders one file to one
 dest — it also emits each command's `sandbox/internal/commands/<name>/entries.go` from
-`assets/templates/entries.go` (see `build/generate_command_entries.go`).
+`assets/templates/entries.go` (see `build/generate_command_entries.go`). The other
+`assets/templates/**` files are single-file scaffolds rendered outside any group:
+`command_entries.yaml` + `command_handler.go` are what `agnos add-command` writes for a new
+command (`internal/actions/add_command`).
 
 **Deps (`assets/deplist/<dep>/**`).** Each sub-directory of `assets/deplist/` is one
 installable dep; the tree under it mirrors the target-project layout (an asset at
@@ -226,7 +243,8 @@ package therefore exposes its binder under the single uniform name `Bind(deps *d
 `CollectCommands` is the exception to the one-line shape: it reads each
 `sandbox/internal/commands/<x>/entries.yaml` through `parsables/commandconf` and returns a
 rich `map[string]any` per command (identifiers, category, help text, and a precomputed
-`Flags`/`Args` list carrying Go field names, types, getter names and default literals) for
+`Flags`/`Args` list carrying Go field names, types, getter names, default literals and a
+precomputed `RangeCheck` snippet for `min`/`max` enforcement) for
 the `{{range .Commands}}` loops in the generated `sandbox/internal/cli/climain.go` and
 `help` package. The `help` directory is skipped — it is generated, not declared. Every
 command package therefore exposes its handler under the single uniform name
@@ -258,6 +276,13 @@ existing, pending removals as gone). `WriteFile` refuses to overwrite; `WriteFil
 replaces. `smartio.New` also loads `<ProjectName>Config/ignore.yaml` and `paths.yaml` to
 filter/rewrite paths during listing.
 
+Every path an action hands SmartIO is **project-relative**. `SmartIO.Root` (the `--path`
+value, normalized by `normalizeRoot` so `""`/`"."`/`"./"` all mean "no prefix") is joined
+on by `rootedPath` only at the boundary calls into `deps.Iodeps` (reads, writes in
+`Persist`, existence checks, listings), and `unrootedPath` strips it back off listing
+results — so `--path` is a hard boundary and callers never build `path + "/..."`
+themselves. `rootedPath` is idempotent (a path already under `Root` is left alone).
+
 ### Config files (`parsables`)
 
 Each `sandbox/internal/parsables/<name>conf/` package is a small YAML-or-gomod parser with a
@@ -277,10 +302,15 @@ rendered result is unchanged (`Agnos` / `0.0.1`), keeping `agnos build .` idempo
 
 ## Adding a command (generated-project contract)
 
+`agnos add-command <name>` does steps 1–3 for you (renders `assets/templates/command_*`
+into `sandbox/internal/commands/<name>/`, then runs `build`); do it by hand only when the
+scaffold does not fit.
+
 1. `sandbox/internal/commands/<name>/entries.yaml` — declare `identifiers`, `category`,
-   `help`, optional `long-description`, `examples`, `hidden`, and `flags:` / `args:` maps
-   (each entry: `identifiers`, `description`, `type` (`string`/`boolean`/`int`/`float`),
-   optional `default`, `required`, `array`).
+   `help`, optional `long-description`, `examples`, `hidden`, and `flags:` / `args:`
+   **sequences** (each entry an object: `name` (or, for a flag, the first `--identifier`),
+   `identifiers`, `description`, `type` (`string`/`boolean`/`int`/`float`), optional
+   `default`, `required`, `array`, and `min` / `max` for `int`/`float`).
 2. `sandbox/internal/commands/<name>/handler.go` — `package <name>`, one function
    `func CommandHander(deps *deps.Deps, entries *Entries) int`.
 3. Run `agnos build` — it generates `entries.go` and re-wires `climain.go` + `help`.

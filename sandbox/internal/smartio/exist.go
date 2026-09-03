@@ -13,5 +13,5 @@ func Exist(deps *deps.Deps, io *SmartIO, path string) bool {
 	if isPendingCreate(io, p) {
 		return true
 	}
-	return deps.Iodeps.Exist(p)
+	return deps.Iodeps.Exist(rootedPath(io, p))
 }

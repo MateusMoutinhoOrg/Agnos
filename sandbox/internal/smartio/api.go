@@ -6,6 +6,14 @@ import (
 )
 
 type SmartIO struct {
+	// Root is the target project directory every path is resolved against —
+	// the value of the command's --path flag. It is normalized so "", "." and
+	// "./" all mean "" (the current working directory, no prefix). Every path
+	// handed to a SmartIO method is project-relative; SmartIO joins Root on
+	// only at the boundary where it touches the real filesystem, so no
+	// generation ever escapes Root.
+	Root string
+
 	Ignore       *ignorableconf.IgnorableConf
 	Replacers    *pathreplacerconf.PathReplacerConf
 	Transactions map[string][]byte

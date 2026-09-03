@@ -10,33 +10,33 @@ examples:
   - "start -p my-project --path ./my-project-dir"
   - "start -p my-project -q"
 flags:
-  path:
+  - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)
     examples:
       - "start --path ./my-project"
     type: string
     default: "."
-  project-name:
+  - name: project-name
     identifiers: ["--project-name", "-p"]
     description: the name of the project
     examples:
       - "start -p my-project"
     type: string
     required: true
-  quiet:
+  - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:
       - "start -q"
     type: boolean
-  force:
+  - name: force
     identifiers: ["--force", "-f"]
     description: Forces the creation of the project, overwriting existing files
     examples:
       - "start -f"
     type: boolean
-  module:
+  - name: module
     identifiers: ["--module", "-m"]
     description: Module name for go.mod
     examples:

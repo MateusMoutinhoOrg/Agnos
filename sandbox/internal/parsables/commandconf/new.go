@@ -1,7 +1,9 @@
 package commandconf
 
 import (
+	"sort"
 	"strconv"
+	"strings"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
@@ -38,8 +40,8 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 	conf.Hidden = readBool(specs, "hidden")
 
 	flags_item, _ := specs.GetObjectItem("flags")
-	if flags_item != nil && flags_item.IsObject() {
-		fields, err := readFields(flags_item)
+	if flags_item != nil {
+		fields, err := readFieldCollection(deps, flags_item)
 		if err != nil {
 			return nil, err
 		}
@@ -47,8 +49,8 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 	}
 
 	args_item, _ := specs.GetObjectItem("args")
-	if args_item != nil && args_item.IsObject() {
-		fields, err := readFields(args_item)
+	if args_item != nil {
+		fields, err := readFieldCollection(deps, args_item)
 		if err != nil {
 			return nil, err
 		}
@@ -59,13 +61,55 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 	return conf, nil
 }
 
-// readFields walks the ordered keys of a flags/args object and parses each
-// entry into a Field.
-func readFields(obj *serializibles.SerializibleObject) ([]Field, error) {
+// readFieldCollection parses a flags/args declaration into an ordered slice of
+// Field. Two shapes are accepted:
+//
+//   - a YAML sequence (canonical) — each entry an object carrying an explicit
+//     `name` (or, for flags, deriving one from the first long `--identifier`).
+//     Sequences are ordered, so positional args bind by written position.
+//   - a YAML mapping (legacy) — the key names the field. Mappings are
+//     unordered, so the keys are sorted for a deterministic result; declare
+//     positional args as a sequence when order matters.
+func readFieldCollection(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Field, error) {
+	if item.IsArray() {
+		return readFieldsFromArray(deps, item)
+	}
+	if item.IsObject() {
+		return readFieldsFromObject(item)
+	}
+	return []Field{}, nil
+}
+
+func readFieldsFromArray(deps *deps.Deps, arr *serializibles.SerializibleObject) ([]Field, error) {
+	size, err := arr.GetArraySize()
+	if err != nil {
+		return nil, err
+	}
+
+	fields := make([]Field, 0, size)
+	for i := 0; i < size; i++ {
+		entry := arr.GetArrayItem(i)
+		if entry == nil || !entry.IsObject() {
+			continue
+		}
+
+		field := readFieldEntry(entry)
+		field.Key = fieldKey(entry, field.Identifiers)
+		if field.Key == "" {
+			return nil, deps.Std.Errorf("flags/args entry #%d needs a name (or a -- identifier)", i)
+		}
+		fields = append(fields, field)
+	}
+
+	return fields, nil
+}
+
+func readFieldsFromObject(obj *serializibles.SerializibleObject) ([]Field, error) {
 	keys, err := obj.GetKeys()
 	if err != nil {
 		return nil, err
 	}
+	sort.Strings(keys)
 
 	fields := make([]Field, 0, len(keys))
 	for _, key := range keys {
@@ -73,28 +117,57 @@ func readFields(obj *serializibles.SerializibleObject) ([]Field, error) {
 		if item == nil || !item.IsObject() {
 			continue
 		}
-
-		field := Field{
-			Key:         key,
-			Identifiers: readStringArray(item, "identifiers"),
-			Examples:    readStringArray(item, "examples"),
-			Description: readString(item, "description"),
-			Type:        normalizeType(readString(item, "type")),
-			Required:    readBool(item, "required"),
-			Array:       readBool(item, "array"),
-			Min:         readInt(item, "min"),
-			Max:         readInt(item, "max"),
-		}
-
-		if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
-			field.HasDefault = true
-			field.Default = anyToString(default_item)
-		}
-
+		field := readFieldEntry(item)
+		field.Key = key
 		fields = append(fields, field)
 	}
 
 	return fields, nil
+}
+
+// readFieldEntry parses the attributes common to both shapes; the caller
+// assigns Key.
+func readFieldEntry(item *serializibles.SerializibleObject) Field {
+	field := Field{
+		Identifiers: readStringArray(item, "identifiers"),
+		Examples:    readStringArray(item, "examples"),
+		Description: readString(item, "description"),
+		Type:        normalizeType(readString(item, "type")),
+		Required:    readBool(item, "required"),
+		Array:       readBool(item, "array"),
+	}
+
+	if min_item, _ := item.GetObjectItem("min"); min_item != nil && !min_item.IsNull() {
+		field.Min, field.HasMin = readNumber(min_item)
+	}
+	if max_item, _ := item.GetObjectItem("max"); max_item != nil && !max_item.IsNull() {
+		field.Max, field.HasMax = readNumber(max_item)
+	}
+
+	if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
+		field.HasDefault = true
+		field.Default = anyToString(default_item)
+	}
+
+	return field
+}
+
+// fieldKey resolves the generated struct field name for a sequence entry:
+// an explicit `name`, else the first long `--identifier` with its dashes
+// stripped, else the first identifier.
+func fieldKey(entry *serializibles.SerializibleObject, identifiers []string) string {
+	if name := readString(entry, "name"); name != "" {
+		return name
+	}
+	for _, id := range identifiers {
+		if strings.HasPrefix(id, "--") {
+			return strings.TrimLeft(id, "-")
+		}
+	}
+	for _, id := range identifiers {
+		return strings.TrimLeft(id, "-")
+	}
+	return ""
 }
 
 // normalizeType maps the type spellings accepted in entries.yaml onto the
@@ -136,16 +209,24 @@ func readBool(obj *serializibles.SerializibleObject, key string) bool {
 	return value
 }
 
-func readInt(obj *serializibles.SerializibleObject, key string) int {
-	item, _ := obj.GetObjectItem(key)
-	if item == nil || item.IsNull() {
-		return 0
+// readNumber reads a scalar yaml int or float as a float64, reporting whether
+// a usable numeric value was found.
+func readNumber(item *serializibles.SerializibleObject) (float64, bool) {
+	if item.IsInt() {
+		value, err := item.GetInt()
+		if err != nil {
+			return 0, false
+		}
+		return float64(value), true
 	}
-	value, err := item.GetInt()
-	if err != nil {
-		return 0
+	if item.IsFloat() {
+		value, err := item.GetFloat()
+		if err != nil {
+			return 0, false
+		}
+		return value, true
 	}
-	return int(value)
+	return 0, false
 }
 
 func readStringArray(obj *serializibles.SerializibleObject, key string) []string {

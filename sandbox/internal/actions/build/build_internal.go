@@ -18,13 +18,10 @@ import (
 func loadProjectConf(deps *deps.Deps, io *smartio.SmartIO, path string) (*projectconf.ProjectConf, error) {
 	rel := config.ProjectName + "Config/project.yaml"
 
-	// The `start` asset group writes project.yaml under its bare relative path,
-	// so try that first (visible in the transaction before Persist); fall back
-	// to the path-prefixed location for `agnos build <dir>`.
+	// io resolves rel against the target project root (the --path flag), so
+	// this reads the file the `start` asset group wrote — whether or not it
+	// has been persisted yet.
 	content, err := io.ReadFile(rel)
-	if err != nil {
-		content, err = io.ReadFile(path + "/" + rel)
-	}
 	if err != nil {
 		return nil, deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
@@ -48,7 +45,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	io.CreateDir("sandbox/api")
 	io.CreateDir("sandbox/internal")
 
-	gomod, err := io.ReadFile(path + "/go.mod")
+	gomod, err := io.ReadFile("go.mod")
 	if err != nil {
 		return err
 	}

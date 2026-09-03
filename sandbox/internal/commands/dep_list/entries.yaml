@@ -7,14 +7,14 @@ long-description: |
 examples:
   - "dep-list"
 flags:
-  path:
+  - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)
     examples:
       - "dep-list --path ./my-project"
     type: string
     default: "."
-  quiet:
+  - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:

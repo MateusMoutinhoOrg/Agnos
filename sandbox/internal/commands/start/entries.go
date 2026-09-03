@@ -4,9 +4,9 @@ package start
 // It is the typed view of the parsed command line handed to CommandHander.
 // Do not edit by hand — put your logic in handler.go.
 type Entries struct {
-	Module string
 	Path string
 	ProjectName string
 	Quiet bool
 	Force bool
+	Module string
 }

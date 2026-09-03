@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
 	help "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/help"
+	add_command "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_command"
 	build "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/build"
 	cli_init "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/cli_init"
 	cli_purge "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/cli_purge"
@@ -47,6 +48,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 	switch {
 	case action == "help" || action == "--help":
 		return help.Run(deps, verb)
+	case action == "add-command":
+		return dispatchAddCommand(deps, verb)
 	case action == "build":
 		return dispatchBuild(deps, verb)
 	case action == "cli-init":
@@ -73,6 +76,28 @@ func CliMain(deps *deps.Deps, args []string) int {
 
 	deps.Std.Printf("Unknown Command!\n")
 	return ExitUsage
+}
+
+func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_command.Entries{}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return add_command.CommandHander(deps, entries)
 }
 
 func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -110,7 +135,6 @@ func dispatchCliInit(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchCliPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &cli_purge.Entries{}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
 		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
 		if valueErr != nil {
@@ -121,6 +145,7 @@ func dispatchCliPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	return cli_purge.CommandHander(deps, entries)
 }
 
@@ -218,14 +243,6 @@ func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &start.Entries{}
-	if verb.GetOptionsSize([]string{ "--module", "-m" }) > 0 {
-		value, valueErr := verb.GetStringOption([]string{ "--module", "-m" }, 0)
-		if valueErr != nil {
-			deps.Std.Printf("flag 'module': %s\n", valueErr.Error())
-			return ExitUsage
-		}
-		entries.Module = value
-	}
 	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
 		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
 		if valueErr != nil {
@@ -249,12 +266,19 @@ func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 	}
 	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	entries.Force = verb.IsPresent([]string{ "--force", "-f" })
+	if verb.GetOptionsSize([]string{ "--module", "-m" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--module", "-m" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'module': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Module = value
+	}
 	return start.CommandHander(deps, entries)
 }
 
 func dispatchVerify(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &verify.Entries{}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
 		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
 		if valueErr != nil {
@@ -265,6 +289,7 @@ func dispatchVerify(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	return verify.CommandHander(deps, entries)
 }
 

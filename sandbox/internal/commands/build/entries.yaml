@@ -10,20 +10,20 @@ examples:
   - "build --path ./my-project"
   - "build -q"
 flags:
-  path:
+  - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)
     examples:
       - "build --path ./my-project"
     type: string
     default: "."
-  quiet:
+  - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:
       - "build -q"
     type: boolean
-  unsafe:
+  - name: unsafe
     identifiers: ["--unsafe"]
     description: Skips the verify schema gate before building
     examples:

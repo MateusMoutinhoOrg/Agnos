@@ -13,5 +13,5 @@ func IsDir(deps *deps.Deps, io *SmartIO, path string) bool {
 	if isPendingCreate(io, p) {
 		return true
 	}
-	return deps.Iodeps.IsDir(p)
+	return deps.Iodeps.IsDir(rootedPath(io, p))
 }

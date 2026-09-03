@@ -60,6 +60,21 @@ type helpCommand struct {
 
 var helpCommands = []helpCommand{
 	{
+		Identifiers:     []string{ "add-command" },
+		Category:        "Cli System",
+		Description:     "Scaffold a new command package in the project",
+		LongDescription: "Creates sandbox/internal/commands/<name>/ with a hand-written\nentries.yaml and a stub handler.go, then runs build so entries.go\nand the dispatch layer are generated for it. Refuses to overwrite\nan existing command.\n",
+		Examples:        []string{ "add-command my-feature", "add-command my-feature --path ./my-project",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "add-command my-feature --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "add-command my-feature -q",  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the name of the new command (e.g. my-feature)", Examples: []string{ "add-command my-feature",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{ "build" },
 		Category:        "Core Commands",
 		Description:     "Build the project in a directory",
@@ -96,8 +111,8 @@ var helpCommands = []helpCommand{
 		Examples:        []string{ "cli-purge", "cli-purge --path ./my-project",  },
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "cli-purge -q",  }, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "cli-purge --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "cli-purge -q",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
 		},
@@ -182,11 +197,11 @@ var helpCommands = []helpCommand{
 		Examples:        []string{ "start -p my-project", "start -p my-project --path ./my-project-dir", "start -p my-project -q",  },
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{ "--module", "-m" }, Description: "Module name for go.mod", Examples: []string{ "start -m github.com/user/project",  }, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "start --path ./my-project",  }, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{ "--project-name", "-p" }, Description: "the name of the project", Examples: []string{ "start -p my-project",  }, Type: "string", Default: "", Required: true},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "start -q",  }, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{ "--force", "-f" }, Description: "Forces the creation of the project, overwriting existing files", Examples: []string{ "start -f",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--module", "-m" }, Description: "Module name for go.mod", Examples: []string{ "start -m github.com/user/project",  }, Type: "string", Default: "", Required: false},
 		},
 		Args: []helpField{
 		},
@@ -199,8 +214,8 @@ var helpCommands = []helpCommand{
 		Examples:        []string{ "verify",  },
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "verify -q",  }, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "verify --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "verify -q",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
 		},
