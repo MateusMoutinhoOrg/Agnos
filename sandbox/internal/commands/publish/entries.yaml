@@ -1,0 +1,27 @@
+identifiers: ["publish"]
+category: "CORE COMMANDS"
+help: "Builds, compiles and publishes a release via gh"
+flags:
+  - name: path
+    identifiers: ["--path", "-p"]
+    description: "The directory holding the project (defaults to the current directory)"
+    type: string
+    default: "."
+  - name: release_name
+    identifiers: ["--release-name", "-rn"]
+    description: "The name of the release"
+    type: string
+  - name: draft
+    identifiers: ["--draft"]
+    description: "Create a draft release"
+    type: boolean
+  - name: target
+    identifiers: ["--target", "-t"]
+    description: "The target to compile for (defaults to all)"
+    type: string
+    default: "all"
+  - name: publisher
+    identifiers: ["--publisher", "-pub"]
+    description: "The publisher to use (defaults to gh)"
+    type: string
+    default: "gh"

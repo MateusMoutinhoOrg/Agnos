@@ -280,6 +280,23 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{ "publish" },
+		Category:        "CORE COMMANDS",
+		Description:     "Builds, compiles and publishes a release via gh",
+		LongDescription: "",
+		Examples:        []string{  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--path", "-p" }, Description: "The directory holding the project (defaults to the current directory)", Examples: []string{  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--release-name", "-rn" }, Description: "The name of the release", Examples: []string{  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--draft" }, Description: "Create a draft release", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--target", "-t" }, Description: "The target to compile for (defaults to all)", Examples: []string{  }, Type: "string", Default: "all", Required: false},
+			{Identifiers: []string{ "--publisher", "-pub" }, Description: "The publisher to use (defaults to gh)", Examples: []string{  }, Type: "string", Default: "gh", Required: false},
+		},
+		Args: []helpField{
+		},
+	},
+	{
 		Identifiers:     []string{ "remove-arg" },
 		Category:        "Cli System",
 		Description:     "Remove a positional arg from a command's entries.yaml",

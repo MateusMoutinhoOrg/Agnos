@@ -20,6 +20,7 @@ import (
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
+	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_command"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
@@ -87,6 +88,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchDepsPurge(deps, verb)
 	case action == "help" || action == "--help":
 		return dispatchHelp(deps, verb)
+	case action == "publish":
+		return dispatchPublish(deps, verb)
 	case action == "remove-arg":
 		return dispatchRemoveArg(deps, verb)
 	case action == "remove-command":
@@ -869,6 +872,68 @@ func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return help.CommandHandler(deps, entries)
+}
+
+func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &publish.Entries{}
+	if verb.GetOptionsSize([]string{ "--path", "-p" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path", "-p" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	if verb.GetOptionsSize([]string{ "--release-name", "-rn" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "release_name", []string{ "--release-name", "-rn" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "release_name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.ReleaseName = value
+	}
+	entries.Draft = verb.IsPresent([]string{ "--draft" })
+	if verb.GetOptionsSize([]string{ "--target", "-t" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "target", []string{ "--target", "-t" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "target", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Target = value
+	} else {
+		entries.Target = "all"
+	}
+	if verb.GetOptionsSize([]string{ "--publisher", "-pub" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "publisher", []string{ "--publisher", "-pub" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "publisher", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Publisher = value
+	} else {
+		entries.Publisher = "gh"
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return publish.CommandHandler(deps, entries)
 }
 
 func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
