@@ -5,3 +5,24 @@ long-description: |
   Builds the project in the given directory, compiling
   the source code into the output artifacts. If no
   path is provided, the current directory is used.
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "build --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "build -q"
+    type: boolean # sets true when is present
+  unsafe:
+    identifiers: ["--unsafe"]
+    description: Skips the verify schema gate before building
+    examples:
+      - "build --unsafe"
+    type: boolean
+  
