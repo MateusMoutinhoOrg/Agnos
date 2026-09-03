@@ -1,0 +1,35 @@
+identifiers: ["compile"]
+category: Core Commands
+help: Cross-compile the project's binaries into release/
+long-description: |
+  Runs `build` over the project and then cross-compiles its
+  ./cmd/main entrypoint once per --target into release/, with CGO
+  disabled. Repeat --target for several targets, or pass
+  --target all to build every one. Accepted targets: linux86,
+  linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32.
+examples:
+  - "compile --target linux86"
+  - "compile --target linux86 --target macarm64"
+  - "compile --target all"
+flags:
+  - name: target
+    identifiers: ["--target", "-t"]
+    description: a target to cross-compile (repeatable); one of linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, or all
+    examples:
+      - "compile --target linux86 --target windows86"
+    type: string
+    array: true
+    required: true
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "compile --target all --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "compile --target all -q"
+    type: boolean

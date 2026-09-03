@@ -24,7 +24,7 @@ What `sandbox.New` hands back: an `Actions` struct and a `Cli` struct, one field
 The whole command-line interface as one function, `CliMain(args []string) int`, plus the three exit-code constants.
 
 ### [api.Actions](/docs/References/PublicApi/api.Actions.md)
-Every operation `agnos` performs, as a function field: `Build`, `Verify`, `Start`, the deps and cli subsystems, and the command editors.
+Every operation `agnos` performs, as a function field: `Build`, `Compile`, `Verify`, `Start`, the deps and cli subsystems, and the command editors.
 
 ---
 
@@ -32,6 +32,9 @@ Every operation `agnos` performs, as a function field: `Build`, `Verify`, `Start
 
 ### [api.Actions.Build](/docs/References/PublicApi/api.Actions.md#build)
 Re-renders a project's generated files and hands it to a runtime.
+
+### [api.Actions.Compile](/docs/References/PublicApi/api.Actions.md#compile)
+Runs `Build`, then cross-compiles `./cmd/main` into `release/` once per target.
 
 ### [api.Actions.Verify](/docs/References/PublicApi/api.Actions.md#verify)
 Checks a project against the harness schema without writing.
@@ -60,6 +63,9 @@ Add and drop a command's fields.
 
 ### [api.BuildProps](/docs/References/PublicApi/api.BuildProps.md)
 `Path` and `Runtime` (`api.RuntimeGo` / `api.RuntimeNone`) for one build.
+
+### [api.CompileProps](/docs/References/PublicApi/api.CompileProps.md)
+`Path` and `Targets` (target names, or `"all"`) for one cross-compile run.
 
 ### [api.StartProps](/docs/References/PublicApi/api.StartProps.md)
 `Path`, `ProjectName`, optional `Module`, `Force` for one scaffold.

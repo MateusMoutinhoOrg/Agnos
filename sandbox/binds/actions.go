@@ -7,6 +7,7 @@ import (
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_command"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	cliPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_purge"
 	depInstallAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_install"
@@ -25,6 +26,9 @@ import (
 func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.Build = func(props api.BuildProps) error {
 		return buildAction.Build(deps, props)
+	}
+	sandbox.Actions.Compile = func(props api.CompileProps) error {
+		return compileAction.Compile(deps, props)
 	}
 	sandbox.Actions.Verify = func(path string) error {
 		return verifyAction.Verify(deps, path)

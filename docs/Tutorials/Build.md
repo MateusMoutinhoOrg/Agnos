@@ -56,6 +56,23 @@ Cross-compile `agnos` into a binary for each supported operating system and arch
    ls release/
    ```
 
+### Build with `agnos compile`
+
+An installed `agnos` does every step above in one command — it runs `build` (schema
+check, re-render, `go build` over the tree), creates `release/`, then cross-compiles each
+target with `CGO_ENABLED=0`:
+
+```bash
+agnos compile --target all                        # every target in the table
+agnos compile --target linux86 --target macarm64  # a subset; --target repeats
+agnos compile --target windows86 --path ./my-tool # another project
+```
+
+The target names are `linux86`, `linuxarm64`, `linuxi32`, `mac86`, `macarm64`,
+`windows86`, `windowsi32` — the same rows as the table above. An unknown name is a usage
+error. Adding a row to that table means teaching `agnos compile` the name too: the map is
+`targets` in [sandbox/internal/actions/compile/compile.go](/sandbox/internal/actions/compile/compile.go).
+
 ### Add a new target
 
 5. Run `go tool dist list` to see every `GOOS`/`GOARCH` pair the installed Go runtime supports, and pick one.

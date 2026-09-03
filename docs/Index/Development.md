@@ -16,6 +16,7 @@ Index of the documentation for contributors changing this repository: the bindin
   - **description:** Cross-compile the CLI into a binary for each supported OS and architecture
   - [Build a single target](/docs/Tutorials/Build.md#build-a-single-target)
   - [Build every target at once](/docs/Tutorials/Build.md#build-every-target-at-once)
+  - [Build with agnos compile](/docs/Tutorials/Build.md#build-with-agnos-compile)
   - [Add a new target](/docs/Tutorials/Build.md#add-a-new-target)
 - [AddAction.md](/docs/Tutorials/AddAction.md)
   - **description:** Add a reusable operation: the two-file action, its contract field and its binder

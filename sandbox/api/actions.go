@@ -17,6 +17,15 @@ type BuildProps struct {
 	Runtime string
 }
 
+// CompileProps describes one cross-compile run: the directory holding the
+// project and the target names to build. Each name is one of the keys
+// `agnos compile` accepts (linux86, linuxarm64, linuxi32, mac86, macarm64,
+// windows86, windowsi32) or "all", which expands to every target.
+type CompileProps struct {
+	Path    string
+	Targets []string
+}
+
 type StartProps struct {
 	Path        string
 	ProjectName string
@@ -61,6 +70,7 @@ type CommandProps struct {
 
 type Actions struct {
 	Build         func(props BuildProps) error
+	Compile       func(props CompileProps) error
 	Verify        func(path string) error
 	Start         func(props StartProps) error
 	DepsInit      func(path string) error

@@ -7,6 +7,7 @@
 ```go
 type Actions struct {
 	Build         func(props BuildProps) error
+	Compile       func(props CompileProps) error
 	Verify        func(path string) error
 	Start         func(props StartProps) error
 	DepsInit      func(path string) error
@@ -34,6 +35,9 @@ Every operation `agnos` performs, as function fields filled by `sandbox/binds/ac
 
 ### Build
 `Build(props BuildProps) error` — re-renders every generated file of the project and hands it to `props.Runtime`. Unlike the `build` command it does **not** run `Verify` first, so a mid-refactor tree can still regenerate. See [BuildPipeline.md](/docs/References/BuildPipeline.md).
+
+### Compile
+`Compile(props CompileProps) error` — runs `Build` with the `go` runtime, creates `release/`, then cross-compiles `./cmd/main` once per name in `props.Targets` into `release/<name>` with `CGO_ENABLED=0` and the target's `GOOS`/`GOARCH`. `"all"` expands to every target; an unknown or empty target is an error. See [Commands.md](/docs/References/Commands.md) for the name table.
 
 ### Verify
 `Verify(path string) error` — checks the tree against the harness schema and writes nothing. The error lists every violation at once. Does not run a runtime; the `verify` command does.

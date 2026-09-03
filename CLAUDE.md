@@ -88,6 +88,7 @@ agnos add-arg <name> --command <cmd> [--type ...] [--description <t>] [--example
 agnos remove-arg <name> --command <cmd> [--path <dir>]  # drop a positional arg from entries.yaml, then rebuild
 agnos verify [--path <dir>] [--runtime go|none]  # check the schema (no writes), then hand the project to the runtime
 agnos build [--path <dir>] [--unsafe] [--runtime go|none] # run verify (unless --unsafe), re-render generated files, then hand the result to the runtime
+agnos compile --target <name>... [--path <dir>]  # run build, then cross-compile ./cmd/main into release/ once per --target (CGO off); --target repeats, or --target all for every one. Names: linux86 linuxarm64 linuxi32 mac86 macarm64 windows86 windowsi32
 agnos help | version
 ```
 
@@ -147,7 +148,10 @@ positional args are drained, anything still unread is an unexpected argument.
   `argvdeps.Lib.New(args)` (which hands back an `argvdeps.Parser` bound to that argv) —
   injected whole as `Deps.Requestdeps` / `Deps.Argvdeps`, exactly like `Deps.Iodeps` and
   `Deps.Serializables`. `Deps.Rundeps.Run` is how the sandbox executes external processes
-  (the `go` toolchain in `start` and `build/run_runtime.go`). `Deps.Goimportsdeps` (a
+  (the `go` toolchain in `start`, `build/run_runtime.go` and the `compile` action; its
+  `RunProps.Env` carries per-invocation `KEY=VALUE` overrides on top of the current
+  environment — `compile` uses it to set `GOOS`/`GOARCH`/`CGO_ENABLED` per cross-compile).
+  `Deps.Goimportsdeps` (a
   `go/parser`-backed Go source reader) is wired but not yet used by any action. **Every `Deps` field name is mechanical: it is the title-cased
   sub-contract directory name** (`sandbox/deps/iodeps/` → `Deps.Iodeps`,
   `sandbox/deps/serializables/` → `Deps.Serializables`, …) — never a hand-picked alias —
@@ -196,7 +200,7 @@ positional args are drained, anything still unread is an unexpected argument.
   (`ExitOk`/`ExitUsage`/`ExitFailure`) are consts in both `sandbox/api` and the generated
   `cli` package.
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
-  (`Build`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
+  (`Build`, `Compile`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
   `CliInit`, `CliPurge`, `AddCommand`, `RemoveCommand`, `SetCommand`, `AddFlag`,
   `RemoveFlag`, `AddArg`, `RemoveArg`), each from `sandbox/internal/actions/<name>/`.
 
@@ -213,7 +217,19 @@ positional args are drained, anything still unread is an unexpected argument.
 (`entries.yaml` declaration + `handler.go`); `internal/actions/<name>` is the logic. Command handlers currently
 call the action package directly (e.g. `start` calls `startAction.Start` then
 `buildAction.Build`); `binds/actions.go` also exposes the same actions as library API.
-Note `build` runs as a follow-up step after `start`/`deps-init`/`deps-purge`.
+Note `build` runs as a follow-up step after `start`/`deps-init`/`deps-purge`, and the
+`compile` action calls `buildAction.Build` (with `RuntimeGo`) before it cross-compiles, so
+every released binary comes from a freshly rendered, compilable tree.
+
+**The compile action (`internal/actions/compile`).** `Compile(deps, api.CompileProps{Path,
+Targets})` resolves the requested `--target` names against a fixed table (`linux86`,
+`linuxarm64`, `linuxi32`, `mac86`, `macarm64`, `windows86`, `windowsi32` → a `GOOS`/`GOARCH`
+pair + a `release/<name>` filename; `all` expands to every one, in a fixed order; an unknown
+name or an empty request is a usage error), runs `build`, creates `release/` through
+`smartio`, then for each target runs `go build -o release/<file> ./cmd/main` through
+`deps.Rundeps.Run` with `Env: CGO_ENABLED=0 GOOS=… GOARCH=…`. It is registered in
+`binds/actions.go` + `api/actions.go` as `Actions.Compile` like every other action; the
+`compile` command's `handler.go` just forwards `entries.Target` / `entries.Path`.
 
 **The verify gate.** `internal/actions/verify` reads the target tree through `smartio` and
 performs **no writes** (it never calls `io.Persist`). It enforces the harness schema and

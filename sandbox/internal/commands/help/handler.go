@@ -180,6 +180,21 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{ "compile" },
+		Category:        "Core Commands",
+		Description:     "Cross-compile the project's binaries into release/",
+		LongDescription: "Runs `build` over the project and then cross-compiles its\n./cmd/main entrypoint once per --target into release/, with CGO\ndisabled. Repeat --target for several targets, or pass\n--target all to build every one. Accepted targets: linux86,\nlinuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32.\n",
+		Examples:        []string{ "compile --target linux86", "compile --target linux86 --target macarm64", "compile --target all",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--target", "-t" }, Description: "a target to cross-compile (repeatable); one of linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, or all", Examples: []string{ "compile --target linux86 --target windows86",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "compile --target all --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "compile --target all -q",  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+		},
+	},
+	{
 		Identifiers:     []string{ "dep-install" },
 		Category:        "Dependencies",
 		Description:     "Installs an embedded dep into the project",

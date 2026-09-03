@@ -13,6 +13,7 @@ import (
 	build "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/build"
 	cli_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_init"
 	cli_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_purge"
+	compile "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/compile"
 	dep_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_install"
 	dep_list "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_list"
 	dep_remove "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_remove"
@@ -72,6 +73,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchCliInit(deps, verb)
 	case action == "cli-purge":
 		return dispatchCliPurge(deps, verb)
+	case action == "compile":
+		return dispatchCompile(deps, verb)
 	case action == "dep-install":
 		return dispatchDepInstall(deps, verb)
 	case action == "dep-list":
@@ -645,6 +648,49 @@ func dispatchCliPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return cli_purge.CommandHandler(deps, entries)
+}
+
+func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &compile.Entries{}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--target", "-t" }); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "target", []string{ "--target", "-t" }, occurrence)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "target", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Target = append(entries.Target, value)
+	}
+	if len(entries.Target) == 0 {
+		deps.Std.Error("required flag 'target' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return compile.CommandHandler(deps, entries)
 }
 
 func dispatchDepInstall(deps *deps.Deps, verb argvdeps.Parser) int {
