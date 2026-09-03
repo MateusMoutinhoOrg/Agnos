@@ -52,4 +52,4 @@ New here? [CLI Usage → InstallCli.md](/docs/Tutorials/InstallCli.md) installs 
 
 ## License
 
-This project is licensed under the [Unlicense](./LICENSE).
+This project is licensed under the [MIT](./LICENSE).
