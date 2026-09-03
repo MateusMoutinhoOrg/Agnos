@@ -1,0 +1,13 @@
+identifiers: ["local-install"]
+category: "Core Commands"
+help: "Builds the project and installs it locally"
+flags:
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    type: boolean

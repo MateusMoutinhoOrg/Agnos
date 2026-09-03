@@ -280,6 +280,20 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{ "local-install" },
+		Category:        "Core Commands",
+		Description:     "Builds the project and installs it locally",
+		LongDescription: "",
+		Examples:        []string{  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+		},
+	},
+	{
 		Identifiers:     []string{ "publish" },
 		Category:        "CORE COMMANDS",
 		Description:     "Builds, compiles and publishes a release via gh",

@@ -20,6 +20,7 @@ import (
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
+	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_command"
@@ -88,6 +89,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchDepsPurge(deps, verb)
 	case action == "help" || action == "--help":
 		return dispatchHelp(deps, verb)
+	case action == "local-install":
+		return dispatchLocalInstall(deps, verb)
 	case action == "publish":
 		return dispatchPublish(deps, verb)
 	case action == "remove-arg":
@@ -872,6 +875,34 @@ func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return help.CommandHandler(deps, entries)
+}
+
+func dispatchLocalInstall(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &local_install.Entries{}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return local_install.CommandHandler(deps, entries)
 }
 
 func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
