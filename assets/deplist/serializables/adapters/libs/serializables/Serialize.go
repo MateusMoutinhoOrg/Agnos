@@ -1,18 +1,18 @@
-package serializebles
+package serializables
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"{{.Module}}/sandbox/deps"
-	serializibles "{{.Module}}/sandbox/deps/serializebles"
+	serializibles "{{.Module}}/sandbox/deps/serializables"
 	"gopkg.in/yaml.v3"
 )
 
 // Bind fills deps.Deps.SerializeLib, providing the capability to
 // create, parse, and serialize generic JSON/YAML structures.
 func Bind(deps *deps.Deps) {
-	deps.Serializebles = serializibles.Lib{
+	deps.Serializables = serializibles.Lib{
 		CreateString: func(value string) *serializibles.SerializibleObject {
 			var v any = value
 			return wrapValue(&v)

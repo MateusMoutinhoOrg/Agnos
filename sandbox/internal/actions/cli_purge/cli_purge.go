@@ -1,6 +1,7 @@
 package cli_purge
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
@@ -17,5 +18,5 @@ func CliPurge(deps *deps.Deps, path string) error {
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(deps, path)
+	return buildAction.Build(deps, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
 }

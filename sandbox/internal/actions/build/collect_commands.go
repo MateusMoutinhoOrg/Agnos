@@ -51,6 +51,7 @@ func commandData(name string, conf *commandconf.CommandConf) map[string]any {
 
 	return map[string]any{
 		"Name":            name,
+		"QuietField":      quietField(conf),
 		"GoName":          exportedName(name),
 		"Identifiers":     conf.Identifiers,
 		"IdentifiersGo":   goStringList(conf.Identifiers),
@@ -76,6 +77,7 @@ func fieldData(field commandconf.Field) map[string]any {
 		"IdentifiersGo":  goStringList(field.Identifiers),
 		"OptionGetter":   optionGetter(field.Type),
 		"ArgGetter":      argGetter(field.Type),
+		"ParseFunc":      parseFunc(field.Type),
 		"Required":       field.Required,
 		"HasDefault":     field.HasDefault,
 		"DefaultLiteral": defaultLiteral(field.Type, field.Default),
@@ -126,7 +128,7 @@ func rangeCheck(field commandconf.Field) string {
 	guard := func(failOp, wantOp, bound string) {
 		fmt.Fprintf(&b,
 			"\t\tif entries.%s %s %s {\n"+
-				"\t\t\tdeps.Std.Printf(\"%s '%s' must be %s %s\\n\")\n"+
+				"\t\t\tdeps.Std.Error(\"%s '%s' must be %s %s\\n\")\n"+
 				"\t\t\treturn ExitUsage\n"+
 				"\t\t}\n",
 			goField, failOp, bound, subject, field.Key, wantOp, bound)
@@ -190,6 +192,32 @@ func elemLiteral(kind string) string {
 		return "0"
 	default:
 		return `""`
+	}
+}
+
+// quietField is the generated Entries field the dispatch checks to turn the
+// progress channel off, "" when the command declares no boolean quiet flag.
+// Every command that wants --quiet to work declares the flag; the dispatch
+// does the silencing once, so no handler has to.
+func quietField(conf *commandconf.CommandConf) string {
+	for _, flag := range conf.Flags {
+		if flag.Key == "quiet" && flag.Type == "boolean" && !flag.Array {
+			return exportedName(flag.Key)
+		}
+	}
+	return ""
+}
+
+// parseFunc is the generated helper that converts one raw command-line value
+// into the field's Go type, reporting a clean usage error of its own.
+func parseFunc(kind string) string {
+	switch kind {
+	case "int":
+		return "parseIntValue"
+	case "float":
+		return "parseFloatValue"
+	default:
+		return "parseStringValue"
 	}
 }
 

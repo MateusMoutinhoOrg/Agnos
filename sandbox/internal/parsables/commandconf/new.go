@@ -6,7 +6,7 @@ import (
 	"strings"
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
+	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializables"
 )
 
 // New parses one entries.yaml body into a CommandConf.
@@ -16,7 +16,7 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.Serializebles.ParseYaml(content)
+	specs, parse_error := deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}

@@ -2,9 +2,11 @@ identifiers: ["build"]
 category: Core Commands
 help: Build the project in a directory
 long-description: |
-  Builds the project in the given directory, compiling
-  the source code into the output artifacts. If no
-  path is provided, the current directory is used.
+  Re-renders every generated file of the project in the given
+  directory, then hands the result to the runtime named by
+  --runtime ("go" resolves the module graph and compiles every
+  package, "none" renders only). If no path is provided, the
+  current directory is used.
 examples:
   - "build"
   - "build --path ./my-project"
@@ -23,6 +25,13 @@ flags:
     examples:
       - "build -q"
     type: boolean
+  - name: runtime
+    identifiers: ["--runtime"]
+    description: "the toolchain the rendered project is handed to: go (tidy + compile) or none"
+    examples:
+      - "build --runtime none"
+    type: string
+    default: "go"
   - name: unsafe
     identifiers: ["--unsafe"]
     description: Skips the verify schema gate before building

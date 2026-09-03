@@ -23,8 +23,8 @@ import (
 )
 
 func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
-	sandbox.Actions.Build = func(path string) error {
-		return buildAction.Build(deps, path)
+	sandbox.Actions.Build = func(props api.BuildProps) error {
+		return buildAction.Build(deps, props)
 	}
 	sandbox.Actions.Verify = func(path string) error {
 		return verifyAction.Verify(deps, path)

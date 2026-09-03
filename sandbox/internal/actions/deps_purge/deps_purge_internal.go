@@ -6,7 +6,7 @@ import (
 )
 
 func DepsPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Printf("deps-purge started with path %s \n", path)
+	deps.Std.Log("deps-purge started with path %s \n", path)
 
 	io.RemoveDir("sandbox/deps")
 	io.RemoveDir("adapters")

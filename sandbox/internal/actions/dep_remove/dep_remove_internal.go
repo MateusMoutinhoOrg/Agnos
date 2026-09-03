@@ -6,8 +6,8 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/depsversionconf"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
 )
 
 // DepRemoveInternal removes from the target project every file that
@@ -15,7 +15,7 @@ import (
 // that dep, then drops any directory the removal left empty so the build
 // collectors stop enumerating it.
 func DepRemoveInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) error {
-	deps.Std.Printf("dep-remove started with path %s dep %s \n", path, dep)
+	deps.Std.Log("dep-remove started with path %s dep %s \n", path, dep)
 
 	group := "deplist/" + dep
 
@@ -58,11 +58,7 @@ func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) er
 		return nil
 	}
 
-	gomod, err := io.ReadFile("go.mod")
-	if err != nil {
-		return err
-	}
-	module_conf, err := moduleconf.New(deps, string(gomod))
+	module_conf, err := utils.LoadModuleConf(deps, io)
 	if err != nil {
 		return err
 	}

@@ -21,8 +21,16 @@ type Lib struct {
 	// Now returns the current wall-clock time.
 	Now func() time.Time
 
-	// Printf writes one formatted message to standard output.
+	// Printf writes one formatted message to standard output. It carries
+	// the command's result — the data a script would read — so it is never
+	// silenced.
 	Printf func(format string, a ...any) (n int, err error)
+
+	// Log writes one formatted progress message to standard error. It is
+	// the channel every "… started with path …" notice goes through, so a
+	// caller can keep stdout free of log noise, and it is what --quiet
+	// turns off.
+	Log func(format string, a ...any) (n int, err error)
 
 	// Error writes one formatted message to standard error.
 	Error func(format string, a ...any) (n int, err error)

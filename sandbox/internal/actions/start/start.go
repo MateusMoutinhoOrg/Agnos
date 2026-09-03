@@ -15,5 +15,8 @@ func Start(deps *deps.Deps, props api.StartProps) error {
 	if err := buildAction.BuildInternal(deps, io, props.Path); err != nil {
 		return err
 	}
-	return io.Persist()
+	if err := io.Persist(); err != nil {
+		return err
+	}
+	return buildAction.RunRuntime(deps, props.Path, api.RuntimeGo)
 }

@@ -12,7 +12,7 @@ import (
 // into the target project at the path it holds inside that dep, using the
 // same Module variable the build step derives from go.mod.
 func DepInstallInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) error {
-	deps.Std.Printf("dep-install started with path %s dep %s \n", path, dep)
+	deps.Std.Log("dep-install started with path %s dep %s \n", path, dep)
 
 	group := "deplist/" + dep
 
@@ -24,11 +24,7 @@ func DepInstallInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep s
 		return deps.Std.Errorf("unknown dep %q", dep)
 	}
 
-	gomod, err := io.ReadFile("go.mod")
-	if err != nil {
-		return err
-	}
-	module_conf, err := moduleconf.New(deps, string(gomod))
+	module_conf, err := utils.LoadModuleConf(deps, io)
 	if err != nil {
 		return err
 	}

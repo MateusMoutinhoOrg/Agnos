@@ -16,8 +16,15 @@ import (
 
 const (
 	exitOk    = 0
-	exitUsage = 1
+	exitUsage = 2
 )
+
+// binaryName is the executable's name as a user types it: the configured
+// project name, lowercased. Usage lines show what to type, not the display
+// name of the project.
+func binaryName() string {
+	return strings.ToLower(config.ProjectName)
+}
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
 
@@ -106,11 +113,11 @@ func Run(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 	}
 
-	p := deps.Std.Printf
-	p("\n")
-	p("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, name, reset)
-	p("  %sRun '%s help' to see available commands.%s\n", dim, config.ProjectName, reset)
-	p("\n")
+	e := deps.Std.Error
+	e("\n")
+	e("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, name, reset)
+	e("  %sRun '%s help' to see available commands.%s\n", dim, binaryName(), reset)
+	e("\n")
 	return exitUsage
 }
 
@@ -126,7 +133,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 	p("  %s%sUSAGE%s\n", bold, cyan, reset)
 	p("  %s│%s\n", gray, reset)
 	p("  %s│%s  %s$%s %s %s<command>%s %s[flags]%s %s[args]%s\n",
-		gray, reset, dim, reset, config.ProjectName,
+		gray, reset, dim, reset, binaryName(),
 		green, reset, yellow, reset, dim, reset,
 	)
 	p("  %s│%s\n", gray, reset)
@@ -190,7 +197,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 		dim, gray, italic, reset+dim+gray, gray, reset,
 	)
 	p("  %sRun %s%s help <command>%s%s for detailed info on any command.%s\n",
-		dim, reset+cyan, config.ProjectName, reset, dim, reset,
+		dim, reset+cyan, binaryName(), reset, dim, reset,
 	)
 	p("\n")
 }
@@ -202,7 +209,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 
 	name := cmd.Identifiers[0]
 
-	titleLine := fmt.Sprintf("%s %s", config.ProjectName, name)
+	titleLine := fmt.Sprintf("%s %s", binaryName(), name)
 	innerW := len(titleLine) + 4
 	if w := len(cmd.Description) + 4; w > innerW {
 		innerW = w
@@ -232,7 +239,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	}
 
 	printSection(p, "USAGE")
-	usage := fmt.Sprintf("  %s$%s %s %s", dim, reset, config.ProjectName, name)
+	usage := fmt.Sprintf("  %s$%s %s %s", dim, reset, binaryName(), name)
 	flagPart := ""
 	if len(cmd.Flags) > 0 {
 		flagPart = fmt.Sprintf(" %s[flags]%s", yellow, reset)
@@ -290,7 +297,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	if len(cmd.Examples) > 0 {
 		printSection(p, "EXAMPLES")
 		for _, ex := range cmd.Examples {
-			p("  %s│%s  %s$%s %s %s\n", gray, reset, dim, reset, config.ProjectName, ex)
+			p("  %s│%s  %s$%s %s %s\n", gray, reset, dim, reset, binaryName(), ex)
 		}
 		p("  %s│%s\n", gray, reset)
 		p("\n")

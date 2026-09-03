@@ -38,7 +38,7 @@ flags:
     type: boolean
   - name: module
     identifiers: ["--module", "-m"]
-    description: Module name for go.mod
+    description: the go module path written into go.mod (required when the target dir has no go.mod yet)
     examples:
       - "start -m github.com/user/project"
     type: string

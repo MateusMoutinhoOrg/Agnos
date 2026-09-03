@@ -7,22 +7,20 @@ import (
 	verifyAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/verify"
 )
 
-func CommandHander(deps *deps.Deps, entries *Entries) int {
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	if !entries.Unsafe {
+		// The schema gate only: the toolchain runs after the render, on
+		// what was rendered, through entries.Runtime below.
 		if verify_error := verifyAction.Verify(deps, entries.Path); verify_error != nil {
-			if !entries.Quiet {
-				deps.Std.Error(verify_error.Error())
-			}
+			deps.Std.Error("%s\n", verify_error.Error())
 			return api.ExitFailure
 		}
 	}
 
-	build_error := buildAction.Build(deps, entries.Path)
+	build_error := buildAction.Build(deps, api.BuildProps{Path: entries.Path, Runtime: entries.Runtime})
 
-	if !entries.Quiet && build_error != nil {
-		deps.Std.Error(build_error.Error())
-	}
 	if build_error != nil {
+		deps.Std.Error("%s\n", build_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

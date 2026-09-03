@@ -6,7 +6,8 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
 	keep "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/keep"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"
-	serializebles "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializebles"
+	rundeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/rundeps"
+	serializables "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializables"
 	std "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
 	verb "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
 	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
@@ -19,7 +20,8 @@ func New() deps.Deps {
 	iodeps.Bind(&deps)
 	keep.Bind(&deps)
 	requestdeps.Bind(&deps)
-	serializebles.Bind(&deps)
+	rundeps.Bind(&deps)
+	serializables.Bind(&deps)
 	std.Bind(&deps)
 	verb.Bind(&deps)
 	return deps

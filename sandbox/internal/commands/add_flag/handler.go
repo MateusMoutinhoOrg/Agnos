@@ -6,7 +6,7 @@ import (
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/add_flag"
 )
 
-func CommandHander(deps *deps.Deps, entries *Entries) int {
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	add_error := addFlagAction.AddFlag(deps, api.FieldProps{
 		Path:        entries.Path,
 		Command:     entries.Command,
@@ -22,10 +22,8 @@ func CommandHander(deps *deps.Deps, entries *Entries) int {
 		Max:         entries.Max,
 		Position:    entries.Position,
 	})
-	if !entries.Quiet && add_error != nil {
-		deps.Std.Error(add_error.Error())
-	}
 	if add_error != nil {
+		deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

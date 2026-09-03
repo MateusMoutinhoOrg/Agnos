@@ -20,7 +20,7 @@ func RemoveArgInternal(deps *deps.Deps, io *smartio.SmartIO, command string, nam
 		return deps.Std.Errorf("command %q has no arg named %q", command, name)
 	}
 
-	deps.Std.Printf("remove-arg removing %s from %s \n", conf.Args[index].Key, utils.CommandEntriesPath(command))
+	deps.Std.Log("remove-arg removing %s from %s \n", conf.Args[index].Key, utils.CommandEntriesPath(command))
 
 	conf.Args = utils.RemoveField(conf.Args, index)
 	return utils.SaveCommandConf(deps, io, command, conf)

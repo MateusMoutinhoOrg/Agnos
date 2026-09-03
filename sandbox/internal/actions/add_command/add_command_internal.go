@@ -5,7 +5,6 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
@@ -21,19 +20,17 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 		return deps.Std.Errorf("add-command requires --category")
 	}
 
-	identifier := utils.CommandIdentifier(name)
-	pkg := utils.CommandPackage(name)
-	if pkg == "" {
-		return deps.Std.Errorf("invalid command name %q", name)
-	}
-
-	deps.Std.Printf("add-command creating sandbox/internal/commands/%s \n", pkg)
-
-	gomod, err := io.ReadFile("go.mod")
-	if err != nil {
+	if err := utils.ValidateCommandName(deps, name); err != nil {
 		return err
 	}
-	module_conf, err := moduleconf.New(deps, string(gomod))
+	utils.NoteNormalizedCommandName(deps, name)
+
+	identifier := utils.CommandIdentifier(name)
+	pkg := utils.CommandPackage(name)
+
+	deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
+
+	module_conf, err := utils.LoadModuleConf(deps, io)
 	if err != nil {
 		return err
 	}

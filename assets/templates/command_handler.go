@@ -5,7 +5,7 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-func CommandHander(deps *deps.Deps, entries *Entries) int {
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	deps.Std.Printf("{{.Identifier}} called\n")
 	return api.ExitOk
 }

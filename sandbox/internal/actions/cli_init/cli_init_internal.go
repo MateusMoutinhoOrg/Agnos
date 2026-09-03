@@ -2,7 +2,6 @@ package cli_init
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
 )
@@ -11,13 +10,9 @@ import (
 // target project at the path it holds inside that group, using the same
 // Module variable the build step derives from go.mod.
 func CliInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Printf("cli-init started with path %s \n", path)
+	deps.Std.Log("cli-init started with path %s \n", path)
 
-	gomod, err := io.ReadFile("go.mod")
-	if err != nil {
-		return err
-	}
-	module_conf, err := moduleconf.New(deps, string(gomod))
+	module_conf, err := utils.LoadModuleConf(deps, io)
 	if err != nil {
 		return err
 	}

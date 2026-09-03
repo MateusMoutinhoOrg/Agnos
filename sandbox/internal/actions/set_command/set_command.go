@@ -19,5 +19,5 @@ func SetCommand(deps *deps.Deps, props api.CommandProps) error {
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(deps, props.Path)
+	return buildAction.Build(deps, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

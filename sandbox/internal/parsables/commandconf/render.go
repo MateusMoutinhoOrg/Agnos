@@ -2,12 +2,12 @@ package commandconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
+	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializables"
 )
 
 // Render serializes a CommandConf back to the entries.yaml shape.
 func Render(deps *deps.Deps, conf *CommandConf) string {
-	obj := deps.Serializebles.CreateObject()
+	obj := deps.Serializables.CreateObject()
 
 	obj.AddItemToObject("identifiers", stringArray(deps, conf.Identifiers))
 	obj.AddItemToObject("category", conf.Category)
@@ -28,14 +28,14 @@ func Render(deps *deps.Deps, conf *CommandConf) string {
 		obj.AddItemToObject("args", fieldsArray(deps, conf.Args))
 	}
 
-	return deps.Serializebles.SerializeToYaml(obj)
+	return deps.Serializables.SerializeToYaml(obj)
 }
 
 // fieldsArray renders flags/args in the canonical ordered sequence shape.
 func fieldsArray(deps *deps.Deps, fields []Field) *serializibles.SerializibleObject {
-	arr := deps.Serializebles.CreateArray()
+	arr := deps.Serializables.CreateArray()
 	for _, field := range fields {
-		entry := deps.Serializebles.CreateObject()
+		entry := deps.Serializables.CreateObject()
 		entry.AddItemToObject("name", field.Key)
 		if len(field.Identifiers) > 0 {
 			entry.AddItemToObject("identifiers", stringArray(deps, field.Identifiers))
@@ -68,7 +68,7 @@ func fieldsArray(deps *deps.Deps, fields []Field) *serializibles.SerializibleObj
 }
 
 func stringArray(deps *deps.Deps, values []string) *serializibles.SerializibleObject {
-	arr := deps.Serializebles.CreateArray()
+	arr := deps.Serializables.CreateArray()
 	for _, value := range values {
 		arr.AddItemToArray(value)
 	}

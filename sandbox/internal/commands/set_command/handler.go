@@ -6,7 +6,7 @@ import (
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/set_command"
 )
 
-func CommandHander(deps *deps.Deps, entries *Entries) int {
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	set_error := setCommandAction.SetCommand(deps, api.CommandProps{
 		Path:            entries.Path,
 		Command:         entries.Name,
@@ -18,10 +18,8 @@ func CommandHander(deps *deps.Deps, entries *Entries) int {
 		Identifiers:     entries.Identifier,
 		Examples:        entries.Example,
 	})
-	if !entries.Quiet && set_error != nil {
-		deps.Std.Error(set_error.Error())
-	}
 	if set_error != nil {
+		deps.Std.Error("%s\n", set_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

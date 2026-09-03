@@ -18,6 +18,13 @@ flags:
       - "verify --path ./my-project"
     type: string
     default: "."
+  - name: runtime
+    identifiers: ["--runtime"]
+    description: "the toolchain the project is handed to after the schema check: go (tidy + compile) or none"
+    examples:
+      - "verify --runtime none"
+    type: string
+    default: "go"
   - name: quiet
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output

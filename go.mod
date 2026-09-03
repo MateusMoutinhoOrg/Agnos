@@ -7,4 +7,4 @@ require (
 	github.com/MateusMoutinhoOrg/Verb v0.0.1
 )
 
-require gopkg.in/yaml.v3 v3.0.1 // indirect
+require gopkg.in/yaml.v3 v3.0.1

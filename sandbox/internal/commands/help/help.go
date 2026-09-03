@@ -16,8 +16,15 @@ import (
 
 const (
 	exitOk    = 0
-	exitUsage = 1
+	exitUsage = 2
 )
+
+// binaryName is the executable's name as a user types it: the configured
+// project name, lowercased. Usage lines show what to type, not the display
+// name of the project.
+func binaryName() string {
+	return strings.ToLower(config.ProjectName)
+}
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
 
@@ -131,12 +138,13 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{ "build" },
 		Category:        "Core Commands",
 		Description:     "Build the project in a directory",
-		LongDescription: "Builds the project in the given directory, compiling\nthe source code into the output artifacts. If no\npath is provided, the current directory is used.\n",
+		LongDescription: "Re-renders every generated file of the project in the given\ndirectory, then hands the result to the runtime named by\n--runtime (\"go\" resolves the module graph and compiles every\npackage, \"none\" renders only). If no path is provided, the\ncurrent directory is used.\n",
 		Examples:        []string{ "build", "build --path ./my-project", "build -q",  },
 		Hidden:          false,
 		Flags: []helpField{
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "build --path ./my-project",  }, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "build -q",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--runtime" }, Description: "the toolchain the rendered project is handed to: go (tidy + compile) or none", Examples: []string{ "build --runtime none",  }, Type: "string", Default: "go", Required: false},
 			{Identifiers: []string{ "--unsafe" }, Description: "Skips the verify schema gate before building", Examples: []string{ "build --unsafe",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
@@ -323,7 +331,7 @@ var helpCommands = []helpCommand{
 			{Identifiers: []string{ "--project-name", "-p" }, Description: "the name of the project", Examples: []string{ "start -p my-project",  }, Type: "string", Default: "", Required: true},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "start -q",  }, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{ "--force", "-f" }, Description: "Forces the creation of the project, overwriting existing files", Examples: []string{ "start -f",  }, Type: "boolean", Default: "", Required: false},
-			{Identifiers: []string{ "--module", "-m" }, Description: "Module name for go.mod", Examples: []string{ "start -m github.com/user/project",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--module", "-m" }, Description: "the go module path written into go.mod (required when the target dir has no go.mod yet)", Examples: []string{ "start -m github.com/user/project",  }, Type: "string", Default: "", Required: false},
 		},
 		Args: []helpField{
 		},
@@ -337,6 +345,7 @@ var helpCommands = []helpCommand{
 		Hidden:          false,
 		Flags: []helpField{
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "verify --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--runtime" }, Description: "the toolchain the project is handed to after the schema check: go (tidy + compile) or none", Examples: []string{ "verify --runtime none",  }, Type: "string", Default: "go", Required: false},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "verify -q",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
@@ -381,11 +390,11 @@ func Run(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 	}
 
-	p := deps.Std.Printf
-	p("\n")
-	p("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, name, reset)
-	p("  %sRun '%s help' to see available commands.%s\n", dim, config.ProjectName, reset)
-	p("\n")
+	e := deps.Std.Error
+	e("\n")
+	e("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, name, reset)
+	e("  %sRun '%s help' to see available commands.%s\n", dim, binaryName(), reset)
+	e("\n")
 	return exitUsage
 }
 
@@ -401,7 +410,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 	p("  %s%sUSAGE%s\n", bold, cyan, reset)
 	p("  %s│%s\n", gray, reset)
 	p("  %s│%s  %s$%s %s %s<command>%s %s[flags]%s %s[args]%s\n",
-		gray, reset, dim, reset, config.ProjectName,
+		gray, reset, dim, reset, binaryName(),
 		green, reset, yellow, reset, dim, reset,
 	)
 	p("  %s│%s\n", gray, reset)
@@ -465,7 +474,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 		dim, gray, italic, reset+dim+gray, gray, reset,
 	)
 	p("  %sRun %s%s help <command>%s%s for detailed info on any command.%s\n",
-		dim, reset+cyan, config.ProjectName, reset, dim, reset,
+		dim, reset+cyan, binaryName(), reset, dim, reset,
 	)
 	p("\n")
 }
@@ -477,7 +486,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 
 	name := cmd.Identifiers[0]
 
-	titleLine := fmt.Sprintf("%s %s", config.ProjectName, name)
+	titleLine := fmt.Sprintf("%s %s", binaryName(), name)
 	innerW := len(titleLine) + 4
 	if w := len(cmd.Description) + 4; w > innerW {
 		innerW = w
@@ -507,7 +516,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	}
 
 	printSection(p, "USAGE")
-	usage := fmt.Sprintf("  %s$%s %s %s", dim, reset, config.ProjectName, name)
+	usage := fmt.Sprintf("  %s$%s %s %s", dim, reset, binaryName(), name)
 	flagPart := ""
 	if len(cmd.Flags) > 0 {
 		flagPart = fmt.Sprintf(" %s[flags]%s", yellow, reset)
@@ -565,7 +574,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	if len(cmd.Examples) > 0 {
 		printSection(p, "EXAMPLES")
 		for _, ex := range cmd.Examples {
-			p("  %s│%s  %s$%s %s %s\n", gray, reset, dim, reset, config.ProjectName, ex)
+			p("  %s│%s  %s$%s %s %s\n", gray, reset, dim, reset, binaryName(), ex)
 		}
 		p("  %s│%s\n", gray, reset)
 		p("\n")

@@ -7,7 +7,8 @@ import (
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/goimportsdeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
-	serializebles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializebles"
+	rundeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/rundeps"
+	serializables "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializables"
 	std "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
 )
 
@@ -18,6 +19,7 @@ type Deps struct {
 	Goimportsdeps goimportsdeps.Lib
 	Iodeps iodeps.Lib
 	Requestdeps requestdeps.Lib
-	Serializebles serializebles.Lib
+	Rundeps rundeps.Lib
+	Serializables serializables.Lib
 	Std std.Lib
 }

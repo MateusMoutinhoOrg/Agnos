@@ -20,6 +20,42 @@ func CommandIdentifier(name string) string {
 	return out
 }
 
+// ValidateCommandName reports whether a user-typed command name normalizes to
+// a usable CLI verb. The identifier becomes a directory name and a Go package
+// clause, so anything outside [a-z][a-z0-9-]* would be propagated straight
+// into `package bad_name!` and break the whole project's build. The check runs
+// before any file is written.
+func ValidateCommandName(deps *deps.Deps, name string) error {
+	identifier := CommandIdentifier(name)
+	if identifier == "" {
+		return deps.Std.Errorf("a command needs a name")
+	}
+	if identifier[0] < 'a' || identifier[0] > 'z' {
+		return deps.Std.Errorf("invalid command name %q: a command name must start with a lowercase letter", name)
+	}
+	for _, letter := range identifier {
+		valid := (letter >= 'a' && letter <= 'z') ||
+			(letter >= '0' && letter <= '9') ||
+			letter == '-'
+		if !valid {
+			return deps.Std.Errorf(
+				"invalid command name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/commands/%s and a Go package name)",
+				name, CommandPackage(name))
+		}
+	}
+	return nil
+}
+
+// NoteNormalizedCommandName logs the rewriting a command name went through,
+// so a name that is silently lowercased or re-punctuated ("MyCmd" -> "mycmd")
+// is never a surprise later.
+func NoteNormalizedCommandName(deps *deps.Deps, name string) {
+	identifier := CommandIdentifier(name)
+	if identifier != name {
+		deps.Std.Log("note: command name %q normalized to %q \n", name, identifier)
+	}
+}
+
 // CommandPackage is the Go package / directory name for a command: the
 // identifier with dashes turned into underscores ("my-feature" -> "my_feature").
 func CommandPackage(name string) string {
@@ -38,12 +74,12 @@ func CommandEntriesPath(name string) string {
 
 // LoadCommandConf reads and parses sandbox/internal/commands/<name>/entries.yaml.
 func LoadCommandConf(deps *deps.Deps, io *smartio.SmartIO, name string) (*commandconf.CommandConf, error) {
-	if CommandPackage(name) == "" {
-		return nil, deps.Std.Errorf("invalid command name %q", name)
+	if err := ValidateCommandName(deps, name); err != nil {
+		return nil, err
 	}
 	content, err := io.ReadFile(CommandEntriesPath(name))
 	if err != nil {
-		return nil, deps.Std.Errorf("command %q not found: %w", CommandIdentifier(name), err)
+		return nil, deps.Std.Errorf("command %q not found in %s", CommandIdentifier(name), CommandDir(name))
 	}
 	conf, err := commandconf.New(deps, string(content))
 	if err != nil {
@@ -148,6 +184,27 @@ func FindField(fields []commandconf.Field, name string) int {
 		}
 	}
 	return -1
+}
+
+// AppendPosition is the --position value meaning "put it last". It is the
+// flag's default, so "not given" and "at the end" are the same request.
+const AppendPosition = -1
+
+// CheckPosition validates a --position against the list it will be inserted
+// into: AppendPosition means the end, and anything else must land inside
+// 0..len(fields). An out-of-range index is reported as such instead of
+// silently becoming an append (which then trips a later, unrelated rule).
+func CheckPosition(deps *deps.Deps, kind string, position int, fields []commandconf.Field) (int, error) {
+	if position == AppendPosition {
+		return len(fields), nil
+	}
+	if position < 0 {
+		return 0, deps.Std.Errorf("--position %d is negative: use an index from 0 to %d, or leave it out to append", position, len(fields))
+	}
+	if position > len(fields) {
+		return 0, deps.Std.Errorf("--position %d is out of range: this command has %d %s(s), so the accepted range is 0 to %d", position, len(fields), kind, len(fields))
+	}
+	return position, nil
 }
 
 // InsertField places field at position inside fields (appending when

@@ -47,7 +47,7 @@ func SetCommandInternal(deps *deps.Deps, io *smartio.SmartIO, props api.CommandP
 		return deps.Std.Errorf("set-command: nothing to change (pass --help, --category, --long-description, --hidden, --visible, --identifier or --example)")
 	}
 
-	deps.Std.Printf("set-command updating %s \n", utils.CommandEntriesPath(props.Command))
+	deps.Std.Log("set-command updating %s \n", utils.CommandEntriesPath(props.Command))
 
 	return utils.SaveCommandConf(deps, io, props.Command, conf)
 }

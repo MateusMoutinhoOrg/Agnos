@@ -6,13 +6,11 @@ import (
 	depListAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_list"
 )
 
-func CommandHander(deps *deps.Deps, entries *Entries) int {
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	deplist, list_error := depListAction.DepList(deps, entries.Path)
 
-	if !entries.Quiet && list_error != nil {
-		deps.Std.Error(list_error.Error())
-	}
 	if list_error != nil {
+		deps.Std.Error("%s\n", list_error.Error())
 		return api.ExitFailure
 	}
 

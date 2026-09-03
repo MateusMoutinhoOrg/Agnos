@@ -23,6 +23,12 @@ func printf(output io.Writer, format string, a ...any) (int, error) {
 	return fmt.Fprintf(output, format, a...)
 }
 
+// logWrite fills std.Lib.Log, writing one formatted progress message to the
+// given output.
+func logWrite(output io.Writer, format string, a ...any) (int, error) {
+	return fmt.Fprintf(output, format, a...)
+}
+
 // errorWrite fills std.Lib.Error, writing one formatted message to the given
 // output.
 func errorWrite(output io.Writer, format string, a ...any) (int, error) {
@@ -42,6 +48,9 @@ func Bind(deps *deps.Deps) {
 		},
 		Printf: func(format string, a ...any) (n int, err error) {
 			return printf(os.Stdout, format, a...)
+		},
+		Log: func(format string, a ...any) (n int, err error) {
+			return logWrite(os.Stderr, format, a...)
 		},
 		Error: func(format string, a ...any) (n int, err error) {
 			return errorWrite(os.Stderr, format, a...)

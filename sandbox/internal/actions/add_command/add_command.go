@@ -1,6 +1,7 @@
 package add_command
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
@@ -19,5 +20,5 @@ func AddCommand(deps *deps.Deps, path string, name string, help string, category
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(deps, path)
+	return buildAction.Build(deps, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

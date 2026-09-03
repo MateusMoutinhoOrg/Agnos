@@ -6,13 +6,11 @@ import (
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/add_command"
 )
 
-func CommandHander(deps *deps.Deps, entries *Entries) int {
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	add_error := addCommandAction.AddCommand(deps, entries.Path, entries.Name, entries.Help, entries.Category)
 
-	if !entries.Quiet && add_error != nil {
-		deps.Std.Error(add_error.Error())
-	}
 	if add_error != nil {
+		deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

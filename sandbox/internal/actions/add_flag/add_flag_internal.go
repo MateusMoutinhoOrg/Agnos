@@ -47,8 +47,13 @@ func AddFlagInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps)
 		}
 	}
 
-	deps.Std.Printf("add-flag adding %s to %s \n", field.Key, utils.CommandEntriesPath(props.Command))
+	position, err := utils.CheckPosition(deps, "flag", props.Position, conf.Flags)
+	if err != nil {
+		return err
+	}
 
-	conf.Flags = utils.InsertField(conf.Flags, field, props.Position)
+	deps.Std.Log("add-flag adding %s to %s \n", field.Key, utils.CommandEntriesPath(props.Command))
+
+	conf.Flags = utils.InsertField(conf.Flags, field, position)
 	return utils.SaveCommandConf(deps, io, props.Command, conf)
 }

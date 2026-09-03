@@ -33,9 +33,9 @@ func AddArgInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps) 
 		return deps.Std.Errorf("command %q already has a flag named %q", props.Command, field.Key)
 	}
 
-	position := props.Position
-	if position < 0 || position > len(conf.Args) {
-		position = len(conf.Args)
+	position, err := utils.CheckPosition(deps, "arg", props.Position, conf.Args)
+	if err != nil {
+		return err
 	}
 	for i, existing := range conf.Args {
 		if existing.Array && i < position {
@@ -46,7 +46,7 @@ func AddArgInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps) 
 		return deps.Std.Errorf("an array arg must be the last positional arg")
 	}
 
-	deps.Std.Printf("add-arg adding %s to %s \n", field.Key, utils.CommandEntriesPath(props.Command))
+	deps.Std.Log("add-arg adding %s to %s \n", field.Key, utils.CommandEntriesPath(props.Command))
 
 	conf.Args = utils.InsertField(conf.Args, field, position)
 	return utils.SaveCommandConf(deps, io, props.Command, conf)

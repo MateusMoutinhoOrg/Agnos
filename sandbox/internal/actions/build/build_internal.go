@@ -5,7 +5,6 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
@@ -39,17 +38,13 @@ func projectNameConst(name string) string {
 }
 
 func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Printf("build started with path %s \n", path)
+	deps.Std.Log("build started with path %s \n", path)
 
 	//Creating the basic dir struct
 	io.CreateDir("sandbox/api")
 	io.CreateDir("sandbox/internal")
 
-	gomod, err := io.ReadFile("go.mod")
-	if err != nil {
-		return err
-	}
-	module_conf, err := moduleconf.New(deps, string(gomod))
+	module_conf, err := utils.LoadModuleConf(deps, io)
 	if err != nil {
 		return err
 	}
@@ -101,6 +96,6 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		}
 	}
 
-	deps.Std.Printf("successfully rendered template")
+	deps.Std.Log("successfully rendered template\n")
 	return nil
 }

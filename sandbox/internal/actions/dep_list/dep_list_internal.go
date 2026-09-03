@@ -10,7 +10,7 @@ import (
 // DepListInternal returns the name of every dep available under
 // assets/deplist/, one entry per immediate sub-directory, in listing order.
 func DepListInternal(deps *deps.Deps, io *smartio.SmartIO, path string) ([]string, error) {
-	deps.Std.Printf("dep-list started with path %s \n", path)
+	deps.Std.Log("dep-list started with path %s \n", path)
 
 	files, err := deps.Embeddeps.ListFilesRecursively("deplist")
 	if err != nil {

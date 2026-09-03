@@ -7,7 +7,7 @@ import (
 )
 
 func Render(deps *deps.Deps, conf *DepsVersionConf) string {
-	obj := deps.Serializebles.CreateObject()
+	obj := deps.Serializables.CreateObject()
 
 	names := make([]string, 0, len(conf.Deps))
 	for name := range conf.Deps {
@@ -19,5 +19,5 @@ func Render(deps *deps.Deps, conf *DepsVersionConf) string {
 		obj.AddItemToObject(name, conf.Deps[name])
 	}
 
-	return deps.Serializebles.SerializeToYaml(obj)
+	return deps.Serializables.SerializeToYaml(obj)
 }

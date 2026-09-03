@@ -9,10 +9,11 @@ type Cli struct {
 
 const (
 	ExitOk = 0
-	// ExitUsage reports that the command line itself was wrong — an unknown
-	// command, a missing operand, an unparsable amount.
-	ExitUsage = 1
 	// ExitFailure reports that a well-formed command could not be carried
 	// out.
-	ExitFailure = 2
+	ExitFailure = 1
+	// ExitUsage reports that the command line itself was wrong — an unknown
+	// command or flag, a missing operand, an unparsable amount. Every such
+	// error exits with this one code, whichever command produced it.
+	ExitUsage = 2
 )

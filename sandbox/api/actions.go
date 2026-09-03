@@ -1,5 +1,22 @@
 package api
 
+// The runtimes `build` can hand a rendered project to. RuntimeGo resolves the
+// module graph and compiles every package, so a build that reports success is
+// a build the Go toolchain accepted; RuntimeNone renders only, which is what
+// the removal commands use — dropping a command or a flag may leave
+// hand-written code referring to what is gone.
+const (
+	RuntimeGo   = "go"
+	RuntimeNone = "none"
+)
+
+// BuildProps describes one (re)render of a project: the directory holding it
+// and the runtime that then checks the result.
+type BuildProps struct {
+	Path    string
+	Runtime string
+}
+
 type StartProps struct {
 	Path        string
 	ProjectName string
@@ -43,7 +60,7 @@ type CommandProps struct {
 }
 
 type Actions struct {
-	Build         func(path string) error
+	Build         func(props BuildProps) error
 	Verify        func(path string) error
 	Start         func(props StartProps) error
 	DepsInit      func(path string) error
