@@ -1,3 +1,4 @@
+package build
 
 type Entries struct {
 	Path   string
