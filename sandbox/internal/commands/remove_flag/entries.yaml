@@ -1,0 +1,36 @@
+identifiers: ["remove-flag"]
+category: Cli System
+help: Remove a flag from a command's entries.yaml
+long-description: |
+  Drops one flag declaration (matched by its name or by one of its
+  identifiers) from sandbox/internal/commands/<command>/entries.yaml and
+  runs build so entries.go and the dispatch layer forget it.
+examples:
+  - "remove-flag output --command exec"
+  - "remove-flag --out --command exec"
+args:
+  - name: name
+    description: the flag name (or one of its identifiers, e.g. --out)
+    examples:
+      - "remove-flag output --command exec"
+    type: string
+    required: true
+flags:
+  - name: command
+    identifiers: ["--command", "-c"]
+    description: the command (identifier or package name) that owns the flag
+    examples:
+      - "--command exec"
+    type: string
+    required: true
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "remove-flag output --command exec --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    type: boolean

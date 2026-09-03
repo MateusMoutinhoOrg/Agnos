@@ -1,0 +1,102 @@
+identifiers: ["add-flag"]
+category: Cli System
+help: Add a flag to a command's entries.yaml
+long-description: |
+  Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml
+  and runs build so entries.go and the dispatch layer are regenerated.
+  Without --identifier the flag answers to --<name>. Refuses a name or
+  identifier the command already uses.
+examples:
+  - "add-flag output --identifier --out --identifier -o --type string --required --command exec"
+  - "add-flag verbose --type boolean --description \"print every step\" --command exec"
+  - "add-flag retries --type int --min 0 --max 5 --default 1 --command exec"
+args:
+  - name: name
+    description: the flag name (becomes the generated struct field, e.g. out-file -> OutFile)
+    examples:
+      - "add-flag output --command exec"
+    type: string
+    required: true
+flags:
+  - name: identifier
+    identifiers: ["--identifier", "-i"]
+    description: a cli identifier for the flag, e.g. --out or -o (repeatable; defaults to --<name>)
+    examples:
+      - "--identifier --out --identifier -o"
+    type: string
+    array: true
+  - name: command
+    identifiers: ["--command", "-c"]
+    description: the command (identifier or package name) that receives the field
+    examples:
+      - "--command exec"
+    type: string
+    required: true
+  - name: type
+    identifiers: ["--type", "-t"]
+    description: "the value type: string, boolean, int or float (defaults to string)"
+    examples:
+      - "--type int"
+    type: string
+    default: string
+  - name: description
+    identifiers: ["--description", "-d"]
+    description: help text shown for the field
+    examples:
+      - "--description \"where the output is written\""
+    type: string
+  - name: example
+    identifiers: ["--example", "-e"]
+    description: an usage example for the field (repeatable)
+    examples:
+      - "--example \"exec --out result.txt\""
+    type: string
+    array: true
+  - name: default
+    identifiers: ["--default"]
+    description: the literal assigned when the field is absent (cannot be combined with --required)
+    examples:
+      - "--default ."
+    type: string
+  - name: required
+    identifiers: ["--required", "-r"]
+    description: fail with a usage error when the field is not provided (not for booleans or fields with --default)
+    examples:
+      - "--required"
+    type: boolean
+  - name: array
+    identifiers: ["--array"]
+    description: collect every occurrence into a []T field instead of a single value
+    examples:
+      - "--array"
+    type: boolean
+  - name: min
+    identifiers: ["--min"]
+    description: smallest accepted value (int/float only)
+    examples:
+      - "--type int --min 1"
+    type: string
+  - name: max
+    identifiers: ["--max"]
+    description: largest accepted value (int/float only)
+    examples:
+      - "--type int --max 10"
+    type: string
+  - name: position
+    identifiers: ["--position"]
+    description: zero-based index to insert the field at (defaults to the end)
+    examples:
+      - "--position 0"
+    type: int
+    default: -1
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "add-flag out --command exec --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    type: boolean

@@ -40,7 +40,9 @@ func fieldsArray(deps *deps.Deps, fields []Field) *serializibles.SerializibleObj
 		if len(field.Identifiers) > 0 {
 			entry.AddItemToObject("identifiers", stringArray(deps, field.Identifiers))
 		}
-		entry.AddItemToObject("description", field.Description)
+		if field.Description != "" {
+			entry.AddItemToObject("description", field.Description)
+		}
 		if len(field.Examples) > 0 {
 			entry.AddItemToObject("examples", stringArray(deps, field.Examples))
 		}

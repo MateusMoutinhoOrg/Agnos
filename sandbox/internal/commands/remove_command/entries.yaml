@@ -1,0 +1,29 @@
+identifiers: ["remove-command"]
+category: Cli System
+help: Delete a command package from the project
+long-description: |
+  Deletes sandbox/internal/commands/<name>/ (entries.yaml, entries.go,
+  handler.go and anything else inside) and runs build so climain.go and
+  help stop dispatching to it. The generated help command cannot be removed.
+examples:
+  - "remove-command my-feature"
+  - "remove-command my-feature --path ./my-project"
+args:
+  - name: name
+    description: the command to delete (identifier or package name)
+    examples:
+      - "remove-command my-feature"
+    type: string
+    required: true
+flags:
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "remove-command my-feature --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    type: boolean

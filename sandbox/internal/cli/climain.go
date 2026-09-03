@@ -4,7 +4,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
 	help "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/help"
+	add_arg "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_arg"
 	add_command "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_command"
+	add_flag "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_flag"
 	build "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/build"
 	cli_init "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/cli_init"
 	cli_purge "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/cli_purge"
@@ -13,6 +15,10 @@ import (
 	dep_remove "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/dep_remove"
 	deps_init "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/deps_purge"
+	remove_arg "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/remove_arg"
+	remove_command "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/remove_command"
+	remove_flag "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/remove_flag"
+	set_command "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/set_command"
 	start "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/start"
 	verify "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/verify"
 	version "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/version"
@@ -48,8 +54,12 @@ func CliMain(deps *deps.Deps, args []string) int {
 	switch {
 	case action == "help" || action == "--help":
 		return help.Run(deps, verb)
+	case action == "add-arg":
+		return dispatchAddArg(deps, verb)
 	case action == "add-command":
 		return dispatchAddCommand(deps, verb)
+	case action == "add-flag":
+		return dispatchAddFlag(deps, verb)
 	case action == "build":
 		return dispatchBuild(deps, verb)
 	case action == "cli-init":
@@ -66,6 +76,14 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchDepsInit(deps, verb)
 	case action == "deps-purge":
 		return dispatchDepsPurge(deps, verb)
+	case action == "remove-arg":
+		return dispatchRemoveArg(deps, verb)
+	case action == "remove-command":
+		return dispatchRemoveCommand(deps, verb)
+	case action == "remove-flag":
+		return dispatchRemoveFlag(deps, verb)
+	case action == "set-command":
+		return dispatchSetCommand(deps, verb)
 	case action == "start":
 		return dispatchStart(deps, verb)
 	case action == "verify":
@@ -76,6 +94,101 @@ func CliMain(deps *deps.Deps, args []string) int {
 
 	deps.Std.Printf("Unknown Command!\n")
 	return ExitUsage
+}
+
+func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_arg.Entries{}
+	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--command", "-c" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'command': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Command = value
+	} else {
+		deps.Std.Printf("required flag 'command' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--type", "-t" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--type", "-t" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'type': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Type = value
+	} else {
+		entries.Type = "string"
+	}
+	if verb.GetOptionsSize([]string{ "--description", "-d" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--description", "-d" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'description': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Description = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--example", "-e" }); occurrence++ {
+		value, valueErr := verb.GetStringOption([]string{ "--example", "-e" }, occurrence)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'example': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Example = append(entries.Example, value)
+	}
+	if verb.GetOptionsSize([]string{ "--default" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--default" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'default': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Default = value
+	}
+	entries.Required = verb.IsPresent([]string{ "--required", "-r" })
+	entries.Array = verb.IsPresent([]string{ "--array" })
+	if verb.GetOptionsSize([]string{ "--min" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--min" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'min': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Min = value
+	}
+	if verb.GetOptionsSize([]string{ "--max" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--max" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'max': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Max = value
+	}
+	if verb.GetOptionsSize([]string{ "--position" }) > 0 {
+		value, valueErr := verb.GetIntOption([]string{ "--position" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'position': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Position = value
+	} else {
+		entries.Position = -1
+	}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return add_arg.CommandHander(deps, entries)
 }
 
 func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -120,6 +233,109 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_command.CommandHander(deps, entries)
+}
+
+func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_flag.Entries{}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--identifier", "-i" }); occurrence++ {
+		value, valueErr := verb.GetStringOption([]string{ "--identifier", "-i" }, occurrence)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'identifier': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Identifier = append(entries.Identifier, value)
+	}
+	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--command", "-c" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'command': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Command = value
+	} else {
+		deps.Std.Printf("required flag 'command' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--type", "-t" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--type", "-t" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'type': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Type = value
+	} else {
+		entries.Type = "string"
+	}
+	if verb.GetOptionsSize([]string{ "--description", "-d" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--description", "-d" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'description': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Description = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--example", "-e" }); occurrence++ {
+		value, valueErr := verb.GetStringOption([]string{ "--example", "-e" }, occurrence)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'example': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Example = append(entries.Example, value)
+	}
+	if verb.GetOptionsSize([]string{ "--default" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--default" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'default': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Default = value
+	}
+	entries.Required = verb.IsPresent([]string{ "--required", "-r" })
+	entries.Array = verb.IsPresent([]string{ "--array" })
+	if verb.GetOptionsSize([]string{ "--min" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--min" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'min': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Min = value
+	}
+	if verb.GetOptionsSize([]string{ "--max" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--max" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'max': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Max = value
+	}
+	if verb.GetOptionsSize([]string{ "--position" }) > 0 {
+		value, valueErr := verb.GetIntOption([]string{ "--position" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'position': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Position = value
+	} else {
+		entries.Position = -1
+	}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return add_flag.CommandHander(deps, entries)
 }
 
 func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -261,6 +477,158 @@ func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	}
 	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
 	return deps_purge.CommandHander(deps, entries)
+}
+
+func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_arg.Entries{}
+	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--command", "-c" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'command': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Command = value
+	} else {
+		deps.Std.Printf("required flag 'command' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return remove_arg.CommandHander(deps, entries)
+}
+
+func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_command.Entries{}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return remove_command.CommandHander(deps, entries)
+}
+
+func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_flag.Entries{}
+	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--command", "-c" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'command': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Command = value
+	} else {
+		deps.Std.Printf("required flag 'command' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return remove_flag.CommandHander(deps, entries)
+}
+
+func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &set_command.Entries{}
+	if verb.GetOptionsSize([]string{ "--help" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--help" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'help': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Help = value
+	}
+	if verb.GetOptionsSize([]string{ "--category" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--category" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'category': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Category = value
+	}
+	if verb.GetOptionsSize([]string{ "--long-description" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--long-description" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'long-description': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.LongDescription = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--identifier", "-i" }); occurrence++ {
+		value, valueErr := verb.GetStringOption([]string{ "--identifier", "-i" }, occurrence)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'identifier': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Identifier = append(entries.Identifier, value)
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--example", "-e" }); occurrence++ {
+		value, valueErr := verb.GetStringOption([]string{ "--example", "-e" }, occurrence)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'example': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Example = append(entries.Example, value)
+	}
+	entries.Hidden = verb.IsPresent([]string{ "--hidden" })
+	entries.Visible = verb.IsPresent([]string{ "--visible" })
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'path': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if value, valueErr := verb.GetNextStringArg(); valueErr == nil {
+		entries.Name = value
+	} else {
+		deps.Std.Printf("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	return set_command.CommandHander(deps, entries)
 }
 
 func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {

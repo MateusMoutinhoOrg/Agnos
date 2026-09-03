@@ -1,3 +1,4 @@
 description: "Go CLI that scaffolds and regenerates other Go applications"
 name: agnos
-version: 0.0.2
+version: 0.0.3
+

@@ -67,6 +67,12 @@ agnos dep-list [--path <dir>]         # list the dep names available under asset
 agnos cli-init [--path <dir>]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
 agnos cli-purge [--path <dir>]        # cli subsystem: remove every file the cli asset group installs, then rebuild
 agnos add-command <name> --help <text> --category <cat> [--path <dir>]  # scaffold sandbox/internal/commands/<name>/ (minimal entries.yaml + stub handler.go), then rebuild; --help and --category are required
+agnos remove-command <name> [--path <dir>]  # delete sandbox/internal/commands/<name>/ entirely, then rebuild (help is refused)
+agnos set-command <name> [--help <t>] [--category <c>] [--long-description <t>] [--hidden|--visible] [--identifier <v>]... [--example <e>]... [--path <dir>]  # rewrite command-level keys of entries.yaml, then rebuild; identifiers/examples append
+agnos add-flag <name> --command <cmd> [--identifier <id>]... [--type string|boolean|int|float] [--description <t>] [--example <e>]... [--default <v>] [--required] [--array] [--min <n>] [--max <n>] [--position <i>] [--path <dir>]  # append a flag to <cmd>'s entries.yaml, then rebuild; identifiers default to --<name>
+agnos remove-flag <name-or-identifier> --command <cmd> [--path <dir>]  # drop a flag from entries.yaml, then rebuild
+agnos add-arg <name> --command <cmd> [--type ...] [--description <t>] [--example <e>]... [--default <v>] [--required] [--array] [--min <n>] [--max <n>] [--position <i>] [--path <dir>]  # insert a positional arg (at --position, else last), then rebuild; an array arg must stay last
+agnos remove-arg <name> --command <cmd> [--path <dir>]  # drop a positional arg from entries.yaml, then rebuild
 agnos verify [--path <dir>]           # check the project keeps the sandbox/adapter schema (no writes)
 agnos build [--path <dir>] [--unsafe] # run verify (unless --unsafe), then re-render generated files from templates
 agnos help | version
@@ -146,8 +152,8 @@ that its CLI layer is bootstrapped onto this shape (see the self-hosting status 
   `cli` package.
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
   (`Build`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
-  `CliInit`, `CliPurge`, `AddCommand`), each from
-  `sandbox/internal/actions/<name>/`.
+  `CliInit`, `CliPurge`, `AddCommand`, `RemoveCommand`, `SetCommand`, `AddFlag`,
+  `RemoveFlag`, `AddArg`, `RemoveArg`), each from `sandbox/internal/actions/<name>/`.
 
 > **Self-hosting status:** Agnos-Cli's own CLI layer has been bootstrapped onto this
 > shape. Every `sandbox/internal/commands/<name>/` holds `entries.yaml` + generated
@@ -201,6 +207,23 @@ dest — it also emits each command's `sandbox/internal/commands/<name>/entries.
 `assets/templates/**` files are single-file scaffolds rendered outside any group:
 `command_entries.yaml` + `command_handler.go` are what `agnos add-command` writes for a new
 command (`internal/actions/add_command`).
+
+**entries.yaml editors (`internal/actions/{set_command,add_flag,remove_flag,add_arg,remove_arg}`).**
+The CLI-driven way to shape a command without touching files: each action loads
+`sandbox/internal/commands/<cmd>/entries.yaml` through `utils.LoadCommandConf` (→
+`commandconf.New`), mutates the `CommandConf` in memory, writes it back with
+`utils.SaveCommandConf` (→ `commandconf.Render`, via `io.WriteFileOverwrite`), persists, then runs
+`build` as a follow-up step so `entries.go`, `climain.go` and `help` catch up. The shared
+helpers live in `sandbox/internal/utils/command_conf.go`: name normalization
+(`CommandIdentifier` / `CommandPackage` / `CommandDir` / `CommandEntriesPath`, also used by
+`add_command`), `NewField` (builds a `commandconf.Field` from `api.FieldProps`, validating the
+type and the `default`/`min`/`max` literals, which arrive as raw strings so "unset" is
+distinguishable from zero) and the slice helpers `FindField` / `InsertField` / `RemoveField` /
+`AppendUnique`. `api.FieldProps` (add-flag / add-arg) and `api.CommandProps` (set-command) are
+the props structs, next to `api.StartProps`. Because the file is re-rendered from the parsed
+struct, YAML comments are dropped and keys come out in the serializer's (alphabetical) order —
+the content round-trips exactly, only the layout is canonicalized. `remove_command` deletes the
+whole command directory through `io.RemoveDir` and rebuilds.
 
 **Deps (`assets/deplist/<dep>/**`).** Each sub-directory of `assets/deplist/` is one
 installable dep; the tree under it mirrors the target-project layout (an asset at
@@ -306,8 +329,17 @@ rendered result is unchanged (`Agnos` / `0.0.1`), keeping `agnos build .` idempo
 `assets/templates/command_*` into `sandbox/internal/commands/<name>/`, then runs `build`);
 do it by hand only when the scaffold does not fit. The scaffolded `entries.yaml` is
 deliberately minimal — only `identifiers`, `category` and `help`, all three supplied on the
-command line (`--help` and `--category` are required flags) — so you add `flags:` / `args:`
-and the optional keys yourself.
+command line (`--help` and `--category` are required flags). Grow it from the CLI instead of
+editing YAML: `agnos add-flag <name> --command <cmd> ...` / `agnos add-arg <name> --command
+<cmd> ...` append `flags:` / `args:` entries (every key of a field — `identifiers`, `type`,
+`description`, `examples`, `default`, `required`, `array`, `min`, `max` — has a flag),
+`--required` is refused on a boolean or on a field with `--default` (and the parser drops a
+hand-written `required: true` in those cases, since absence is already covered),
+`remove-flag` / `remove-arg` drop them, `set-command` rewrites `help`, `category`,
+`long-description`, `hidden` and appends `identifiers` / `examples`, and `remove-command`
+deletes the package. Each of these rebuilds, so only `handler.go` is ever hand-written. This
+is the design intent: an LLM driving `agnos` should be able to declare a whole CLI surface
+through commands alone, spending no tokens on file contents.
 
 1. `sandbox/internal/commands/<name>/entries.yaml` — declare `identifiers`, `category`,
    `help`, optional `long-description`, `examples`, `hidden`, and `flags:` / `args:`

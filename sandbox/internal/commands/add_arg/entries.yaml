@@ -1,0 +1,94 @@
+identifiers: ["add-arg"]
+category: Cli System
+help: Add a positional arg to a command's entries.yaml
+long-description: |
+  Inserts one positional arg declaration into
+  sandbox/internal/commands/<command>/entries.yaml (at --position, else at
+  the end) and runs build so entries.go and the dispatch layer are
+  regenerated. Positional args bind by order; an array arg must stay last.
+examples:
+  - "add-arg file --type string --required --description \"the file to process\" --command exec"
+  - "add-arg count --type int --min 1 --position 0 --command exec"
+args:
+  - name: name
+    description: the arg name (becomes the generated struct field)
+    examples:
+      - "add-arg file --command exec"
+    type: string
+    required: true
+flags:
+  - name: command
+    identifiers: ["--command", "-c"]
+    description: the command (identifier or package name) that receives the field
+    examples:
+      - "--command exec"
+    type: string
+    required: true
+  - name: type
+    identifiers: ["--type", "-t"]
+    description: "the value type: string, boolean, int or float (defaults to string)"
+    examples:
+      - "--type int"
+    type: string
+    default: string
+  - name: description
+    identifiers: ["--description", "-d"]
+    description: help text shown for the field
+    examples:
+      - "--description \"where the output is written\""
+    type: string
+  - name: example
+    identifiers: ["--example", "-e"]
+    description: an usage example for the field (repeatable)
+    examples:
+      - "--example \"exec --out result.txt\""
+    type: string
+    array: true
+  - name: default
+    identifiers: ["--default"]
+    description: the literal assigned when the field is absent (cannot be combined with --required)
+    examples:
+      - "--default ."
+    type: string
+  - name: required
+    identifiers: ["--required", "-r"]
+    description: fail with a usage error when the field is not provided (not for booleans or fields with --default)
+    examples:
+      - "--required"
+    type: boolean
+  - name: array
+    identifiers: ["--array"]
+    description: collect every occurrence into a []T field instead of a single value
+    examples:
+      - "--array"
+    type: boolean
+  - name: min
+    identifiers: ["--min"]
+    description: smallest accepted value (int/float only)
+    examples:
+      - "--type int --min 1"
+    type: string
+  - name: max
+    identifiers: ["--max"]
+    description: largest accepted value (int/float only)
+    examples:
+      - "--type int --max 10"
+    type: string
+  - name: position
+    identifiers: ["--position"]
+    description: zero-based index to insert the field at (defaults to the end)
+    examples:
+      - "--position 0"
+    type: int
+    default: -1
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "add-arg file --command exec --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    type: boolean

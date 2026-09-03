@@ -149,6 +149,13 @@ func readFieldEntry(item *serializibles.SerializibleObject) Field {
 		field.Default = anyToString(default_item)
 	}
 
+	// `required` is meaningless for a boolean (absent means false) or for a
+	// field that carries a default (the default covers its absence), so it is
+	// dropped here and never reaches the generated dispatch or help.
+	if field.Type == "boolean" || field.HasDefault {
+		field.Required = false
+	}
+
 	return field
 }
 

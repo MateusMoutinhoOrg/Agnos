@@ -60,6 +60,31 @@ type helpCommand struct {
 
 var helpCommands = []helpCommand{
 	{
+		Identifiers:     []string{ "add-arg" },
+		Category:        "Cli System",
+		Description:     "Add a positional arg to a command's entries.yaml",
+		LongDescription: "Inserts one positional arg declaration into\nsandbox/internal/commands/<command>/entries.yaml (at --position, else at\nthe end) and runs build so entries.go and the dispatch layer are\nregenerated. Positional args bind by order; an array arg must stay last.\n",
+		Examples:        []string{ "add-arg file --type string --required --description \"the file to process\" --command exec", "add-arg count --type int --min 1 --position 0 --command exec",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--command", "-c" }, Description: "the command (identifier or package name) that receives the field", Examples: []string{ "--command exec",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--type", "-t" }, Description: "the value type: string, boolean, int or float (defaults to string)", Examples: []string{ "--type int",  }, Type: "string", Default: "string", Required: false},
+			{Identifiers: []string{ "--description", "-d" }, Description: "help text shown for the field", Examples: []string{ "--description \"where the output is written\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--example", "-e" }, Description: "an usage example for the field (repeatable)", Examples: []string{ "--example \"exec --out result.txt\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--default" }, Description: "the literal assigned when the field is absent (cannot be combined with --required)", Examples: []string{ "--default .",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--required", "-r" }, Description: "fail with a usage error when the field is not provided (not for booleans or fields with --default)", Examples: []string{ "--required",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--array" }, Description: "collect every occurrence into a []T field instead of a single value", Examples: []string{ "--array",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--min" }, Description: "smallest accepted value (int/float only)", Examples: []string{ "--type int --min 1",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--max" }, Description: "largest accepted value (int/float only)", Examples: []string{ "--type int --max 10",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--position" }, Description: "zero-based index to insert the field at (defaults to the end)", Examples: []string{ "--position 0",  }, Type: "int", Default: "-1", Required: false},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "add-arg file --command exec --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the arg name (becomes the generated struct field)", Examples: []string{ "add-arg file --command exec",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{ "add-command" },
 		Category:        "Cli System",
 		Description:     "Scaffold a new command package in the project",
@@ -74,6 +99,32 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the name of the new command (e.g. my-feature)", Examples: []string{ "add-command my-feature",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{ "add-flag" },
+		Category:        "Cli System",
+		Description:     "Add a flag to a command's entries.yaml",
+		LongDescription: "Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml\nand runs build so entries.go and the dispatch layer are regenerated.\nWithout --identifier the flag answers to --<name>. Refuses a name or\nidentifier the command already uses.\n",
+		Examples:        []string{ "add-flag output --identifier --out --identifier -o --type string --required --command exec", "add-flag verbose --type boolean --description \"print every step\" --command exec", "add-flag retries --type int --min 0 --max 5 --default 1 --command exec",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--identifier", "-i" }, Description: "a cli identifier for the flag, e.g. --out or -o (repeatable; defaults to --<name>)", Examples: []string{ "--identifier --out --identifier -o",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--command", "-c" }, Description: "the command (identifier or package name) that receives the field", Examples: []string{ "--command exec",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--type", "-t" }, Description: "the value type: string, boolean, int or float (defaults to string)", Examples: []string{ "--type int",  }, Type: "string", Default: "string", Required: false},
+			{Identifiers: []string{ "--description", "-d" }, Description: "help text shown for the field", Examples: []string{ "--description \"where the output is written\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--example", "-e" }, Description: "an usage example for the field (repeatable)", Examples: []string{ "--example \"exec --out result.txt\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--default" }, Description: "the literal assigned when the field is absent (cannot be combined with --required)", Examples: []string{ "--default .",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--required", "-r" }, Description: "fail with a usage error when the field is not provided (not for booleans or fields with --default)", Examples: []string{ "--required",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--array" }, Description: "collect every occurrence into a []T field instead of a single value", Examples: []string{ "--array",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--min" }, Description: "smallest accepted value (int/float only)", Examples: []string{ "--type int --min 1",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--max" }, Description: "largest accepted value (int/float only)", Examples: []string{ "--type int --max 10",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--position" }, Description: "zero-based index to insert the field at (defaults to the end)", Examples: []string{ "--position 0",  }, Type: "int", Default: "-1", Required: false},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "add-flag out --command exec --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the flag name (becomes the generated struct field, e.g. out-file -> OutFile)", Examples: []string{ "add-flag output --command exec",  }, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -189,6 +240,75 @@ var helpCommands = []helpCommand{
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "deps-purge -q",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
+		},
+	},
+	{
+		Identifiers:     []string{ "remove-arg" },
+		Category:        "Cli System",
+		Description:     "Remove a positional arg from a command's entries.yaml",
+		LongDescription: "Drops one positional arg declaration from\nsandbox/internal/commands/<command>/entries.yaml and runs build so\nentries.go and the dispatch layer forget it. Later args shift up.\n",
+		Examples:        []string{ "remove-arg file --command exec",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--command", "-c" }, Description: "the command (identifier or package name) that owns the arg", Examples: []string{ "--command exec",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "remove-arg file --command exec --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the arg name", Examples: []string{ "remove-arg file --command exec",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{ "remove-command" },
+		Category:        "Cli System",
+		Description:     "Delete a command package from the project",
+		LongDescription: "Deletes sandbox/internal/commands/<name>/ (entries.yaml, entries.go,\nhandler.go and anything else inside) and runs build so climain.go and\nhelp stop dispatching to it. The generated help command cannot be removed.\n",
+		Examples:        []string{ "remove-command my-feature", "remove-command my-feature --path ./my-project",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "remove-command my-feature --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the command to delete (identifier or package name)", Examples: []string{ "remove-command my-feature",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{ "remove-flag" },
+		Category:        "Cli System",
+		Description:     "Remove a flag from a command's entries.yaml",
+		LongDescription: "Drops one flag declaration (matched by its name or by one of its\nidentifiers) from sandbox/internal/commands/<command>/entries.yaml and\nruns build so entries.go and the dispatch layer forget it.\n",
+		Examples:        []string{ "remove-flag output --command exec", "remove-flag --out --command exec",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--command", "-c" }, Description: "the command (identifier or package name) that owns the flag", Examples: []string{ "--command exec",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "remove-flag output --command exec --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the flag name (or one of its identifiers, e.g. --out)", Examples: []string{ "remove-flag output --command exec",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{ "set-command" },
+		Category:        "Cli System",
+		Description:     "Update the command-level keys of a command's entries.yaml",
+		LongDescription: "Rewrites help, category, long-description and hidden in\nsandbox/internal/commands/<name>/entries.yaml, and appends extra\nidentifiers / examples, then runs build so help output is regenerated.\nKeys not passed are left untouched.\n",
+		Examples:        []string{ "set-command exec --help \"run the thing\" --category Core", "set-command exec --identifier run --example \"exec file.txt\"", "set-command exec --hidden",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--help" }, Description: "new one-line help text", Examples: []string{ "--help \"run the thing\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--category" }, Description: "new category the command is grouped under in help output", Examples: []string{ "--category Core",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--long-description" }, Description: "new long description shown by help <command>", Examples: []string{ "--long-description \"Runs the thing end to end.\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--identifier", "-i" }, Description: "an extra verb the command answers to (repeatable)", Examples: []string{ "--identifier run",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--example", "-e" }, Description: "an extra usage example (repeatable)", Examples: []string{ "--example \"exec file.txt\"",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--hidden" }, Description: "hide the command from help listings", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--visible" }, Description: "show the command in help listings again", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "set-command exec --hidden --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the command to update (identifier or package name)", Examples: []string{ "set-command exec --help \"run the thing\"",  }, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

@@ -8,6 +8,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
 )
 
 // AddCommandInternal writes the two hand-written files of a new command
@@ -20,8 +21,8 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 		return deps.Std.Errorf("add-command requires --category")
 	}
 
-	identifier := commandIdentifier(name)
-	pkg := commandPackage(name)
+	identifier := utils.CommandIdentifier(name)
+	pkg := utils.CommandPackage(name)
 	if pkg == "" {
 		return deps.Std.Errorf("invalid command name %q", name)
 	}
@@ -46,7 +47,7 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 		"Category":    strings.TrimSpace(category),
 	}
 
-	dir := "sandbox/internal/commands/" + pkg
+	dir := utils.CommandDir(name)
 
 	entries, err := deps.Embeddeps.RenderTemplate("templates/command_entries.yaml", vars)
 	if err != nil {
@@ -65,21 +66,6 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 	}
 
 	return nil
-}
-
-// commandIdentifier normalizes the user's name into the CLI verb: lowercased,
-// spaces and underscores turned into dashes ("My Feature" -> "my-feature").
-func commandIdentifier(name string) string {
-	out := strings.ToLower(strings.TrimSpace(name))
-	out = strings.ReplaceAll(out, " ", "-")
-	out = strings.ReplaceAll(out, "_", "-")
-	return out
-}
-
-// commandPackage is the Go package / directory name for the command: the
-// identifier with dashes turned into underscores ("my-feature" -> "my_feature").
-func commandPackage(name string) string {
-	return strings.ReplaceAll(commandIdentifier(name), "-", "_")
 }
 
 // projectName title-cases the target project's configured name for use in the
