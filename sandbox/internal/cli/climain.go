@@ -7,7 +7,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
-	help "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/help"
 	add_arg "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_arg"
 	add_command "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_command"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/add_flag"
@@ -19,6 +18,7 @@ import (
 	dep_remove "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/dep_remove"
 	deps_init "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/deps_purge"
+	help "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/help"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/remove_arg"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/remove_command"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/commands/remove_flag"
@@ -41,6 +41,9 @@ const (
 // sandbox/internal/commands/<name>/entries.yaml. It reads the verb, then hands
 // the remaining argv to the matching command's generated dispatch function,
 // which fills that command's Entries struct and calls its CommandHandler.
+// `help` is dispatched through that same path — it is a declared command whose
+// three files agnos happens to write itself — and is reached directly only for
+// the empty command line below.
 func CliMain(deps *deps.Deps, args []string) int {
 
 	if len(args) == 0 {
@@ -57,8 +60,6 @@ func CliMain(deps *deps.Deps, args []string) int {
 	}
 
 	switch {
-	case action == "help" || action == "--help":
-		return help.Run(deps, verb)
 	case action == "add-arg":
 		return dispatchAddArg(deps, verb)
 	case action == "add-command":
@@ -81,6 +82,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchDepsInit(deps, verb)
 	case action == "deps-purge":
 		return dispatchDepsPurge(deps, verb)
+	case action == "help" || action == "--help":
+		return dispatchHelp(deps, verb)
 	case action == "remove-arg":
 		return dispatchRemoveArg(deps, verb)
 	case action == "remove-command":
@@ -802,6 +805,24 @@ func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return deps_purge.CommandHandler(deps, entries)
+}
+
+func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &help.Entries{}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "command", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Command = value
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return help.CommandHandler(deps, entries)
 }
 
 func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {

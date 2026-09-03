@@ -57,6 +57,19 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	// The help command's entries.yaml is generated, so it is written before
+	// the commands are collected — from there on help is just another entry
+	// in the set.
+	if hasCli {
+		helpVars := map[string]interface{}{
+			"Module":      module_conf.Module,
+			"ProjectName": projectNameConst(project_conf.Name),
+		}
+		if err := GenerateHelpEntriesYaml(deps, io, helpVars); err != nil {
+			return err
+		}
+	}
+
 	commands, err := CollectCommands(deps, io)
 	if err != nil {
 		return err

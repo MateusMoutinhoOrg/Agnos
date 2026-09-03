@@ -13,13 +13,14 @@ import (
 // CollectCommands reads every sandbox/internal/commands/<name>/entries.yaml and
 // returns one rich data map per command, in listing order, for the
 // {{range .Commands}} loops in the generated sandbox/internal/cli/climain.go and
-// help package. The `help` directory is skipped: it is generated, not declared.
+// help package. `help` is collected like every other command: its entries.yaml
+// is written by GenerateHelpEntriesYaml just before this runs.
 func CollectCommands(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, error) {
 	var commands []map[string]any
 
 	for _, dir := range io.ListDirs("sandbox/internal/commands") {
 		name := lastSegmentOf(dir)
-		if name == "" || name == "help" {
+		if name == "" {
 			continue
 		}
 

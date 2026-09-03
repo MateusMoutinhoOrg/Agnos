@@ -7,7 +7,6 @@ import (
 	"{{.Module}}/sandbox/deps"
 	"{{.Module}}/sandbox/deps/argvdeps"
 	"{{.Module}}/sandbox/internal/config"
-	help "{{.Module}}/sandbox/internal/commands/help"
 {{- range .Commands}}
 	{{.Name}} "{{$.Module}}/sandbox/internal/commands/{{.Name}}"
 {{- end}}
@@ -26,6 +25,9 @@ const (
 // sandbox/internal/commands/<name>/entries.yaml. It reads the verb, then hands
 // the remaining argv to the matching command's generated dispatch function,
 // which fills that command's Entries struct and calls its CommandHandler.
+// `help` is dispatched through that same path — it is a declared command whose
+// three files agnos happens to write itself — and is reached directly only for
+// the empty command line below.
 func CliMain(deps *deps.Deps, args []string) int {
 
 	if len(args) == 0 {
@@ -42,8 +44,6 @@ func CliMain(deps *deps.Deps, args []string) int {
 	}
 
 	switch {
-	case action == "help" || action == "--help":
-		return help.Run(deps, verb)
 {{- range .Commands}}
 	case {{.MatchExpr}}:
 		return dispatch{{.GoName}}(deps, verb)

@@ -28,6 +28,10 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 	identifier := utils.CommandIdentifier(name)
 	pkg := utils.CommandPackage(name)
 
+	if pkg == "help" {
+		return deps.Std.Errorf("the help command is generated and cannot be declared")
+	}
+
 	deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
 
 	module_conf, err := utils.LoadModuleConf(deps, io)
