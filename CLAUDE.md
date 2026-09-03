@@ -444,3 +444,29 @@ through commands alone, spending no tokens on file contents.
    Nothing to append anywhere.
 4. If it needs logic reusable as library API, add `sandbox/internal/actions/<name>/` and
    register it in `sandbox/binds/actions.go` + `sandbox/api/actions.go`.
+
+## Documentation (`docs/`)
+
+`README.md` + `docs/` is the human-facing documentation, shaped like the old template's docs
+(`old/docs/`, now superseded). Four **themes**, one index each under `docs/Index/`
+(`CliUsage`, `GeneratedProject`, `LibUsage`, `Development`); pages live flat under
+`docs/Tutorials/` (one goal per page, numbered steps) and `docs/References/` (lookups and
+explanations), plus `docs/References/PublicApi/<pkg>.<Symbol>.md` detail pages and
+`docs/References/Specs/<Spec>/{Specs.md,sample.*}` specifications. Every `.md` file follows
+the specs indexed by `docs/References/Specs.md`; code files follow the code specs there
+(Contract, Binder, DepsContract, AdapterLib, Available, CommandEntries, CommandHandler,
+Action, Collector, Parsable, Dep, AssetTemplate, CliMain). Rules that matter when changing
+code:
+
+- A pattern established or changed in this file is mirrored in `docs/` in the same change,
+  and the reverse — `docs/References/Structure.md` is the schema map, `BuildPipeline.md` /
+  `SmartIO.md` / `CommandDispatch.md` the mechanics.
+- Adding a command updates `docs/References/Commands.md`; adding a dep updates
+  `docs/References/DepList.md`; adding an action or contract field adds a page under
+  `docs/References/PublicApi/` and a row in `PublicApi.md`; adding an adapter lib updates
+  `docs/References/Adapters.md`; a new generated file is registered in
+  `docs/References/GeneratedFiles.md`.
+- Adding, renaming or deleting a `.md` page updates its theme index in `docs/Index/`
+  (nested entry: `**description:**` line + one link per `##` topic section) — see
+  `docs/Tutorials/HandleDocuments.md`. Links are repository-rooted (`/docs/...`); never
+  link into `old/`.
