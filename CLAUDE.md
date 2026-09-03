@@ -42,22 +42,27 @@ any individual feature.
 ## Commands
 
 ```bash
-# Build the CLI for the current machine (macOS Intel example) into release/
-bash ./scripts/mac86.sh          # other targets: macarm64, linux86, linuxarm64, linuxi32, windows86, windowsi32
-bash ./scripts/all.sh            # every target into release/
-
-go build -C . -o release/agnos ./cmd/main   # quick local build
+# Quick local build for the current machine into release/
+CGO_ENABLED=0 go build -o release/agnos ./cmd/main
 go vet ./cmd/... ./sandbox/... ./adapters/...   # never ./... — assets/ holds Go templates
 
-# Bootstrap + install: compiles this tree, has THAT binary run `agnos build` over the tree
-# (so the installed agnos never rewrites the repo to an older shape), rebuilds, installs
-# to /usr/local/bin/agnos
-sh ./local_install.sh
+# Cross-compile any target: set GOOS/GOARCH, keep CGO_ENABLED=0, compile ./cmd/main only.
+# Targets: darwin/amd64 mac86.bin, darwin/arm64 macarm64.bin, linux/amd64 linux86.out,
+# linux/arm64 linuxarm64.out, linux/386 linuxi32.out, windows/amd64 windows86.exe,
+# windows/386 windowsi32.exe — see docs/Tutorials/Build.md.
+CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o release/mac86.bin ./cmd/main
+
+# Bootstrap + install: compile this tree, have THAT binary run `agnos build` over the tree
+# (so the installed agnos never rewrites the repo to an older shape), rebuild, install
+# to /usr/local/bin/agnos — full steps (every OS) in docs/Tutorials/BootstrapAgnos.md
+go build -o release/bootstrap.bin ./cmd/main
+./release/bootstrap.bin build
+CGO_ENABLED=0 go build -o release/agnos ./cmd/main && sudo mv release/agnos /usr/local/bin/agnos
 ```
 
 Never run an already-installed `agnos build` against this repo after changing templates or
 collectors: compile first (`go build -o release/bootstrap.bin ./cmd/main`) and run *that*
-binary, exactly as `local_install.sh` does. `agnos build` also runs `go build` over the
+binary (see `docs/Tutorials/BootstrapAgnos.md`). `agnos build` also runs `go build` over the
 schema dirs, so a broken generation fails there.
 
 There is currently **no test suite** (`*_test.go` files) and no lint config beyond `go vet`.

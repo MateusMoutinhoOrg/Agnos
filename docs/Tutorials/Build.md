@@ -8,7 +8,6 @@ Cross-compile `agnos` into a binary for each supported operating system and arch
 - Every artifact goes to `release/`, which is git-ignored.
 - `CGO_ENABLED=0` on every target: the binary must not link against the building machine's libc.
 - Compile `./cmd/main` and nothing wider. `./...` would try to compile `assets/`, which holds Go **templates**, not Go.
-- The `scripts/` wrappers named below are a local convenience and are git-ignored too; the commands they run are the ones written out here.
 
 ---
 
@@ -18,15 +17,15 @@ Cross-compile `agnos` into a binary for each supported operating system and arch
 
 1. Pick a target from the table below:
 
-   | `GOOS`/`GOARCH` | Output | Platform | Wrapper |
-   |-----------------|--------|----------|---------|
-   | `linux`/`amd64` | `release/linux86.out` | Linux, 64-bit Intel/AMD | `scripts/linux86.sh` |
-   | `linux`/`arm64` | `release/linuxarm64.out` | Linux, 64-bit ARM | `scripts/linuxarm64.sh` |
-   | `linux`/`386` | `release/linuxi32.out` | Linux, 32-bit Intel | `scripts/linuxi32.sh` |
-   | `windows`/`amd64` | `release/windows86.exe` | Windows, 64-bit Intel/AMD | `scripts/windows86.sh` |
-   | `windows`/`386` | `release/windowsi32.exe` | Windows, 32-bit Intel | `scripts/windowsi32.sh` |
-   | `darwin`/`amd64` | `release/mac86.bin` | macOS, Intel | `scripts/mac86.sh` |
-   | `darwin`/`arm64` | `release/macarm64.bin` | macOS, Apple Silicon | `scripts/macarm64.sh` |
+   | `GOOS`/`GOARCH` | Output | Platform |
+   |-----------------|--------|----------|
+   | `linux`/`amd64` | `release/linux86.out` | Linux, 64-bit Intel/AMD |
+   | `linux`/`arm64` | `release/linuxarm64.out` | Linux, 64-bit ARM |
+   | `linux`/`386` | `release/linuxi32.out` | Linux, 32-bit Intel |
+   | `windows`/`amd64` | `release/windows86.exe` | Windows, 64-bit Intel/AMD |
+   | `windows`/`386` | `release/windowsi32.exe` | Windows, 32-bit Intel |
+   | `darwin`/`amd64` | `release/mac86.bin` | macOS, Intel |
+   | `darwin`/`arm64` | `release/macarm64.bin` | macOS, Apple Silicon |
 
 2. Build it from the repository root:
 
@@ -35,15 +34,9 @@ Cross-compile `agnos` into a binary for each supported operating system and arch
    CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o release/linux86.out ./cmd/main
    ```
 
-   With the wrapper present, the same thing is:
-
-   ```bash
-   bash ./scripts/linux86.sh
-   ```
-
 ### Build every target at once
 
-3. Loop over the table — or run `scripts/all.sh`, which does exactly this:
+3. Loop over the table:
 
    ```bash
    mkdir -p release
@@ -73,4 +66,4 @@ Cross-compile `agnos` into a binary for each supported operating system and arch
    CGO_ENABLED=0 GOOS=linux GOARCH=arm GOARM=7 go build -o release/linuxarmv7.out ./cmd/main
    ```
 
-7. Add the pair to the target table above and, if you keep the wrappers, copy the closest `scripts/<target>.sh` and add its name to the `targets` array of `scripts/all.sh`.
+7. Add the pair to the target table above.

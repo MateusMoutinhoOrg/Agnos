@@ -29,12 +29,21 @@ Covers regenerating this repository with the `agnos` compiled **from this checko
    ```bash
    ./release/bootstrap.bin build -q && git diff --quiet && echo idempotent
    ```
-5. Rebuild for your machine from the regenerated tree and install it. On an Intel Mac:
+5. Rebuild for your machine from the regenerated tree and install it. `CGO_ENABLED=0` keeps the binary from linking against the building machine's libc. Pick the row for your platform:
+
+   | Platform | Build command | Install |
+   |----------|---------------|---------|
+   | macOS, Apple Silicon | `CGO_ENABLED=0 GOOS=darwin GOARCH=arm64 go build -o release/macarm64.bin ./cmd/main` | `sudo mv release/macarm64.bin /usr/local/bin/agnos` |
+   | macOS, Intel | `CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o release/mac86.bin ./cmd/main` | `sudo mv release/mac86.bin /usr/local/bin/agnos` |
+   | Linux, 64-bit Intel/AMD | `CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o release/linux86.out ./cmd/main` | `sudo mv release/linux86.out /usr/local/bin/agnos` |
+   | Linux, 64-bit ARM | `CGO_ENABLED=0 GOOS=linux GOARCH=arm64 go build -o release/linuxarm64.out ./cmd/main` | `sudo mv release/linuxarm64.out /usr/local/bin/agnos` |
+   | Linux, 32-bit Intel | `CGO_ENABLED=0 GOOS=linux GOARCH=386 go build -o release/linuxi32.out ./cmd/main` | `sudo mv release/linuxi32.out /usr/local/bin/agnos` |
+   | Windows, 64-bit Intel/AMD | `CGO_ENABLED=0 GOOS=windows GOARCH=amd64 go build -o release/windows86.exe ./cmd/main` | move `release/windows86.exe` onto a directory in your `PATH` as `agnos.exe` |
+   | Windows, 32-bit Intel | `CGO_ENABLED=0 GOOS=windows GOARCH=386 go build -o release/windowsi32.exe ./cmd/main` | move `release/windowsi32.exe` onto a directory in your `PATH` as `agnos.exe` |
+
+   When building for the machine you are on, the `GOOS`/`GOARCH` prefix is optional — a bare `CGO_ENABLED=0 go build -o release/agnos ./cmd/main` targets the host. Then drop the bootstrap binary and confirm the install:
    ```bash
-   CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o release/mac86.bin ./cmd/main
    rm -f release/bootstrap.bin
-   sudo mv release/mac86.bin /usr/local/bin/agnos
    agnos version
    ```
-   `local_install.sh`, when present in your checkout, runs steps 1, 2 and 5 in this order.
 6. Bump the release version in `AgnosConfig/project.yaml` when shipping. `build` regenerates `sandbox/internal/config/config.go` from it, so the `Version` constant and `agnos version` follow.
