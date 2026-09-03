@@ -1,3 +1,5 @@
+//go:build ignore
+
 // This file is an illustrative sample, not part of the build. It shows the two
 // files of one action in a single listing; in the tree they are separate.
 

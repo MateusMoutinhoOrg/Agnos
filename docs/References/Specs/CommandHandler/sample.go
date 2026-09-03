@@ -1,3 +1,5 @@
+//go:build ignore
+
 package dep_list
 
 // This file is an illustrative sample, not part of the build.

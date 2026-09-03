@@ -474,7 +474,9 @@ through commands alone, spending no tokens on file contents.
 `docs/Tutorials/` (one goal per page, numbered steps) and `docs/References/` (lookups and
 explanations), plus `docs/References/PublicApi/<pkg>.<Symbol>.md` detail pages and
 `docs/References/Specs/<Spec>/{Specs.md,sample.*}` specifications. Every `.md` file follows
-the specs indexed by `docs/References/Specs.md`; code files follow the code specs there
+the specs indexed by `docs/References/Specs.md`. Each `docs/References/Specs/<Spec>/sample.*`
+that is Go carries a `//go:build ignore` line so `agnos build`'s module-wide `go mod tidy`
+never tries to resolve its illustrative imports. Code files follow the code specs there
 (Contract, Binder, DepsContract, AdapterLib, Available, CommandEntries, CommandHandler,
 Action, Collector, Parsable, Dep, AssetTemplate, CliMain). Rules that matter when changing
 code:

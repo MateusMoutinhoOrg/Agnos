@@ -1,3 +1,5 @@
+//go:build ignore
+
 package main
 
 // This file is an illustrative sample, not part of the build. It is what

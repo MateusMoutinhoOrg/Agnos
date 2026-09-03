@@ -1,3 +1,5 @@
+//go:build ignore
+
 package frozen
 
 // This file is an illustrative sample, not part of the build.

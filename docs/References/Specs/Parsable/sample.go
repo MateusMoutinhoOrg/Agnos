@@ -1,3 +1,5 @@
+//go:build ignore
+
 // This file is an illustrative sample, not part of the build. It shows the
 // five files of one parsable in a single listing; in the tree they are separate.
 

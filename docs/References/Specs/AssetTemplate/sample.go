@@ -1,3 +1,5 @@
+//go:build ignore
+
 // This file is an illustrative sample, not part of the build. It is a Go
 // text/template, not Go: it is the shape of assets/deps/sandbox/deps/deps.go,
 // which renders to sandbox/deps/deps.go inside a project.
