@@ -342,10 +342,13 @@ from a user's command is who writes the files: `agnos build` writes all three.
 `GenerateHelpEntriesYaml` (`build/generate_help_command.go`) renders
 `assets/templates/help_entries.yaml` into `sandbox/internal/commands/help/entries.yaml`
 *before* `CollectCommands` runs, so the declaration is already in the transaction when the
-collector reads it; `handler.go` comes from the `cli` asset group and bakes the collected
-metadata of every command (including help itself) into its `helpCommands` table. Because
-the files are regenerated on every build, `add-command help`, `remove-command help` and
-hand edits to `sandbox/internal/commands/help/` are pointless — the first two are refused.
+collector reads it — but only when that file does **not** already exist: `entries.yaml` is
+created once and never overwritten, so help's declaration can be edited like any other
+command's. `entries.go` and `handler.go` *are* regenerated on every build; `handler.go`
+comes from the `cli` asset group and bakes the collected metadata of every command
+(including help itself) into its `helpCommands` table. `add-command help` and
+`remove-command help` are refused, and hand edits to `handler.go` / `entries.go` are
+pointless — they are overwritten on the next build.
 
 **This repo bootstraps itself.** `agnos build` runs against Agnos-Cli's own tree
 (`AgnosConfig/` holds its `project.yaml` / `themes.yaml` / `ignore.yaml` / `paths.yaml`) and
