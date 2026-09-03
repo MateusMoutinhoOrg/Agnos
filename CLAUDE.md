@@ -8,11 +8,12 @@ Agnos-Cli (`agnos`) is a Go CLI that **scaffolds and regenerates other Go applic
 built around a command/action architecture. It began as a Go CLI template but is being
 refactored (branch `Cli-Refactor`) into a "factory builder": `agnos start` creates a new
 project skeleton, and `agnos build` (re)renders parts of that project from embedded
-templates according to the project's `*Config/` files. See `AGENTS.md` for the intent.
+templates according to the project's `*Config/` files.
 
-`old/` (previous template + full docs under `old/docs/`) and `local_test/` (a generated
-sample project) are reference material, not part of the build. `main` is a committed
-prebuilt binary.
+`old/` (previous template + full docs under `old/docs/`) is reference material, not part
+of the build. `release/` holds built binaries. `Relatorio.md` is a Portuguese bug/DX report
+against Agnos 0.0.2; most of its items are already fixed, but it is the record of *why*
+the exit codes, output channels and runtime gate below exist.
 
 ## North star: self-hosting / bootstrap
 
@@ -28,12 +29,12 @@ design constraint behind every change, even while it is still aspirational:
   structurally identical (same filenames, same function names, same ordering). A reader or
   a template renderer should be able to predict a package's contents from its role.
 - **Anything hand-written today is a template tomorrow.** Prefer mechanical, regular code
-  that a Go `text/template` in `assets/sandbox/**` could emit. Avoid constructs that would
+  that a Go `text/template` under `assets/<group>/**` could emit. Avoid constructs that would
   be awkward to generate (irregular formatting, ad-hoc special cases, hidden state).
 - **The sandbox rule is absolute.** No OS effects outside `adapters/`. Self-hosting depends
   on the core staying pure so it can be rendered and re-rendered safely.
-- **Keep this file and `AGENTS.md` current.** They are the harness's spec. When you
-  establish or change a pattern, update the relevant section in the same change.
+- **Keep this file current.** It is the harness's spec. When you establish or change a
+  pattern, update the relevant section in the same change.
 
 This is a harness: consistency, predictability, and documented conventions matter more than
 any individual feature.
@@ -48,9 +49,16 @@ bash ./scripts/all.sh            # every target into release/
 go build -C . -o release/agnos ./cmd/main   # quick local build
 go vet ./cmd/... ./sandbox/... ./adapters/...   # never ./... — assets/ holds Go templates
 
-# End-to-end smoke test: builds, installs to /usr/local/bin/agnos, scaffolds a fresh project
-sh ./local_test.sh
+# Bootstrap + install: compiles this tree, has THAT binary run `agnos build` over the tree
+# (so the installed agnos never rewrites the repo to an older shape), rebuilds, installs
+# to /usr/local/bin/agnos
+sh ./local_install.sh
 ```
+
+Never run an already-installed `agnos build` against this repo after changing templates or
+collectors: compile first (`go build -o release/bootstrap.bin ./cmd/main`) and run *that*
+binary, exactly as `local_install.sh` does. `agnos build` also runs `go build` over the
+schema dirs, so a broken generation fails there.
 
 There is currently **no test suite** (`*_test.go` files) and no lint config beyond `go vet`.
 `go` 1.25.0 is required (see `go.mod`).
@@ -124,24 +132,27 @@ positional args are drained, anything still unread is an unexpected argument.
 - **`sandbox/`** — the closed core. It performs **no OS effects directly**. Everything
   external (filesystem, time, stdout/stderr, HTTP, embedded assets, YAML) arrives through
   `sandbox/deps.Deps`, a struct of **only** sub-contract structs — no bare function
-  fields (`std`, `iodeps`, `argvdeps`, `dbdeps`, `embeddeps`, `requestdeps`,
-  `rundeps`, `serializables`). Each sub-contract is *restated* inside `sandbox/deps/<x>/` precisely
+  fields (`argvdeps`, `embeddeps`, `goimportsdeps`, `iodeps`, `requestdeps`, `rundeps`,
+  `serializables`, `std`; `dbdeps` was dropped from this repo in commit 5e939f5 but is
+  still shipped as an installable dep under `assets/deplist/`). Each sub-contract is *restated* inside `sandbox/deps/<x>/` precisely
   because its real implementation must live outside the sandbox. The loose runtime
   functions (`Now`, `Printf`, `Error`, `Errorf`) are gathered into `sandbox/deps/std.Lib`,
   injected as `Deps.Std`. Sub-contracts whose real object is created per call expose that
   constructor as a field on their own `Lib` struct — `requestdeps.Lib.NewRequest(url)`,
-  `dbdeps.Lib.NewDatabase(props)` (rooted at `props.Path`), `argvdeps.Lib.New(args)`
-  (which hands back an `argvdeps.Parser` bound to that argv) — injected whole as
-  `Deps.Requestdeps` / `Deps.Dbdeps` / `Deps.Argvdeps`, exactly like `Deps.Iodeps` and
-  `Deps.Serializables`. **Every `Deps` field name is mechanical: it is the title-cased
+  `argvdeps.Lib.New(args)` (which hands back an `argvdeps.Parser` bound to that argv) —
+  injected whole as `Deps.Requestdeps` / `Deps.Argvdeps`, exactly like `Deps.Iodeps` and
+  `Deps.Serializables`. `Deps.Rundeps.Run` is how the sandbox executes external processes
+  (the `go` toolchain in `start` and `build/run_runtime.go`). `Deps.Goimportsdeps` (a
+  `go/parser`-backed Go source reader) is wired but not yet used by any action. **Every `Deps` field name is mechanical: it is the title-cased
   sub-contract directory name** (`sandbox/deps/iodeps/` → `Deps.Iodeps`,
   `sandbox/deps/serializables/` → `Deps.Serializables`, …) — never a hand-picked alias —
-  because `render_deps.go` regenerates `sandbox/deps/deps.go` by iterating those dirs. There
+  because `build/collect_deps_libs.go` regenerates `sandbox/deps/deps.go` by iterating
+  those dirs. There
   is no separate `Factory` struct: `deps.Deps` references each `<x>.Lib` directly.
 - **`adapters/`** — the only place `os`, `embed`, `net/http` etc. are touched. Split in two:
-  - **`adapters/libs/<x>deps/`** — one isolated real implementation per sub-contract
-    (`argvdeps`, `dbdeps`, `embeddeps`, `iodeps`, `requestdeps`, `rundeps`,
-    `serializables`, `std`),
+  - **`adapters/libs/<x>/`** — one isolated real implementation per sub-contract
+    (`verb` (fills `argvdeps`), `embeddeps`, `goimportsdeps`, `iodeps`, `requestdeps`,
+    `rundeps`, `serializables`, `std`),
     each a package exporting a uniform `Bind(deps *deps.Deps)` that fills that one `deps`
     sub-contract field.
   - **`adapters/availables/<name>/new.go`** — a ready-made `Deps` assembly wiring the libs
@@ -149,7 +160,7 @@ positional args are drained, anything still unread is an unexpected argument.
     wants a different mix composes their own `Deps` from `adapters/libs` directly.
 - **`assets/`** — files embedded into the binary via `//go:embed all:*` in `assets/asset.go`.
   The embed directive must live in this package. Reached only through `deps.Embeddeps`.
-  `assets/sandbox/**` are Go **text/templates** (`{{.Module}}`, `{{if .HasDeps}}`) that
+  `assets/<group>/**` files are Go **text/templates** (`{{.Module}}`, `{{if .HasDeps}}`) that
   `agnos build` renders into a target project.
 - **`cmd/main/main.go`** — wires `standard.New()` into `sandbox.New(&deps)` and calls
   `lib.Cli.CliMain(os.Args[1:])`. Holds no logic.
@@ -305,8 +316,8 @@ Every lib this repo ships is mirrored there as a dep, each bundling its
 `assets/asset.go`), `goimportsdeps`, `iodeps`, `requestdeps`, `rundeps`, `serializables`,
 `std`. After
 `dep-install`, `build`'s collectors regenerate `sandbox/deps/deps.go` and
-`adapters/availables/standard/new.go` to include the new sub-contract; `dbdeps` and `argvdeps`
-pull external modules, so `dep-install` writes their pinned `require` into the target
+`adapters/availables/standard/new.go` to include the new sub-contract; `dbdeps` (not
+installed in this repo) and `argvdeps` pull external modules, so `dep-install` writes their pinned `require` into the target
 `go.mod` (from `assets/depsversion.yaml`) and the user still runs `go mod tidy` there to
 download them.
 
@@ -360,8 +371,8 @@ regenerates `sandbox/deps/deps.go`, `adapters/availables/standard/new.go` and
 `sandbox/binds/cli.go` in place, and the result still compiles (`go build ./cmd/... ./sandbox/... ./adapters/...`). Keep it that
 way: `agnos build` must stay idempotent and compilable. In particular, all sandbox and
 adapter code must reference `Deps` fields by their mechanical names (`deps.Iodeps`,
-`deps.Serializables`, `deps.Argvdeps`, `deps.Dbdeps`, `deps.Requestdeps`, `deps.Embeddeps`,
-`deps.Std`) so the regenerated struct keeps matching its callers. After changing anything
+`deps.Serializables`, `deps.Argvdeps`, `deps.Requestdeps`, `deps.Embeddeps`, `deps.Rundeps`,
+`deps.Goimportsdeps`, `deps.Std`) so the regenerated struct keeps matching its callers. After changing anything
 under `sandbox/deps/<x>/`, `adapters/libs/<x>/`, `sandbox/binds/`, or `sandbox/api/`, run
 `agnos build` and rebuild.
 
