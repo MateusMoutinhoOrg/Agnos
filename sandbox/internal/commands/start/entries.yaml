@@ -1,0 +1,44 @@
+identifiers: ["start"]
+category: Core Commands
+help: Initialize a new project in a directory
+long-description: |
+  Scaffolds a new Agnos project in the given directory, creating
+  the required configuration files and folder structure. If no
+  path is provided, the current directory is used.
+examples:
+  - "start -p my-project"
+  - "start -p my-project --path ./my-project-dir"
+  - "start -p my-project -q"
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "start --path ./my-project"
+    type: string
+    default: "."
+  project-name:
+    identifiers: ["--project-name", "-p"]
+    description: the name of the project
+    examples:
+      - "start -p my-project"
+    type: string
+    required: true
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "start -q"
+    type: boolean
+  force:
+    identifiers: ["--force", "-f"]
+    description: Forces the creation of the project, overwriting existing files
+    examples:
+      - "start -f"
+    type: boolean
+  module:
+    identifiers: ["--module", "-m"]
+    description: Module name for go.mod
+    examples:
+      - "start -m github.com/user/project"
+    type: string

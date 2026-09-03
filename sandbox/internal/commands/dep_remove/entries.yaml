@@ -1,0 +1,30 @@
+identifiers: ["dep-remove"]
+category: Dependencies
+help: Removes an embedded dep from the project
+long-description: |
+  Removes every file that assets/deplist/<dep> installs into the
+  project, then calls build.
+examples:
+  - "dep-remove embed"
+  - "dep-remove embed --path ./my-project"
+args:
+  dep:
+    description: the dep to remove from the project
+    examples:
+      - "dep-remove embed"
+    type: string
+    required: true
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "dep-remove --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "dep-remove embed -q"
+    type: boolean

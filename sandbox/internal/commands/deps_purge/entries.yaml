@@ -1,0 +1,22 @@
+identifiers: ["deps-purge"]
+category: Dependency System
+help: Removes the dependency-injection subsystem from the project
+long-description: |
+  Removes the sandbox/deps and adapters directories and calls build.
+examples:
+  - "deps-purge"
+  - "deps-purge --path ./my-project"
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "deps-purge --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "deps-purge -q"
+    type: boolean

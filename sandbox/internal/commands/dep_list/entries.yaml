@@ -1,0 +1,22 @@
+identifiers: ["dep-list"]
+category: Dependencies
+help: Lists the embedded deps available to install
+long-description: |
+  Lists the name of every dep under assets/deplist that dep-install
+  can render into a project.
+examples:
+  - "dep-list"
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "dep-list --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "dep-list -q"
+    type: boolean

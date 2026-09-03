@@ -1,0 +1,7 @@
+identifiers: ["version", "--version"]
+category: Info
+help: Print the installed version
+long-description: |
+  Prints the current version of the installed binary and exits.
+examples:
+  - "version"

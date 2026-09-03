@@ -1,0 +1,26 @@
+identifiers: ["verify"]
+category: Core Commands
+help: Checks the project keeps the sandbox/adapter schema
+long-description: |
+  Verifies the structural rules the harness depends on: sandbox/ imports
+  stay inside sandbox/, sandbox/ holds only api, binds, deps, internal and
+  new.go, sandbox/api and sandbox/deps import nothing external, every
+  sandbox/binds file mirrors a sandbox/api file and declares only functions,
+  and adapters/ holds only availables and libs. `agnos build` runs this as a
+  gate unless --unsafe is passed.
+examples:
+  - "verify"
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "verify --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "verify -q"
+    type: boolean

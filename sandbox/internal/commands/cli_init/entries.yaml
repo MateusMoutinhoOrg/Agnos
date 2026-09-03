@@ -1,0 +1,23 @@
+identifiers: ["cli-init"]
+category: Cli System
+help: Initializes the CLI layer for the project
+long-description: |
+  Installs the std and argv deps the CLI layer depends on, renders the
+  "cli" asset group into the project, and calls build.
+examples:
+  - "cli-init"
+  - "cli-init --path ./my-project"
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "cli-init --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "cli-init -q"
+    type: boolean

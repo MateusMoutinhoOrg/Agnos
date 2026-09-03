@@ -1,0 +1,30 @@
+identifiers: ["dep-install"]
+category: Dependencies
+help: Installs an embedded dep into the project
+long-description: |
+  Renders every file under assets/deplist/<dep> into the project
+  at the path it holds inside that dep, then calls build.
+examples:
+  - "dep-install embed"
+  - "dep-install embed --path ./my-project"
+args:
+  dep:
+    description: the dep to install from assets/deplist
+    examples:
+      - "dep-install embed"
+    type: string
+    required: true
+flags:
+  path:
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "dep-install --path ./my-project"
+    type: string
+    default: "."
+  quiet:
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "dep-install embed -q"
+    type: boolean
