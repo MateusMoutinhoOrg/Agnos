@@ -4,7 +4,6 @@ import (
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/embeddeps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/goimportsdeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
-	keep "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/keep"
 	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializables"
@@ -18,7 +17,6 @@ func New() deps.Deps {
 	embeddeps.Bind(&deps)
 	goimportsdeps.Bind(&deps)
 	iodeps.Bind(&deps)
-	keep.Bind(&deps)
 	requestdeps.Bind(&deps)
 	rundeps.Bind(&deps)
 	serializables.Bind(&deps)
