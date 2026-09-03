@@ -184,14 +184,14 @@ var helpCommands = []helpCommand{
 		Category:        "Dependencies",
 		Description:     "Installs an embedded dep into the project",
 		LongDescription: "Renders every file under assets/deplist/<dep> into the project\nat the path it holds inside that dep, then calls build.\n",
-		Examples:        []string{ "dep-install embed", "dep-install embed --path ./my-project",  },
+		Examples:        []string{ "dep-install embeddeps", "dep-install embeddeps --path ./my-project",  },
 		Hidden:          false,
 		Flags: []helpField{
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "dep-install --path ./my-project",  }, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "dep-install embed -q",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "dep-install embeddeps -q",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
-			{Name: "dep", Description: "the dep to install from assets/deplist", Examples: []string{ "dep-install embed",  }, Type: "string", Default: "", Required: true},
+			{Name: "dep", Description: "the dep to install from assets/deplist", Examples: []string{ "dep-install embeddeps",  }, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -213,14 +213,14 @@ var helpCommands = []helpCommand{
 		Category:        "Dependencies",
 		Description:     "Removes an embedded dep from the project",
 		LongDescription: "Removes every file that assets/deplist/<dep> installs into the\nproject, then calls build.\n",
-		Examples:        []string{ "dep-remove embed", "dep-remove embed --path ./my-project",  },
+		Examples:        []string{ "dep-remove embeddeps", "dep-remove embeddeps --path ./my-project",  },
 		Hidden:          false,
 		Flags: []helpField{
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "dep-remove --path ./my-project",  }, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "dep-remove embed -q",  }, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "dep-remove embeddeps -q",  }, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
-			{Name: "dep", Description: "the dep to remove from the project", Examples: []string{ "dep-remove embed",  }, Type: "string", Default: "", Required: true},
+			{Name: "dep", Description: "the dep to remove from the project", Examples: []string{ "dep-remove embeddeps",  }, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

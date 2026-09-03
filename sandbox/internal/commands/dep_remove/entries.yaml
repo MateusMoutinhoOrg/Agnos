@@ -5,13 +5,13 @@ long-description: |
   Removes every file that assets/deplist/<dep> installs into the
   project, then calls build.
 examples:
-  - "dep-remove embed"
-  - "dep-remove embed --path ./my-project"
+  - "dep-remove embeddeps"
+  - "dep-remove embeddeps --path ./my-project"
 args:
   - name: dep
     description: the dep to remove from the project
     examples:
-      - "dep-remove embed"
+      - "dep-remove embeddeps"
     type: string
     required: true
 flags:
@@ -26,5 +26,5 @@ flags:
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:
-      - "dep-remove embed -q"
+      - "dep-remove embeddeps -q"
     type: boolean

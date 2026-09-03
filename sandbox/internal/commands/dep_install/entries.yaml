@@ -5,13 +5,13 @@ long-description: |
   Renders every file under assets/deplist/<dep> into the project
   at the path it holds inside that dep, then calls build.
 examples:
-  - "dep-install embed"
-  - "dep-install embed --path ./my-project"
+  - "dep-install embeddeps"
+  - "dep-install embeddeps --path ./my-project"
 args:
   - name: dep
     description: the dep to install from assets/deplist
     examples:
-      - "dep-install embed"
+      - "dep-install embeddeps"
     type: string
     required: true
 flags:
@@ -26,5 +26,5 @@ flags:
     identifiers: ["--quiet", "-q"]
     description: Quiets the cli output
     examples:
-      - "dep-install embed -q"
+      - "dep-install embeddeps -q"
     type: boolean

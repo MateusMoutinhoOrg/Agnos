@@ -64,7 +64,7 @@ agnos deps-purge [--path <dir>]       # dependency subsystem: remove them, then 
 agnos dep-install <dep> [--path <dir>]  # render assets/deplist/<dep>/** into the project, then rebuild
 agnos dep-remove <dep> [--path <dir>]   # remove what that dep installed (and now-empty dirs), then rebuild
 agnos dep-list [--path <dir>]         # list the dep names available under assets/deplist
-agnos cli-init [--path <dir>]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
+agnos cli-init [--path <dir>]         # cli subsystem: install the std + argvdeps deps, render the cli asset group, then rebuild
 agnos cli-purge [--path <dir>]        # cli subsystem: remove the cli asset group's files plus sandbox/internal/{cli,commands} whole, then rebuild
 agnos add-command <name> --help <text> --category <cat> [--path <dir>]  # scaffold sandbox/internal/commands/<name>/ (minimal entries.yaml + stub handler.go), then rebuild; --help and --category are required; <name> must normalize to [a-z][a-z0-9-]* and the normalization is logged (the name "help" is refused: agnos generates that command)
 agnos remove-command <name> [--path <dir>]  # delete sandbox/internal/commands/<name>/ entirely, then rebuild (help is refused)
@@ -279,8 +279,11 @@ the content round-trips exactly, only the layout is canonicalized. `remove_comma
 whole command directory through `io.RemoveDir` and rebuilds.
 
 **Deps (`assets/deplist/<dep>/**`).** Each sub-directory of `assets/deplist/` is one
-installable dep; the tree under it mirrors the target-project layout (an asset at
-`assets/deplist/embed/sandbox/deps/embeddeps/embeddeps.go` installs to
+installable dep, and **its name is the `sandbox/deps/<contract>/` sub-contract it installs**
+(never the `adapters/libs/<lib>/` implementation name): the dep that installs
+`sandbox/deps/argvdeps` is called `argvdeps`, even though its adapter lib is `verb`. The
+tree under it mirrors the target-project layout (an asset at
+`assets/deplist/embeddeps/sandbox/deps/embeddeps/embeddeps.go` installs to
 `sandbox/deps/embeddeps/embeddeps.go`). `dep-install` renders that subtree as one asset
 group via `utils.RenderGroup(deps, io, "deplist/"+dep, {"Module": …})`, then runs `build`
 as a follow-up step so the collectors pick up the new sub-contract dirs; `dep-remove`
@@ -297,11 +300,12 @@ because `build`'s collectors list dirs from disk and would not see pending write
 
 Every lib this repo ships is mirrored there as a dep, each bundling its
 `sandbox/deps/<contract>/` copy with its `adapters/libs/<lib>/` implementation and
-`{{.Module}}` substituted for the import path: `embed` (embeddeps + `assets/asset.go`),
-`iodeps`, `keep` (dbdeps), `requestdeps`, `rundeps`, `serializables`, `std`,
-`verb` (argvdeps). After
+`{{.Module}}` substituted for the import path, each named after the sub-contract:
+`argvdeps` (lib `verb`), `dbdeps` (lib `keep`), `embeddeps` (lib `embeddeps` +
+`assets/asset.go`), `goimportsdeps`, `iodeps`, `requestdeps`, `rundeps`, `serializables`,
+`std`. After
 `dep-install`, `build`'s collectors regenerate `sandbox/deps/deps.go` and
-`adapters/availables/standard/new.go` to include the new sub-contract; `keep` and `verb`
+`adapters/availables/standard/new.go` to include the new sub-contract; `dbdeps` and `argvdeps`
 pull external modules, so `dep-install` writes their pinned `require` into the target
 `go.mod` (from `assets/depsversion.yaml`) and the user still runs `go mod tidy` there to
 download them.

@@ -1,2 +1,2 @@
-keep: github.com/MateusMoutinhoOrg/Keep@v0.0.4
-verb: github.com/MateusMoutinhoOrg/Verb@v0.0.1
+dbdeps: github.com/MateusMoutinhoOrg/Keep@v0.0.4
+argvdeps: github.com/MateusMoutinhoOrg/Verb@v0.0.1
