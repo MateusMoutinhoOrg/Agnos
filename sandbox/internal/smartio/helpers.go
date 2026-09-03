@@ -3,7 +3,7 @@ package smartio
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 // rootedPath joins io.Root onto a project-relative path, right before the

@@ -13,7 +13,7 @@ Covers installing Agnos as a Go module and running its actions from a program of
 ## Workflow
 1. Install the module:
    ```bash
-   go get github.com/MateusMoutinhoOrg/Agnos-Cli@latest
+   go get github.com/MateusMoutinhoOrg/Agnos@latest
    ```
 2. Create a `main.go` that scaffolds a project the way `agnos start` does. `Start` writes the configuration, renders the skeleton, persists, and hands the result to the Go toolchain, so the directory it leaves behind compiles:
    ```go
@@ -23,9 +23,9 @@ Covers installing Agnos as a Go module and running its actions from a program of
    import (
        "log"
 
-       agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/availables/standard"
-       agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
-       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
+       agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+       agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+       "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
    )
 
    func main() {
@@ -84,9 +84,9 @@ package main
 import (
 	"log"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/availables/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 func main() {

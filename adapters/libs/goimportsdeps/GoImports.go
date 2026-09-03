@@ -9,8 +9,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/goimportsdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 )
 
 // Bind fills deps.Deps.Goimportsdeps, providing the capability to parse a Go

@@ -1,7 +1,7 @@
 # Public API
 
 ## Description
-Index of every public-facing entry of the library, grouped by role. Callers hold **structs of function fields** declared in `sandbox/api` and `sandbox/deps`; the implementations that fill those fields live in `sandbox/internal` and are unreachable from outside `sandbox/`. See [StructContracts.md](/docs/References/StructContracts.md). Every symbol is imported from `github.com/MateusMoutinhoOrg/Agnos-Cli/<package path>`.
+Index of every public-facing entry of the library, grouped by role. Callers hold **structs of function fields** declared in `sandbox/api` and `sandbox/deps`; the implementations that fill those fields live in `sandbox/internal` and are unreachable from outside `sandbox/`. See [StructContracts.md](/docs/References/StructContracts.md). Every symbol is imported from `github.com/MateusMoutinhoOrg/Agnos/<package path>`.
 
 ---
 

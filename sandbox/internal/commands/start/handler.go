@@ -1,9 +1,9 @@
 package start
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	startAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/start"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {

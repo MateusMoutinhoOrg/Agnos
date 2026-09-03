@@ -3,7 +3,7 @@ package depsversionconf
 import (
 	"sort"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func Render(deps *deps.Deps, conf *DepsVersionConf) string {

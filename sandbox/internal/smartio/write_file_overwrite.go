@@ -1,6 +1,6 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
 func WriteFileOverwrite(deps *deps.Deps, io *SmartIO, path string, content []byte) error {
 	p, err := processInputPath(deps, io, path)

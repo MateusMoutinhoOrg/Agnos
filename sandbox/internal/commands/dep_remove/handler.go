@@ -1,9 +1,9 @@
 package dep_remove
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	depRemoveAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_remove"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	depRemoveAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_remove"
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {

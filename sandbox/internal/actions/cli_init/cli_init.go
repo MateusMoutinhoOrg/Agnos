@@ -1,12 +1,12 @@
 package cli_init
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
-	depInstallAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_install"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	depInstallAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_install"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 // CliInit installs the std and argv deps the CLI layer depends on and renders

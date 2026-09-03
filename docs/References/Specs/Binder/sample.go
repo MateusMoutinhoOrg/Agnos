@@ -3,11 +3,11 @@ package binds
 // This file is an illustrative sample, not part of the build.
 
 import (
-	api "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
-	depListAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_list"
-	verifyAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/verify"
+	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	depListAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_list"
+	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
 )
 
 // ActionsBind fills every field of sandbox.Actions, forwarding to the action

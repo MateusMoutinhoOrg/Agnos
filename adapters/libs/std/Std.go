@@ -6,9 +6,9 @@ import (
 	"os"
 	"time"
 
-	std "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
+	std "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/std"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 // now fills std.Lib.Now, returning the real current time.

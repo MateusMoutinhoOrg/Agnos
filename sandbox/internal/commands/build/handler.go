@@ -1,10 +1,10 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	buildAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/build"
-	verifyAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/verify"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {

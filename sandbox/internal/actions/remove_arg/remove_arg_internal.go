@@ -1,9 +1,9 @@
 package remove_arg
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // RemoveArgInternal parses the target command's entries.yaml, drops the

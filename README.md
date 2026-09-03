@@ -1,7 +1,7 @@
-# Agnos-Cli
+# Agnos
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos-Cli.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos-Cli)
-[![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos-Cli)](https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
+[![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.25-blue)](go.mod)
 [![License](https://img.shields.io/badge/license-Unlicense-green)](LICENSE)
 
@@ -17,7 +17,7 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed,
 
 ## Overview
 
-Agnos-Cli (`agnos`) is a **factory**. `agnos start` writes a project skeleton; `agnos build` regenerates every generated file of that project from templates embedded in the binary; and a handful of commands — `add-command`, `add-flag`, `add-arg`, `dep-install` — declare the project's whole command surface and capability set without a file being edited by hand. Only two kinds of file are ever hand-written in a generated project: a command's `handler.go`, and a contract-plus-adapter pair for a capability of its own.
+Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton; `agnos build` regenerates every generated file of that project from templates embedded in the binary; and a handful of commands — `add-command`, `add-flag`, `add-arg`, `dep-install` — declare the project's whole command surface and capability set without a file being edited by hand. Only two kinds of file are ever hand-written in a generated project: a command's `handler.go`, and a contract-plus-adapter pair for a capability of its own.
 
 The core of every project, this one included, lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`, a struct of sub-contract structs reconstructed from a directory listing on every build.
 
@@ -31,7 +31,7 @@ adapters/  ──▶  sandbox/  ◀──  cmd/
 - **`/assets/`**: the Go templates every generated file is rendered from, and the installable deps.
 - **`/cmd/main/`**: wires an adapter into the sandbox and exits with what the CLI returns. Holds no logic.
 
-Agnos-Cli is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md) and [BuildPipeline.md](/docs/References/BuildPipeline.md) for the full mechanic.
+Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md) and [BuildPipeline.md](/docs/References/BuildPipeline.md) for the full mechanic.
 
 ---
 

@@ -1,9 +1,9 @@
 package dep_list
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	depListAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/dep_list"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	depListAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_list"
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {

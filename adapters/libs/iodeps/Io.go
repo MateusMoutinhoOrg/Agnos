@@ -5,8 +5,8 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
 )
 
 // Bind fills deps.Deps.IoLib with the implementation of the Io dependency

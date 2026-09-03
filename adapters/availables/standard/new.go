@@ -1,15 +1,15 @@
 package standard
 
 import (
-	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/embeddeps"
-	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/goimportsdeps"
-	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
-	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/requestdeps"
-	rundeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/rundeps"
-	serializables "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/serializables"
-	std "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
-	verb "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
-	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	embeddeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/embeddeps"
+	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/goimportsdeps"
+	iodeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/iodeps"
+	requestdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/requestdeps"
+	rundeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/rundeps"
+	serializables "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serializables"
+	std "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/std"
+	verb "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/verb"
+	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func New() deps.Deps {

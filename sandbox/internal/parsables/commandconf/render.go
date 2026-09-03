@@ -1,8 +1,8 @@
 package commandconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializables"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
 
 // Render serializes a CommandConf back to the entries.yaml shape.

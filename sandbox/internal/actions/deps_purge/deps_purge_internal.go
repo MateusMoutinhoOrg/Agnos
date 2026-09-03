@@ -1,8 +1,8 @@
 package deps_purge
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 func DepsPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {

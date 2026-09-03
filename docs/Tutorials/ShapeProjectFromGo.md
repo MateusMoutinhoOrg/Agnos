@@ -72,9 +72,9 @@ package main
 import (
 	"log"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/availables/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 func main() {

@@ -1,9 +1,9 @@
 package version
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/config"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
 // CommandHandler backs the `version` / `--version` verb. Entries has no fields:

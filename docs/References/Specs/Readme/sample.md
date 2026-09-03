@@ -1,7 +1,7 @@
-# Agnos-Cli
+# Agnos
 
-[![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos-Cli.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos-Cli)
-[![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos-Cli)](https://github.com/MateusMoutinhoOrg/Agnos-Cli/releases/latest)
+[![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
+[![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
 [![License](https://img.shields.io/badge/license-Unlicense-green)](LICENSE)
 
 A Go CLI that **scaffolds and regenerates other Go CLIs** built around a closed, dependency-injected sandbox.
@@ -10,7 +10,7 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** built around a closed,
 
 ## Overview
 
-Agnos-Cli is a factory: `agnos start` writes a project skeleton, `agnos build` regenerates its generated files from embedded templates, and a handful of commands declare the project's whole command surface without editing a file by hand.
+Agnos is a factory: `agnos start` writes a project skeleton, `agnos build` regenerates its generated files from embedded templates, and a handful of commands declare the project's whole command surface without editing a file by hand.
 
 - **`/sandbox/`** is a closed sandbox: every effect arrives through an injected `Deps`.
 - **`/adapters/`** is the only place OS-bound and third-party code lives.

@@ -1,7 +1,7 @@
 package moduleconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func NewFromPath(deps *deps.Deps, path string) (*ModuleConf, error) {

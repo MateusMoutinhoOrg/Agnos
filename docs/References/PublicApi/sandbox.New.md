@@ -12,7 +12,7 @@ func New(deps *deps.Deps) *api.Sandbox
 
 Injects a filled dependency contract into the sandbox and returns the [`api.Sandbox`](/docs/References/PublicApi/api.Sandbox.md) entry point. It creates an empty `api.Sandbox`, then runs every binder of `sandbox/binds/` over it — `ActionsBind`, `CliBind` — each assigning the internal implementations onto one contract struct, closing over the `deps` pointer so the sandbox reads dependencies at call time. This is the only wiring point: `sandbox` never imports an adapter, so the caller chooses which implementation to pass. The file is **generated** by `agnos build` from the listing of `sandbox/binds/`; in a project without `sandbox/deps/` the signature is `New() *api.Sandbox`.
 
-Importers alias the package: `agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"`, matching the `agnosadapter` / `agnoslib` convention `cmd/main` uses.
+Importers alias the package: `agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"`, matching the `agnosadapter` / `agnoslib` convention `cmd/main` uses.
 
 ## Parameters
 
@@ -34,8 +34,8 @@ package main
 import (
 	"os"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/availables/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
 )
 
 func main() {

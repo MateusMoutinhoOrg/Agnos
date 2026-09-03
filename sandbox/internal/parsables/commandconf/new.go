@@ -5,8 +5,8 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializables"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
 
 // New parses one entries.yaml body into a CommandConf.

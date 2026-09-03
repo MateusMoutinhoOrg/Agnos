@@ -1,7 +1,7 @@
 # Bootstrap Agnos with Itself
 
 ## Description
-Covers regenerating this repository with the `agnos` compiled **from this checkout**, then rebuilding and installing the result. Agnos-Cli is one of the projects `agnos build` renders — its `sandbox/deps/deps.go`, `adapters/availables/standard/new.go`, `sandbox/internal/cli/climain.go` and every `entries.go` are generated — so after any change to a template, a collector, a `sandbox/deps/<x>/`, an `adapters/libs/<x>/` or an `entries.yaml`, the tree must be re-rendered. Cross-compiling for other platforms is [Build.md](/docs/Tutorials/Build.md); the pipeline that runs is [BuildPipeline.md](/docs/References/BuildPipeline.md).
+Covers regenerating this repository with the `agnos` compiled **from this checkout**, then rebuilding and installing the result. Agnos is one of the projects `agnos build` renders — its `sandbox/deps/deps.go`, `adapters/availables/standard/new.go`, `sandbox/internal/cli/climain.go` and every `entries.go` are generated — so after any change to a template, a collector, a `sandbox/deps/<x>/`, an `adapters/libs/<x>/` or an `entries.yaml`, the tree must be re-rendered. Cross-compiling for other platforms is [Build.md](/docs/Tutorials/Build.md); the pipeline that runs is [BuildPipeline.md](/docs/References/BuildPipeline.md).
 
 ### Rules
 - **Never run an already-installed `agnos build` against this repo after changing templates or collectors.** An older binary rewrites the tree to its own, stale shape. Compile first, and run *that* binary.

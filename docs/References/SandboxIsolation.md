@@ -1,7 +1,7 @@
 # Sandbox Isolation
 
 ## Description
-Explains what "closed sandbox" means in practice, for Agnos-Cli and for every project it generates: the code in `sandbox/` reaches nothing outside itself — no adapter, no third-party module, no OS-bound standard-library package — so everything it can do is exactly what the injected `Deps` allows. `verify` enforces the wall mechanically. [StructContracts.md](/docs/References/StructContracts.md) explains how the contracts crossing it are shaped.
+Explains what "closed sandbox" means in practice, for Agnos and for every project it generates: the code in `sandbox/` reaches nothing outside itself — no adapter, no third-party module, no OS-bound standard-library package — so everything it can do is exactly what the injected `Deps` allows. `verify` enforces the wall mechanically. [StructContracts.md](/docs/References/StructContracts.md) explains how the contracts crossing it are shaped.
 
 ---
 

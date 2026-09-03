@@ -2,7 +2,7 @@
 
 This document maps the project **schema** — the kinds of files the project is built from — not every concrete file. A slot with a **Spec** name is governed by a specification; resolve the name through [Specs.md](/docs/References/Specs.md) to get its description and sample. A slot marked *generated* is written by `agnos build` and never edited by hand — see [GeneratedFiles.md](/docs/References/GeneratedFiles.md).
 
-Agnos-Cli is a **factory**: `agnos start` scaffolds a project of this same schema, and `agnos build` regenerates its generated slots. The repository is therefore also the reference instance of what it produces — a generated project has every slot below except `assets/deplist/`, `assets/templates/`, `sandbox/internal/actions/`, `parsables/`, `smartio/` and `utils/`, which are Agnos's own logic. The dependency flow between the code trees is one-way:
+Agnos is a **factory**: `agnos start` scaffolds a project of this same schema, and `agnos build` regenerates its generated slots. The repository is therefore also the reference instance of what it produces — a generated project has every slot below except `assets/deplist/`, `assets/templates/`, `sandbox/internal/actions/`, `parsables/`, `smartio/` and `utils/`, which are Agnos's own logic. The dependency flow between the code trees is one-way:
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/

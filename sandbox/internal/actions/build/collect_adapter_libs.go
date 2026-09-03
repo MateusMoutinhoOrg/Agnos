@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 // CollectAdapterLibs returns one entry per adapters/libs sub-contract

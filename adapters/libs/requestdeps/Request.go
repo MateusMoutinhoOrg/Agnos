@@ -6,8 +6,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	requestdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/requestdeps"
 )
 
 // requestTimeout bounds one whole round trip — connect, send, and read the

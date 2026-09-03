@@ -1,7 +1,7 @@
 package ignorableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func Render(deps *deps.Deps, items *IgnorableConf) string {

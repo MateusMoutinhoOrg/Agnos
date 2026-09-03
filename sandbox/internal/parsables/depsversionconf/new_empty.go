@@ -1,7 +1,7 @@
 package depsversionconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func NewEmpty(deps *deps.Deps) *DepsVersionConf {

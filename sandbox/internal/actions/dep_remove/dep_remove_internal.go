@@ -4,10 +4,10 @@ import (
 	"sort"
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/depsversionconf"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/depsversionconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // DepRemoveInternal removes from the target project every file that

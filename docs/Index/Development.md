@@ -4,7 +4,7 @@
 Index of the documentation for contributors changing this repository: the binding rules, the mechanics every change runs into, the per-goal workflows, and the specifications every file must satisfy. Using the project is indexed by [CliUsage.md](/docs/Index/CliUsage.md) and [LibUsage.md](/docs/Index/LibUsage.md); working inside a project it generated is indexed by [GeneratedProject.md](/docs/Index/GeneratedProject.md).
 
 > [!IMPORTANT]
-> **Read before contributing.** [Structure.md](/docs/References/Structure.md) and [Specs.md](/docs/References/Specs.md) are required reading: they say **where** a change belongs and **how** the file you touch must be shaped. Agnos-Cli regenerates itself — every pattern is a template tomorrow, so consistency matters more than any individual feature.
+> **Read before contributing.** [Structure.md](/docs/References/Structure.md) and [Specs.md](/docs/References/Specs.md) are required reading: they say **where** a change belongs and **how** the file you touch must be shaped. Agnos regenerates itself — every pattern is a template tomorrow, so consistency matters more than any individual feature.
 
 ---
 

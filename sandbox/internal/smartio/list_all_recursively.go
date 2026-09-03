@@ -1,6 +1,6 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
 func ListAllRecursively(deps *deps.Deps, io *SmartIO, path string) []string {
 	p, err := processInputPath(deps, io, path)

@@ -42,7 +42,7 @@ Covers changing what `agnos build` renders: adding a template to an asset group 
    import (
        "strings"
 
-       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+       "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
    )
 
    // CollectParsables lists sandbox/internal/parsables/<x>/ and returns the

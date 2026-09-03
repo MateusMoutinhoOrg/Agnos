@@ -1,10 +1,10 @@
 package sandbox
 
 import (
-	api "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
-	binds "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/binds"
+	binds "github.com/MateusMoutinhoOrg/Agnos/sandbox/binds"
 )
 
 func New(deps *deps.Deps) *api.Sandbox {

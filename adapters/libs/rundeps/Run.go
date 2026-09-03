@@ -4,8 +4,8 @@ import (
 	"bytes"
 	"os/exec"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	rundeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/rundeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	rundeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 )
 
 // Bind fills deps.Deps.Rundeps, providing the capability to run one external

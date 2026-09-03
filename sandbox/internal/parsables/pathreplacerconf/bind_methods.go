@@ -3,7 +3,7 @@ package pathreplacerconf
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func BindMethods(deps *deps.Deps, conf *PathReplacerConf) {

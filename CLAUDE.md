@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## What this is
 
-Agnos-Cli (`agnos`) is a Go CLI that **scaffolds and regenerates other Go applications**
+Agnos (`agnos`) is a Go CLI that **scaffolds and regenerates other Go applications**
 built around a command/action architecture. It began as a Go CLI template but is being
 refactored (branch `Cli-Refactor`) into a "factory builder": `agnos start` creates a new
 project skeleton, and `agnos build` (re)renders parts of that project from embedded
@@ -100,7 +100,7 @@ filesystem, so every read, write, listing and directory op is scoped to the targ
 generation ever escapes it. Actions pass SmartIO **project-relative** paths (`"go.mod"`,
 `"sandbox/api"`), never `path + "/..."`. In the generated dispatch a
 value flag with a `default:` is assigned that literal when absent, so the corresponding
-`entries.Path` field is always populated — including for Agnos-Cli's own commands, now
+`entries.Path` field is always populated — including for Agnos's own commands, now
 that its CLI layer is bootstrapped onto this shape (see the self-hosting status note below).
 
 ### Output channels and exit codes
@@ -200,7 +200,7 @@ positional args are drained, anything still unread is an unexpected argument.
   `CliInit`, `CliPurge`, `AddCommand`, `RemoveCommand`, `SetCommand`, `AddFlag`,
   `RemoveFlag`, `AddArg`, `RemoveArg`), each from `sandbox/internal/actions/<name>/`.
 
-> **Self-hosting status:** Agnos-Cli's own CLI layer has been bootstrapped onto this
+> **Self-hosting status:** Agnos's own CLI layer has been bootstrapped onto this
 > shape. Every `sandbox/internal/commands/<name>/` holds `entries.yaml` + generated
 > `entries.go` + hand-written `handler.go` — including `help`, whose three files are
 > written by `agnos build` rather than by hand; `sandbox/api/cli.go` is just
@@ -370,7 +370,7 @@ comes from the `cli` asset group and bakes the collected metadata of every comma
 `remove-command help` are refused, and hand edits to `handler.go` / `entries.go` are
 pointless — they are overwritten on the next build.
 
-**This repo bootstraps itself.** `agnos build` runs against Agnos-Cli's own tree
+**This repo bootstraps itself.** `agnos build` runs against Agnos's own tree
 (`AgnosConfig/` holds its `project.yaml` / `themes.yaml` / `ignore.yaml` / `paths.yaml`) and
 regenerates `sandbox/deps/deps.go`, `adapters/availables/standard/new.go` and
 `sandbox/binds/cli.go` in place, and the result still compiles (`go build ./cmd/... ./sandbox/... ./adapters/...`). Keep it that

@@ -1,7 +1,7 @@
 # Add a Command to Agnos
 
 ## Description
-Covers exposing an action on `agnos`'s own command line. Agnos-Cli is itself a project of the shape it generates, so a command here is the same three files as everywhere else — `entries.yaml`, generated `entries.go`, hand-written `handler.go` under `sandbox/internal/commands/<name>/` — and is declared with the same commands a user runs, pointed at this checkout. The logic the command calls is [AddAction.md](/docs/Tutorials/AddAction.md); the generic handler rules are [WriteCommandHandler.md](/docs/Tutorials/WriteCommandHandler.md).
+Covers exposing an action on `agnos`'s own command line. Agnos is itself a project of the shape it generates, so a command here is the same three files as everywhere else — `entries.yaml`, generated `entries.go`, hand-written `handler.go` under `sandbox/internal/commands/<name>/` — and is declared with the same commands a user runs, pointed at this checkout. The logic the command calls is [AddAction.md](/docs/Tutorials/AddAction.md); the generic handler rules are [WriteCommandHandler.md](/docs/Tutorials/WriteCommandHandler.md).
 
 ### Rules
 - Run the **bootstrap binary**, never an installed `agnos`, against this checkout — see [BootstrapAgnos.md](/docs/Tutorials/BootstrapAgnos.md).
@@ -35,9 +35,9 @@ Covers exposing an action on `agnos`'s own command line. Agnos-Cli is itself a p
    package rename_command
 
    import (
-       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-       "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-       renameCommandAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/rename_command"
+       "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+       "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+       renameCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_command"
    )
 
    func CommandHandler(deps *deps.Deps, entries *Entries) int {

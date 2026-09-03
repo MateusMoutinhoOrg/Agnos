@@ -1,9 +1,9 @@
 package remove_arg
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	removeArgAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/remove_arg"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {

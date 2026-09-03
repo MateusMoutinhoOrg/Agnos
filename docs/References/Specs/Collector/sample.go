@@ -5,7 +5,7 @@ package build
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 // DepsLib is one sub-contract directory: Name is the directory as written,

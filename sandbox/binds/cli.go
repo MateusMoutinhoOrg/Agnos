@@ -1,9 +1,9 @@
 package binds
 
 import (
-	api "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	cli "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/cli"
+	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	cli "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/cli"
 )
 
 // CliBind wires the generated cli.CliMain (built by `agnos build` from every

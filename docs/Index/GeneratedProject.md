@@ -1,7 +1,7 @@
 # Generated Project
 
 ## Description
-Index of the documentation for people working **inside** a project `agnos` scaffolded: what its files are, which ones are theirs to write, how a command's handler receives its input, and how to give the sandbox a capability of their own. Driving `agnos` itself is indexed by [CliUsage.md](/docs/Index/CliUsage.md); contributing to Agnos-Cli — which is a project of this same shape — is indexed by [Development.md](/docs/Index/Development.md).
+Index of the documentation for people working **inside** a project `agnos` scaffolded: what its files are, which ones are theirs to write, how a command's handler receives its input, and how to give the sandbox a capability of their own. Driving `agnos` itself is indexed by [CliUsage.md](/docs/Index/CliUsage.md); contributing to Agnos — which is a project of this same shape — is indexed by [Development.md](/docs/Index/Development.md).
 
 A generated project is a closed sandbox behind a generated command-line interface. The reader hand-writes exactly two kinds of file — `handler.go` for a command, and a contract-plus-lib pair for a capability — and `agnos build` writes the rest.
 

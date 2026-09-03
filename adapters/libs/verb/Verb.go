@@ -1,8 +1,8 @@
 package verb
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	argvdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	argvdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
 	verblib "github.com/MateusMoutinhoOrg/Verb/sandbox"
 )
 

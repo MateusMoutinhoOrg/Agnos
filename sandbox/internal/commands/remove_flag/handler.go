@@ -1,9 +1,9 @@
 package remove_flag
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/actions/remove_flag"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_flag"
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {

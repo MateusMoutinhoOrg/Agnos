@@ -3,9 +3,9 @@ package main
 import (
 	"os"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/availables/standard"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
 )
 
 func main() {

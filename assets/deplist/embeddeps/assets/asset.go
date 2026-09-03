@@ -23,7 +23,7 @@ package assets
 import "embed"
 
 // Files is every asset shipped with the project, compiled into the binary, so
-// an installed `agnos-cli` carries them with no files on disk next to it.
+// an installed `agnos` carries them with no files on disk next to it.
 // Paths inside it are slash-separated and rooted here: an asset written to
 // assets/templates/report.tmpl is read as "templates/report.tmpl".
 //

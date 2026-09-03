@@ -1,6 +1,6 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
 func Persist(deps *deps.Deps, io *SmartIO) error {
 	for _, p := range io.PendingRemoveDirs {

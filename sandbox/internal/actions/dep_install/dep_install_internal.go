@@ -1,11 +1,11 @@
 package dep_install
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/depsversionconf"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/moduleconf"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/utils"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/depsversionconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/moduleconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // DepInstallInternal renders every embedded asset under assets/deplist/<dep>

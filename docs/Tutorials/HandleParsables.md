@@ -30,7 +30,7 @@ Covers adding a package under `sandbox/internal/parsables/<name>conf/` — a sma
    ```go
    package hooksconf
 
-   import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+   import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
    func NewEmpty(deps *deps.Deps) *HooksConf {
        self := &HooksConf{}
@@ -42,7 +42,7 @@ Covers adding a package under `sandbox/internal/parsables/<name>conf/` — a sma
    ```go
    package hooksconf
 
-   import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+   import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
    func New(deps *deps.Deps, content string) (*HooksConf, error) {
        root, err := deps.Serializables.ParseYaml(content)
@@ -65,7 +65,7 @@ Covers adding a package under `sandbox/internal/parsables/<name>conf/` — a sma
    ```go
    package hooksconf
 
-   import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+   import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
    func bindMethods(deps *deps.Deps, self *HooksConf) {
        self.AddBefore = func(command string) { self.Before = append(self.Before, command) }
@@ -77,7 +77,7 @@ Covers adding a package under `sandbox/internal/parsables/<name>conf/` — a sma
    ```go
    package hooksconf
 
-   import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+   import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
    func render(deps *deps.Deps, self *HooksConf) string {
        root := deps.Serializables.CreateObject()

@@ -1,14 +1,14 @@
 package deps
 
 import (
-	argvdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/argvdeps"
-	embeddeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/embeddeps"
-	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/goimportsdeps"
-	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/iodeps"
-	requestdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/requestdeps"
-	rundeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/rundeps"
-	serializables "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/serializables"
-	std "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/std"
+	argvdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
+	embeddeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/embeddeps"
+	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
+	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
+	requestdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/requestdeps"
+	rundeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
+	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	std "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/std"
 )
 
 type Deps struct {

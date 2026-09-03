@@ -20,8 +20,8 @@ Covers adding a capability to the set `agnos dep-install` can render into a proj
    ```
 3. Copy both files in and replace this module's path with the template variable:
    ```bash
-   sed 's#github.com/MateusMoutinhoOrg/Agnos-Cli#{{.Module}}#g' sandbox/deps/clockdeps/clockdeps.go > assets/deplist/clockdeps/sandbox/deps/clockdeps/clockdeps.go
-   sed 's#github.com/MateusMoutinhoOrg/Agnos-Cli#{{.Module}}#g' adapters/libs/clockdeps/Clock.go > assets/deplist/clockdeps/adapters/libs/clockdeps/Clock.go
+   sed 's#github.com/MateusMoutinhoOrg/Agnos#{{.Module}}#g' sandbox/deps/clockdeps/clockdeps.go > assets/deplist/clockdeps/sandbox/deps/clockdeps/clockdeps.go
+   sed 's#github.com/MateusMoutinhoOrg/Agnos#{{.Module}}#g' adapters/libs/clockdeps/Clock.go > assets/deplist/clockdeps/adapters/libs/clockdeps/Clock.go
    ```
 4. Pin the external module, if the adapter lib imports one:
    ```yaml

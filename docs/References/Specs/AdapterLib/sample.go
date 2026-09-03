@@ -5,8 +5,8 @@ package clockdeps
 import (
 	"time"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
-	clockdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/clockdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	clockdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/clockdeps"
 )
 
 // Bind fills deps.Deps.Clockdeps with the real wall clock over the standard

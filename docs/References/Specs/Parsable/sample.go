@@ -15,7 +15,7 @@ type ProjectConf struct {
 
 // ─── new.go ─────────────────────────────────────────────────────────────────
 
-import "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 
 func New(deps *deps.Deps, content string) (*ProjectConf, error) {
 	root, err := deps.Serializables.ParseYaml(content)

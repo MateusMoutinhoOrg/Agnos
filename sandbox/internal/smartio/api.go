@@ -1,8 +1,8 @@
 package smartio
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/ignorableconf"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/pathreplacerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/ignorableconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/pathreplacerconf"
 )
 
 type SmartIO struct {

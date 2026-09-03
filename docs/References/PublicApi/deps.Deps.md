@@ -48,9 +48,9 @@ package main
 import (
 	"fmt"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/availables/standard"
-	agnoslib "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox"
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps/rundeps"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 )
 
 func main() {

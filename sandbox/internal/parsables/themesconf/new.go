@@ -1,7 +1,7 @@
 package themesconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func New(deps *deps.Deps, content string) (*ThemesConf, error) {

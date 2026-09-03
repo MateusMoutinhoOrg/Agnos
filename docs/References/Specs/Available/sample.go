@@ -5,11 +5,11 @@ package frozen
 import (
 	"time"
 
-	clockdeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/clockdeps"
-	iodeps "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/iodeps"
-	std "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/std"
-	verb "github.com/MateusMoutinhoOrg/Agnos-Cli/adapters/libs/verb"
-	deps "github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	clockdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/clockdeps"
+	iodeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/iodeps"
+	std "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/std"
+	verb "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/verb"
+	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 // New assembles a Deps whose clock is frozen at the given time: the real

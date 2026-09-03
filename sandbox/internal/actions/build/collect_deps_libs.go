@@ -3,7 +3,7 @@ package build
 import (
 	"strings"
 
-	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 // collectLibDirs lists the immediate sub-directories of dir and returns one
