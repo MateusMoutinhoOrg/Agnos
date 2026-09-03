@@ -22,7 +22,7 @@ design constraint behind every change, even while it is still aspirational:
 
 - **Everything is a pattern.** Any new file, package, or operation must follow an existing
   repeatable shape (see the "fixed shape" of `parsables/`, the two-layer
-  command/action split, the `NewCommand` contract). If no pattern fits, first define the
+  command/action split, the `entries.yaml` + `handler.go` command contract). If no pattern fits, first define the
   pattern — document it here — *then* implement against it. Never add a one-off.
 - **Uniformity over cleverness.** When two packages do a similar job they should be
   structurally identical (same filenames, same function names, same ordering). A reader or
@@ -72,9 +72,10 @@ agnos help | version
 ```
 
 Every command that operates on a target project takes the target directory as the
-**`--path` flag** (never a positional arg), defaulting to `.`. Non-bool flag `Defaults`
-are materialised by the parser (`collectValueFlag` in `sandbox/internal/cli/climain.go`)
-when the flag is absent, so `entries.GetFlagById("path").Values[0]` is always populated.
+**`--path` flag** (never a positional arg), defaulting to `.`. In the generated dispatch a
+value flag with a `default:` is assigned that literal when absent, so the corresponding
+`entries.Path` field is always populated. (Agnos-Cli's own commands still use the previous
+`entries.GetFlagById("path")` accessor — see the migration note below.)
 
 ## Architecture
 
@@ -116,18 +117,31 @@ when the flag is absent, so `entries.GetFlagById("path").Values[0]` is always po
 
 `sandbox.New` runs two binders that populate an `api.Sandbox`:
 
-- **`binds/cli.go`** registers `api.CliCommand` values from `sandbox/internal/commands/<name>/`
-  and sets `Cli.CliMain` to `sandbox/internal/cli.CliMain` — a declarative parser: each
-  command declares `Args`/`Flags` (`api.CliArg`/`api.Cliflag`), the parser collects and
-  validates them from the argv via `argvdeps`, then calls `Handler(entries)` (which closes over `deps`) and
-  returns an exit code (`api.ExitOk` / `ExitUsage` / `ExitFailure`).
+- **`binds/cli.go`** only sets `Cli.CliMain` to the generated `sandbox/internal/cli.CliMain`.
+  There is no command registry: `api.Cli` holds a single `CliMain func([]string) int`.
+  Each command lives in `sandbox/internal/commands/<name>/` as three files — `entries.yaml`
+  (hand-written declaration: `identifiers`, `category`, `help`, `long-description`,
+  `examples`, `hidden`, `flags:`, `args:`), `entries.go` (the typed struct **generated** by
+  `agnos build` from `entries.yaml`), and `handler.go` (hand-written:
+  `func CommandHander(deps *deps.Deps, entries *Entries) int`). `agnos build` parses every
+  `entries.yaml` (`parsables/commandconf`), regenerates each `entries.go`, then regenerates
+  `sandbox/internal/cli/climain.go` with one `dispatch<Name>` arm per command that reads the
+  argv via `argvdeps`, fills that command's `Entries`, and calls its `CommandHander`. A flag
+  or arg with `array: true` becomes a `[]T` field collecting every occurrence. Exit codes
+  (`ExitOk`/`ExitUsage`/`ExitFailure`) are consts in both `sandbox/api` and the generated
+  `cli` package.
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
   (`Build`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
   `CliInit`, `CliPurge`), each from
   `sandbox/internal/actions/<name>/`.
 
-**Two layers per operation:** `internal/commands/<name>` is the CLI surface (flag/arg
-declaration + handler); `internal/actions/<name>` is the logic. Command handlers currently
+> **Migration note:** the generator (build action + `assets/cli/**`) emits this new
+> three-file command shape, but Agnos-Cli's own `sandbox/internal/commands/**` and
+> `sandbox/api/cli.go` still use the previous `api.CliCommand` / `NewCommand` registry —
+> the self-hosting bootstrap has not been re-run against it yet.
+
+**Two layers per operation:** `internal/commands/<name>` is the CLI surface
+(`entries.yaml` declaration + `handler.go`); `internal/actions/<name>` is the logic. Command handlers currently
 call the action package directly (e.g. `start` calls `startAction.Start` then
 `buildAction.Build`); `binds/actions.go` also exposes the same actions as library API.
 Note `build` runs as a follow-up step after `start`/`deps-init`/`deps-purge`.
@@ -140,9 +154,9 @@ returns one error listing every violation:
   `new.go`.
 - No file under `sandbox/` imports a module-internal package outside `sandbox/`.
 - `sandbox/api/*` imports only other `sandbox/api` packages — nothing else at all (no
-  stdlib, no external modules, not even `sandbox/deps`: api is pure contract, so
-  `CliCommand.Handler` is `func(entries CliEntrys) int` and each command's `NewCommand`
-  closes over `deps` in a one-line wrapper);
+  stdlib, no external modules, not even `sandbox/deps`: api is pure contract). In the new
+  command shape `api/cli.go` is just `type Cli struct { CliMain func([]string) int }` plus
+  the exit-code consts; all parsing lives in the generated `sandbox/internal/cli`.
   `sandbox/deps/*` imports only the standard library and other `sandbox/deps` packages.
 - Every file in `sandbox/binds/` mirrors a file of the same name in `sandbox/api/` and
   declares only functions (no top-level types/consts/vars).
@@ -161,9 +175,12 @@ written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new
 `io.WriteFileOverwrite`). The groups: `start` (config skeleton written by `agnos start`),
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
 `sandbox/deps` exists), `cli` (the CLI layer — `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`,
-`sandbox/internal/cli/**`, the `help`/`version` commands — rendered by `agnos cli-init` and
-deleted by `agnos cli-purge`). `utils.RenderTemplateToDest` still renders one file to one
-dest for callers that need it.
+`sandbox/internal/cli/climain.go` (generated from every command's `entries.yaml`), the
+generated `help` command, and the `version` command as `entries.yaml` + `handler.go` —
+rendered by `agnos cli-init` and every later `agnos build` when `sandbox/internal/cli`
+exists, deleted by `agnos cli-purge`). `utils.RenderTemplateToDest` renders one file to one
+dest — it also emits each command's `sandbox/internal/commands/<name>/entries.go` from
+`assets/templates/entries.go` (see `build/generate_command_entries.go`).
 
 **Deps (`assets/deplist/<dep>/**`).** Each sub-directory of `assets/deplist/` is one
 installable dep; the tree under it mirrors the target-project layout (an asset at
@@ -203,14 +220,19 @@ dirs, emitting one `{{.Title}} {{.Name}}.Lib` field (and its import) per dir in
 `adapters/libs/<x>/` dirs, emitting one `{{.Name}}.Bind(&deps)` call (and its import) per lib
 in `{{range .AdapterLibs}}` (`adapters/availables/standard/new.go`). Every `adapters/libs/<x>`
 package therefore exposes its binder under the single uniform name `Bind(deps *deps.Deps)`.
-`CollectCommands` iterates the `sandbox/internal/commands/<x>/` dirs, emitting one
-`{{.Name}}.NewCommand(deps, sandbox)` call (and its import) per dir in `{{range .Commands}}`
-(`sandbox/binds/cli.go`, in the `cli` group). Every command package therefore exposes its
-constructor under the single uniform name `NewCommand(deps, sandbox)`.
+`CollectCommands` is the exception to the one-line shape: it reads each
+`sandbox/internal/commands/<x>/entries.yaml` through `parsables/commandconf` and returns a
+rich `map[string]any` per command (identifiers, category, help text, and a precomputed
+`Flags`/`Args` list carrying Go field names, types, getter names and default literals) for
+the `{{range .Commands}}` loops in the generated `sandbox/internal/cli/climain.go` and
+`help` package. The `help` directory is skipped — it is generated, not declared. Every
+command package therefore exposes its handler under the single uniform name
+`CommandHander(deps *deps.Deps, entries *Entries) int`.
 
-`BuildInternal` also sets `HasCli` (`sandbox/internal/cli` exists) alongside `HasDeps`, and
-renders the `cli` group only when it is true — so once `cli-init` has run, every later
-`agnos build` regenerates `sandbox/binds/cli.go` from the current command listing.
+`BuildInternal` also sets `HasCli` (`sandbox/internal/cli` exists) alongside `HasDeps`;
+when true it calls `GenerateCommandEntries` (one `entries.go` per command) and renders the
+`cli` group — so once `cli-init` has run, every later `agnos build` regenerates
+`climain.go` and the `help` package from the current `entries.yaml` set.
 
 **This repo bootstraps itself.** `agnos build .` runs against Agnos-Cli's own tree
 (`AgnosConfig/` holds its `project.yaml` / `themes.yaml` / `ignore.yaml` / `paths.yaml`) and
@@ -250,10 +272,15 @@ missing/unparsable `project.yaml` is a hard error — `agnos start` is a prerequ
 `agnos build`, so `loadProjectConf` never falls back to defaults. For this repo the
 rendered result is unchanged (`Agnos` / `0.0.1`), keeping `agnos build .` idempotent.
 
-## Adding a command
+## Adding a command (generated-project contract)
 
-1. `sandbox/internal/commands/<name>/<name>.go` — `NewCommand(deps, sandbox) api.CliCommand`
-   with `ValidStartIdentifiers`, `Category`, `Args`, `Flags`, `Description`, `Handler`.
-2. If it needs logic reusable as library API, add `sandbox/internal/actions/<name>/` and
+1. `sandbox/internal/commands/<name>/entries.yaml` — declare `identifiers`, `category`,
+   `help`, optional `long-description`, `examples`, `hidden`, and `flags:` / `args:` maps
+   (each entry: `identifiers`, `description`, `type` (`string`/`boolean`/`int`/`float`),
+   optional `default`, `required`, `array`).
+2. `sandbox/internal/commands/<name>/handler.go` — `package <name>`, one function
+   `func CommandHander(deps *deps.Deps, entries *Entries) int`.
+3. Run `agnos build` — it generates `entries.go` and re-wires `climain.go` + `help`.
+   Nothing to append anywhere.
+4. If it needs logic reusable as library API, add `sandbox/internal/actions/<name>/` and
    register it in `sandbox/binds/actions.go` + `sandbox/api/actions.go`.
-3. Append it in `sandbox/binds/cli.go`.

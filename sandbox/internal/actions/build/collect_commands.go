@@ -1,13 +1,205 @@
 package build
 
 import (
+	"strconv"
+	"strings"
+
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos-Cli/sandbox/internal/smartio"
 )
 
-// CollectCommands returns one {"Name": <dir>, "Title": <Dir>} entry per
-// sandbox/internal/commands sub-directory, in listing order, for the
-// {{range .Commands}} loop in sandbox/binds/cli.go. Each sub-directory is one
-// command package exposing NewCommand(deps, sandbox).
-func CollectCommands(io *smartio.SmartIO) []map[string]string {
-	return collectLibDirs(io, "sandbox/internal/commands")
+// CollectCommands reads every sandbox/internal/commands/<name>/entries.yaml and
+// returns one rich data map per command, in listing order, for the
+// {{range .Commands}} loops in the generated sandbox/internal/cli/climain.go and
+// help package. The `help` directory is skipped: it is generated, not declared.
+func CollectCommands(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, error) {
+	var commands []map[string]any
+
+	for _, dir := range io.ListDirs("sandbox/internal/commands") {
+		name := lastSegmentOf(dir)
+		if name == "" || name == "help" {
+			continue
+		}
+
+		content, err := io.ReadFile("sandbox/internal/commands/" + name + "/entries.yaml")
+		if err != nil {
+			continue
+		}
+
+		conf, err := commandconf.New(deps, string(content))
+		if err != nil {
+			return nil, deps.Std.Errorf("commands/%s/entries.yaml: %w", name, err)
+		}
+
+		commands = append(commands, commandData(name, conf))
+	}
+
+	return commands, nil
+}
+
+func commandData(name string, conf *commandconf.CommandConf) map[string]any {
+	flags := make([]map[string]any, 0, len(conf.Flags))
+	for _, flag := range conf.Flags {
+		flags = append(flags, fieldData(flag))
+	}
+	args := make([]map[string]any, 0, len(conf.Args))
+	for _, arg := range conf.Args {
+		args = append(args, fieldData(arg))
+	}
+
+	return map[string]any{
+		"Name":            name,
+		"GoName":          exportedName(name),
+		"Identifiers":     conf.Identifiers,
+		"IdentifiersGo":   goStringList(conf.Identifiers),
+		"MatchExpr":       matchExpr(conf.Identifiers),
+		"Category":        conf.Category,
+		"Help":            conf.Help,
+		"LongDescription": conf.LongDescription,
+		"Examples":        conf.Examples,
+		"Hidden":          conf.Hidden,
+		"Flags":           flags,
+		"Args":            args,
+	}
+}
+
+func fieldData(field commandconf.Field) map[string]any {
+	return map[string]any{
+		"Key":            field.Key,
+		"GoField":        exportedName(field.Key),
+		"GoType":         goType(field.Type, field.Array),
+		"IsBool":         field.Type == "boolean",
+		"IsArray":        field.Array,
+		"Identifiers":    field.Identifiers,
+		"IdentifiersGo":  goStringList(field.Identifiers),
+		"OptionGetter":   optionGetter(field.Type),
+		"ArgGetter":      argGetter(field.Type),
+		"Required":       field.Required,
+		"HasDefault":     field.HasDefault,
+		"DefaultLiteral": defaultLiteral(field.Type, field.Default),
+		"ElemLiteral":    elemLiteral(field.Type),
+		"Description":    field.Description,
+		"Examples":       field.Examples,
+		"Type":           field.Type,
+		"Default":        field.Default,
+	}
+}
+
+// ─── helpers ────────────────────────────────────────────────────────────────
+
+func lastSegmentOf(path string) string {
+	parts := strings.Split(path, "/")
+	return parts[len(parts)-1]
+}
+
+// exportedName turns a kebab/snake identifier into an exported Go name:
+// "project-name" -> "ProjectName", "unsafe" -> "Unsafe".
+func exportedName(raw string) string {
+	parts := strings.FieldsFunc(raw, func(r rune) bool { return r == '-' || r == '_' })
+	var b strings.Builder
+	for _, part := range parts {
+		if part == "" {
+			continue
+		}
+		b.WriteString(strings.ToUpper(part[:1]) + part[1:])
+	}
+	if b.Len() == 0 {
+		return "Field"
+	}
+	return b.String()
+}
+
+func goType(kind string, array bool) string {
+	base := "string"
+	switch kind {
+	case "boolean":
+		base = "bool"
+	case "int":
+		base = "int"
+	case "float":
+		base = "float64"
+	}
+	if array {
+		return "[]" + base
+	}
+	return base
+}
+
+// elemLiteral is the zero literal for one element of a value flag/arg, used
+// when appending to an array field.
+func elemLiteral(kind string) string {
+	switch kind {
+	case "int":
+		return "0"
+	case "float":
+		return "0"
+	default:
+		return `""`
+	}
+}
+
+func optionGetter(kind string) string {
+	switch kind {
+	case "int":
+		return "IntOption"
+	case "float":
+		return "DoubleOption"
+	default:
+		return "StringOption"
+	}
+}
+
+func argGetter(kind string) string {
+	switch kind {
+	case "int":
+		return "Int"
+	case "float":
+		return "Double"
+	default:
+		return "String"
+	}
+}
+
+func defaultLiteral(kind, value string) string {
+	switch kind {
+	case "boolean":
+		if value == "true" {
+			return "true"
+		}
+		return "false"
+	case "int":
+		if value == "" {
+			return "0"
+		}
+		return value
+	case "float":
+		if value == "" {
+			return "0"
+		}
+		return value
+	default:
+		return strconv.Quote(value)
+	}
+}
+
+func goStringList(values []string) string {
+	quoted := make([]string, 0, len(values))
+	for _, value := range values {
+		quoted = append(quoted, strconv.Quote(value))
+	}
+	return strings.Join(quoted, ", ")
+}
+
+// matchExpr builds the boolean switch guard that matches the command verb,
+// e.g. `action == "version" || action == "--version"`.
+func matchExpr(identifiers []string) string {
+	if len(identifiers) == 0 {
+		return "false"
+	}
+	parts := make([]string, 0, len(identifiers))
+	for _, id := range identifiers {
+		parts = append(parts, "action == "+strconv.Quote(id))
+	}
+	return strings.Join(parts, " || ")
 }

@@ -65,6 +65,11 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	commands, err := CollectCommands(deps, io)
+	if err != nil {
+		return err
+	}
+
 	vars := map[string]interface{}{
 		"Module":       module_conf.Module,
 		"Name":         project_conf.Name,
@@ -77,7 +82,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Constructors": CollectConstructors(io),
 		"DepsLibs":     CollectDepsLibs(io),
 		"AdapterLibs":  CollectAdapterLibs(io),
-		"Commands":     CollectCommands(io),
+		"Commands":     commands,
 	}
 
 	if err := utils.RenderGroup(deps, io, "all", vars); err != nil {
@@ -91,6 +96,9 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	if hasCli {
+		if err := GenerateCommandEntries(deps, io, commands); err != nil {
+			return err
+		}
 		if err := utils.RenderGroup(deps, io, "cli", vars); err != nil {
 			return err
 		}
