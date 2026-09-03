@@ -19,7 +19,7 @@ Covers installing the `agnos` command-line interface globally, so it runs from a
    ```bash
    curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/macarm64.bin -o agnos && \
      chmod +x agnos && \
-     sudo mv agnos /usr/local/bin/ && \
+     sudo mkdir -p /usr/local/bin && sudo mv agnos /usr/local/bin/ && \
      agnos version
    ```
 
@@ -27,7 +27,7 @@ Covers installing the `agnos` command-line interface globally, so it runs from a
    ```bash
    curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/mac86.bin -o agnos && \
      chmod +x agnos && \
-     sudo mv agnos /usr/local/bin/ && \
+     sudo mkdir -p /usr/local/bin && sudo mv agnos /usr/local/bin/ && \
      agnos version
    ```
 
@@ -41,7 +41,7 @@ Covers installing the `agnos` command-line interface globally, so it runs from a
    ```bash
    curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/linux86.out -o agnos && \
      chmod +x agnos && \
-     sudo mv agnos /usr/local/bin/ && \
+     sudo mkdir -p /usr/local/bin && sudo mv agnos /usr/local/bin/ && \
      agnos version
    ```
 
@@ -49,7 +49,7 @@ Covers installing the `agnos` command-line interface globally, so it runs from a
    ```bash
    curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/linuxarm64.out -o agnos && \
      chmod +x agnos && \
-     sudo mv agnos /usr/local/bin/ && \
+     sudo mkdir -p /usr/local/bin && sudo mv agnos /usr/local/bin/ && \
      agnos version
    ```
 
@@ -57,7 +57,7 @@ Covers installing the `agnos` command-line interface globally, so it runs from a
    ```bash
    curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/linuxi32.out -o agnos && \
      chmod +x agnos && \
-     sudo mv agnos /usr/local/bin/ && \
+     sudo mkdir -p /usr/local/bin && sudo mv agnos /usr/local/bin/ && \
      agnos version
    ```
 
