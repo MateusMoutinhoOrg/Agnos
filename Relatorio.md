@@ -1,150 +1,283 @@
-# Agnos Framework: Developer Experience (DX) and Usability Report
+# Relatório de Bugs — Agnos 0.0.2
 
-## 1. Executive Summary
-
-Agnos is a highly promising CLI builder framework that successfully tackles one of the most painful aspects of Command Line Interface (CLI) development: boilerplate code. By enforcing a declarative approach using YAML configurations, Agnos allows developers (and AI agents) to focus strictly on the business logic of their commands.
-
-However, a framework's success relies heavily on its Developer Experience (DX), predictability, and out-of-the-box stability. During the evaluation of Agnos, several critical bugs and usability pain points were identified. 
-
-This report provides a high-level, conceptual analysis of these issues. It focuses on how these bugs impact the user experience and outlines conceptual recommendations for how the framework's behavior and features should evolve in future versions, without delving into internal codebase mechanics.
-
----
-
-## 2. Strengths and Core Value Proposition
-
-Before addressing the areas for improvement, it is important to recognize the conceptual strengths of Agnos that make it a compelling tool.
-
-### 2.1. Declarative Design Paradigm
-The decision to separate the CLI interface configuration (`entries.yaml`) from the business logic (`handler.go`) is conceptually brilliant. It forces developers into a clean architecture. By looking at a single YAML file, a developer can instantly understand a command's purpose, expected arguments, flags, and types.
-
-### 2.2. Boilerplate Elimination
-By abstracting the flag parsing and argument binding processes, Agnos significantly lowers the barrier to entry for building robust CLIs. Developers do not need to learn complex setup functions; they simply define their schema and write their logic.
-
-### 2.3. AI-Friendly Architecture
-For Large Language Models (LLMs) assisting developers, Agnos is an ideal target. AI agents thrive in strictly structured environments. The predictability of the directory structure and the simplicity of YAML generation mean that LLMs can scaffold Agnos commands with an incredibly low error rate.
+**Data:** 2026-09-03
+**Binário testado:** `/usr/local/bin/agnos` (`agnos version` → `Version:0.0.2`)
+**Ambiente:** macOS (darwin 22.6.0), Go 1.26.0
+**Método:** exercício de todos os comandos (`start`, `build`, `verify`, `cli-init`, `cli-purge`,
+`add-command`, `add-arg`, `add-flag`, `remove-*`, `set-command`, `dep-list`, `dep-install`,
+`deps-init`, `help`, `version`) em projetos recém-criados, incluindo casos de erro e de borda.
 
 ---
 
-## 3. Identified Bugs and Usability Issues
+## Resumo
 
-Despite its strengths, the current iteration of Agnos contains bugs and structural decisions that severely disrupt the developer workflow. 
+| # | Severidade | Bug |
+|---|-----------|-----|
+| 1 | 🔴 Alta | `build` e `verify` reportam sucesso mesmo com projeto que não compila |
+| 2 | 🔴 Alta | `add-command` aceita nomes inválidos e gera código Go inválido |
+| 3 | 🔴 Alta | `--quiet` / `-q` não faz absolutamente nada em nenhum comando |
+| 4 | 🔴 Alta | Flags desconhecidas são silenciosamente ignoradas (ex.: `--path` digitado errado) |
+| 5 | 🟠 Média | `start` + `cli-init` deixam o projeto sem compilar (falta `go.sum` / `go mod tidy`) |
+| 6 | 🟠 Média | Argumento `--array` descarta elementos inválidos silenciosamente (perda de dados) |
+| 7 | 🟠 Média | `cli-purge` não remove `sandbox/internal/commands` e `sandbox/internal/cli` (deixa arquivo gerado órfão) |
+| 8 | 🟠 Média | `add-arg --position` fora do intervalo / negativo dá mensagem de erro enganosa |
+| 9 | 🟡 Baixa | Identificador gerado com erro de digitação: `CommandHander` |
+| 10 | 🟡 Baixa | Códigos de saída inconsistentes entre erros de uso |
+| 11 | 🟡 Baixa | Erros internos do Go vazam para o usuário final |
+| 12 | 🟡 Baixa | Toda saída (inclusive erros) vai para stdout; stderr nunca é usado |
+| 13 | 🟡 Baixa | Ruído de log misturado com saída "de máquina" (`dep-list`) |
+| 14 | 🟡 Baixa | `start --module` documentado como opcional, mas é obrigatório sem `go.mod` |
+| 15 | ⚪ Trivial | Falta de `\n` final na saída; `Agnos` vs `agnos`; nome de dep `serializebles` |
 
-### 3.1. Bug: Inconsistent Directory Creation in `agnos start`
+---
 
-**The Scenario:**
-When a developer attempts to initialize a new project in a specific directory from their current workspace by running:
-`agnos start -p project_name --path ./target_directory`
+## Detalhes
 
-**The Expected Behavior:**
-All project files, configurations, and internal folders (`sandbox/`, `AgnosConfig/`, `cmd/`, `adapters/`, and `go.mod`) should be contained entirely within the `./target_directory`.
+### 1. 🔴 `build` / `verify` reportam sucesso com projeto quebrado
 
-**The Actual Behavior (Bug):**
-The framework scatters the files. The `go.mod` file is correctly placed inside the `./target_directory`, but the core Agnos folders (`sandbox/`, `AgnosConfig/`, `cmd/`, `adapters/`) are erroneously generated in the Current Working Directory (the parent folder). 
+`agnos build` imprime `successfully rendered template` e `agnos verify` imprime `verify passed`
+(exit 0 nos dois) mesmo quando o projeto **não compila**. A documentação do `build` diz
+"compiling the source code into the output artifacts", mas nenhum dos dois invoca o compilador Go.
 
-**The Impact on Developer Experience (DX):**
-This is a highly frustrating bug. It pollutes the user's workspace, leading to fragmented projects that fail to build. The developer is forced to manually clean up the scattered folders, navigate into the target directory, and run the command again without the `--path` flag. This breaks trust in the tooling right at the first step of adoption.
-
-### 3.2. Usability Issue: Non-Deterministic Positional Arguments
-
-**The Scenario:**
-In CLI tools, the order of positional arguments is sacred. If a user runs a subtraction command `sub 10 5`, the tool must deterministically map `10` to the first argument and `5` to the second argument. 
-
-In Agnos, arguments are defined in `entries.yaml` using a YAML Map (a key-value dictionary):
-```yaml
-args:
-  first_number:
-    type: string
-  second_number:
-    type: string
+**Reprodução:**
+```
+agnos start -p demo -m x/demo
+agnos add-command "Bad Name!" --help x --category Y     # ver bug #2
+agnos verify        # -> "verify passed"  (exit 0)
+agnos build         # -> "successfully rendered template"  (exit 0)
+go build ./...      # -> malformed import path ".../bad_name!": invalid char '!'
 ```
 
-**The Actual Behavior:**
-YAML maps are inherently unordered structures. When Agnos processes this configuration, there is no guarantee whether `first_number` or `second_number` will be parsed first. Consequently, the CLI might bind `5` to `first_number` and `10` to `second_number`, completely inverting the logic.
+**Esperado:** `build`/`verify` deveriam falhar (exit ≠ 0) quando o código gerado não é Go válido.
 
-**The Impact on Developer Experience (DX):**
-This unpredictability makes positional arguments entirely unreliable. Developers are forced to rely on "hacks," such as naming their arguments alphabetically (`arg1`, `arg2`), hoping the underlying parser iterates them in alphabetical order. This breaks the declarative promise of the framework and introduces subtle, hard-to-track bugs in mathematical or data-processing commands.
+**Mudanças propostas:**
 
-### 3.3. Usability Issue: Manual Type Casting (Loss of YAML Type Value)
-
-**The Scenario:**
-Agnos allows developers to declare the data type of an argument directly in the YAML file:
-```yaml
-args:
-  age:
-    type: integer
-```
-
-**The Expected Behavior:**
-Because the framework knows the argument is an `integer`, the developer expects the framework to hand them an integer when their command logic executes.
-
-**The Actual Behavior:**
-Agnos ignores the declared YAML type when passing the data to the command logic. Everything is passed as a generic string. 
-
-**The Impact on Developer Experience (DX):**
-The developer is forced to write repetitive, manual data conversion code (e.g., parsing a string to an integer, checking for conversion errors, handling invalid formats) for every single numeric or boolean argument. This defeats the purpose of declaring the type in the YAML file. The YAML `type` field becomes purely cosmetic, offering no real runtime utility.
-
-### 3.4. Usability Issue: Lack of Scaffolding CLI Commands
-
-**The Scenario:**
-Agnos enforces a strict directory structure. To add a single new command to the CLI, a developer must manually create a folder under `sandbox/internal/commands/`, create an `entries.yaml` file, remember the exact schema for the YAML file, create a `handler.go` file, and remember the exact function signature required by the framework.
-
-**The Expected Behavior:**
-A modern CLI builder should provide tooling to automate its own boilerplate. A developer should be able to run a simple command to scaffold a new feature.
-
-**The Impact on Developer Experience (DX):**
-The manual process is tedious, error-prone, and slow. Developers spend more time creating folders and copying boilerplate templates than they do writing their actual command logic.
+Para consertar o erro 1, adicione a flag `--runtime` — ex.: `--runtime "go"` (default `"go"`).
+Então use o runtime `go` para executar comandos e garantir que o código está compilável.
 
 ---
 
-## 4. Proposed Conceptual Changes and Enhancements
+### 2. 🔴 `add-command` aceita nomes inválidos e gera pacote Go inválido
 
-To address the issues outlined above and evolve Agnos into a mature, production-grade framework, the following conceptual changes should be prioritized.
+Não há validação do nome do comando. Nomes são silenciosamente transformados
+(`"Bad Name!"` → diretório `sandbox/internal/commands/bad_name!`, `MyCmd` → `mycmd`) sem aviso,
+e caracteres ilegais são propagados para `package bad_name!` em `handler.go` / `entries.go`,
+quebrando todo o build do projeto.
 
-### 4.1. Fix Scoping in Initialization Commands
-The `--path` flag must act as an absolute boundary. The framework must guarantee that no file or folder generation ever escapes the directory specified by `--path`. If a target directory is specified, Agnos must treat that directory as the absolute root for all generation processes.
-
-### 4.2. Shift to Array-Based Argument Configuration
-To solve the non-deterministic argument ordering, Agnos must stop using YAML maps for positional arguments. Instead, the schema should require developers to define arguments as a List/Array. 
-
-**Conceptual Fix:**
-```yaml
-args:
-  - name: first_number
-    type: string
-  - name: second_number
-    type: string
+**Reprodução:**
 ```
-Because lists are ordered by definition, the framework will explicitly know that `first_number` is always index 0, and `second_number` is always index 1. This guarantees 100% predictability.
+agnos add-command "Bad Name!" --help x --category Y   # exit 0, cria pacote inválido
+agnos add-command MyCmd --help x --category Y         # exit 0, vira "mycmd" sem avisar
+```
 
-### 4.3. Implement Native Type Binding and Validation
-The framework must honor the types declared in the YAML file. If a developer defines an argument as an `integer` or `float`, Agnos itself should handle the string-to-number conversion. 
-
-Furthermore, Agnos should handle validation failures automatically. If a user runs a command and passes the word "apple" to a field defined as an `integer`, Agnos should intercept this, print a clean "Invalid Type" error to the console, and halt execution. The command logic should only ever be executed if all data inputs perfectly match the declared YAML schema.
-
-### 4.4. Introduce a Robust Command Scaffolding Tool
-Agnos should introduce an `add command` utility (e.g., `agnos add command my_feature`). 
-When executed, this tool should:
-1. Automatically create the necessary folder structure.
-2. Generate a standard `entries.yaml` with placeholder values.
-3. Generate a standard `handler.go` ready for business logic.
-
-This single feature would exponentially speed up the development lifecycle and drastically improve the Developer Experience.
-
-### 4.5. Introduce Advanced YAML Validation Features (Future Roadmap)
-Looking ahead, Agnos should expand its declarative power by allowing developers to define complex validation rules directly in the YAML file. 
-For example:
-- `required: true` (Already present but should be strictly enforced)
-- `min_value: 0` / `max_value: 100` (For numbers)
-- `regex: "^[a-z]+$"` (For strings)
-
-By offloading these validations to the framework, developers would never have to write "If X is less than 0, return error" inside their command logic. The framework would guarantee that the data is clean and valid before the command ever runs.
+**Esperado:** rejeitar nomes que não sejam identificadores válidos (`^[a-z][a-z0-9-]*$`),
+ou pelo menos avisar sobre a normalização.
 
 ---
 
-## 5. Conclusion
+### 3. 🔴 `--quiet` / `-q` não funciona
 
-Agnos is built on a very solid philosophical foundation. The separation of interface configuration and business logic is a pattern that yields highly maintainable code. 
+Todos os comandos documentam `--quiet, -q` ("Quiets the cli output"). Em nenhum deles a flag
+tem qualquer efeito — a saída é idêntica com e sem a flag.
 
-However, the current bugs related to project generation (`--path` scoping), structural flaws in YAML parsing (non-deterministic maps), and a lack of built-in conveniences (automatic type casting and scaffolding tools) hold the framework back from its true potential.
+**Reprodução:**
+```
+agnos start -p p -m x/p -q       # imprime "started with path .", "build started...", etc.
+agnos build -q                    # imprime "verify started...", "verify passed", ...
+agnos verify -q                   # imprime "verify started...", "verify passed"
+agnos dep-install iodeps -q       # imprime tudo normalmente
+```
 
-By addressing these high-level DX issues, Agnos can transition from a promising concept into a highly competitive, beloved tool for building Command Line Interfaces.
+---
+
+### 4. 🔴 Flags desconhecidas são silenciosamente ignoradas
+
+Qualquer flag não reconhecida é aceita e ignorada, com exit 0. Um erro de digitação em
+`--path` faz o comando operar no diretório errado (o atual) sem qualquer aviso.
+
+**Reprodução:**
+```
+agnos build --bogus-flag         # exit 0, roda normalmente
+agnos build -z                    # exit 0
+agnos verify --pathh /nao/existe  # exit 0 — verifica o diretório ATUAL, não /nao/existe
+```
+
+**Esperado:** `unknown flag "--pathh"` e exit ≠ 0.
+
+---
+
+### 5. 🟠 `start` + `cli-init` deixam o projeto sem compilar
+
+Depois de `agnos start` seguido de `agnos cli-init` (ambos exit 0, "successfully rendered
+template"), o projeto não compila porque o `go.sum` não é gerado/atualizado. É necessário
+rodar `go mod tidy` manualmente.
+
+**Reprodução:**
+```
+mkdir demo && cd demo
+agnos start -p demo -m github.com/test/demo
+agnos cli-init
+go build ./...
+# -> missing go.sum entry for module providing package
+#    github.com/MateusMoutinhoOrg/Verb/sandbox
+go mod tidy && go build ./...   # só agora funciona
+```
+
+**Esperado:** `agnos build` deveria rodar `go mod tidy` (ou `go mod download` + escrever
+`go.sum`) para deixar o projeto em estado compilável.
+
+---
+
+### 6. 🟠 Argumento `--array` descarta elementos inválidos silenciosamente
+
+Um argumento posicional `--array --type int` para de coletar no primeiro elemento inválido,
+**sem erro** e descartando também os elementos válidos seguintes. O caso escalar equivalente
+reporta o erro corretamente.
+
+**Reprodução:**
+```
+agnos add-command calc --help c --category M
+agnos add-flag n --command calc --type int
+agnos add-arg items --command calc --array --type int
+# ...
+./demo calc --n 5 1 x 3     # -> items=[1]   (nenhum erro; "x" e "3" sumiram)
+./demo calc --n abc 1        # -> erro correto: "abc" is not a valid integer
+```
+
+**Esperado:** erro `arg "items": "x" is not a valid integer` e exit ≠ 0.
+
+---
+
+### 7. 🟠 `cli-purge` deixa lixo para trás
+
+Após `agnos cli-init` seguido de `agnos cli-purge`:
+
+- `sandbox/internal/commands/version/entries.go` fica **órfão** — sem `entries.yaml` nem
+  `handler.go` correspondentes (esses foram removidos, mas o arquivo gerado não).
+
+A limpeza é parcial e inconsistente: mexe no comando `version` (criado pelo `start`, não pelo
+`cli-init`) removendo uns arquivos e deixando outros.
+
+**Esperado:** `cli-purge` deve remover por completo `sandbox/internal/commands` e
+`sandbox/internal/cli`. As deps instaladas por `cli-init` (`sandbox/deps/argvdeps/`,
+`sandbox/deps/std/`) **podem** ser deixadas para trás — não há problema nisso, já que podem
+estar sendo usadas por outras partes do código.
+
+---
+
+### 8. 🟠 `add-arg --position` fora do intervalo dá erro enganoso
+
+Quando existe um arg `--array` (que deve ficar por último), `--position` com valor grande
+demais ou negativo (≠ -1) não reporta "posição inválida" — reporta a mensagem de
+"array must stay last" com um índice sugerido incoerente.
+
+**Reprodução:**
+```
+# comando calc já tem args: name (req), tags (--array)
+agnos add-arg far --command calc --position 99   # -> "arg 'tags' ... insert before it with --position 2"
+agnos add-arg neg --command calc --position -5   # -> mesma mensagem
+```
+
+**Esperado:** `--position 99 out of range (0..2)` / `--position must be >= 0`.
+
+---
+
+### 9. 🟡 Identificador gerado com erro de digitação: `CommandHander`
+
+Todo `handler.go` gerado declara `func CommandHander(...)` (falta o "l" de "Handler"),
+inclusive no comentário-doc. Compila, mas é um erro visível na API pública gerada.
+
+```go
+func CommandHander(deps *deps.Deps, entries *Entries) int {
+```
+
+---
+
+### 10. 🟡 Códigos de saída inconsistentes
+
+| Situação | Exit |
+|----------|------|
+| Erro de uso em `add-arg` / `add-flag` (tipo inválido, duplicado, etc.) | 2 |
+| `start` sem flag obrigatória `--project-name` | 1 |
+| Comando desconhecido (`agnos frobnicate`) | 1 |
+| Flag desconhecida (`agnos build --bogus`) | 0 |
+
+Convém padronizar (ex.: 2 para todo erro de uso/CLI).
+
+---
+
+### 11. 🟡 Erros internos do Go vazam para o usuário
+
+- Fora de um projeto: `open go.mod: no such file or directory` (deveria ser algo como
+  "no Agnos project found at <path>").
+- Comando inexistente em `add-flag`: `command "nope" not found: open
+  sandbox/internal/commands/nope/entries.yaml: no such file or directory`.
+- Validação de int em runtime: `flag 'n': verb: "abc" is not a valid integer:
+  strconv.Atoi: parsing "abc": invalid syntax` — vaza o nome do pacote interno (`verb:`)
+  e o erro cru da stdlib.
+
+---
+
+### 12. 🟡 Tudo vai para stdout; stderr nunca é usado
+
+Mensagens de progresso (`... started with path .`) **e** mensagens de erro
+(`Unknown Command!`, `min must be an int`) são todas escritas em stdout. `stderr` fica sempre
+vazio. Isso impede redirecionar log e resultado separadamente.
+
+**Reprodução:**
+```
+agnos frobnicate 2>/dev/null    # ainda imprime "Unknown Command!"
+agnos build 1>/dev/null          # não imprime nada — os logs foram para stdout
+```
+
+---
+
+### 13. 🟡 Ruído de log misturado com saída de máquina
+
+`agnos dep-list` imprime `dep-list started with path .` junto com a lista de deps, tudo em
+stdout, dificultando o uso em scripts:
+```
+dep-list started with path .
+embed
+goimportsdeps
+...
+```
+`agnos frobnicate` imprime só `Unknown Command!` (sem apontar `agnos help`), enquanto
+`agnos help frobnicate` dá uma mensagem bem melhor (`✘ Unknown command: ... Run 'Agnos help'`).
+Inconsistente.
+
+---
+
+### 14. 🟡 `start --module` documentado como opcional mas é obrigatório
+
+`agnos help start` mostra `--module, -m` como `string │ optional`, mas sem `go.mod` no
+diretório o comando falha:
+```
+agnos start -p demo
+# -> the module flag (--module) is required when there is no go.mod in the path
+```
+
+---
+
+### 15. ⚪ Diversos (trivial)
+
+- Falta `\n` no fim de várias saídas — o prompt do shell cola no texto
+  (`verify passedEXIT`, `successfully rendered template$`).
+- Inconsistência de caixa: help e usage usam `Agnos` (maiúsculo) enquanto o binário é `agnos`.
+- Nome de dep com erro de digitação em `dep-list`: `serializebles` (provável `serializables`).
+- Struct `Entries` gerada ordena os campos em ordem alfabética (`Items` antes de `N`), não na
+  ordem de declaração — surpreendente ao ler o código gerado.
+- `go.mod` gerado fixa `go 1.25.0` mesmo com Go 1.26 instalado.
+
+---
+
+## O que funcionou bem
+
+- Validação de `add-flag` / `add-arg`: tipo desconhecido, flag/arg duplicado, `--required`
+  junto com `--default`, `--required` em boolean, `--min/--max` em string, `min > max`,
+  `--min` não numérico — todos rejeitados com mensagens claras e exit 2.
+- Validação de int em runtime para valor escalar (`flag 'n' must be <= 10`).
+- `add-command` / `add-flag` / `add-arg` / `remove-command` recusam-se a sobrescrever/duplicar.
+- Fluxo feliz (`start` → `cli-init` → `add-command` → `add-flag` → `add-arg` → `go mod tidy`
+  → `go build` → executar) produz um CLI funcional.
+- `--position 1` insere o arg na posição correta.
