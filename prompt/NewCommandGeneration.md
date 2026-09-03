@@ -19,6 +19,8 @@ ao rodar o comando agnos-build, o sistema tem que iterar sobre os arquivos de in
 
 apos criar todos os entries.go, o build precisa criar o arquivo sandbox/internal/cli/climain.go , esse arquivo tem que validar todas as entradas (assim como esta agora), e caso seja o identifier, construir a estutura de entries, e chamar a funcao handler respectiva.
 
+## Help 
+da mesma forma que o sandbox/internal/cli/climain.go sera gerado pelo agnos, faca na geracao do build o  sandbox/commands/help/* tambem ser gerado pelo agnos, pode construir o help antes de gerar o main se for o caso.
 
 ## Assets
 Modifique os assets para ja ficarem nesse novo formato.
