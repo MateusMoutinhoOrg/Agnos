@@ -20,3 +20,9 @@ ao rodar o comando agnos-build, o sistema tem que iterar sobre os arquivos de in
 apos criar todos os entries.go, o build precisa criar o arquivo sandbox/internal/cli/climain.go , esse arquivo tem que validar todas as entradas (assim como esta agora), e caso seja o identifier, construir a estutura de entries, e chamar a funcao handler respectiva.
 
 
+## Assets
+Modifique os assets para ja ficarem nesse novo formato.
+
+## Importante: 
+nao refatore o proprio codigo em si, eu vou testar antes se esta funcionando, antes de aplicar o boostrap .
+
