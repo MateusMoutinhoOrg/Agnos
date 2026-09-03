@@ -84,3 +84,14 @@ error. Adding a row to that table means teaching `agnos compile` the name too: t
    ```
 
 7. Add the pair to the target table above.
+
+### Build and Install from Source (Clone)
+
+8. You can also build and install the CLI directly on your machine by cloning the repository:
+
+   ```bash
+   git clone https://github.com/MateusMoutinhoOrg/Agnos.git
+   cd Agnos
+   go build -o agnos ./cmd/main
+   sudo mv agnos /usr/local/bin/
+   ```
