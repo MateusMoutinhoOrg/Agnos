@@ -66,7 +66,7 @@ agnos dep-remove <dep> [--path <dir>]   # remove what that dep installed (and no
 agnos dep-list [--path <dir>]         # list the dep names available under assets/deplist
 agnos cli-init [--path <dir>]         # cli subsystem: install the std + verb deps, render the cli asset group, then rebuild
 agnos cli-purge [--path <dir>]        # cli subsystem: remove every file the cli asset group installs, then rebuild
-agnos add-command <name> [--path <dir>]  # scaffold sandbox/internal/commands/<name>/ (entries.yaml + stub handler.go), then rebuild
+agnos add-command <name> --help <text> --category <cat> [--path <dir>]  # scaffold sandbox/internal/commands/<name>/ (minimal entries.yaml + stub handler.go), then rebuild; --help and --category are required
 agnos verify [--path <dir>]           # check the project keeps the sandbox/adapter schema (no writes)
 agnos build [--path <dir>] [--unsafe] # run verify (unless --unsafe), then re-render generated files from templates
 agnos help | version
@@ -302,9 +302,12 @@ rendered result is unchanged (`Agnos` / `0.0.1`), keeping `agnos build .` idempo
 
 ## Adding a command (generated-project contract)
 
-`agnos add-command <name>` does steps 1–3 for you (renders `assets/templates/command_*`
-into `sandbox/internal/commands/<name>/`, then runs `build`); do it by hand only when the
-scaffold does not fit.
+`agnos add-command <name> --help <text> --category <cat>` does steps 1–3 for you (renders
+`assets/templates/command_*` into `sandbox/internal/commands/<name>/`, then runs `build`);
+do it by hand only when the scaffold does not fit. The scaffolded `entries.yaml` is
+deliberately minimal — only `identifiers`, `category` and `help`, all three supplied on the
+command line (`--help` and `--category` are required flags) — so you add `flags:` / `args:`
+and the optional keys yourself.
 
 1. `sandbox/internal/commands/<name>/entries.yaml` — declare `identifiers`, `category`,
    `help`, optional `long-description`, `examples`, `hidden`, and `flags:` / `args:`

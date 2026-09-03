@@ -67,6 +67,8 @@ var helpCommands = []helpCommand{
 		Examples:        []string{ "add-command my-feature", "add-command my-feature --path ./my-project",  },
 		Hidden:          false,
 		Flags: []helpField{
+			{Identifiers: []string{ "--help" }, Description: "one-line help text for the new command", Examples: []string{ "add-command my-feature --help \"does the thing\" --category Misc",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--category" }, Description: "the category the new command is grouped under in help output", Examples: []string{ "add-command my-feature --help \"does the thing\" --category Misc",  }, Type: "string", Default: "", Required: true},
 			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "add-command my-feature --path ./my-project",  }, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "add-command my-feature -q",  }, Type: "boolean", Default: "", Required: false},
 		},

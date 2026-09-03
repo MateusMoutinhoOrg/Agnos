@@ -47,7 +47,7 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.CliPurge = func(path string) error {
 		return cliPurgeAction.CliPurge(deps, path)
 	}
-	sandbox.Actions.AddCommand = func(path string, name string) error {
-		return addCommandAction.AddCommand(deps, path, name)
+	sandbox.Actions.AddCommand = func(path string, name string, help string, category string) error {
+		return addCommandAction.AddCommand(deps, path, name, help, category)
 	}
 }

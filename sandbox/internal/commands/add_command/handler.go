@@ -7,7 +7,7 @@ import (
 )
 
 func CommandHander(deps *deps.Deps, entries *Entries) int {
-	add_error := addCommandAction.AddCommand(deps, entries.Path, entries.Name)
+	add_error := addCommandAction.AddCommand(deps, entries.Path, entries.Name, entries.Help, entries.Category)
 
 	if !entries.Quiet && add_error != nil {
 		deps.Std.Error(add_error.Error())

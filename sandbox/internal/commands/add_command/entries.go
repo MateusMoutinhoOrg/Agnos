@@ -5,6 +5,8 @@ package add_command
 // Do not edit by hand — put your logic in handler.go.
 type Entries struct {
 	Name string
+	Help string
+	Category string
 	Path string
 	Quiet bool
 }

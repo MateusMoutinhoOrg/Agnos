@@ -12,7 +12,14 @@ import (
 
 // AddCommandInternal writes the two hand-written files of a new command
 // package. It refuses to overwrite an existing command (via io.WriteFile).
-func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string) error {
+func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help string, category string) error {
+	if strings.TrimSpace(help) == "" {
+		return deps.Std.Errorf("add-command requires --help")
+	}
+	if strings.TrimSpace(category) == "" {
+		return deps.Std.Errorf("add-command requires --category")
+	}
+
 	identifier := commandIdentifier(name)
 	pkg := commandPackage(name)
 	if pkg == "" {
@@ -35,6 +42,8 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string) error
 		"Package":     pkg,
 		"Module":      module_conf.Module,
 		"ProjectName": projectName(deps, io),
+		"Help":        strings.TrimSpace(help),
+		"Category":    strings.TrimSpace(category),
 	}
 
 	dir := "sandbox/internal/commands/" + pkg

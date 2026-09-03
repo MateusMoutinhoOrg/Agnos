@@ -80,6 +80,28 @@ func CliMain(deps *deps.Deps, args []string) int {
 
 func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_command.Entries{}
+	if verb.GetOptionsSize([]string{ "--help" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--help" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'help': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Help = value
+	} else {
+		deps.Std.Printf("required flag 'help' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--category" }) > 0 {
+		value, valueErr := verb.GetStringOption([]string{ "--category" }, 0)
+		if valueErr != nil {
+			deps.Std.Printf("flag 'category': %s\n", valueErr.Error())
+			return ExitUsage
+		}
+		entries.Category = value
+	} else {
+		deps.Std.Printf("required flag 'category' not provided\n")
+		return ExitUsage
+	}
 	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
 		value, valueErr := verb.GetStringOption([]string{ "--path" }, 0)
 		if valueErr != nil {

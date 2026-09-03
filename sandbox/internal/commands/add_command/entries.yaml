@@ -17,6 +17,20 @@ args:
     type: string
     required: true
 flags:
+  - name: help
+    identifiers: ["--help"]
+    description: one-line help text for the new command
+    examples:
+      - "add-command my-feature --help \"does the thing\" --category Misc"
+    type: string
+    required: true
+  - name: category
+    identifiers: ["--category"]
+    description: the category the new command is grouped under in help output
+    examples:
+      - "add-command my-feature --help \"does the thing\" --category Misc"
+    type: string
+    required: true
   - name: path
     identifiers: ["--path"]
     description: the dir holding the project (defaults to the current directory)

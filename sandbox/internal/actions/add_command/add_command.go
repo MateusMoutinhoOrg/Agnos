@@ -11,9 +11,9 @@ import (
 // sandbox/internal/commands/<name>/ — a hand-written entries.yaml and a stub
 // handler.go — then runs build as a follow-up step so entries.go and the
 // dispatch layer are generated for it.
-func AddCommand(deps *deps.Deps, path string, name string) error {
+func AddCommand(deps *deps.Deps, path string, name string, help string, category string) error {
 	io := smartio.New(deps, path, config.ProjectName)
-	if err := AddCommandInternal(deps, io, name); err != nil {
+	if err := AddCommandInternal(deps, io, name, help, category); err != nil {
 		return err
 	}
 	if err := io.Persist(); err != nil {
