@@ -27,6 +27,7 @@ func NewCommand(deps *deps.Deps, sandbox *api.Sandbox) api.CliCommand {
 				RequiredMaxSize:  1,
 				RequiredPresence: false,
 			},
+
 			{
 				Id:               "quiet",
 				ValidIdentifiers: []string{"--quiet", "-q"},
