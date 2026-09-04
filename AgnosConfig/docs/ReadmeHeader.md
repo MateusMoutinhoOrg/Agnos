@@ -37,3 +37,73 @@ adapters/  ──▶  sandbox/  ◀──  cmd/
 Agnos builds itself: `agnos build` re-renders this repo in place and the result compiles.
 Start with [Quickstart](docs/Quickstart/doc.md); the mechanics are in
 [Structure](docs/Structure/doc.md) and [BuildPipeline](docs/BuildPipeline/doc.md).
+
+## Installation
+
+`agnos` is a single static binary. Pick your platform, paste the block, done. Go 1.25+ is
+only needed to build the projects it scaffolds, not to run `agnos` itself.
+
+**macOS (Apple Silicon)**
+
+```bash
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/macarm64.bin -o agnos
+chmod +x agnos && sudo mv agnos /usr/local/bin/
+agnos version
+```
+
+**macOS (Intel)**
+
+```bash
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/mac86.bin -o agnos
+chmod +x agnos && sudo mv agnos /usr/local/bin/
+agnos version
+```
+
+**Linux (amd64)**
+
+```bash
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/linux86.out -o agnos
+chmod +x agnos && sudo mv agnos /usr/local/bin/
+agnos version
+```
+
+**Linux (arm64)**
+
+```bash
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/linuxarm64.out -o agnos
+chmod +x agnos && sudo mv agnos /usr/local/bin/
+agnos version
+```
+
+**Linux (32-bit)**
+
+```bash
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/linuxi32.out -o agnos
+chmod +x agnos && sudo mv agnos /usr/local/bin/
+agnos version
+```
+
+**Windows (64-bit)** — PowerShell:
+
+```powershell
+$dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null
+curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/windows86.exe -o "$dir\agnos.exe"
+[Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
+```
+
+**Windows (32-bit)** — PowerShell:
+
+```powershell
+$dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null
+curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/windowsi32.exe -o "$dir\agnos.exe"
+[Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
+```
+
+**From source** — needs Go 1.25+:
+
+```bash
+git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos
+go run ./cmd/main local-install
+```
+
+More detail in [Install](docs/Install/doc.md).
