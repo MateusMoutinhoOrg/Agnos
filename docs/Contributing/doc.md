@@ -59,7 +59,8 @@ Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf`
 
 - A doc is `docs/<Name>/{doc.md,props.yaml}`; sub-docs nest as `docs/<Name>/<Sub>/`. Other files in a doc dir are assets.
 - Create/delete with `agnos add-doc <Name> --description "..." --theme <id>` / `agnos remove-doc <Name>`; a theme is an entry in `AgnosConfig/themes.yaml` (`cli-usage`, `lib-usage`, `api-usage`, `architecture`, `development`, `deployment`, `reference`) and only groups the doc into a section of `README.md`. `README.md` and every `Index.md` are generated on build; never edit them.
-- `docs/LibUsage/` and `docs/PublicApi/` are generated on every build (`assets/all/docs/`); PublicApi's content is the doc comments of `sandbox/api/` and `sandbox/deps/`, so it is changed by editing those comments, never the page.
+- `docs/LibUsage/`, `docs/PublicApi/` and `docs/Structure/` are generated on every build (`assets/all/docs/`); PublicApi's content is the doc comments of `sandbox/api/` and `sandbox/deps/`, so it is changed by editing those comments, never the page.
+- Structure's tree is rendered from `AgnosConfig/structure.yaml`: describe an element by adding `<path>: {description: "..."}` there — nested under `children:` of its parent, with `dir: true` on a directory, `gen: true` on a file `build` rewrites, and `order:` to place it among its siblings (unordered siblings follow, alphabetically). Drop the entry when the path goes: `verify` rejects a ghost spec. A path holding `<`, `*` or `?` describes a family, and only the literal head of it has to exist.
 - Keep docs short: tables and commands over prose. One page per topic; no sub-doc unless the content is a real list of independent items.
 - Links are relative to the file that carries them: `../X/doc.md` inside `docs/`, `docs/X/doc.md` in `README.md` / `ReadmeHeader.md`.
 - A pattern changed in `CLAUDE.md` is mirrored here in the same commit, and the reverse.

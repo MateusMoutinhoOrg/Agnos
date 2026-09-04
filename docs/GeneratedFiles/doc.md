@@ -4,7 +4,7 @@
 
 | File | Written by | Template | Rewrite |
 |---|---|---|---|
-| `AgnosConfig/{project,themes,ignore,paths}.yaml` | `start` | `start/` | once |
+| `AgnosConfig/{project,themes,structure,ignore,paths}.yaml` | `start` | `start/` | once |
 | `AgnosConfig/docs/ReadmeHeader.md` | `start` | `start/` | once. The README body (itself a template) |
 | `go.mod` | `start` | - | once. `dep-install/remove` edit `require` |
 | `go.sum` | `go mod tidy` (runtime) | - | - |
@@ -14,6 +14,7 @@
 | `sandbox/internal/config/config.go` | `build` | `all/` | always. `ProjectName`, `Version` from `project.yaml` |
 | `docs/LibUsage/{doc.md,props.yaml}` | `build` | `all/` | always. Generic "use this project as a Go module" doc |
 | `docs/PublicApi/{doc.md,props.yaml}` | `build` | `all/` | always. Every exported symbol of `sandbox/api/` and `sandbox/deps/`, described by its own doc comment |
+| `docs/Structure/{doc.md,props.yaml}` | `build` | `all/` | always. The tree declared in `AgnosConfig/structure.yaml` |
 | `docs/**/Index.md` | `build` (docs with sub-docs) | `templates/doc_index.md` | always. `docs/Index/` from older versions is deleted |
 | `sandbox/deps/deps.go` | `build` (if `sandbox/deps/`) | `deps/` | always. One `<Title> <dir>.Lib` per dir |
 | `adapters/availables/standard/new.go` | `build` (if `sandbox/deps/`) | `deps/` | always. One `<lib>.Bind(&deps)` per dir of `adapters/libs/` |

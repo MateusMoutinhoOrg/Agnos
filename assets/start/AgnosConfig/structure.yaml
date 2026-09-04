@@ -1,0 +1,29 @@
+AgnosConfig:
+  order: 1
+  dir: true
+  description: written once by `start`, read by every `build`
+sandbox:
+  order: 2
+  dir: true
+  description: "closed: imports nothing outside sandbox/, no OS packages"
+  children:
+    new.go:
+      order: 1
+      gen: true
+      description: New(deps) *api.Sandbox, one binds.<X>Bind per binds/ file
+    api:
+      order: 2
+      dir: true
+      description: contracts only; imports nothing but sandbox/api
+    internal:
+      order: 3
+      dir: true
+      description: the logic; unreachable from outside the sandbox
+docs:
+  order: 3
+  dir: true
+  description: one dir per doc, holding doc.md + props.yaml. README.md indexes them all
+README.md:
+  order: 4
+  gen: true
+  description: "`render AgnosConfig/docs/ReadmeHeader.md` + the documentation index"

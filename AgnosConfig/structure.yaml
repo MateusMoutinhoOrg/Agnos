@@ -1,0 +1,177 @@
+AgnosConfig:
+  order: 1
+  dir: true
+  description: written once by `start`, read by every `build`
+  children:
+    project.yaml:
+      order: 1
+      description: name, version, description  (projectconf)
+    themes.yaml:
+      order: 2
+      description: "doc themes: name, id, description  (themesconf)"
+    structure.yaml:
+      order: 3
+      description: this tree  (structureconf)
+    ignore.yaml:
+      order: 4
+      description: SmartIO listing filters  (ignorableconf)
+    paths.yaml:
+      order: 5
+      description: SmartIO listing rewrites  (pathreplacerconf)
+    docs/ReadmeHeader.md:
+      order: 6
+      description: README body, a template
+sandbox:
+  order: 2
+  dir: true
+  description: "closed: imports nothing outside sandbox/, no OS packages"
+  children:
+    new.go:
+      order: 1
+      gen: true
+      description: New(deps) *api.Sandbox, one binds.<X>Bind per binds/ file
+    api:
+      order: 2
+      dir: true
+      description: contracts only; imports nothing but sandbox/api
+      children:
+        sandbox.go:
+          order: 1
+          gen: true
+          description: Sandbox struct, one field per api/ file
+        actions.go:
+          order: 2
+          description: Actions struct + props structs + Runtime consts
+        cli.go:
+          order: 3
+          gen: true
+          description: Cli struct + exit consts
+    binds:
+      order: 3
+      dir: true
+      description: one file per api/ file, functions only
+      children:
+        actions.go:
+          order: 1
+          description: "ActionsBind(deps, sandbox): one assignment per action"
+        cli.go:
+          order: 2
+          gen: true
+          description: CliBind
+    deps:
+      order: 4
+      dir: true
+      description: contracts; imports only stdlib + sandbox/deps
+      children:
+        deps.go:
+          order: 1
+          gen: true
+          description: Deps struct, one <Title> <dir>.Lib per dir
+        <x>/<x>.go:
+          order: 2
+          description: type Lib struct of func fields
+    internal:
+      order: 5
+      dir: true
+      description: the logic; unreachable from outside the sandbox
+      children:
+        config/config.go:
+          order: 1
+          gen: true
+          description: ProjectName, Version
+        cli/climain.go:
+          order: 2
+          gen: true
+          description: CliMain + dispatch<Name> per command
+        commands/<name>:
+          order: 3
+          dir: true
+          description: entries.yaml (decl), entries.go (gen), handler.go (hand)
+        actions/<name>:
+          order: 4
+          dir: true
+          description: <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
+        actions/build/collect_*.go:
+          order: 5
+          description: "collectors: list one dir, title-case names"
+        actions/build/generate_*.go:
+          order: 6
+          description: entries.go per command, help entries.yaml, doc indexes
+        actions/verify/check_*.go:
+          order: 7
+          description: one rule set per file, each returns []string
+        parsables/<name>conf:
+          order: 8
+          dir: true
+          description: api.go, new.go, new_empty.go, bind_methods.go, render.go
+        smartio:
+          order: 9
+          dir: true
+          description: transactional fs rooted at --path
+        utils:
+          order: 10
+          dir: true
+          description: RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
+adapters:
+  order: 3
+  dir: true
+  description: the only place OS-bound and third-party code lives
+  children:
+    libs/<lib>/<lib>.go:
+      order: 1
+      description: one package per contract, exports Bind(deps *deps.Deps)
+    availables/standard/new.go:
+      order: 2
+      gen: true
+      description: New() deps.Deps calling every lib's Bind
+    availables/<name>/new.go:
+      order: 3
+      description: hand-written mix, left alone
+assets:
+  order: 4
+  dir: true
+  description: Go text/templates embedded by asset.go; never `go build ./...`
+  children:
+    start:
+      order: 1
+      dir: true
+      description: written once, on `start`
+    all:
+      order: 2
+      dir: true
+      description: rendered by every `build`
+    deps:
+      order: 3
+      dir: true
+      description: rendered when sandbox/deps/ exists
+    cli:
+      order: 4
+      dir: true
+      description: rendered when sandbox/internal/cli/ exists
+    deplist/<dep>:
+      order: 5
+      dir: true
+      description: one installable dep, mirroring the target layout
+    templates:
+      order: 6
+      dir: true
+      description: single-file scaffolds (entries.go, command_*, help_entries.yaml, doc_doc.md, *_index.md)
+    depsversion.yaml:
+      order: 7
+      description: "<dep>: <module>@<version>"
+cmd/main/main.go:
+  order: 5
+  gen: true
+  description: standard.New() -> sandbox.New -> CliMain(os.Args[1:])
+docs:
+  order: 6
+  dir: true
+  description: one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
+  children:
+    "**/Index.md":
+      gen: true
+      description: written for every doc that has sub-docs
+release:
+  order: 7
+  dir: true
+  description: git-ignored binaries

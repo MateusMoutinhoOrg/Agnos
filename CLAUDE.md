@@ -28,8 +28,8 @@ first-class constraint. Humans are a secondary audience.
   declaration, it must be — hand-written code is only contracts, adapters and `handler.go`.
   A new hand-written file needs a reason why generation cannot cover it.
 - **Generate over document.** The same applies to docs: `README.md` (its documentation index
-  included), every `Index.md`, `docs/LibUsage/` and `docs/PublicApi/` are rendered, never
-  typed. Document by commenting the contract, not by writing a page.
+  included), every `Index.md`, `docs/LibUsage/`, `docs/PublicApi/` and `docs/Structure/` are
+  rendered, never typed. Document by commenting the contract, not by writing a page.
 - **Docs are short, objective and dense.** Tables, commands, file paths and rules — no prose,
   no narrative, no tutorials, no motivation sections, no repetition across pages. Shorter is
   strictly better: a page an LLM re-reads on every task costs tokens each time. Say the rule
@@ -113,12 +113,15 @@ follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` t
 - Exit codes: `api.ExitOk` 0, `api.ExitFailure` 1 (well-formed command failed),
   `api.ExitUsage` 2 (bad command line).
 - Docs: create/delete with `agnos add-doc` / `agnos remove-doc`, never by hand. `README.md`
-  (the documentation index included), `Index.md`, `docs/LibUsage/` and `docs/PublicApi/` are
-  generated. A theme only groups a doc into a README section; a theme no doc names renders
+  (the documentation index included), `Index.md`, `docs/LibUsage/`, `docs/PublicApi/` and
+  `docs/Structure/` are generated. A theme only groups a doc into a README section; a theme no doc names renders
   nothing and is not an error. PublicApi is rendered
   from the doc comments of `sandbox/api/` and `sandbox/deps/` (parsed through
   `deps.Goimportsdeps`), and `verify` requires one on every exported declaration there — so
   the public api is documented by commenting the contract, never by editing the page.
+  `docs/Structure/doc.md`'s tree is rendered from `AgnosConfig/structure.yaml`, so an element
+  is described by an entry there — and `verify` rejects an entry whose path is gone (a ghost
+  spec).
   `docs/Commands/doc.md` stays hand-written (its columns carry judgement the declarations do
   not hold), but `verify` requires it to name every visible command and every declared flag —
   so `add-command` / `add-flag` are followed by a row there. Links inside `docs/` are relative

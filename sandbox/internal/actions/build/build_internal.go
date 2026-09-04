@@ -101,6 +101,14 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	// docs/Structure's tree is rendered from the project's own structure.yaml,
+	// so the page describes the shape its author declared rather than one
+	// typed into the doc by hand. `verify` rejects an item whose path is gone.
+	structure, err := CollectStructure(deps, io)
+	if err != nil {
+		return err
+	}
+
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
@@ -115,22 +123,24 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	vars := map[string]interface{}{
-		"Module":       module_conf.Module,
-		"Name":         project_conf.Name,
-		"Version":      project_conf.Version,
-		"ProjectName":  projectNameConst(project_conf.Name),
-		"ConfigDir":    config.ProjectName + "Config",
-		"HasDeps":      hasDeps,
-		"HasCli":       hasCli,
-		"Binds":        CollectBinds(io),
-		"Constructors": CollectConstructors(io),
-		"DepsLibs":     CollectDepsLibs(io),
-		"AdapterLibs":  CollectAdapterLibs(io),
-		"Commands":     commands,
-		"Themes":       themes_conf.Themes,
-		"DocIndex":     CollectDocIndex(docs, themes_conf.Themes),
-		"PublicApi":    public_api,
-		"DepsApi":      deps_api,
+		"Module":            module_conf.Module,
+		"Name":              project_conf.Name,
+		"Version":           project_conf.Version,
+		"ProjectName":       projectNameConst(project_conf.Name),
+		"ConfigDir":         config.ProjectName + "Config",
+		"StructureConfFile": utils.StructureConfFile,
+		"HasDeps":           hasDeps,
+		"HasCli":            hasCli,
+		"Binds":             CollectBinds(io),
+		"Constructors":      CollectConstructors(io),
+		"DepsLibs":          CollectDepsLibs(io),
+		"AdapterLibs":       CollectAdapterLibs(io),
+		"Commands":          commands,
+		"Themes":            themes_conf.Themes,
+		"DocIndex":          CollectDocIndex(docs, themes_conf.Themes),
+		"PublicApi":         public_api,
+		"Structure":         structure,
+		"DepsApi":           deps_api,
 	}
 
 	if err := utils.RenderGroup(deps, io, "all", vars); err != nil {
