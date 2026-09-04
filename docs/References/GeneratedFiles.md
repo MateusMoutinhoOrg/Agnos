@@ -13,6 +13,7 @@ Every file `agnos` writes into a project, grouped by the command that first writ
 | `AgnosConfig/themes.yaml` | `start` | once | The documentation themes of the project. Parsed by `themesconf`; not consumed by any action yet. |
 | `AgnosConfig/ignore.yaml` | `start` | once | Paths SmartIO hides from listings. Empty by default. |
 | `AgnosConfig/paths.yaml` | `start` | once | Path rewrites SmartIO applies to listings. Empty by default. |
+| `AgnosConfig/docs/ReadmeHeader.md` | `start` | once | The body of the project's `README.md`, itself a Go `text/template` — every `build` renders it (with the full `vars` map) into `README.md`. Edit this, not `README.md`. |
 | `go.mod` | — | once | Written from `--module` and the installed toolchain's version when the directory has none (`--force` overwrites). `dep-install` / `dep-remove` edit its `require` block. |
 
 ---
@@ -24,6 +25,7 @@ Every file `agnos` writes into a project, grouped by the command that first writ
 | `sandbox/new.go` | `all` | overwritten | `New(deps *deps.Deps) *api.Sandbox` — or `New()` without deps — calling one `binds.<X>Bind` per file of `sandbox/binds/`. |
 | `sandbox/api/sandbox.go` | `all` | overwritten | `type Sandbox struct` with one field per package of `sandbox/api/`. |
 | `sandbox/internal/config/config.go` | `all` | overwritten | `ProjectName` (title-cased `name`) and `Version` from `project.yaml`. |
+| `README.md` | `all` | overwritten | `{{ render "<ProjectName>Config/docs/ReadmeHeader.md" }}` — the `all` template is a single call to the `render` native function, which reads that project file, renders it as a template, and returns it. Change the text in `ReadmeHeader.md`. |
 | `go.sum` | — | — | Written by the `go mod tidy` the `go` runtime runs. |
 
 ---

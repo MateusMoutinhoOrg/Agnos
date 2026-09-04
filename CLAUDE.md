@@ -275,7 +275,16 @@ leave hand-written code referring to what is gone.
 written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new.go`).
 `utils.RenderGroup(deps, io, "<group>", vars)` renders every file in one group as a Go
 `text/template` with the same `vars` and writes each to its stripped path (via
-`io.WriteFileOverwrite`). The groups: `start` (config skeleton written by `agnos start`),
+`io.WriteFileOverwrite`). Every template rendered through `utils` (both `RenderGroup` and
+`RenderTemplateToDest`) has one **native function** beyond the `text/template` builtins:
+`render "<project-relative path>"` reads that file from the target project through the
+transaction-aware `io`, renders it with the *same* `vars` and the same native function
+(nesting to any depth), and returns the result — a missing/unparsable target is a hard
+build error. `assets/all/README.md` is a single `render` call against
+`{{.ConfigDir}}/docs/ReadmeHeader.md` (`ConfigDir` = `config.ProjectName + "Config"`), so a
+project's README body is the hand-editable `AgnosConfig/docs/ReadmeHeader.md` — itself a
+template — and `README.md` is regenerated from it on every build. The groups: `start` (config skeleton written by `agnos start`,
+including `AgnosConfig/docs/ReadmeHeader.md`),
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
 `sandbox/deps` exists), `cli` (the CLI layer — `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`,
 `sandbox/internal/cli/climain.go` (generated from every command's `entries.yaml`), the
@@ -420,7 +429,9 @@ Each `sandbox/internal/parsables/<name>conf/` package is a small YAML-or-gomod p
 fixed shape: `api.go` (struct + `Render func() string`), `new.go` (parse from string),
 `new_empty.go` (defaults), `bind_methods.go`, `render.go`. `moduleconf` parses `go.mod`
 directly. `agnos start` renders the `start` asset group (`project.yaml`, `themes.yaml`, `ignore.yaml`,
-`paths.yaml`) into `AgnosConfig/`; `agnos build` reads them back.
+`paths.yaml`, `docs/ReadmeHeader.md`) into `AgnosConfig/`; `agnos build` reads them back
+(`docs/ReadmeHeader.md` is re-rendered into `README.md` on every build via the `render`
+native function — see **Asset groups**).
 
 `sandbox/internal/config/config.go` holds the CLI's own constants: `ProjectName = "Agnos"`
 (used to name the generated `AgnosConfig/` dir, and lowercased for the binary name the help

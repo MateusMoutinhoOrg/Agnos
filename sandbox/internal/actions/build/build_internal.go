@@ -80,6 +80,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Name":         project_conf.Name,
 		"Version":      project_conf.Version,
 		"ProjectName":  projectNameConst(project_conf.Name),
+		"ConfigDir":    config.ProjectName + "Config",
 		"HasDeps":      hasDeps,
 		"HasCli":       hasCli,
 		"Binds":        CollectBinds(io),

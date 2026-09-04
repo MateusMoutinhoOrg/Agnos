@@ -4,6 +4,7 @@
 Defines the required structure and layout for the project's root `README.md` file.
 
 ### Rules
+- `README.md` is generated: `agnos build` renders `<ProjectName>Config/docs/ReadmeHeader.md` (itself a Go `text/template` with the full build `vars` in scope) into it on every build. Edit `ReadmeHeader.md`, never `README.md`.
 - The `README.md` must strictly follow the section order defined below.
 - Every table must follow the formatting defined in [GeneralDoc](/docs/References/Specs/GeneralDoc/Specs.md).
 

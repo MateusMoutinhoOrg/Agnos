@@ -49,6 +49,7 @@ Every group is rendered with one `vars` map:
 | `Module` | The module path from `go.mod` — every generated import is `{{.Module}}/…`. |
 | `Name`, `Description`, `Version` | From `AgnosConfig/project.yaml`. |
 | `ProjectName` | `Name` title-cased; becomes `config.ProjectName`, and lowercased the binary name `help` prints. |
+| `ConfigDir` | `config.ProjectName + "Config"` — the config directory this binary reads (`AgnosConfig`). Used by `README.md` to locate `docs/ReadmeHeader.md`. |
 | `HasDeps`, `HasCli` | The two switches above; `sandbox/new.go` takes a `*deps.Deps` only when `HasDeps`. |
 | `Binds`, `Constructors`, `DepsLibs`, `AdapterLibs`, `Commands` | The collectors' output. |
 
@@ -60,12 +61,14 @@ Templates live at `assets/<group>/<path>` and render to `<path>` inside the proj
 
 | Group | Condition | Renders |
 |-------|-----------|---------|
-| `all` | always | `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/internal/config/config.go` |
+| `all` | always | `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/internal/config/config.go`, `README.md` |
 | `deps` | `HasDeps` | `sandbox/deps/deps.go`, `adapters/availables/standard/new.go` |
 | *(per command)* | `HasCli` | `sandbox/internal/commands/<x>/entries.go` from `assets/templates/entries.go` |
 | `cli` | `HasCli` | `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`, `sandbox/internal/cli/climain.go`, `help/handler.go`, `version/{entries.yaml,handler.go}` |
 
 Two groups are rendered by other commands: `start` (the `AgnosConfig/` files, once) and `deplist/<dep>` (by `dep-install`). `assets/templates/` holds single-file scaffolds rendered outside any group.
+
+Every asset template is rendered by `utils.RenderGroup` / `utils.RenderTemplateToDest` with one native function in scope: **`render "<project-relative path>"`** reads that file from the target project (through the transaction-aware `io`, so a file written earlier in the same build is visible), renders it as a Go `text/template` with the *same* `vars` and the same native function (so nesting works to any depth), and returns the result. `README.md`'s `all` template is a single `render` call against `<ConfigDir>/docs/ReadmeHeader.md`. A missing or unparsable target is a hard build error.
 
 ---
 
