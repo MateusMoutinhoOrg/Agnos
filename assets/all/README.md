@@ -1,5 +1,5 @@
-{{- render (printf "%s/docs/ReadmeHeader.md" .ConfigDir) -}}
+{{- render (printf "%s/docs/ReadmeHeader.md" .ConfigDir) }}
 
 ## License
 
-{{- copy "LICENSE" -}}
+{{ copy "LICENSE" -}}
