@@ -5,29 +5,19 @@ go get github.com/MateusMoutinhoOrg/Agnos@latest
 ```
 
 ```go
+package main 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
-
+func main(){
 deps := standard.New()          // every adapter lib bound
 lib := sandbox.New(&deps)       // *api.Sandbox: Actions + Cli
 
-module := "github.com/you/my-tool"
-err := lib.Actions.Start(api.StartProps{Path: "./my-tool", ProjectName: "my-tool", Module: &module})
-err = lib.Actions.DepsInit("./my-tool")
-err = lib.Actions.DepInstall("./my-tool", "iodeps")
-err = lib.Actions.CliInit("./my-tool")
-err = lib.Actions.AddCommand("./my-tool", "greet", "Say hello", "Demo")
-err = lib.Actions.AddFlag(api.FieldProps{Path: "./my-tool", Command: "greet", Name: "name", Identifiers: []string{"--name", "-n"}, Required: true})
-err = lib.Actions.Build(api.BuildProps{Path: "./my-tool", Runtime: api.RuntimeGo})
+}
 
-code := lib.Cli.CliMain([]string{"dep-list", "--path", "./my-tool"})   // the whole CLI, in-process
 ```
-
-- Actions mirror the CLI one to one; signatures in [PublicApi](../PublicApi/doc.md#actions). Each takes the project dir, scopes every read/write to it, logs progress via `deps.Std.Log`, returns `error`.
-- Every action that adds something ends by running `build`, like its command.
 
 ## Custom Deps
 
