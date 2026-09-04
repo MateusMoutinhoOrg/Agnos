@@ -1,5 +1,5 @@
-name: "The Build Pipeline"
-description: "The verify gate, the collectors, the asset groups in order, persist, and the runtime"
+description: "What build does: verify, collectors, template vars, asset groups, SmartIO persist, runtime, dispatch"
+name: "BuildPipeline"
+order: 2
 themes:
   - development
-order: 30

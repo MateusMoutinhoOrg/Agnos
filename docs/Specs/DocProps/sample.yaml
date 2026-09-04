@@ -1,5 +1,0 @@
-name: Public API
-description: Every public-facing entry of the library, grouped by role, with a page per symbol
-themes:
-  - lib-usage
-order: 25

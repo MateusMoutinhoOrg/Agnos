@@ -1,3 +1,0 @@
-name: "argvdeps.Lib"
-description: "`Deps.Argvdeps` \u2014 a per-call argument-vector parser, the sandbox's copy of the Verb library"
-order: 13

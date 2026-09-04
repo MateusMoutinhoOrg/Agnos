@@ -1,3 +1,0 @@
-name: "goimportsdeps.Lib"
-description: "`Deps.Goimportsdeps` \u2014 a Go source reader: package clause, imports, top-level declarations"
-order: 15

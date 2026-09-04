@@ -1,3 +1,0 @@
-name: "api.StartProps"
-description: "`Path`, `ProjectName`, optional `Module` and `Force` for one scaffold"
-order: 8

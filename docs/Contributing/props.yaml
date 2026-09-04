@@ -1,0 +1,5 @@
+description: "Recipes for changing this repo: bootstrap, add action, command, contract, dep, template, parsable, doc"
+name: "Contributing"
+order: 3
+themes:
+  - development

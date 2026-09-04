@@ -1,5 +1,0 @@
-name: "Library Initialization"
-description: "Install the module, create deps via an adapter, and scaffold a project from Go"
-themes:
-  - lib-usage
-order: 8

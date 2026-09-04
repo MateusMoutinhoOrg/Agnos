@@ -1,5 +1,0 @@
-name: "Add a Command to Agnos"
-description: "Expose an action on `agnos`'s own command line with the bootstrap binary"
-themes:
-  - development
-order: 14

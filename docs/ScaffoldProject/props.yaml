@@ -1,5 +1,0 @@
-name: "Scaffold a Project"
-description: "Take an empty directory to a compiling CLI with one command of your own"
-themes:
-  - cli-usage
-order: 2

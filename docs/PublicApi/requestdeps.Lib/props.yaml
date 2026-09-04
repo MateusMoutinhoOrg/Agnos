@@ -1,3 +1,0 @@
-name: "requestdeps.Lib"
-description: "`Deps.Requestdeps` \u2014 a per-call HTTP request, with its `Request` and `Response` structs"
-order: 17

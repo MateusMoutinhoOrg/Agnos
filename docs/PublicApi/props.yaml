@@ -1,5 +1,5 @@
-name: "Public API"
-description: "Every public-facing entry of the library, grouped by role, with a page per symbol"
+description: "Every public symbol: entry points, actions, props structs and dependency contracts"
+name: "PublicApi"
+order: 2
 themes:
   - lib-usage
-order: 25

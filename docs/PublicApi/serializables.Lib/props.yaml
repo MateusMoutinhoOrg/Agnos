@@ -1,3 +1,0 @@
-name: "serializables.Lib"
-description: "`Deps.Serializables` \u2014 generic JSON/YAML values: create, parse, walk, serialize"
-order: 19

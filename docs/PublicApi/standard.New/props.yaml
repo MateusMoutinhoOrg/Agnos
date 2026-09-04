@@ -1,3 +1,0 @@
-name: "standard.New"
-description: "Builds a `deps.Deps` by running every adapter lib's `Bind` \u2014 the default assembly `cmd/main` wires"
-order: 2

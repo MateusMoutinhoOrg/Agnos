@@ -1,3 +1,0 @@
-name: "AdapterLib"
-description: "`adapters/libs/<lib>/*.go`, and its copy under `assets/deplist/`"
-order: 13

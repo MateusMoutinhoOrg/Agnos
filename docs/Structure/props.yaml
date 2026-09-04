@@ -1,5 +1,5 @@
-name: "Project Structure"
-description: "The project's schema: which kind of file lives where, which are generated, and its spec"
+description: "The project schema: what lives where, what is generated, what verify enforces"
+name: "Structure"
+order: 1
 themes:
   - development
-order: 28

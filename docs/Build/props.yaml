@@ -1,5 +1,0 @@
-name: "Build the CLI for Every Architecture"
-description: "Cross-compile the CLI into a binary for each supported OS and architecture"
-themes:
-  - development
-order: 12

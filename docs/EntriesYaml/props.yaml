@@ -1,5 +1,5 @@
-name: "The entries.yaml Declaration"
-description: "Every key of a command declaration and what it makes the generated code do"
+description: "Every key of a command's entries.yaml and what the generated code does with it"
+name: "EntriesYaml"
+order: 4
 themes:
   - cli-usage
-order: 22

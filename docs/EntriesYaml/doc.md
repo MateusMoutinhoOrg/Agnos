@@ -1,16 +1,14 @@
-# The entries.yaml Declaration
+# EntriesYaml
 
-## Description
-Every key of `sandbox/internal/commands/<name>/entries.yaml` — the hand-written declaration of one command that `agnos build` turns into a typed `Entries` struct and a dispatch arm — and what each key makes the generated code do. The file is grown from the command line by [ShapeCommands](/docs/ShapeCommands/doc.md); how the dispatch consumes it is explained in [CommandDispatch](/docs/CommandDispatch/doc.md); its required shape is the CommandEntries specification in [Specs](/docs/Specs/doc.md).
+`sandbox/internal/commands/<name>/entries.yaml` declares one command. `agnos build` generates `entries.go` (the `Entries` struct) and a dispatch arm from it. Grow it with `add-flag`/`add-arg`/`set-command`, not by hand: the editors re-render it with keys in alphabetical order and drop comments.
 
 ```yaml
 identifiers: ["greet", "hello"]
 category: Demo
 help: Say hello
 long-description: |
-  Greets someone, as many times as asked.
-examples:
-  - "greet -n bob 2"
+  Greets someone.
+examples: ["greet -n bob 2"]
 hidden: false
 flags:
   - name: name
@@ -23,73 +21,33 @@ args:
     type: int
     default: "1"
     min: 1
-    description: how many times
 ```
 
----
+## Command keys
 
-## Command Keys
+| Key | Effect |
+|---|---|
+| `identifiers` | Verbs the command answers to; the first is canonical in `help` |
+| `category` | Heading in the general help |
+| `help` | One-line description |
+| `long-description` | Paragraph under `help <command>` |
+| `examples` | Lines printed as `$ <binary> <example>` |
+| `hidden` | Dropped from the general listing, still dispatches |
+| `flags`, `args` | Sequences of fields. Flags are read first in any position; args bind by written order |
 
-| Key | Type | Effect |
-|-----|------|--------|
-| `identifiers` | list of strings | The verbs the command answers to. The first is the canonical name shown by `help`; every one becomes a `case` of the generated dispatch. |
-| `category` | string | The heading `help` groups the command under (`Core Commands`, `Cli System`, …). |
-| `help` | string | The one-line description in the general help listing and the header of `help <command>`. |
-| `long-description` | string | The paragraph `help <command>` prints under the header. Optional. |
-| `examples` | list of strings | Command lines `help <command>` prints as `$ <binary> <example>`. Optional. |
-| `hidden` | boolean | Drops the command from the general listing. It still dispatches and still answers `help <command>`. Optional, default `false`. |
-| `flags` | sequence of fields | The named options, read first, in any position on the command line. |
-| `args` | sequence of fields | The positional arguments, bound by their written order after every flag has been consumed. |
+## Field keys
 
-`flags:` and `args:` are YAML **sequences** — each entry an object with a `name`. A legacy mapping form (`flags: { name: {…} }`) is still parsed, with keys sorted for determinism, but never write positional args that way: a mapping has no order to bind them by.
+| Key | Effect |
+|---|---|
+| `name` | Go field name (`out-file` -> `OutFile`). For a flag, defaults to the first identifier |
+| `identifiers` | Flag spellings (`--name`, `-n`). Flags only. Default `--<name>` |
+| `type` | `string` (default), `boolean` (presence only, never required), `int`, `float` |
+| `description`, `examples` | Help text |
+| `default` | Literal assigned when absent (string, converted to the type). Excludes `required` |
+| `required` | Absence is a usage error. Refused on boolean or with `default` |
+| `array` | Every occurrence collected into `[]T`. An array arg must be last |
+| `min`, `max` | Bounds for `int`/`float`, checked before the handler runs |
 
----
+Go types: `string`/`[]string`, `bool`, `int`/`[]int`, `float64`/`[]float64`.
 
-## Field Keys
-
-| Key | Applies to | Effect |
-|-----|-----------|--------|
-| `name` | flags, args | The Go field name, title-cased and with hyphens dropped (`out-file` → `OutFile`), and the name error messages use. For a flag, derived from the first identifier when omitted. |
-| `identifiers` | flags | The spellings that select the flag (`--name`, `-n`). Defaults to `--<name>`. |
-| `type` | flags, args | `string`, `boolean`, `int` or `float`. Defaults to `string`. A boolean is a presence flag: no value follows it, and it cannot be `required`. |
-| `description` | flags, args | The help text `help <command>` prints under the field. |
-| `examples` | flags, args | Usage lines `help <command>` prints under the field. |
-| `default` | flags, args | The literal assigned when the field is absent, so the `Entries` field is always populated. Written as a string; converted to the field's type. Excludes `required`. |
-| `required` | flags, args | Makes absence a usage error (`required flag 'name' not provided`). Refused on a boolean and on a field with `default`; the parser drops a hand-written `required: true` in those cases. |
-| `array` | flags, args | Collects every occurrence into a `[]T` field: a repeatable flag, or every remaining positional. An array arg must be the **last** arg. |
-| `min`, `max` | `int`, `float` fields | Bounds checked by the dispatch after conversion; an out-of-range value is a usage error before the handler runs. |
-
----
-
-## Generated Types
-
-| `type` | Go field | Array field | Rejected value |
-|--------|----------|-------------|----------------|
-| `string` | `string` | `[]string` | — |
-| `boolean` | `bool` | — | — |
-| `int` | `int` | `[]int` | `"x" is not a valid integer`, `must be >= <min>`, `must be <= <max>` |
-| `float` | `float64` | `[]float64` | not a valid number, out of range |
-
-The `Entries` struct lists the flags first, then the args, each in declaration order:
-
-```go
-// generated by `agnos build` — do not edit
-type Entries struct {
-	Name  string
-	Times int
-}
-```
-
----
-
-## The quiet Flag
-
-A boolean flag named `quiet` is the one field with a behavior of its own: as soon as the dispatch has read it, and before the handler runs, it replaces `deps.Std.Log` with a no-op. A command gets a working `--quiet` by declaring that flag; there is nothing else to write.
-
-```yaml
-flags:
-  - name: quiet
-    identifiers: ["--quiet", "-q"]
-    type: boolean
-    description: Quiets the cli output
-```
+A boolean flag named `quiet` is special: the dispatch replaces `deps.Std.Log` with a no-op before the handler runs.

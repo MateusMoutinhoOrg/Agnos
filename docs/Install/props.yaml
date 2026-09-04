@@ -1,0 +1,5 @@
+description: "Install the agnos binary, or run it from a checkout"
+name: "Install"
+order: 1
+themes:
+  - cli-usage

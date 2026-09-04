@@ -1,5 +1,0 @@
-name: "Shape a Command from the Command Line"
-description: "Declare a command's flags, args, aliases and help from the command line"
-themes:
-  - cli-usage
-order: 3

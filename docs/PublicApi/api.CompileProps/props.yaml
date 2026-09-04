@@ -1,3 +1,0 @@
-name: "api.CompileProps"
-description: "`Path` and `Targets` for one cross-compile run"
-order: 7

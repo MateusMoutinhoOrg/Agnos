@@ -1,5 +1,0 @@
-name: "Write a Command Handler"
-description: "Fill in the one file of a command you write by hand, inside the sandbox"
-themes:
-  - cli-usage
-order: 4

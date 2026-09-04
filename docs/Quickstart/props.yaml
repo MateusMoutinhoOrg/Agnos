@@ -1,0 +1,5 @@
+description: "Empty directory to a compiling CLI with one command, using only agnos commands"
+name: "Quickstart"
+order: 2
+themes:
+  - cli-usage

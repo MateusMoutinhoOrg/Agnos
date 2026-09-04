@@ -1,3 +1,0 @@
-name: "CommandHandler"
-description: "`sandbox/internal/commands/<name>/handler.go`"
-order: 16

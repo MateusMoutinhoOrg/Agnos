@@ -1,106 +1,52 @@
-# The Build Pipeline
+# BuildPipeline
 
-## Description
-Explains what happens between `agnos build` (or any command that ends by running it) and a compiling project: the schema gate, the collectors, the asset groups rendered in order, the single persist, and the runtime handed the result. The command's flags are in [Commands](/docs/Commands/doc.md#core-commands); every file it writes is in [GeneratedFiles](/docs/GeneratedFiles/doc.md); the transactional filesystem it writes through is [SmartIO](/docs/SmartIO/doc.md).
+`build` command = `verify` (unless `--unsafe`) -> `BuildInternal` -> `Persist` -> runtime. The `build` **action** (the follow-up every other command runs) skips verify so mid-refactor states still regenerate.
 
----
+## BuildInternal
 
-## The Verify Gate
+1. Read `AgnosConfig/project.yaml` (hard error if missing) and `go.mod`. Set `HasDeps` (`sandbox/deps/` exists) and `HasCli` (`sandbox/internal/cli/` exists).
+2. Load `themes.yaml`; `CollectDocs` + `GenerateDocIndexes` (removes `docs/Index/`, rewrites one `<theme-id>.md` per theme and one `Index.md` per doc with sub-docs). Skipped when `docs/` is absent.
+3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `entries.go` per command.
+4. Collectors, then render groups in order: `all` (always), `deps` (`HasDeps`), `cli` (`HasCli`).
 
-The `build` **command** runs `verify` first, unless `--unsafe` is passed. `verify` reads the tree through SmartIO, writes nothing, and returns one error listing every violation of the harness schema:
+| Collector | Lists | Var | Feeds |
+|---|---|---|---|
+| `CollectBinds` | `sandbox/binds/*.go` | `Binds` | `sandbox/new.go` |
+| `CollectConstructors` | `sandbox/api/*` | `Constructors` | `sandbox/api/sandbox.go` |
+| `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
+| `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `adapters/availables/standard/new.go` |
+| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (rich map: identifiers, category, help, `Flags`/`Args` with Go names, types, getters, defaults, `RangeCheck`) | `climain.go`, `help/handler.go`, `entries.go` |
+| `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `docs/Index/*.md`, `**/Index.md` |
 
-| Rule | Where it is checked |
-|------|---------------------|
-| `sandbox/` holds only the `api`, `binds`, `deps`, `internal` directories plus a loose `new.go`. | `check_sandbox.go` |
-| No file under `sandbox/` imports a module-internal package outside `sandbox/`. | `check_sandbox.go` |
-| `sandbox/api/*` imports only other `sandbox/api` packages — no stdlib, no external module, not even `sandbox/deps`: api is pure contract. | `check_sandbox.go` |
-| `sandbox/deps/*` imports only the standard library and other `sandbox/deps` packages. | `check_sandbox.go` |
-| Every file in `sandbox/binds/` mirrors a file of the same name in `sandbox/api/` and declares only functions — no top-level types, consts or vars. | `check_sandbox.go` |
-| `adapters/` holds only the `availables` and `libs` directories. | `check_adapters.go` |
-| Every doc directory of `docs/` holds a parsable `props.yaml`. | `check_docs.go` |
-| Every theme a `props.yaml` names is declared in `themes.yaml`, and every theme of `themes.yaml` is named by at least one doc. | `check_docs.go` |
-| Every first-level doc names at least one theme, and no sub-doc names any. | `check_docs.go` |
+Template vars: `Module`, `Name`, `Description`, `Version`, `ProjectName`, `ConfigDir`, `HasDeps`, `HasCli`, `Themes`, plus the collector outputs. Native template funcs: `render "<path>"` (read a project file through the transaction, render it with the same vars, nestable) and `copy "<path>"` (verbatim). Missing target = hard error. `README.md` = `render ConfigDir/docs/ReadmeHeader.md` + theme table + `copy LICENSE`.
 
-The `build` **action** — and the follow-up build run by `start`, `deps-*`, `dep-*`, `cli-*` and the command editors — does not run the gate, so a mid-refactor state can still regenerate. Checks live in `check_*.go` files each returning `[]string`; a new rule is a sibling file.
+## SmartIO
 
----
+`smartio.New(deps, path, projectName)`: `Root` = `--path` (normalized; `""`/`.`/`./` = no prefix). Every path an action passes is project-relative; `Root` is joined only at the `deps.Iodeps` boundary, so nothing escapes `--path`. Loads `ignore.yaml` / `paths.yaml` to filter and rewrite listings.
 
-## Collectors
+| Call | Effect |
+|---|---|
+| `WriteFile` | Buffers; refuses to overwrite (disk or pending) |
+| `WriteFileOverwrite` | Buffers, replaces. Every generated file uses it |
+| `CreateDir`, `RemoveDir` | Pending sets (`RemoveDir` takes files too) |
+| `ReadFile`, `Exist`, `IsFile`, `IsDir` | Transaction-aware |
+| `List*` | **Disk only** (with ignore/paths applied) |
+| `Persist` | Removals, then dir creations, then file writes |
 
-`BuildInternal` first reads `AgnosConfig/project.yaml` (a missing or unparsable one is a hard error: `start` is a prerequisite) and `go.mod`, then decides two switches: `HasDeps` (`sandbox/deps/` exists) and `HasCli` (`sandbox/internal/cli/` exists). When `HasCli`, it renders `help`'s `entries.yaml` if missing, so the collector below sees it.
+Because listings read disk, an action that runs `build` as a follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` through their `*Internal` function.
 
-Then the collectors run. Each one lists one directory, takes the last path segment, title-cases it, and returns the slice — so a generated file's contents are predictable from a directory listing:
+## Runtime
 
-| Collector | Lists | Feeds | Into |
-|-----------|-------|-------|------|
-| `CollectBinds` | `sandbox/binds/*.go` | `{{range .Binds}}` — `CliBind`, `ActionsBind` | `sandbox/new.go` |
-| `CollectConstructors` | `sandbox/api/*` | `{{range .Constructors}}` — `Actions`, `Cli` | `sandbox/api/sandbox.go` |
-| `CollectDepsLibs` | `sandbox/deps/<x>/` | `{{range .DepsLibs}}` — `{Title, Name}` per contract | `sandbox/deps/deps.go` |
-| `CollectAdapterLibs` | `adapters/libs/<x>/` | `{{range .AdapterLibs}}` — `{Name}` per lib | `adapters/availables/standard/new.go` |
-| `CollectCommands` | `sandbox/internal/commands/<x>/entries.yaml` | `{{range .Commands}}` — a rich map per command | `climain.go`, `help/handler.go`, each `entries.go` |
-| `CollectDocs` | `docs/**/props.yaml` | The doc tree, sorted by `order` then name | `docs/Index/<theme-id>.md`, `docs/**/Index.md` |
+After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes `go.sum`) then `go build` over whichever of `./cmd/... ./sandbox/... ./adapters/...` exist (never `./...`, `assets/` is templates); `none` = nothing. Commands that add pass `go`; commands that remove pass `none`.
 
-`CollectDocs` walks the tree instead of one directory: every directory under `docs/` is a doc — the reserved `docs/Index/` aside — and carries its sub-docs recursively, so a missing `props.yaml` fails the build the same way it fails `verify`. `GenerateDocIndexes` then removes `docs/Index/` and rewrites it, one `<theme-id>.md` per theme of `themes.yaml`, plus one `Index.md` per doc that has sub-docs. A project with no `docs/` directory generates nothing.
+## Deps install
 
-`CollectCommands` is the one other exception to the one-line shape: it parses each `entries.yaml` through `parsables/commandconf` and precomputes, per command, the Go name, a `MatchExpr` over its identifiers, and per field the Go field name, Go type, getter names, default literal and a `RangeCheck` snippet.
+`dep-install`: list `deplist/<dep>` in embedded assets (empty = unknown dep), add pinned `require` from `depsversion.yaml`, `RenderGroup("deplist/"+dep, {Module})`, persist, then `build`. `dep-remove` is the inverse.
 
----
+## Dispatch (`climain.go`)
 
-## Template Variables
+`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against every command's identifiers; unknown -> exit 2. `dispatch<Name>`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `CommandHandler(deps, &entries)`.
 
-Every group is rendered with one `vars` map:
+## Self-hosting
 
-| Key | Value |
-|-----|-------|
-| `Module` | The module path from `go.mod` — every generated import is `{{.Module}}/…`. |
-| `Name`, `Description`, `Version` | From `AgnosConfig/project.yaml`. |
-| `ProjectName` | `Name` title-cased; becomes `config.ProjectName`, and lowercased the binary name `help` prints. |
-| `ConfigDir` | `config.ProjectName + "Config"` — the config directory this binary reads (`AgnosConfig`). Used by `README.md` to locate `docs/ReadmeHeader.md`. |
-| `HasDeps`, `HasCli` | The two switches above; `sandbox/new.go` takes a `*deps.Deps` only when `HasDeps`. |
-| `Themes` | The `name` / `id` / `description` of every theme of `AgnosConfig/themes.yaml` — one `README.md` row per entry, linking `/docs/Index/<id>.md`. |
-| `Binds`, `Constructors`, `DepsLibs`, `AdapterLibs`, `Commands` | The collectors' output. |
-
----
-
-## Asset Groups, in Order
-
-Templates live at `assets/<group>/<path>` and render to `<path>` inside the project through `utils.RenderGroup`, which writes each with `WriteFileOverwrite`. Groups render in this order, each only when its condition holds:
-
-| Group | Condition | Renders |
-|-------|-----------|---------|
-| *(the doc indexes)* | `docs/` exists | `docs/Index/<theme-id>.md` from `assets/templates/theme_index.md`, `docs/**/Index.md` from `assets/templates/doc_index.md` |
-| `all` | always | `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/internal/config/config.go`, `README.md` |
-| `deps` | `HasDeps` | `sandbox/deps/deps.go`, `adapters/availables/standard/new.go` |
-| *(per command)* | `HasCli` | `sandbox/internal/commands/<x>/entries.go` from `assets/templates/entries.go` |
-| `cli` | `HasCli` | `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`, `sandbox/internal/cli/climain.go`, `help/handler.go`, `version/{entries.yaml,handler.go}` |
-
-Two groups are rendered by other commands: `start` (the `AgnosConfig/` files, once) and `deplist/<dep>` (by `dep-install`). `assets/templates/` holds single-file scaffolds rendered outside any group.
-
-Every asset template is rendered by `utils.RenderGroup` / `utils.RenderTemplateToDest` with two native functions in scope: **`render "<project-relative path>"`** reads that file from the target project (through the transaction-aware `io`, so a file written earlier in the same build is visible), renders it as a Go `text/template` with the *same* `vars` and the same native functions (so nesting works to any depth), and returns the result; **`copy "<project-relative path>"`** reads a file through the same `io` and returns its contents verbatim, with no rendering, for embedding a non-template file. `README.md`'s `all` template is a `render` call against `<ConfigDir>/docs/ReadmeHeader.md` followed by `copy "LICENSE"`. A missing target is a hard build error (unparsable too, for `render`).
-
----
-
-## Persist, then Runtime
-
-Nothing above touches the disk. Every write is buffered in the SmartIO transaction, and `io.Persist()` flushes it once: pending removals, then pending directory creations, then file writes. Only then does `RunRuntime` hand the project to a toolchain, because the toolchain reads the disk, not the transaction:
-
-| Runtime | Steps |
-|---------|-------|
-| `go` (default) | `go mod tidy` — the step that writes `go.sum`, so a fresh scaffold is left compilable — then `go build` over whichever of `./cmd/...`, `./sandbox/...`, `./adapters/...` exist. Never `./...`: `assets/` holds Go **templates**. |
-| `none` | Nothing. Renders only. |
-
-Any other name is a usage error. A non-zero toolchain exit is reported with the toolchain's output and exits `1`: `build` and `verify` cannot report success over a project that does not compile.
-
-Every follow-up build names its runtime through `api.BuildProps`. Commands that add something (`start`, `deps-init`, `dep-install`, `cli-init`, `add-command`, `add-flag`, `add-arg`, `set-command`) pass `go`; commands that remove something (`deps-purge`, `dep-remove`, `cli-purge`, `remove-command`, `remove-flag`, `remove-arg`) pass `none`, because dropping a field or a command can legitimately leave hand-written code referring to what is gone.
-
----
-
-## Deps
-
-`dep-install <dep>` and `dep-remove <dep>` sit beside the pipeline rather than inside it. Install lists `deplist/<dep>` in the embedded assets (an empty listing is `unknown dep`), adds the pinned `require` from `assets/depsversion.yaml` to `go.mod` when the dep is listed there, renders the dep's subtree as one group with `{"Module": …}`, **persists**, and only then runs `build` — because `build`'s collectors list directories from disk and would not see the pending writes. Remove deletes those same files and any directory left empty, strips the `require`, persists, and runs `build` with `none`.
-
----
-
-## Self-Hosting
-
-Agnos is one of the projects this pipeline renders: its own `sandbox/deps/deps.go`, `adapters/availables/standard/new.go`, `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/binds/cli.go`, `climain.go`, every `entries.go` and the `help` command are generated in place, and the result compiles. Two consequences follow. `agnos build` must stay **idempotent** over this tree, and every sandbox and adapter file must reach `Deps` fields by their mechanical, title-cased directory names, because the struct is regenerated from the listing. Regenerating the checkout with itself is [BootstrapAgnos](/docs/BootstrapAgnos/doc.md).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `binds/cli.go`, `climain.go`, every `entries.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](/docs/Contributing/doc.md#bootstrap).

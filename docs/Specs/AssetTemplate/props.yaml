@@ -1,3 +1,0 @@
-name: "AssetTemplate"
-description: "Every file under `assets/<group>/**` and `assets/templates/*`"
-order: 21

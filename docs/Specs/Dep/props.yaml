@@ -1,3 +1,0 @@
-name: "Dep"
-description: "The directory `assets/deplist/<dep>/` and its entry in `assets/depsversion.yaml`"
-order: 20

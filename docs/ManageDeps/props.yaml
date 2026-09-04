@@ -1,5 +1,0 @@
-name: "Manage the Dependencies of a Project"
-description: "Turn the dependency layer on and off, and install or remove capabilities"
-themes:
-  - cli-usage
-order: 5

@@ -1,5 +1,0 @@
-name: "Sandbox Isolation"
-description: "The sandbox wall: what `sandbox/` may not import, and why every effect is a dep"
-themes:
-  - development
-order: 32

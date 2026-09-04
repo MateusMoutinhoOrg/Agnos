@@ -1,5 +1,5 @@
-name: "Installable Deps"
-description: "Every installable dep, the contract and adapter it brings, and its module"
+description: "Every installable dep, the contract and adapter lib it brings, and what backs it"
+name: "DepList"
+order: 5
 themes:
   - cli-usage
-order: 23

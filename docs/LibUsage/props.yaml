@@ -1,0 +1,5 @@
+description: "Use Agnos as a Go module: inject deps, call actions, run the CLI in-process, compose a custom Deps"
+name: "LibUsage"
+order: 1
+themes:
+  - lib-usage

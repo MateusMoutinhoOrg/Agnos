@@ -1,5 +1,0 @@
-name: "Compose a Custom Deps"
-description: "Replace one field for a test, or assemble a different mix of adapter libs"
-themes:
-  - lib-usage
-order: 10

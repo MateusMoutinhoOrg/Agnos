@@ -1,3 +1,0 @@
-name: "api.Actions"
-description: "Every operation `agnos` performs, as a function field on one struct"
-order: 5

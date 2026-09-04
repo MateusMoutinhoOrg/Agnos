@@ -1,5 +1,0 @@
-name: "Add a Parsable Config"
-description: "Add a five-file parser for one configuration file the actions read and write"
-themes:
-  - development
-order: 17

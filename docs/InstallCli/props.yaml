@@ -1,5 +1,0 @@
-name: "Install the CLI"
-description: "Install the CLI globally, or build and run it from a checkout"
-themes:
-  - cli-usage
-order: 1

@@ -1,3 +1,0 @@
-name: "deps.Deps"
-description: "The dependency contract every adapter fills: one sub-contract struct per directory of `sandbox/deps/`"
-order: 12

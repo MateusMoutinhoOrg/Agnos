@@ -1,3 +1,0 @@
-name: "ReferenceDocs"
-description: "The `doc.md` of a lookup doc \u2014 listable content, e.g. `Commands`, `DepList`, `PublicApi` and its sub-docs"
-order: 6

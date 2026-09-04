@@ -1,114 +1,62 @@
-# Public API
+# PublicApi
 
-## Description
-Index of every public-facing entry of the library, grouped by role. Callers hold **structs of function fields** declared in `sandbox/api` and `sandbox/deps`; the implementations that fill those fields live in `sandbox/internal` and are unreachable from outside `sandbox/`. See [StructContracts](/docs/StructContracts/doc.md). Every symbol is imported from `github.com/MateusMoutinhoOrg/Agnos/<package path>`. Each symbol below is a sub-doc of this page; the generated [Index.md](/docs/PublicApi/Index.md) lists them flat.
+Module `github.com/MateusMoutinhoOrg/Agnos`. Every contract is a struct of function fields filled by binders; implementations live in `sandbox/internal` and are unreachable.
 
----
+## Entry points
 
-## Entry Points
-
-### [sandbox.New](/docs/PublicApi/sandbox.New/doc.md)
-Injects a `*deps.Deps` into the sandbox and returns the `*api.Sandbox` carrying every action and the command-line interface.
-
-### [standard.New](/docs/PublicApi/standard.New/doc.md)
-Builds a `deps.Deps` by running every adapter lib's `Bind` — the default assembly `cmd/main` wires.
-
----
-
-## Core Interface
-
-### [api.Sandbox](/docs/PublicApi/api.Sandbox/doc.md)
-What `sandbox.New` hands back: an `Actions` struct and a `Cli` struct, one field per file of `sandbox/api/`.
-
-### [api.Cli](/docs/PublicApi/api.Cli/doc.md)
-The whole command-line interface as one function, `CliMain(args []string) int`, plus the three exit-code constants.
-
-### [api.Actions](/docs/PublicApi/api.Actions/doc.md)
-Every operation `agnos` performs, as a function field: `Build`, `Compile`, `Verify`, `Start`, the deps and cli subsystems, and the command editors.
-
----
+| Symbol | Signature |
+|---|---|
+| `sandbox.New` | `func(deps *deps.Deps) *api.Sandbox` |
+| `standard.New` | `func() deps.Deps` (`adapters/availables/standard`) |
+| `api.Sandbox` | `struct { Actions Actions; Cli Cli }` |
+| `api.Cli` | `struct { CliMain func(args []string) int }` |
+| `api.ExitOk`, `api.ExitFailure`, `api.ExitUsage` | `0`, `1`, `2` |
+| `api.RuntimeGo`, `api.RuntimeNone` | `"go"`, `"none"` |
 
 ## Actions
 
-### [api.Actions.Build](/docs/PublicApi/api.Actions/doc.md#build)
-Re-renders a project's generated files and hands it to a runtime.
+`api.Actions` fields. Every `path` is the project dir.
 
-### [api.Actions.Compile](/docs/PublicApi/api.Actions/doc.md#compile)
-Runs `Build`, then cross-compiles `./cmd/main` into `release/` once per target.
-
-### [api.Actions.Verify](/docs/PublicApi/api.Actions/doc.md#verify)
-Checks a project against the harness schema without writing.
-
-### [api.Actions.Start](/docs/PublicApi/api.Actions/doc.md#start)
-Scaffolds a project: configuration, `go.mod`, sandbox skeleton, then `build`.
-
-### [api.Actions.DepsInit / DepsPurge](/docs/PublicApi/api.Actions/doc.md#depsinit--depspurge)
-Turn the dependency-injection layer on and off.
-
-### [api.Actions.DepInstall / DepRemove / DepList](/docs/PublicApi/api.Actions/doc.md#depinstall--depremove--deplist)
-Render, delete, and enumerate installable deps.
-
-### [api.Actions.CliInit / CliPurge](/docs/PublicApi/api.Actions/doc.md#cliinit--clipurge)
-Install and remove the command-line layer.
-
-### [api.Actions.AddCommand / RemoveCommand / SetCommand](/docs/PublicApi/api.Actions/doc.md#addcommand--removecommand--setcommand)
-Create, delete, and rewrite a command's declaration.
-
-### [api.Actions.AddFlag / RemoveFlag / AddArg / RemoveArg](/docs/PublicApi/api.Actions/doc.md#addflag--removeflag--addarg--removearg)
-Add and drop a command's fields.
-
-### [api.Actions.AddDoc / RemoveDoc](/docs/PublicApi/api.Actions/doc.md#adddoc--removedoc)
-Create and delete a doc directory of `docs/`, leaving every index to the build.
-
----
+| Field | Signature |
+|---|---|
+| `Build` | `func(BuildProps) error` |
+| `Compile` | `func(CompileProps) error` |
+| `Verify` | `func(path string) error` |
+| `Start` | `func(StartProps) error` |
+| `DepsInit`, `DepsPurge` | `func(path string) error` |
+| `DepInstall`, `DepRemove` | `func(path, dep string) error` |
+| `DepList` | `func(path string) ([]string, error)` |
+| `CliInit`, `CliPurge` | `func(path string) error` |
+| `AddCommand` | `func(path, name, help, category string) error` |
+| `RemoveCommand` | `func(path, name string) error` |
+| `SetCommand` | `func(CommandProps) error` |
+| `AddFlag`, `AddArg` | `func(FieldProps) error` |
+| `RemoveFlag`, `RemoveArg` | `func(path, command, name string) error` |
+| `AddDoc` | `func(DocProps) error` |
+| `RemoveDoc` | `func(path, name string) error` |
 
 ## Props
 
-### [api.BuildProps](/docs/PublicApi/api.BuildProps/doc.md)
-`Path` and `Runtime` (`api.RuntimeGo` / `api.RuntimeNone`) for one build.
+| Struct | Fields |
+|---|---|
+| `BuildProps` | `Path, Runtime string` |
+| `CompileProps` | `Path string; Targets []string` (target names or `"all"`) |
+| `StartProps` | `Path, ProjectName string; Module *string; Force bool` |
+| `CommandProps` | `Path, Command, Help, Category, LongDescription string; Hidden, Visible bool; Identifiers, Examples []string` (empty string = untouched; lists append) |
+| `FieldProps` | `Path, Command, Name, Description, Type, Default, Min, Max string; Identifiers, Examples []string; Required, Array bool; Position int` (`Default/Min/Max` raw literals, `""` = unset; `Position < 0` appends) |
+| `DocProps` | `Path, Name, Description string; Themes []string` (`Name` is `/`-nested for a sub-doc) |
 
-### [api.CompileProps](/docs/PublicApi/api.CompileProps/doc.md)
-`Path` and `Targets` (target names, or `"all"`) for one cross-compile run.
+## Dependency contracts
 
-### [api.StartProps](/docs/PublicApi/api.StartProps/doc.md)
-`Path`, `ProjectName`, optional `Module`, `Force` for one scaffold.
+`deps.Deps` has one field per dir of `sandbox/deps/`, named by title-casing it. Each is a `Lib` struct.
 
-### [api.FieldProps](/docs/PublicApi/api.FieldProps/doc.md)
-One flag or positional argument to add: name, identifiers, type, description, examples, and the raw `Default` / `Min` / `Max` literals.
-
-### [api.CommandProps](/docs/PublicApi/api.CommandProps/doc.md)
-The command-level keys `SetCommand` may rewrite.
-
-### [api.DocProps](/docs/PublicApi/api.DocProps/doc.md)
-One doc to create: its directory under `docs/`, its one-line description, and its themes.
-
----
-
-## Dependency Contracts
-
-### [deps.Deps](/docs/PublicApi/deps.Deps/doc.md)
-The dependency contract every adapter fills: one sub-contract struct per directory of `sandbox/deps/`, named mechanically after it.
-
-### [argvdeps.Lib](/docs/PublicApi/argvdeps.Lib/doc.md)
-`Deps.Argvdeps` — a per-call argument-vector parser, the sandbox's copy of the Verb library.
-
-### [embeddeps.Lib](/docs/PublicApi/embeddeps.Lib/doc.md)
-`Deps.Embeddeps` — read-only access to the assets compiled into the binary, and template rendering over them.
-
-### [goimportsdeps.Lib](/docs/PublicApi/goimportsdeps.Lib/doc.md)
-`Deps.Goimportsdeps` — a Go source reader: package clause, imports, top-level declarations.
-
-### [iodeps.Lib](/docs/PublicApi/iodeps.Lib/doc.md)
-`Deps.Iodeps` — the filesystem: read, write, predicates, directory ops, listings.
-
-### [requestdeps.Lib](/docs/PublicApi/requestdeps.Lib/doc.md)
-`Deps.Requestdeps` — a per-call HTTP request, with its `Request` and `Response` structs.
-
-### [rundeps.Lib](/docs/PublicApi/rundeps.Lib/doc.md)
-`Deps.Rundeps` — running one external program to completion.
-
-### [serializables.Lib](/docs/PublicApi/serializables.Lib/doc.md)
-`Deps.Serializables` — generic JSON/YAML values: create, parse, walk, serialize.
-
-### [std.Lib](/docs/PublicApi/std.Lib/doc.md)
-`Deps.Std` — the clock and the three output channels `Printf` / `Log` / `Error`, plus `Errorf`.
+| Field | `Lib` fields |
+|---|---|
+| `Argvdeps` | `New(args []string) Parser`. `Parser`: `Args []string; Used []bool; IsPresent(flags) bool; GetOptionsSize(flags) int; GetKeyValuesSize(prefixes) int; Get{String,Int,Double,Timestamp}Option(flags, occurrence); Get{String,Int,Double,Timestamp}Arg(index); GetNext{String,Int,Double,Timestamp}Arg(); Get{String,Int,Double,Timestamp}KeyValues(prefixes, occurrence)`, each returning `(T, error)` |
+| `Embeddeps` | `ReadFile(path) ([]byte, error); ListFiles(path) ([]string, error); ListFilesRecursively(path) ([]string, error); RenderTemplate(path, vars any) ([]byte, error)` |
+| `Goimportsdeps` | `Parse(content) (*File, error); GetPackageName(content) (string, error); GetImports(content) ([]string, error)`. `File{Package, Doc, Imports []Import, Functions []Function, Types []Type, Constants, Variables []Value}` |
+| `Iodeps` | `ReadFile(path) ([]byte, error); WriteFile(path, content) error; IsDir/IsFile/Exist(path) bool; CreateDir/RemoveDir(path); ListDirs/ListFiles/ListAll(path) []string` and their `Recursively` variants |
+| `Requestdeps` | `NewRequest(url) Request`. `Request{AddHeader(k, v); SetMethod(m); SetBody([]byte); Fetch() (Response, error)}`. `Response{GetStatusCode() int; GetHeader(k) string; ReadBody(size) ([]byte, error); Close() error}` |
+| `Rundeps` | `Run(RunProps) (Result, error)`. `RunProps{Dir, Program string; Args, Env []string}`. `Result{Output string; ExitCode int}` |
+| `Serializables` | `Create{String,Int,Float,Bool,Null,Object,Array}(...) *SerializibleObject; ParseJson/ParseYaml(data) (*SerializibleObject, error); SerializeToJson/SerializeToYaml(*SerializibleObject) string`. Object: `Is{Int,String,Float,Bool,Null,Object,Array}() bool; Get{Int,Float,String,Bool}(); GetObjectItem(key); HasKey(key); GetKeys(); GetArrayItem(i); GetArraySize(); AddItemToObject/ReplaceItemInObject(key, any); DeleteItemFromObject(key); AddItemToArray(any); DeleteItemFromArray(i)` |
+| `Std` | `Now() time.Time; Printf/Log/Error(format, a...) (int, error); Errorf(format, a...) error` |

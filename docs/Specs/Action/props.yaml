@@ -1,3 +1,0 @@
-name: "Action"
-description: "`sandbox/internal/actions/<name>/<name>.go` and `<name>_internal.go`"
-order: 17

@@ -1,3 +1,0 @@
-name: "DepsContract"
-description: "`sandbox/deps/<x>/<x>.go`, and its copy under `assets/deplist/`"
-order: 12
