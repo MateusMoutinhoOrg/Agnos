@@ -2,11 +2,12 @@
 trackerdata
 bootstrap-trackerdata
 install.sh
-
+user_test
 builder
 
 local_test/
 release/
+user_test.sh
 local_install.sh
 local_test.sh
 scripts
