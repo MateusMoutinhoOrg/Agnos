@@ -5,6 +5,7 @@ install.sh
 user_test
 builder
 blackbox
+TestDir
 local_test/
 release/
 user_test.sh
