@@ -197,7 +197,7 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"compile"},
 		Category:        "Core Commands",
 		Description:     "Cross-compile the project's binaries into release/",
-		LongDescription: "Runs `build` over the project and then cross-compiles its\n./cmd/main entrypoint once per --target into release/, with CGO\ndisabled. Repeat --target for several targets, or pass\n--target all to build every one. Accepted targets: linux86,\nlinuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32.\n",
+		LongDescription: "Runs build over the project and then cross-compiles its ./cmd/main entrypoint once per --target into release/, with CGO disabled. Repeat --target for several targets, or pass --target all to build every one. Targets and their outputs: linux86 -> linux86.out, linuxarm64 -> linuxarm64.out, linuxi32 -> linuxi32.out, mac86 -> mac86.bin, macarm64 -> macarm64.bin, windows86 -> windows86.exe, windowsi32 -> windowsi32.exe.",
 		Examples:        []string{"compile --target linux86", "compile --target linux86 --target macarm64", "compile --target all"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -292,7 +292,7 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"local-install"},
 		Category:        "Core Commands",
 		Description:     "Builds the project and installs it locally",
-		LongDescription: "",
+		LongDescription: "Runs build over the project, then compiles ./cmd/main into /usr/local/bin/<project-name> (~/.local/bin on Windows) so the binary is on PATH.",
 		Examples:        []string{},
 		Hidden:          false,
 		Flags: []helpField{
@@ -303,9 +303,9 @@ var helpCommands = []helpCommand{
 	},
 	{
 		Identifiers:     []string{"publish"},
-		Category:        "CORE COMMANDS",
+		Category:        "Core Commands",
 		Description:     "Builds, compiles and publishes a release via gh",
-		LongDescription: "",
+		LongDescription: "Runs build, then compile (every target by default), and publishes every file of release/ as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml.",
 		Examples:        []string{},
 		Hidden:          false,
 		Flags: []helpField{

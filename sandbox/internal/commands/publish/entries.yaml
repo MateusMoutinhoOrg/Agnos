@@ -1,27 +1,38 @@
-identifiers: ["publish"]
-category: "CORE COMMANDS"
-help: "Builds, compiles and publishes a release via gh"
+category: Core Commands
 flags:
-  - name: path
-    identifiers: ["--path", "-p"]
-    description: "The directory holding the project (defaults to the current directory)"
-    type: string
-    default: "."
-  - name: release_name
-    identifiers: ["--release-name", "-rn"]
-    description: "The name of the release"
-    type: string
-  - name: draft
-    identifiers: ["--draft"]
-    description: "Create a draft release"
-    type: boolean
-  - name: target
-    identifiers: ["--target", "-t"]
-    description: "The target to compile for (defaults to all)"
-    type: string
-    default: "all"
-  - name: publisher
-    identifiers: ["--publisher", "-pub"]
-    description: "The publisher to use (defaults to gh)"
-    type: string
-    default: "gh"
+    - default: .
+      description: The directory holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+        - -p
+      name: path
+      type: string
+    - description: The name of the release
+      identifiers:
+        - --release-name
+        - -rn
+      name: release_name
+      type: string
+    - description: Create a draft release
+      identifiers:
+        - --draft
+      name: draft
+      type: boolean
+    - default: all
+      description: The target to compile for (defaults to all)
+      identifiers:
+        - --target
+        - -t
+      name: target
+      type: string
+    - default: gh
+      description: The publisher to use (defaults to gh)
+      identifiers:
+        - --publisher
+        - -pub
+      name: publisher
+      type: string
+help: Builds, compiles and publishes a release via gh
+identifiers:
+    - publish
+long-description: Runs build, then compile (every target by default), and publishes every file of release/ as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml.

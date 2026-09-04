@@ -109,6 +109,14 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	// docs/Commands is rendered from the command declarations themselves, so
+	// every visible command, flag, argument and example on the page is the one
+	// its entries.yaml declares.
+	command_docs, err := CollectCommandDocs(deps, io)
+	if err != nil {
+		return err
+	}
+
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
@@ -136,6 +144,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"DepsLibs":          CollectDepsLibs(io),
 		"AdapterLibs":       CollectAdapterLibs(io),
 		"Commands":          commands,
+		"CommandDocs":       command_docs,
 		"Themes":            themes_conf.Themes,
 		"DocIndex":          CollectDocIndex(docs, themes_conf.Themes),
 		"PublicApi":         public_api,

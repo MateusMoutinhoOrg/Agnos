@@ -30,7 +30,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 ./release/bootstrap.bin add-flag quiet --command <name> --identifier --quiet --identifier -q --type boolean --description "Quiets the cli output"
 ```
 
-Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf` any result. Add a row to [Commands](../Commands/doc.md).
+Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf` any result. [Commands](../Commands/doc.md) picks the command up on the next build.
 
 ## Add a contract + adapter lib
 

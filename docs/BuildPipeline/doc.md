@@ -21,6 +21,7 @@
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
 | `CollectPublicApi` | `sandbox/api/*.go` parsed by `deps.Goimportsdeps` | `PublicApi` (per file: `Path`, `Doc`, `Types`, `Constants`, `Variables`, `Functions`; exported only, doc comments flattened to one table line) | `docs/PublicApi/doc.md` |
 | `CollectDepsApi` | `sandbox/deps/<x>/*.go`, same parse | `DepsApi` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |
+| `CollectCommandDocs` | `commands/<x>/entries.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Help`, `LongDescription`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
 | `CollectStructure` | `AgnosConfig/structure.yaml` (structureconf) | `Structure` (one `Line` per item, depth-indented and padded to a common description column) | `docs/Structure/doc.md` |
 
 Every render whose destination ends in `.go` is passed through `deps.Goimportsdeps.Format` (`go/format`, i.e. `gofmt`) before it is written, so generated Go is byte-identical to what a formatting editor saves and a regenerated tree diffs to zero. An unparsable render is written unformatted and reported by the runtime compile, not by the renderer.

@@ -12,6 +12,7 @@
 | `sandbox/new.go` | `build` | `all/` | always. One `binds.<X>Bind` per file of `sandbox/binds/` |
 | `sandbox/api/sandbox.go` | `build` | `all/` | always. One field per file of `sandbox/api/` |
 | `sandbox/internal/config/config.go` | `build` | `all/` | always. `ProjectName`, `Version` from `project.yaml` |
+| `docs/Commands/{doc.md,props.yaml}` | `build` | `all/` | always. Every visible command, from its `entries.yaml` |
 | `docs/LibUsage/{doc.md,props.yaml}` | `build` | `all/` | always. Generic "use this project as a Go module" doc |
 | `docs/PublicApi/{doc.md,props.yaml}` | `build` | `all/` | always. Every exported symbol of `sandbox/api/` and `sandbox/deps/`, described by its own doc comment |
 | `docs/Structure/{doc.md,props.yaml}` | `build` | `all/` | always. The tree declared in `AgnosConfig/structure.yaml` |

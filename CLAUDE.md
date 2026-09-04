@@ -108,8 +108,8 @@ change a rule there and nowhere else. The ones most easily broken:
 - Output: `deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`),
   `deps.Std.Error` -> stderr. Never `fmt.Printf`.
 - Docs: create/delete with `agnos add-doc` / `agnos remove-doc`. `README.md`, every `Index.md`,
-  and `docs/{LibUsage,PublicApi,Structure,Rules}/` are generated. `docs/Commands/doc.md` stays
-  hand-written and `verify` requires it to name every visible command and declared flag.
+  and `docs/{Commands,LibUsage,PublicApi,Structure,Rules}/` are generated — `docs/Commands`
+  from every command's `entries.yaml`.
   `docs/Structure/doc.md`'s tree comes from `AgnosConfig/structure.yaml`.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
   reverse.

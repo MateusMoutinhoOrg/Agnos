@@ -112,8 +112,10 @@ Never `fmt.Printf`.
 - Every entry of `AgnosConfig/structure.yaml` names a path that exists — a directory
   when it declares `dir: true`, a file otherwise. A path holding `<`, `*` or `?` stands for a
   family, and only its literal head has to exist. Drop the entry when the path goes. **(verify)**
-- `docs/Commands/doc.md`, when present, names every visible command and every flag it
-  declares. **(verify)**
+- [Commands](../Commands/doc.md) is rendered from every
+  `sandbox/internal/commands/<name>/entries.yaml`: document a command by declaring it —
+  `set-command` for its help, long description and examples, `add-flag` / `add-arg` for its
+  fields — never by editing the page.
 - Docs are short, objective and dense: tables, commands, file paths and rules — no prose, no
   narrative, no tutorials, no motivation sections. One page per topic; no sub-doc unless the
   content is a real list of independent items.
