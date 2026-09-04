@@ -284,9 +284,13 @@ file through the same `io` and returns its contents **verbatim**, with no render
 embedding a non-template file. A missing target is a hard build error (unparsable too, for
 `render`). `assets/all/README.md` is a single `render` call against
 `{{.ConfigDir}}/docs/ReadmeHeader.md` (`ConfigDir` = `config.ProjectName + "Config"`)
-followed by a `copy "LICENSE"`, so a
+followed by a "Documentation Index" table that ranges over `{{.Themes}}` (one row per
+theme, linking `/docs/Index/<Name>.md`) and a `copy "LICENSE"`, so a
 project's README body is the hand-editable `AgnosConfig/docs/ReadmeHeader.md` — itself a
-template — with the project's `LICENSE` appended, and `README.md` is regenerated on every build. The groups: `start` (config skeleton written by `agnos start`,
+template — with the theme index and the project's `LICENSE` appended, and `README.md` is
+regenerated on every build. `{{.Themes}}` comes from `BuildInternal`'s `loadThemesConf`
+(reads `<ProjectName>Config/themes.yaml` via `themesconf`, a hard error if missing), a
+`[]themesconf.Theme` (`Name`/`Id`/`Description`). The groups: `start` (config skeleton written by `agnos start`,
 including `AgnosConfig/docs/ReadmeHeader.md`),
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
 `sandbox/deps` exists), `cli` (the CLI layer — `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`,

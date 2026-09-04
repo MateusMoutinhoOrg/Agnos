@@ -6,6 +6,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -26,6 +27,20 @@ func loadProjectConf(deps *deps.Deps, io *smartio.SmartIO, path string) (*projec
 	}
 
 	return projectconf.New(deps, string(content))
+}
+
+// loadThemesConf reads <ProjectName>Config/themes.yaml back through the
+// transaction-aware io. Like project.yaml it is written by `agnos start`, so a
+// missing or unparsable file is a hard error rather than an empty fallback.
+func loadThemesConf(deps *deps.Deps, io *smartio.SmartIO) (*themesconf.ThemesConf, error) {
+	rel := config.ProjectName + "Config/themes.yaml"
+
+	content, err := io.ReadFile(rel)
+	if err != nil {
+		return nil, deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
+	}
+
+	return themesconf.New(deps, string(content))
 }
 
 // projectNameConst title-cases the configured project name for use as the
@@ -75,6 +90,11 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	themes_conf, err := loadThemesConf(deps, io)
+	if err != nil {
+		return err
+	}
+
 	vars := map[string]interface{}{
 		"Module":       module_conf.Module,
 		"Name":         project_conf.Name,
@@ -88,6 +108,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"DepsLibs":     CollectDepsLibs(io),
 		"AdapterLibs":  CollectAdapterLibs(io),
 		"Commands":     commands,
+		"Themes":       themes_conf.Themes,
 	}
 
 	if err := utils.RenderGroup(deps, io, "all", vars); err != nil {
