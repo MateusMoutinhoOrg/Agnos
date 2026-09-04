@@ -1,4 +1,4 @@
-# Agnos
+# agnos
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
@@ -17,39 +17,57 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed,
 
 ## Overview
 
-Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton; `agnos build` regenerates every generated file of that project from templates embedded in the binary; and a handful of commands — `add-command`, `add-flag`, `add-arg`, `dep-install` — declare the project's whole command surface and capability set without a file being edited by hand. Only two kinds of file are ever hand-written in a generated project: a command's `handler.go`, and a contract-plus-adapter pair for a capability of its own.
-
-The core of every project, this one included, lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`, a struct of sub-contract structs reconstructed from a directory listing on every build.
+Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton, `agnos build`
+re-renders every generated file from templates embedded in the binary, and commands like
+`add-command`, `add-flag` and `dep-install` declare the project's whole command surface
+without a file being edited by hand. Only two things stay hand-written: a command's
+`handler.go`, and any contract-plus-adapter pair of your own.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/
 (reaches the OS)  (closed)     (wires the two together)
 ```
 
-- **`/sandbox/`**: the closed sandbox — the actions, the generated command dispatch, and the contracts everything is wired through.
-- **`/adapters/`**: the only place OS-bound and third-party code lives — one isolated lib per contract, and the assembly wiring them together.
-- **`/assets/`**: the Go templates every generated file is rendered from, and the installable deps.
-- **`/cmd/main/`**: wires an adapter into the sandbox and exits with what the CLI returns. Holds no logic.
+- **`/sandbox/`** — the closed core: actions, the generated dispatch, and the contracts
+  everything is injected through. Reaches nothing outside itself.
+- **`/adapters/`** — the only place OS-bound and third-party code lives.
+- **`/assets/`** — the templates every generated file comes from, plus the installable deps.
+- **`/cmd/main/`** — wires an adapter into the sandbox. Holds no logic.
 
-Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation.md](/docs/References/SandboxIsolation.md) and [BuildPipeline.md](/docs/References/BuildPipeline.md) for the full mechanic.
+Agnos builds itself: `agnos build` re-renders this repo in place and the result compiles.
+Start with [Quickstart](docs/Quickstart/doc.md); the mechanics are in
+[Structure](docs/Structure/doc.md) and [BuildPipeline](docs/BuildPipeline/doc.md).
 
----
 
-## Doc Index
+## Documentation Index
 
-Documentation is split into four themes, one index page each under `docs/Index/`, listing that theme's **Tutorials** — step-by-step workflows — and its **References** — explanations and lookups. Start from the theme index matching what you want to do.
-
-| Theme | Description |
+| Name | Description |
 | --- | --- |
-| [CLI Usage](/docs/Index/CliUsage.md) | For end users: installing `agnos`, scaffolding a project, and every command it takes. |
-| [Generated Project](/docs/Index/GeneratedProject.md) | For people working inside a project `agnos` wrote: its files, contracts and handlers. |
-| [Library Usage](/docs/Index/LibUsage.md) | For Go callers: running the same actions from code, and the public API. |
-| [Development](/docs/Index/Development.md) | For contributors: the rules, the mechanics, the workflows, and the specifications. |
-
-New here? [CLI Usage → InstallCli.md](/docs/Tutorials/InstallCli.md) installs the binary; [ScaffoldProject.md](/docs/Tutorials/ScaffoldProject.md) takes an empty directory to a running CLI.
-
----
+| [CliUsage](docs/Index/cli-usage.md) | Driving agnos from a terminal - install, scaffold, declare commands, reference |
+| [LibUsage](docs/Index/lib-usage.md) | Using Agnos as a Go module - deps injection, actions, public API |
+| [Development](docs/Index/development.md) | Changing this repository - schema, build mechanics, recipes |
 
 ## License
 
-This project is licensed under the [MIT](./LICENSE).
+
+MIT License
+
+Copyright (c) 2026 Mateus Moutinho
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
