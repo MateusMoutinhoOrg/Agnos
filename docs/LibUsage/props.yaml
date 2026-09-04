@@ -1,4 +1,4 @@
-description: "Use Agnos as a Go module: inject deps, call actions, run the CLI in-process, compose a custom Deps"
+description: "Use agnos as a Go module: wire the deps, build the sandbox, call its API"
 name: "LibUsage"
 order: 1
 themes:

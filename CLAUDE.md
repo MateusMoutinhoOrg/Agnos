@@ -295,7 +295,14 @@ followed by a "Documentation Index" table that ranges over `{{.Themes}}` (one ro
 theme, linking `/docs/Index/<Id>.md`) and a `copy "LICENSE"`, so a
 project's README body is the hand-editable `AgnosConfig/docs/ReadmeHeader.md` — itself a
 template — with the theme index and the project's `LICENSE` appended, and `README.md` is
-regenerated on every build. `{{.Themes}}` comes from `utils.LoadThemesConf`
+regenerated on every build. The `all` group also carries `docs/LibUsage/{doc.md,props.yaml}`, the one doc every
+generated project gets: it explains how to consume *that* project as a Go module (install,
+`sandbox.New`, the `{{.Constructors}}` field table, patching `{{.DepsLibs}}` contracts) and
+is written entirely in the target project's terms — never Agnos's own commands, internals
+or CLI, since a generated project may have no CLI but is always a library. Agnos's own
+`docs/LibUsage/` is that rendered template, like any other generated file.
+
+`{{.Themes}}` comes from `utils.LoadThemesConf`
 (reads `<ProjectName>Config/themes.yaml` via `themesconf`, a hard error if missing), a
 `[]themesconf.Theme` (`Name`/`Id`/`Description`) — the same list `GenerateDocIndexes` writes
 one `docs/Index/<Id>.md` per entry from. The groups: `start` (config skeleton written by `agnos start`,

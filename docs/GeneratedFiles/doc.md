@@ -12,6 +12,7 @@
 | `sandbox/new.go` | `build` | `all/` | always. One `binds.<X>Bind` per file of `sandbox/binds/` |
 | `sandbox/api/sandbox.go` | `build` | `all/` | always. One field per file of `sandbox/api/` |
 | `sandbox/internal/config/config.go` | `build` | `all/` | always. `ProjectName`, `Version` from `project.yaml` |
+| `docs/LibUsage/{doc.md,props.yaml}` | `build` | `all/` | always. Generic "use this project as a Go module" doc |
 | `docs/Index/<theme-id>.md` | `build` (if `docs/` exists) | `templates/theme_index.md` | always. `docs/Index/` is removed and rewritten whole |
 | `docs/**/Index.md` | `build` (docs with sub-docs) | `templates/doc_index.md` | always |
 | `sandbox/deps/deps.go` | `build` (if `sandbox/deps/`) | `deps/` | always. One `<Title> <dir>.Lib` per dir |

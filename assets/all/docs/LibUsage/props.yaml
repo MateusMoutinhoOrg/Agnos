@@ -1,0 +1,5 @@
+description: "Use {{.Name}} as a Go module: wire the deps, build the sandbox, call its API"
+name: "LibUsage"
+order: 1
+themes:
+  - lib-usage
