@@ -41,6 +41,8 @@ func errorf(format string, a ...any) error {
 	return fmt.Errorf(format, a...)
 }
 
+// Bind fills deps.Deps.Std with the clock and the three output channels,
+// built on the standard library's time and fmt over os.Stdout and os.Stderr.
 func Bind(deps *deps.Deps) {
 	deps.Std = std.Lib{
 		Now: func() time.Time {

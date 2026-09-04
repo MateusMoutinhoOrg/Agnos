@@ -17,7 +17,7 @@ package assets
 // files inside its own package directory, so the directive has to live next
 // to the assets themselves. It holds no behavior and no state beyond the
 // embedded filesystem, and only code outside the sandbox may import it — the
-// embed lib does, in adapters/libs/embeddeps/EmbedDeps.go, and wraps it into the
+// embed lib does, in adapters/libs/embeddeps/embeddeps.go, and wraps it into the
 // embeddeps.Lib contract the sandbox reads through.
 
 import "embed"

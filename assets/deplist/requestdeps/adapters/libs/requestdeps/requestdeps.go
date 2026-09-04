@@ -16,7 +16,7 @@ import (
 // exposes no cancellation, which makes the bound this adapter's job.
 const requestTimeout = 30 * time.Second
 
-// Bind fills deps.Deps.RequestLib.NewRequest with the HTTP request
+// Bind fills deps.Deps.Requestdeps.NewRequest with the HTTP request
 // implementation built on the standard library's net/http package.
 func Bind(deps *deps.Deps) {
 	deps.Requestdeps.NewRequest = newRequest

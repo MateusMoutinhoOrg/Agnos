@@ -12,8 +12,9 @@ the project's command surface without a file being hand-edited.
 Agnos is built with itself: `agnos build` regenerates this repo in place, and the result must
 compile and be idempotent. That self-hosting constraint drives every rule below.
 
-Full documentation lives under `docs/` and is the source of truth — three indexes in
-`docs/Index/` (`cli-usage`, `lib-usage`, `development`). Start with
+Full documentation lives under `docs/` and is the source of truth, indexed in `README.md`
+(one section per theme of `AgnosConfig/themes.yaml`; there is no index file between the
+README and a doc). Start with
 `docs/Structure/doc.md` (schema), `docs/BuildPipeline/doc.md` (what `build` does), and
 `docs/Contributing/doc.md` (recipes for every kind of change).
 
@@ -26,9 +27,9 @@ first-class constraint. Humans are a secondary audience.
 - **Generate over hand-write.** If a file can be rendered from a template, a collector or a
   declaration, it must be — hand-written code is only contracts, adapters and `handler.go`.
   A new hand-written file needs a reason why generation cannot cover it.
-- **Generate over document.** The same applies to docs: indexes, `README.md`,
-  `docs/LibUsage/` and `docs/PublicApi/` are rendered, never typed. Document by commenting
-  the contract, not by writing a page.
+- **Generate over document.** The same applies to docs: `README.md` (its documentation index
+  included), every `Index.md`, `docs/LibUsage/` and `docs/PublicApi/` are rendered, never
+  typed. Document by commenting the contract, not by writing a page.
 - **Docs are short, objective and dense.** Tables, commands, file paths and rules — no prose,
   no narrative, no tutorials, no motivation sections, no repetition across pages. Shorter is
   strictly better: a page an LLM re-reads on every task costs tokens each time. Say the rule
@@ -95,8 +96,13 @@ follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` t
   same filenames, same function names, same ordering. If no pattern fits, define and document
   the pattern first. Never add a one-off — `verify` and the collectors read shape by convention.
 - Naming is load-bearing: a `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` ->
-  `deps.Iodeps`); an adapter binder is always `Bind(deps *deps.Deps)`; a command handler is
-  always `CommandHandler(deps *deps.Deps, entries *Entries) int`.
+  `deps.Iodeps`); an adapter binder is always `Bind(deps *deps.Deps)` in
+  `adapters/libs/<lib>/<lib>.go`; a command handler is always
+  `CommandHandler(deps *deps.Deps, entries *Entries) int`.
+- Generated `.go` is written through `deps.Goimportsdeps.Format` (gofmt), so the tree is always
+  formatted and a template's own indentation only has to be parsable.
+- `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on; `verify`
+  compares them, so re-mirror whenever either side changes.
 - Generated files (`(gen)` in `docs/Structure/doc.md`, the `always` rows of
   `docs/GeneratedFiles/doc.md`) are never edited — change the template under `assets/` and
   bootstrap.
@@ -106,11 +112,16 @@ follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` t
   (progress, silenced by `--quiet`), `deps.Std.Error` -> stderr (failures). Never `fmt.Printf`.
 - Exit codes: `api.ExitOk` 0, `api.ExitFailure` 1 (well-formed command failed),
   `api.ExitUsage` 2 (bad command line).
-- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`, never by hand. Indexes,
-  `README.md`, `docs/LibUsage/` and `docs/PublicApi/` are generated. PublicApi is rendered
+- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`, never by hand. `README.md`
+  (the documentation index included), `Index.md`, `docs/LibUsage/` and `docs/PublicApi/` are
+  generated. A theme only groups a doc into a README section; a theme no doc names renders
+  nothing and is not an error. PublicApi is rendered
   from the doc comments of `sandbox/api/` and `sandbox/deps/` (parsed through
   `deps.Goimportsdeps`), and `verify` requires one on every exported declaration there — so
-  the public api is documented by commenting the contract, never by editing the page. Links inside `docs/` are relative to the doc; keep pages short —
-  tables and commands over prose.
+  the public api is documented by commenting the contract, never by editing the page.
+  `docs/Commands/doc.md` stays hand-written (its columns carry judgement the declarations do
+  not hold), but `verify` requires it to name every visible command and every declared flag —
+  so `add-command` / `add-flag` are followed by a row there. Links inside `docs/` are relative
+  to the doc; keep pages short — tables and commands over prose.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
   reverse.

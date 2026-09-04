@@ -109,35 +109,40 @@ go run ./cmd/main local-install
 More detail in [Install](docs/Install/doc.md).
 
 
-## Documentation Index
+## Documentation
 
-| Name | Description |
+### CliUsage
+
+Driving agnos from a terminal - install, scaffold, declare commands, reference
+
+| Doc | Description |
 | --- | --- |
-| [CliUsage](docs/Index/cli-usage.md) | Driving agnos from a terminal - install, scaffold, declare commands, reference |
-| [LibUsage](docs/Index/lib-usage.md) | Using Agnos as a Go module - deps injection, actions, public API |
-| [Development](docs/Index/development.md) | Changing this repository - schema, build mechanics, recipes |
+| [Install](docs/Install/doc.md) | Install the agnos binary, or run it from a checkout |
+| [Quickstart](docs/Quickstart/doc.md) | Empty directory to a compiling CLI with one command, using only agnos commands |
+| [Commands](docs/Commands/doc.md) | Every agnos command, flag, output channel and exit code |
+| [EntriesYaml](docs/EntriesYaml/doc.md) | Every key of a command's entries.yaml and what the generated code does with it |
+| [DepList](docs/DepList/doc.md) | Every installable dep, the contract and adapter lib it brings, and what backs it |
+| [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into a project and whether build overwrites it |
+
+### LibUsage
+
+Using Agnos as a Go module - deps injection, actions, public API
+
+| Doc | Description |
+| --- | --- |
+| [LibUsage](docs/LibUsage/doc.md) | Use agnos as a Go module: wire the deps, build the sandbox, call its API |
+| [PublicApi](docs/PublicApi/doc.md) | Every exported symbol of agnos, generated from the contract sources and their doc comments |
+
+### Development
+
+Changing this repository - schema, build mechanics, recipes
+
+| Doc | Description |
+| --- | --- |
+| [Structure](docs/Structure/doc.md) | The project schema: what lives where, what is generated, what verify enforces |
+| [BuildPipeline](docs/BuildPipeline/doc.md) | What build does: verify, collectors, template vars, asset groups, SmartIO persist, runtime, dispatch |
+| [Contributing](docs/Contributing/doc.md) | Recipes for changing this repo: bootstrap, add action, command, contract, dep, template, parsable, doc |
 
 ## License
 
-
-MIT License
-
-Copyright (c) 2026 Mateus Moutinho
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+[MIT](LICENSE)

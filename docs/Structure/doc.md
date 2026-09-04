@@ -37,7 +37,7 @@ sandbox/                          closed: imports nothing outside sandbox/, no O
     smartio/                      transactional fs rooted at --path
     utils/                        RenderGroup, RenderTemplateToDest, Load/Save*Conf, CollectDocTree, entries.yaml field helpers
 adapters/
-  libs/<lib>/                     one package per contract, exports Bind(deps *deps.Deps)
+  libs/<lib>/<lib>.go             one package per contract, exports Bind(deps *deps.Deps)
   availables/standard/new.go      (gen) New() deps.Deps calling every lib's Bind
   availables/<name>/new.go        hand-written mix, left alone
 assets/                           Go text/templates embedded by asset.go; never `go build ./...`
@@ -46,9 +46,8 @@ assets/                           Go text/templates embedded by asset.go; never 
   templates/*                     single-file scaffolds (entries.go, command_*, help_entries.yaml, doc_doc.md, *_index.md)
   depsversion.yaml                <dep>: <module>@<version>
 cmd/main/main.go                  (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
-docs/<Doc>/                       doc.md + props.yaml (+ assets, + sub-doc dirs); Index/ and **/Index.md are (gen)
+docs/<Doc>/                       doc.md + props.yaml (+ assets, + sub-doc dirs); **/Index.md is (gen). README.md indexes them all
 release/                          git-ignored binaries
-old/                              previous template, reference only
 ```
 
 ## Verify rules
@@ -58,12 +57,15 @@ old/                              previous template, reference only
 - `sandbox/api/*` imports only `sandbox/api`. `sandbox/deps/*` imports only stdlib and `sandbox/deps`.
 - Every file of `sandbox/api/` and `sandbox/deps/` parses, and every exported type, func, const and var in them carries a doc comment — `docs/PublicApi/doc.md` is generated from those comments.
 - Every `sandbox/binds/` file mirrors an `api/` file and declares only functions.
-- `adapters/` holds only `availables` and `libs`.
-- Every `docs/**` dir has a parsable `props.yaml`; first-level docs name at least one theme from `themes.yaml`; sub-docs name none; every theme is used.
+- `adapters/` holds only `availables` and `libs`. Every `libs/<lib>/` exports `Bind(deps *deps.Deps)`, and every `sandbox/deps/<x>` contract has a lib mentioning its `deps.<X>` field.
+- Every `assets/deplist/<dep>/<path>`, rendered with this module, equals `<path>` whenever that file exists here.
+- `docs/Commands/doc.md`, when present, names every visible command and every flag it declares.
+- Every `docs/**` dir has a parsable `props.yaml`; first-level docs name at least one theme from `themes.yaml`; sub-docs name none. A theme no doc names renders no README section and is not an error.
 
 ## Naming
 
 - `Deps` field = title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always use that spelling.
 - Adapter lib binder is always `Bind(deps *deps.Deps)`. Command handler is always `CommandHandler(deps *deps.Deps, entries *Entries) int`.
+- An adapter lib's file is named after its package (`adapters/libs/iodeps/iodeps.go`), like a contract's (`sandbox/deps/iodeps/iodeps.go`). A second file in the package is named after what it holds.
 - A dep is named after the contract it installs, not its lib (`argvdeps`, lib `verb`).
 - Parsables: struct with data fields, then func fields, `Render` last; parsing through `deps.Serializables` (except `moduleconf`, hand-parsed `go.mod`).

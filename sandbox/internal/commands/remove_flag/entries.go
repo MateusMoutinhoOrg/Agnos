@@ -7,7 +7,7 @@ package remove_flag
 // in the order it is declared there.
 type Entries struct {
 	Command string
-	Path string
-	Quiet bool
-	Name string
+	Path    string
+	Quiet   bool
+	Name    string
 }

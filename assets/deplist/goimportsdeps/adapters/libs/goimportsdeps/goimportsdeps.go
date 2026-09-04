@@ -3,6 +3,7 @@ package goimportsdeps
 import (
 	"bytes"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/printer"
 	"go/token"
@@ -20,7 +21,19 @@ func Bind(deps *deps.Deps) {
 		Parse:          parse,
 		GetPackageName: getPackageName,
 		GetImports:     getImports,
+		Format:         formatSource,
 	}
+}
+
+// formatSource fills goimportsdeps.Lib.Format over go/format, which is the
+// same pass the gofmt command runs: it parses the source and prints it back
+// in canonical form, so unparsable input errors instead of being mangled.
+func formatSource(content string) (string, error) {
+	formatted, err := format.Source([]byte(content))
+	if err != nil {
+		return "", err
+	}
+	return string(formatted), nil
 }
 
 // getImports fills goimportsdeps.Lib.GetImports, parsing only the import

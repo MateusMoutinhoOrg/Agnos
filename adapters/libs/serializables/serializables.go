@@ -9,7 +9,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Bind fills deps.Deps.SerializeLib, providing the capability to
+// Bind fills deps.Deps.Serializables, providing the capability to
 // create, parse, and serialize generic JSON/YAML structures.
 func Bind(deps *deps.Deps) {
 	deps.Serializables = serializibles.Lib{

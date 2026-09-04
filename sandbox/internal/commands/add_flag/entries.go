@@ -6,18 +6,18 @@ package add_flag
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Identifier []string
-	Command string
-	Type string
+	Identifier  []string
+	Command     string
+	Type        string
 	Description string
-	Example []string
-	Default string
-	Required bool
-	Array bool
-	Min string
-	Max string
-	Position int
-	Path string
-	Quiet bool
-	Name string
+	Example     []string
+	Default     string
+	Required    bool
+	Array       bool
+	Min         string
+	Max         string
+	Position    int
+	Path        string
+	Quiet       bool
+	Name        string
 }

@@ -228,6 +228,7 @@ Lib is the Go-source parser injected whole as the Deps.Goimportsdeps field. Ever
 | `Parse` | `func(content string) (*File, error)` | Parse parses a whole Go source file into a File describing its package clause, imports and top-level declarations (functions, methods, types, constants and variables). |
 | `GetPackageName` | `func(content string) (string, error)` | GetPackageName returns the name in the file's package clause. |
 | `GetImports` | `func(content string) ([]string, error)` | GetImports returns every import path the file declares, in source order. |
+| `Format` | `func(content string) (string, error)` | Format rewrites the given source in the canonical form of the Go toolchain — the same bytes `gofmt` would write: standard indentation, aligned struct fields and comment blocks, no trailing whitespace. Everything agnos generates goes through it, so a regenerated tree diffs to zero against one a formatting editor has saved. |
 
 ### `File`
 

@@ -81,14 +81,10 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	// The documentation tree is indexed before anything is rendered, so
-	// README.md's theme table and docs/Index/ are written from the same
-	// themes.yaml in one build.
+	// README.md's index and every sub-doc Index.md come out of the same walk
+	// in one build.
 	docs, err := CollectDocs(deps, io)
 	if err != nil {
-		return err
-	}
-
-	if err := GenerateDocIndexes(deps, io, docs, themes_conf.Themes); err != nil {
 		return err
 	}
 
@@ -102,6 +98,19 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 
 	deps_api, err := CollectDepsApi(deps, io)
 	if err != nil {
+		return err
+	}
+
+	// The docs this build generates are merged in before the index is built:
+	// SmartIO listings read disk, so on a project's first build they are not
+	// there to be walked yet.
+	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name))
+	if err != nil {
+		return err
+	}
+	docs = MergeDocs(docs, generated_docs)
+
+	if err := GenerateSubdocIndexes(deps, io, docs); err != nil {
 		return err
 	}
 
@@ -119,6 +128,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"AdapterLibs":  CollectAdapterLibs(io),
 		"Commands":     commands,
 		"Themes":       themes_conf.Themes,
+		"DocIndex":     CollectDocIndex(docs, themes_conf.Themes),
 		"PublicApi":    public_api,
 		"DepsApi":      deps_api,
 	}

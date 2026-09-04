@@ -1,14 +1,17 @@
 {{- render (printf "%s/docs/ReadmeHeader.md" .ConfigDir) }}
 
-## Documentation Index
+## Documentation
+{{ range .DocIndex }}
+### {{ .Name }}
 
-| Name | Description |
+{{ .Description }}
+
+| Doc | Description |
 | --- | --- |
-{{- range .Themes }}
-| [{{ .Name }}](docs/Index/{{ .Id }}.md) | {{ .Description }} |
+{{- range .Docs }}
+| [{{ .Name }}]({{ .Link }}) | {{ .Description }} |
 {{- end }}
-
+{{ end }}
 ## License
 
-
-{{ copy "LICENSE" -}}
+[MIT](LICENSE)

@@ -6,9 +6,9 @@ package add_doc
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Theme []string
+	Theme       []string
 	Description string
-	Path string
-	Quiet bool
-	Name string
+	Path        string
+	Quiet       bool
+	Name        string
 }

@@ -9,8 +9,8 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
 )
 
-// Bind fills deps.Deps.IoLib with the implementation of the Io dependency
-// using the standard library's os and filepath packages.
+// Bind fills deps.Deps.Iodeps with the filesystem implementation built on
+// the standard library's os and filepath packages.
 func Bind(deps *deps.Deps) {
 	deps.Iodeps = iodeps.Lib{
 		ReadFile: func(path string) ([]byte, error) {

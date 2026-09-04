@@ -6,8 +6,8 @@ package build
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Path string
-	Quiet bool
+	Path    string
+	Quiet   bool
 	Runtime string
-	Unsafe bool
+	Unsafe  bool
 }

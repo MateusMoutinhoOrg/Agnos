@@ -20,6 +20,13 @@ type Lib struct {
 
 	// GetImports returns every import path the file declares, in source order.
 	GetImports func(content string) ([]string, error)
+
+	// Format rewrites the given source in the canonical form of the Go
+	// toolchain — the same bytes `gofmt` would write: standard indentation,
+	// aligned struct fields and comment blocks, no trailing whitespace.
+	// Everything agnos generates goes through it, so a regenerated tree
+	// diffs to zero against one a formatting editor has saved.
+	Format func(content string) (string, error)
 }
 
 // File is the parsed view of one Go source file.

@@ -3,6 +3,7 @@ package utils
 import (
 	"bytes"
 	"path"
+	"strings"
 	"text/template"
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
@@ -50,6 +51,14 @@ func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) templ
 	}
 }
 
+// RenderTemplate renders one template source over vars and returns the result
+// without writing anything. It is what a caller needs when it has to read a
+// value out of an asset the build is about to write — the doc props of a
+// generated doc, say — rather than render that asset to its destination.
+func RenderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
+	return renderTemplate(deps, io, name, src, vars)
+}
+
 // renderTemplate parses src as a Go text/template named name and executes it
 // over vars, with templateFuncs available. It is the single rendering path for
 // this package: RenderTemplateToDest and RenderGroup both go through it, so the
@@ -67,6 +76,29 @@ func renderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byt
 	return buf.Bytes(), nil
 }
 
+// formatIfGo returns content in the canonical form of the Go toolchain when
+// dest is a Go file, and content untouched otherwise. Every generated .go file
+// passes through here so a regenerated tree diffs to zero against one a
+// formatting editor has saved. A render that is not parsable Go is written as
+// it came out: the compile step reports it with a real message, which a
+// rendering error here would only hide.
+func formatIfGo(deps *deps.Deps, dest string, content []byte) []byte {
+	if !strings.HasSuffix(dest, ".go") {
+		return content
+	}
+
+	formatted, err := deps.Goimportsdeps.Format(string(content))
+	if err != nil {
+		deps.Std.Log("could not format %s: %s\n", dest, err.Error())
+		return content
+	}
+
+	return []byte(formatted)
+}
+
+// RenderTemplateToDest renders one asset as a Go text/template over vars and
+// writes the result to dest_path. A Go destination is formatted first (see
+// formatIfGo).
 func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path string, vars interface{}, dest_path string) error {
 
 	src, err := deps.Embeddeps.ReadFile(template_path)
@@ -79,7 +111,7 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 		return err
 	}
 
-	err = io.WriteFileOverwrite(dest_path, content)
+	err = io.WriteFileOverwrite(dest_path, formatIfGo(deps, dest_path, content))
 	if err != nil {
 		return err
 	}
@@ -111,7 +143,7 @@ func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interf
 			return err
 		}
 
-		err = io.WriteFileOverwrite(file, content)
+		err = io.WriteFileOverwrite(file, formatIfGo(deps, file, content))
 		if err != nil {
 			return err
 		}

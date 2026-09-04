@@ -6,7 +6,7 @@ package verify
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Path string
+	Path    string
 	Runtime string
-	Quiet bool
+	Quiet   bool
 }

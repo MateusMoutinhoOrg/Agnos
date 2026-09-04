@@ -7,6 +7,6 @@ package compile
 // in the order it is declared there.
 type Entries struct {
 	Target []string
-	Path string
-	Quiet bool
+	Path   string
+	Quiet  bool
 }

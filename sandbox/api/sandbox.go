@@ -5,5 +5,5 @@ package api
 // callable lives outside of it.
 type Sandbox struct {
 	Actions Actions
-	Cli Cli
+	Cli     Cli
 }

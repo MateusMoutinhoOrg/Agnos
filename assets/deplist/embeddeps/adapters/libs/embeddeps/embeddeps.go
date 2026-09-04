@@ -1,10 +1,9 @@
 package embeddeps
 
 // The standard adapter's embedded-asset implementation: the factory filling
-// deps.Deps.EmbedDeps out of the assets compiled into the binary. It lives in
-// its own file because it is the one part of this adapter that reaches for a
-// package of the project outside the sandbox — assets — and because the
-// conversion helpers below belong to it and to nothing else.
+// deps.Deps.Embeddeps out of the assets compiled into the binary. It is the
+// one adapter that reaches for a package of the project outside the sandbox —
+// assets — which is what the conversion helpers below exist for.
 //
 // Everything here is outside the sandbox, which is what makes the `embed`
 // directive and the io/fs walk legal: the sandbox only ever sees the three
@@ -69,7 +68,7 @@ func relativeTo(root string, current string) string {
 	return current[len(root)+1:]
 }
 
-// Bind fills deps.Deps.EmbedDeps with the project's assets, compiled
+// Bind fills deps.Deps.Embeddeps with the project's assets, compiled
 // into the binary by the assets package and served from the root of that tree.
 // Each field of the assigned struct is a closure reading the embedded
 // filesystem at call time.

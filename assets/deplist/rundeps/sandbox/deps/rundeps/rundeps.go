@@ -27,6 +27,11 @@ type RunProps struct {
 	Program string
 	// Args are the arguments handed to the program, excluding its own name.
 	Args []string
+	// Env is a list of "KEY=VALUE" entries added on top of the current
+	// process environment for this one invocation (later entries win). Empty
+	// means "inherit the environment unchanged" — the common case. `agnos
+	// compile` uses it to set GOOS/GOARCH/CGO_ENABLED per cross-compile.
+	Env []string
 }
 
 // Result is what one finished invocation produced.

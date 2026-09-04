@@ -6,7 +6,6 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	add_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_arg"
 	add_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_command"
 	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_doc"
@@ -31,6 +30,7 @@ import (
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
 	verify "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/verify"
 	version "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/version"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
 // Exit codes. Kept here (not in sandbox/api) so the cli layer has no
@@ -219,8 +219,8 @@ func checkUnusedArgs(deps *deps.Deps, verb argvdeps.Parser) bool {
 
 func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_arg.Entries{}
-	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "command", []string{ "--command", "-c" }, 0)
+	if verb.GetOptionsSize([]string{"--command", "-c"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "command", []string{"--command", "-c"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -233,8 +233,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'command' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--type", "-t" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "type", []string{ "--type", "-t" }, 0)
+	if verb.GetOptionsSize([]string{"--type", "-t"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type", "-t"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -246,8 +246,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Type = "string"
 	}
-	if verb.GetOptionsSize([]string{ "--description", "-d" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "description", []string{ "--description", "-d" }, 0)
+	if verb.GetOptionsSize([]string{"--description", "-d"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{"--description", "-d"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -257,8 +257,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Description = value
 	}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--example", "-e" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "example", []string{ "--example", "-e" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example", "-e"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "example", []string{"--example", "-e"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -268,8 +268,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Example = append(entries.Example, value)
 	}
-	if verb.GetOptionsSize([]string{ "--default" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "default", []string{ "--default" }, 0)
+	if verb.GetOptionsSize([]string{"--default"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "default", []string{"--default"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -279,10 +279,10 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Default = value
 	}
-	entries.Required = verb.IsPresent([]string{ "--required", "-r" })
-	entries.Array = verb.IsPresent([]string{ "--array" })
-	if verb.GetOptionsSize([]string{ "--min" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "min", []string{ "--min" }, 0)
+	entries.Required = verb.IsPresent([]string{"--required", "-r"})
+	entries.Array = verb.IsPresent([]string{"--array"})
+	if verb.GetOptionsSize([]string{"--min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -292,8 +292,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Min = value
 	}
-	if verb.GetOptionsSize([]string{ "--max" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "max", []string{ "--max" }, 0)
+	if verb.GetOptionsSize([]string{"--max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -303,8 +303,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Max = value
 	}
-	if verb.GetOptionsSize([]string{ "--position" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "position", []string{ "--position" }, 0)
+	if verb.GetOptionsSize([]string{"--position"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "position", []string{"--position"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -316,8 +316,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Position = -1
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -329,7 +329,7 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -354,8 +354,8 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_command.Entries{}
-	if verb.GetOptionsSize([]string{ "--help" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "help", []string{ "--help" }, 0)
+	if verb.GetOptionsSize([]string{"--help"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "help", []string{"--help"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -368,8 +368,8 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'help' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--category" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "category", []string{ "--category" }, 0)
+	if verb.GetOptionsSize([]string{"--category"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "category", []string{"--category"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -382,8 +382,8 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'category' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -395,7 +395,7 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -420,8 +420,8 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_doc.Entries{}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--theme", "-t" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "theme", []string{ "--theme", "-t" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--theme", "-t"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "theme", []string{"--theme", "-t"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -431,8 +431,8 @@ func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Theme = append(entries.Theme, value)
 	}
-	if verb.GetOptionsSize([]string{ "--description", "-d" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "description", []string{ "--description", "-d" }, 0)
+	if verb.GetOptionsSize([]string{"--description", "-d"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{"--description", "-d"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -445,8 +445,8 @@ func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'description' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -458,7 +458,7 @@ func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -483,8 +483,8 @@ func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_flag.Entries{}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--identifier", "-i" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "identifier", []string{ "--identifier", "-i" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--identifier", "-i"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "identifier", []string{"--identifier", "-i"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -494,8 +494,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Identifier = append(entries.Identifier, value)
 	}
-	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "command", []string{ "--command", "-c" }, 0)
+	if verb.GetOptionsSize([]string{"--command", "-c"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "command", []string{"--command", "-c"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -508,8 +508,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'command' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--type", "-t" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "type", []string{ "--type", "-t" }, 0)
+	if verb.GetOptionsSize([]string{"--type", "-t"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type", "-t"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -521,8 +521,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Type = "string"
 	}
-	if verb.GetOptionsSize([]string{ "--description", "-d" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "description", []string{ "--description", "-d" }, 0)
+	if verb.GetOptionsSize([]string{"--description", "-d"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{"--description", "-d"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -532,8 +532,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Description = value
 	}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--example", "-e" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "example", []string{ "--example", "-e" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example", "-e"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "example", []string{"--example", "-e"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -543,8 +543,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Example = append(entries.Example, value)
 	}
-	if verb.GetOptionsSize([]string{ "--default" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "default", []string{ "--default" }, 0)
+	if verb.GetOptionsSize([]string{"--default"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "default", []string{"--default"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -554,10 +554,10 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Default = value
 	}
-	entries.Required = verb.IsPresent([]string{ "--required", "-r" })
-	entries.Array = verb.IsPresent([]string{ "--array" })
-	if verb.GetOptionsSize([]string{ "--min" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "min", []string{ "--min" }, 0)
+	entries.Required = verb.IsPresent([]string{"--required", "-r"})
+	entries.Array = verb.IsPresent([]string{"--array"})
+	if verb.GetOptionsSize([]string{"--min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -567,8 +567,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Min = value
 	}
-	if verb.GetOptionsSize([]string{ "--max" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "max", []string{ "--max" }, 0)
+	if verb.GetOptionsSize([]string{"--max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -578,8 +578,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Max = value
 	}
-	if verb.GetOptionsSize([]string{ "--position" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "position", []string{ "--position" }, 0)
+	if verb.GetOptionsSize([]string{"--position"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "position", []string{"--position"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -591,8 +591,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Position = -1
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -604,7 +604,7 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -629,8 +629,8 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &build.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -642,9 +642,9 @@ func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
-	if verb.GetOptionsSize([]string{ "--runtime" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "runtime", []string{ "--runtime" }, 0)
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if verb.GetOptionsSize([]string{"--runtime"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "runtime", []string{"--runtime"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -656,7 +656,7 @@ func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Runtime = "go"
 	}
-	entries.Unsafe = verb.IsPresent([]string{ "--unsafe" })
+	entries.Unsafe = verb.IsPresent([]string{"--unsafe"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -671,8 +671,8 @@ func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchCliInit(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &cli_init.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -684,7 +684,7 @@ func dispatchCliInit(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -699,8 +699,8 @@ func dispatchCliInit(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchCliPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &cli_purge.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -712,7 +712,7 @@ func dispatchCliPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -727,8 +727,8 @@ func dispatchCliPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &compile.Entries{}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--target", "-t" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "target", []string{ "--target", "-t" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--target", "-t"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "target", []string{"--target", "-t"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -742,8 +742,8 @@ func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'target' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -755,7 +755,7 @@ func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -770,8 +770,8 @@ func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchDepInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &dep_install.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -783,7 +783,7 @@ func dispatchDepInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -808,8 +808,8 @@ func dispatchDepInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchDepList(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &dep_list.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -821,7 +821,7 @@ func dispatchDepList(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -836,8 +836,8 @@ func dispatchDepList(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchDepRemove(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &dep_remove.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -849,7 +849,7 @@ func dispatchDepRemove(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -874,8 +874,8 @@ func dispatchDepRemove(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchDepsInit(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &deps_init.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -887,7 +887,7 @@ func dispatchDepsInit(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -902,8 +902,8 @@ func dispatchDepsInit(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &deps_purge.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -915,7 +915,7 @@ func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -948,8 +948,8 @@ func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchLocalInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &local_install.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -961,7 +961,7 @@ func dispatchLocalInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -976,8 +976,8 @@ func dispatchLocalInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &publish.Entries{}
-	if verb.GetOptionsSize([]string{ "--path", "-p" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path", "-p" }, 0)
+	if verb.GetOptionsSize([]string{"--path", "-p"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path", "-p"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -989,8 +989,8 @@ func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	if verb.GetOptionsSize([]string{ "--release-name", "-rn" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "release_name", []string{ "--release-name", "-rn" }, 0)
+	if verb.GetOptionsSize([]string{"--release-name", "-rn"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "release_name", []string{"--release-name", "-rn"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1000,9 +1000,9 @@ func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.ReleaseName = value
 	}
-	entries.Draft = verb.IsPresent([]string{ "--draft" })
-	if verb.GetOptionsSize([]string{ "--target", "-t" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "target", []string{ "--target", "-t" }, 0)
+	entries.Draft = verb.IsPresent([]string{"--draft"})
+	if verb.GetOptionsSize([]string{"--target", "-t"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "target", []string{"--target", "-t"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1014,8 +1014,8 @@ func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Target = "all"
 	}
-	if verb.GetOptionsSize([]string{ "--publisher", "-pub" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "publisher", []string{ "--publisher", "-pub" }, 0)
+	if verb.GetOptionsSize([]string{"--publisher", "-pub"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "publisher", []string{"--publisher", "-pub"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1038,8 +1038,8 @@ func dispatchPublish(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_arg.Entries{}
-	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "command", []string{ "--command", "-c" }, 0)
+	if verb.GetOptionsSize([]string{"--command", "-c"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "command", []string{"--command", "-c"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1052,8 +1052,8 @@ func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'command' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1065,7 +1065,7 @@ func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -1090,8 +1090,8 @@ func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_command.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1103,7 +1103,7 @@ func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -1128,8 +1128,8 @@ func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchRemoveDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_doc.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1141,7 +1141,7 @@ func dispatchRemoveDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -1166,8 +1166,8 @@ func dispatchRemoveDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_flag.Entries{}
-	if verb.GetOptionsSize([]string{ "--command", "-c" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "command", []string{ "--command", "-c" }, 0)
+	if verb.GetOptionsSize([]string{"--command", "-c"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "command", []string{"--command", "-c"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1180,8 +1180,8 @@ func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'command' not provided\n")
 		return ExitUsage
 	}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1193,7 +1193,7 @@ func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -1218,8 +1218,8 @@ func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &set_command.Entries{}
-	if verb.GetOptionsSize([]string{ "--help" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "help", []string{ "--help" }, 0)
+	if verb.GetOptionsSize([]string{"--help"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "help", []string{"--help"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1229,8 +1229,8 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Help = value
 	}
-	if verb.GetOptionsSize([]string{ "--category" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "category", []string{ "--category" }, 0)
+	if verb.GetOptionsSize([]string{"--category"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "category", []string{"--category"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1240,8 +1240,8 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Category = value
 	}
-	if verb.GetOptionsSize([]string{ "--long-description" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "long-description", []string{ "--long-description" }, 0)
+	if verb.GetOptionsSize([]string{"--long-description"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "long-description", []string{"--long-description"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1251,8 +1251,8 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.LongDescription = value
 	}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--identifier", "-i" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "identifier", []string{ "--identifier", "-i" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--identifier", "-i"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "identifier", []string{"--identifier", "-i"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1262,8 +1262,8 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Identifier = append(entries.Identifier, value)
 	}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--example", "-e" }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "example", []string{ "--example", "-e" }, occurrence)
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example", "-e"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "example", []string{"--example", "-e"}, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1273,10 +1273,10 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Example = append(entries.Example, value)
 	}
-	entries.Hidden = verb.IsPresent([]string{ "--hidden" })
-	entries.Visible = verb.IsPresent([]string{ "--visible" })
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	entries.Hidden = verb.IsPresent([]string{"--hidden"})
+	entries.Visible = verb.IsPresent([]string{"--visible"})
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1288,7 +1288,7 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -1313,8 +1313,8 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &start.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1326,8 +1326,8 @@ func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	if verb.GetOptionsSize([]string{ "--project-name", "-p" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "project-name", []string{ "--project-name", "-p" }, 0)
+	if verb.GetOptionsSize([]string{"--project-name", "-p"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "project-name", []string{"--project-name", "-p"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1340,10 +1340,10 @@ func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 		deps.Std.Error("required flag 'project-name' not provided\n")
 		return ExitUsage
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
-	entries.Force = verb.IsPresent([]string{ "--force", "-f" })
-	if verb.GetOptionsSize([]string{ "--module", "-m" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "module", []string{ "--module", "-m" }, 0)
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	entries.Force = verb.IsPresent([]string{"--force", "-f"})
+	if verb.GetOptionsSize([]string{"--module", "-m"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "module", []string{"--module", "-m"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1367,8 +1367,8 @@ func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchVerify(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &verify.Entries{}
-	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1380,8 +1380,8 @@ func dispatchVerify(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Path = "."
 	}
-	if verb.GetOptionsSize([]string{ "--runtime" }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "runtime", []string{ "--runtime" }, 0)
+	if verb.GetOptionsSize([]string{"--runtime"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "runtime", []string{"--runtime"}, 0)
 		if !rawOk {
 			return ExitUsage
 		}
@@ -1393,7 +1393,7 @@ func dispatchVerify(deps *deps.Deps, verb argvdeps.Parser) int {
 	} else {
 		entries.Runtime = "go"
 	}
-	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -1416,4 +1416,3 @@ func dispatchVersion(deps *deps.Deps, verb argvdeps.Parser) int {
 	}
 	return version.CommandHandler(deps, entries)
 }
-

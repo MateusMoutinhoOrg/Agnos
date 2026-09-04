@@ -23,7 +23,9 @@ func VerifyInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	violations = append(violations, CheckSandbox(deps, io, module_conf.Module)...)
 	violations = append(violations, CheckContracts(deps, io)...)
 	violations = append(violations, CheckAdapters(deps, io)...)
+	violations = append(violations, CheckDeplist(deps, io, module_conf.Module)...)
 	violations = append(violations, CheckDocs(deps, io)...)
+	violations = append(violations, CheckCommandsDoc(deps, io)...)
 
 	if len(violations) == 0 {
 		deps.Std.Log("verify passed\n")

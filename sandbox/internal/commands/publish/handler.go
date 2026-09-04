@@ -49,7 +49,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	}
 
 	deps.Std.Printf("Compiling targets...\n")
-	// If targets is empty or "all", we pass "all". 
+	// If targets is empty or "all", we pass "all".
 	targets := entries.Target
 	if targets == "" {
 		targets = "all"
@@ -73,7 +73,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	}
 
 	args = append(args, "--title", fmt.Sprintf("Release %s", releaseName))
-	
+
 	// Default notes can be added, or leave to gh defaults
 
 	for _, e := range entriesInfo {

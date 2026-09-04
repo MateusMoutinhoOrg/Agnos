@@ -2,6 +2,7 @@ package rundeps
 
 import (
 	"bytes"
+	"os"
 	"os/exec"
 
 	"{{.Module}}/sandbox/deps"
@@ -23,6 +24,9 @@ func Bind(deps *deps.Deps) {
 func run(props rundeps.RunProps) (rundeps.Result, error) {
 	command := exec.Command(props.Program, props.Args...)
 	command.Dir = props.Dir
+	if len(props.Env) > 0 {
+		command.Env = append(os.Environ(), props.Env...)
+	}
 
 	var output bytes.Buffer
 	command.Stdout = &output

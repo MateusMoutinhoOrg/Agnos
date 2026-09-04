@@ -9,9 +9,9 @@ import (
 
 // CheckDocs enforces the documentation tree: every doc directory declares
 // itself in a props.yaml, every theme it names exists in themes.yaml, every
-// first-level doc belongs to at least one theme, every theme has at least one
-// doc, and no sub-doc claims a theme (a sub-doc is listed only by its parent's
-// Index.md).
+// first-level doc belongs to at least one theme, and no sub-doc claims a theme
+// (a sub-doc is listed only by its parent's Index.md). A theme no doc names is
+// not a violation: it simply renders no section in README.md's index.
 //
 // A project with no docs/ directory has nothing to check.
 func CheckDocs(deps *deps.Deps, io *smartio.SmartIO) []string {
@@ -31,8 +31,6 @@ func CheckDocs(deps *deps.Deps, io *smartio.SmartIO) []string {
 		return append(violations, err.Error())
 	}
 
-	used := make(map[string]bool)
-
 	for _, doc := range docs {
 		if len(doc.Themes) == 0 {
 			violations = append(violations, doc.Path+"/props.yaml declares no themes"+
@@ -45,24 +43,16 @@ func CheckDocs(deps *deps.Deps, io *smartio.SmartIO) []string {
 					theme+" (it is not declared in themes.yaml)")
 				continue
 			}
-			used[theme] = true
 		}
 
 		violations = append(violations, checkSubdocs(doc.Subdocs)...)
-	}
-
-	for _, theme := range themes_conf.Themes {
-		if !used[theme.Id] {
-			violations = append(violations, "theme "+theme.Id+" has no docs"+
-				" (no first-level doc names it in its props.yaml)")
-		}
 	}
 
 	return violations
 }
 
 // checkSubdocs enforces, at every depth, that a sub-doc carries no themes: it
-// is listed by its parent's Index.md, never by a theme index.
+// is listed by its parent's Index.md, never by README.md's index.
 func checkSubdocs(docs []utils.Doc) []string {
 	var violations []string
 

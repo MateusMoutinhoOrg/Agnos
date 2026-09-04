@@ -6,6 +6,6 @@ package local_install
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Path string
+	Path  string
 	Quiet bool
 }

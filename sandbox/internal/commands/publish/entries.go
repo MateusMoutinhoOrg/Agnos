@@ -6,9 +6,9 @@ package publish
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Path string
+	Path        string
 	ReleaseName string
-	Draft bool
-	Target string
-	Publisher string
+	Draft       bool
+	Target      string
+	Publisher   string
 }

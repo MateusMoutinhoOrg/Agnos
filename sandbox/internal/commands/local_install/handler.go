@@ -21,7 +21,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	}
 
 	deps.Std.Printf("Installing locally...\n")
-	
+
 	// Get GOEXE
 	result, err := deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     entries.Path,

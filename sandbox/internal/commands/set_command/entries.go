@@ -6,14 +6,14 @@ package set_command
 // Fields follow entries.yaml: the flags first, then the positional args, each
 // in the order it is declared there.
 type Entries struct {
-	Help string
-	Category string
+	Help            string
+	Category        string
 	LongDescription string
-	Identifier []string
-	Example []string
-	Hidden bool
-	Visible bool
-	Path string
-	Quiet bool
-	Name string
+	Identifier      []string
+	Example         []string
+	Hidden          bool
+	Visible         bool
+	Path            string
+	Quiet           bool
+	Name            string
 }
