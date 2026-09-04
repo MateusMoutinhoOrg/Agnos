@@ -78,7 +78,6 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	vars := map[string]interface{}{
 		"Module":       module_conf.Module,
 		"Name":         project_conf.Name,
-		"Description":  project_conf.Description,
 		"Version":      project_conf.Version,
 		"ProjectName":  projectNameConst(project_conf.Name),
 		"HasDeps":      hasDeps,

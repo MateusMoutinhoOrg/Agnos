@@ -12,7 +12,5 @@ func Render(deps *deps.Deps, project_conf *ProjectConf) string {
 	} else {
 		obj.AddItemToObject("version", project_conf.Version)
 	}
-	obj.AddItemToObject("description", project_conf.Description)
-
 	return deps.Serializables.SerializeToYaml(obj)
 }

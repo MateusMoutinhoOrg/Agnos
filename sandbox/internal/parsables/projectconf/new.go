@@ -21,7 +21,6 @@ func New(deps *deps.Deps, content string) (*ProjectConf, error) {
 	}
 	name_item, _ := project_specs.GetObjectItem("name")
 	version_item, _ := project_specs.GetObjectItem("version")
-	description_item, _ := project_specs.GetObjectItem("description")
 
 	// Version defaults to empty: `version: null` (or absent) means "no version yet".
 	project_conf := &ProjectConf{}
@@ -31,13 +30,6 @@ func New(deps *deps.Deps, content string) (*ProjectConf, error) {
 		project_conf.Name, err = name_item.GetString()
 		if err != nil {
 			return nil, deps.Std.Errorf("name is not a string")
-		}
-	}
-
-	if description_item != nil && !description_item.IsNull() {
-		project_conf.Description, err = description_item.GetString()
-		if err != nil {
-			return nil, deps.Std.Errorf("description is not a string")
 		}
 	}
 

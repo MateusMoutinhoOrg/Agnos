@@ -45,7 +45,6 @@ func StartInternal(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) e
 	vars := map[string]interface{}{
 		"Name":        project_conf.Name,
 		"Version":     project_conf.Version,
-		"Description": project_conf.Description,
 	}
 
 	if err := utils.RenderGroup(deps, io, "start", vars); err != nil {
