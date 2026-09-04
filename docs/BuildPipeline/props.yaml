@@ -1,5 +1,5 @@
 description: "What build does: verify, collectors, template vars, asset groups, SmartIO persist, runtime, dispatch"
 name: "BuildPipeline"
-order: 3
+order: 4
 themes:
   - development

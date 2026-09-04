@@ -1,0 +1,5 @@
+description: "The two tools this project needs — Go and agnos — installed per platform"
+name: "Requirements"
+order: 0
+themes:
+  - development

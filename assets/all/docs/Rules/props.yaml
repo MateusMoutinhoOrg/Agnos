@@ -1,5 +1,5 @@
 description: "Every rule the generators, `verify` and the hand-written files must hold to"
 name: "Rules"
-order: 1
+order: 2
 themes:
   - development

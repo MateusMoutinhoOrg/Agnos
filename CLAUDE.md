@@ -21,7 +21,7 @@ README and a doc). Start with
 `docs/Workflow/doc.md` (the recipe for every change any agnos project takes) and
 `docs/Contributing/doc.md` (what is specific to changing agnos itself).
 
-`docs/{Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,PublicApi}/`
+`docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,PublicApi}/`
 are rendered from `assets/all/docs/` into **every** agnos project, this one included: editing
 one means editing that template, and it has to read correctly in a scaffolded project, not only
 here. Guard a line that holds for this repo alone with `{{ if .HasAssets }}`.
@@ -114,7 +114,7 @@ change a rule there and nowhere else. The ones most easily broken:
 - Output: `deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`),
   `deps.Std.Error` -> stderr. Never `fmt.Printf`.
 - Docs: create/delete with `agnos add-doc` / `agnos remove-doc`. `README.md`, every `Index.md`,
-  and the nine docs of `assets/all/docs/` are generated — `docs/Commands`
+  and the ten docs of `assets/all/docs/` are generated — `docs/Commands`
   from every command's `entries.yaml`.
   `docs/Structure/doc.md`'s tree comes from `AgnosConfig/structure.yaml`.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the

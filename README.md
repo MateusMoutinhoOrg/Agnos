@@ -73,6 +73,7 @@ Changing this repository - schema, build mechanics, recipes
 
 | Doc | Description |
 | --- | --- |
+| [Requirements](docs/Requirements/doc.md) | The two tools this project needs — Go and agnos — installed per platform |
 | [Workflow](docs/Workflow/doc.md) | Every change this project takes and the agnos command that makes it |
 | [Rules](docs/Rules/doc.md) | Every rule the generators, `verify` and the hand-written files must hold to |
 | [Structure](docs/Structure/doc.md) | The project schema: what lives where, what is generated, what verify enforces |
