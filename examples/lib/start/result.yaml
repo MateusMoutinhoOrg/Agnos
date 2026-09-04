@@ -1,0 +1,8 @@
+cli-output: ""
+tree:
+ -
+   file: AgnosConfig/docs/ReadmeHeader.md
+   sha: "af0796675f5c16a2f2b5a3285d21406a30875803f12d51885c9cc33a882e6a51"
+ - 
+   file: AgnosConfig/ignore.yaml
+   sha: "63186ca147505db781c295629d94c763f1d0b5722b5854925af8f3a909c47255"
