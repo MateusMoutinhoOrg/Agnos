@@ -31,7 +31,7 @@ adapters/  ──▶  sandbox/  ◀──  cmd/
 - **`/assets/`**: the Go templates every generated file is rendered from, and the installable deps.
 - **`/cmd/main/`**: wires an adapter into the sandbox and exits with what the CLI returns. Holds no logic.
 
-Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation](/docs/SandboxIsolation/doc.md) and [BuildPipeline](/docs/BuildPipeline/doc.md) for the full mechanic.
+Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation](docs/SandboxIsolation/doc.md) and [BuildPipeline](docs/BuildPipeline/doc.md) for the full mechanic.
 
 
 
@@ -41,9 +41,9 @@ Agnos is one of the projects it builds: its own generated files are rendered in 
 
 | Name | Description |
 | --- | --- |
-| [CliUsage](/docs/Index/cli-usage.md) | Documentation for people who drive agnos from a terminal - installing the binary, scaffolding a project, declaring its commands, and looking up what each command does |
-| [LibUsage](/docs/Index/lib-usage.md) | Documentation for developers consuming Agnos as a Go module - wiring an adapter into the sandbox, calling the same actions the CLI exposes from code, and the public API |
-| [Development](/docs/Index/development.md) | Documentation for contributors changing this repository - the binding rules, the mechanics every change runs into, the per-goal workflows, and the specifications every file must satisfy |
+| [CliUsage](docs/Index/cli-usage.md) | Documentation for people who drive agnos from a terminal - installing the binary, scaffolding a project, declaring its commands, and looking up what each command does |
+| [LibUsage](docs/Index/lib-usage.md) | Documentation for developers consuming Agnos as a Go module - wiring an adapter into the sandbox, calling the same actions the CLI exposes from code, and the public API |
+| [Development](docs/Index/development.md) | Documentation for contributors changing this repository - the binding rules, the mechanics every change runs into, the per-goal workflows, and the specifications every file must satisfy |
 
 ## License
 

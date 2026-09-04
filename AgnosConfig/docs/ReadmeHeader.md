@@ -31,7 +31,7 @@ adapters/  ──▶  sandbox/  ◀──  cmd/
 - **`/assets/`**: the Go templates every generated file is rendered from, and the installable deps.
 - **`/cmd/main/`**: wires an adapter into the sandbox and exits with what the CLI returns. Holds no logic.
 
-Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation](/docs/SandboxIsolation/doc.md) and [BuildPipeline](/docs/BuildPipeline/doc.md) for the full mechanic.
+Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. See [SandboxIsolation](docs/SandboxIsolation/doc.md) and [BuildPipeline](docs/BuildPipeline/doc.md) for the full mechanic.
 
 
 

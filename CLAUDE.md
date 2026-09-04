@@ -516,7 +516,10 @@ the first level.
 `AgnosConfig/themes.yaml`, listing the first-level docs whose `props.yaml` names that id —
 plus one `<doc>/Index.md` per doc that has sub-docs, listing its direct sub-docs. Both come
 from `assets/templates/{theme_index,doc_index}.md`. A project with no `docs/` generates
-nothing. `README.md` links `/docs/Index/{{ .Id }}.md`, one row per theme.
+nothing. `README.md` links `docs/Index/{{ .Id }}.md`, one row per theme — **relative**, not
+repository-rooted, because a `/`-prefixed link in a README is resolved by GitHub against the
+site root, not the repository. The same holds for every link in
+`AgnosConfig/docs/ReadmeHeader.md`, which is rendered into that README.
 
 `verify` (`verify/check_docs.go`) enforces the tree: a missing or unparsable `props.yaml`, a
 theme id absent from `themes.yaml`, a first-level doc with no themes, a sub-doc *with*
@@ -547,4 +550,6 @@ and Index the generated indexes. Rules that matter when changing code:
   scaffold-then-build shape as `add-command`/`remove-command`), and the doc name is the
   directory under `docs/`, `/`-nested for a sub-doc. Adding or removing a theme is an edit
   to `AgnosConfig/themes.yaml` plus a build. See `docs/HandleDocuments/doc.md`. Links are
-  repository-rooted (`/docs/<DocName>/doc.md`); never link into `old/`.
+  repository-rooted (`/docs/<DocName>/doc.md`) inside `docs/`, but **relative**
+  (`docs/<DocName>/doc.md`) in `README.md` and `AgnosConfig/docs/ReadmeHeader.md`, where a
+  leading `/` would send GitHub to the site root; never link into `old/`.

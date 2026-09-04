@@ -5,7 +5,7 @@
 | Name | Description |
 | --- | --- |
 {{- range .Themes }}
-| [{{ .Name }}](/docs/Index/{{ .Id }}.md) | {{ .Description }} |
+| [{{ .Name }}](docs/Index/{{ .Id }}.md) | {{ .Description }} |
 {{- end }}
 
 ## License
