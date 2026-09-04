@@ -10,9 +10,9 @@ func main() {
 
 	deps := standard.New()    // every adapter lib bound
 	lib := sandbox.New(&deps) // *api.Sandbox
-	module := "TestDir"
+	module := "Test"
 	startProps := api.StartProps{
-		Path:        "blackbox",
+		Path:        "TestDir",
 		ProjectName: "Test",
 		Module:      &module,
 		Force:       false,
