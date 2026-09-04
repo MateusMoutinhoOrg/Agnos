@@ -4,7 +4,6 @@ import (
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/embeddeps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/goimportsdeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/iodeps"
-	requestdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/requestdeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serializables"
 	std "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/std"
@@ -17,7 +16,6 @@ func New() deps.Deps {
 	embeddeps.Bind(&deps)
 	goimportsdeps.Bind(&deps)
 	iodeps.Bind(&deps)
-	requestdeps.Bind(&deps)
 	rundeps.Bind(&deps)
 	serializables.Bind(&deps)
 	std.Bind(&deps)

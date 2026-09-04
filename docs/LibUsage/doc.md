@@ -67,7 +67,6 @@ The contracts available to patch:
 | `deps.Embeddeps` | `sandbox/deps/embeddeps` |
 | `deps.Goimportsdeps` | `sandbox/deps/goimportsdeps` |
 | `deps.Iodeps` | `sandbox/deps/iodeps` |
-| `deps.Requestdeps` | `sandbox/deps/requestdeps` |
 | `deps.Rundeps` | `sandbox/deps/rundeps` |
 | `deps.Serializables` | `sandbox/deps/serializables` |
 | `deps.Std` | `sandbox/deps/std` |
@@ -80,7 +79,6 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 | `adapters/libs/embeddeps` | `embeddeps.Bind(&deps)` |
 | `adapters/libs/goimportsdeps` | `goimportsdeps.Bind(&deps)` |
 | `adapters/libs/iodeps` | `iodeps.Bind(&deps)` |
-| `adapters/libs/requestdeps` | `requestdeps.Bind(&deps)` |
 | `adapters/libs/rundeps` | `rundeps.Bind(&deps)` |
 | `adapters/libs/serializables` | `serializables.Bind(&deps)` |
 | `adapters/libs/std` | `std.Bind(&deps)` |
