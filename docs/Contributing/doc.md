@@ -20,7 +20,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(deps, io *smartio.SmartIO, ...) error`. Project-relative paths only. Log via `deps.Std.Log`, fail via `deps.Std.Errorf`, never `Printf`.
 2. `<name>.go`: `func <Name>(deps, ...) error` = `smartio.New(deps, path, config.ProjectName)` -> internal -> `io.Persist()` -> `buildAction.Build(deps, api.BuildProps{Path, Runtime})` (`RuntimeGo` if it adds, `RuntimeNone` if it removes). Props with more than three values go in a struct in `sandbox/api/actions.go`.
 3. Add the field to `api.Actions` and the assignment to `sandbox/binds/actions.go`.
-4. Add a row to [PublicApi](/docs/PublicApi/doc.md#actions).
+4. Add a row to [PublicApi](../PublicApi/doc.md#actions).
 
 ## Add a command to agnos
 
@@ -30,7 +30,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 ./release/bootstrap.bin add-flag quiet --command <name> --identifier --quiet --identifier -q --type boolean --description "Quiets the cli output"
 ```
 
-Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf` any result. Add a row to [Commands](/docs/Commands/doc.md).
+Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf` any result. Add a row to [Commands](../Commands/doc.md).
 
 ## Add a contract + adapter lib
 
@@ -42,11 +42,11 @@ Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf`
 
 1. Mirror the two files under `assets/deplist/<contract>/sandbox/deps/<contract>/` and `assets/deplist/<contract>/adapters/libs/<lib>/`, replacing this module path with `{{.Module}}`. Keep the copies identical to the repo's.
 2. If it pulls a module: `assets/depsversion.yaml` `<dep>: <module>@<version>`.
-3. Bootstrap, test with `dep-install`/`dep-remove` on a scratch project. Add a row to [DepList](/docs/DepList/doc.md).
+3. Bootstrap, test with `dep-install`/`dep-remove` on a scratch project. Add a row to [DepList](../DepList/doc.md).
 
 ## Add a template or collector
 
-- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](/docs/BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `start`. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Register in [GeneratedFiles](/docs/GeneratedFiles/doc.md).
+- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `start`. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Register in [GeneratedFiles](../GeneratedFiles/doc.md).
 - Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(io)` to the vars map in `build_internal.go`.
 - Bootstrap twice; the second run must change nothing.
 

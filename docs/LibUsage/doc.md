@@ -26,7 +26,7 @@ err = lib.Actions.Build(api.BuildProps{Path: "./my-tool", Runtime: api.RuntimeGo
 code := lib.Cli.CliMain([]string{"dep-list", "--path", "./my-tool"})   // the whole CLI, in-process
 ```
 
-- Actions mirror the CLI one to one; signatures in [PublicApi](/docs/PublicApi/doc.md#actions). Each takes the project dir, scopes every read/write to it, logs progress via `deps.Std.Log`, returns `error`.
+- Actions mirror the CLI one to one; signatures in [PublicApi](../PublicApi/doc.md#actions). Each takes the project dir, scopes every read/write to it, logs progress via `deps.Std.Log`, returns `error`.
 - Every action that adds something ends by running `build`, like its command.
 
 ## Custom Deps

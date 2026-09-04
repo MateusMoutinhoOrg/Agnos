@@ -43,7 +43,7 @@ Targets: `linux86 linuxarm64 linuxi32 mac86 macarm64 windows86 windowsi32` or `a
 | `add-arg <name> --command <cmd> [same field flags as add-flag]` | Inserts a positional at `--position` (else last). An `--array` arg must stay last | go |
 | `remove-arg <name> --command <cmd>` | Drops a positional | none |
 
-`--command`/`-c` takes the identifier or package name. `--required` is refused on a boolean or with `--default`. `--min`/`--max` apply to `int`/`float`. Keys are in [EntriesYaml](/docs/EntriesYaml/doc.md).
+`--command`/`-c` takes the identifier or package name. `--required` is refused on a boolean or with `--default`. `--min`/`--max` apply to `int`/`float`. Keys are in [EntriesYaml](../EntriesYaml/doc.md).
 
 ## Docs
 

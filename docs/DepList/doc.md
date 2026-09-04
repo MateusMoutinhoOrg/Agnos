@@ -1,6 +1,6 @@
 # DepList
 
-What `agnos dep-install <dep>` renders. A dep is named after the contract it installs under `sandbox/deps/<dep>/`; the `Deps` field is the title-cased dir name. Contract signatures are in [PublicApi](/docs/PublicApi/doc.md#dependency-contracts).
+What `agnos dep-install <dep>` renders. A dep is named after the contract it installs under `sandbox/deps/<dep>/`; the `Deps` field is the title-cased dir name. Contract signatures are in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 
 | Dep | `Deps` field | Adapter lib | Backed by | Provides |
 |---|---|---|---|---|

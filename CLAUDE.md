@@ -551,7 +551,10 @@ Rules that matter when changing code:
   `agnos remove-doc <name>` do it (`internal/actions/{add_doc,remove_doc}`, the same
   scaffold-then-build shape as `add-command`/`remove-command`), and the doc name is the
   directory under `docs/`, `/`-nested for a sub-doc. Adding or removing a theme is an edit
-  to `AgnosConfig/themes.yaml` plus a build. Links are
-  repository-rooted (`/docs/<DocName>/doc.md`) inside `docs/`, but **relative**
-  (`docs/<DocName>/doc.md`) in `README.md` and `AgnosConfig/docs/ReadmeHeader.md`, where a
-  leading `/` would send GitHub to the site root; never link into `old/`.
+  to `AgnosConfig/themes.yaml` plus a build. **Every link between Markdown files is
+  relative to the file it is written in** — `../<DocName>/doc.md` from a doc or a generated
+  index under `docs/`, `docs/<DocName>/doc.md` from `README.md` and
+  `AgnosConfig/docs/ReadmeHeader.md` — never `/`-prefixed, which GitHub resolves against
+  the site root rather than the repository. The generated indexes obey this too:
+  `build/generate_doc_indexes.go` writes each row's link through `relativeLink(from_dir,
+  target)`, relative to the directory that index file lives in. Never link into `old/`.

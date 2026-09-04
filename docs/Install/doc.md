@@ -26,7 +26,7 @@ curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download
 [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
 ```
 
-From a checkout (never regenerate this repo with an older installed binary, see [Contributing](/docs/Contributing/doc.md#bootstrap)):
+From a checkout (never regenerate this repo with an older installed binary, see [Contributing](../Contributing/doc.md#bootstrap)):
 
 ```bash
 git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos

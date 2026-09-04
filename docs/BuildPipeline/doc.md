@@ -49,4 +49,4 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Self-hosting
 
-Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `binds/cli.go`, `climain.go`, every `entries.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](/docs/Contributing/doc.md#bootstrap).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `binds/cli.go`, `climain.go`, every `entries.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).
