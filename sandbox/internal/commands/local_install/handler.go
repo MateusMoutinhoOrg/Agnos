@@ -1,7 +1,9 @@
 package local_install
 
 import (
+	"os"
 	"path/filepath"
+	"runtime"
 	"strings"
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
@@ -20,39 +22,8 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 
 	deps.Std.Printf("Installing locally...\n")
 	
-	// Get GOBIN
-	result, err := deps.Rundeps.Run(rundeps.RunProps{
-		Dir:     entries.Path,
-		Program: "go",
-		Args:    []string{"env", "GOBIN"},
-	})
-	if err != nil {
-		deps.Std.Error("failed to run go env GOBIN: %s\n", err.Error())
-		return api.ExitFailure
-	}
-	gobin := strings.TrimSpace(result.Output)
-
-	if gobin == "" {
-		// Fallback to GOPATH/bin
-		result, err = deps.Rundeps.Run(rundeps.RunProps{
-			Dir:     entries.Path,
-			Program: "go",
-			Args:    []string{"env", "GOPATH"},
-		})
-		if err != nil {
-			deps.Std.Error("failed to run go env GOPATH: %s\n", err.Error())
-			return api.ExitFailure
-		}
-		gopath := strings.TrimSpace(result.Output)
-		if gopath == "" {
-			deps.Std.Error("GOPATH is empty, cannot determine install location\n")
-			return api.ExitFailure
-		}
-		gobin = filepath.Join(gopath, "bin")
-	}
-
 	// Get GOEXE
-	result, err = deps.Rundeps.Run(rundeps.RunProps{
+	result, err := deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     entries.Path,
 		Program: "go",
 		Args:    []string{"env", "GOEXE"},
@@ -64,7 +35,23 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	goexe := strings.TrimSpace(result.Output)
 
 	binName := strings.ToLower(config.ProjectName) + goexe
-	outPath := filepath.Join(gobin, binName)
+
+	var outPath string
+	if runtime.GOOS == "windows" {
+		home, err := os.UserHomeDir()
+		if err != nil {
+			deps.Std.Error("failed to get user home dir: %s\n", err.Error())
+			return api.ExitFailure
+		}
+		outPath = filepath.Join(home, ".local", "bin", binName)
+	} else {
+		outPath = filepath.Join("/usr/local/bin", binName)
+	}
+
+	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
+		deps.Std.Error("failed to create directory %s: %s\n", filepath.Dir(outPath), err.Error())
+		return api.ExitFailure
+	}
 
 	deps.Std.Log("building to %s\n", outPath)
 	result, err = deps.Rundeps.Run(rundeps.RunProps{
