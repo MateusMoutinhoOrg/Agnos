@@ -1,4 +1,4 @@
-description: "Every public symbol: entry points, actions, props structs and dependency contracts"
+description: "Every exported symbol of agnos, generated from the contract sources and their doc comments"
 name: "PublicApi"
 order: 2
 themes:

@@ -6,7 +6,10 @@ package api
 // the removal commands use — dropping a command or a flag may leave
 // hand-written code referring to what is gone.
 const (
-	RuntimeGo   = "go"
+	// RuntimeGo resolves the module graph and compiles every package after
+	// the render.
+	RuntimeGo = "go"
+	// RuntimeNone renders only, leaving the result unchecked.
 	RuntimeNone = "none"
 )
 
@@ -26,6 +29,10 @@ type CompileProps struct {
 	Targets []string
 }
 
+// StartProps describes one project to scaffold: the directory to write it
+// into, the name it carries in <Name>Config/project.yaml, the module path for
+// go.mod (nil derives it from the name) and whether an existing directory may
+// be written over.
 type StartProps struct {
 	Path        string
 	ProjectName string
@@ -79,25 +86,79 @@ type DocProps struct {
 	Themes      []string
 }
 
+// Actions is the whole set of operations agnos performs on a project. Every
+// field takes the project directory as its first input (`path`, or the Path of
+// a props struct) and reports failure as an error; the ones that change the
+// tree re-render it before returning, so a project is always left in a built
+// state.
 type Actions struct {
-	Build         func(props BuildProps) error
-	Compile       func(props CompileProps) error
-	Verify        func(path string) error
-	Start         func(props StartProps) error
-	DepsInit      func(path string) error
-	DepsPurge     func(path string) error
-	DepInstall    func(path string, dep string) error
-	DepRemove     func(path string, dep string) error
-	DepList       func(path string) ([]string, error)
-	CliInit       func(path string) error
-	CliPurge      func(path string) error
-	AddCommand    func(path string, name string, help string, category string) error
+	// Build re-renders every generated file of the project and hands the
+	// result to the runtime named by the props.
+	Build func(props BuildProps) error
+
+	// Compile cross-compiles the project's cmd/ binaries into release/, one
+	// file per named target.
+	Compile func(props CompileProps) error
+
+	// Verify checks the project against the schema every generator assumes
+	// and writes nothing; it reports every violation at once.
+	Verify func(path string) error
+
+	// Start scaffolds a new project: the config directory, go.mod, the
+	// sandbox skeleton and a first build.
+	Start func(props StartProps) error
+
+	// DepsInit adds the dependency layer (sandbox/deps/ and
+	// adapters/availables/standard/) to a project that has none.
+	DepsInit func(path string) error
+
+	// DepsPurge removes the dependency layer and every installed dep with it.
+	DepsPurge func(path string) error
+
+	// DepInstall installs one dep of the built-in list: its contract under
+	// sandbox/deps/, its adapter under adapters/libs/ and its go.mod require.
+	DepInstall func(path string, dep string) error
+
+	// DepRemove uninstalls one installed dep, contract, adapter and require.
+	DepRemove func(path string, dep string) error
+
+	// DepList returns the names of the deps installed in the project.
+	DepList func(path string) ([]string, error)
+
+	// CliInit adds the CLI layer (cmd/main, the dispatcher and the help and
+	// version commands) to a project that has none.
+	CliInit func(path string) error
+
+	// CliPurge removes the CLI layer and every command declared in it.
+	CliPurge func(path string) error
+
+	// AddCommand declares a new command: its entries.yaml, its generated
+	// entries.go and a handler.go to fill in.
+	AddCommand func(path string, name string, help string, category string) error
+
+	// RemoveCommand deletes one command and unwires it from the dispatcher.
 	RemoveCommand func(path string, name string) error
-	SetCommand    func(props CommandProps) error
-	AddFlag       func(props FieldProps) error
-	RemoveFlag    func(path string, command string, name string) error
-	AddArg        func(props FieldProps) error
-	RemoveArg     func(path string, command string, name string) error
-	AddDoc        func(props DocProps) error
-	RemoveDoc     func(path string, name string) error
+
+	// SetCommand rewrites the command-level keys of one command's
+	// entries.yaml.
+	SetCommand func(props CommandProps) error
+
+	// AddFlag declares one flag on a command.
+	AddFlag func(props FieldProps) error
+
+	// RemoveFlag deletes one declared flag from a command.
+	RemoveFlag func(path string, command string, name string) error
+
+	// AddArg declares one positional argument on a command.
+	AddArg func(props FieldProps) error
+
+	// RemoveArg deletes one declared positional argument from a command.
+	RemoveArg func(path string, command string, name string) error
+
+	// AddDoc creates one doc directory under docs/, with its props.yaml and
+	// a doc.md to fill in.
+	AddDoc func(props DocProps) error
+
+	// RemoveDoc deletes one doc directory and everything under it.
+	RemoveDoc func(path string, name string) error
 }

@@ -8,6 +8,7 @@ type Cli struct {
 }
 
 const (
+	// ExitOk reports that the command did what it was asked to do.
 	ExitOk = 0
 	// ExitFailure reports that a well-formed command could not be carried
 	// out.

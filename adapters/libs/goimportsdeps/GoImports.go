@@ -296,11 +296,16 @@ func valuesFromDecl(fset *token.FileSet, decl *ast.GenDecl) []goimportsdeps.Valu
 		if doc == "" && len(decl.Specs) == 1 {
 			doc = docText(decl.Doc)
 		}
-		for _, name := range vs.Names {
+		for index, name := range vs.Names {
+			value := ""
+			if index < len(vs.Values) {
+				value = exprString(fset, vs.Values[index])
+			}
 			values = append(values, goimportsdeps.Value{
 				Name:     name.Name,
 				Doc:      doc,
 				Type:     typ,
+				Value:    value,
 				Exported: isExported(name.Name),
 			})
 		}

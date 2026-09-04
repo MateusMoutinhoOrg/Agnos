@@ -1,0 +1,5 @@
+description: "Every exported symbol of {{.Name}}, generated from the contract sources and their doc comments"
+name: "PublicApi"
+order: 2
+themes:
+  - lib-usage

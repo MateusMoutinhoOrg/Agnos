@@ -123,6 +123,10 @@ type Value struct {
 	Doc string
 	// Type is the declared type expression, "" when the type is inferred.
 	Type string
+	// Value is the assigned expression rendered back to source, "" when the
+	// spec assigns nothing (a const repeating the previous expression, or a
+	// var declared by type alone).
+	Value string
 	// Exported reports whether Name is exported.
 	Exported bool
 }

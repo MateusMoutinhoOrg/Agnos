@@ -92,6 +92,19 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	// docs/PublicApi/doc.md is rendered from the contract sources themselves,
+	// so the public surface and its description are always the ones the code
+	// declares. `verify` keeps those sources parsable and commented.
+	public_api, err := CollectPublicApi(deps, io)
+	if err != nil {
+		return err
+	}
+
+	deps_api, err := CollectDepsApi(deps, io)
+	if err != nil {
+		return err
+	}
+
 	vars := map[string]interface{}{
 		"Module":       module_conf.Module,
 		"Name":         project_conf.Name,
@@ -106,6 +119,8 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"AdapterLibs":  CollectAdapterLibs(io),
 		"Commands":     commands,
 		"Themes":       themes_conf.Themes,
+		"PublicApi":    public_api,
+		"DepsApi":      deps_api,
 	}
 
 	if err := utils.RenderGroup(deps, io, "all", vars); err != nil {

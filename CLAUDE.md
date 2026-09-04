@@ -84,8 +84,11 @@ follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` t
   (progress, silenced by `--quiet`), `deps.Std.Error` -> stderr (failures). Never `fmt.Printf`.
 - Exit codes: `api.ExitOk` 0, `api.ExitFailure` 1 (well-formed command failed),
   `api.ExitUsage` 2 (bad command line).
-- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`, never by hand. Indexes and
-  `README.md` are generated. Links inside `docs/` are relative to the doc; keep pages short —
+- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`, never by hand. Indexes,
+  `README.md`, `docs/LibUsage/` and `docs/PublicApi/` are generated. PublicApi is rendered
+  from the doc comments of `sandbox/api/` and `sandbox/deps/` (parsed through
+  `deps.Goimportsdeps`), and `verify` requires one on every exported declaration there — so
+  the public api is documented by commenting the contract, never by editing the page. Links inside `docs/` are relative to the doc; keep pages short —
   tables and commands over prose.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
   reverse.

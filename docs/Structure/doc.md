@@ -56,6 +56,7 @@ old/                              previous template, reference only
 - `sandbox/` holds only `api`, `binds`, `deps`, `internal` and `new.go`.
 - Nothing under `sandbox/` imports a module package outside `sandbox/`.
 - `sandbox/api/*` imports only `sandbox/api`. `sandbox/deps/*` imports only stdlib and `sandbox/deps`.
+- Every file of `sandbox/api/` and `sandbox/deps/` parses, and every exported type, func, const and var in them carries a doc comment — `docs/PublicApi/doc.md` is generated from those comments.
 - Every `sandbox/binds/` file mirrors an `api/` file and declares only functions.
 - `adapters/` holds only `availables` and `libs`.
 - Every `docs/**` dir has a parsable `props.yaml`; first-level docs name at least one theme from `themes.yaml`; sub-docs name none; every theme is used.

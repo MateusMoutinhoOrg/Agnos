@@ -56,8 +56,8 @@ Everything callable from Go is behind one of them.
 | `lib.{{ . }}` | `api.{{ . }}` |
 {{- end }}
 
-Read `sandbox/api/` for the exact function signatures and props structs: it is pure
-contract — no logic, no imports — so it is the shortest description of the whole surface.
+[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
+dependency contracts{{end}} — generated from `sandbox/api/` itself on every build.
 {{if .HasDeps}}
 ## Custom deps
 

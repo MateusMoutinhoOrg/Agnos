@@ -1,5 +1,9 @@
 package serializibles
 
+// SerializibleObject is one node of a parsed document — a scalar, an object or
+// an array — and the whole tree is navigated and edited through its function
+// fields. The same struct is what the Create* constructors of Lib return, so a
+// document can be built in memory and serialized without ever being parsed.
 type SerializibleObject struct {
 	IsInt    func() bool
 	IsString func() bool
@@ -29,6 +33,8 @@ type SerializibleObject struct {
 	DeleteItemFromArray func(index int) error
 }
 
+// Lib is the JSON/YAML codec injected whole as the Deps.Serializables field:
+// constructors for every node kind, the two parsers and the two serializers.
 type Lib struct {
 	CreateString func(value string) *SerializibleObject
 	CreateInt    func(value int64) *SerializibleObject
