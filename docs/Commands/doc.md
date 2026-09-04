@@ -1,13 +1,12 @@
 # Commands
 
-`agnos <command> [flags] [args]`. `agnos help <command>` prints the same for one
-command; an empty command line prints the general help and exits 2.
+`agnos <command> [flags] [args]`. `agnos help <command>` prints
+the same for one command; an empty command line prints the general help and exits 2.
 
-Every section below is rendered from `sandbox/internal/commands/<name>/entries.yaml` on each
-build: declare a command with `add-command`, its fields with `add-flag` / `add-arg`, and its
-prose with `set-command`. Hidden commands are not listed. Flags may appear anywhere on the
-command line; positionals bind in order after them. A `repeatable` field is given once per
-value.
+Hidden commands are not listed. Flags may appear anywhere on the command line; positionals
+bind in order after them. A `repeatable` field is given once per value. Every section below is
+rendered from that command's `entries.yaml` ([EntriesYaml](../EntriesYaml/doc.md)) on each
+build.
 
 ## Cli System
 

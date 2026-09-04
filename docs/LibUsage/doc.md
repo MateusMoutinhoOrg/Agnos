@@ -91,4 +91,6 @@ panics on first call. For a permanent mix, write your own
 `adapters/availables/<name>/new.go` binding only the libs you want — `standard/new.go` is
 regenerated on every build, while other directories under `availables/` are left alone.
 
-The rules a caller can count on are in [Rules](../Rules/doc.md#callers).
+`sandbox/api` is pure contract and `sandbox/` never touches the OS, so both are safe to import
+anywhere; the rest of the rules a caller can count on are in [Rules](../Rules/doc.md#layers),
+and [DepList](../DepList/doc.md) lists every contract that can be added.

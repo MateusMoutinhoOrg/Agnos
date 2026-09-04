@@ -1,5 +1,5 @@
 description: "The project schema: what lives where, what is generated, what verify enforces"
 name: "Structure"
-order: 1
+order: 2
 themes:
   - development

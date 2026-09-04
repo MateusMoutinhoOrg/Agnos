@@ -23,7 +23,10 @@ docs:
   order: 3
   dir: true
   description: one dir per doc, holding doc.md + props.yaml. README.md indexes them all
-README.md:
+go.mod:
   order: 4
+  description: written by `start`; dep-install and dep-remove edit its require block
+README.md:
+  order: 5
   gen: true
   description: "`render AgnosConfig/docs/ReadmeHeader.md` + the documentation index"

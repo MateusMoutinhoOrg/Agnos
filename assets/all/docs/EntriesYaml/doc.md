@@ -34,7 +34,7 @@ args:
 | `category` | Heading in the general help |
 | `help` | One-line description |
 | `long-description` | Paragraph under `help <command>` |
-| `examples` | Lines printed as `$ agnos <example>` |
+| `examples` | Lines printed as `$ {{.Name}} <example>` |
 | `hidden` | Dropped from the general listing, still dispatches |
 | `flags`, `args` | Sequences of fields. Flags are read first in any position; args bind by written order |
 

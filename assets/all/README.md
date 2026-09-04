@@ -14,4 +14,4 @@
 {{ end }}
 ## License
 
-[MIT](LICENSE)
+{{ copy "LICENSE" }}

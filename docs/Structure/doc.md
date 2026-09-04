@@ -1,15 +1,17 @@
 # Structure
 
-`(gen)` = written by `build`, never edited.
+`(gen)` = written by `build`, never edited — the full list is in
+[GeneratedFiles](../GeneratedFiles/doc.md).
 
 ```
 adapters/  -->  sandbox/  <--  cmd/        assets/ (templates, reached via Deps.Embeddeps)
 (reaches OS)    (closed)       (wires)
 ```
 
-Every line below is declared in `AgnosConfig/structure.yaml`, one entry per element
-worth describing. Add or drop an entry there and run `build`; `verify` rejects an entry whose
-path no longer exists, so this tree cannot drift from the disk.
+Every line below is one entry of `AgnosConfig/structure.yaml` — add `<path>:
+{description: "..."}` there, nested under `children:` of its parent, with `dir: true` on a
+directory, `gen: true` on a file `build` rewrites, and `order:` to place it among its siblings
+(unordered siblings follow, alphabetically).
 
 ```
 AgnosConfig/                     written once by `start`, read by every `build`
@@ -61,4 +63,5 @@ release/                         git-ignored binaries
 ```
 
 Every rule this shape has to hold to — layers, naming, generated files, docs — is in
-[Rules](../Rules/doc.md).
+[Rules](../Rules/doc.md); the command that makes each change is in
+[Workflow](../Workflow/doc.md).

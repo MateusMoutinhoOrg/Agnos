@@ -1,6 +1,6 @@
 # Contributing
 
-Recipes only. Every rule these recipes have to hold to — layers, naming, generated files, handlers, docs — is in [Rules](../Rules/doc.md).
+Recipes for changing **agnos itself**. Everything an agnos project does through agnos commands — declare a command, its flags and args, add a doc, install a dep, describe a path — is in [Workflow](../Workflow/doc.md), and the rules every recipe holds to are in [Rules](../Rules/doc.md). Only what is specific to this repo is below.
 
 ## Bootstrap
 
@@ -24,19 +24,19 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 
 ## Add a command to agnos
 
+Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
+
 ```bash
-./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"   # categories: Core Commands, Cli System, Dependencies, Dependency System, Info
-./release/bootstrap.bin add-flag path --command <name> --default . --description "..."
+./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"
+./release/bootstrap.bin add-flag path --command <name> --default . --description "the dir holding the project (defaults to the current directory)"
 ./release/bootstrap.bin add-flag quiet --command <name> --identifier --quiet --identifier -q --type boolean --description "Quiets the cli output"
 ```
 
-Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf` any result. [Commands](../Commands/doc.md) picks the command up on the next build.
+`handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
 
 ## Add a contract + adapter lib
 
-1. `sandbox/deps/<x>/<x>.go`: `type Lib struct { ... func fields }`. Per-call objects use a constructor field (`New func(...) Thing`) like `argvdeps`/`requestdeps`. Doc-comment every exported declaration and every field you want described in [PublicApi](../PublicApi/doc.md).
-2. `adapters/libs/<x>/<x>.go`: `func Bind(deps *deps.Deps) { deps.<X> = <x>.Lib{...} }`. Any import allowed.
-3. Bootstrap: `deps.go` and `standard/new.go` pick it up from the dir listing. Reach it as `deps.<X>`.
+The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency). Per-call objects use a constructor field (`New func(...) Thing`) like `argvdeps`/`requestdeps`. Doc-comment every exported declaration and every field you want described in [PublicApi](../PublicApi/doc.md). To make it installable elsewhere, mirror it into `assets/deplist/` below.
 
 ## Add an installable dep
 
@@ -46,7 +46,7 @@ Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf`
 
 ## Add a template or collector
 
-- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `start`. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Register in [GeneratedFiles](../GeneratedFiles/doc.md).
+- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `start`. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/all/docs/GeneratedFiles/doc.md`.
 - Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources takes `deps` too and reads them through `deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
 - Bootstrap twice; the second run must change nothing.
 
@@ -56,13 +56,6 @@ Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf`
 
 ## Docs
 
-```bash
-./release/bootstrap.bin add-doc <Name> --description "..." --theme <id>   # themes: AgnosConfig/themes.yaml
-./release/bootstrap.bin add-doc <Name>/<Sub> --description "..."          # sub-doc, no theme
-./release/bootstrap.bin remove-doc <Name>
-```
+`add-doc` / `remove-doc` and `AgnosConfig/structure.yaml` work as in [Workflow](../Workflow/doc.md#add-a-doc), driven by `./release/bootstrap.bin`. What is specific to this repo: [Workflow](../Workflow/doc.md), [Rules](../Rules/doc.md), [Structure](../Structure/doc.md), [EntriesYaml](../EntriesYaml/doc.md), [DepList](../DepList/doc.md), [GeneratedFiles](../GeneratedFiles/doc.md), [Commands](../Commands/doc.md), [LibUsage](../LibUsage/doc.md) and [PublicApi](../PublicApi/doc.md) are rendered into *every* agnos project from `assets/all/docs/`, so a change to one of them is a change to that template — and must read correctly in a scaffolded project, not only here. Guard a line that only holds for this repo with `{{ if .HasAssets }}`.
 
-Write `docs/<Name>/doc.md`. Describe a new path in `AgnosConfig/structure.yaml`. A new rule
-goes in `assets/all/docs/Rules/doc.md` (which renders [Rules](../Rules/doc.md)), never in the
-page that happens to touch it. A pattern changed in `CLAUDE.md` is mirrored here in the same
-commit, and the reverse.
+A new rule goes in `assets/all/docs/Rules/doc.md`, never in the page that happens to touch it. A pattern changed in `CLAUDE.md` is mirrored here in the same commit, and the reverse.

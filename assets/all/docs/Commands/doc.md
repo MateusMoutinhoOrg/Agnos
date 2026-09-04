@@ -1,13 +1,12 @@
 # Commands
-
-`{{.Name}} <command> [flags] [args]`. `{{.Name}} help <command>` prints the same for one
-command; an empty command line prints the general help and exits 2.
 {{ if .CommandDocs }}
-Every section below is rendered from `sandbox/internal/commands/<name>/entries.yaml` on each
-build: declare a command with `add-command`, its fields with `add-flag` / `add-arg`, and its
-prose with `set-command`. Hidden commands are not listed. Flags may appear anywhere on the
-command line; positionals bind in order after them. A `repeatable` field is given once per
-value.
+`{{.Name}} <command> [flags] [args]`. `{{.Name}} help <command>` prints
+the same for one command; an empty command line prints the general help and exits 2.
+
+Hidden commands are not listed. Flags may appear anywhere on the command line; positionals
+bind in order after them. A `repeatable` field is given once per value. Every section below is
+rendered from that command's `entries.yaml` ([EntriesYaml](../EntriesYaml/doc.md)) on each
+build.
 {{- range .CommandDocs }}
 
 ## {{ .Category }}
@@ -52,7 +51,9 @@ value.
 {{- end }}
 {{- end }}
 {{- else }}
-No command is declared yet: run `{{.Name}} cli-init`, then `{{.Name}} add-command <name>`.
+No command is declared yet — this project has no CLI surface. Run `agnos cli-init`, then
+`agnos add-command <name> --help "..." --category "..."`, and every command lands on this page
+on the next build.
 {{- end }}
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

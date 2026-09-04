@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.25-blue)](go.mod)
-[![License](https://img.shields.io/badge/license-Unlicense-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed, dependency-injected sandbox behind a command-line interface generated from declarations.
 
@@ -120,9 +120,6 @@ Driving agnos from a terminal - install, scaffold, declare commands, reference
 | [Install](docs/Install/doc.md) | Install the agnos binary, or run it from a checkout |
 | [Quickstart](docs/Quickstart/doc.md) | Empty directory to a compiling CLI with one command, using only agnos commands |
 | [Commands](docs/Commands/doc.md) | Every command of agnos, generated from the command declarations |
-| [EntriesYaml](docs/EntriesYaml/doc.md) | Every key of a command's entries.yaml and what the generated code does with it |
-| [DepList](docs/DepList/doc.md) | Every installable dep, the contract and adapter lib it brings, and what backs it |
-| [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into a project and whether build overwrites it |
 
 ### LibUsage
 
@@ -139,11 +136,43 @@ Changing this repository - schema, build mechanics, recipes
 
 | Doc | Description |
 | --- | --- |
+| [Workflow](docs/Workflow/doc.md) | Every change this project takes and the agnos command that makes it |
 | [Rules](docs/Rules/doc.md) | Every rule the generators, `verify` and the hand-written files must hold to |
 | [Structure](docs/Structure/doc.md) | The project schema: what lives where, what is generated, what verify enforces |
 | [BuildPipeline](docs/BuildPipeline/doc.md) | What build does: verify, collectors, template vars, asset groups, SmartIO persist, runtime, dispatch |
-| [Contributing](docs/Contributing/doc.md) | Recipes for changing this repo: bootstrap, add action, command, contract, dep, template, parsable, doc |
+| [Contributing](docs/Contributing/doc.md) | Recipes specific to changing agnos itself: bootstrap, actions, installable deps, templates, collectors, parsables |
+
+### Reference
+
+Lookup tables - schemas, file formats, generated file listings
+
+| Doc | Description |
+| --- | --- |
+| [EntriesYaml](docs/EntriesYaml/doc.md) | Every key of a command's entries.yaml and what the generated code does with it |
+| [DepList](docs/DepList/doc.md) | Every dep `agnos dep-install` can add, the contract and adapter lib it brings, and what backs it |
+| [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into this project and whether build overwrites it |
 
 ## License
 
-[MIT](LICENSE)
+MIT License
+
+Copyright (c) 2026 Mateus Moutinho
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+

@@ -52,6 +52,12 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	hasDeps := io.IsDir("sandbox/deps")
 	hasCli := io.IsDir("sandbox/internal/cli")
 
+	// hasAssets reports that the project carries its own agnos asset groups —
+	// it is itself a generator, like agnos. The docs of such a project have to
+	// name its templates and its own bootstrap; every other project has no
+	// assets/ tree to be told about.
+	hasAssets := io.IsDir("assets/all")
+
 	project_conf, err := loadProjectConf(deps, io, path)
 	if err != nil {
 		return err
@@ -139,6 +145,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"StructureConfFile": utils.StructureConfFile,
 		"HasDeps":           hasDeps,
 		"HasCli":            hasCli,
+		"HasAssets":         hasAssets,
 		"Binds":             CollectBinds(io),
 		"Constructors":      CollectConstructors(io),
 		"DepsLibs":          CollectDepsLibs(io),

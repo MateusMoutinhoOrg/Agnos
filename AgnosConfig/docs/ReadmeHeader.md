@@ -3,7 +3,7 @@
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.25-blue)](go.mod)
-[![License](https://img.shields.io/badge/license-Unlicense-green)](LICENSE)
+[![License](https://img.shields.io/badge/license-MIT-green)](LICENSE)
 
 A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed, dependency-injected sandbox behind a command-line interface generated from declarations.
 
