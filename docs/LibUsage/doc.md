@@ -91,11 +91,4 @@ panics on first call. For a permanent mix, write your own
 `adapters/availables/<name>/new.go` binding only the libs you want — `standard/new.go` is
 regenerated on every build, while other directories under `availables/` are left alone.
 
-## Rules that hold for callers
-
-| Rule | Why it matters to you |
-| --- | --- |
-| `sandbox/api` is pure contract | Import it freely; it pulls in nothing else. |
-| `sandbox/` never touches the OS | Anything the library does to the outside world goes through a field you can replace. |
-| `deps.Deps` field names are mechanical | A field is the title-cased contract directory name, so an added contract never renames an existing one. |
-| Generated files are overwritten | Build your own entry point in a package of your own instead of editing regenerated ones. |
+The rules a caller can count on are in [Rules](../Rules/doc.md#callers).

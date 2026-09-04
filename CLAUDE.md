@@ -15,6 +15,8 @@ compile and be idempotent. That self-hosting constraint drives every rule below.
 Full documentation lives under `docs/` and is the source of truth, indexed in `README.md`
 (one section per theme of `AgnosConfig/themes.yaml`; there is no index file between the
 README and a doc). Start with
+`docs/Rules/doc.md` (every rule, in one page — generated from
+`assets/all/docs/Rules/doc.md`, which is where a rule is added or changed),
 `docs/Structure/doc.md` (schema), `docs/BuildPipeline/doc.md` (what `build` does), and
 `docs/Contributing/doc.md` (recipes for every kind of change).
 
@@ -92,39 +94,22 @@ follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` t
 
 ## Rules that generated code depends on
 
+The full list is `docs/Rules/doc.md`, rendered from `assets/all/docs/Rules/doc.md`; add or
+change a rule there and nowhere else. The ones most easily broken:
+
 - **Every file is an instance of a pattern.** New code copies an existing sibling exactly:
-  same filenames, same function names, same ordering. If no pattern fits, define and document
-  the pattern first. Never add a one-off — `verify` and the collectors read shape by convention.
-- Naming is load-bearing: a `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` ->
-  `deps.Iodeps`); an adapter binder is always `Bind(deps *deps.Deps)` in
-  `adapters/libs/<lib>/<lib>.go`; a command handler is always
+  same filenames, same function names, same ordering. Never add a one-off — `verify` and the
+  collectors read shape by convention.
+- Naming is load-bearing: `deps.Iodeps` from `sandbox/deps/iodeps`, `Bind(deps *deps.Deps)`,
   `CommandHandler(deps *deps.Deps, entries *Entries) int`.
-- Generated `.go` is written through `deps.Goimportsdeps.Format` (gofmt), so the tree is always
-  formatted and a template's own indentation only has to be parsable.
-- `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on; `verify`
-  compares them, so re-mirror whenever either side changes.
-- Generated files (`(gen)` in `docs/Structure/doc.md`, the `always` rows of
-  `docs/GeneratedFiles/doc.md`) are never edited — change the template under `assets/` and
-  bootstrap.
-- Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`
-  (they re-render it alphabetically and drop comments).
-- Output channels: `deps.Std.Printf` -> stdout (the result), `deps.Std.Log` -> stderr
-  (progress, silenced by `--quiet`), `deps.Std.Error` -> stderr (failures). Never `fmt.Printf`.
-- Exit codes: `api.ExitOk` 0, `api.ExitFailure` 1 (well-formed command failed),
-  `api.ExitUsage` 2 (bad command line).
-- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`, never by hand. `README.md`
-  (the documentation index included), `Index.md`, `docs/LibUsage/`, `docs/PublicApi/` and
-  `docs/Structure/` are generated. A theme only groups a doc into a README section; a theme no doc names renders
-  nothing and is not an error. PublicApi is rendered
-  from the doc comments of `sandbox/api/` and `sandbox/deps/` (parsed through
-  `deps.Goimportsdeps`), and `verify` requires one on every exported declaration there — so
-  the public api is documented by commenting the contract, never by editing the page.
-  `docs/Structure/doc.md`'s tree is rendered from `AgnosConfig/structure.yaml`, so an element
-  is described by an entry there — and `verify` rejects an entry whose path is gone (a ghost
-  spec).
-  `docs/Commands/doc.md` stays hand-written (its columns carry judgement the declarations do
-  not hold), but `verify` requires it to name every visible command and every declared flag —
-  so `add-command` / `add-flag` are followed by a row there. Links inside `docs/` are relative
-  to the doc; keep pages short — tables and commands over prose.
+- Generated files are never edited — change the template under `assets/` and bootstrap.
+- Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`.
+- `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.
+- Output: `deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`),
+  `deps.Std.Error` -> stderr. Never `fmt.Printf`.
+- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`. `README.md`, every `Index.md`,
+  and `docs/{LibUsage,PublicApi,Structure,Rules}/` are generated. `docs/Commands/doc.md` stays
+  hand-written and `verify` requires it to name every visible command and declared flag.
+  `docs/Structure/doc.md`'s tree comes from `AgnosConfig/structure.yaml`.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
   reverse.

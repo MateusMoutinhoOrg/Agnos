@@ -59,18 +59,4 @@ Targets: `linux86 linuxarm64 linuxi32 mac86 macarm64 windows86 windowsi32` or `a
 | `help [command]`, `--help` | General listing by category, or one command's usage. Empty command line prints help and exits 2 |
 | `version`, `--version` | Prints `Version:<v>` from `project.yaml` |
 
-## Output channels
-
-| Channel | Stream | Carries | `--quiet` |
-|---|---|---|---|
-| `deps.Std.Printf` | stdout | The result (listings, version, help) | kept |
-| `deps.Std.Log` | stderr | Progress | silenced |
-| `deps.Std.Error` | stderr | Usage errors and failures | kept |
-
-## Exit codes
-
-| Code | Const | Meaning |
-|---|---|---|
-| 0 | `api.ExitOk` | Done |
-| 1 | `api.ExitFailure` | Well-formed command failed (verify violation, compile error, unknown dep, existing command) |
-| 2 | `api.ExitUsage` | Bad command line: unknown command/flag, leftover positional, missing required, bad or out-of-range number, unknown `--runtime` |
+Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

@@ -15,6 +15,7 @@
 | `docs/LibUsage/{doc.md,props.yaml}` | `build` | `all/` | always. Generic "use this project as a Go module" doc |
 | `docs/PublicApi/{doc.md,props.yaml}` | `build` | `all/` | always. Every exported symbol of `sandbox/api/` and `sandbox/deps/`, described by its own doc comment |
 | `docs/Structure/{doc.md,props.yaml}` | `build` | `all/` | always. The tree declared in `AgnosConfig/structure.yaml` |
+| `docs/Rules/{doc.md,props.yaml}` | `build` | `all/` | always. Every rule of the project, in one page |
 | `docs/**/Index.md` | `build` (docs with sub-docs) | `templates/doc_index.md` | always. `docs/Index/` from older versions is deleted |
 | `sandbox/deps/deps.go` | `build` (if `sandbox/deps/`) | `deps/` | always. One `<Title> <dir>.Lib` per dir |
 | `adapters/availables/standard/new.go` | `build` (if `sandbox/deps/`) | `deps/` | always. One `<lib>.Bind(&deps)` per dir of `adapters/libs/` |
