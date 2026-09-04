@@ -159,7 +159,7 @@ Outside the sandbox. Every file is a Go `text/template` compiled into the binary
 | `deps/**` | Rendered when `sandbox/deps/` exists: `sandbox/deps/deps.go`, `adapters/availables/standard/new.go` | AssetTemplate |
 | `cli/**` | Rendered when `sandbox/internal/cli/` exists: `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`, `sandbox/internal/cli/climain.go`, the `help` handler, the `version` command | AssetTemplate |
 | `deplist/<dep>/**` | One installable dep, mirroring the target layout: its `sandbox/deps/<dep>/` contract and `adapters/libs/<lib>/` implementation | Dep |
-| `templates/*` | Single-file scaffolds rendered outside any group: `command_entries.yaml`, `command_handler.go` (by `add-command`), `entries.go` (per command, by `build`), `help_entries.yaml` (once, by `build`), `theme_index.md` and `doc_index.md` (per index, by `build`) | AssetTemplate |
+| `templates/*` | Single-file scaffolds rendered outside any group: `command_entries.yaml`, `command_handler.go` (by `add-command`), `entries.go` (per command, by `build`), `help_entries.yaml` (once, by `build`), `doc_doc.md` (by `add-doc`), `theme_index.md` and `doc_index.md` (per index, by `build`) | AssetTemplate |
 
 ---
 

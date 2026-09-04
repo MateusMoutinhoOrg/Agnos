@@ -86,6 +86,8 @@ agnos add-flag <name> --command <cmd> [--identifier <id>]... [--type string|bool
 agnos remove-flag <name-or-identifier> --command <cmd> [--path <dir>]  # drop a flag from entries.yaml, then rebuild
 agnos add-arg <name> --command <cmd> [--type ...] [--description <t>] [--example <e>]... [--default <v>] [--required] [--array] [--min <n>] [--max <n>] [--position <i>] [--path <dir>]  # insert a positional arg (at --position, else last), then rebuild; an array arg must stay last
 agnos remove-arg <name> --command <cmd> [--path <dir>]  # drop a positional arg from entries.yaml, then rebuild
+agnos add-doc <name> --description <text> [--theme <id>]... [--path <dir>]  # scaffold docs/<name>/{doc.md,props.yaml}, then rebuild; <name> is /-nested for a sub-doc; --theme repeats and is required on a first-level doc, refused on a sub-doc
+agnos remove-doc <name> [--path <dir>]  # delete docs/<name>/ (sub-docs and assets included), then rebuild
 agnos verify [--path <dir>] [--runtime go|none]  # check the schema (no writes), then hand the project to the runtime
 agnos build [--path <dir>] [--unsafe] [--runtime go|none] # run verify (unless --unsafe), re-render generated files, then hand the result to the runtime
 agnos compile --target <name>... [--path <dir>]  # run build, then cross-compile ./cmd/main into release/ once per --target (CGO off); --target repeats, or --target all for every one. Names: linux86 linuxarm64 linuxi32 mac86 macarm64 windows86 windowsi32
@@ -202,7 +204,8 @@ positional args are drained, anything still unread is an unexpected argument.
 - **`binds/actions.go`** registers the reusable operations in `api.Sandbox.Actions`
   (`Build`, `Compile`, `Verify`, `Start`, `DepsInit`, `DepsPurge`, `DepInstall`, `DepRemove`, `DepList`,
   `CliInit`, `CliPurge`, `AddCommand`, `RemoveCommand`, `SetCommand`, `AddFlag`,
-  `RemoveFlag`, `AddArg`, `RemoveArg`), each from `sandbox/internal/actions/<name>/`.
+  `RemoveFlag`, `AddArg`, `RemoveArg`, `AddDoc`, `RemoveDoc`), each from
+  `sandbox/internal/actions/<name>/`.
 
 > **Self-hosting status:** Agnos's own CLI layer has been bootstrapped onto this
 > shape. Every `sandbox/internal/commands/<name>/` holds `entries.yaml` + generated
@@ -270,9 +273,9 @@ renders only. Any other name is a usage error.
 
 Every follow-up build names its runtime through `api.BuildProps{Path, Runtime}`: the
 commands that add something (`start`, `cli-init`, `deps-init`, `dep-install`,
-`add-command`, `add-flag`, `add-arg`, `set-command`) pass `RuntimeGo`; the ones that remove
-something (`cli-purge`, `deps-purge`, `dep-remove`, `remove-command`, `remove-flag`,
-`remove-arg`) pass `RuntimeNone`, because dropping a command or a field can legitimately
+`add-command`, `add-flag`, `add-arg`, `set-command`, `add-doc`) pass `RuntimeGo`; the ones
+that remove something (`cli-purge`, `deps-purge`, `dep-remove`, `remove-command`,
+`remove-flag`, `remove-arg`, `remove-doc`) pass `RuntimeNone`, because dropping a command or a field can legitimately
 leave hand-written code referring to what is gone.
 
 **Asset groups.** Templates live under `assets/<group>/**`, each file at the path it will be
@@ -312,7 +315,8 @@ dest — it also emits each command's `sandbox/internal/commands/<name>/entries.
 `assets/templates/entries.go` (see `build/generate_command_entries.go`). The other
 `assets/templates/**` files are single-file scaffolds rendered outside any group:
 `command_entries.yaml` + `command_handler.go` are what `agnos add-command` writes for a new
-command (`internal/actions/add_command`).
+command (`internal/actions/add_command`), and `doc_doc.md` is the `doc.md` stub
+`agnos add-doc` writes for a new doc (`internal/actions/add_doc`).
 
 **entries.yaml editors (`internal/actions/{set_command,add_flag,remove_flag,add_arg,remove_arg}`).**
 The CLI-driven way to shape a command without touching files: each action loads
@@ -538,6 +542,9 @@ and Index the generated indexes. Rules that matter when changing code:
   `docs/Adapters/doc.md`; a new generated file is registered in
   `docs/GeneratedFiles/doc.md`.
 - Adding, renaming or deleting a doc is a directory plus a `props.yaml` plus a build —
-  never a hand-edited index; adding or removing a theme is an edit to
-  `AgnosConfig/themes.yaml` plus a build. See `docs/HandleDocuments/doc.md`. Links are
+  never a hand-edited index; `agnos add-doc <name> --description <t> [--theme <id>]...` and
+  `agnos remove-doc <name>` do it (`internal/actions/{add_doc,remove_doc}`, the same
+  scaffold-then-build shape as `add-command`/`remove-command`), and the doc name is the
+  directory under `docs/`, `/`-nested for a sub-doc. Adding or removing a theme is an edit
+  to `AgnosConfig/themes.yaml` plus a build. See `docs/HandleDocuments/doc.md`. Links are
   repository-rooted (`/docs/<DocName>/doc.md`); never link into `old/`.

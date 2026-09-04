@@ -66,4 +66,4 @@ Covers changing what `agnos build` renders: adding a template to an asset group 
 
 ### Add a single-file scaffold
 
-9. Put a template that is rendered to **one** destination outside any group, under `assets/templates/`, and render it with `utils.RenderTemplateToDest(deps, io, "templates/<file>", vars, dest)` from the action that owns it — `command_entries.yaml` and `command_handler.go` (rendered by `add-command`) and `entries.go` (rendered per command by `build`) are the existing ones.
+9. Put a template that is rendered to **one** destination outside any group, under `assets/templates/`, and render it with `utils.RenderTemplateToDest(deps, io, "templates/<file>", vars, dest)` from the action that owns it — `command_entries.yaml` and `command_handler.go` (rendered by `add-command`), `doc_doc.md` (rendered by `add-doc`) and `entries.go` (rendered per command by `build`) are the existing ones.

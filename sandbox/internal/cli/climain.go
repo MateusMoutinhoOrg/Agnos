@@ -9,6 +9,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	add_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_arg"
 	add_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_command"
+	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_doc"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_flag"
 	build "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/build"
 	cli_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_init"
@@ -24,6 +25,7 @@ import (
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_command"
+	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_doc"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
@@ -67,6 +69,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchAddArg(deps, verb)
 	case action == "add-command":
 		return dispatchAddCommand(deps, verb)
+	case action == "add-doc":
+		return dispatchAddDoc(deps, verb)
 	case action == "add-flag":
 		return dispatchAddFlag(deps, verb)
 	case action == "build":
@@ -97,6 +101,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchRemoveArg(deps, verb)
 	case action == "remove-command":
 		return dispatchRemoveCommand(deps, verb)
+	case action == "remove-doc":
+		return dispatchRemoveDoc(deps, verb)
 	case action == "remove-flag":
 		return dispatchRemoveFlag(deps, verb)
 	case action == "set-command":
@@ -410,6 +416,69 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_command.CommandHandler(deps, entries)
+}
+
+func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_doc.Entries{}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ "--theme", "-t" }); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "theme", []string{ "--theme", "-t" }, occurrence)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "theme", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Theme = append(entries.Theme, value)
+	}
+	if verb.GetOptionsSize([]string{ "--description", "-d" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{ "--description", "-d" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "description", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Description = value
+	} else {
+		deps.Std.Error("required flag 'description' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_doc.CommandHandler(deps, entries)
 }
 
 func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -1055,6 +1124,44 @@ func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return remove_command.CommandHandler(deps, entries)
+}
+
+func dispatchRemoveDoc(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_doc.Entries{}
+	if verb.GetOptionsSize([]string{ "--path" }) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{ "--path" }, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{ "--quiet", "-q" })
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_doc.CommandHandler(deps, entries)
 }
 
 func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {

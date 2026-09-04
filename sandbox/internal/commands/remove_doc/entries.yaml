@@ -1,0 +1,32 @@
+identifiers: ["remove-doc"]
+category: Documentation
+help: Delete a doc directory from docs/
+long-description: |
+  Deletes docs/<name>/ (doc.md, props.yaml, its assets and every sub-doc
+  nested under it) and runs build so the indexes that listed it are rewritten
+  without it. Dropping the last doc of a theme leaves that theme empty, which
+  `agnos verify` rejects: remove it from themes.yaml too.
+examples:
+  - "remove-doc HandleReports"
+  - "remove-doc PublicApi/api.AddDoc --path ./my-project"
+args:
+  - name: name
+    description: the doc directory under docs/, nested with / for a sub-doc (e.g. PublicApi/api.AddDoc)
+    examples:
+      - "remove-doc HandleReports"
+    type: string
+    required: true
+flags:
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "remove-doc HandleReports --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "remove-doc HandleReports -q"
+    type: boolean

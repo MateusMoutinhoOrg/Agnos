@@ -151,6 +151,98 @@ func SortDocs(docs []Doc) {
 	})
 }
 
+// DocSegments splits a user-typed doc name into the directory segments it
+// names under docs/ ("PublicApi/api.Actions" -> ["PublicApi", "api.Actions"]).
+// Empty segments — a leading, trailing or doubled slash — are dropped, so the
+// result is the doc's path relative to docs/.
+func DocSegments(name string) []string {
+	var segments []string
+	for _, segment := range strings.Split(strings.TrimSpace(name), "/") {
+		segment = strings.TrimSpace(segment)
+		if segment != "" {
+			segments = append(segments, segment)
+		}
+	}
+	return segments
+}
+
+// ValidateDocName reports whether a user-typed doc name is usable as a
+// directory path under docs/. Each segment becomes a directory name and is
+// linked from a generated index, so only letters, digits, dots, dashes and
+// underscores are allowed, and Index is reserved at the first level for the
+// generated theme indexes.
+func ValidateDocName(deps *deps.Deps, name string) error {
+	segments := DocSegments(name)
+	if len(segments) == 0 {
+		return deps.Std.Errorf("a doc needs a name")
+	}
+
+	for index, segment := range segments {
+		if index == 0 && segment == DocsIndexName {
+			return deps.Std.Errorf("invalid doc name %q: %s is reserved for the generated theme indexes", name, DocsIndexName)
+		}
+		for _, letter := range segment {
+			valid := (letter >= 'a' && letter <= 'z') ||
+				(letter >= 'A' && letter <= 'Z') ||
+				(letter >= '0' && letter <= '9') ||
+				letter == '.' || letter == '-' || letter == '_'
+			if !valid {
+				return deps.Std.Errorf(
+					"invalid doc name %q: only letters, digits, dots, dashes, underscores and / are allowed (it becomes the directory %s)",
+					name, DocDir(name))
+			}
+		}
+	}
+	return nil
+}
+
+// DocDir is the project-relative directory holding a doc
+// ("PublicApi/api.Actions" -> "docs/PublicApi/api.Actions").
+func DocDir(name string) string {
+	return DocsDir + "/" + strings.Join(DocSegments(name), "/")
+}
+
+// DocParentDir is the project-relative directory holding a doc's parent — the
+// docs/ directory itself for a first-level doc.
+func DocParentDir(name string) string {
+	segments := DocSegments(name)
+	if len(segments) < 2 {
+		return DocsDir
+	}
+	return DocsDir + "/" + strings.Join(segments[:len(segments)-1], "/")
+}
+
+// DocTitle is the human-readable name a new doc is declared with: its last
+// segment, with CamelCase split into words ("HandleDocuments" -> "Handle
+// Documents"). A segment already carrying its own punctuation — a dot, dash,
+// underscore or space, as in "api.Actions" — is kept verbatim.
+func DocTitle(name string) string {
+	segments := DocSegments(name)
+	if len(segments) == 0 {
+		return ""
+	}
+	title := segments[len(segments)-1]
+
+	if strings.ContainsAny(title, ".-_ ") {
+		return title
+	}
+
+	// A word starts where a lowercase letter or a digit is followed by an
+	// uppercase one, so an acronym stays whole ("SmartIO" -> "Smart IO").
+	var out strings.Builder
+	letters := []rune(title)
+	for index, letter := range letters {
+		if index > 0 && letter >= 'A' && letter <= 'Z' {
+			previous := letters[index-1]
+			if (previous >= 'a' && previous <= 'z') || (previous >= '0' && previous <= '9') {
+				out.WriteString(" ")
+			}
+		}
+		out.WriteRune(letter)
+	}
+	return out.String()
+}
+
 // LastSegment is the final element of a project-relative path
 // ("docs/PublicApi" -> "PublicApi").
 func LastSegment(path string) string {

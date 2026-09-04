@@ -24,6 +24,8 @@ type Actions struct {
 	RemoveFlag    func(path string, command string, name string) error
 	AddArg        func(props FieldProps) error
 	RemoveArg     func(path string, command string, name string) error
+	AddDoc        func(props DocProps) error
+	RemoveDoc     func(path string, name string) error
 }
 ```
 
@@ -59,6 +61,9 @@ Every operation `agnos` performs, as function fields filled by `sandbox/binds/ac
 
 ### AddFlag / RemoveFlag / AddArg / RemoveArg
 `AddFlag(props FieldProps) error` and `AddArg(props FieldProps) error` validate the field (type, literals, `Required` against booleans and defaults, an array arg staying last), insert it at `props.Position`, build. `RemoveFlag(path, command, name) error` matches by name or identifier; `RemoveArg(path, command, name) error` by name; both build with `none`.
+
+### AddDoc / RemoveDoc
+`AddDoc(props DocProps) error` writes a new doc's `doc.md` stub and `props.yaml` under `docs/<props.Name>/`, then builds — refusing an existing doc, an unknown theme, a first-level doc with no theme, a sub-doc with one, and a sub-doc whose parent is not a doc. `RemoveDoc(path, name) error` deletes the doc directory whole, sub-docs and assets included, then builds with `none`. Both leave every index to `Build`, which rewrites them from the `props.yaml` files; see [HandleDocuments](/docs/HandleDocuments/doc.md).
 
 ## Examples
 

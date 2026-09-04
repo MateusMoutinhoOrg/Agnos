@@ -68,6 +68,17 @@ type CommandProps struct {
 	Examples        []string
 }
 
+// DocProps describes one doc to create under docs/. Name is the doc's
+// directory, optionally nested under its parent ("PublicApi/api.Actions").
+// Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs
+// to: required on a first-level doc, forbidden on a sub-doc.
+type DocProps struct {
+	Path        string
+	Name        string
+	Description string
+	Themes      []string
+}
+
 type Actions struct {
 	Build         func(props BuildProps) error
 	Compile       func(props CompileProps) error
@@ -87,4 +98,6 @@ type Actions struct {
 	RemoveFlag    func(path string, command string, name string) error
 	AddArg        func(props FieldProps) error
 	RemoveArg     func(path string, command string, name string) error
+	AddDoc        func(props DocProps) error
+	RemoveDoc     func(path string, name string) error
 }

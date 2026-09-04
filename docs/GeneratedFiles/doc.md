@@ -76,3 +76,12 @@ Every file `agnos` writes into a project, grouped by the command that first writ
 |------|-------|----------------------|-------------|
 | `sandbox/internal/commands/<name>/entries.yaml` | `templates/command_entries.yaml` | once | `identifiers`, `category`, `help` — grown afterwards by `add-flag`, `add-arg`, `set-command`, which rewrite it in canonical (alphabetical) key order. |
 | `sandbox/internal/commands/<name>/handler.go` | `templates/command_handler.go` | once | A stub `CommandHandler` printing `<name> called`. The project's to fill. |
+
+---
+
+## Written by `add-doc <name>`
+
+| File | Group | Rewritten by `build` | Description |
+|------|-------|----------------------|-------------|
+| `docs/<name>/props.yaml` | — | once | `name` (the last segment, CamelCase split into words), `description`, `themes` — rendered by `docpropsconf`, so keys come out in canonical (alphabetical) order. Every index is generated from this file. |
+| `docs/<name>/doc.md` | `templates/doc_doc.md` | once | A stub carrying the H1 and the `Description` section. The writer's to fill, following the specs indexed by [Specs](/docs/Specs/doc.md). |

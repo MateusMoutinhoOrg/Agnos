@@ -5,6 +5,7 @@ import (
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_arg"
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_command"
+	addDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_doc"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
@@ -17,6 +18,7 @@ import (
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
 	removeCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_command"
+	removeDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_doc"
 	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_flag"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
@@ -77,5 +79,11 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	}
 	sandbox.Actions.RemoveArg = func(path string, command string, name string) error {
 		return removeArgAction.RemoveArg(deps, path, command, name)
+	}
+	sandbox.Actions.AddDoc = func(props api.DocProps) error {
+		return addDocAction.AddDoc(deps, props)
+	}
+	sandbox.Actions.RemoveDoc = func(path string, name string) error {
+		return removeDocAction.RemoveDoc(deps, path, name)
 	}
 }

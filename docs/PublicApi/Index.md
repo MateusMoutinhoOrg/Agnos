@@ -13,6 +13,7 @@ Every public-facing entry of the library, grouped by role, with a page per symbo
 | [api.StartProps](/docs/PublicApi/api.StartProps/doc.md) | `Path`, `ProjectName`, optional `Module` and `Force` for one scaffold |
 | [api.FieldProps](/docs/PublicApi/api.FieldProps/doc.md) | One flag or positional argument to add to a command's declaration |
 | [api.CommandProps](/docs/PublicApi/api.CommandProps/doc.md) | The command-level keys `SetCommand` may rewrite |
+| [api.DocProps](/docs/PublicApi/api.DocProps/doc.md) | One documentation page to create: its directory, summary and themes |
 | [deps.Deps](/docs/PublicApi/deps.Deps/doc.md) | The dependency contract every adapter fills: one sub-contract struct per directory of `sandbox/deps/` |
 | [argvdeps.Lib](/docs/PublicApi/argvdeps.Lib/doc.md) | `Deps.Argvdeps` — a per-call argument-vector parser, the sandbox's copy of the Verb library |
 | [embeddeps.Lib](/docs/PublicApi/embeddeps.Lib/doc.md) | `Deps.Embeddeps` — read-only access to the assets compiled into the binary, and template rendering over them |

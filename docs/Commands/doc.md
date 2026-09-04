@@ -66,6 +66,19 @@ Flags may appear anywhere on the command line: the generated dispatch reads ever
 | `add-arg <name> --command <cmd> [--type …] [--description <t>] [--example <e>]… [--default <v>] [--required] [--array] [--min <n>] [--max <n>] [--position <i>]` | Inserts a positional argument at `--position` (else last) and runs `build`. An `--array` argument must stay last. |
 | `remove-arg <name> --command <cmd>` | Drops a positional argument, shifting later ones up, then runs `build` with the `none` runtime. |
 
+---
+
+## Documentation
+
+| Command | Description |
+|---------|-------------|
+| `add-doc <name> --description <text> [--theme <id>]…` | Writes `docs/<name>/doc.md` (a stub) and `docs/<name>/props.yaml` (`name`, `description`, `themes`), then runs `build` so the indexes list it. `--theme`/`-t` repeats and is **required on a first-level doc**, **refused on a sub-doc**; an id not declared in `themes.yaml` is refused. A nested `<name>` (`PublicApi/api.AddDoc`) creates a sub-doc and its parent must already be a doc. `Index` is refused: it is the generated theme index directory. |
+| `remove-doc <name>` | Deletes `docs/<name>/` — `doc.md`, `props.yaml`, its assets and every sub-doc — then runs `build` with the `none` runtime, which rewrites the indexes without it. |
+
+`<name>` is the doc's directory under `docs/`, `/`-nested for a sub-doc. Its `name` key is derived from the last segment, CamelCase split into words (`HandleReports` → `Handle Reports`); a segment carrying its own punctuation (`api.AddDoc`) is kept verbatim. Both commands leave `doc.md`'s content to the writer — the rules it must follow are in [HandleDocuments](/docs/HandleDocuments/doc.md). Removing the last doc of a theme leaves that theme empty, which `verify` rejects: drop it from `themes.yaml` too.
+
+---
+
 `--command`/`-c` accepts the command's identifier or its package name. `--required`/`-r` is refused on a boolean and on a field with `--default`. `--min` / `--max` apply to `int` and `float` only. Every key of a field, and what the dispatch does with it, is in [EntriesYaml](/docs/EntriesYaml/doc.md).
 
 ---

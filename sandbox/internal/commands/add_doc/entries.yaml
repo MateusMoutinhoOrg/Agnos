@@ -1,0 +1,47 @@
+identifiers: ["add-doc"]
+category: Documentation
+help: Scaffold a new doc directory under docs/
+long-description: |
+  Creates docs/<name>/ with a doc.md stub and the props.yaml declaring it,
+  then runs build so the theme indexes and the parent's Index.md list it.
+  A first-level doc needs at least one --theme of themes.yaml; a nested name
+  (docs/<Parent>/<Name>) creates a sub-doc, which takes no theme. Refuses to
+  overwrite an existing doc.
+examples:
+  - "add-doc HandleReports --theme development --description \"How a report is written and regenerated\""
+  - "add-doc PublicApi/api.AddDoc --description \"The AddDoc action of the sandbox api\""
+args:
+  - name: name
+    description: the doc directory under docs/, nested with / for a sub-doc (e.g. PublicApi/api.AddDoc)
+    examples:
+      - "add-doc HandleReports"
+    type: string
+    required: true
+flags:
+  - name: theme
+    identifiers: ["--theme", "-t"]
+    description: a theme id of themes.yaml the doc belongs to (repeatable; first-level docs only)
+    examples:
+      - "--theme development --theme cli-usage"
+    type: string
+    array: true
+  - name: description
+    identifiers: ["--description", "-d"]
+    description: the one-line summary every index lists the doc with
+    examples:
+      - "--description \"How a report is written and regenerated\""
+    type: string
+    required: true
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "add-doc HandleReports --theme development -d \"...\" --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    examples:
+      - "add-doc HandleReports --theme development -d \"...\" -q"
+    type: boolean

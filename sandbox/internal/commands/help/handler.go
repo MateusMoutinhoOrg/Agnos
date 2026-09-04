@@ -110,6 +110,23 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{ "add-doc" },
+		Category:        "Documentation",
+		Description:     "Scaffold a new doc directory under docs/",
+		LongDescription: "Creates docs/<name>/ with a doc.md stub and the props.yaml declaring it,\nthen runs build so the theme indexes and the parent's Index.md list it.\nA first-level doc needs at least one --theme of themes.yaml; a nested name\n(docs/<Parent>/<Name>) creates a sub-doc, which takes no theme. Refuses to\noverwrite an existing doc.\n",
+		Examples:        []string{ "add-doc HandleReports --theme development --description \"How a report is written and regenerated\"", "add-doc PublicApi/api.AddDoc --description \"The AddDoc action of the sandbox api\"",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--theme", "-t" }, Description: "a theme id of themes.yaml the doc belongs to (repeatable; first-level docs only)", Examples: []string{ "--theme development --theme cli-usage",  }, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{ "--description", "-d" }, Description: "the one-line summary every index lists the doc with", Examples: []string{ "--description \"How a report is written and regenerated\"",  }, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "add-doc HandleReports --theme development -d \"...\" --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "add-doc HandleReports --theme development -d \"...\" -q",  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the doc directory under docs/, nested with / for a sub-doc (e.g. PublicApi/api.AddDoc)", Examples: []string{ "add-doc HandleReports",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{ "add-flag" },
 		Category:        "Cli System",
 		Description:     "Add a flag to a command's entries.yaml",
@@ -339,6 +356,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the command to delete (identifier or package name)", Examples: []string{ "remove-command my-feature",  }, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{ "remove-doc" },
+		Category:        "Documentation",
+		Description:     "Delete a doc directory from docs/",
+		LongDescription: "Deletes docs/<name>/ (doc.md, props.yaml, its assets and every sub-doc\nnested under it) and runs build so the indexes that listed it are rewritten\nwithout it. Dropping the last doc of a theme leaves that theme empty, which\n`agnos verify` rejects: remove it from themes.yaml too.\n",
+		Examples:        []string{ "remove-doc HandleReports", "remove-doc PublicApi/api.AddDoc --path ./my-project",  },
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{ "--path" }, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{ "remove-doc HandleReports --path ./my-project",  }, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{ "--quiet", "-q" }, Description: "Quiets the cli output", Examples: []string{ "remove-doc HandleReports -q",  }, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the doc directory under docs/, nested with / for a sub-doc (e.g. PublicApi/api.AddDoc)", Examples: []string{ "remove-doc HandleReports",  }, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

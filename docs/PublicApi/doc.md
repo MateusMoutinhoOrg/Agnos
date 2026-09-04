@@ -57,6 +57,9 @@ Create, delete, and rewrite a command's declaration.
 ### [api.Actions.AddFlag / RemoveFlag / AddArg / RemoveArg](/docs/PublicApi/api.Actions/doc.md#addflag--removeflag--addarg--removearg)
 Add and drop a command's fields.
 
+### [api.Actions.AddDoc / RemoveDoc](/docs/PublicApi/api.Actions/doc.md#adddoc--removedoc)
+Create and delete a doc directory of `docs/`, leaving every index to the build.
+
 ---
 
 ## Props
@@ -75,6 +78,9 @@ One flag or positional argument to add: name, identifiers, type, description, ex
 
 ### [api.CommandProps](/docs/PublicApi/api.CommandProps/doc.md)
 The command-level keys `SetCommand` may rewrite.
+
+### [api.DocProps](/docs/PublicApi/api.DocProps/doc.md)
+One doc to create: its directory under `docs/`, its one-line description, and its themes.
 
 ---
 

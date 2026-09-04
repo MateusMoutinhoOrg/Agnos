@@ -20,12 +20,22 @@ Covers creating, renaming, moving, and deleting a doc in [docs/](/docs/), and re
 ## Add a Document
 1. Decide whether the doc is a **workflow** (numbered steps toward one goal), a **lookup**, or an **explanation** — the kind picks its specification, not its location. Every doc is a directory of `docs/`.
 2. Decide where it belongs: a first-level `docs/<DocName>/` for a doc a theme index lists, or `docs/<Parent>/<DocName>/` for one that only makes sense inside another doc (a symbol page, a specification).
-3. Check [Specs](/docs/Specs/doc.md) for the specifications matching the files you are about to write, and read them first.
-4. Create the directory and write `doc.md`, paying special attention to:
+3. Scaffold it with `add-doc`, which writes both files and runs the build:
+   ```bash
+   # a first-level doc: one --theme per theme id of themes.yaml, repeatable
+   agnos add-doc HandleReports --theme development \
+     --description "How a report is written and regenerated"
+
+   # a sub-doc: nested name, and no theme — its parent's Index.md lists it
+   agnos add-doc HandleReports/Layout \
+     --description "The sections every generated report carries"
+   ```
+   The `name` key is derived from the last segment (`HandleReports` → `Handle Reports`); a segment with its own punctuation (`api.AddDoc`) is kept verbatim. Edit `props.yaml` afterwards to change it or to add an `order`.
+4. Check [Specs](/docs/Specs/doc.md) for the specifications matching the files you are about to write, and read them first.
+5. Replace the stub `doc.md`, paying special attention to:
    - **Topic-driven structure** — one concern per section.
    - **Conciseness** — short, direct sentences.
    - **Heading hierarchy** — never skip heading levels.
-5. Write `props.yaml` next to it: `name`, `description`, `themes` (first-level docs only) and an optional `order`.
 6. Add cross-references using **repository-rooted paths** to the other doc's `doc.md`, and add the reverse link in every doc that should point back to this one.
 7. Run a build so the indexes catch up:
    ```bash
@@ -54,6 +64,9 @@ Covers creating, renaming, moving, and deleting a doc in [docs/](/docs/), and re
    grep -rn "DocName/doc.md" --include="*.md" . --exclude-dir=old
    ```
 2. For each reference, remove it or repoint it to the doc that now covers the topic.
-3. Delete the doc directory, sub-docs and assets included.
-4. Run `agnos build`: the theme indexes are rewritten whole, and the parent's `Index.md` loses the row.
+3. Delete the doc directory, sub-docs and assets included — `remove-doc` does it and rebuilds:
+   ```bash
+   agnos remove-doc HandleReports
+   ```
+4. The theme indexes are rewritten whole by that build, and the parent's `Index.md` loses the row.
 5. Remove the doc's entry from [Structure](/docs/Structure/doc.md) if it is explicitly listed, and drop its theme from `themes.yaml` if it was the last doc of that theme — `verify` rejects a theme with no docs.
