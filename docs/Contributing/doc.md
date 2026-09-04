@@ -58,7 +58,7 @@ Write `handler.go`: call the action, return `api.ExitFailure` on error, `Printf`
 ## Docs
 
 - A doc is `docs/<Name>/{doc.md,props.yaml}`; sub-docs nest as `docs/<Name>/<Sub>/`. Other files in a doc dir are assets.
-- Create/delete with `agnos add-doc <Name> --description "..." --theme <id>` / `agnos remove-doc <Name>`; a theme is an entry in `AgnosConfig/themes.yaml` (`cli-usage`, `lib-usage`, `development`) and only groups the doc into a section of `README.md`. `README.md` and every `Index.md` are generated on build; never edit them.
+- Create/delete with `agnos add-doc <Name> --description "..." --theme <id>` / `agnos remove-doc <Name>`; a theme is an entry in `AgnosConfig/themes.yaml` (`cli-usage`, `lib-usage`, `api-usage`, `architecture`, `development`, `deployment`, `reference`) and only groups the doc into a section of `README.md`. `README.md` and every `Index.md` are generated on build; never edit them.
 - `docs/LibUsage/` and `docs/PublicApi/` are generated on every build (`assets/all/docs/`); PublicApi's content is the doc comments of `sandbox/api/` and `sandbox/deps/`, so it is changed by editing those comments, never the page.
 - Keep docs short: tables and commands over prose. One page per topic; no sub-doc unless the content is a real list of independent items.
 - Links are relative to the file that carries them: `../X/doc.md` inside `docs/`, `docs/X/doc.md` in `README.md` / `ReadmeHeader.md`.

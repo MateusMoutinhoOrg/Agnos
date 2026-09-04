@@ -1,6 +1,21 @@
-- description: Documentation explaning how to use the lib
+- description: Driving the CLI from a terminal - install, commands, flags, exit codes
+  id: cli-usage
+  name: CliUsage
+- description: Using the project as a Go module - wiring the deps, calling the sandbox
   id: lib-usage
   name: LibUsage
-- description: 'Documentation explaning how to to. build the project, and how to modify the project '
+- description: The exported surface - contracts, deps and what each one promises
+  id: api-usage
+  name: ApiUsage
+- description: How the project is put together - layers, boundaries, data flow
+  id: architecture
+  name: Architecture
+- description: Changing this repository - schema, build mechanics, recipes
   id: development
   name: Development
+- description: Shipping the project - build targets, versioning, release
+  id: deployment
+  name: Deployment
+- description: Lookup tables - schemas, file formats, generated file listings
+  id: reference
+  name: Reference

@@ -4,6 +4,18 @@
 - description: Using Agnos as a Go module - deps injection, actions, public API
   id: lib-usage
   name: LibUsage
+- description: The exported surface - contracts, deps and what each one promises
+  id: api-usage
+  name: ApiUsage
+- description: How the project is put together - layers, boundaries, data flow
+  id: architecture
+  name: Architecture
 - description: Changing this repository - schema, build mechanics, recipes
   id: development
   name: Development
+- description: Shipping the project - build targets, versioning, release
+  id: deployment
+  name: Deployment
+- description: Lookup tables - schemas, file formats, generated file listings
+  id: reference
+  name: Reference
