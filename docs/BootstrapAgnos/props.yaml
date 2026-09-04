@@ -1,0 +1,5 @@
+name: "Bootstrap Agnos with Itself"
+description: "Regenerate this checkout with the binary compiled from it, then rebuild and install"
+themes:
+  - development
+order: 11

@@ -1,0 +1,5 @@
+name: "Handle Asset Groups and Collectors"
+description: "Add a template to an asset group, and feed it a variable through a collector"
+themes:
+  - development
+order: 16

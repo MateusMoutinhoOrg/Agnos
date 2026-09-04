@@ -1,0 +1,5 @@
+name: "Installable Deps"
+description: "Every installable dep, the contract and adapter it brings, and its module"
+themes:
+  - cli-usage
+order: 23

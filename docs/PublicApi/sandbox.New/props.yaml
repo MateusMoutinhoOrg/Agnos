@@ -1,0 +1,3 @@
+name: "sandbox.New"
+description: "Injects a `*deps.Deps` into the sandbox and returns the `*api.Sandbox` carrying every action and the command-line interface"
+order: 1

@@ -1,0 +1,5 @@
+name: "Regenerate and Check a Project"
+description: "Check a project against the schema and re-render its generated files"
+themes:
+  - cli-usage
+order: 7

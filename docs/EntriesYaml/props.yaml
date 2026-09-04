@@ -1,0 +1,5 @@
+name: "The entries.yaml Declaration"
+description: "Every key of a command declaration and what it makes the generated code do"
+themes:
+  - cli-usage
+order: 22

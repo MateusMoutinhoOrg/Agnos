@@ -1,0 +1,5 @@
+name: "Handle Documents"
+description: "Create, rename, move, or delete a doc without leaving broken indexes or links"
+themes:
+  - development
+order: 18

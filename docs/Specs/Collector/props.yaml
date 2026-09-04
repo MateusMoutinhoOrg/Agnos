@@ -1,0 +1,3 @@
+name: "Collector"
+description: "`sandbox/internal/actions/build/collect_*.go`"
+order: 18

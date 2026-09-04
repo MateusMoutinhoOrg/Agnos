@@ -1,0 +1,3 @@
+name: "ExplanationDocs"
+description: "The `doc.md` of an explanation doc \u2014 background on one mechanic, e.g. `SandboxIsolation`, `BuildPipeline`"
+order: 7

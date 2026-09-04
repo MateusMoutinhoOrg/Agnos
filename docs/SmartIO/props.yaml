@@ -1,0 +1,5 @@
+name: "SmartIO"
+description: "The transactional filesystem rooted at `--path` every action writes through"
+themes:
+  - development
+order: 31

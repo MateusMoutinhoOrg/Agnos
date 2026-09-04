@@ -1,0 +1,3 @@
+name: "api.Sandbox"
+description: "What `sandbox.New` hands back: an `Actions` struct and a `Cli` struct, one field per file of `sandbox/api/`"
+order: 3

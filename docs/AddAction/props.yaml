@@ -1,0 +1,5 @@
+name: "Add an Action"
+description: "Add a reusable operation: the two-file action, its contract field and its binder"
+themes:
+  - development
+order: 13

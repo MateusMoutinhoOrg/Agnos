@@ -1,0 +1,3 @@
+name: "api.Cli"
+description: "The whole command-line interface as one function, plus the three exit-code constants"
+order: 4

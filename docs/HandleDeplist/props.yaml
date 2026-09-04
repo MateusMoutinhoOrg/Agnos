@@ -1,0 +1,5 @@
+name: "Add an Installable Dep"
+description: "Add a capability to the set `dep-install` can render, and pin its module"
+themes:
+  - development
+order: 15

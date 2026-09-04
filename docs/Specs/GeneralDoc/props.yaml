@@ -1,0 +1,3 @@
+name: "GeneralDoc"
+description: "Every `doc.md` and every other `.md` file in the project"
+order: 1

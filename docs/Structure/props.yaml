@@ -1,0 +1,5 @@
+name: "Project Structure"
+description: "The project's schema: which kind of file lives where, which are generated, and its spec"
+themes:
+  - development
+order: 28

@@ -1,0 +1,5 @@
+name: "Generated Files"
+description: "Every file `agnos` writes into a project, and whether builds overwrite it"
+themes:
+  - cli-usage
+order: 24

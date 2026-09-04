@@ -49,12 +49,12 @@ go vet ./cmd/... ./sandbox/... ./adapters/...   # never ./... — assets/ holds 
 # Cross-compile any target: set GOOS/GOARCH, keep CGO_ENABLED=0, compile ./cmd/main only.
 # Targets: darwin/amd64 mac86.bin, darwin/arm64 macarm64.bin, linux/amd64 linux86.out,
 # linux/arm64 linuxarm64.out, linux/386 linuxi32.out, windows/amd64 windows86.exe,
-# windows/386 windowsi32.exe — see docs/Tutorials/Build.md.
+# windows/386 windowsi32.exe — see docs/Build/doc.md.
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o release/mac86.bin ./cmd/main
 
 # Bootstrap + install: compile this tree, have THAT binary run `agnos build` over the tree
 # (so the installed agnos never rewrites the repo to an older shape), rebuild, install
-# to /usr/local/bin/agnos — full steps (every OS) in docs/Tutorials/BootstrapAgnos.md
+# to /usr/local/bin/agnos — full steps (every OS) in docs/BootstrapAgnos/doc.md
 go build -o release/bootstrap.bin ./cmd/main
 ./release/bootstrap.bin build
 CGO_ENABLED=0 go build -o release/agnos ./cmd/main && sudo mv release/agnos /usr/local/bin/agnos
@@ -62,7 +62,7 @@ CGO_ENABLED=0 go build -o release/agnos ./cmd/main && sudo mv release/agnos /usr
 
 Never run an already-installed `agnos build` against this repo after changing templates or
 collectors: compile first (`go build -o release/bootstrap.bin ./cmd/main`) and run *that*
-binary (see `docs/Tutorials/BootstrapAgnos.md`). `agnos build` also runs `go build` over the
+binary (see `docs/BootstrapAgnos/doc.md`). `agnos build` also runs `go build` over the
 schema dirs, so a broken generation fails there.
 
 There is currently **no test suite** (`*_test.go` files) and no lint config beyond `go vet`.
@@ -246,6 +246,10 @@ returns one error listing every violation:
 - Every file in `sandbox/binds/` mirrors a file of the same name in `sandbox/api/` and
   declares only functions (no top-level types/consts/vars).
 - `adapters/` holds only the `availables` and `libs` directories.
+- Every doc directory of `docs/` holds a parsable `props.yaml`; every theme it names is
+  declared in `themes.yaml`; every first-level doc names at least one theme and no sub-doc
+  names any; every theme of `themes.yaml` is named by at least one doc
+  (`check_docs.go`; a project with no `docs/` is exempt).
 
 The `build` **command** handler runs `verifyAction.Verify` before `buildAction.Build` unless
 `--unsafe` is passed; the `build` **action** (and the follow-up `build` after
@@ -285,12 +289,13 @@ embedding a non-template file. A missing target is a hard build error (unparsabl
 `render`). `assets/all/README.md` is a single `render` call against
 `{{.ConfigDir}}/docs/ReadmeHeader.md` (`ConfigDir` = `config.ProjectName + "Config"`)
 followed by a "Documentation Index" table that ranges over `{{.Themes}}` (one row per
-theme, linking `/docs/Index/<Name>.md`) and a `copy "LICENSE"`, so a
+theme, linking `/docs/Index/<Id>.md`) and a `copy "LICENSE"`, so a
 project's README body is the hand-editable `AgnosConfig/docs/ReadmeHeader.md` — itself a
 template — with the theme index and the project's `LICENSE` appended, and `README.md` is
-regenerated on every build. `{{.Themes}}` comes from `BuildInternal`'s `loadThemesConf`
+regenerated on every build. `{{.Themes}}` comes from `utils.LoadThemesConf`
 (reads `<ProjectName>Config/themes.yaml` via `themesconf`, a hard error if missing), a
-`[]themesconf.Theme` (`Name`/`Id`/`Description`). The groups: `start` (config skeleton written by `agnos start`,
+`[]themesconf.Theme` (`Name`/`Id`/`Description`) — the same list `GenerateDocIndexes` writes
+one `docs/Index/<Id>.md` per entry from. The groups: `start` (config skeleton written by `agnos start`,
 including `AgnosConfig/docs/ReadmeHeader.md`),
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
 `sandbox/deps` exists), `cli` (the CLI layer — `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`,
@@ -369,7 +374,11 @@ dirs, emitting one `{{.Title}} {{.Name}}.Lib` field (and its import) per dir in
 `adapters/libs/<x>/` dirs, emitting one `{{.Name}}.Bind(&deps)` call (and its import) per lib
 in `{{range .AdapterLibs}}` (`adapters/availables/standard/new.go`). Every `adapters/libs/<x>`
 package therefore exposes its binder under the single uniform name `Bind(deps *deps.Deps)`.
-`CollectCommands` is the exception to the one-line shape: it reads each
+`CollectDocs` is one of the two exceptions to the one-line shape: it walks `docs/`
+recursively through `utils.CollectDocTree`, parsing every doc's `props.yaml` and returning
+the sorted `[]utils.Doc` tree that `GenerateDocIndexes` turns into `docs/Index/<theme-id>.md`
+and `<doc>/Index.md` (see **Documentation** below).
+`CollectCommands` is the other: it reads each
 `sandbox/internal/commands/<x>/entries.yaml` through `parsables/commandconf` and returns a
 rich `map[string]any` per command (identifiers, category, help text, and a precomputed
 `Flags`/`Args` list carrying Go field names, types, getter names, default literals and a
@@ -379,7 +388,9 @@ the `{{range .Commands}}` loops in the generated `sandbox/internal/cli/climain.g
 below. Every command package therefore exposes its handler under the single uniform name
 `CommandHandler(deps *deps.Deps, entries *Entries) int`.
 
-`BuildInternal` also sets `HasCli` (`sandbox/internal/cli` exists) alongside `HasDeps`;
+`BuildInternal` runs `CollectDocs` + `GenerateDocIndexes` right after loading themes.yaml,
+before any group is rendered, so `README.md` and the theme indexes come from one read of the
+same file. `BuildInternal` also sets `HasCli` (`sandbox/internal/cli` exists) alongside `HasDeps`;
 when true it calls `GenerateHelpEntriesYaml` (**before** `CollectCommands`), then
 `GenerateCommandEntries` (one `entries.go` per command) and renders the `cli` group — so
 once `cli-init` has run, every later `agnos build` regenerates `climain.go` and the `help`
@@ -435,7 +446,8 @@ themselves. `rootedPath` is idempotent (a path already under `Root` is left alon
 Each `sandbox/internal/parsables/<name>conf/` package is a small YAML-or-gomod parser with a
 fixed shape: `api.go` (struct + `Render func() string`), `new.go` (parse from string),
 `new_empty.go` (defaults), `bind_methods.go`, `render.go`. `moduleconf` parses `go.mod`
-directly. `agnos start` renders the `start` asset group (`project.yaml`, `themes.yaml`, `ignore.yaml`,
+directly; `docpropsconf` parses a doc's `docs/**/props.yaml` (`name`, `description`,
+`themes`, optional `order` — `HasOrder` distinguishes an absent key from `order: 0`). `agnos start` renders the `start` asset group (`project.yaml`, `themes.yaml`, `ignore.yaml`,
 `paths.yaml`, `docs/ReadmeHeader.md`) into `AgnosConfig/`; `agnos build` reads them back
 (`docs/ReadmeHeader.md` is re-rendered into `README.md` on every build via the `render`
 native function — see **Asset groups**).
@@ -486,28 +498,46 @@ through commands alone, spending no tokens on file contents.
 
 ## Documentation (`docs/`)
 
-`README.md` + `docs/` is the human-facing documentation, shaped like the old template's docs
-(`old/docs/`, now superseded). Four **themes**, one index each under `docs/Index/`
-(`CliUsage`, `GeneratedProject`, `LibUsage`, `Development`); pages live flat under
-`docs/Tutorials/` (one goal per page, numbered steps) and `docs/References/` (lookups and
-explanations), plus `docs/References/PublicApi/<pkg>.<Symbol>.md` detail pages and
-`docs/References/Specs/<Spec>/{Specs.md,sample.*}` specifications. Every `.md` file follows
-the specs indexed by `docs/References/Specs.md`. Each `docs/References/Specs/<Spec>/sample.*`
-that is Go carries a `//go:build ignore` line so `agnos build`'s module-wide `go mod tidy`
-never tries to resolve its illustrative imports. Code files follow the code specs there
-(Contract, Binder, DepsContract, AdapterLib, Available, CommandEntries, CommandHandler,
-Action, Collector, Parsable, Dep, AssetTemplate, CliMain). Rules that matter when changing
-code:
+`README.md` + `docs/` is the human-facing documentation. **Every doc is a directory**:
+`docs/<DocName>/` holds `doc.md` (what a reader opens) and `props.yaml` (its declaration:
+`name`, `description`, `themes`, optional `order`), plus — recursively, to any depth — its
+sub-doc directories of the same shape. Any other file in a doc directory (a `sample.go`, an
+image) is an **asset**: carried by the doc, ignored by the collector. `Index` is reserved at
+the first level.
+
+**Every index is generated by `agnos build`, never hand-written.** `CollectDocs`
+(`utils.CollectDocTree`) walks `docs/`, parsing each `props.yaml` through
+`parsables/docpropsconf` and sorting by `order` then name; `GenerateDocIndexes` then removes
+`docs/Index/` and rewrites it whole — one `docs/Index/<theme-id>.md` per entry of
+`AgnosConfig/themes.yaml`, listing the first-level docs whose `props.yaml` names that id —
+plus one `<doc>/Index.md` per doc that has sub-docs, listing its direct sub-docs. Both come
+from `assets/templates/{theme_index,doc_index}.md`. A project with no `docs/` generates
+nothing. `README.md` links `/docs/Index/{{ .Id }}.md`, one row per theme.
+
+`verify` (`verify/check_docs.go`) enforces the tree: a missing or unparsable `props.yaml`, a
+theme id absent from `themes.yaml`, a first-level doc with no themes, a sub-doc *with*
+themes, and a theme no doc names are each a violation.
+
+The themes are `cli-usage`, `lib-usage` and `development`. `docs/PublicApi/<pkg>.<Symbol>/`
+holds one sub-doc per public symbol and `docs/Specs/<Spec>/` one sub-doc per specification
+(its `sample.*` sitting beside `doc.md` as an asset). Every `.md` file follows the specs
+indexed by `docs/Specs/doc.md`. Each `docs/Specs/<Spec>/sample.*` that is Go carries a
+`//go:build ignore` line so `agnos build`'s module-wide `go mod tidy` never tries to resolve
+its illustrative imports. Code files follow the code specs there (Contract, Binder,
+DepsContract, AdapterLib, Available, CommandEntries, CommandHandler, Action, Collector,
+Parsable, Dep, AssetTemplate, CliMain); documentation files follow GeneralDoc plus one of
+TutorialDocs / ReferenceDocs / ExplanationDocs, with DocProps governing every `props.yaml`
+and Index the generated indexes. Rules that matter when changing code:
 
 - A pattern established or changed in this file is mirrored in `docs/` in the same change,
-  and the reverse — `docs/References/Structure.md` is the schema map, `BuildPipeline.md` /
-  `SmartIO.md` / `CommandDispatch.md` the mechanics.
-- Adding a command updates `docs/References/Commands.md`; adding a dep updates
-  `docs/References/DepList.md`; adding an action or contract field adds a page under
-  `docs/References/PublicApi/` and a row in `PublicApi.md`; adding an adapter lib updates
-  `docs/References/Adapters.md`; a new generated file is registered in
-  `docs/References/GeneratedFiles.md`.
-- Adding, renaming or deleting a `.md` page updates its theme index in `docs/Index/`
-  (nested entry: `**description:**` line + one link per `##` topic section) — see
-  `docs/Tutorials/HandleDocuments.md`. Links are repository-rooted (`/docs/...`); never
-  link into `old/`.
+  and the reverse — `docs/Structure/doc.md` is the schema map, `docs/BuildPipeline/doc.md` /
+  `docs/SmartIO/doc.md` / `docs/CommandDispatch/doc.md` the mechanics.
+- Adding a command updates `docs/Commands/doc.md`; adding a dep updates
+  `docs/DepList/doc.md`; adding an action or contract field adds a sub-doc under
+  `docs/PublicApi/` and a row in its `doc.md`; adding an adapter lib updates
+  `docs/Adapters/doc.md`; a new generated file is registered in
+  `docs/GeneratedFiles/doc.md`.
+- Adding, renaming or deleting a doc is a directory plus a `props.yaml` plus a build —
+  never a hand-edited index; adding or removing a theme is an edit to
+  `AgnosConfig/themes.yaml` plus a build. See `docs/HandleDocuments/doc.md`. Links are
+  repository-rooted (`/docs/<DocName>/doc.md`); never link into `old/`.

@@ -1,0 +1,5 @@
+name: "Command Dispatch"
+description: "How `climain.go` is generated, parses argv into `Entries`, and reaches a handler"
+themes:
+  - development
+order: 33

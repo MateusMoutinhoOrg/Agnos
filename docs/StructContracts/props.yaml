@@ -1,0 +1,6 @@
+name: "Struct Contracts"
+description: "Why every contract is a struct of function fields, and how binders fill them"
+themes:
+  - lib-usage
+  - development
+order: 27

@@ -1,0 +1,3 @@
+name: "Index"
+description: "The generated indexes \u2014 `docs/Index/<theme-id>.md` and every `docs/**/Index.md`"
+order: 4

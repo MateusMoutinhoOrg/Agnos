@@ -1,0 +1,3 @@
+name: "embeddeps.Lib"
+description: "`Deps.Embeddeps` \u2014 read-only access to the assets compiled into the binary, and template rendering over them"
+order: 13

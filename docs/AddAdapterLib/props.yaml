@@ -1,0 +1,6 @@
+name: "Add a Capability to a Project"
+description: "Write the contract and adapter pair for an effect no installable dep provides"
+themes:
+  - cli-usage
+  - development
+order: 6

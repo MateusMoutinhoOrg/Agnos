@@ -1,0 +1,6 @@
+name: "CLI Commands"
+description: "Every command, flag, output channel and exit code of `agnos`"
+themes:
+  - cli-usage
+  - development
+order: 21

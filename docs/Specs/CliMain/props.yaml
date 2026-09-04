@@ -1,0 +1,3 @@
+name: "CliMain"
+description: "`assets/cli/cmd/main/main.go`, rendered to `cmd/main/main.go`"
+order: 22

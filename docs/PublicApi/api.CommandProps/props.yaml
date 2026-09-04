@@ -1,0 +1,3 @@
+name: "api.CommandProps"
+description: "The command-level keys `SetCommand` may rewrite"
+order: 10

@@ -1,0 +1,3 @@
+name: "api.BuildProps"
+description: "`Path` and `Runtime` for one build"
+order: 6

@@ -1,0 +1,5 @@
+name: "Shape a Project's Commands from Go"
+description: "Declare a project's commands, flags and args through the action props structs"
+themes:
+  - lib-usage
+order: 9
