@@ -9,18 +9,39 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// generatedDocsGroup is the asset group whose docs every build writes, whether
-// or not the project already has them.
-const generatedDocsGroup = "all"
+// GeneratedDocsGroups returns the asset groups whose docs this build writes:
+// `all` always, `cli` when the project has a cli, exactly as the groups are
+// rendered.
+func GeneratedDocsGroups(has_cli bool) []string {
+	if has_cli {
+		return []string{"all", "cli"}
+	}
+	return []string{"all"}
+}
 
-// CollectGeneratedDocs returns the first-level docs the `all` group writes on
-// this build, read from that group's own props.yaml templates. They belong in
+// CollectGeneratedDocs returns the first-level docs the given groups write on
+// this build, read from those groups' own props.yaml templates. They belong in
 // the doc index like any other doc, but SmartIO listings read disk, so on a
 // project's first build they are not there to be listed yet: without this the
 // README of a freshly scaffolded project would index nothing. Any doc later
-// added under assets/all/docs/ is picked up here on its own.
-func CollectGeneratedDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]interface{}) ([]utils.Doc, error) {
-	files, err := deps.Embeddeps.ListFilesRecursively(generatedDocsGroup)
+// added under assets/<group>/docs/ is picked up here on its own.
+func CollectGeneratedDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]interface{}, groups []string) ([]utils.Doc, error) {
+	var docs []utils.Doc
+
+	for _, group := range groups {
+		group_docs, err := collectGroupDocs(deps, io, vars, group)
+		if err != nil {
+			return nil, err
+		}
+		docs = append(docs, group_docs...)
+	}
+
+	return docs, nil
+}
+
+// collectGroupDocs is CollectGeneratedDocs over one asset group.
+func collectGroupDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]interface{}, group string) ([]utils.Doc, error) {
+	files, err := deps.Embeddeps.ListFilesRecursively(group)
 	if err != nil {
 		return nil, err
 	}
@@ -33,7 +54,7 @@ func CollectGeneratedDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]
 			continue
 		}
 
-		src, err := deps.Embeddeps.ReadFile(generatedDocsGroup + "/" + file)
+		src, err := deps.Embeddeps.ReadFile(group + "/" + file)
 		if err != nil {
 			return nil, err
 		}
@@ -43,7 +64,7 @@ func CollectGeneratedDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]
 			return nil, err
 		}
 
-		props, err := docPropsOf(deps, string(rendered), file)
+		props, err := docPropsOf(deps, string(rendered), group, file)
 		if err != nil {
 			return nil, err
 		}
@@ -83,10 +104,10 @@ func generatedDocDir(file string) (string, bool) {
 
 // docPropsOf parses one rendered props.yaml, naming the asset it came from
 // when it does not parse.
-func docPropsOf(deps *deps.Deps, content string, file string) (*docpropsconf.DocPropsConf, error) {
+func docPropsOf(deps *deps.Deps, content string, group string, file string) (*docpropsconf.DocPropsConf, error) {
 	conf, err := docpropsconf.New(deps, content)
 	if err != nil {
-		return nil, deps.Std.Errorf("assets/%s/%s: %w", generatedDocsGroup, file, err)
+		return nil, deps.Std.Errorf("assets/%s/%s: %w", group, file, err)
 	}
 	return conf, nil
 }

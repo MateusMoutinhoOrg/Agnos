@@ -126,7 +126,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
-	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name))
+	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name), GeneratedDocsGroups(hasCli))
 	if err != nil {
 		return err
 	}

@@ -5,7 +5,7 @@
 ## BuildInternal
 
 1. Read `AgnosConfig/project.yaml` (hard error if missing) and `go.mod`. Set `HasDeps` (`sandbox/deps/` exists), `HasCli` (`sandbox/internal/cli/` exists) and `HasAssets` (`assets/all/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
-2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the `all` group itself writes — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions). Skipped when `docs/` is absent.
+2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the asset groups themselves write — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions). Skipped when `docs/` is absent.
 3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `entries.go` per command.
 4. Collectors, then render groups in order: `all` (always), `deps` (`HasDeps`), `cli` (`HasCli`).
 
@@ -17,7 +17,7 @@
 | `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `adapters/availables/standard/new.go` |
 | `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (rich map: identifiers, category, help, `Flags`/`Args` with Go names, types, getters, defaults, `RangeCheck`) | `climain.go`, `help/handler.go`, `entries.go` |
 | `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
-| `CollectGeneratedDocs` | `assets/all/docs/*/props.yaml`, rendered | merged into the doc tree | same |
+| `CollectGeneratedDocs` | `assets/{all,cli}/docs/*/props.yaml` (`cli` only when `HasCli`), rendered | merged into the doc tree | same |
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
 | `CollectPublicApi` | `sandbox/api/*.go` parsed by `deps.Goimportsdeps` | `PublicApi` (per file: `Path`, `Doc`, `Types`, `Constants`, `Variables`, `Functions`; exported only, doc comments flattened to one table line) | `docs/PublicApi/doc.md` |
 | `CollectDepsApi` | `sandbox/deps/<x>/*.go`, same parse | `DepsApi` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |

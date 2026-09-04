@@ -24,6 +24,7 @@
 | `assets/asset.go` | `dep-install embeddeps` | once |
 {{- if .HasCli }}
 | `cmd/main/main.go` | `build` | always |
+| `docs/CliInstall/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `build` | always |
 | `sandbox/internal/cli/climain.go` | `build` | always. `CliMain` + one `dispatch<Name>` per command |
 | `sandbox/internal/commands/help/{entries.yaml,handler.go}` | `build` | always |
