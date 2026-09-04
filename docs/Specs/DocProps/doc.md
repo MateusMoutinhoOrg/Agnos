@@ -5,7 +5,7 @@ Defines the required shape of `docs/<doc-name>/props.yaml` — the declaration t
 
 ### Rules
 - Every doc directory — first level or nested — holds exactly one `props.yaml`, next to its `doc.md`. A missing or unparsable file fails `verify`.
-- `name` is the doc as an index lists it, and matches the H1 of its `doc.md`.
+- `name` is the doc as an index lists it: the H1 of its `doc.md`, minus any suffix every sibling repeats (`GeneralDoc Specification` is listed as `GeneralDoc`).
 - `description` is one line, 50–100 characters, saying what the reader gets. It is the row description in every index that lists the doc, so it must read on its own.
 - `themes` is a list of theme **ids** from `<ProjectName>Config/themes.yaml` (`cli-usage`, not `CliUsage`). It is **required** on a first-level doc — a doc reachable from no theme index fails `verify` — and **forbidden** on a sub-doc, which is listed only by its parent's `Index.md`.
 - A theme id that is not declared in `themes.yaml` fails `verify`, and so does a theme that no doc names.
