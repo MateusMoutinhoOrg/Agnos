@@ -12,3 +12,6 @@ specs: sandbox/binds.specs.yaml
 
 ### Important
 all specs must be verified to not happen the risk of creating a "ghost spec"a spec of a file or a dir that were deleted.
+### doc name
+
+docs/structure/ 
