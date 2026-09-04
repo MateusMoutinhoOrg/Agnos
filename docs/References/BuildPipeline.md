@@ -68,7 +68,7 @@ Templates live at `assets/<group>/<path>` and render to `<path>` inside the proj
 
 Two groups are rendered by other commands: `start` (the `AgnosConfig/` files, once) and `deplist/<dep>` (by `dep-install`). `assets/templates/` holds single-file scaffolds rendered outside any group.
 
-Every asset template is rendered by `utils.RenderGroup` / `utils.RenderTemplateToDest` with one native function in scope: **`render "<project-relative path>"`** reads that file from the target project (through the transaction-aware `io`, so a file written earlier in the same build is visible), renders it as a Go `text/template` with the *same* `vars` and the same native function (so nesting works to any depth), and returns the result. `README.md`'s `all` template is a single `render` call against `<ConfigDir>/docs/ReadmeHeader.md`. A missing or unparsable target is a hard build error.
+Every asset template is rendered by `utils.RenderGroup` / `utils.RenderTemplateToDest` with two native functions in scope: **`render "<project-relative path>"`** reads that file from the target project (through the transaction-aware `io`, so a file written earlier in the same build is visible), renders it as a Go `text/template` with the *same* `vars` and the same native functions (so nesting works to any depth), and returns the result; **`copy "<project-relative path>"`** reads a file through the same `io` and returns its contents verbatim, with no rendering, for embedding a non-template file. `README.md`'s `all` template is a `render` call against `<ConfigDir>/docs/ReadmeHeader.md` followed by `copy "LICENSE"`. A missing target is a hard build error (unparsable too, for `render`).
 
 ---
 

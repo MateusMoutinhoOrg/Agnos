@@ -21,6 +21,12 @@ import (
 // (so nesting works to any depth), and returns the result as a string. A
 // missing or unparsable file is a hard error, surfaced through the template
 // execution error like any other.
+//
+// The second native function, `copy`, is the raw counterpart of `render`: it
+// reads a project-relative file through the same transaction-aware io and
+// returns its contents verbatim, without any template rendering. Use it to
+// embed a file that is not itself a template (a LICENSE, a fixed snippet). A
+// missing file is a hard error.
 func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) template.FuncMap {
 	return template.FuncMap{
 		"render": func(project_path string) (string, error) {
@@ -33,6 +39,13 @@ func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) templ
 				return "", err
 			}
 			return string(rendered), nil
+		},
+		"copy": func(project_path string) (string, error) {
+			content, err := io.ReadFile(project_path)
+			if err != nil {
+				return "", err
+			}
+			return string(content), nil
 		},
 	}
 }

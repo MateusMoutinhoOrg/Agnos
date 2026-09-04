@@ -25,7 +25,7 @@ Every file `agnos` writes into a project, grouped by the command that first writ
 | `sandbox/new.go` | `all` | overwritten | `New(deps *deps.Deps) *api.Sandbox` — or `New()` without deps — calling one `binds.<X>Bind` per file of `sandbox/binds/`. |
 | `sandbox/api/sandbox.go` | `all` | overwritten | `type Sandbox struct` with one field per package of `sandbox/api/`. |
 | `sandbox/internal/config/config.go` | `all` | overwritten | `ProjectName` (title-cased `name`) and `Version` from `project.yaml`. |
-| `README.md` | `all` | overwritten | `{{ render "<ProjectName>Config/docs/ReadmeHeader.md" }}` — the `all` template is a single call to the `render` native function, which reads that project file, renders it as a template, and returns it. Change the text in `ReadmeHeader.md`. |
+| `README.md` | `all` | overwritten | `{{ render "<ProjectName>Config/docs/ReadmeHeader.md" }}` then `{{ copy "LICENSE" }}` — the `all` template renders `ReadmeHeader.md` as a template and appends the project's `LICENSE` verbatim (`copy` native function). Change the text in `ReadmeHeader.md`. |
 | `go.sum` | — | — | Written by the `go mod tidy` the `go` runtime runs. |
 
 ---

@@ -17,7 +17,7 @@ type Lib struct {
 
 The embedded-asset library injected whole as `Deps.Embeddeps`. It is read-only by design: assets ship with the program, and nothing in the sandbox ever writes one back. The sandbox asks for an asset by path the way it would ask a filesystem — `"all/sandbox/new.go"`, `"deplist/iodeps"` — and where the bytes come from is the adapter's decision: the `embeddeps` adapter lib serves them out of the `assets/` tree compiled into the binary by `//go:embed all:*`, so an installed `agnos` carries every template wherever it runs. Every path is slash-separated and relative to the asset root; the root itself is `"."`.
 
-Generated files come from `utils.RenderGroup`, which lists a group with `ListFilesRecursively`, reads each asset with `ReadFile`, and renders it as a Go `text/template` with one `vars` map and the `render` native function — see [BuildPipeline.md](/docs/References/BuildPipeline.md#asset-groups-in-order). `RenderTemplate` bundles the read-and-execute step for a single asset with no native functions; `add-command` uses it for its scaffolds. Installed by the `embeddeps` dep, which also carries `assets/asset.go`.
+Generated files come from `utils.RenderGroup`, which lists a group with `ListFilesRecursively`, reads each asset with `ReadFile`, and renders it as a Go `text/template` with one `vars` map and the `render` / `copy` native functions — see [BuildPipeline.md](/docs/References/BuildPipeline.md#asset-groups-in-order). `RenderTemplate` bundles the read-and-execute step for a single asset with no native functions; `add-command` uses it for its scaffolds. Installed by the `embeddeps` dep, which also carries `assets/asset.go`.
 
 ## Fields
 

@@ -276,14 +276,17 @@ written to inside a target project (`assets/all/sandbox/new.go` → `sandbox/new
 `utils.RenderGroup(deps, io, "<group>", vars)` renders every file in one group as a Go
 `text/template` with the same `vars` and writes each to its stripped path (via
 `io.WriteFileOverwrite`). Every template rendered through `utils` (both `RenderGroup` and
-`RenderTemplateToDest`) has one **native function** beyond the `text/template` builtins:
+`RenderTemplateToDest`) has two **native functions** beyond the `text/template` builtins:
 `render "<project-relative path>"` reads that file from the target project through the
-transaction-aware `io`, renders it with the *same* `vars` and the same native function
-(nesting to any depth), and returns the result — a missing/unparsable target is a hard
-build error. `assets/all/README.md` is a single `render` call against
-`{{.ConfigDir}}/docs/ReadmeHeader.md` (`ConfigDir` = `config.ProjectName + "Config"`), so a
+transaction-aware `io`, renders it with the *same* `vars` and the same native functions
+(nesting to any depth), and returns the result; `copy "<project-relative path>"` reads a
+file through the same `io` and returns its contents **verbatim**, with no rendering, for
+embedding a non-template file. A missing target is a hard build error (unparsable too, for
+`render`). `assets/all/README.md` is a single `render` call against
+`{{.ConfigDir}}/docs/ReadmeHeader.md` (`ConfigDir` = `config.ProjectName + "Config"`)
+followed by a `copy "LICENSE"`, so a
 project's README body is the hand-editable `AgnosConfig/docs/ReadmeHeader.md` — itself a
-template — and `README.md` is regenerated from it on every build. The groups: `start` (config skeleton written by `agnos start`,
+template — with the project's `LICENSE` appended, and `README.md` is regenerated on every build. The groups: `start` (config skeleton written by `agnos start`,
 including `AgnosConfig/docs/ReadmeHeader.md`),
 `all` (always rendered by `agnos build`), `deps` (rendered by `agnos build` only when
 `sandbox/deps` exists), `cli` (the CLI layer — `cmd/main/main.go`, `sandbox/api/cli.go`, `sandbox/binds/cli.go`,

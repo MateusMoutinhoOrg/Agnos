@@ -5,5 +5,5 @@
 [![Go Version](https://img.shields.io/badge/go-%3E%3D1.25-blue)](go.mod)
 [![License](https://img.shields.io/badge/license-Unlicense-green)](LICENSE)
 
-Place your description Here
+Place your description in {{.ConfigDir}}/docs/ReadmeHeader.md
 
