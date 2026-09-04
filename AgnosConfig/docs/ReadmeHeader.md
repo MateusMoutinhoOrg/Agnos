@@ -17,21 +17,23 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed,
 
 ## Overview
 
-Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton; `agnos build` regenerates every generated file of that project from templates embedded in the binary; and a handful of commands — `add-command`, `add-flag`, `add-arg`, `dep-install` — declare the project's whole command surface and capability set without a file being edited by hand. Only two kinds of file are ever hand-written in a generated project: a command's `handler.go`, and a contract-plus-adapter pair for a capability of its own.
-
-The core of every project, this one included, lives in **`/sandbox/`**: a **closed sandbox** that reaches nothing outside itself. Everything it can do arrives through an injected `Deps`, a struct of sub-contract structs reconstructed from a directory listing on every build.
+Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton, `agnos build`
+re-renders every generated file from templates embedded in the binary, and commands like
+`add-command`, `add-flag` and `dep-install` declare the project's whole command surface
+without a file being edited by hand. Only two things stay hand-written: a command's
+`handler.go`, and any contract-plus-adapter pair of your own.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/
 (reaches the OS)  (closed)     (wires the two together)
 ```
 
-- **`/sandbox/`**: the closed sandbox — the actions, the generated command dispatch, and the contracts everything is wired through.
-- **`/adapters/`**: the only place OS-bound and third-party code lives — one isolated lib per contract, and the assembly wiring them together.
-- **`/assets/`**: the Go templates every generated file is rendered from, and the installable deps.
-- **`/cmd/main/`**: wires an adapter into the sandbox and exits with what the CLI returns. Holds no logic.
+- **`/sandbox/`** — the closed core: actions, the generated dispatch, and the contracts
+  everything is injected through. Reaches nothing outside itself.
+- **`/adapters/`** — the only place OS-bound and third-party code lives.
+- **`/assets/`** — the templates every generated file comes from, plus the installable deps.
+- **`/cmd/main/`** — wires an adapter into the sandbox. Holds no logic.
 
-Agnos is one of the projects it builds: its own generated files are rendered in place by `agnos build`, and the result compiles. Start with [Quickstart](docs/Quickstart/doc.md); the mechanics are in [Structure](docs/Structure/doc.md) and [BuildPipeline](docs/BuildPipeline/doc.md).
-
-
-
+Agnos builds itself: `agnos build` re-renders this repo in place and the result compiles.
+Start with [Quickstart](docs/Quickstart/doc.md); the mechanics are in
+[Structure](docs/Structure/doc.md) and [BuildPipeline](docs/BuildPipeline/doc.md).
