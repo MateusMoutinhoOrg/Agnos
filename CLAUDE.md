@@ -523,9 +523,12 @@ the first level.
 `AgnosConfig/themes.yaml`, listing the first-level docs whose `props.yaml` names that id —
 plus one `<doc>/Index.md` per doc that has sub-docs, listing its direct sub-docs. Both come
 from `assets/templates/{theme_index,doc_index}.md`. A project with no `docs/` generates
-nothing. `README.md` links `docs/Index/{{ .Id }}.md`, one row per theme — **relative**, not
-repository-rooted, because a `/`-prefixed link in a README is resolved by GitHub against the
-site root, not the repository. The same holds for every link in
+nothing. `README.md` links `docs/Index/{{ .Id }}.md`, one row per theme — **the theme's
+`id`, never its `name`**: `GenerateDocIndexes` names each file `<theme-id>.md`, so a link
+built from `{{ .Name }}` (`docs/Index/CliUsage.md`) is a 404. The `name` is only ever the
+link *text*. This has been broken and fixed before — do not reintroduce it. The link is
+also **relative**, not repository-rooted, because a `/`-prefixed link in a README is
+resolved by GitHub against the site root, not the repository. The same holds for every link in
 `AgnosConfig/docs/ReadmeHeader.md`, which is rendered into that README.
 
 `verify` (`verify/check_docs.go`) enforces the tree: a missing or unparsable `props.yaml`, a
