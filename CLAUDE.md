@@ -49,12 +49,12 @@ go vet ./cmd/... ./sandbox/... ./adapters/...   # never ./... — assets/ holds 
 # Cross-compile any target: set GOOS/GOARCH, keep CGO_ENABLED=0, compile ./cmd/main only.
 # Targets: darwin/amd64 mac86.bin, darwin/arm64 macarm64.bin, linux/amd64 linux86.out,
 # linux/arm64 linuxarm64.out, linux/386 linuxi32.out, windows/amd64 windows86.exe,
-# windows/386 windowsi32.exe — see docs/Build/doc.md.
+# windows/386 windowsi32.exe — or just `agnos compile --target all`.
 CGO_ENABLED=0 GOOS=darwin GOARCH=amd64 go build -o release/mac86.bin ./cmd/main
 
 # Bootstrap + install: compile this tree, have THAT binary run `agnos build` over the tree
 # (so the installed agnos never rewrites the repo to an older shape), rebuild, install
-# to /usr/local/bin/agnos — full steps (every OS) in docs/BootstrapAgnos/doc.md
+# to /usr/local/bin/agnos — see docs/Contributing/doc.md#bootstrap (or `local-install`)
 go build -o release/bootstrap.bin ./cmd/main
 ./release/bootstrap.bin build
 CGO_ENABLED=0 go build -o release/agnos ./cmd/main && sudo mv release/agnos /usr/local/bin/agnos
@@ -62,7 +62,7 @@ CGO_ENABLED=0 go build -o release/agnos ./cmd/main && sudo mv release/agnos /usr
 
 Never run an already-installed `agnos build` against this repo after changing templates or
 collectors: compile first (`go build -o release/bootstrap.bin ./cmd/main`) and run *that*
-binary (see `docs/BootstrapAgnos/doc.md`). `agnos build` also runs `go build` over the
+binary (see `docs/Contributing/doc.md`). `agnos build` also runs `go build` over the
 schema dirs, so a broken generation fails there.
 
 There is currently **no test suite** (`*_test.go` files) and no lint config beyond `go vet`.
@@ -525,31 +525,33 @@ site root, not the repository. The same holds for every link in
 theme id absent from `themes.yaml`, a first-level doc with no themes, a sub-doc *with*
 themes, and a theme no doc names are each a violation.
 
-The themes are `cli-usage`, `lib-usage` and `development`. `docs/PublicApi/<pkg>.<Symbol>/`
-holds one sub-doc per public symbol and `docs/Specs/<Spec>/` one sub-doc per specification
-(its `sample.*` sitting beside `doc.md` as an asset). Every `.md` file follows the specs
-indexed by `docs/Specs/doc.md`. Each `docs/Specs/<Spec>/sample.*` that is Go carries a
-`//go:build ignore` line so `agnos build`'s module-wide `go mod tidy` never tries to resolve
-its illustrative imports. Code files follow the code specs there (Contract, Binder,
-DepsContract, AdapterLib, Available, CommandEntries, CommandHandler, Action, Collector,
-Parsable, Dep, AssetTemplate, CliMain); documentation files follow GeneralDoc plus one of
-TutorialDocs / ReferenceDocs / ExplanationDocs, with DocProps governing every `props.yaml`
-and Index the generated indexes. Rules that matter when changing code:
+The themes are `cli-usage`, `lib-usage` and `development`. The doc set is deliberately
+**small and dense** — eleven single-page docs, no sub-docs, no specification pages: the
+CLI and `verify` already enforce every file shape, so docs never restate rules the tool
+checks. Tables and commands over prose; a doc is read by an LLM looking something up,
+so it must be locatable from its index row and short enough to read whole.
+
+| Theme | Docs |
+|---|---|
+| `cli-usage` | `Install`, `Quickstart`, `Commands`, `EntriesYaml`, `DepList`, `GeneratedFiles` |
+| `lib-usage` | `LibUsage`, `PublicApi` |
+| `development` | `Structure`, `BuildPipeline`, `Contributing` |
+
+Rules that matter when changing code:
 
 - A pattern established or changed in this file is mirrored in `docs/` in the same change,
-  and the reverse — `docs/Structure/doc.md` is the schema map, `docs/BuildPipeline/doc.md` /
-  `docs/SmartIO/doc.md` / `docs/CommandDispatch/doc.md` the mechanics.
-- Adding a command updates `docs/Commands/doc.md`; adding a dep updates
-  `docs/DepList/doc.md`; adding an action or contract field adds a sub-doc under
-  `docs/PublicApi/` and a row in its `doc.md`; adding an adapter lib updates
-  `docs/Adapters/doc.md`; a new generated file is registered in
-  `docs/GeneratedFiles/doc.md`.
+  and the reverse — `docs/Structure/doc.md` is the schema map, `docs/BuildPipeline/doc.md`
+  the mechanics (build, SmartIO, runtime, dispatch), `docs/Contributing/doc.md` the recipes.
+- Adding a command updates `docs/Commands/doc.md`; adding a dep or adapter lib updates
+  `docs/DepList/doc.md`; adding an action, props struct or contract field updates the
+  matching table of `docs/PublicApi/doc.md`; a new generated file is registered in
+  `docs/GeneratedFiles/doc.md`. Never add a new doc when a row in an existing table will do.
 - Adding, renaming or deleting a doc is a directory plus a `props.yaml` plus a build —
   never a hand-edited index; `agnos add-doc <name> --description <t> [--theme <id>]...` and
   `agnos remove-doc <name>` do it (`internal/actions/{add_doc,remove_doc}`, the same
   scaffold-then-build shape as `add-command`/`remove-command`), and the doc name is the
   directory under `docs/`, `/`-nested for a sub-doc. Adding or removing a theme is an edit
-  to `AgnosConfig/themes.yaml` plus a build. See `docs/HandleDocuments/doc.md`. Links are
+  to `AgnosConfig/themes.yaml` plus a build. Links are
   repository-rooted (`/docs/<DocName>/doc.md`) inside `docs/`, but **relative**
   (`docs/<DocName>/doc.md`) in `README.md` and `AgnosConfig/docs/ReadmeHeader.md`, where a
   leading `/` would send GitHub to the site root; never link into `old/`.

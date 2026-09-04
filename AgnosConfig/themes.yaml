@@ -1,9 +1,9 @@
-- description: Documentation for people who drive agnos from a terminal - installing the binary, scaffolding a project, declaring its commands, and looking up what each command does
+- description: Driving agnos from a terminal - install, scaffold, declare commands, reference
   id: cli-usage
   name: CliUsage
-- description: Documentation for developers consuming Agnos as a Go module - wiring an adapter into the sandbox, calling the same actions the CLI exposes from code, and the public API
+- description: Using Agnos as a Go module - deps injection, actions, public API
   id: lib-usage
   name: LibUsage
-- description: Documentation for contributors changing this repository - the binding rules, the mechanics every change runs into, the per-goal workflows, and the specifications every file must satisfy
+- description: Changing this repository - schema, build mechanics, recipes
   id: development
   name: Development
