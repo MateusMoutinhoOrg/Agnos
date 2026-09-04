@@ -4,8 +4,7 @@ bootstrap-trackerdata
 install.sh
 
 builder
-PROMPT.md
-Prompttree
+
 local_test/
 release/
 local_install.sh
