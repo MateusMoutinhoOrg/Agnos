@@ -17,6 +17,28 @@ Full documentation lives under `docs/` and is the source of truth — three inde
 `docs/Structure/doc.md` (schema), `docs/BuildPipeline/doc.md` (what `build` does), and
 `docs/Contributing/doc.md` (recipes for every kind of change).
 
+## Audience: LLMs, not humans
+
+The primary reader and writer of this repo is an LLM. Every choice — code shape, docs,
+naming, file layout — optimizes for machine reading and machine writing, and token cost is a
+first-class constraint. Humans are a secondary audience.
+
+- **Generate over hand-write.** If a file can be rendered from a template, a collector or a
+  declaration, it must be — hand-written code is only contracts, adapters and `handler.go`.
+  A new hand-written file needs a reason why generation cannot cover it.
+- **Generate over document.** The same applies to docs: indexes, `README.md`,
+  `docs/LibUsage/` and `docs/PublicApi/` are rendered, never typed. Document by commenting
+  the contract, not by writing a page.
+- **Docs are short, objective and dense.** Tables, commands, file paths and rules — no prose,
+  no narrative, no tutorials, no motivation sections, no repetition across pages. Shorter is
+  strictly better: a page an LLM re-reads on every task costs tokens each time. Say the rule
+  once, in the one place it belongs, and link with a relative path from elsewhere.
+- **Convention over configuration.** Shape is read by convention (`verify` and the collectors
+  parse it), so uniformity is what makes generation possible. Every file is an instance of a
+  pattern; one-offs break the machine reader.
+- **Deterministic and idempotent.** Same input, same bytes out. An LLM must be able to
+  regenerate the tree and diff it to zero.
+
 ## Bootstrap workflow
 
 **Never run an installed `agnos build` on this repo after touching templates, collectors,
