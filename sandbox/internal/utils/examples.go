@@ -6,7 +6,6 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
-	"gopkg.in/yaml.v3"
 )
 
 // ExamplesDir is the example tree of a project: one directory per side, each
@@ -69,7 +68,7 @@ type Example struct {
 // examples/, sorted. A project with no examples/ directory — every project
 // before its first add-cli-example / add-lib-example — yields none, which is
 // what the generated listing then documents.
-func CollectExamples(io *smartio.SmartIO, side string) []Example {
+func CollectExamples(deps *deps.Deps, io *smartio.SmartIO, side string) []Example {
 	dir := ExampleSideDir(side)
 	if !io.IsDir(dir) {
 		return nil
@@ -81,11 +80,12 @@ func CollectExamples(io *smartio.SmartIO, side string) []Example {
 		desc := ""
 		propsPath := entry + "/props.yaml"
 		if content, err := io.ReadFile(propsPath); err == nil {
-			var props struct {
-				Description string `yaml:"description"`
-			}
-			if yaml.Unmarshal(content, &props) == nil {
-				desc = props.Description
+			if tree, err := deps.Serializables.ParseYaml(string(content)); err == nil {
+				if props, err := tree.GetObjectItem("description"); err == nil {
+					if description, err := props.GetString(); err == nil {
+						desc = description
+					}
+				}
 			}
 		}
 		examples = append(examples, Example{Name: name, Description: desc})

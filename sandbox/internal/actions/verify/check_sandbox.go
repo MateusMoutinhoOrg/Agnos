@@ -59,13 +59,18 @@ func checkSandboxContents(io *smartio.SmartIO) []string {
 }
 
 // checkSandboxImports enforces that no file under sandbox/ imports a
-// module-internal package that lives outside sandbox/.
+// module-internal package that lives outside sandbox/, nor any third-party package.
 func checkSandboxImports(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(io, "sandbox") {
 		for _, imp := range fileImports(deps, io, file) {
-			if isModuleInternal(imp, module) && !isUnder(imp, module+"/sandbox") {
+			if isModuleInternal(imp, module) {
+				if !isUnder(imp, module+"/sandbox") {
+					violations = append(violations,
+						file+" imports "+imp+" which is outside sandbox/")
+				}
+			} else if !isStdlib(imp) {
 				violations = append(violations,
 					file+" imports "+imp+" which is outside sandbox/")
 			}
