@@ -1,0 +1,6 @@
+description: "Examples of the {{.Name}} cli, and the suite that runs them as tests"
+name: "CliExamples"
+order: 4
+themes:
+  - cli-usage
+  - reference

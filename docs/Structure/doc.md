@@ -59,7 +59,12 @@ assets/                          Go text/templates embedded by asset.go; never `
 cmd/main/main.go                 (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
 docs/                            one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
   **/Index.md                    (gen) written for every doc that has sub-docs
-release/                         git-ignored binaries
+examples/                        one dir per example; `exec-test` runs each and diffs it against its golden
+  cli/<name>/example.sh          the example, run with `sh` and its own dir as cwd
+  lib/<name>/example.go          the example, run with `go run` and its own dir as cwd
+  <side>/<name>/result.yaml      (gen) golden: cli-output, exit-code, sha256 of every TestDir file
+  <side>/<name>/TestDir/         the only place an example writes; removed before every run
+release/                         git-ignored binaries, and the exec-test cli alias
 ```
 
 Every rule this shape has to hold to — layers, naming, generated files, docs — is in

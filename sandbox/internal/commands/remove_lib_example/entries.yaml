@@ -1,0 +1,31 @@
+args:
+    - description: the example directory under examples/lib/
+      examples:
+        - remove-lib-example start
+      name: name
+      required: true
+      type: string
+category: Examples
+examples:
+    - remove-lib-example start
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-lib-example start --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - remove-lib-example start -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete an example from examples/lib/
+identifiers:
+    - remove-lib-example
+long-description: Deletes examples/lib/<name>/ whole - the example.go, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.

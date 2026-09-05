@@ -1,0 +1,33 @@
+package main
+
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+)
+
+// The remove-lib-example example: delete an example of examples/lib/
+//
+// It calls the same action `agnos remove-lib-example` calls, and writes only inside TestDir.
+func main() {
+
+	deps := standard.New()    // every adapter lib bound
+	lib := sandbox.New(&deps) // *api.Sandbox
+	module := "Test"
+
+	if err := lib.Actions.Start(api.StartProps{
+		Path:        "TestDir",
+		ProjectName: "Test",
+		Module:      &module,
+	}); err != nil {
+		panic(err)
+	}
+
+	if err := lib.Actions.AddLibExample("TestDir", "greet"); err != nil {
+		panic(err)
+	}
+
+	if err := lib.Actions.RemoveLibExample("TestDir", "greet"); err != nil {
+		panic(err)
+	}
+}

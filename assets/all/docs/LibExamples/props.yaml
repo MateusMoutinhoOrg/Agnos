@@ -1,0 +1,6 @@
+description: "Examples of {{.Name}} as a Go module, and the suite that runs them as tests"
+name: "LibExamples"
+order: 3
+themes:
+  - lib-usage
+  - reference

@@ -21,7 +21,7 @@ README and a doc). Start with
 `docs/Workflow/doc.md` (the recipe for every change any agnos project takes) and
 `docs/Contributing/doc.md` (what is specific to changing agnos itself).
 
-`docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,PublicApi}/`
+`docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,LibExamples,PublicApi}/`
 are rendered from `assets/all/docs/` into **every** agnos project, this one included: editing
 one means editing that template, and it has to read correctly in a scaffolded project, not only
 here. Guard a line that holds for this repo alone with `{{ if .HasAssets }}`.
@@ -63,9 +63,21 @@ go build -o release/bootstrap.bin ./cmd/main
 Compile scope is always `./cmd/... ./sandbox/... ./adapters/...` — **never `go build ./...`**,
 because `assets/` holds Go templates, not compilable Go.
 
-There is no test suite. `verify` (schema check, no writes) plus a compiling, idempotent
-`build` is the check that a change is correct. Release: bump `version` in
-`AgnosConfig/project.yaml`, then `agnos publish`.
+There are no Go tests. The checks are `verify` (schema check, no writes), a compiling and
+idempotent `build`, and the example suite:
+
+```bash
+./release/bootstrap.bin exec-test              # every example, checked against its golden
+./release/bootstrap.bin exec-test --only start --update
+```
+
+`examples/{cli,lib}/<name>/` holds one `example.sh` / `example.go` that runs with its own
+directory as the cwd and writes only into `TestDir`; `result.yaml` (output, exit code, sha256 of
+every `TestDir` file) is the golden, written by `exec-test`, never by hand. `exec-test` puts an
+`agnos` alias (`go run ./cmd/main`) in front of the PATH, so an example always runs against this
+tree. A `<name>` on both sides must leave the same tree and exit the same way. Create and delete
+examples with `add-cli-example` / `add-lib-example` / `remove-cli-example` / `remove-lib-example`
+only. Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish`.
 
 ## Architecture
 
@@ -84,6 +96,8 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   `templates/*` are single-file scaffolds.
 - **`cmd/main/`** — generated; wires an adapter into the sandbox, holds no logic.
 - **`AgnosConfig/`** — written once by `start`, read by every `build`.
+- **`examples/`** — one directory per example, on the `cli` and the `lib` side; `exec-test` runs
+  each and diffs it against the `result.yaml` beside it.
 
 Two layers per feature: an **action** (`sandbox/internal/actions/<name>/`) with `<name>.go`
 (opens SmartIO, persists, runs the follow-up `build`) plus `<name>_internal.go` (pure logic on
@@ -113,6 +127,8 @@ change a rule there and nowhere else. The ones most easily broken:
 - `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.
 - Output: `deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`),
   `deps.Std.Error` -> stderr. Never `fmt.Printf`.
+- An example is never created or deleted by hand, and `result.yaml` is never edited — refresh a
+  golden with `exec-test --update` or by deleting it.
 - Docs: create/delete with `agnos add-doc` / `agnos remove-doc`. `README.md`, every `Index.md`,
   and the ten docs of `assets/all/docs/` are generated — `docs/Commands`
   from every command's `entries.yaml`.

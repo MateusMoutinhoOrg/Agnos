@@ -32,6 +32,13 @@ type RunProps struct {
 	// means "inherit the environment unchanged" — the common case. `agnos
 	// compile` uses it to set GOOS/GOARCH/CGO_ENABLED per cross-compile.
 	Env []string
+	// PathPrefix are directories prepended to the PATH the program sees,
+	// ahead of the inherited one, and searched first when Program itself is
+	// looked up. A PATH entry cannot be expressed through Env: the adapter is
+	// what reads the current PATH and joins it, because the sandbox cannot.
+	// `agnos exec-test` uses it to put the project's own cli alias in front
+	// of the PATH an example runs with.
+	PathPrefix []string
 }
 
 // Result is what one finished invocation produced.

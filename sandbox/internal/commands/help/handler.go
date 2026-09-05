@@ -93,6 +93,21 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{"add-cli-example"},
+		Category:        "Examples",
+		Description:     "Scaffold a new example under examples/cli/",
+		LongDescription: "Creates examples/cli/<name>/ with an example.sh stub that already runs and exits 0, then runs build so the example listing of the docs names it. The golden result.yaml is written by the first exec-test, never by hand. Refuses an existing name, and refuses outright in a project with no cli.",
+		Examples:        []string{"add-cli-example start"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-cli-example start --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-cli-example start -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the name of the new example (it becomes one directory under examples/cli/)", Examples: []string{"add-cli-example start"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{"add-command"},
 		Category:        "Cli System",
 		Description:     "Scaffold a new command package in the project",
@@ -150,6 +165,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the flag name (becomes the generated struct field, e.g. out-file -> OutFile)", Examples: []string{"add-flag output --command exec"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"add-lib-example"},
+		Category:        "Examples",
+		Description:     "Scaffold a new example under examples/lib/",
+		LongDescription: "Creates examples/lib/<name>/ with an example.go stub (package main) that already runs and exits 0, then runs build so the example listing of the docs names it. The golden result.yaml is written by the first exec-test, never by hand. Refuses an existing name.",
+		Examples:        []string{"add-lib-example start"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-lib-example start --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-lib-example start -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the name of the new example (it becomes one directory under examples/lib/)", Examples: []string{"add-lib-example start"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -277,6 +307,21 @@ var helpCommands = []helpCommand{
 		Args: []helpField{},
 	},
 	{
+		Identifiers:     []string{"exec-test"},
+		Category:        "Examples",
+		Description:     "Run the project's examples and check them against their goldens",
+		LongDescription: "Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project's own cli in front of the PATH. Every run starts from a removed TestDir, and what it produced - the merged output, the exit status and the sha256 of every file left in TestDir - is compared against the example's result.yaml, or written there when that golden does not exist yet. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.",
+		Examples:        []string{"exec-test", "exec-test --only start", "exec-test --update"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--only"}, Description: "run a single example by name, both sides (defaults to every example)", Examples: []string{"exec-test --only start"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--update"}, Description: "rewrite every golden result.yaml with what this run produced instead of comparing", Examples: []string{"exec-test --update"}, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"exec-test --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"exec-test -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{},
+	},
+	{
 		Identifiers:     []string{"help", "--help"},
 		Category:        "Info",
 		Description:     "Display help for a command",
@@ -334,6 +379,21 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{"remove-cli-example"},
+		Category:        "Examples",
+		Description:     "Delete an example from examples/cli/",
+		LongDescription: "Deletes examples/cli/<name>/ whole - the example.sh, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.",
+		Examples:        []string{"remove-cli-example start"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-cli-example start --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-cli-example start -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the example directory under examples/cli/", Examples: []string{"remove-cli-example start"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{"remove-command"},
 		Category:        "Cli System",
 		Description:     "Delete a command package from the project",
@@ -377,6 +437,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the flag name (or one of its identifiers, e.g. --out)", Examples: []string{"remove-flag output --command exec"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"remove-lib-example"},
+		Category:        "Examples",
+		Description:     "Delete an example from examples/lib/",
+		LongDescription: "Deletes examples/lib/<name>/ whole - the example.go, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.",
+		Examples:        []string{"remove-lib-example start"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-lib-example start --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-lib-example start -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the example directory under examples/lib/", Examples: []string{"remove-lib-example start"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

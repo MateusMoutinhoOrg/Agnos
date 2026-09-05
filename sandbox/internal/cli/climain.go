@@ -7,9 +7,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
 	add_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_arg"
+	add_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_cli_example"
 	add_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_command"
 	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_doc"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_flag"
+	add_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_lib_example"
 	build "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/build"
 	cli_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_init"
 	cli_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_purge"
@@ -19,13 +21,16 @@ import (
 	dep_remove "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_remove"
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_purge"
+	exec_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/exec_test"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
+	remove_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_cli_example"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_command"
 	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_doc"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
+	remove_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_lib_example"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
 	verify "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/verify"
@@ -67,12 +72,16 @@ func CliMain(deps *deps.Deps, args []string) int {
 	switch {
 	case action == "add-arg":
 		return dispatchAddArg(deps, verb)
+	case action == "add-cli-example":
+		return dispatchAddCliExample(deps, verb)
 	case action == "add-command":
 		return dispatchAddCommand(deps, verb)
 	case action == "add-doc":
 		return dispatchAddDoc(deps, verb)
 	case action == "add-flag":
 		return dispatchAddFlag(deps, verb)
+	case action == "add-lib-example":
+		return dispatchAddLibExample(deps, verb)
 	case action == "build":
 		return dispatchBuild(deps, verb)
 	case action == "cli-init":
@@ -91,6 +100,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchDepsInit(deps, verb)
 	case action == "deps-purge":
 		return dispatchDepsPurge(deps, verb)
+	case action == "exec-test":
+		return dispatchExecTest(deps, verb)
 	case action == "help" || action == "--help":
 		return dispatchHelp(deps, verb)
 	case action == "local-install":
@@ -99,12 +110,16 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchPublish(deps, verb)
 	case action == "remove-arg":
 		return dispatchRemoveArg(deps, verb)
+	case action == "remove-cli-example":
+		return dispatchRemoveCliExample(deps, verb)
 	case action == "remove-command":
 		return dispatchRemoveCommand(deps, verb)
 	case action == "remove-doc":
 		return dispatchRemoveDoc(deps, verb)
 	case action == "remove-flag":
 		return dispatchRemoveFlag(deps, verb)
+	case action == "remove-lib-example":
+		return dispatchRemoveLibExample(deps, verb)
 	case action == "set-command":
 		return dispatchSetCommand(deps, verb)
 	case action == "start":
@@ -350,6 +365,44 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_arg.CommandHandler(deps, entries)
+}
+
+func dispatchAddCliExample(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_cli_example.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_cli_example.CommandHandler(deps, entries)
 }
 
 func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -625,6 +678,44 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_flag.CommandHandler(deps, entries)
+}
+
+func dispatchAddLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_lib_example.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_lib_example.CommandHandler(deps, entries)
 }
 
 func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -928,6 +1019,46 @@ func dispatchDepsPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 	return deps_purge.CommandHandler(deps, entries)
 }
 
+func dispatchExecTest(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &exec_test.Entries{}
+	if verb.GetOptionsSize([]string{"--only"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "only", []string{"--only"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "only", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Only = value
+	}
+	entries.Update = verb.IsPresent([]string{"--update"})
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return exec_test.CommandHandler(deps, entries)
+}
+
 func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &help.Entries{}
 	if !checkUnknownFlags(deps, verb) {
@@ -1088,6 +1219,44 @@ func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	return remove_arg.CommandHandler(deps, entries)
 }
 
+func dispatchRemoveCliExample(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_cli_example.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_cli_example.CommandHandler(deps, entries)
+}
+
 func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_command.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -1214,6 +1383,44 @@ func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return remove_flag.CommandHandler(deps, entries)
+}
+
+func dispatchRemoveLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_lib_example.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_lib_example.CommandHandler(deps, entries)
 }
 
 func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {

@@ -57,6 +57,7 @@ Driving agnos from a terminal - install, scaffold, declare commands, reference
 | [Install](docs/Install/doc.md) | Install the agnos binary, or run it from a checkout |
 | [Quickstart](docs/Quickstart/doc.md) | Empty directory to a compiling CLI with one command, using only agnos commands |
 | [Commands](docs/Commands/doc.md) | Every command of agnos, generated from the command declarations |
+| [CliExamples](docs/CliExamples/doc.md) | Examples of the agnos cli, and the suite that runs them as tests |
 
 ### LibUsage
 
@@ -66,6 +67,7 @@ Using Agnos as a Go module - deps injection, actions, public API
 | --- | --- |
 | [LibUsage](docs/LibUsage/doc.md) | Use agnos as a Go module: wire the deps, build the sandbox, call its API |
 | [PublicApi](docs/PublicApi/doc.md) | Every exported symbol of agnos, generated from the contract sources and their doc comments |
+| [LibExamples](docs/LibExamples/doc.md) | Examples of agnos as a Go module, and the suite that runs them as tests |
 
 ### Development
 
@@ -89,6 +91,8 @@ Lookup tables - schemas, file formats, generated file listings
 | [EntriesYaml](docs/EntriesYaml/doc.md) | Every key of a command's entries.yaml and what the generated code does with it |
 | [DepList](docs/DepList/doc.md) | Every dep `agnos dep-install` can add, the contract and adapter lib it brings, and what backs it |
 | [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into this project and whether build overwrites it |
+| [LibExamples](docs/LibExamples/doc.md) | Examples of agnos as a Go module, and the suite that runs them as tests |
+| [CliExamples](docs/CliExamples/doc.md) | Examples of the agnos cli, and the suite that runs them as tests |
 
 ## License
 

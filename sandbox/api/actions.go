@@ -40,6 +40,16 @@ type StartProps struct {
 	Force       bool
 }
 
+// ExecTestProps describes one run of the project's example suite: the
+// directory holding the project, the single example name to run (empty runs
+// every one, both sides) and whether the goldens are rewritten with what the
+// run produced instead of compared against it.
+type ExecTestProps struct {
+	Path   string
+	Only   string
+	Update bool
+}
+
 // FieldProps describes one flag or positional arg to add to a command's
 // entries.yaml. Default, Min and Max are the raw literals typed on the
 // command line ("" means unset) so the action can tell "not given" from a
@@ -161,4 +171,22 @@ type Actions struct {
 
 	// RemoveDoc deletes one doc directory and everything under it.
 	RemoveDoc func(path string, name string) error
+
+	// AddCliExample creates one example under examples/cli/, with an
+	// example.sh stub that already runs.
+	AddCliExample func(path string, name string) error
+
+	// RemoveCliExample deletes one example of examples/cli/ whole.
+	RemoveCliExample func(path string, name string) error
+
+	// AddLibExample creates one example under examples/lib/, with an
+	// example.go stub that already runs.
+	AddLibExample func(path string, name string) error
+
+	// RemoveLibExample deletes one example of examples/lib/ whole.
+	RemoveLibExample func(path string, name string) error
+
+	// ExecTest runs the project's examples and checks each one against its
+	// golden result.yaml, reporting every example that diverged.
+	ExecTest func(props ExecTestProps) error
 }

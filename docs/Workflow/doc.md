@@ -104,6 +104,21 @@ Write `docs/<Name>/doc.md`; `README.md`'s index, and the parent `Index.md` of a 
 regenerated. Describe any new path worth naming in `AgnosConfig/structure.yaml` — that
 file is what renders [Structure](../Structure/doc.md).
 
+## Add an example
+
+```bash
+agnos add-cli-example <name>       # examples/cli/<name>/example.sh
+agnos add-lib-example <name>       # examples/lib/<name>/example.go
+agnos exec-test                    # run them all, check each against its golden
+agnos exec-test --only <name> --update
+agnos remove-cli-example <name>
+agnos remove-lib-example <name>
+```
+
+Write the example itself; `result.yaml` is written by the first `exec-test` and refreshed with
+`--update`. Details in [LibExamples](../LibExamples/doc.md) and
+[CliExamples](../CliExamples/doc.md).
+
 ## Hand-written code
 
 | File | Written when |

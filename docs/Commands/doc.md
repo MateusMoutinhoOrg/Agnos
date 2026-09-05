@@ -251,6 +251,123 @@ agnos set-command exec --identifier run --example "exec file.txt"
 agnos set-command exec --hidden
 ```
 
+## Examples
+
+### `add-cli-example`
+
+Scaffold a new example under examples/cli/
+
+```bash
+agnos add-cli-example [--path <path>] [--quiet] <name>
+```
+
+Creates examples/cli/<name>/ with an example.sh stub that already runs and exits 0, then runs build so the example listing of the docs names it. The golden result.yaml is written by the first exec-test, never by hand. Refuses an existing name, and refuses outright in a project with no cli.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the name of the new example (it becomes one directory under examples/cli/) |
+
+```bash
+agnos add-cli-example start
+```
+
+### `add-lib-example`
+
+Scaffold a new example under examples/lib/
+
+```bash
+agnos add-lib-example [--path <path>] [--quiet] <name>
+```
+
+Creates examples/lib/<name>/ with an example.go stub (package main) that already runs and exits 0, then runs build so the example listing of the docs names it. The golden result.yaml is written by the first exec-test, never by hand. Refuses an existing name.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the name of the new example (it becomes one directory under examples/lib/) |
+
+```bash
+agnos add-lib-example start
+```
+
+### `exec-test`
+
+Run the project's examples and check them against their goldens
+
+```bash
+agnos exec-test [--only <only>] [--update] [--path <path>] [--quiet]
+```
+
+Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project's own cli in front of the PATH. Every run starts from a removed TestDir, and what it produced - the merged output, the exit status and the sha256 of every file left in TestDir - is compared against the example's result.yaml, or written there when that golden does not exist yet. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--only` | string |  | run a single example by name, both sides (defaults to every example) |
+| `--update` | boolean |  | rewrite every golden result.yaml with what this run produced instead of comparing |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos exec-test
+agnos exec-test --only start
+agnos exec-test --update
+```
+
+### `remove-cli-example`
+
+Delete an example from examples/cli/
+
+```bash
+agnos remove-cli-example [--path <path>] [--quiet] <name>
+```
+
+Deletes examples/cli/<name>/ whole - the example.sh, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the example directory under examples/cli/ |
+
+```bash
+agnos remove-cli-example start
+```
+
+### `remove-lib-example`
+
+Delete an example from examples/lib/
+
+```bash
+agnos remove-lib-example [--path <path>] [--quiet] <name>
+```
+
+Deletes examples/lib/<name>/ whole - the example.go, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the example directory under examples/lib/ |
+
+```bash
+agnos remove-lib-example start
+```
+
 ## Documentation
 
 ### `add-doc`

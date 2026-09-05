@@ -171,7 +171,26 @@ docs:
     "**/Index.md":
       gen: true
       description: written for every doc that has sub-docs
-release:
+examples:
   order: 7
   dir: true
-  description: git-ignored binaries
+  description: one dir per example; `exec-test` runs each and diffs it against its golden
+  children:
+    cli/<name>/example.sh:
+      order: 1
+      description: the example, run with `sh` and its own dir as cwd
+    lib/<name>/example.go:
+      order: 2
+      description: the example, run with `go run` and its own dir as cwd
+    <side>/<name>/result.yaml:
+      order: 3
+      gen: true
+      description: "golden: cli-output, exit-code, sha256 of every TestDir file"
+    <side>/<name>/TestDir:
+      order: 4
+      dir: true
+      description: the only place an example writes; removed before every run
+release:
+  order: 8
+  dir: true
+  description: git-ignored binaries, and the exec-test cli alias

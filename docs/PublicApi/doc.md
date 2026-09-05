@@ -65,6 +65,16 @@ StartProps describes one project to scaffold: the directory to write it into, th
 | `Module` | `*string` |
 | `Force` | `bool` |
 
+### `ExecTestProps`
+
+ExecTestProps describes one run of the project's example suite: the directory holding the project, the single example name to run (empty runs every one, both sides) and whether the goldens are rewritten with what the run produced instead of compared against it.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Only` | `string` |
+| `Update` | `bool` |
+
 ### `FieldProps`
 
 FieldProps describes one flag or positional arg to add to a command's entries.yaml. Default, Min and Max are the raw literals typed on the command line ("" means unset) so the action can tell "not given" from a zero value; Position is the index to insert at (< 0 appends).
@@ -138,6 +148,11 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared positional argument from a command. |
 | `AddDoc` | `func(props DocProps) error` | AddDoc creates one doc directory under docs/, with its props.yaml and a doc.md to fill in. |
 | `RemoveDoc` | `func(path string, name string) error` | RemoveDoc deletes one doc directory and everything under it. |
+| `AddCliExample` | `func(path string, name string) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |
+| `RemoveCliExample` | `func(path string, name string) error` | RemoveCliExample deletes one example of examples/cli/ whole. |
+| `AddLibExample` | `func(path string, name string) error` | AddLibExample creates one example under examples/lib/, with an example.go stub that already runs. |
+| `RemoveLibExample` | `func(path string, name string) error` | RemoveLibExample deletes one example of examples/lib/ whole. |
+| `ExecTest` | `func(props ExecTestProps) error` | ExecTest runs the project's examples and checks each one against its golden result.yaml, reporting every example that diverged. |
 
 ## `sandbox/api/cli.go`
 
@@ -360,6 +375,7 @@ RunProps describes one program invocation.
 | `Program` | `string` | Program is the executable to run, looked up on PATH. |
 | `Args` | `[]string` | Args are the arguments handed to the program, excluding its own name. |
 | `Env` | `[]string` | Env is a list of "KEY=VALUE" entries added on top of the current process environment for this one invocation (later entries win). Empty means "inherit the environment unchanged" — the common case. `agnos compile` uses it to set GOOS/GOARCH/CGO_ENABLED per cross-compile. |
+| `PathPrefix` | `[]string` | PathPrefix are directories prepended to the PATH the program sees, ahead of the inherited one, and searched first when Program itself is looked up. A PATH entry cannot be expressed through Env: the adapter is what reads the current PATH and joins it, because the sandbox cannot. `agnos exec-test` uses it to put the project's own cli alias in front of the PATH an example runs with. |
 
 ### `Result`
 

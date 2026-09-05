@@ -4,6 +4,8 @@ import (
 	"bytes"
 	"os"
 	"os/exec"
+	"path/filepath"
+	"strings"
 
 	"{{.Module}}/sandbox/deps"
 	rundeps "{{.Module}}/sandbox/deps/rundeps"
@@ -24,7 +26,13 @@ func Bind(deps *deps.Deps) {
 func run(props rundeps.RunProps) (rundeps.Result, error) {
 	command := exec.Command(props.Program, props.Args...)
 	command.Dir = props.Dir
-	if len(props.Env) > 0 {
+
+	if len(props.PathPrefix) > 0 {
+		path := prefixedPath(props.PathPrefix)
+		command.Env = append(os.Environ(), "PATH="+path)
+		command.Env = append(command.Env, props.Env...)
+		lookInPath(command, path, props.Program)
+	} else if len(props.Env) > 0 {
 		command.Env = append(os.Environ(), props.Env...)
 	}
 
@@ -46,4 +54,31 @@ func run(props rundeps.RunProps) (rundeps.Result, error) {
 
 	result.ExitCode = exitError.ExitCode()
 	return result, nil
+}
+
+// prefixedPath is the PATH value a PathPrefix asks for: the requested
+// directories, in order, ahead of the one this process inherited. Reading the
+// current PATH is why the join happens here and not in the sandbox.
+func prefixedPath(prefix []string) string {
+	return strings.Join(append(append([]string{}, prefix...), os.Getenv("PATH")), string(os.PathListSeparator))
+}
+
+// lookInPath re-resolves the program against the prefixed PATH, so a name the
+// prefix provides is the one that runs. exec.Command already looked it up in
+// this process's PATH; a hit here replaces that answer, and a miss leaves it —
+// together with the lookup error exec.Command recorded when there was none.
+func lookInPath(command *exec.Cmd, path string, program string) {
+	if strings.ContainsRune(program, os.PathSeparator) {
+		return
+	}
+	for _, dir := range filepath.SplitList(path) {
+		candidate := filepath.Join(dir, program)
+		info, err := os.Stat(candidate)
+		if err != nil || info.IsDir() || info.Mode()&0111 == 0 {
+			continue
+		}
+		command.Path = candidate
+		command.Err = nil
+		return
+	}
 }

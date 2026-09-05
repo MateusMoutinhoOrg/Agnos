@@ -5,28 +5,9 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
-
-// loadProjectConf reads <ProjectName>Config/project.yaml back through the
-// transaction-aware io (so it is visible during `agnos start`, before Persist).
-// It never falls back to empty defaults: `agnos start` is a prerequisite for
-// `agnos build`, so a missing or unparsable project.yaml is a hard error.
-func loadProjectConf(deps *deps.Deps, io *smartio.SmartIO, path string) (*projectconf.ProjectConf, error) {
-	rel := config.ProjectName + "Config/project.yaml"
-
-	// io resolves rel against the target project root (the --path flag), so
-	// this reads the file the `start` asset group wrote — whether or not it
-	// has been persisted yet.
-	content, err := io.ReadFile(rel)
-	if err != nil {
-		return nil, deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
-	}
-
-	return projectconf.New(deps, string(content))
-}
 
 // projectNameConst title-cases the configured project name for use as the
 // generated config.ProjectName constant (which names the <X>Config/ dir).
@@ -58,7 +39,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	// assets/ tree to be told about.
 	hasAssets := io.IsDir("assets/all")
 
-	project_conf, err := loadProjectConf(deps, io, path)
+	project_conf, err := utils.LoadProjectConf(deps, io)
 	if err != nil {
 		return err
 	}
@@ -150,6 +131,8 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Constructors":      CollectConstructors(io),
 		"DepsLibs":          CollectDepsLibs(io),
 		"AdapterLibs":       CollectAdapterLibs(io),
+		"CliExamples":       utils.CollectExamples(io, utils.ExampleCliSide),
+		"LibExamples":       utils.CollectExamples(io, utils.ExampleLibSide),
 		"Commands":          commands,
 		"CommandDocs":       command_docs,
 		"Themes":            themes_conf.Themes,

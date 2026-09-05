@@ -1,0 +1,73 @@
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-lib-example creating examples/lib/greet \nbuild started with path TestDir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: AgnosConfig/docs/ReadmeHeader.md
+      sha: 08e362d5f66308599226fdf1adfb0c5cc7a13b8d4b2cbf0b02d56350c2beef0b
+    - file: AgnosConfig/ignore.yaml
+      sha: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    - file: AgnosConfig/paths.yaml
+      sha: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
+    - file: AgnosConfig/project.yaml
+      sha: d855450b74c63de8d82ae1523bc76e3dc25175a99bd17fce161e2451e02bb783
+    - file: AgnosConfig/structure.yaml
+      sha: edebcb3258291ad65c57fc615bcfa14b0579ff49a7135780969c314796503854
+    - file: AgnosConfig/themes.yaml
+      sha: f40d60abbb046efc5e32317a8d9129644b73e85e6328f0550ffee8766151c6d9
+    - file: LICENSE
+      sha: 9173dbaad07873fbe18b5147e516eefa45321a3bc2ce8534592bd32703390f83
+    - file: README.md
+      sha: 2fa36af711b6373a15d293623074a7d453e7e631840095130bc643d252b190ef
+    - file: docs/Commands/doc.md
+      sha: e56fd3987f43615bf06da7eb48501c7fe05e1219ac030625e89f8b227ee58c2f
+    - file: docs/Commands/props.yaml
+      sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
+    - file: docs/DepList/doc.md
+      sha: c95e4b70a1880a1180db218b2c1d93ce4c200c3944ac5d6843279b1bc413e5d8
+    - file: docs/DepList/props.yaml
+      sha: 0fe62c1dd4cd79a6c6b436e14164cd1178f4920df752872535decdb93bdb33e5
+    - file: docs/EntriesYaml/doc.md
+      sha: 83c089328395dc2ce9a93a1d987191af2e584bb343960df64e2d8f6a6e0448a8
+    - file: docs/EntriesYaml/props.yaml
+      sha: b2b3fb7a3d0d54857cbce60bc3e04cdf9961230598afed4eb5d474407d5bafed
+    - file: docs/GeneratedFiles/doc.md
+      sha: 7bf0fdf2ac3026eadbd3904415012efb3bcfc14886ad9a299d74013676426126
+    - file: docs/GeneratedFiles/props.yaml
+      sha: a0eef341ebd88c5ba305c3948e7486fd5b001ff50af0232d73fb0c9a32982ab3
+    - file: docs/LibExamples/doc.md
+      sha: ab547d159601d117d20f2283329563086c5e129feb3da0b9c090c2e3b5dcbd8b
+    - file: docs/LibExamples/props.yaml
+      sha: b7a1453afeddc4ec3620d4e77f5b4f6c82a818064372d75ff94b5680fa16cfbb
+    - file: docs/LibUsage/doc.md
+      sha: 4a6e9bc6b5ccfc26710c33310e3add488c4b74d17bf55a2ea6615a4f668bbf35
+    - file: docs/LibUsage/props.yaml
+      sha: b901bd3853e5a437cb1c734b15b3d3e97ccf99fa6837048c8f646a7ed948872d
+    - file: docs/PublicApi/doc.md
+      sha: ba946c7d5fb37a64edafd32beb8de63609c0b8930b5c0cc2a0a7f868670d72c0
+    - file: docs/PublicApi/props.yaml
+      sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
+    - file: docs/Requirements/doc.md
+      sha: af1247b889336bda160e2013c8eafc840705d0d228d2069d807c8043ed9ec5bb
+    - file: docs/Requirements/props.yaml
+      sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
+    - file: docs/Rules/doc.md
+      sha: f52c2af60284915cd3d7cf78fa51982e2d297b1119936618c757a692297f3861
+    - file: docs/Rules/props.yaml
+      sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
+    - file: docs/Structure/doc.md
+      sha: 1c26be604628aadacef0d13e96b3706ca729aff5c6884772c71b161eb8f0ed15
+    - file: docs/Structure/props.yaml
+      sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
+    - file: docs/Workflow/doc.md
+      sha: 5ed9c04152e3dcb5790651d922b11f88ae234193936c77e7efb34c1c4f3ac656
+    - file: docs/Workflow/props.yaml
+      sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b
+    - file: examples/lib/greet/example.go
+      sha: 5a0385768ad45d02ee5cb19fd28031c69ac69644ee2b72b239c78f78eddc39e2
+    - file: go.mod
+      sha: 78bace56005d8c5ccf295067a06ea07be0770f9a3fdd4d08f6b696fe9b5962f9
+    - file: sandbox/api/sandbox.go
+      sha: 8d1b2318d2c8733f7e037c4824a71f1df8ffb8a00fc7296c6c51748cd699069f
+    - file: sandbox/internal/config/config.go
+      sha: aab6f7a4c149a73b0125511d51c75e6cc765c168db181090726b3d9c8c64c88e
+    - file: sandbox/new.go
+      sha: 67a1dc5b9392e324ae8bbe3d0ef93b475ef7a4d9f48d1c06da63d6efbbc68957

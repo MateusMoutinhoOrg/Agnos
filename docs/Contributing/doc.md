@@ -50,12 +50,24 @@ The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency). Per-call 
 - Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources takes `deps` too and reads them through `deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
 - Bootstrap twice; the second run must change nothing.
 
+## Add an example to agnos
+
+Examples are declared with the bootstrap binary and run against this tree, never against an installed `agnos`:
+
+```bash
+./release/bootstrap.bin add-cli-example <name>
+./release/bootstrap.bin add-lib-example <name>
+./release/bootstrap.bin exec-test --only <name> --update
+```
+
+`exec-test` writes `release/exec-test/agnos` — `exec go run <repo>/cmd/main "$@"` — and puts it in front of the PATH, so an `example.sh` typing `agnos` runs this source tree. An example that reaches the go runtime is slow (`go mod tidy` + `go build` per run); `--only` narrows the suite. `examples/lib/*/example.go` is `package main` inside the module but outside the compile scope, so it is checked by `exec-test` alone, never by `build`.
+
 ## Add a parsable
 
 `sandbox/internal/parsables/<name>conf/`: `api.go` (struct: data fields, func fields, `Render` last), `new.go` (`New(deps, content) (*T, error)` via `deps.Serializables.ParseYaml`), `new_empty.go` (`NewEmpty(deps) *T`), `bind_methods.go` (`bindMethods(deps, self)`), `render.go` (`SerializeToYaml`). `Render` must round-trip through `New`. Shared loaders go in `utils/` (`LoadXConf`/`SaveXConf`).
 
 ## Docs
 
-`add-doc` / `remove-doc` and `AgnosConfig/structure.yaml` work as in [Workflow](../Workflow/doc.md#add-a-doc), driven by `./release/bootstrap.bin`. What is specific to this repo: [Workflow](../Workflow/doc.md), [Rules](../Rules/doc.md), [Structure](../Structure/doc.md), [EntriesYaml](../EntriesYaml/doc.md), [DepList](../DepList/doc.md), [GeneratedFiles](../GeneratedFiles/doc.md), [Commands](../Commands/doc.md), [LibUsage](../LibUsage/doc.md) and [PublicApi](../PublicApi/doc.md) are rendered into *every* agnos project from `assets/all/docs/`, and [CliInstall](../CliInstall/doc.md) into every one with a cli from `assets/cli/docs/`, so a change to one of them is a change to that template — and must read correctly in a scaffolded project, not only here. Guard a line that only holds for this repo with `{{ if .HasAssets }}`.
+`add-doc` / `remove-doc` and `AgnosConfig/structure.yaml` work as in [Workflow](../Workflow/doc.md#add-a-doc), driven by `./release/bootstrap.bin`. What is specific to this repo: [Workflow](../Workflow/doc.md), [Rules](../Rules/doc.md), [Structure](../Structure/doc.md), [EntriesYaml](../EntriesYaml/doc.md), [DepList](../DepList/doc.md), [GeneratedFiles](../GeneratedFiles/doc.md), [Commands](../Commands/doc.md), [LibUsage](../LibUsage/doc.md), [LibExamples](../LibExamples/doc.md) and [PublicApi](../PublicApi/doc.md) are rendered into *every* agnos project from `assets/all/docs/`, and [CliInstall](../CliInstall/doc.md) and [CliExamples](../CliExamples/doc.md) into every one with a cli from `assets/cli/docs/`, so a change to one of them is a change to that template — and must read correctly in a scaffolded project, not only here. Guard a line that only holds for this repo with `{{ if .HasAssets }}`.
 
 A new rule goes in `assets/all/docs/Rules/doc.md`, never in the page that happens to touch it. A pattern changed in `CLAUDE.md` is mirrored here in the same commit, and the reverse.

@@ -1,0 +1,40 @@
+category: Examples
+examples:
+    - exec-test
+    - exec-test --only start
+    - exec-test --update
+flags:
+    - description: run a single example by name, both sides (defaults to every example)
+      examples:
+        - exec-test --only start
+      identifiers:
+        - --only
+      name: only
+      type: string
+    - description: rewrite every golden result.yaml with what this run produced instead of comparing
+      examples:
+        - exec-test --update
+      identifiers:
+        - --update
+      name: update
+      type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - exec-test --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - exec-test -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Run the project's examples and check them against their goldens
+identifiers:
+    - exec-test
+long-description: 'Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project''s own cli in front of the PATH. Every run starts from a removed TestDir, and what it produced - the merged output, the exit status and the sha256 of every file left in TestDir - is compared against the example''s result.yaml, or written there when that golden does not exist yet. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.'
