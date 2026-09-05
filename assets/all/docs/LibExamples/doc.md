@@ -9,10 +9,10 @@ golden holding the output, the exit code and the sha256 of every `TestDir` file,
 `exec-test` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
 remove one{{ if .HasCli }}; the cli side is [CliExamples](../CliExamples/doc.md){{ end }}.
 {{ if .LibExamples }}
-| Example | Source |
-|---|---|
+| Example | Description | Source |
+|---|---|---|
 {{- range .LibExamples }}
-| `{{ . }}` | [example.go](../../examples/lib/{{ . }}/example.go) |
+| `{{ .Name }}` | {{ .Description }} | [example.go](../../examples/lib/{{ .Name }}/example.go) |
 {{- end }}
 {{ else }}
 No example is declared yet: `examples/lib/` is created by the first

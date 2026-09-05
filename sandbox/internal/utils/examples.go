@@ -6,6 +6,7 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"gopkg.in/yaml.v3"
 )
 
 // ExamplesDir is the example tree of a project: one directory per side, each
@@ -58,22 +59,41 @@ func ExampleFile(side string) string {
 	return ExampleLibFile
 }
 
-// CollectExamples returns the names of the examples declared on one side of
+// Example metadata
+type Example struct {
+	Name        string
+	Description string
+}
+
+// CollectExamples returns the examples declared on one side of
 // examples/, sorted. A project with no examples/ directory — every project
 // before its first add-cli-example / add-lib-example — yields none, which is
 // what the generated listing then documents.
-func CollectExamples(io *smartio.SmartIO, side string) []string {
+func CollectExamples(io *smartio.SmartIO, side string) []Example {
 	dir := ExampleSideDir(side)
 	if !io.IsDir(dir) {
 		return nil
 	}
 
-	var names []string
+	var examples []Example
 	for _, entry := range io.ListDirs(dir) {
-		names = append(names, LastSegment(entry))
+		name := LastSegment(entry)
+		desc := ""
+		propsPath := entry + "/props.yaml"
+		if content, err := io.ReadFile(propsPath); err == nil {
+			var props struct {
+				Description string `yaml:"description"`
+			}
+			if yaml.Unmarshal(content, &props) == nil {
+				desc = props.Description
+			}
+		}
+		examples = append(examples, Example{Name: name, Description: desc})
 	}
-	sort.Strings(names)
-	return names
+	sort.Slice(examples, func(i, j int) bool {
+		return examples[i].Name < examples[j].Name
+	})
+	return examples
 }
 
 // ValidateExampleName reports whether a user-typed example name is usable as
