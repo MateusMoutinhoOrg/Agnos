@@ -16,7 +16,7 @@ tree:
     - file: LICENSE
       sha: 9173dbaad07873fbe18b5147e516eefa45321a3bc2ce8534592bd32703390f83
     - file: README.md
-      sha: 4dfc122ebd8aec3eca4ed989cfba0cc578ceaf1e8c4d25f4e1a5b55b7dcf257d
+      sha: a2fd6c6146c2da53fdad1051564955df2141277bcdaeb7df585b67781a22b6c1
     - file: adapters/availables/standard/new.go
       sha: aff6bd6930bb24056a76389da826cf4294b0ef451f213549805b0eb0e651c0fd
     - file: adapters/libs/std/std.go
@@ -26,9 +26,9 @@ tree:
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: docs/CliExamples/doc.md
-      sha: 9be45671d6648ecae95677b3fce6b17b3251d21f8654d7e8349e80be176f5b4f
+      sha: e8f3eab201dea30cfcd2da3abe077b0613fe85b9dd7332255e71988b01519e17
     - file: docs/CliExamples/props.yaml
-      sha: 4fee053016fd8916cb3ebcbfacea850becc9979ebcdd8939f23a9326a5495ea5
+      sha: b419645e7cf90ba5ad94f21d423b6d67bb08b0ea3712ab9bf00239feddbee412
     - file: docs/CliInstall/doc.md
       sha: 1eae2825c0837ce150d187b1c549834dfa78f4e9355532ec2eb55f8324c6ed7e
     - file: docs/CliInstall/props.yaml
@@ -50,9 +50,9 @@ tree:
     - file: docs/GeneratedFiles/props.yaml
       sha: a0eef341ebd88c5ba305c3948e7486fd5b001ff50af0232d73fb0c9a32982ab3
     - file: docs/LibExamples/doc.md
-      sha: f62ab4b13e490aafd72060e6f3d799efa1d748966f09902abe3918f507e604b2
+      sha: e70b990d21073e145f931ac977a0b5bca0015c8c334c3ea53e126e7abfda6f15
     - file: docs/LibExamples/props.yaml
-      sha: b7a1453afeddc4ec3620d4e77f5b4f6c82a818064372d75ff94b5680fa16cfbb
+      sha: 12e3e2ce4605e04a1d13db3a014bb0416be1793c8bc39d85daa2cc6f29eb0767
     - file: docs/LibUsage/doc.md
       sha: 3e3af06c0b1c16024d0d2290b68b283997a6ce38fe0506bc95aa471a2497a2a2
     - file: docs/LibUsage/props.yaml
