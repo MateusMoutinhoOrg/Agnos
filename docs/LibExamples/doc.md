@@ -1,107 +1,38 @@
 # LibExamples
 
-An example is documentation and a test at once: `examples/lib/<name>/example.go` is a program
-a reader can copy, and `agnos exec-test` runs it and compares what it produced with the
-golden beside it. The cli side is [CliExamples](../CliExamples/doc.md); the
-schema, the normalization and the cross-check below cover both.
+Every example of agnos used as a Go module. Each one is a `package main` program that
+runs with its own directory as the working directory and writes only into its own `TestDir`,
+so it can be read as documentation and copied as a starting point.
 
-## Layout
+`agnos exec-test` runs them all and checks each against the `result.yaml` beside it — the
+golden holding the output, the exit code and the sha256 of every `TestDir` file, written by
+`exec-test` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
+remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 
-```
-examples/lib/<name>/
-  example.go     package main, run with `go run example.go`, cwd = this directory
-  result.yaml    the golden, generated
-  TestDir/       the only place the example may write; git-ignored
-```
-
-Exactly one `example.go` per directory. It writes nothing outside its own `TestDir`, and it
-reports failure by panicking — the lib's counterpart of a cli error message.
-
-## Managing examples
-
-```bash
-agnos add-lib-example <name>       # writes example.go, a stub that already runs
-agnos remove-lib-example <name>    # deletes the directory whole
-```
-
-Never create or delete an example directory by hand, the same rule `add-doc` / `remove-doc`
-hold: both commands run `build` afterwards, so the table below is rewritten from the tree.
-
-## Running the suite
-
-```bash
-agnos exec-test                    # every example, cli side before lib side
-agnos exec-test --only <name>      # one name, both sides
-agnos exec-test --update           # rewrite every golden with what this run produced
-```
-
-Per example, in alphabetical order: `TestDir` is removed, the example runs with its own
-directory as the working directory, and the result is compared against `result.yaml` — or
-written there when the file does not exist yet. Without `--update` the only other way to
-refresh a golden is to delete it. Exit `0` when every check passes, `1` when any diverges;
-a divergence prints the expected and produced `exit-code`, a line diff of `cli-output`, and
-per file of the tree `+` (only produced), `-` (only golden) or `~` (different sha).
-
-## result.yaml
-
-```yaml
-cli-output: "start started with path TestDir \n"
-exit-code: 0
-tree:
-    - file: AgnosConfig/project.yaml
-      sha: "af0796675f5c16a2f2b5a3285d21406a30875803f12d51885c9cc33a882e6a51"
-```
-
-| field | what it is |
+| Example | Source |
 |---|---|
-| `cli-output` | stdout and stderr, merged in the order they were written, normalized |
-| `exit-code` | the status the example exited with; `0` is success |
-| `tree` | every file inside `TestDir`, ordered by `file`, with the sha256 of its content |
-
-All three are compared. The file is generated — keys alphabetical, no trailing space — so it
-has to come out byte-for-byte identical on a re-run or the suite stops being idempotent.
-
-**Normalization.** Before comparing or writing, the absolute path of the example's own
-directory becomes `<dir>` and `\r\n` becomes `\n`. An example whose output carries any other
-absolute path, a timestamp or a resolved version is not a valid example.
-
-**Volatility.** `go.sum` and `release/` are left out of the tree: an example that reaches the
-Go runtime (`start` runs `build`, which runs `go mod tidy` and `go build`) writes whatever the
-module proxy resolved that day, which is not a property of the project.
-
-## cli and lib are the same run
-
-When `<name>` exists on both sides, the two runs must agree on `tree` and on `exit-code` —
-that is the assertion that the cli is only a wrapper over the lib. `cli-output` is left out of
-that comparison: each side has its own text (a cli error on one, a `panic` on the other) and is
-checked against its own golden.
-
-## Declared examples
-
-| example | directory |
-|---|---|
-| `add-arg` | `examples/lib/add-arg/` |
-| `add-cli-example` | `examples/lib/add-cli-example/` |
-| `add-command` | `examples/lib/add-command/` |
-| `add-doc` | `examples/lib/add-doc/` |
-| `add-flag` | `examples/lib/add-flag/` |
-| `add-lib-example` | `examples/lib/add-lib-example/` |
-| `build` | `examples/lib/build/` |
-| `cli-init` | `examples/lib/cli-init/` |
-| `cli-purge` | `examples/lib/cli-purge/` |
-| `compile` | `examples/lib/compile/` |
-| `dep-install` | `examples/lib/dep-install/` |
-| `dep-list` | `examples/lib/dep-list/` |
-| `dep-remove` | `examples/lib/dep-remove/` |
-| `deps-init` | `examples/lib/deps-init/` |
-| `deps-purge` | `examples/lib/deps-purge/` |
-| `remove-arg` | `examples/lib/remove-arg/` |
-| `remove-cli-example` | `examples/lib/remove-cli-example/` |
-| `remove-command` | `examples/lib/remove-command/` |
-| `remove-doc` | `examples/lib/remove-doc/` |
-| `remove-flag` | `examples/lib/remove-flag/` |
-| `remove-lib-example` | `examples/lib/remove-lib-example/` |
-| `set-command` | `examples/lib/set-command/` |
-| `start` | `examples/lib/start/` |
-| `verify` | `examples/lib/verify/` |
+| `add-arg` | [example.go](../../examples/lib/add-arg/example.go) |
+| `add-cli-example` | [example.go](../../examples/lib/add-cli-example/example.go) |
+| `add-command` | [example.go](../../examples/lib/add-command/example.go) |
+| `add-doc` | [example.go](../../examples/lib/add-doc/example.go) |
+| `add-flag` | [example.go](../../examples/lib/add-flag/example.go) |
+| `add-lib-example` | [example.go](../../examples/lib/add-lib-example/example.go) |
+| `build` | [example.go](../../examples/lib/build/example.go) |
+| `cli-init` | [example.go](../../examples/lib/cli-init/example.go) |
+| `cli-purge` | [example.go](../../examples/lib/cli-purge/example.go) |
+| `compile` | [example.go](../../examples/lib/compile/example.go) |
+| `dep-install` | [example.go](../../examples/lib/dep-install/example.go) |
+| `dep-list` | [example.go](../../examples/lib/dep-list/example.go) |
+| `dep-remove` | [example.go](../../examples/lib/dep-remove/example.go) |
+| `deps-init` | [example.go](../../examples/lib/deps-init/example.go) |
+| `deps-purge` | [example.go](../../examples/lib/deps-purge/example.go) |
+| `remove-arg` | [example.go](../../examples/lib/remove-arg/example.go) |
+| `remove-cli-example` | [example.go](../../examples/lib/remove-cli-example/example.go) |
+| `remove-command` | [example.go](../../examples/lib/remove-command/example.go) |
+| `remove-doc` | [example.go](../../examples/lib/remove-doc/example.go) |
+| `remove-flag` | [example.go](../../examples/lib/remove-flag/example.go) |
+| `remove-lib-example` | [example.go](../../examples/lib/remove-lib-example/example.go) |
+| `set-command` | [example.go](../../examples/lib/set-command/example.go) |
+| `start` | [example.go](../../examples/lib/start/example.go) |
+| `verify` | [example.go](../../examples/lib/verify/example.go) |
 

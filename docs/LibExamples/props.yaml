@@ -1,4 +1,4 @@
-description: "Examples of agnos as a Go module, and the suite that runs them as tests"
+description: "Index of every runnable example of agnos as a Go module"
 name: "LibExamples"
 order: 3
 themes:

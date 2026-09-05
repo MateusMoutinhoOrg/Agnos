@@ -1,4 +1,4 @@
-description: "Examples of the agnos cli, and the suite that runs them as tests"
+description: "Index of every runnable example of the agnos cli"
 name: "CliExamples"
 order: 4
 themes:
