@@ -33,7 +33,7 @@ sandbox:
     api:
       order: 2
       dir: true
-      description: contracts only; imports nothing but sandbox/api
+      description: contracts only; imports nothing at all
       children:
         sandbox.go:
           order: 1
@@ -61,7 +61,7 @@ sandbox:
     deps:
       order: 4
       dir: true
-      description: contracts; imports only stdlib + sandbox/deps
+      description: contracts; each <x>/ imports nothing at all
       children:
         deps.go:
           order: 1

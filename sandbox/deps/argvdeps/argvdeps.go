@@ -1,7 +1,5 @@
 package argvdeps
 
-import "time"
-
 // Lib is the argv-parser constructor injected whole as the Deps.ArgvLib
 // field — the same mechanic as requestdeps.Lib. A parser is bound to one
 // argument vector, so it is created per call rather than injected once: what
@@ -31,8 +29,9 @@ type Lib struct {
 //
 // Each getter family (Option, Arg, NextArg, KeyValues) is exposed once per
 // supported value type: String (raw text), Int (base-10), Double (float64),
-// and Timestamp (RFC 3339). A typed getter marks its match as used even
-// when parsing then fails.
+// and Timestamp (RFC 3339 text, reported as nanoseconds since the Unix
+// epoch, UTC — the sandbox may not name a `time.Time`). A typed getter
+// marks its match as used even when parsing then fails.
 type Parser struct {
 	// Args is the argument vector being parsed. Every index-based field
 	// refers to positions in this slice. Treat it as read-only: mutating it
@@ -69,8 +68,9 @@ type Parser struct {
 	// value as a 64-bit floating-point number.
 	GetDoubleOption func(flags []string, occurrence int) (float64, error)
 	// GetTimestampOption behaves like GetStringOption, additionally parsing
-	// the value as an RFC 3339 timestamp.
-	GetTimestampOption func(flags []string, occurrence int) (time.Time, error)
+	// the value as an RFC 3339 timestamp and reporting it as nanoseconds
+	// since the Unix epoch, UTC.
+	GetTimestampOption func(flags []string, occurrence int) (int64, error)
 
 	// GetStringArg returns the argument at the given absolute index of Args
 	// and marks it used. It errors when index is out of range.
@@ -82,8 +82,9 @@ type Parser struct {
 	// argument as a 64-bit floating-point number.
 	GetDoubleArg func(index int) (float64, error)
 	// GetTimestampArg behaves like GetStringArg, additionally parsing the
-	// argument as an RFC 3339 timestamp.
-	GetTimestampArg func(index int) (time.Time, error)
+	// argument as an RFC 3339 timestamp and reporting it as nanoseconds
+	// since the Unix epoch, UTC.
+	GetTimestampArg func(index int) (int64, error)
 
 	// GetNextStringArg returns the first still-unused argument, in order,
 	// and marks it used — the leftover positional arguments, drained one
@@ -96,8 +97,9 @@ type Parser struct {
 	// the argument as a 64-bit floating-point number.
 	GetNextDoubleArg func() (float64, error)
 	// GetNextTimestampArg behaves like GetNextStringArg, additionally
-	// parsing the argument as an RFC 3339 timestamp.
-	GetNextTimestampArg func() (time.Time, error)
+	// parsing the argument as an RFC 3339 timestamp and reporting it as
+	// nanoseconds since the Unix epoch, UTC.
+	GetNextTimestampArg func() (int64, error)
 
 	// GetStringKeyValues returns the text after the matched prefix of the
 	// occurrence-th (0-based) argument starting with one of the given
@@ -111,6 +113,7 @@ type Parser struct {
 	// parsing the value portion as a 64-bit floating-point number.
 	GetDoubleKeyValues func(prefixes []string, occurrence int) (float64, error)
 	// GetTimestampKeyValues behaves like GetStringKeyValues, additionally
-	// parsing the value portion as an RFC 3339 timestamp.
-	GetTimestampKeyValues func(prefixes []string, occurrence int) (time.Time, error)
+	// parsing the value portion as an RFC 3339 timestamp and reporting it
+	// as nanoseconds since the Unix epoch, UTC.
+	GetTimestampKeyValues func(prefixes []string, occurrence int) (int64, error)
 }

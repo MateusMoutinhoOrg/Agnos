@@ -22,7 +22,7 @@ func CheckSandbox(deps *deps.Deps, io *smartio.SmartIO, module string) []string 
 
 	violations = append(violations, checkSandboxContents(deps, io)...)
 	violations = append(violations, checkSandboxImports(deps, io, module)...)
-	violations = append(violations, checkSandboxApi(deps, io, module)...)
+	violations = append(violations, checkSandboxApi(deps, io)...)
 	violations = append(violations, checkSandboxDeps(deps, io, module)...)
 	violations = append(violations, checkSandboxBinds(deps, io)...)
 
@@ -82,41 +82,47 @@ func checkSandboxImports(deps *deps.Deps, io *smartio.SmartIO, module string) []
 	return violations
 }
 
-// checkSandboxApi enforces that sandbox/api/* imports nothing at all beyond
-// other sandbox/api packages (no stdlib, no external modules, and in
-// particular not sandbox/deps — api is pure contract).
-func checkSandboxApi(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
+// checkSandboxApi enforces that sandbox/api/* imports nothing at all — no
+// stdlib, no external module, not sandbox/deps and not another sandbox/api
+// package. api is pure contract: every type it declares is written in Go's
+// own builtin types, so an import there is always a contract leaking a shape
+// it does not own.
+func checkSandboxApi(deps *deps.Deps, io *smartio.SmartIO) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(deps, io, "sandbox/api") {
 		for _, imp := range fileImports(deps, io, file) {
-			if !isUnder(imp, module+"/sandbox/api") {
-				violations = append(violations,
-					file+" imports "+imp+"; sandbox/api/* may import only other sandbox/api packages")
-			}
+			violations = append(violations,
+				file+" imports "+imp+"; sandbox/api/* may import nothing at all")
 		}
 	}
 
 	return violations
 }
 
-// checkSandboxDeps enforces that sandbox/deps/* imports nothing but the
-// standard library and other sandbox/deps packages. It is the boundary itself:
-// a contract restates an outside api, so it names the standard library types
-// that api is written in, and nothing more.
+// checkSandboxDeps enforces that a contract package under sandbox/deps/<x>/
+// imports nothing at all — the stdlib included. A contract restates an
+// outside api, so it may not name a type it borrows from one: a shape the
+// sandbox needs is spelled out in Go's own builtin types, and the adapter,
+// which lives outside the sandbox, is what converts.
+//
+// The loose files directly in sandbox/deps/ are the one exception. deps.go
+// composes the contracts into deps.Deps, so it names them and nothing else.
 func checkSandboxDeps(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(deps, io, "sandbox/deps") {
 		for _, imp := range fileImports(deps, io, file) {
-			if isStdlib(deps, imp) {
-				continue
-			}
-			if isUnder(imp, module+"/sandbox/deps") {
+			if isDirectChild(deps, file, "sandbox/deps") {
+				if isUnder(imp, module+"/sandbox/deps") {
+					continue
+				}
+				violations = append(violations,
+					file+" imports "+imp+"; sandbox/deps/*.go may import only sandbox/deps packages")
 				continue
 			}
 			violations = append(violations,
-				file+" imports "+imp+"; sandbox/deps/* may import only the standard library and sandbox/deps packages")
+				file+" imports "+imp+"; sandbox/deps/<x>/ may import nothing at all")
 		}
 	}
 
@@ -231,9 +237,9 @@ func isUnder(imp string, prefix string) bool {
 	return imp == prefix || len(imp) > len(prefix) && imp[:len(prefix)+1] == prefix+"/"
 }
 
-// isStdlib reports whether imp is a standard-library package (its first path
-// segment carries no dot, so it is not a domain).
-func isStdlib(deps *deps.Deps, imp string) bool {
-	first := deps.Stringsdeps.Split(imp, "/")[0]
-	return !deps.Stringsdeps.Contains(first, ".")
+// isDirectChild reports whether path is a loose entry of dir rather than of a
+// directory below it.
+func isDirectChild(deps *deps.Deps, path string, dir string) bool {
+	return isUnder(path, dir) &&
+		len(deps.Stringsdeps.Split(path, "/")) == len(deps.Stringsdeps.Split(dir, "/"))+1
 }

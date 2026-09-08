@@ -1,9 +1,5 @@
 package std
 
-import (
-	"time"
-)
-
 // This package is the sandbox's *copy* of the api the process runtime
 // exposes — the same mechanic as argvdeps, dbdeps, embeddeps, iodeps and
 // requestdeps, for the same reason: reading the clock and writing to stdout
@@ -18,8 +14,10 @@ import (
 
 // Lib is the runtime library injected whole as the Deps.Std field.
 type Lib struct {
-	// Now returns the current wall-clock time.
-	Now func() time.Time
+	// Now returns the current wall-clock time as nanoseconds since the
+	// Unix epoch, UTC. The sandbox may not name a `time.Time`, so an
+	// instant crosses this boundary as a plain integer.
+	Now func() int64
 
 	// Printf writes one formatted message to standard output. It carries
 	// the command's result — the data a script would read — so it is never

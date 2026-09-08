@@ -14,7 +14,7 @@ sandbox:
     api:
       order: 2
       dir: true
-      description: contracts only; imports nothing but sandbox/api
+      description: contracts only; imports nothing at all
     internal:
       order: 3
       dir: true

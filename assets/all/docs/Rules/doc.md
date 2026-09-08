@@ -27,12 +27,14 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 ## Layers
 
-- `sandbox/` is closed: outside `sandbox/deps/`, a file there imports only `sandbox/` packages —
-  the stdlib included. A capability from outside (io, text, sorting, hashing, templating) is
-  restated as a contract under `sandbox/deps/` and reached as `deps.<Contract>`. **(verify)**
+- `sandbox/` is closed: a file there imports only `sandbox/` packages — the stdlib included. A
+  capability from outside (io, text, sorting, hashing, templating) is restated as a contract
+  under `sandbox/deps/` and reached as `deps.<Contract>`. **(verify)**
 - `sandbox/` holds only `api`, `binds`, `deps`, `internal` and `new.go`. **(verify)**
-- `sandbox/api/*` imports only `sandbox/api`. **(verify)**
-- `sandbox/deps/*` imports only the stdlib and `sandbox/deps`. **(verify)**
+- `sandbox/api/*` imports nothing at all. **(verify)**
+- `sandbox/deps/<x>/` imports nothing at all: a contract is written in Go's builtin types only,
+  and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
+  `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
 - Every `sandbox/binds/` file mirrors one `api/` file and declares only functions. **(verify)**
 - Every file of `sandbox/api/` and `sandbox/deps/` parses, and every exported type, func, const
   and var in them carries a doc comment — [PublicApi](../PublicApi/doc.md) is generated from

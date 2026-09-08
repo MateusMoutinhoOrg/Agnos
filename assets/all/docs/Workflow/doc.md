@@ -98,7 +98,7 @@ agnos dep-remove <dep>
 [DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves and
 `build` picks them up from the directory listing:
 
-1. `sandbox/deps/<x>/<x>.go` — `type Lib struct { ... }` of function fields, stdlib imports only.
+1. `sandbox/deps/<x>/<x>.go` — `type Lib struct { ... }` of function fields, no import at all.
 2. `adapters/libs/<x>/<x>.go` — `func Bind(deps *deps.Deps) { deps.<X> = <x>.Lib{...} }`, any
    import allowed.
 

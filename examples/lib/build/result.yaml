@@ -10,7 +10,7 @@ tree:
     - file: AgnosConfig/project.yaml
       sha: d855450b74c63de8d82ae1523bc76e3dc25175a99bd17fce161e2451e02bb783
     - file: AgnosConfig/structure.yaml
-      sha: edebcb3258291ad65c57fc615bcfa14b0579ff49a7135780969c314796503854
+      sha: e310eb47afd196099ed102bb56b3fb4052ca6f3f1441975e72fd3ecd23eb5196
     - file: AgnosConfig/themes.yaml
       sha: f40d60abbb046efc5e32317a8d9129644b73e85e6328f0550ffee8766151c6d9
     - file: docs/Commands/doc.md
@@ -46,14 +46,14 @@ tree:
     - file: docs/Requirements/props.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: a9325c9e5a66d5f6586a4c3068e5b026e10d34cb2a58731b75bfed90b95d429e
+      sha: 38c1106acae854996d775b9cd15d2ae2bd2b8b3a5d1b0b4a9f94ae725eaec787
     - file: docs/Rules/props.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md
-      sha: 1c26be604628aadacef0d13e96b3706ca729aff5c6884772c71b161eb8f0ed15
+      sha: bdf68b3a53c924502955b2fbc9ccbd4bdcab9f84d949af2be4a031b3aadba253
     - file: docs/Structure/props.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 9bd0c240f4652e2b8f1f25bcc4d63f45233bae794ab4c2992317f838372142ac
+      sha: 144f050e873a98ce3c0db824d9728f8a07c12a61845d22eb1a924b7fa0021e69
     - file: docs/Workflow/props.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b

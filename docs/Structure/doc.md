@@ -23,14 +23,14 @@ AgnosConfig/                     written once by `start`, read by every `build`
   docs/ReadmeHeader.md           README body, a template
 sandbox/                         closed: imports nothing outside sandbox/, no OS packages
   new.go                         (gen) New(deps) *api.Sandbox, one binds.<X>Bind per binds/ file
-  api/                           contracts only; imports nothing but sandbox/api
+  api/                           contracts only; imports nothing at all
     sandbox.go                   (gen) Sandbox struct, one field per api/ file
     actions.go                   Actions struct + props structs + Runtime consts
     cli.go                       (gen) Cli struct + exit consts
   binds/                         one file per api/ file, functions only
     actions.go                   ActionsBind(deps, sandbox): one assignment per action
     cli.go                       (gen) CliBind
-  deps/                          contracts; imports only stdlib + sandbox/deps
+  deps/                          contracts; each <x>/ imports nothing at all
     deps.go                      (gen) Deps struct, one <Title> <dir>.Lib per dir
     <x>/<x>.go                   type Lib struct of func fields
   internal/                      the logic; unreachable from outside the sandbox

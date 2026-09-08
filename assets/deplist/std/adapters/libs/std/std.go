@@ -12,9 +12,10 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// now fills std.Lib.Now, returning the real current time.
-func now() time.Time {
-	return time.Now()
+// now fills std.Lib.Now, returning the real current time as nanoseconds
+// since the Unix epoch.
+func now() int64 {
+	return time.Now().UnixNano()
 }
 
 // printf fills std.Lib.Printf, writing one formatted message to the given
@@ -58,7 +59,7 @@ func errorf(format string, a ...any) error {
 // built on the standard library's time and fmt over os.Stdout and os.Stderr.
 func Bind(deps *deps.Deps) {
 	deps.Std = std.Lib{
-		Now: func() time.Time {
+		Now: func() int64 {
 			return now()
 		},
 		Printf: func(format string, a ...any) (n int, err error) {
