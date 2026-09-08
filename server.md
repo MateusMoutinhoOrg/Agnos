@@ -23,9 +23,16 @@ novo: cada arquivo abaixo é a instância *server* de um arquivo *cli* que já e
 | Editores da declaração | `add-command`, `add-flag`, `add-arg`, `set-command` | `add-route`, `add-field`, `remove-field`, `set-route`, `remove-route` |
 | Gatilho no build | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` |
 
-Invariante herdada: **o despacho valida tudo antes do handler rodar**. Assim como um
-`CommandHandler` nunca retorna `api.ExitUsage`, um `RouteHandler` nunca retorna `400`/`404`/
-`405`/`413`/`415` — quem responde isso é `servermain.go`.
+Invariante herdada: **o despacho valida tudo que não é o corpo antes do handler rodar**.
+Assim como um `CommandHandler` nunca retorna `api.ExitUsage`, um `RouteHandler` nunca *decide*
+um `400`/`404`/`405`/`415` — quem responde isso é `servermain.go`.
+
+O corpo é a exceção deliberada: ele não é lido nem parseado antes do handler. Um handler só
+quer o corpo depois de aprovar o resto (autorização, tenant, estado), então `Entries` não traz
+um campo `Body` pronto — traz o método **`ReadBody`**, que lê, valida e converte sob demanda,
+devolvendo uma struct (`type: json` com schema), `[]byte` (`raw`) ou `string` (`text`). Falha
+de corpo continua sem ser decisão do handler: `ReadBody` já responde o erro e devolve o status
+para o handler propagar.
 
 ---
 
@@ -254,6 +261,11 @@ em `params`, e lê todas as ocorrências da chave.
 | `content-type` | exigido no header; divergência vira `415`. Default `application/json` para `type: json` |
 | `json-schema` | subconjunto de JSON Schema, só quando `type: json` |
 
+Só `content-type` é checado pelo despacho (é um header, não custa ler o corpo). `required`,
+`max-bytes` e `json-schema` são aplicados dentro de `ReadBody`, na primeira chamada do handler
+— um `Content-Length` já maior que `max-bytes` é a única antecipação, e responde `413` antes de
+chamar o handler.
+
 ### Subconjunto de JSON Schema suportado
 
 `type` (`object`/`array`/`string`/`integer`/`number`/`boolean`/`null`), `properties`,
@@ -296,7 +308,8 @@ Renderizado por todo `build` quando `sandbox/internal/server/` existe. Todo arqu
 | `assets/server/sandbox/api/server.go` | `sandbox/api/server.go` |
 | `assets/server/sandbox/binds/server.go` | `sandbox/binds/server.go` |
 | `assets/server/sandbox/internal/server/servermain.go` | `sandbox/internal/server/servermain.go` |
-| `assets/server/sandbox/internal/server/jsonschema.go` | `sandbox/internal/server/jsonschema.go` |
+| `assets/server/sandbox/internal/routeio/jsonschema.go` | `sandbox/internal/routeio/jsonschema.go` |
+| `assets/server/sandbox/internal/routeio/write_error.go` | `sandbox/internal/routeio/write_error.go` |
 | `assets/server/sandbox/internal/routes/health/route.yaml` | `sandbox/internal/routes/health/route.yaml` |
 | `assets/server/sandbox/internal/routes/health/handler.go` | `sandbox/internal/routes/health/handler.go` |
 | `assets/server/docs/RouteYaml/{doc.md,props.yaml}` | `docs/RouteYaml/` |
@@ -351,35 +364,51 @@ func ServerMain(deps *deps.Deps, props ServeProps) error {
 ```
 
 mais um `handle<GoName>` por rota, que: lê e converte os segmentos capturados de `paths` ->
-headers -> params -> body, na ordem de declaração e com a primeira origem que traz valor
-vencendo em nomes repetidos; aplica defaults; checa `required`, `min`/`max`, `array`; valida
-`content-type` e `max-bytes`; roda
-`validateSchema` quando há `json-schema`; monta `Entries`; e só então chama
-`routes_<name>.RouteHandler(deps, &entries, res)`. Qualquer falha responde antes, em JSON
+headers -> params, na ordem de declaração e com a primeira origem que traz valor vencendo em
+nomes repetidos; aplica defaults; checa `required`, `min`/`max`, `array`; valida `content-type`
+e um `Content-Length` acima de `max-bytes`; monta `Entries` — guardando em `Entries.Request` a
+requisição de onde `ReadBody` vai ler; e só então chama
+`routes_<name>.RouteHandler(deps, &entries, res)`. **O corpo não é tocado aqui**: nada é lido do
+socket enquanto o handler não chamar `ReadBody`. Qualquer falha responde antes, em JSON
 (`{"error": "...", "field": "..."}`), com o status da tabela abaixo, e registra em
-`deps.Std.Log`. Os helpers compartilhados (`readHeader`, `parseIntValue`, `writeError`,
-`bindQueryArray`) ficam no rodapé do arquivo, exatamente como os helpers de argv em
-`climain.go`.
+`deps.Std.Log`. Os helpers compartilhados (`readHeader`, `parseIntValue`, `bindQueryArray`)
+ficam no rodapé do arquivo, exatamente como os helpers de argv em `climain.go`; o
+`writeError` é o de `routeio`, compartilhado com o `ReadBody` de cada rota.
 
-| Situação | Status |
-|---|---|
-| rota inexistente | 404 |
-| método divergente no mesmo path | 405 |
-| `content-type` divergente | 415 |
-| corpo maior que `max-bytes` | 413 |
-| header/param/JSON inválido, `required` ausente, fora de `min`/`max`, schema reprovado | 400 |
-| handler devolveu `0` ou entrou em pânico | 500 |
+| Situação | Status | Quem responde |
+|---|---|---|
+| rota inexistente | 404 | despacho |
+| método divergente no mesmo path | 405 | despacho |
+| `content-type` divergente | 415 | despacho |
+| `Content-Length` acima de `max-bytes` | 413 | despacho |
+| header/param inválido, `required` ausente, fora de `min`/`max` | 400 | despacho |
+| corpo excede `max-bytes` na leitura | 413 | `ReadBody` |
+| corpo ausente com `required: true`, JSON inválido, schema reprovado | 400 | `ReadBody` |
+| handler devolveu `0` ou entrou em pânico | 500 | despacho |
 
-### `jsonschema.go` (gerado, estático)
+### `routeio/` (gerado, estático)
 
-Validador puro do subconjunto acima, sobre `deps.Serializables.ParseJson` — sem stdlib, sem
-regexp externo (`pattern` limitado às âncoras/classes que o validador implementa, ou delegado a
-um `Stringsdeps.MatchPattern` a acrescentar no contrato). Assinatura:
+Pacote próprio, e não um arquivo dentro de `sandbox/internal/server/`, porque quem chama o
+validador agora é o `ReadBody` de cada rota: `servermain.go` importa todo
+`sandbox/internal/routes/<name>/`, então uma rota não pode importar `internal/server` de volta.
+`routeio` não importa nenhum dos dois e é importado pelos dois.
+
+`jsonschema.go` — validador puro do subconjunto acima, sobre `deps.Serializables.ParseJson` —
+sem stdlib, sem regexp externo (`pattern` limitado às âncoras/classes que o validador
+implementa, ou delegado a um `Stringsdeps.MatchPattern` a acrescentar no contrato):
 
 ```go
-func validateSchema(deps *deps.Deps, schema_json string, body []byte) (*serializables.SerializibleObject, string, bool)
+func ValidateSchema(deps *deps.Deps, schema_json string, body []byte) (*serializables.SerializibleObject, string, bool)
 ```
 (o objeto parseado, a mensagem da primeira violação, e se passou).
+
+`write_error.go` — a única forma de escrever uma falha, usada pelo despacho e por todo
+`ReadBody`, para que os dois lados respondam o mesmo JSON:
+
+```go
+func WriteError(deps *deps.Deps, response serverdeps.Response, status int, field string, message string) int
+```
+(devolve o próprio `status`, para o chamador retornar em uma linha).
 
 ---
 
@@ -387,7 +416,7 @@ func validateSchema(deps *deps.Deps, schema_json string, body []byte) (*serializ
 
 | Arquivo | Papel |
 |---|---|
-| `sandbox/internal/actions/build/collect_routes.go` | `CollectRoutes(deps, io)`: lê todo `sandbox/internal/routes/<name>/route.yaml` via `routeconf`, devolve `[]map[string]any` (`Name`, `GoName`, `Method`, `Trigger`, `Path` — derivado de `paths` —, `Segments`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`) — cópia de `collect_commands.go` |
+| `sandbox/internal/actions/build/collect_routes.go` | `CollectRoutes(deps, io)`: lê todo `sandbox/internal/routes/<name>/route.yaml` via `routeconf`, devolve `[]map[string]any` (`Name`, `GoName`, `Method`, `Trigger`, `Path` — derivado de `paths` —, `Segments`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`, `HasBody`) — cópia de `collect_commands.go` |
 | `sandbox/internal/actions/build/collect_route_docs.go` | alimenta `docs/Routes` — cópia de `collect_command_docs.go` |
 | `sandbox/internal/actions/build/generate_route_entries.go` | renderiza `assets/templates/route_entries.go` uma vez por rota em `sandbox/internal/routes/<name>/entries.go` |
 | `assets/templates/route_entries.go` | template do `Entries` de uma rota |
@@ -411,12 +440,12 @@ Edições em `sandbox/internal/actions/build/build_internal.go`:
 package create_user
 
 type Entries struct {
-	Tenant        string   // segmentos capturados de `paths`, na ordem declarada
-	Authorization string   // headers, na ordem declarada
+	Tenant        string             // segmentos capturados de `paths`, na ordem declarada
+	Authorization string             // headers, na ordem declarada
 	XTraceId      string
-	Page          int      // params, na ordem declarada
+	Page          int                // params, na ordem declarada
 	Tag           []string
-	Body          Body     // body.type == json com schema de objeto
+	Request       serverdeps.Request // preenchido pelo despacho; a fonte de `ReadBody`
 }
 
 type Body struct {
@@ -431,12 +460,32 @@ type BodyAddress struct {
 	Zip  string
 }
 
-const EntriesSchema = `{"type":"object", ...}`   // schema canônico, para validateSchema
+const EntriesSchema = `{"type":"object", ...}`   // schema canônico, para ValidateSchema
+
+// ReadBody lê, valida e converte o corpo na primeira chamada; o resultado fica em cache para
+// as seguintes. Devolve api.StatusOk quando passou; em qualquer outro status a resposta de
+// erro já foi escrita e o handler só propaga o retorno.
+func (entries *Entries) ReadBody(deps *deps.Deps, response serverdeps.Response) (Body, int)
 ```
 
+O corpo nunca é campo de `Entries` — é o retorno de `ReadBody`, que é gerado com o tipo de
+`body.type`:
+
+| `body.type` | Assinatura gerada |
+|---|---|
+| `none` (padrão) | nenhum `ReadBody` é gerado |
+| `raw` | `ReadBody(deps, response) ([]byte, int)` |
+| `text` | `ReadBody(deps, response) (string, int)` |
+| `json` com `json-schema` de objeto | `ReadBody(deps, response) (Body, int)` |
+| `json` sem `json-schema` | `ReadBody(deps, response) (*serializables.SerializibleObject, int)` |
+
+Toda variante faz, na ordem: `Request.ReadBody(max-bytes)` (`413` se estourar), `required`
+(`400` se vazio) e — só no caso `json` — `routeio.ValidateSchema` contra `EntriesSchema`
+(`400` na primeira violação, com o campo reprovado em `"field"`). Uma segunda chamada devolve
+o valor já lido, sem tocar no socket de novo.
+
 Regras de nome: objeto aninhado -> `Body<Caminho>` (`Body` + `Address` -> `BodyAddress`);
-item de array de objetos -> `Body<Caminho>Item`. `body.type: raw` -> campo `Body []byte`;
-`text` -> `Body string`; `json` sem `json-schema` -> `Body *serializables.SerializibleObject`.
+item de array de objetos -> `Body<Caminho>Item`.
 
 ### `handler.go` (à mão, único arquivo escrito à mão de uma rota)
 
@@ -444,8 +493,27 @@ item de array de objetos -> `Body<Caminho>Item`. `body.type: raw` -> campo `Body
 func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int
 ```
 
-Retorna o status com que respondeu — o análogo do `int` de `CommandHandler`. Nunca retorna
-`400`/`404`/`405`/`413`/`415`.
+Retorna o status com que respondeu — o análogo do `int` de `CommandHandler`. Nunca *decide* um
+`400`/`404`/`405`/`413`/`415`; o único caminho pelo qual devolve um deles é propagando o que
+`ReadBody` já respondeu:
+
+```go
+func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int {
+	// checagens do handler primeiro — o corpo ainda não foi lido
+	if !isAuthorized(deps, entries.Authorization) {
+		return writeJson(response, api.StatusFailure, ...)
+	}
+
+	body, status := entries.ReadBody(deps, response)
+	if status != api.StatusOk {
+		return status
+	}
+
+	return writeJson(response, api.StatusCreated, createUser(deps, entries.Tenant, body))
+}
+```
+
+Uma rota com `body.type: none` não tem `ReadBody` e nem essas três linhas.
 
 ---
 
@@ -532,7 +600,7 @@ Regras (nenhuma escrita, uma string por violação):
 | `assets/server/docs/RouteYaml/doc.md` + `props.yaml` | toda chave do `route.yaml` (irmão de `assets/all/docs/EntriesYaml/`) |
 | `assets/server/docs/Routes/doc.md` + `props.yaml` | tabela renderizada de `{{range .RouteDocs}}` (irmão de `docs/Commands`) |
 | `assets/server/docs/ServerUsage/doc.md` + `props.yaml` | subir o servidor, ciclo `add-route` -> `add-field` -> `build` |
-| `assets/all/docs/Rules/doc.md` | seção `## Routes` sob `{{ if .HasServer }}` — o handler nunca devolve status de validação, `route.yaml` nunca é editado à mão, nomes canônicos |
+| `assets/all/docs/Rules/doc.md` | seção `## Routes` sob `{{ if .HasServer }}` — o handler nunca decide status de validação (só propaga o de `ReadBody`), o corpo só é lido por `ReadBody`, `route.yaml` nunca é editado à mão, nomes canônicos |
 | `assets/all/docs/GeneratedFiles/doc.md` | bloco `{{- if .HasServer }}` com as linhas de `sandbox/api/server.go`, `binds/server.go`, `internal/server/*.go`, `routes/<name>/entries.go` (always) e `route.yaml`/`handler.go` (once) |
 | `assets/all/docs/Workflow/doc.md` | seções `## Add the server layer` e `## Change the route surface` |
 | `assets/all/docs/DepList/doc.md` | linha do `serverdeps` |
@@ -574,7 +642,8 @@ adapters/libs/serverdeps/serverdeps.go                               novo (espel
 assets/server/sandbox/api/server.go                                  novo
 assets/server/sandbox/binds/server.go                                novo
 assets/server/sandbox/internal/server/servermain.go                  novo
-assets/server/sandbox/internal/server/jsonschema.go                  novo
+assets/server/sandbox/internal/routeio/jsonschema.go                 novo
+assets/server/sandbox/internal/routeio/write_error.go                novo
 assets/server/sandbox/internal/routes/health/route.yaml              novo
 assets/server/sandbox/internal/routes/health/handler.go              novo
 assets/server/docs/RouteYaml/{doc.md,props.yaml}                     novo
@@ -636,7 +705,7 @@ go build -o release/bootstrap.bin ./cmd/main
 2. `routeconf` + `docs/RouteYaml` — só parse/render, sem geração ainda
 3. Grupo `assets/server/` com `api`, `binds`, `servermain.go` sem rotas e a rota `health`
 4. Collectors + `generate_route_entries.go` + vars do `build_internal.go`
-5. `jsonschema.go` e a validação completa no despacho
+5. `routeio` (`ValidateSchema` + `WriteError`) e o `ReadBody` gerado em cada `entries.go`
 6. Ações e comandos (`server-init`, `add-route`, `add-field`, …) + `api/actions.go` +
    `binds/actions.go`
 7. `check_routes.go` no `verify`
@@ -653,7 +722,13 @@ go build -o release/bootstrap.bin ./cmd/main
   seria lógica sem dono. O contrato expõe `GetPathParam`, e só.
 - **Schema validado em runtime, struct gerada em build.** A struct sai do `json-schema` no
   `build` (tipagem estática no handler) e o mesmo schema vai canonizado para
-  `EntriesSchema`, validado por `jsonschema.go` a cada request. Uma só declaração, dois usos.
+  `EntriesSchema`, validado por `routeio.ValidateSchema` a cada request. Uma só declaração,
+  dois usos.
+- **Corpo lido sob demanda, tudo o mais no despacho.** Path, headers e params são baratos e
+  identificam a requisição, então o despacho os resolve antes do handler. O corpo é caro e só
+  interessa depois que o handler aprovou o resto — uma requisição rejeitada por autorização não
+  paga a leitura nem o parse. Daí `ReadBody` em vez de um campo `Body`, e daí `routeio` como
+  pacote separado (uma rota não pode importar `internal/server`, que a importa).
 - **`pattern` de JSON Schema** precisa de regex, que o sandbox não tem. Ou se acrescenta
   `MatchPattern` a `stringsdeps` (adapter sobre `regexp`), ou `pattern` fica fora do
   subconjunto na primeira versão. Recomendação: acrescentar ao `stringsdeps`, é uma linha de
