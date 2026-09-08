@@ -11,15 +11,11 @@ are in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 | `dbdeps` | `Dbdeps` | `keep` | `github.com/MateusMoutinhoOrg/Keep` (pinned) | Schema database |
 | `embeddeps` | `Embeddeps` | `embeddeps` + `assets/asset.go` | `embed`, `text/template` | Read and render files compiled into the binary |
 | `goimportsdeps` | `Goimportsdeps` | `goimportsdeps` | `go/parser` | Go source reader (package, imports, declarations) |
-| `hashdeps` | `Hashdeps` | `hashdeps` | `crypto/sha256`, `encoding/hex` | SHA-256 of a byte slice, lower-case hex |
-| `iodeps` | `Iodeps` | `iodeps` | `os`, `path/filepath` | Filesystem. `WriteFile` creates parents; `RemoveDir` removes files too; `Join`/`Dir` build host paths |
+| `iodeps` | `Iodeps` | `iodeps` | `os`, `path/filepath` | Filesystem. `WriteFile` creates parents; `RemoveDir` removes files too |
 | `requestdeps` | `Requestdeps` | `requestdeps` | `net/http` (30s timeout) | Per-call HTTP request |
 | `rundeps` | `Rundeps` | `rundeps` | `os/exec` | Run a program to completion; stdout+stderr merged; non-zero exit is `Result.ExitCode`, not an error |
 | `serializables` | `Serializables` | `serializables` | `gopkg.in/yaml.v3`, `encoding/json` | Generic JSON/YAML values |
-| `sortdeps` | `Sortdeps` | `sortdeps` | `sort` | Sort a string slice, or any slice by a less function |
-| `std` | `Std` | `std` | `time`, `fmt`, `runtime`, `os.Stdout/Stderr` | Clock, `Sprintf`, the host `Goos` and the three output channels. Installed by `cli-init` |
-| `stringsdeps` | `Stringsdeps` | `stringsdeps` | `strings`, `strconv` | Text manipulation and string/number conversion |
-| `templatedeps` | `Templatedeps` | `templatedeps` | `text/template` | Parse and execute one template over vars, with native funcs |
+| `std` | `Std` | `std` | `time`, `fmt`, `os.Stdout/Stderr` | Clock and the three output channels. Installed by `cli-init` |
 
 `agnos dep-list` prints the same names; `agnos dep-remove <dep>` takes one back out. Writing a
 contract of your own instead is in

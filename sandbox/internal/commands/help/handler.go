@@ -1,6 +1,10 @@
 package help
 
 import (
+	"fmt"
+	"slices"
+	"strings"
+
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
@@ -16,22 +20,11 @@ const (
 	exitUsage = 2
 )
 
-// identifiedBy reports whether name is one of the identifiers a command
-// answers to, its aliases included.
-func identifiedBy(identifiers []string, name string) bool {
-	for _, identifier := range identifiers {
-		if identifier == name {
-			return true
-		}
-	}
-	return false
-}
-
 // binaryName is the executable's name as a user types it: the configured
 // project name, lowercased. Usage lines show what to type, not the display
 // name of the project.
-func binaryName(deps *deps.Deps) string {
-	return deps.Stringsdeps.ToLower(config.ProjectName)
+func binaryName() string {
+	return strings.ToLower(config.ProjectName)
 }
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
@@ -553,7 +546,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	}
 
 	for i := range helpCommands {
-		if identifiedBy(helpCommands[i].Identifiers, name) {
+		if slices.Contains(helpCommands[i].Identifiers, name) {
 			printCommandHelp(deps, &helpCommands[i])
 			return exitOk
 		}
@@ -562,7 +555,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	e := deps.Std.Error
 	e("\n")
 	e("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, name, reset)
-	e("  %sRun '%s help' to see available commands.%s\n", dim, binaryName(deps), reset)
+	e("  %sRun '%s help' to see available commands.%s\n", dim, binaryName(), reset)
 	e("\n")
 	return exitUsage
 }
@@ -579,7 +572,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 	p("  %s%sUSAGE%s\n", bold, cyan, reset)
 	p("  %s│%s\n", gray, reset)
 	p("  %s│%s  %s$%s %s %s<command>%s %s[flags]%s %s[args]%s\n",
-		gray, reset, dim, reset, binaryName(deps),
+		gray, reset, dim, reset, binaryName(),
 		green, reset, yellow, reset, dim, reset,
 	)
 	p("  %s│%s\n", gray, reset)
@@ -612,7 +605,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 	}
 
 	for _, cat := range categoryOrder {
-		p("  %s%s%s%s\n", bold, cyan, deps.Stringsdeps.ToUpper(cat), reset)
+		p("  %s%s%s%s\n", bold, cyan, strings.ToUpper(cat), reset)
 		p("  %s│%s\n", gray, reset)
 		for _, cmd := range categorized[cat] {
 			if len(cmd.Identifiers) == 0 {
@@ -622,14 +615,14 @@ func PrintGeneralHelp(deps *deps.Deps) {
 
 			aliasTag := ""
 			if len(cmd.Identifiers) > 1 {
-				aliasTag = deps.Std.Sprintf("  %s[%s]%s", dim, deps.Stringsdeps.Join(cmd.Identifiers[1:], ", "), reset)
+				aliasTag = fmt.Sprintf("  %s[%s]%s", dim, strings.Join(cmd.Identifiers[1:], ", "), reset)
 			}
 
 			dotsNeeded := (maxNameLen + 20) - len(name)
 			if dotsNeeded < 4 {
 				dotsNeeded = 4
 			}
-			dots := " " + deps.Stringsdeps.Repeat("·", dotsNeeded-2) + " "
+			dots := " " + strings.Repeat("·", dotsNeeded-2) + " "
 
 			p("  %s│%s  %s%s%s%s%s%s%s%s\n",
 				gray, reset, green+bold, name, reset, gray, dots, reset, cmd.Description, aliasTag,
@@ -643,7 +636,7 @@ func PrintGeneralHelp(deps *deps.Deps) {
 		dim, gray, italic, reset+dim+gray, gray, reset,
 	)
 	p("  %sRun %s%s help <command>%s%s for detailed info on any command.%s\n",
-		dim, reset+cyan, binaryName(deps), reset, dim, reset,
+		dim, reset+cyan, binaryName(), reset, dim, reset,
 	)
 	p("\n")
 }
@@ -655,7 +648,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 
 	name := cmd.Identifiers[0]
 
-	titleLine := deps.Std.Sprintf("%s %s", binaryName(deps), name)
+	titleLine := fmt.Sprintf("%s %s", binaryName(), name)
 	innerW := len(titleLine) + 4
 	if w := len(cmd.Description) + 4; w > innerW {
 		innerW = w
@@ -665,37 +658,37 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	}
 
 	p("\n")
-	p("  %s╭%s╮%s\n", cyan, deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╭%s╮%s\n", cyan, strings.Repeat("─", innerW), reset)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
 		cyan, reset, bold+white, titleLine, reset,
-		deps.Stringsdeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
+		strings.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
 	)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
 		cyan, reset, dim, cmd.Description, reset,
-		deps.Stringsdeps.Repeat(" ", innerW-2-len(cmd.Description)), cyan, reset,
+		strings.Repeat(" ", innerW-2-len(cmd.Description)), cyan, reset,
 	)
-	p("  %s╰%s╯%s\n", cyan, deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╰%s╯%s\n", cyan, strings.Repeat("─", innerW), reset)
 	p("\n")
 
 	if cmd.LongDescription != "" {
-		for _, line := range deps.Stringsdeps.Split(cmd.LongDescription, "\n") {
+		for _, line := range strings.Split(cmd.LongDescription, "\n") {
 			p("  %s%s%s\n", dim, line, reset)
 		}
 		p("\n")
 	}
 
 	printSection(p, "USAGE")
-	usage := deps.Std.Sprintf("  %s$%s %s %s", dim, reset, binaryName(deps), name)
+	usage := fmt.Sprintf("  %s$%s %s %s", dim, reset, binaryName(), name)
 	flagPart := ""
 	if len(cmd.Flags) > 0 {
-		flagPart = deps.Std.Sprintf(" %s[flags]%s", yellow, reset)
+		flagPart = fmt.Sprintf(" %s[flags]%s", yellow, reset)
 	}
 	argPart := ""
 	for _, arg := range cmd.Args {
 		if arg.Required {
-			argPart += deps.Std.Sprintf(" %s%s<%s>%s", bold, green, arg.Name, reset)
+			argPart += fmt.Sprintf(" %s%s<%s>%s", bold, green, arg.Name, reset)
 		} else {
-			argPart += deps.Std.Sprintf(" %s[%s]%s", dim, arg.Name, reset)
+			argPart += fmt.Sprintf(" %s[%s]%s", dim, arg.Name, reset)
 		}
 	}
 	p("  %s│%s%s%s%s\n", gray, reset, usage, flagPart, argPart)
@@ -730,7 +723,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	if len(cmd.Flags) > 0 {
 		printSection(p, "FLAGS")
 		for i, flag := range cmd.Flags {
-			label := deps.Stringsdeps.Join(flag.Identifiers, gray+", "+reset+yellow+bold)
+			label := strings.Join(flag.Identifiers, gray+", "+reset+yellow+bold)
 			printField(p, label, flag.Description, flag.Type, flag.Default, flag.Required, flag.Examples)
 			if i < len(cmd.Flags)-1 {
 				p("  %s│%s\n", gray, reset)
@@ -743,7 +736,7 @@ func printCommandHelp(deps *deps.Deps, cmd *helpCommand) {
 	if len(cmd.Examples) > 0 {
 		printSection(p, "EXAMPLES")
 		for _, ex := range cmd.Examples {
-			p("  %s│%s  %s$%s %s %s\n", gray, reset, dim, reset, binaryName(deps), ex)
+			p("  %s│%s  %s$%s %s %s\n", gray, reset, dim, reset, binaryName(), ex)
 		}
 		p("  %s│%s\n", gray, reset)
 		p("\n")
@@ -774,19 +767,19 @@ func printField(p func(string, ...any) (int, error), label, description, kind, d
 func printBanner(deps *deps.Deps) {
 	p := deps.Std.Printf
 
-	titleLine := deps.Std.Sprintf("%s  %s", config.ProjectName, config.Version)
+	titleLine := fmt.Sprintf("%s  %s", config.ProjectName, config.Version)
 	innerW := len(titleLine) + 4
 	if innerW < 42 {
 		innerW = 42
 	}
 
 	p("\n")
-	p("  %s╭%s╮%s\n", cyan, deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╭%s╮%s\n", cyan, strings.Repeat("─", innerW), reset)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
 		cyan, reset, bold+white, titleLine, reset,
-		deps.Stringsdeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
+		strings.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
 	)
-	p("  %s╰%s╯%s\n", cyan, deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╰%s╯%s\n", cyan, strings.Repeat("─", innerW), reset)
 	p("\n")
 }
 
