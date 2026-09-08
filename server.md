@@ -344,7 +344,7 @@ func WriteError(deps *deps.Deps, response serverdeps.Response, status int, field
 | `actions/build/collect_route_docs.go` | alimenta `docs/Routes` — cópia de `collect_command_docs.go` |
 | `actions/build/generate_route_entries.go` | renderiza `assets/templates/route_entries.go` por rota em `routes/<name>/entries.go` |
 | `assets/templates/route_{entries.go,route.yaml,handler.go}` | template do `Entries` e scaffolds usados por `add-route` |
-| `assets/templates/serve_{entries.yaml,handler.go}` | scaffold do comando `serve` (escrito por `server-init` quando há CLI) |
+| `assets/templates/start_server_{entries.yaml,handler.go}` | scaffold do comando `start-server`, escrito por `server-init` |
 
 Em `actions/build/build_internal.go`: `hasServer := io.IsDir("sandbox/internal/server")`,
 chamadas a `CollectRoutes`/`CollectRouteDocs`, vars `"HasServer"`, `"Routes"`, `"RouteDocs"`, e
@@ -426,7 +426,7 @@ Duas camadas por feature: `<name>.go` (abre SmartIO, persiste, dispara `build`) 
 
 | Ação / comando | Faz |
 |---|---|
-| `server_init` -> `server-init` | instala `serverdeps`, `std`, `serializables`, `stringsdeps`; renderiza o grupo `server`; escreve o comando `serve` quando há CLI; roda `build` |
+| `server_init` -> `server-init` | roda `cli-init` quando o projeto não tem CLI; instala `serverdeps`, `std`, `serializables`, `stringsdeps`; renderiza o grupo `server`; escreve o comando `start-server`; roda `build` |
 | `server_purge` -> `server-purge` | remove o grupo `server` + `sandbox/internal/{server,routes}` (cópia de `cli_purge`) |
 | `add_route` -> `add-route` | escreve `route.yaml` + `handler.go` (recusa sobrescrever) |
 | `remove_route` -> `remove-route` | apaga o diretório da rota |
@@ -438,6 +438,85 @@ Um único par `add-field`/`remove-field`: as origens diferem só pelo seletor `-
 acrescenta ao fim de `paths` (ou em `--position`), com `--identifier` para trigger ou `--name`
 para captura. `--in body` aceita caminho pontuado (`address.city`), criando os objetos
 intermediários no `json-schema`.
+
+### `server-init` implica CLI
+
+Um servidor precisa de um ponto de entrada que o suba, e esse ponto de entrada é um comando —
+então **`server-init` garante a camada CLI antes de renderizar a camada server**:
+
+1. `hasCli := io.IsDir("sandbox/internal/cli")`. Se for `false`, `ServerInitInternal` chama
+   `cli_init.CliInitInternal(deps, io, path)` sobre o **mesmo** SmartIO aberto (ações compõem
+   compartilhando um `*SmartIO`, como manda o `CLAUDE.md`) — sem `Persist` intermediário e sem
+   `build` intermediário.
+2. Renderiza o grupo `server`.
+3. Escreve `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` a partir de
+   `assets/templates/start_server_*` com `utils.RenderTemplateToDest`, recusando sobrescrever um
+   `start_server/` já existente (mesma regra de `add-route`).
+4. Persiste e roda o `build`, que gera o `entries.go` do `start-server` e o `climain.go` já com
+   ele no despacho.
+
+`server-purge` é o inverso e apaga `sandbox/internal/commands/start_server/` junto; **não** roda
+`cli-purge` — a camada CLI, uma vez instalada, é do projeto.
+
+### Comando `start-server`
+
+Único ponto de entrada do servidor pela CLI. Handler à mão (scaffold), curto por construção: lê
+as flags e chama `server.ServerMain` — o mesmo que `binds/server.go` expõe como
+`sandbox.Server.Serve`.
+
+```yaml
+# sandbox/internal/commands/start_server/entries.yaml
+identifiers: ["start-server"]
+category: Server
+help: Starts the http server
+long-description: |
+  Opens the port and serves every route declared under
+  sandbox/internal/routes, until the process is stopped.
+examples:
+  - "start-server"
+  - "start-server --addr :3000"
+flags:
+  - name: addr
+    identifiers: ["--addr"]
+    description: the address the server listens on
+    examples:
+      - "start-server --addr :3000"
+    type: string
+    default: ":8080"
+  - name: read_timeout_ms
+    identifiers: ["--read-timeout-ms"]
+    description: how long a request has to arrive, in milliseconds
+    examples:
+      - "start-server --read-timeout-ms 30000"
+    type: int
+    default: "10000"
+  - name: write_timeout_ms
+    identifiers: ["--write-timeout-ms"]
+    description: how long a response has to be written, in milliseconds
+    examples:
+      - "start-server --write-timeout-ms 30000"
+    type: int
+    default: "10000"
+```
+
+```go
+// sandbox/internal/commands/start_server/handler.go
+func CommandHandler(deps *deps.Deps, entries *Entries) int {
+	err := server.ServerMain(deps, api.ServeProps{
+		Addr:           entries.Addr,
+		ReadTimeoutMs:  entries.ReadTimeoutMs,
+		WriteTimeoutMs: entries.WriteTimeoutMs,
+	})
+	if err != nil {
+		deps.Std.Error("server stopped: %s \n", err.Error())
+		return api.ExitFailure
+	}
+	return api.ExitOk
+}
+```
+
+`Serve` bloqueia; o handler só retorna quando o servidor cai. Como todo `handler.go`, é escrito
+uma vez e nunca reescrito por `build`.
 
 Em `sandbox/api/actions.go` (doc comment em cada campo) e `sandbox/binds/actions.go`:
 
@@ -519,7 +598,8 @@ Criados só por comando; `result.yaml` só por `exec-test`/`update-test`.
 ```
 
 - `cli/server-init` — `start` + `server-init`; copia `sandbox/api/server.go`,
-  `sandbox/internal/server/`, `sandbox/internal/routes/health/`
+  `sandbox/internal/server/`, `sandbox/internal/routes/health/` e
+  `sandbox/internal/commands/start_server/` (prova de que o `cli-init` implícito rodou)
 - `cli/add-route` — `add-route` + três `add-field` (`--in path`, `--in header`, `--in body`);
   copia o `route.yaml` e o `entries.go` da rota
 - `lib/server-route` — mesmo resultado pela API, copiando o mesmo conjunto
@@ -550,7 +630,8 @@ Cada passo termina com o ciclo de bootstrap do `CLAUDE.md` (`build`, `verify`, `
 - **`pattern` de JSON Schema** precisa de regex, que o sandbox não tem. Recomendação:
   acrescentar `MatchPattern` a `stringsdeps` (adapter sobre `regexp`) — é uma linha de contrato
   e resolve `format` também. Alternativa: `pattern` fora do subconjunto na v1.
-- **`serve` como comando** só é escrito quando há camada CLI; um projeto lib sobe o servidor por
-  `sandbox.Server.Serve(...)`.
+- **`start-server` é sempre escrito**, porque `server-init` instala a camada CLI quando ela
+  falta. Um projeto que quiser subir o servidor sem passar pela CLI continua podendo chamar
+  `sandbox.Server.Serve(...)` direto — o comando é conveniência, não o único caminho.
 - **Sem TLS na v1** — certificados entram depois como campos novos de `ServerProps`, sem quebrar
   o contrato.
