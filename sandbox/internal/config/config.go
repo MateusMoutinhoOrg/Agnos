@@ -2,5 +2,5 @@ package config
 
 const (
 	ProjectName = "Agnos"
-	Version     = "v0.1.1"
+	Version     = "v0.1.2"
 )
