@@ -7,8 +7,8 @@ import (
 )
 
 // RemoveLibExampleInternal deletes the example's directory and everything in
-// it — the example.go, the golden result.yaml and any TestDir left behind by
-// the last run.
+// it — the example.go, the golden result.yaml and any TestDir or AssertDir left
+// behind by the last run.
 func RemoveLibExampleInternal(deps *deps.Deps, io *smartio.SmartIO, name string) error {
 	return utils.RemoveExample(deps, io, utils.ExampleLibSide, name)
 }

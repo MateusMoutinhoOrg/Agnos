@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"fmt"
 
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
@@ -39,5 +41,14 @@ func main() {
 	}
 	for _, dep := range installed {
 		fmt.Println(dep)
+	}
+
+	// What result.yaml records: the paths this example asserts, copied out of
+	// TestDir. The cli side copies the same set.
+	if err := os.CopyFS("AssertDir/sandbox/deps", os.DirFS("TestDir/sandbox/deps")); err != nil {
+		panic(err)
+	}
+	if err := os.CopyFS("AssertDir/adapters", os.DirFS("TestDir/adapters")); err != nil {
+		panic(err)
 	}
 }

@@ -7,8 +7,8 @@ import (
 )
 
 // RemoveCliExampleInternal deletes the example's directory and everything in
-// it — the example.sh, the golden result.yaml and any TestDir left behind by
-// the last run.
+// it — the example.sh, the golden result.yaml and any TestDir or AssertDir left
+// behind by the last run.
 func RemoveCliExampleInternal(deps *deps.Deps, io *smartio.SmartIO, name string) error {
 	return utils.RemoveExample(deps, io, utils.ExampleCliSide, name)
 }

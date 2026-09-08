@@ -7,3 +7,8 @@ agnos start --path TestDir --project-name Test --module Test -q
 agnos add-doc Report --theme reference --description "How a report is written" --path TestDir -q
 
 agnos remove-doc Report --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The lib side copies the same set.
+mkdir -p AssertDir/docs
+cp -R TestDir/docs/. AssertDir/docs/

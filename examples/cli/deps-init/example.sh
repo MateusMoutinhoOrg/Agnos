@@ -6,3 +6,10 @@
 agnos start --path TestDir --project-name Test --module Test -q
 
 agnos deps-init --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The lib side copies the same set.
+mkdir -p AssertDir/sandbox/deps
+cp -R TestDir/sandbox/deps/. AssertDir/sandbox/deps/
+mkdir -p AssertDir/adapters
+cp -R TestDir/adapters/. AssertDir/adapters/

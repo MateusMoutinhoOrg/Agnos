@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
@@ -28,6 +30,15 @@ func main() {
 	}
 
 	if err := lib.Actions.AddCommand("TestDir", "greet", "Greet someone", "Core"); err != nil {
+		panic(err)
+	}
+
+	// What result.yaml records: the paths this example asserts, copied out of
+	// TestDir. The cli side copies the same set.
+	if err := os.CopyFS("AssertDir/sandbox/internal/commands/greet", os.DirFS("TestDir/sandbox/internal/commands/greet")); err != nil {
+		panic(err)
+	}
+	if err := os.CopyFS("AssertDir/docs/Commands", os.DirFS("TestDir/docs/Commands")); err != nil {
 		panic(err)
 	}
 }

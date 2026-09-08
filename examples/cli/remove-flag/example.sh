@@ -9,3 +9,8 @@ agnos add-command greet --help "Greet someone" --category "Core" --path TestDir 
 agnos add-flag name --command greet --type string --default world --description "who to greet" --path TestDir -q
 
 agnos remove-flag name --command greet --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The lib side copies the same set.
+mkdir -p AssertDir/sandbox/internal/commands/greet
+cp -R TestDir/sandbox/internal/commands/greet/. AssertDir/sandbox/internal/commands/greet/

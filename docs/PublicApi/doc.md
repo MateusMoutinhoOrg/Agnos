@@ -153,6 +153,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `AddLibExample` | `func(path string, name string) error` | AddLibExample creates one example under examples/lib/, with an example.go stub that already runs. |
 | `RemoveLibExample` | `func(path string, name string) error` | RemoveLibExample deletes one example of examples/lib/ whole. |
 | `ExecTest` | `func(props ExecTestProps) error` | ExecTest runs the project's examples and checks each one against its golden result.yaml, reporting every example that diverged. |
+| `UpdateTest` | `func(path string, name string) error` | UpdateTest runs one example by name, both sides, and rewrites its golden result.yaml with what the run produced, printing the changes. |
 
 ## `sandbox/api/cli.go`
 

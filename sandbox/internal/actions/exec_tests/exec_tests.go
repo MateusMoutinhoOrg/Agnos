@@ -13,9 +13,10 @@ import (
 
 // ExecTest runs the project's examples and checks each one against its golden
 // result.yaml. Unlike every action that writes into the project tree it opens
-// no SmartIO: there is no transaction to persist — each example's TestDir is
-// written by a child process, outside any buffer, and the tree recorded for it
-// has to be the literal one on disk, unfiltered by ignore.yaml / paths.yaml.
+// no SmartIO: there is no transaction to persist — each example's TestDir and
+// AssertDir are written by a child process, outside any buffer, and the tree
+// recorded for it has to be the literal one on disk, unfiltered by
+// ignore.yaml / paths.yaml.
 // The project path is therefore joined here rather than at the SmartIO
 // boundary.
 func ExecTest(deps *deps.Deps, props api.ExecTestProps) error {

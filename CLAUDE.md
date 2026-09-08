@@ -68,14 +68,18 @@ idempotent `build`, and the example suite:
 
 ```bash
 ./release/bootstrap.bin exec-test              # every example, checked against its golden
-./release/bootstrap.bin exec-test --only start --update
+./release/bootstrap.bin update-test start     # rewrite one golden, printing what it changes
 ```
 
 `examples/{cli,lib}/<name>/` holds one `example.sh` / `example.go` that runs with its own
-directory as the cwd and writes only into `TestDir`; `result.yaml` (output, exit code, sha256 of
-every `TestDir` file) is the golden, written by `exec-test`, never by hand. `exec-test` puts an
-`agnos` alias (`go run ./cmd/main`) in front of the PATH, so an example always runs against this
-tree. A `<name>` on both sides must leave the same tree and exit the same way. Create and delete
+directory as the cwd and writes only into `TestDir`, then copies out of it into `AssertDir` the
+paths it asserts; `result.yaml` (output, exit code, sha256 of every `AssertDir` file) is the
+golden, written by `exec-test`, never by hand. An example that copies nothing out fails, and
+only `start` copies the whole tree — every other one asserts what its own command touched, so a
+`start` template change moves one golden and not all of them. `exec-test` puts an `agnos` alias
+(`go run ./cmd/main`) in front of the PATH, so an example always runs against this tree. A
+`<name>` on both sides must leave the same tree and exit the same way, so both sides copy the
+same set. Create and delete
 examples with `add-cli-example` / `add-lib-example` / `remove-cli-example` / `remove-lib-example`
 only. Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish`.
 
@@ -127,8 +131,8 @@ change a rule there and nowhere else. The ones most easily broken:
 - `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.
 - Output: `deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`),
   `deps.Std.Error` -> stderr. Never `fmt.Printf`.
-- An example is never created or deleted by hand, and `result.yaml` is never edited — refresh a
-  golden with `exec-test --update` or by deleting it.
+- An example is never created or deleted by hand, and `result.yaml` is never edited — refresh one
+  golden with `update-test <name>`, the whole suite with `exec-test --update`, or delete it.
 - Docs: create/delete with `agnos add-doc` / `agnos remove-doc`. `README.md`, every `Index.md`,
   and the ten docs of `assets/all/docs/` are generated — `docs/Commands`
   from every command's `entries.yaml`.

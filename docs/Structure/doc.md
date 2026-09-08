@@ -62,8 +62,9 @@ docs/                            one dir per doc, holding doc.md + props.yaml (+
 examples/                        one dir per example; `exec-test` runs each and diffs it against its golden
   cli/<name>/example.sh          the example, run with `sh` and its own dir as cwd
   lib/<name>/example.go          the example, run with `go run` and its own dir as cwd
-  <side>/<name>/result.yaml      (gen) golden: cli-output, exit-code, sha256 of every TestDir file
+  <side>/<name>/result.yaml      (gen) golden: cli-output, exit-code, sha256 of every AssertDir file
   <side>/<name>/TestDir/         the only place an example writes; removed before every run
+  <side>/<name>/AssertDir/       what the example copied out of TestDir to assert; the golden's tree
 release/                         git-ignored binaries, and the exec-test cli alias
 ```
 

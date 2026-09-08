@@ -1,7 +1,7 @@
 package resultconf
 
-// TreeEntry is one file an example wrote into its TestDir: the path it holds
-// relative to that directory, and the sha256 of its content, hex-encoded.
+// TreeEntry is one file an example copied into its AssertDir: the path it
+// holds relative to that directory, and the sha256 of its content, hex-encoded.
 type TreeEntry struct {
 	File string
 	Sha  string
@@ -19,10 +19,10 @@ type ResultConf struct {
 	// ExitCode is the status the example exited with; 0 is success.
 	ExitCode int
 
-	// Tree is every file inside the example's TestDir, ordered by File.
+	// Tree is every file inside the example's AssertDir, ordered by File.
 	Tree []TreeEntry
 
-	// AddTreeEntry appends one file of the TestDir to Tree.
+	// AddTreeEntry appends one file of the AssertDir to Tree.
 	AddTreeEntry func(file string, sha string)
 
 	Render func() string

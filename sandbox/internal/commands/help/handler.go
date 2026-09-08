@@ -310,7 +310,7 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"exec-test"},
 		Category:        "Examples",
 		Description:     "Run the project's examples and check them against their goldens",
-		LongDescription: "Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project's own cli in front of the PATH. Every run starts from a removed TestDir, and what it produced - the merged output, the exit status and the sha256 of every file left in TestDir - is compared against the example's result.yaml, or written there when that golden does not exist yet. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.",
+		LongDescription: "Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project's own cli in front of the PATH. Every run starts from a removed TestDir and a removed AssertDir, and what it produced - the merged output, the exit status and the sha256 of every file the example copied out of TestDir into AssertDir - is compared against the example's result.yaml, or written there when that golden does not exist yet. An example that copied nothing out fails: it asserted nothing. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.",
 		Examples:        []string{"exec-test", "exec-test --only start", "exec-test --update"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -382,7 +382,7 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"remove-cli-example"},
 		Category:        "Examples",
 		Description:     "Delete an example from examples/cli/",
-		LongDescription: "Deletes examples/cli/<name>/ whole - the example.sh, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.",
+		LongDescription: "Deletes examples/cli/<name>/ whole - the example.sh, the golden result.yaml and any TestDir or AssertDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.",
 		Examples:        []string{"remove-cli-example start"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -443,7 +443,7 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"remove-lib-example"},
 		Category:        "Examples",
 		Description:     "Delete an example from examples/lib/",
-		LongDescription: "Deletes examples/lib/<name>/ whole - the example.go, the golden result.yaml and any TestDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.",
+		LongDescription: "Deletes examples/lib/<name>/ whole - the example.go, the golden result.yaml and any TestDir or AssertDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.",
 		Examples:        []string{"remove-lib-example start"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -491,6 +491,21 @@ var helpCommands = []helpCommand{
 			{Identifiers: []string{"--module", "-m"}, Description: "the go module path written into go.mod (required when the target dir has no go.mod yet)", Examples: []string{"start -m github.com/user/project"}, Type: "string", Default: "", Required: false},
 		},
 		Args: []helpField{},
+	},
+	{
+		Identifiers:     []string{"update-test"},
+		Category:        "Examples",
+		Description:     "Rewrite one example's golden with what it produces now",
+		LongDescription: "Runs one example by name, both sides, and writes what it produced over its result.yaml instead of comparing against it. Every write prints what it changes first - the paths that entered, left or changed sha, and the old output against the new one - so a golden is never rewritten unread. It is the normal way one golden is refreshed; exec-test --update rewrites the whole suite at once and hides the one that moved for a reason nobody meant.",
+		Examples:        []string{"update-test start", "update-test add-command --path ./my-project"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the example to update, both sides", Examples: []string{}, Type: "string", Default: "", Required: true},
+		},
 	},
 	{
 		Identifiers:     []string{"verify"},

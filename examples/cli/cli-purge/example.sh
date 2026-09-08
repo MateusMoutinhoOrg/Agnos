@@ -7,3 +7,10 @@ agnos start --path TestDir --project-name Test --module Test -q
 agnos cli-init --path TestDir -q
 
 agnos cli-purge --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The lib side copies the same set.
+mkdir -p AssertDir/sandbox/internal
+cp -R TestDir/sandbox/internal/. AssertDir/sandbox/internal/
+mkdir -p AssertDir/docs
+cp -R TestDir/docs/. AssertDir/docs/

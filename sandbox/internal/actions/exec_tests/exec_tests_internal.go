@@ -21,9 +21,9 @@ import (
 // what this is.
 const aliasDir = "release/exec-test"
 
-// volatileFiles and volatileDirs are the TestDir paths left out of a result's
-// tree. An example that reaches the Go runtime (`start` runs `build`, which
-// runs `go mod tidy` and `go build`) writes a go.sum holding whatever the
+// volatileFiles and volatileDirs are the AssertDir paths left out of a
+// result's tree. An example that reaches the Go runtime (`start` runs `build`,
+// which runs `go mod tidy` and `go build`) writes a go.sum holding whatever the
 // module proxy resolved that day and binaries under release/: neither is a
 // property of the project, so neither can be a golden.
 var volatileFiles = []string{"go.sum"}
@@ -65,6 +65,11 @@ func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) er
 		result, err := execExample(deps, path, root, prefix, run)
 		if err != nil {
 			return err
+		}
+		if len(result.Tree) == 0 {
+			failed = append(failed, run.Side+"/"+run.Name)
+			report(deps, run.Side+"/"+run.Name, []string{emptyAssertDir(run)})
+			continue
 		}
 		produced[run.Side+"/"+run.Name] = result
 
@@ -174,16 +179,16 @@ func crossCheckedNames(runs []exampleRun) []string {
 	return both
 }
 
-// execExample runs one example from scratch: its TestDir is removed straight
-// off disk (no buffer to persist), the example is executed with its own
-// directory as the working directory, and what it produced is gathered into a
-// result — the exit status and merged output of the run, plus every file the
-// TestDir ended up holding.
+// execExample runs one example from scratch: its TestDir and AssertDir are
+// removed straight off disk (no buffer to persist), the example is executed
+// with its own directory as the working directory, and what it produced is
+// gathered into a result — the exit status and merged output of the run, plus
+// every file it copied out of TestDir into AssertDir.
 func execExample(deps *deps.Deps, path string, root string, prefix []string, run exampleRun) (*resultconf.ResultConf, error) {
 	dir := join(path, run.Dir)
-	test_dir := dir + "/" + utils.ExampleTestDir
 
-	deps.Iodeps.RemoveDir(test_dir)
+	deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleTestDir)
+	deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleAssertDir)
 
 	program, args := invocation(run.Side)
 	result, err := deps.Rundeps.Run(rundeps.RunProps{
@@ -200,7 +205,7 @@ func execExample(deps *deps.Deps, path string, root string, prefix []string, run
 	conf.CliOutput = normalize(result.Output, root+"/"+run.Dir)
 	conf.ExitCode = result.ExitCode
 
-	for _, entry := range treeOf(deps, test_dir) {
+	for _, entry := range treeOf(deps, dir+"/"+utils.ExampleAssertDir) {
 		conf.AddTreeEntry(entry.File, entry.Sha)
 	}
 
@@ -217,15 +222,15 @@ func invocation(side string) (string, []string) {
 	return "go", []string{"run", utils.ExampleLibFile}
 }
 
-// treeOf is every file inside one example's TestDir, ordered by path relative
-// to that directory and carrying the sha256 of its content. A file that
-// cannot be read is recorded with an empty sha rather than aborting the suite:
-// the comparison then reports it like any other divergence.
-func treeOf(deps *deps.Deps, test_dir string) []resultconf.TreeEntry {
+// treeOf is every file inside one example's AssertDir, ordered by path
+// relative to that directory and carrying the sha256 of its content. A file
+// that cannot be read is recorded with an empty sha rather than aborting the
+// suite: the comparison then reports it like any other divergence.
+func treeOf(deps *deps.Deps, assert_dir string) []resultconf.TreeEntry {
 	var entries []resultconf.TreeEntry
 
-	for _, file := range deps.Iodeps.ListFilesRecursively(test_dir) {
-		name := strings.TrimPrefix(strings.TrimPrefix(file, test_dir), "/")
+	for _, file := range deps.Iodeps.ListFilesRecursively(assert_dir) {
+		name := strings.TrimPrefix(strings.TrimPrefix(file, assert_dir), "/")
 		if name == "" || isVolatile(name) {
 			continue
 		}
@@ -246,7 +251,7 @@ func treeOf(deps *deps.Deps, test_dir string) []resultconf.TreeEntry {
 	return entries
 }
 
-// isVolatile reports whether a TestDir-relative path is one the tree leaves
+// isVolatile reports whether an AssertDir-relative path is one the tree leaves
 // out (see volatileFiles / volatileDirs).
 func isVolatile(name string) bool {
 	for _, file := range volatileFiles {
@@ -271,17 +276,47 @@ func normalize(output string, dir string) string {
 	return strings.ReplaceAll(output, dir, "<dir>")
 }
 
-// checkGolden compares one produced result with the example's result.yaml, or
-// writes that file when it does not exist yet or --update was passed. It
-// returns one line per divergence, empty when the example passed.
-func checkGolden(deps *deps.Deps, path string, run exampleRun, produced *resultconf.ResultConf, update bool) ([]string, error) {
-	golden_path := join(path, run.Dir+"/"+utils.ExampleResultFile)
+// emptyAssertDir is what one example is told when it copied nothing out of its
+// TestDir. Without it a forgotten copy is a green run asserting nothing at all.
+func emptyAssertDir(run exampleRun) string {
+	return "assert-dir: " + run.Dir + "/" + utils.ExampleAssertDir +
+		" is empty — an example ends by copying out of " + utils.ExampleTestDir + " what it asserts"
+}
 
-	if update || !deps.Iodeps.IsFile(golden_path) {
-		deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, run.Dir+"/"+utils.ExampleResultFile)
+// checkGolden compares one produced result with the example's result.yaml, or
+// writes that file when it does not exist yet or the run is an updating one.
+// It returns one line per divergence, empty when the example passed. Writing
+// over a golden that already exists prints what changed first: a golden
+// rewritten in silence is a golden nobody read.
+func checkGolden(deps *deps.Deps, path string, run exampleRun, produced *resultconf.ResultConf, update bool) ([]string, error) {
+	rel := run.Dir + "/" + utils.ExampleResultFile
+	golden_path := join(path, rel)
+
+	if !deps.Iodeps.IsFile(golden_path) {
+		deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
 		return nil, deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
 	}
 
+	golden, err := loadGolden(deps, run, golden_path)
+	if err != nil {
+		return nil, err
+	}
+
+	divergences := diffExitCode(golden.ExitCode, produced.ExitCode)
+	divergences = append(divergences, diffOutput(golden.CliOutput, produced.CliOutput)...)
+	divergences = append(divergences, diffTree(golden.Tree, produced.Tree)...)
+
+	if !update {
+		return divergences, nil
+	}
+
+	deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
+	reportUpdate(deps, divergences)
+	return nil, deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
+}
+
+// loadGolden reads and parses one example's result.yaml.
+func loadGolden(deps *deps.Deps, run exampleRun, golden_path string) (*resultconf.ResultConf, error) {
 	content, err := deps.Iodeps.ReadFile(golden_path)
 	if err != nil {
 		return nil, deps.Std.Errorf("exec-test %s/%s: could not read %s: %w", run.Side, run.Name, golden_path, err)
@@ -291,10 +326,20 @@ func checkGolden(deps *deps.Deps, path string, run exampleRun, produced *resultc
 	if err != nil {
 		return nil, deps.Std.Errorf("exec-test %s/%s: %s: %w", run.Side, run.Name, golden_path, err)
 	}
+	return golden, nil
+}
 
-	divergences := diffExitCode(golden.ExitCode, produced.ExitCode)
-	divergences = append(divergences, diffOutput(golden.CliOutput, produced.CliOutput)...)
-	return append(divergences, diffTree(golden.Tree, produced.Tree)...), nil
+// reportUpdate prints what a golden is about to be written over with, in the
+// shape a failure reports it. It goes to the log channel and not the error
+// one: an update is progress, and --quiet silences progress.
+func reportUpdate(deps *deps.Deps, divergences []string) {
+	if len(divergences) == 0 {
+		deps.Std.Log("  unchanged \n")
+		return
+	}
+	for _, line := range divergences {
+		deps.Std.Log("  %s \n", line)
+	}
 }
 
 // crossCheck holds the cli side of an example to the lib side: the same tree

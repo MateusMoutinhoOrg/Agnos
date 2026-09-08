@@ -38,7 +38,7 @@
 | `examples/cli/<name>/example.sh` | `add-cli-example` | once. A stub that already runs |
 {{- end }}
 | `examples/lib/<name>/example.go` | `add-lib-example` | once. A stub that already runs |
-| `examples/<side>/<name>/result.yaml` | `exec-test` | always, on `--update` or when absent — never by hand |
+| `examples/<side>/<name>/result.yaml` | `exec-test` | on `update-test <name>`, on `--update` or when absent — never by hand |
 
 Everything not listed is yours: `sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
 and `sandbox/deps/` that you write, their `sandbox/binds/` and `adapters/libs/` halves, and any

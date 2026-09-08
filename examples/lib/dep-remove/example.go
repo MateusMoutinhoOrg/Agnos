@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
@@ -32,6 +34,15 @@ func main() {
 	}
 
 	if err := lib.Actions.DepRemove("TestDir", "iodeps"); err != nil {
+		panic(err)
+	}
+
+	// What result.yaml records: the paths this example asserts, copied out of
+	// TestDir. The cli side copies the same set.
+	if err := os.CopyFS("AssertDir/sandbox/deps", os.DirFS("TestDir/sandbox/deps")); err != nil {
+		panic(err)
+	}
+	if err := os.CopyFS("AssertDir/adapters", os.DirFS("TestDir/adapters")); err != nil {
 		panic(err)
 	}
 }

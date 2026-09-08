@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
@@ -24,6 +26,14 @@ func main() {
 	}
 
 	if err := lib.Actions.Verify("TestDir"); err != nil {
+		panic(err)
+	}
+
+	// What result.yaml records: the paths this example asserts, copied out of
+	// TestDir. The cli side copies the same set.
+	// verify writes nothing, so what this asserts is the config it read,
+	// untouched.
+	if err := os.CopyFS("AssertDir/AgnosConfig", os.DirFS("TestDir/AgnosConfig")); err != nil {
 		panic(err)
 	}
 }

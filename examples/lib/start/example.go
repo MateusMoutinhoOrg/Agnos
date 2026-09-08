@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
@@ -20,6 +22,12 @@ func main() {
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
+		panic(err)
+	}
+
+	// What result.yaml records: the paths this example asserts, copied out of
+	// TestDir. The cli side copies the same set.
+	if err := os.CopyFS("AssertDir", os.DirFS("TestDir")); err != nil {
 		panic(err)
 	}
 }

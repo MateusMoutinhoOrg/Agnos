@@ -1,6 +1,8 @@
 package main
 
 import (
+	"os"
+
 	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
@@ -28,6 +30,14 @@ func main() {
 	}
 
 	if err := lib.Actions.Compile(api.CompileProps{Path: "TestDir", Targets: []string{"linux86"}}); err != nil {
+		panic(err)
+	}
+
+	// What result.yaml records: the paths this example asserts, copied out of
+	// TestDir. The cli side copies the same set.
+	// The binary in release/ is machine-specific and no golden, so what this
+	// asserts is the source it was built from, untouched.
+	if err := os.CopyFS("AssertDir/cmd", os.DirFS("TestDir/cmd")); err != nil {
 		panic(err)
 	}
 }

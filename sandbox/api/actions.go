@@ -189,4 +189,8 @@ type Actions struct {
 	// ExecTest runs the project's examples and checks each one against its
 	// golden result.yaml, reporting every example that diverged.
 	ExecTest func(props ExecTestProps) error
+
+	// UpdateTest runs one example by name, both sides, and rewrites its
+	// golden result.yaml with what the run produced, printing the changes.
+	UpdateTest func(path string, name string) error
 }

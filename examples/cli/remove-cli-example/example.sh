@@ -8,3 +8,10 @@ agnos cli-init --path TestDir -q
 agnos add-cli-example greet --path TestDir -q
 
 agnos remove-cli-example greet --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The lib side copies the same set.
+mkdir -p AssertDir/examples
+cp -R TestDir/examples/. AssertDir/examples/
+mkdir -p AssertDir/docs/CliExamples
+cp -R TestDir/docs/CliExamples/. AssertDir/docs/CliExamples/

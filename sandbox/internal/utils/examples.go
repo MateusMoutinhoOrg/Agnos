@@ -27,11 +27,15 @@ const (
 	ExampleLibFile = "example.go"
 )
 
-// ExampleResultFile is the golden one example run is compared against, and
-// ExampleTestDir the only directory an example may write into.
+// ExampleResultFile is the golden one example run is compared against,
+// ExampleTestDir the only directory an example may write into, and
+// ExampleAssertDir the subset of it the example copies out at the end — the
+// one the golden's tree is taken from, so that an example asserts what it is
+// about and not the whole project. Both are removed before every run.
 const (
 	ExampleResultFile = "result.yaml"
 	ExampleTestDir    = "TestDir"
+	ExampleAssertDir  = "AssertDir"
 )
 
 // ExampleSides is the fixed order the two sides are walked in: an example
@@ -121,8 +125,8 @@ func ValidateExampleName(deps *deps.Deps, name string) error {
 }
 
 // RemoveExample deletes one example directory and everything in it — the
-// example file, its golden result.yaml and any TestDir the last run left
-// behind. It is the whole of both remove-*-example actions: the two differ
+// example file, its golden result.yaml and any TestDir / AssertDir the last
+// run left behind. It is the whole of both remove-*-example actions: the two differ
 // only in the side they name.
 func RemoveExample(deps *deps.Deps, io *smartio.SmartIO, side string, name string) error {
 	if err := ValidateExampleName(deps, name); err != nil {

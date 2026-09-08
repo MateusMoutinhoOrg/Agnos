@@ -57,10 +57,12 @@ Examples are declared with the bootstrap binary and run against this tree, never
 ```bash
 ./release/bootstrap.bin add-cli-example <name>
 ./release/bootstrap.bin add-lib-example <name>
-./release/bootstrap.bin exec-test --only <name> --update
+./release/bootstrap.bin update-test <name>
 ```
 
 `exec-test` writes `release/exec-test/agnos` — `exec go run <repo>/cmd/main "$@"` — and puts it in front of the PATH, so an `example.sh` typing `agnos` runs this source tree. An example that reaches the go runtime is slow (`go mod tidy` + `go build` per run); `--only` narrows the suite. `examples/lib/*/example.go` is `package main` inside the module but outside the compile scope, so it is checked by `exec-test` alone, never by `build`.
+
+What each example asserts is the set it copies into `AssertDir`, and only `start` copies the whole tree: a change to a `start` template must move that one golden and no other. `exec-test --update` rewrites all of them at once and is for a shape change alone.
 
 ## Add a parsable
 

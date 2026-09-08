@@ -27,6 +27,7 @@ import (
 	removeLibExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_lib_example"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
+	updateTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_tests"
 	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
 )
 
@@ -105,5 +106,8 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	}
 	sandbox.Actions.ExecTest = func(props api.ExecTestProps) error {
 		return execTestsAction.ExecTest(deps, props)
+	}
+	sandbox.Actions.UpdateTest = func(path string, name string) error {
+		return updateTestsAction.UpdateTest(deps, path, name)
 	}
 }

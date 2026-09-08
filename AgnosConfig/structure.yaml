@@ -185,11 +185,15 @@ examples:
     <side>/<name>/result.yaml:
       order: 3
       gen: true
-      description: "golden: cli-output, exit-code, sha256 of every TestDir file"
+      description: "golden: cli-output, exit-code, sha256 of every AssertDir file"
     <side>/<name>/TestDir:
       order: 4
       dir: true
       description: the only place an example writes; removed before every run
+    <side>/<name>/AssertDir:
+      order: 5
+      dir: true
+      description: what the example copied out of TestDir to assert; the golden's tree
 release:
   order: 8
   dir: true

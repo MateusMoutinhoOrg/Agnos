@@ -110,13 +110,17 @@ file is what renders [Structure](../Structure/doc.md).
 agnos add-cli-example <name>       # examples/cli/<name>/example.sh
 agnos add-lib-example <name>       # examples/lib/<name>/example.go
 agnos exec-test                    # run them all, check each against its golden
-agnos exec-test --only <name> --update
+agnos exec-test --only <name>      # one example, both sides
+agnos update-test <name>           # rewrite that one golden with what it produces now
+agnos exec-test --update           # rewrite every golden at once
 agnos remove-cli-example <name>
 agnos remove-lib-example <name>
 ```
 
-Write the example itself; `result.yaml` is written by the first `exec-test` and refreshed with
-`--update`. Details in [LibExamples](../LibExamples/doc.md) and
+Write the example itself, ending with the copy out of `TestDir` into `AssertDir` that says what
+it asserts: `result.yaml` records `AssertDir`, and an example that copies nothing out fails.
+The golden is written by the first `exec-test` and refreshed with `update-test <name>`, which
+prints what it changes before writing. Details in [LibExamples](../LibExamples/doc.md) and
 [CliExamples](../CliExamples/doc.md).
 
 ## Hand-written code

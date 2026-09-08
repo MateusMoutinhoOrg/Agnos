@@ -33,6 +33,7 @@ import (
 	remove_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_lib_example"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
+	update_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/update_test"
 	verify "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/verify"
 	version "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/version"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
@@ -124,6 +125,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchSetCommand(deps, verb)
 	case action == "start":
 		return dispatchStart(deps, verb)
+	case action == "update-test":
+		return dispatchUpdateTest(deps, verb)
 	case action == "verify":
 		return dispatchVerify(deps, verb)
 	case action == "version" || action == "--version":
@@ -1570,6 +1573,44 @@ func dispatchStart(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return start.CommandHandler(deps, entries)
+}
+
+func dispatchUpdateTest(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &update_test.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return update_test.CommandHandler(deps, entries)
 }
 
 func dispatchVerify(deps *deps.Deps, verb argvdeps.Parser) int {

@@ -8,3 +8,10 @@ agnos cli-init --path TestDir -q
 agnos add-command greet --help "Greet someone" --category "Core" --path TestDir -q
 
 agnos remove-command greet --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The lib side copies the same set.
+mkdir -p AssertDir/sandbox/internal/commands
+cp -R TestDir/sandbox/internal/commands/. AssertDir/sandbox/internal/commands/
+mkdir -p AssertDir/docs/Commands
+cp -R TestDir/docs/Commands/. AssertDir/docs/Commands/
