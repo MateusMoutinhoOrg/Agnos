@@ -40,8 +40,11 @@ para o handler propagar.
 
 Dep nomeado pelo contrato (`serverdeps`), campo `Deps.Serverdeps`, lib adapter `serverdeps`,
 sobre `net/http` (stdlib -> **sem** entrada em `assets/depsversion.yaml`).
-Go 1.25 no `go.mod`, então o `ServeMux` já resolve padrões `POST /users/{tenant}` e
-`r.PathValue` — o casamento de rota fica no adapter, não no sandbox.
+O dep é **0 opinativo**: não conhece rota, método, padrão nem `{param}`. Ele abre a porta,
+aplica os timeouts e entrega toda requisição à única função que recebeu em
+`ServerProps.Handler`. Casamento de rota, `404` e `405` são do `servermain.go` gerado — quem se
+adapta ao dep é o sandbox, nunca o contrário. Sem `ServeMux`, sem `PathValue`: trocar `net/http`
+por outra implementação não muda uma linha do sandbox.
 
 | Arquivo | Papel |
 |---|---|
@@ -61,22 +64,21 @@ type Lib struct {
 }
 
 type ServerProps struct {
-	Addr            string // ":8080"
-	ReadTimeoutMs   int
-	WriteTimeoutMs  int
+	Addr           string // ":8080"
+	ReadTimeoutMs  int
+	WriteTimeoutMs int
+	Handler        func(Request, Response) // chamada uma vez por requisição, qualquer que seja
 }
 
 type Server struct {
-	Handle   func(method string, pattern string, handler func(Request, Response))
-	Listen   func() error   // bloqueia até Shutdown ou erro
+	Listen   func() error // bloqueia até Shutdown ou erro
 	Shutdown func() error
 }
 
 type Request struct {
 	GetMethod     func() string
-	GetPath       func() string
+	GetPath       func() string // caminho cru; quem o fatia em segmentos é o sandbox
 	GetHeader     func(key string) string
-	GetPathParam  func(name string) string   // do padrão /users/{tenant}
 	GetQueryParam func(name string) string
 	GetQueryAll   func(name string) []string // campos `array: true`
 	ReadBody      func(limit int) ([]byte, error) // limit -1 = tudo
@@ -106,8 +108,8 @@ Diretório em snake_case para rota kebab-case (`get-user` -> `get_user/`).
 
 A declaração é lida de fora para dentro: **`paths`** diz qual URL casa, **`headers`** e
 **`params`** dizem o que é lido dela, **`body`** diz o que vem no corpo. Não existe chave
-`path` escrita à mão — o caminho registrado no mux é a concatenação, na ordem, dos segmentos
-de `paths`, e o collector é quem o deriva.
+`path` escrita à mão — o caminho da rota é a concatenação, na ordem, dos segmentos de `paths`,
+e o collector é quem o deriva.
 
 Um segmento de `paths` é de um de dois tipos, distinguidos pela chave presente:
 
@@ -236,7 +238,7 @@ body:
 | Chave | Efeito |
 |---|---|
 | `identifier` | literal do segmento. Exclui `name` e todas as chaves de campo no mesmo item |
-| `name` | nome do segmento capturado; vira `{name}` no padrão do mux e campo de `Entries` |
+| `name` | nome do segmento capturado; vira posição variável no casamento e campo de `Entries` |
 | `type` | `string`\|`boolean`\|`int`\|`float`. Default `string` |
 | `description`, `examples` | documentação, alimenta `docs/Routes` |
 | `min`, `max` | mesmos limites de `entries.yaml` |
@@ -290,8 +292,9 @@ Fora do subconjunto (`$ref`, `oneOf`, `allOf`, `anyOf`, `patternProperties`) -> 
 | `sandbox/internal/parsables/routeconf/bind_methods.go` | `BindMethods` (liga `Render`) |
 | `sandbox/internal/parsables/routeconf/render.go` | `Render` -> volta ao `route.yaml` canônico |
 
-`Segment` é `{Identifier string; Field *Field}` — exatamente um dos dois preenchido; o
-padrão do mux (`RouteConf.Pattern()`) é `/` + os segmentos na ordem, literal ou `{name}`.
+`Segment` é `{Identifier string; Field *Field}` — exatamente um dos dois preenchido; o caminho
+canônico (`RouteConf.Pattern()`) é `/` + os segmentos na ordem, literal ou `{name}`, usado em
+`docs/Routes` e nas mensagens — o casamento em si compara segmento a segmento, não o texto.
 `Schema` é uma árvore recursiva (`Type`, `Properties []SchemaProperty`, `Items *Schema`,
 `Required []string`, bounds com o par valor/`Has…` como em `Field.Min`/`HasMin`).
 `Render` reemite as chaves na ordem canônica — determinismo/idempotência.
@@ -333,13 +336,16 @@ type ServeProps struct {
 }
 
 const (
-	StatusOk         = 200
-	StatusCreated    = 201
-	StatusNoContent  = 204
-	StatusBadRequest = 400
-	StatusNotFound   = 404
-	StatusConflict   = 409
-	StatusFailure    = 500
+	StatusOk                 = 200
+	StatusCreated            = 201
+	StatusNoContent          = 204
+	StatusBadRequest         = 400
+	StatusNotFound           = 404
+	StatusMethodNotAllowed   = 405
+	StatusConflict           = 409
+	StatusPayloadTooLarge    = 413
+	StatusUnsupportedMedia   = 415
+	StatusFailure            = 500
 )
 ```
 
@@ -349,21 +355,47 @@ de `api/`), e `sandbox/new.go` chama `binds.ServerBind` sozinho (um `<X>Bind` po
 
 ### `servermain.go` (gerado)
 
-Um `{{range .Routes}}` sobre as rotas coletadas:
+Uma única função entregue ao dep, e todo o despacho abaixo dela — o dep não sabe que rota
+existe. `ServerMain` não tem `range`; o `{{range .Routes}}` está no `dispatch`:
 
 ```go
 func ServerMain(deps *deps.Deps, props ServeProps) error {
-	server := deps.Serverdeps.NewServer(serverdeps.ServerProps{...})
-{{- range .Routes}}
-	server.Handle("{{.Method}}", "{{.Path}}", func(req serverdeps.Request, res serverdeps.Response) {
-		handle{{.GoName}}(deps, req, res)
+	server := deps.Serverdeps.NewServer(serverdeps.ServerProps{
+		Addr:           props.Addr,
+		ReadTimeoutMs:  props.ReadTimeoutMs,
+		WriteTimeoutMs: props.WriteTimeoutMs,
+		Handler: func(req serverdeps.Request, res serverdeps.Response) {
+			dispatch(deps, req, res)
+		},
 	})
-{{- end}}
 	return server.Listen()
+}
+
+func dispatch(deps *deps.Deps, req serverdeps.Request, res serverdeps.Response) {
+	segments := splitPath(deps, req.GetPath())
+	method := req.GetMethod()
+	path_matched := false
+{{- range .Routes}}
+	if match{{.GoName}}(segments) {
+		path_matched = true
+		if method == "{{.Method}}" {
+			handle{{.GoName}}(deps, req, res, segments)
+			return
+		}
+	}
+{{- end}}
+	if path_matched {
+		routeio.WriteError(deps, res, api.StatusMethodNotAllowed, "", "method not allowed")
+		return
+	}
+	routeio.WriteError(deps, res, api.StatusNotFound, "", "route not found")
 }
 ```
 
-mais um `handle<GoName>` por rota, que: lê e converte os segmentos capturados de `paths` ->
+mais um `match<GoName>(segments []string) bool` por rota — comprimento mais os `identifier`
+comparados por posição, as posições de captura aceitando qualquer valor —, e um
+`handle<GoName>` por rota, que: lê e converte os segmentos capturados de `paths` (por índice em
+`segments`, não por nome) ->
 headers -> params, na ordem de declaração e com a primeira origem que traz valor vencendo em
 nomes repetidos; aplica defaults; checa `required`, `min`/`max`, `array`; valida `content-type`
 e um `Content-Length` acima de `max-bytes`; monta `Entries` — guardando em `Entries.Request` a
@@ -372,13 +404,14 @@ requisição de onde `ReadBody` vai ler; e só então chama
 socket enquanto o handler não chamar `ReadBody`. Qualquer falha responde antes, em JSON
 (`{"error": "...", "field": "..."}`), com o status da tabela abaixo, e registra em
 `deps.Std.Log`. Os helpers compartilhados (`readHeader`, `parseIntValue`, `bindQueryArray`)
-ficam no rodapé do arquivo, exatamente como os helpers de argv em `climain.go`; o
+ficam no rodapé do arquivo, junto de `splitPath` (`deps.Stringsdeps.Split` do caminho por
+`"/"`, descartando os vazios das pontas), exatamente como os helpers de argv em `climain.go`; o
 `writeError` é o de `routeio`, compartilhado com o `ReadBody` de cada rota.
 
 | Situação | Status | Quem responde |
 |---|---|---|
-| rota inexistente | 404 | despacho |
-| método divergente no mesmo path | 405 | despacho |
+| nenhum `match<GoName>` casou | 404 | despacho |
+| path casou, método divergente | 405 | despacho |
 | `content-type` divergente | 415 | despacho |
 | `Content-Length` acima de `max-bytes` | 413 | despacho |
 | header/param inválido, `required` ausente, fora de `min`/`max` | 400 | despacho |
@@ -717,9 +750,13 @@ go build -o release/bootstrap.bin ./cmd/main
 
 ## 13. Decisões e pontos em aberto
 
-- **Casamento de rota no adapter, não no sandbox.** O collector deriva de `paths` um padrão
-  `/articles/{article-name}`, que o `ServeMux` do Go 1.25 já resolve; duplicar isso no sandbox
-  seria lógica sem dono. O contrato expõe `GetPathParam`, e só.
+- **Dep 0 opinativo; o casamento de rota é do sandbox.** Um dep não decide nada do domínio de
+  quem o usa — `serverdeps` só sabe abrir porta, receber requisição e escrever resposta, e
+  recebe uma única `Handler` em `ServerProps`. Rota, método, `{param}`, `404` e `405` são
+  política da aplicação e vivem no `servermain.go` gerado: é o sandbox que se adapta ao dep. O
+  custo é um `match<GoName>` gerado por rota; o ganho é que o contrato não vaza a semântica de
+  `ServeMux` (padrões, precedência, `PathValue`) e um adapter sobre outra implementação
+  continua sendo uma troca de arquivo.
 - **Schema validado em runtime, struct gerada em build.** A struct sai do `json-schema` no
   `build` (tipagem estática no handler) e o mesmo schema vai canonizado para
   `EntriesSchema`, validado por `routeio.ValidateSchema` a cada request. Uma só declaração,
