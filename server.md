@@ -99,8 +99,24 @@ collector. Um segmento é de um de dois tipos:
 
 | Segmento | Chave | Papel |
 |---|---|---|
-| **trigger** | `identifier` | literal na URL. O primeiro `identifier` da rota é o gatilho que a nomeia em `docs/Routes` |
+| **trigger** | `identifier` | literal na URL, **sempre começando com `/`** (`/users`, nunca `users`). O primeiro `identifier` da rota é o gatilho que a nomeia em `docs/Routes` |
 | **captura** | `name` | segmento variável, vira campo de `Entries` já convertido |
+
+**Todo `identifier` começa com `/`.** A barra inicial é obrigatória: é ela que faz o segmento se
+ler como caminho no arquivo, nas mensagens e nos docs, sem o leitor reconstruir mentalmente a
+concatenação. `/` sozinho é o identifier da raiz; nenhum outro tem `/` interno ou final, e
+nenhum é vazio **(verify)**.
+
+**Ordem de casamento — da rota mais específica para a menos.** A ordem em que o despacho testa
+as rotas não é a ordem do diretório: o collector ordena por
+
+1. **mais `identifier`s primeiro** — a rota que fixa mais segmentos literais é a mais específica;
+2. empate: **maior soma de caracteres dos `identifier`s**;
+3. empate: `Pattern()` em ordem alfabética (determinismo).
+
+Sem isso uma rota `/` e uma rota `/home` colidem: avaliada primeiro, `/` casa e `/home` nunca é
+alcançada. A ordenação é do collector, não do template — `.Routes` já chega ordenado a
+`servermain.go` **(verify não precisa checar, o build garante)**.
 
 O mesmo `name` pode vir de mais de uma origem — o campo de `Entries` é único e vence a primeira
 origem declarada que trouxer valor (`paths`, `headers`, `params`, na ordem do arquivo).
@@ -110,11 +126,11 @@ origem declarada que trouxer valor (`paths`, `headers`, `params`, na ordem do ar
 # sandbox/internal/routes/create_user/route.yaml -> POST /users/{tenant}/create
 method: POST
 paths:
-  - identifier: "users"
+  - identifier: "/users"
   - name: "tenant"
     type: string
     required: true
-  - identifier: "create"
+  - identifier: "/create"
 category: Users
 help: Create a user under a tenant
 examples:
@@ -165,7 +181,7 @@ body:
 
 | Chave de segmento | Efeito |
 |---|---|
-| `identifier` | literal. Exclui `name` e toda chave de campo no mesmo item |
+| `identifier` | literal começando com `/` (`/users`). Exclui `name` e toda chave de campo no mesmo item |
 | `name` | segmento capturado; posição variável no casamento e campo de `Entries` |
 | `type` | `string`\|`boolean`\|`int`\|`float`. Default `string` |
 | `description`, `examples`, `min`, `max` | como em `entries.yaml` |
@@ -209,10 +225,12 @@ de `verify`/`build`, não silêncio.
 | `render.go` | `Render` -> `route.yaml` canônico, chaves em ordem fixa (idempotência) |
 
 `Segment` é `{Identifier string; Field *Field}`, exatamente um preenchido. `RouteConf.Pattern()`
-é `/` + segmentos na ordem, literal ou `{name}` — usado em `docs/Routes` e nas mensagens; o
-casamento compara segmento a segmento, não o texto. `Schema` é árvore recursiva (`Type`,
-`Properties []SchemaProperty`, `Items *Schema`, `Required []string`, bounds com o par
-valor/`Has…` como em `Field.Min`/`HasMin`).
+é a concatenação dos segmentos na ordem — o `identifier` já traz a própria `/`, a captura entra
+como `/{name}` — usado em `docs/Routes` e nas mensagens; o casamento compara segmento a
+segmento, não o texto. `RouteConf.IdentifierCount()` e `RouteConf.IdentifierLen()` alimentam a
+ordenação de casamento. `Schema` é árvore recursiva (`Type`, `Properties []SchemaProperty`,
+`Items *Schema`, `Required []string`, bounds com o par valor/`Has…` como em
+`Field.Min`/`HasMin`).
 
 ---
 
@@ -282,6 +300,7 @@ func dispatch(deps *deps.Deps, req serverdeps.Request, res serverdeps.Response) 
 	segments := splitPath(deps, req.GetPath())
 	method := req.GetMethod()
 	path_matched := false
+{{- /* .Routes chega ordenado: mais identifiers primeiro, depois identifiers mais longos */}}
 {{- range .Routes}}
 	if match{{.GoName}}(segments) {
 		path_matched = true
@@ -300,8 +319,9 @@ func dispatch(deps *deps.Deps, req serverdeps.Request, res serverdeps.Response) 
 ```
 
 Mais, por rota: `match<GoName>(segments []string) bool` (comprimento + `identifier` por
-posição, capturas aceitando qualquer valor) e `handle<GoName>`, que converte segmentos
-capturados (por índice), headers e params na ordem de declaração; aplica defaults; checa
+posição — comparado sem a `/` inicial, que o `splitPath` já consumiu — capturas aceitando
+qualquer valor) e `handle<GoName>`, que converte segmentos capturados (por índice), headers e
+params na ordem de declaração; aplica defaults; checa
 `required`, `min`/`max`, `array`, `content-type` e `Content-Length`; monta `Entries` (com
 `Entries.Request`); e chama `routes_<name>.RouteHandler(deps, &entries, res)`. **Nada é lido do
 socket aqui.** Falhas saem por `routeio.WriteError` em JSON (`{"error": "...", "field": "..."}`)
@@ -340,7 +360,7 @@ func WriteError(deps *deps.Deps, response serverdeps.Response, status int, field
 
 | Arquivo | Papel |
 |---|---|
-| `actions/build/collect_routes.go` | `CollectRoutes(deps, io)`: lê cada `route.yaml` via `routeconf` -> `[]map[string]any` (`Name`, `GoName`, `Method`, `Trigger`, `Path`, `Segments`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`, `HasBody`). Cópia de `collect_commands.go` |
+| `actions/build/collect_routes.go` | `CollectRoutes(deps, io)`: lê cada `route.yaml` via `routeconf` -> `[]map[string]any` (`Name`, `GoName`, `Method`, `Trigger`, `Path`, `Segments`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`, `HasBody`). Cópia de `collect_commands.go`. Devolve a lista **ordenada para o casamento** (mais `identifier`s, depois soma de caracteres dos `identifier`s, depois `Pattern()`), via `deps.Sortdeps` |
 | `actions/build/collect_route_docs.go` | alimenta `docs/Routes` — cópia de `collect_command_docs.go` |
 | `actions/build/generate_route_entries.go` | renderiza `assets/templates/route_entries.go` por rota em `routes/<name>/entries.go` |
 | `assets/templates/route_{entries.go,route.yaml,handler.go}` | template do `Entries` e scaffolds usados por `add-route` |
@@ -436,8 +456,9 @@ Duas camadas por feature: `<name>.go` (abre SmartIO, persiste, dispara `build`) 
 
 Um único par `add-field`/`remove-field`: as origens diferem só pelo seletor `--in`. `--in path`
 acrescenta ao fim de `paths` (ou em `--position`), com `--identifier` para trigger ou `--name`
-para captura. `--in body` aceita caminho pontuado (`address.city`), criando os objetos
-intermediários no `json-schema`.
+para captura. `--identifier` normaliza o valor para começar com `/` (`users` -> `/users`) e
+recusa `/` interno ou final. `--in body` aceita caminho pontuado (`address.city`), criando os
+objetos intermediários no `json-schema`.
 
 ### `server-init` implica CLI
 
@@ -545,6 +566,9 @@ AddField    func(props RouteFieldProps) error
 RemoveField func(path string, route string, in string, name string) error
 ```
 
+`trigger` (em `AddRoute`) e `Identifier` (em `RouteFieldProps`) são normalizados para começar
+com `/`: `users` e `/users` produzem o mesmo `route.yaml`, e `/` interno ou final é erro.
+
 ---
 
 ## 8. Fase 7 — `verify`
@@ -555,7 +579,8 @@ em `verify_internal.go`. Nenhuma escrita, uma string por violação:
 - todo `routes/<name>/` tem `route.yaml`, `entries.go` e `handler.go`
 - `route.yaml` parseia por `routeconf`; `method` é verbo conhecido
 - `paths` não vazio, ao menos um `identifier`, cada item com `identifier` **ou** `name` (nunca
-  os dois); nenhum `identifier` vazio ou com `/`
+  os dois); todo `identifier` começa com `/`, nenhum é vazio, e só o da raiz (`/`) não tem nada
+  depois da barra — `/` interno ou final é violação
 - segmento capturado: `required` só `true`, sem `array` nem `default`
 - nenhum `name` repetido na mesma origem; `name` em mais de uma origem tem o mesmo `type`
 - nenhum par (`method`, padrão derivado de `paths`) repetido entre rotas
