@@ -1,11 +1,6 @@
 package local_install
 
 import (
-	"os"
-	"path/filepath"
-	"runtime"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
@@ -32,26 +27,23 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		deps.Std.Error("failed to run go env GOEXE: %s\n", err.Error())
 		return api.ExitFailure
 	}
-	goexe := strings.TrimSpace(result.Output)
+	goexe := deps.Stringsdeps.TrimSpace(result.Output)
 
-	binName := strings.ToLower(config.ProjectName) + goexe
+	binName := deps.Stringsdeps.ToLower(config.ProjectName) + goexe
 
 	var outPath string
-	if runtime.GOOS == "windows" {
-		home, err := os.UserHomeDir()
+	if deps.Std.Goos() == "windows" {
+		home, err := deps.Iodeps.UserHomeDir()
 		if err != nil {
 			deps.Std.Error("failed to get user home dir: %s\n", err.Error())
 			return api.ExitFailure
 		}
-		outPath = filepath.Join(home, ".local", "bin", binName)
+		outPath = deps.Iodeps.Join(home, ".local", "bin", binName)
 	} else {
-		outPath = filepath.Join("/usr/local/bin", binName)
+		outPath = deps.Iodeps.Join("/usr/local/bin", binName)
 	}
 
-	if err := os.MkdirAll(filepath.Dir(outPath), 0755); err != nil {
-		deps.Std.Error("failed to create directory %s: %s\n", filepath.Dir(outPath), err.Error())
-		return api.ExitFailure
-	}
+	deps.Iodeps.CreateDir(deps.Iodeps.Dir(outPath))
 
 	deps.Std.Log("building to %s\n", outPath)
 	result, err = deps.Rundeps.Run(rundeps.RunProps{

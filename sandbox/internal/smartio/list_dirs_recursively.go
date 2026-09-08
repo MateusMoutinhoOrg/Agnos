@@ -7,5 +7,5 @@ func ListDirsRecursively(deps *deps.Deps, io *SmartIO, path string) []string {
 	if err != nil {
 		return nil
 	}
-	return filterPendingRemoved(io, filterIgnored(io, unrootedPaths(io, deps.Iodeps.ListDirsRecursively(rootedPath(io, p)))))
+	return filterPendingRemoved(deps, io, filterIgnored(io, unrootedPaths(deps, io, deps.Iodeps.ListDirsRecursively(rootedPath(deps, io, p)))))
 }

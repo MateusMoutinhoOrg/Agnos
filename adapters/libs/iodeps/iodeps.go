@@ -104,5 +104,14 @@ func Bind(deps *deps.Deps) {
 			})
 			return all
 		},
+		Join: func(elements ...string) string {
+			return filepath.Join(elements...)
+		},
+		Dir: func(path string) string {
+			return filepath.Dir(path)
+		},
+		UserHomeDir: func() (string, error) {
+			return os.UserHomeDir()
+		},
 	}
 }

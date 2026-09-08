@@ -31,8 +31,8 @@ func CheckStructure(deps *deps.Deps, io *smartio.SmartIO) []string {
 	}
 
 	for _, node := range utils.FlattenStructure(structure_conf.Items) {
-		if utils.IsStructurePattern(node.Path) {
-			parent := utils.StructureParentPath(node.Path)
+		if utils.IsStructurePattern(deps, node.Path) {
+			parent := utils.StructureParentPath(deps, node.Path)
 			if parent != "" && !io.IsDir(parent) {
 				violations = append(violations, ghostSpec(node.Path,
 					"the directory "+parent+" it would live in does not exist"))

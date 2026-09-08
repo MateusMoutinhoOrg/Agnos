@@ -1,6 +1,7 @@
 package smartio
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/pathreplacerconf"
 )
@@ -13,6 +14,11 @@ type SmartIO struct {
 	// only at the boundary where it touches the real filesystem, so no
 	// generation ever escapes Root.
 	Root string
+
+	// deps is the dependency set the helpers resolve paths with. It is held
+	// on the struct rather than passed to every helper because a SmartIO is
+	// built once, by New, and every method closure it carries is bound then.
+	deps *deps.Deps
 
 	Ignore       *ignorableconf.IgnorableConf
 	Replacers    *pathreplacerconf.PathReplacerConf

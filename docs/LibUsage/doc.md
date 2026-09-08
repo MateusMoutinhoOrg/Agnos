@@ -66,10 +66,14 @@ The contracts available to patch:
 | `deps.Argvdeps` | `sandbox/deps/argvdeps` |
 | `deps.Embeddeps` | `sandbox/deps/embeddeps` |
 | `deps.Goimportsdeps` | `sandbox/deps/goimportsdeps` |
+| `deps.Hashdeps` | `sandbox/deps/hashdeps` |
 | `deps.Iodeps` | `sandbox/deps/iodeps` |
 | `deps.Rundeps` | `sandbox/deps/rundeps` |
 | `deps.Serializables` | `sandbox/deps/serializables` |
+| `deps.Sortdeps` | `sandbox/deps/sortdeps` |
 | `deps.Std` | `sandbox/deps/std` |
+| `deps.Stringsdeps` | `sandbox/deps/stringsdeps` |
+| `deps.Templatedeps` | `sandbox/deps/templatedeps` |
 
 Each one is filled by a matching implementation under `adapters/libs/`, every package
 exposing the same `Bind(deps *deps.Deps)` entry point:
@@ -78,10 +82,14 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 | --- | --- |
 | `adapters/libs/embeddeps` | `embeddeps.Bind(&deps)` |
 | `adapters/libs/goimportsdeps` | `goimportsdeps.Bind(&deps)` |
+| `adapters/libs/hashdeps` | `hashdeps.Bind(&deps)` |
 | `adapters/libs/iodeps` | `iodeps.Bind(&deps)` |
 | `adapters/libs/rundeps` | `rundeps.Bind(&deps)` |
 | `adapters/libs/serializables` | `serializables.Bind(&deps)` |
+| `adapters/libs/sortdeps` | `sortdeps.Bind(&deps)` |
 | `adapters/libs/std` | `std.Bind(&deps)` |
+| `adapters/libs/stringsdeps` | `stringsdeps.Bind(&deps)` |
+| `adapters/libs/templatedeps` | `templatedeps.Bind(&deps)` |
 | `adapters/libs/verb` | `verb.Bind(&deps)` |
 
 Starting from `standard.New()` is the safe default: an unfilled field is a nil func that

@@ -7,5 +7,5 @@ func ListAll(deps *deps.Deps, io *SmartIO, path string) []string {
 	if err != nil {
 		return nil
 	}
-	return filterPendingRemoved(io, filterIgnored(io, unrootedPaths(io, deps.Iodeps.ListAll(rootedPath(io, p)))))
+	return filterPendingRemoved(deps, io, filterIgnored(io, unrootedPaths(deps, io, deps.Iodeps.ListAll(rootedPath(deps, io, p)))))
 }

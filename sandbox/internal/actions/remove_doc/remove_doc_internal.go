@@ -14,7 +14,7 @@ func RemoveDocInternal(deps *deps.Deps, io *smartio.SmartIO, name string) error 
 		return err
 	}
 
-	dir := utils.DocDir(name)
+	dir := utils.DocDir(deps, name)
 	if !io.IsDir(dir) {
 		return deps.Std.Errorf("doc %s not found", dir)
 	}

@@ -1,8 +1,6 @@
 package add_command
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
@@ -13,10 +11,10 @@ import (
 // AddCommandInternal writes the two hand-written files of a new command
 // package. It refuses to overwrite an existing command (via io.WriteFile).
 func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help string, category string) error {
-	if strings.TrimSpace(help) == "" {
+	if deps.Stringsdeps.TrimSpace(help) == "" {
 		return deps.Std.Errorf("add-command requires --help")
 	}
-	if strings.TrimSpace(category) == "" {
+	if deps.Stringsdeps.TrimSpace(category) == "" {
 		return deps.Std.Errorf("add-command requires --category")
 	}
 
@@ -25,8 +23,8 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 	}
 	utils.NoteNormalizedCommandName(deps, name)
 
-	identifier := utils.CommandIdentifier(name)
-	pkg := utils.CommandPackage(name)
+	identifier := utils.CommandIdentifier(deps, name)
+	pkg := utils.CommandPackage(deps, name)
 
 	if pkg == "help" {
 		return deps.Std.Errorf("the help command is generated and cannot be declared")
@@ -44,11 +42,11 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 		"Package":     pkg,
 		"Module":      module_conf.Module,
 		"ProjectName": projectName(deps, io),
-		"Help":        strings.TrimSpace(help),
-		"Category":    strings.TrimSpace(category),
+		"Help":        deps.Stringsdeps.TrimSpace(help),
+		"Category":    deps.Stringsdeps.TrimSpace(category),
 	}
 
-	dir := utils.CommandDir(name)
+	dir := utils.CommandDir(deps, name)
 
 	entries, err := deps.Embeddeps.RenderTemplate("templates/command_entries.yaml", vars)
 	if err != nil {
@@ -80,5 +78,5 @@ func projectName(deps *deps.Deps, io *smartio.SmartIO) string {
 	if err != nil || conf.Name == "" {
 		return config.ProjectName
 	}
-	return strings.ToUpper(conf.Name[:1]) + conf.Name[1:]
+	return deps.Stringsdeps.ToUpper(conf.Name[:1]) + conf.Name[1:]
 }

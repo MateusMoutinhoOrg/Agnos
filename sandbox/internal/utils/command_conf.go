@@ -1,9 +1,6 @@
 package utils
 
 import (
-	"strconv"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
@@ -13,10 +10,10 @@ import (
 // CommandIdentifier normalizes a user-typed command name into the CLI verb:
 // lowercased, spaces and underscores turned into dashes
 // ("My Feature" -> "my-feature").
-func CommandIdentifier(name string) string {
-	out := strings.ToLower(strings.TrimSpace(name))
-	out = strings.ReplaceAll(out, " ", "-")
-	out = strings.ReplaceAll(out, "_", "-")
+func CommandIdentifier(deps *deps.Deps, name string) string {
+	out := deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(name))
+	out = deps.Stringsdeps.ReplaceAll(out, " ", "-")
+	out = deps.Stringsdeps.ReplaceAll(out, "_", "-")
 	return out
 }
 
@@ -26,7 +23,7 @@ func CommandIdentifier(name string) string {
 // into `package bad_name!` and break the whole project's build. The check runs
 // before any file is written.
 func ValidateCommandName(deps *deps.Deps, name string) error {
-	identifier := CommandIdentifier(name)
+	identifier := CommandIdentifier(deps, name)
 	if identifier == "" {
 		return deps.Std.Errorf("a command needs a name")
 	}
@@ -40,7 +37,7 @@ func ValidateCommandName(deps *deps.Deps, name string) error {
 		if !valid {
 			return deps.Std.Errorf(
 				"invalid command name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/commands/%s and a Go package name)",
-				name, CommandPackage(name))
+				name, CommandPackage(deps, name))
 		}
 	}
 	return nil
@@ -50,7 +47,7 @@ func ValidateCommandName(deps *deps.Deps, name string) error {
 // so a name that is silently lowercased or re-punctuated ("MyCmd" -> "mycmd")
 // is never a surprise later.
 func NoteNormalizedCommandName(deps *deps.Deps, name string) {
-	identifier := CommandIdentifier(name)
+	identifier := CommandIdentifier(deps, name)
 	if identifier != name {
 		deps.Std.Log("note: command name %q normalized to %q \n", name, identifier)
 	}
@@ -58,18 +55,18 @@ func NoteNormalizedCommandName(deps *deps.Deps, name string) {
 
 // CommandPackage is the Go package / directory name for a command: the
 // identifier with dashes turned into underscores ("my-feature" -> "my_feature").
-func CommandPackage(name string) string {
-	return strings.ReplaceAll(CommandIdentifier(name), "-", "_")
+func CommandPackage(deps *deps.Deps, name string) string {
+	return deps.Stringsdeps.ReplaceAll(CommandIdentifier(deps, name), "-", "_")
 }
 
 // CommandDir is the project-relative directory holding a command package.
-func CommandDir(name string) string {
-	return "sandbox/internal/commands/" + CommandPackage(name)
+func CommandDir(deps *deps.Deps, name string) string {
+	return "sandbox/internal/commands/" + CommandPackage(deps, name)
 }
 
 // CommandEntriesPath is the project-relative path of a command's entries.yaml.
-func CommandEntriesPath(name string) string {
-	return CommandDir(name) + "/entries.yaml"
+func CommandEntriesPath(deps *deps.Deps, name string) string {
+	return CommandDir(deps, name) + "/entries.yaml"
 }
 
 // LoadCommandConf reads and parses sandbox/internal/commands/<name>/entries.yaml.
@@ -77,26 +74,26 @@ func LoadCommandConf(deps *deps.Deps, io *smartio.SmartIO, name string) (*comman
 	if err := ValidateCommandName(deps, name); err != nil {
 		return nil, err
 	}
-	content, err := io.ReadFile(CommandEntriesPath(name))
+	content, err := io.ReadFile(CommandEntriesPath(deps, name))
 	if err != nil {
-		return nil, deps.Std.Errorf("command %q not found in %s", CommandIdentifier(name), CommandDir(name))
+		return nil, deps.Std.Errorf("command %q not found in %s", CommandIdentifier(deps, name), CommandDir(deps, name))
 	}
 	conf, err := commandconf.New(deps, string(content))
 	if err != nil {
-		return nil, deps.Std.Errorf("commands/%s/entries.yaml: %w", CommandPackage(name), err)
+		return nil, deps.Std.Errorf("commands/%s/entries.yaml: %w", CommandPackage(deps, name), err)
 	}
 	return conf, nil
 }
 
 // SaveCommandConf renders conf back over sandbox/internal/commands/<name>/entries.yaml.
 func SaveCommandConf(deps *deps.Deps, io *smartio.SmartIO, name string, conf *commandconf.CommandConf) error {
-	return io.WriteFileOverwrite(CommandEntriesPath(name), []byte(conf.Render()))
+	return io.WriteFileOverwrite(CommandEntriesPath(deps, name), []byte(conf.Render()))
 }
 
 // FieldName normalizes a flag/arg name the same way command names are
 // ("Out File" -> "out-file"); the generated Go field is derived from it.
-func FieldName(name string) string {
-	return CommandIdentifier(name)
+func FieldName(deps *deps.Deps, name string) string {
+	return CommandIdentifier(deps, name)
 }
 
 // NewField builds a commandconf.Field from the raw values typed on the
@@ -105,9 +102,9 @@ func FieldName(name string) string {
 // whether the field is a flag or a positional arg).
 func NewField(deps *deps.Deps, props api.FieldProps) (commandconf.Field, error) {
 	field := commandconf.Field{
-		Key:         FieldName(props.Name),
+		Key:         FieldName(deps, props.Name),
 		Identifiers: props.Identifiers,
-		Description: strings.TrimSpace(props.Description),
+		Description: deps.Stringsdeps.TrimSpace(props.Description),
 		Examples:    props.Examples,
 		Required:    props.Required,
 		Array:       props.Array,
@@ -116,7 +113,7 @@ func NewField(deps *deps.Deps, props api.FieldProps) (commandconf.Field, error) 
 		return field, deps.Std.Errorf("a flag/arg needs a name")
 	}
 
-	kind, ok := FieldType(props.Type)
+	kind, ok := FieldType(deps, props.Type)
 	if !ok {
 		return field, deps.Std.Errorf("unknown type %q (use string, boolean, int or float)", props.Type)
 	}
@@ -160,8 +157,8 @@ func NewField(deps *deps.Deps, props api.FieldProps) (commandconf.Field, error) 
 
 // FieldType maps the type spellings accepted on the command line onto the
 // canonical entries.yaml set; "" defaults to string.
-func FieldType(raw string) (string, bool) {
-	switch strings.ToLower(strings.TrimSpace(raw)) {
+func FieldType(deps *deps.Deps, raw string) (string, bool) {
+	switch deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(raw)) {
 	case "", "string", "str":
 		return "string", true
 	case "bool", "boolean":
@@ -176,8 +173,8 @@ func FieldType(raw string) (string, bool) {
 }
 
 // FindField returns the index of the field named name in fields, or -1.
-func FindField(fields []commandconf.Field, name string) int {
-	key := FieldName(name)
+func FindField(deps *deps.Deps, fields []commandconf.Field, name string) int {
+	key := FieldName(deps, name)
 	for i, field := range fields {
 		if field.Key == key {
 			return i
@@ -252,11 +249,11 @@ func checkLiteral(deps *deps.Deps, kind string, label string, raw string) error 
 			return deps.Std.Errorf("%s for a boolean must be true or false, got %q", label, raw)
 		}
 	case "int":
-		if _, err := strconv.ParseInt(raw, 10, 64); err != nil {
+		if _, err := deps.Stringsdeps.ParseInt(raw, 10, 64); err != nil {
 			return deps.Std.Errorf("%s must be an int, got %q", label, raw)
 		}
 	case "float":
-		if _, err := strconv.ParseFloat(raw, 64); err != nil {
+		if _, err := deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
 			return deps.Std.Errorf("%s must be a float, got %q", label, raw)
 		}
 	}
@@ -270,6 +267,6 @@ func parseBound(deps *deps.Deps, kind string, label string, raw string) (float64
 	if err := checkLiteral(deps, kind, label, raw); err != nil {
 		return 0, err
 	}
-	value, _ := strconv.ParseFloat(raw, 64)
+	value, _ := deps.Stringsdeps.ParseFloat(raw, 64)
 	return value, nil
 }

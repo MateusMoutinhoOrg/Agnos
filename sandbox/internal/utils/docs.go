@@ -1,9 +1,6 @@
 package utils
 
 import (
-	"sort"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
@@ -97,7 +94,7 @@ func collectDocsIn(deps *deps.Deps, io *smartio.SmartIO, parent_path string, fir
 	var docs []Doc
 
 	for _, dir := range io.ListDirs(parent_path) {
-		name := LastSegment(dir)
+		name := LastSegment(deps, dir)
 		if name == "" {
 			continue
 		}
@@ -133,14 +130,14 @@ func collectDocsIn(deps *deps.Deps, io *smartio.SmartIO, parent_path string, fir
 		docs = append(docs, doc)
 	}
 
-	SortDocs(docs)
+	SortDocs(deps, docs)
 	return docs, nil
 }
 
 // SortDocs orders docs the way every index lists them: by `order`, then by
 // name. A doc with no `order` comes after every ordered one.
-func SortDocs(docs []Doc) {
-	sort.SliceStable(docs, func(i, j int) bool {
+func SortDocs(deps *deps.Deps, docs []Doc) {
+	deps.Sortdeps.SliceStable(docs, func(i, j int) bool {
 		left, right := docs[i], docs[j]
 		if left.HasOrder != right.HasOrder {
 			return left.HasOrder
@@ -156,10 +153,10 @@ func SortDocs(docs []Doc) {
 // names under docs/ ("PublicApi/api.Actions" -> ["PublicApi", "api.Actions"]).
 // Empty segments — a leading, trailing or doubled slash — are dropped, so the
 // result is the doc's path relative to docs/.
-func DocSegments(name string) []string {
+func DocSegments(deps *deps.Deps, name string) []string {
 	var segments []string
-	for _, segment := range strings.Split(strings.TrimSpace(name), "/") {
-		segment = strings.TrimSpace(segment)
+	for _, segment := range deps.Stringsdeps.Split(deps.Stringsdeps.TrimSpace(name), "/") {
+		segment = deps.Stringsdeps.TrimSpace(segment)
 		if segment != "" {
 			segments = append(segments, segment)
 		}
@@ -172,7 +169,7 @@ func DocSegments(name string) []string {
 // linked from a generated index, so only letters, digits, dots, dashes and
 // underscores are allowed, and Index is reserved at the first level.
 func ValidateDocName(deps *deps.Deps, name string) error {
-	segments := DocSegments(name)
+	segments := DocSegments(deps, name)
 	if len(segments) == 0 {
 		return deps.Std.Errorf("a doc needs a name")
 	}
@@ -189,7 +186,7 @@ func ValidateDocName(deps *deps.Deps, name string) error {
 			if !valid {
 				return deps.Std.Errorf(
 					"invalid doc name %q: only letters, digits, dots, dashes, underscores and / are allowed (it becomes the directory %s)",
-					name, DocDir(name))
+					name, DocDir(deps, name))
 			}
 		}
 	}
@@ -198,54 +195,54 @@ func ValidateDocName(deps *deps.Deps, name string) error {
 
 // DocDir is the project-relative directory holding a doc
 // ("PublicApi/api.Actions" -> "docs/PublicApi/api.Actions").
-func DocDir(name string) string {
-	return DocsDir + "/" + strings.Join(DocSegments(name), "/")
+func DocDir(deps *deps.Deps, name string) string {
+	return DocsDir + "/" + deps.Stringsdeps.Join(DocSegments(deps, name), "/")
 }
 
 // DocParentDir is the project-relative directory holding a doc's parent — the
 // docs/ directory itself for a first-level doc.
-func DocParentDir(name string) string {
-	segments := DocSegments(name)
+func DocParentDir(deps *deps.Deps, name string) string {
+	segments := DocSegments(deps, name)
 	if len(segments) < 2 {
 		return DocsDir
 	}
-	return DocsDir + "/" + strings.Join(segments[:len(segments)-1], "/")
+	return DocsDir + "/" + deps.Stringsdeps.Join(segments[:len(segments)-1], "/")
 }
 
 // DocTitle is the human-readable name a new doc is declared with: its last
 // segment, with CamelCase split into words ("HandleDocuments" -> "Handle
 // Documents"). A segment already carrying its own punctuation — a dot, dash,
 // underscore or space, as in "api.Actions" — is kept verbatim.
-func DocTitle(name string) string {
-	segments := DocSegments(name)
+func DocTitle(deps *deps.Deps, name string) string {
+	segments := DocSegments(deps, name)
 	if len(segments) == 0 {
 		return ""
 	}
 	title := segments[len(segments)-1]
 
-	if strings.ContainsAny(title, ".-_ ") {
+	if deps.Stringsdeps.ContainsAny(title, ".-_ ") {
 		return title
 	}
 
 	// A word starts where a lowercase letter or a digit is followed by an
 	// uppercase one, so an acronym stays whole ("SmartIO" -> "Smart IO").
-	var out strings.Builder
+	out := ""
 	letters := []rune(title)
 	for index, letter := range letters {
 		if index > 0 && letter >= 'A' && letter <= 'Z' {
 			previous := letters[index-1]
 			if (previous >= 'a' && previous <= 'z') || (previous >= '0' && previous <= '9') {
-				out.WriteString(" ")
+				out += " "
 			}
 		}
-		out.WriteRune(letter)
+		out += string(letter)
 	}
-	return out.String()
+	return out
 }
 
 // LastSegment is the final element of a project-relative path
 // ("docs/PublicApi" -> "PublicApi").
-func LastSegment(path string) string {
-	parts := strings.Split(path, "/")
+func LastSegment(deps *deps.Deps, path string) string {
+	parts := deps.Stringsdeps.Split(path, "/")
 	return parts[len(parts)-1]
 }

@@ -1,8 +1,6 @@
 package utils
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/structureconf"
@@ -32,8 +30,8 @@ type StructureNode struct {
 // paths rather than one ("libs/<lib>/<lib>.go", "collect_*.go"). Such an item
 // has nothing to exist on disk under its own name, so `verify` checks the
 // literal part of the path instead (see StructureParentPath).
-func IsStructurePattern(path string) bool {
-	return strings.ContainsAny(path, "<>*?")
+func IsStructurePattern(deps *deps.Deps, path string) bool {
+	return deps.Stringsdeps.ContainsAny(path, "<>*?")
 }
 
 // StructureConfPath is the project-relative path of the structure declaration.
@@ -103,15 +101,15 @@ func flattenStructureIn(items []structureconf.Item, parent string, depth int) []
 // StructureParentPath is the path a pattern node is checked against: the
 // longest leading run of segments that holds no pattern character. It is empty
 // when the very first segment is already a pattern.
-func StructureParentPath(path string) string {
+func StructureParentPath(deps *deps.Deps, path string) string {
 	var literal []string
 
-	for _, segment := range strings.Split(path, "/") {
-		if strings.ContainsAny(segment, "<>*?") {
+	for _, segment := range deps.Stringsdeps.Split(path, "/") {
+		if deps.Stringsdeps.ContainsAny(segment, "<>*?") {
 			break
 		}
 		literal = append(literal, segment)
 	}
 
-	return strings.Join(literal, "/")
+	return deps.Stringsdeps.Join(literal, "/")
 }

@@ -13,14 +13,14 @@ func RemoveCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string) er
 	if err := utils.ValidateCommandName(deps, name); err != nil {
 		return err
 	}
-	pkg := utils.CommandPackage(name)
+	pkg := utils.CommandPackage(deps, name)
 	if pkg == "help" {
 		return deps.Std.Errorf("the help command is generated and cannot be removed")
 	}
 
-	dir := utils.CommandDir(name)
+	dir := utils.CommandDir(deps, name)
 	if !io.IsDir(dir) {
-		return deps.Std.Errorf("command %q not found", utils.CommandIdentifier(name))
+		return deps.Std.Errorf("command %q not found", utils.CommandIdentifier(deps, name))
 	}
 
 	deps.Std.Log("remove-command removing %s \n", dir)

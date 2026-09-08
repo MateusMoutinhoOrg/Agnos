@@ -1,21 +1,23 @@
 package moduleconf
 
-import "strings"
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+)
 
 // requireModulePath returns the module-path field of a require entry
 // ("github.com/x/y v1.2.3 // indirect" -> "github.com/x/y").
-func requireModulePath(require string) string {
-	fields := strings.Fields(require)
+func requireModulePath(deps *deps.Deps, require string) string {
+	fields := deps.Stringsdeps.Fields(require)
 	if len(fields) == 0 {
 		return ""
 	}
 	return fields[0]
 }
 
-func addRequire(conf *ModuleConf, require string) {
-	module := requireModulePath(require)
+func addRequire(deps *deps.Deps, conf *ModuleConf, require string) {
+	module := requireModulePath(deps, require)
 	for i, existing := range conf.Requires {
-		if requireModulePath(existing) == module {
+		if requireModulePath(deps, existing) == module {
 			conf.Requires[i] = require
 			return
 		}
@@ -23,10 +25,10 @@ func addRequire(conf *ModuleConf, require string) {
 	conf.Requires = append(conf.Requires, require)
 }
 
-func removeRequire(conf *ModuleConf, module string) {
+func removeRequire(deps *deps.Deps, conf *ModuleConf, module string) {
 	kept := conf.Requires[:0:0]
 	for _, existing := range conf.Requires {
-		if requireModulePath(existing) == module {
+		if requireModulePath(deps, existing) == module {
 			continue
 		}
 		kept = append(kept, existing)

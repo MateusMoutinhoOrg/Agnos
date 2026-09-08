@@ -1,8 +1,6 @@
 package build
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -60,7 +58,7 @@ func CollectCommandDocs(deps *deps.Deps, io *smartio.SmartIO) ([]CommandDocGroup
 	index := map[string]int{}
 
 	for _, dir := range io.ListDirs(commandsDocDir) {
-		name := lastSegmentOf(dir)
+		name := lastSegmentOf(deps, dir)
 		if name == "" {
 			continue
 		}
@@ -91,14 +89,14 @@ func CollectCommandDocs(deps *deps.Deps, io *smartio.SmartIO) ([]CommandDocGroup
 			groups = append(groups, CommandDocGroup{Category: category})
 		}
 
-		groups[position].Commands = append(groups[position].Commands, commandDoc(name, conf))
+		groups[position].Commands = append(groups[position].Commands, commandDoc(deps, name, conf))
 	}
 
 	return groups, nil
 }
 
 // commandDoc turns one parsed declaration into its page section.
-func commandDoc(name string, conf *commandconf.CommandConf) CommandDoc {
+func commandDoc(deps *deps.Deps, name string, conf *commandconf.CommandConf) CommandDoc {
 	identifier := name
 	if len(conf.Identifiers) > 0 {
 		identifier = conf.Identifiers[0]
@@ -107,20 +105,20 @@ func commandDoc(name string, conf *commandconf.CommandConf) CommandDoc {
 	doc := CommandDoc{
 		Name:            name,
 		Identifier:      identifier,
-		Aliases:         identifierList(aliasesOf(conf.Identifiers)),
-		Help:            docCell(conf.Help),
-		LongDescription: docText(conf.LongDescription),
+		Aliases:         identifierList(deps, aliasesOf(conf.Identifiers)),
+		Help:            docCell(deps, conf.Help),
+		LongDescription: docText(deps, conf.LongDescription),
 		Examples:        conf.Examples,
 	}
 
 	for _, flag := range conf.Flags {
-		doc.Flags = append(doc.Flags, commandDocField(flag))
+		doc.Flags = append(doc.Flags, commandDocField(deps, flag))
 	}
 	for _, arg := range conf.Args {
-		doc.Args = append(doc.Args, commandDocField(arg))
+		doc.Args = append(doc.Args, commandDocField(deps, arg))
 	}
 
-	doc.Usage = commandUsage(identifier, conf)
+	doc.Usage = commandUsage(deps, identifier, conf)
 
 	return doc
 }
@@ -135,7 +133,7 @@ func aliasesOf(identifiers []string) []string {
 }
 
 // commandDocField renders one flag or positional as its table row.
-func commandDocField(field commandconf.Field) CommandDocField {
+func commandDocField(deps *deps.Deps, field commandconf.Field) CommandDocField {
 	value := ""
 	if field.HasDefault {
 		value = "`" + field.Default + "`"
@@ -143,17 +141,17 @@ func commandDocField(field commandconf.Field) CommandDocField {
 
 	return CommandDocField{
 		Key:         field.Key,
-		Identifiers: identifierList(field.Identifiers),
-		Type:        fieldTypeLabel(field),
+		Identifiers: identifierList(deps, field.Identifiers),
+		Type:        fieldTypeLabel(deps, field),
 		Default:     value,
-		Description: docCell(field.Description),
+		Description: docCell(deps, field.Description),
 	}
 }
 
 // fieldTypeLabel is the one cell carrying everything the type of a field
 // implies: its kind, whether it repeats, whether it must be given, and the
 // bounds a numeric field declares.
-func fieldTypeLabel(field commandconf.Field) string {
+func fieldTypeLabel(deps *deps.Deps, field commandconf.Field) string {
 	label := field.Type
 	if label == "" {
 		label = "string"
@@ -164,7 +162,7 @@ func fieldTypeLabel(field commandconf.Field) string {
 	if field.Required {
 		label += ", required"
 	}
-	if bounds := fieldBounds(field); bounds != "" {
+	if bounds := fieldBounds(deps, field); bounds != "" {
 		label += ", " + bounds
 	}
 	return label
@@ -172,14 +170,14 @@ func fieldTypeLabel(field commandconf.Field) string {
 
 // fieldBounds spells the min/max a numeric field declares, "" when it
 // declares neither.
-func fieldBounds(field commandconf.Field) string {
+func fieldBounds(deps *deps.Deps, field commandconf.Field) string {
 	switch {
 	case field.HasMin && field.HasMax:
-		return numberLabel(field, field.Min, true) + ".." + numberLabel(field, field.Max, true)
+		return numberLabel(deps, field, field.Min, true) + ".." + numberLabel(deps, field, field.Max, true)
 	case field.HasMin:
-		return ">= " + numberLabel(field, field.Min, true)
+		return ">= " + numberLabel(deps, field, field.Min, true)
 	case field.HasMax:
-		return "<= " + numberLabel(field, field.Max, true)
+		return "<= " + numberLabel(deps, field, field.Max, true)
 	}
 	return ""
 }
@@ -187,7 +185,7 @@ func fieldBounds(field commandconf.Field) string {
 // commandUsage builds the one usage line of a command: its verb, every flag
 // in declaration order (bracketed when optional) and every positional after
 // them.
-func commandUsage(identifier string, conf *commandconf.CommandConf) string {
+func commandUsage(deps *deps.Deps, identifier string, conf *commandconf.CommandConf) string {
 	parts := []string{identifier}
 
 	for _, flag := range conf.Flags {
@@ -209,7 +207,7 @@ func commandUsage(identifier string, conf *commandconf.CommandConf) string {
 		parts = append(parts, token)
 	}
 
-	return strings.Join(parts, " ")
+	return deps.Stringsdeps.Join(parts, " ")
 }
 
 // flagToken is one flag as the usage line spells it: its first identifier,
@@ -231,31 +229,31 @@ func flagToken(flag commandconf.Field) string {
 
 // identifierList renders identifiers as the inline code list a table cell
 // carries, "" when there are none (a positional argument).
-func identifierList(identifiers []string) string {
+func identifierList(deps *deps.Deps, identifiers []string) string {
 	quoted := make([]string, 0, len(identifiers))
 	for _, identifier := range identifiers {
 		quoted = append(quoted, "`"+identifier+"`")
 	}
-	return strings.Join(quoted, ", ")
+	return deps.Stringsdeps.Join(quoted, ", ")
 }
 
 // docCell flattens a declared description into one markdown table cell:
 // no line breaks, and no bar to close the cell early.
-func docCell(raw string) string {
-	flat := strings.Join(strings.Fields(raw), " ")
-	return strings.ReplaceAll(flat, "|", `\|`)
+func docCell(deps *deps.Deps, raw string) string {
+	flat := deps.Stringsdeps.Join(deps.Stringsdeps.Fields(raw), " ")
+	return deps.Stringsdeps.ReplaceAll(flat, "|", `\|`)
 }
 
 // docText normalizes a long description into paragraphs: the declaration
 // hard-wraps its lines, which markdown would keep, so each blank-line-separated
 // block is joined back into one line.
-func docText(raw string) string {
-	blocks := strings.Split(strings.TrimSpace(raw), "\n\n")
+func docText(deps *deps.Deps, raw string) string {
+	blocks := deps.Stringsdeps.Split(deps.Stringsdeps.TrimSpace(raw), "\n\n")
 	joined := make([]string, 0, len(blocks))
 	for _, block := range blocks {
-		if text := strings.Join(strings.Fields(block), " "); text != "" {
+		if text := deps.Stringsdeps.Join(deps.Stringsdeps.Fields(block), " "); text != "" {
 			joined = append(joined, text)
 		}
 	}
-	return strings.Join(joined, "\n\n")
+	return deps.Stringsdeps.Join(joined, "\n\n")
 }

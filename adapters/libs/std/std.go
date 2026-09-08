@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"runtime"
 	"time"
 
 	std "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/std"
@@ -35,6 +36,18 @@ func errorWrite(output io.Writer, format string, a ...any) (int, error) {
 	return fmt.Fprintf(output, format, a...)
 }
 
+// sprintf fills std.Lib.Sprintf, formatting a message and returning it as a
+// string.
+func sprintf(format string, a ...any) string {
+	return fmt.Sprintf(format, a...)
+}
+
+// goos fills std.Lib.Goos, reporting the operating system the process was
+// built for.
+func goos() string {
+	return runtime.GOOS
+}
+
 // errorf fills std.Lib.Errorf, formatting an error message and returning it
 // as an error.
 func errorf(format string, a ...any) error {
@@ -59,6 +72,12 @@ func Bind(deps *deps.Deps) {
 		},
 		Errorf: func(format string, a ...any) error {
 			return errorf(format, a...)
+		},
+		Sprintf: func(format string, a ...any) string {
+			return sprintf(format, a...)
+		},
+		Goos: func() string {
+			return goos()
 		},
 	}
 }

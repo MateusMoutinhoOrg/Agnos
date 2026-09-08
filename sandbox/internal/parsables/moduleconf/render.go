@@ -1,27 +1,25 @@
 package moduleconf
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func Render(deps *deps.Deps, conf *ModuleConf) string {
-	var builder strings.Builder
+	builder := ""
 	if conf.Module != "" {
-		builder.WriteString("module " + conf.Module + "\n\n")
+		builder += "module " + conf.Module + "\n\n"
 	}
 	if conf.GoVersion != "" {
-		builder.WriteString("go " + conf.GoVersion + "\n\n")
+		builder += "go " + conf.GoVersion + "\n\n"
 	}
 
 	if len(conf.Requires) > 0 {
-		builder.WriteString("require (\n")
+		builder += "require (\n"
 		for _, req := range conf.Requires {
-			builder.WriteString("\t" + req + "\n")
+			builder += "\t" + req + "\n"
 		}
-		builder.WriteString(")\n")
+		builder += ")\n"
 	}
 
-	return builder.String()
+	return builder
 }

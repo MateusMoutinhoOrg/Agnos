@@ -1,8 +1,6 @@
 package add_doc
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
@@ -20,14 +18,14 @@ func AddDocInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DocProps) er
 		return err
 	}
 
-	description := strings.TrimSpace(props.Description)
+	description := deps.Stringsdeps.TrimSpace(props.Description)
 	if description == "" {
 		return deps.Std.Errorf("add-doc requires --description")
 	}
 
-	segments := utils.DocSegments(props.Name)
-	dir := utils.DocDir(props.Name)
-	parent := utils.DocParentDir(props.Name)
+	segments := utils.DocSegments(deps, props.Name)
+	dir := utils.DocDir(deps, props.Name)
+	parent := utils.DocParentDir(deps, props.Name)
 
 	if io.IsDir(dir) {
 		return deps.Std.Errorf("doc %s already exists", dir)
@@ -45,7 +43,7 @@ func AddDocInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DocProps) er
 	deps.Std.Log("add-doc creating %s \n", dir)
 
 	conf := docpropsconf.NewEmpty(deps)
-	conf.Name = utils.DocTitle(props.Name)
+	conf.Name = utils.DocTitle(deps, props.Name)
 	conf.Description = description
 	for _, theme := range themes {
 		conf.AddTheme(theme)
@@ -72,7 +70,7 @@ func AddDocInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DocProps) er
 func checkThemes(deps *deps.Deps, io *smartio.SmartIO, requested []string, first_level bool) ([]string, error) {
 	var themes []string
 	for _, theme := range requested {
-		theme = strings.TrimSpace(theme)
+		theme = deps.Stringsdeps.TrimSpace(theme)
 		if theme != "" {
 			themes = append(themes, theme)
 		}
@@ -92,13 +90,13 @@ func checkThemes(deps *deps.Deps, io *smartio.SmartIO, requested []string, first
 
 	if len(themes) == 0 {
 		return nil, deps.Std.Errorf("add-doc requires at least one --theme for a first-level doc (declared in themes.yaml: %s)",
-			strings.Join(themeIds(themes_conf.Themes), ", "))
+			deps.Stringsdeps.Join(themeIds(themes_conf.Themes), ", "))
 	}
 
 	for _, theme := range themes {
 		if !hasTheme(themes_conf.Themes, theme) {
 			return nil, deps.Std.Errorf("unknown theme %q: themes.yaml declares %s",
-				theme, strings.Join(themeIds(themes_conf.Themes), ", "))
+				theme, deps.Stringsdeps.Join(themeIds(themes_conf.Themes), ", "))
 		}
 	}
 

@@ -1,8 +1,6 @@
 package verify
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -24,7 +22,7 @@ func CheckContracts(deps *deps.Deps, io *smartio.SmartIO) []string {
 		if !io.IsDir(dir) {
 			continue
 		}
-		for _, file := range goFilesUnder(io, dir) {
+		for _, file := range goFilesUnder(deps, io, dir) {
 			violations = append(violations, checkContractFile(deps, io, file)...)
 		}
 	}
@@ -51,22 +49,22 @@ func checkContractFile(deps *deps.Deps, io *smartio.SmartIO, file string) []stri
 	var violations []string
 
 	for _, entry := range parsed.Types {
-		if entry.Exported && strings.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "type", entry.Name))
 		}
 	}
 	for _, entry := range parsed.Functions {
-		if entry.Exported && strings.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "function", entry.Name))
 		}
 	}
 	for _, entry := range parsed.Constants {
-		if entry.Exported && strings.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "const", entry.Name))
 		}
 	}
 	for _, entry := range parsed.Variables {
-		if entry.Exported && strings.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "var", entry.Name))
 		}
 	}

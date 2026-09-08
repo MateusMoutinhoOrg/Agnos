@@ -1,16 +1,16 @@
-cli-output: "dep-install started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "dep-install started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: sandbox/internal/cli/climain.go
-      sha: c6b90be43fc0df98a08a5c0fca059da3ba221eef36183978d1d3f172dae09606
+      sha: 5f44c53001198d44948ff4dc19fbfe2044c1dcbd6aef932553441a55e1d741f8
     - file: sandbox/internal/commands/help/entries.go
       sha: 71ea9f8358b2645e77876d6d9d25c6b576e7bdb86a677964f349b1c5f1182b93
     - file: sandbox/internal/commands/help/entries.yaml
       sha: de26675d3bf0579b8c2566dda1f1106f007139a5e03452e129262cfe667e64a7
     - file: sandbox/internal/commands/help/handler.go
-      sha: cab0237a0794f56b24343ed856786d989df821ddbc5e3a9424a98bd8f1b8262a
+      sha: 0e463b84502bf24e3a1dbf0b9175ae782a8619b2c98693acd2ed92636b4c4f9c
     - file: sandbox/internal/commands/version/entries.go
       sha: 90337e6ed450c8f839f9c7d507a570de4d3599ca6b61f74c50f92507a65680ef
     - file: sandbox/internal/commands/version/entries.yaml

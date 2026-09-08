@@ -47,7 +47,7 @@ The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency). Per-call 
 ## Add a template or collector
 
 - Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `start`. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/all/docs/GeneratedFiles/doc.md`.
-- Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources takes `deps` too and reads them through `deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
+- Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(deps, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(deps, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
 - Bootstrap twice; the second run must change nothing.
 
 ## Add an example to agnos

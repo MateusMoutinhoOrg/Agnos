@@ -1,10 +1,6 @@
 package build
 
 import (
-	"fmt"
-	"strconv"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -19,7 +15,7 @@ func CollectCommands(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, er
 	var commands []map[string]any
 
 	for _, dir := range io.ListDirs("sandbox/internal/commands") {
-		name := lastSegmentOf(dir)
+		name := lastSegmentOf(deps, dir)
 		if name == "" {
 			continue
 		}
@@ -34,29 +30,29 @@ func CollectCommands(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, er
 			return nil, deps.Std.Errorf("commands/%s/entries.yaml: %w", name, err)
 		}
 
-		commands = append(commands, commandData(name, conf))
+		commands = append(commands, commandData(deps, name, conf))
 	}
 
 	return commands, nil
 }
 
-func commandData(name string, conf *commandconf.CommandConf) map[string]any {
+func commandData(deps *deps.Deps, name string, conf *commandconf.CommandConf) map[string]any {
 	flags := make([]map[string]any, 0, len(conf.Flags))
 	for _, flag := range conf.Flags {
-		flags = append(flags, fieldData(flag))
+		flags = append(flags, fieldData(deps, flag))
 	}
 	args := make([]map[string]any, 0, len(conf.Args))
 	for _, arg := range conf.Args {
-		args = append(args, fieldData(arg))
+		args = append(args, fieldData(deps, arg))
 	}
 
 	return map[string]any{
 		"Name":            name,
-		"QuietField":      quietField(conf),
-		"GoName":          exportedName(name),
+		"QuietField":      quietField(deps, conf),
+		"GoName":          exportedName(deps, name),
 		"Identifiers":     conf.Identifiers,
-		"IdentifiersGo":   goStringList(conf.Identifiers),
-		"MatchExpr":       matchExpr(conf.Identifiers),
+		"IdentifiersGo":   goStringList(deps, conf.Identifiers),
+		"MatchExpr":       matchExpr(deps, conf.Identifiers),
 		"Category":        conf.Category,
 		"Help":            conf.Help,
 		"LongDescription": conf.LongDescription,
@@ -67,49 +63,49 @@ func commandData(name string, conf *commandconf.CommandConf) map[string]any {
 	}
 }
 
-func fieldData(field commandconf.Field) map[string]any {
+func fieldData(deps *deps.Deps, field commandconf.Field) map[string]any {
 	return map[string]any{
 		"Key":            field.Key,
-		"GoField":        exportedName(field.Key),
+		"GoField":        exportedName(deps, field.Key),
 		"GoType":         goType(field.Type, field.Array),
 		"IsBool":         field.Type == "boolean",
 		"IsArray":        field.Array,
 		"Identifiers":    field.Identifiers,
-		"IdentifiersGo":  goStringList(field.Identifiers),
+		"IdentifiersGo":  goStringList(deps, field.Identifiers),
 		"OptionGetter":   optionGetter(field.Type),
 		"ArgGetter":      argGetter(field.Type),
 		"ParseFunc":      parseFunc(field.Type),
 		"Required":       field.Required,
 		"HasDefault":     field.HasDefault,
-		"DefaultLiteral": defaultLiteral(field.Type, field.Default),
+		"DefaultLiteral": defaultLiteral(deps, field.Type, field.Default),
 		"ElemLiteral":    elemLiteral(field.Type),
 		"Description":    field.Description,
 		"Examples":       field.Examples,
 		"Type":           field.Type,
 		"Default":        field.Default,
-		"MinLabel":       numberLabel(field, field.Min, field.HasMin),
-		"MaxLabel":       numberLabel(field, field.Max, field.HasMax),
-		"RangeCheck":     rangeCheck(field),
+		"MinLabel":       numberLabel(deps, field, field.Min, field.HasMin),
+		"MaxLabel":       numberLabel(deps, field, field.Max, field.HasMax),
+		"RangeCheck":     rangeCheck(deps, field),
 	}
 }
 
 // numberLabel renders a min/max bound as the literal it has in entries.yaml
 // ("" when the bound is unset), for help display.
-func numberLabel(field commandconf.Field, value float64, has bool) string {
+func numberLabel(deps *deps.Deps, field commandconf.Field, value float64, has bool) string {
 	if !has {
 		return ""
 	}
 	if field.Type == "int" {
-		return strconv.FormatInt(int64(value), 10)
+		return deps.Stringsdeps.FormatInt(int64(value), 10)
 	}
-	return strconv.FormatFloat(value, 'g', -1, 64)
+	return deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
 }
 
 // rangeCheck emits the Go statements the generated dispatch runs, after a
 // numeric flag/arg has been bound, to enforce its min/max bounds. It returns
 // "" for fields that carry no bound (or are not int/float scalars). The body
 // is indented two tabs — the depth of the block it is spliced into.
-func rangeCheck(field commandconf.Field) string {
+func rangeCheck(deps *deps.Deps, field commandconf.Field) string {
 	if field.Array || (field.Type != "int" && field.Type != "float") {
 		return ""
 	}
@@ -121,13 +117,13 @@ func rangeCheck(field commandconf.Field) string {
 	if len(field.Identifiers) == 0 {
 		subject = "arg"
 	}
-	goField := exportedName(field.Key)
+	goField := exportedName(deps, field.Key)
 
-	var b strings.Builder
+	b := ""
 	// failOp is the comparison that means "out of range"; wantOp is what the
 	// message tells the user to satisfy.
 	guard := func(failOp, wantOp, bound string) {
-		fmt.Fprintf(&b,
+		b += deps.Std.Sprintf(
 			"\t\tif entries.%s %s %s {\n"+
 				"\t\t\tdeps.Std.Error(\"%s '%s' must be %s %s\\n\")\n"+
 				"\t\t\treturn ExitUsage\n"+
@@ -135,36 +131,36 @@ func rangeCheck(field commandconf.Field) string {
 			goField, failOp, bound, subject, field.Key, wantOp, bound)
 	}
 	if field.HasMin {
-		guard("<", ">=", numberLabel(field, field.Min, true))
+		guard("<", ">=", numberLabel(deps, field, field.Min, true))
 	}
 	if field.HasMax {
-		guard(">", "<=", numberLabel(field, field.Max, true))
+		guard(">", "<=", numberLabel(deps, field, field.Max, true))
 	}
-	return strings.TrimRight(b.String(), "\n")
+	return deps.Stringsdeps.TrimRight(b, "\n")
 }
 
 // ─── helpers ────────────────────────────────────────────────────────────────
 
-func lastSegmentOf(path string) string {
-	parts := strings.Split(path, "/")
+func lastSegmentOf(deps *deps.Deps, path string) string {
+	parts := deps.Stringsdeps.Split(path, "/")
 	return parts[len(parts)-1]
 }
 
 // exportedName turns a kebab/snake identifier into an exported Go name:
 // "project-name" -> "ProjectName", "unsafe" -> "Unsafe".
-func exportedName(raw string) string {
-	parts := strings.FieldsFunc(raw, func(r rune) bool { return r == '-' || r == '_' })
-	var b strings.Builder
+func exportedName(deps *deps.Deps, raw string) string {
+	parts := deps.Stringsdeps.FieldsFunc(raw, func(r rune) bool { return r == '-' || r == '_' })
+	b := ""
 	for _, part := range parts {
 		if part == "" {
 			continue
 		}
-		b.WriteString(strings.ToUpper(part[:1]) + part[1:])
+		b += deps.Stringsdeps.ToUpper(part[:1]) + part[1:]
 	}
-	if b.Len() == 0 {
+	if b == "" {
 		return "Field"
 	}
-	return b.String()
+	return b
 }
 
 func goType(kind string, array bool) string {
@@ -200,10 +196,10 @@ func elemLiteral(kind string) string {
 // progress channel off, "" when the command declares no boolean quiet flag.
 // Every command that wants --quiet to work declares the flag; the dispatch
 // does the silencing once, so no handler has to.
-func quietField(conf *commandconf.CommandConf) string {
+func quietField(deps *deps.Deps, conf *commandconf.CommandConf) string {
 	for _, flag := range conf.Flags {
 		if flag.Key == "quiet" && flag.Type == "boolean" && !flag.Array {
-			return exportedName(flag.Key)
+			return exportedName(deps, flag.Key)
 		}
 	}
 	return ""
@@ -244,7 +240,7 @@ func argGetter(kind string) string {
 	}
 }
 
-func defaultLiteral(kind, value string) string {
+func defaultLiteral(deps *deps.Deps, kind, value string) string {
 	switch kind {
 	case "boolean":
 		if value == "true" {
@@ -262,27 +258,27 @@ func defaultLiteral(kind, value string) string {
 		}
 		return value
 	default:
-		return strconv.Quote(value)
+		return deps.Stringsdeps.Quote(value)
 	}
 }
 
-func goStringList(values []string) string {
+func goStringList(deps *deps.Deps, values []string) string {
 	quoted := make([]string, 0, len(values))
 	for _, value := range values {
-		quoted = append(quoted, strconv.Quote(value))
+		quoted = append(quoted, deps.Stringsdeps.Quote(value))
 	}
-	return strings.Join(quoted, ", ")
+	return deps.Stringsdeps.Join(quoted, ", ")
 }
 
 // matchExpr builds the boolean switch guard that matches the command verb,
 // e.g. `action == "version" || action == "--version"`.
-func matchExpr(identifiers []string) string {
+func matchExpr(deps *deps.Deps, identifiers []string) string {
 	if len(identifiers) == 0 {
 		return "false"
 	}
 	parts := make([]string, 0, len(identifiers))
 	for _, id := range identifiers {
-		parts = append(parts, "action == "+strconv.Quote(id))
+		parts = append(parts, "action == "+deps.Stringsdeps.Quote(id))
 	}
-	return strings.Join(parts, " || ")
+	return deps.Stringsdeps.Join(parts, " || ")
 }

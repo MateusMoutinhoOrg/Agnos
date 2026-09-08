@@ -1,8 +1,6 @@
 package add_flag
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -26,15 +24,15 @@ func AddFlagInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps)
 		field.Identifiers = []string{"--" + field.Key}
 	}
 	for _, id := range field.Identifiers {
-		if !strings.HasPrefix(id, "-") {
+		if !deps.Stringsdeps.HasPrefix(id, "-") {
 			return deps.Std.Errorf("flag identifier %q must start with - or --", id)
 		}
 	}
 
-	if utils.FindField(conf.Flags, field.Key) >= 0 {
+	if utils.FindField(deps, conf.Flags, field.Key) >= 0 {
 		return deps.Std.Errorf("command %q already has a flag named %q", props.Command, field.Key)
 	}
-	if utils.FindField(conf.Args, field.Key) >= 0 {
+	if utils.FindField(deps, conf.Args, field.Key) >= 0 {
 		return deps.Std.Errorf("command %q already has an arg named %q", props.Command, field.Key)
 	}
 	for _, existing := range conf.Flags {
@@ -52,7 +50,7 @@ func AddFlagInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps)
 		return err
 	}
 
-	deps.Std.Log("add-flag adding %s to %s \n", field.Key, utils.CommandEntriesPath(props.Command))
+	deps.Std.Log("add-flag adding %s to %s \n", field.Key, utils.CommandEntriesPath(deps, props.Command))
 
 	conf.Flags = utils.InsertField(conf.Flags, field, position)
 	return utils.SaveCommandConf(deps, io, props.Command, conf)

@@ -1,12 +1,8 @@
 package utils
 
 import (
-	"bytes"
-	"path"
-	"strings"
-	"text/template"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/templatedeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -28,14 +24,14 @@ import (
 // returns its contents verbatim, without any template rendering. Use it to
 // embed a file that is not itself a template (a LICENSE, a fixed snippet). A
 // missing file is a hard error.
-func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) template.FuncMap {
-	return template.FuncMap{
+func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) map[string]any {
+	return map[string]any{
 		"render": func(project_path string) (string, error) {
 			content, err := io.ReadFile(project_path)
 			if err != nil {
 				return "", err
 			}
-			rendered, err := renderTemplate(deps, io, path.Base(project_path), content, vars)
+			rendered, err := renderTemplate(deps, io, baseName(deps, project_path), content, vars)
 			if err != nil {
 				return "", err
 			}
@@ -64,16 +60,23 @@ func RenderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byt
 // this package: RenderTemplateToDest and RenderGroup both go through it, so the
 // `render` native function is available in every asset template.
 func renderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
-	t, err := template.New(name).Funcs(templateFuncs(deps, io, vars)).Parse(string(src))
+	rendered, err := deps.Templatedeps.Render(templatedeps.RenderProps{
+		Name:   name,
+		Source: string(src),
+		Vars:   vars,
+		Funcs:  templateFuncs(deps, io, vars),
+	})
 	if err != nil {
 		return nil, err
 	}
+	return []byte(rendered), nil
+}
 
-	var buf bytes.Buffer
-	if err := t.Execute(&buf, vars); err != nil {
-		return nil, err
-	}
-	return buf.Bytes(), nil
+// baseName is the last slash-separated segment of an asset path, the name a
+// template is reported under when it fails to parse or execute.
+func baseName(deps *deps.Deps, path string) string {
+	segments := deps.Stringsdeps.Split(path, "/")
+	return segments[len(segments)-1]
 }
 
 // formatIfGo returns content in the canonical form of the Go toolchain when
@@ -83,7 +86,7 @@ func renderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byt
 // it came out: the compile step reports it with a real message, which a
 // rendering error here would only hide.
 func formatIfGo(deps *deps.Deps, dest string, content []byte) []byte {
-	if !strings.HasSuffix(dest, ".go") {
+	if !deps.Stringsdeps.HasSuffix(dest, ".go") {
 		return content
 	}
 
@@ -106,7 +109,7 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 		return err
 	}
 
-	content, err := renderTemplate(deps, io, path.Base(template_path), src, vars)
+	content, err := renderTemplate(deps, io, baseName(deps, template_path), src, vars)
 	if err != nil {
 		return err
 	}
@@ -138,7 +141,7 @@ func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interf
 			return err
 		}
 
-		content, err := renderTemplate(deps, io, path.Base(file), src, vars)
+		content, err := renderTemplate(deps, io, baseName(deps, file), src, vars)
 		if err != nil {
 			return err
 		}

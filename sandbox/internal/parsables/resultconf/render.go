@@ -1,8 +1,6 @@
 package resultconf
 
 import (
-	"sort"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -13,7 +11,7 @@ func Render(deps *deps.Deps, conf *ResultConf) string {
 
 	entries := make([]TreeEntry, len(conf.Tree))
 	copy(entries, conf.Tree)
-	sort.SliceStable(entries, func(i, j int) bool {
+	deps.Sortdeps.SliceStable(entries, func(i, j int) bool {
 		return entries[i].File < entries[j].File
 	})
 

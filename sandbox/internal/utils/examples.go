@@ -1,9 +1,6 @@
 package utils
 
 import (
-	"sort"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -80,7 +77,7 @@ func CollectExamples(deps *deps.Deps, io *smartio.SmartIO, side string) []Exampl
 
 	var examples []Example
 	for _, entry := range io.ListDirs(dir) {
-		name := LastSegment(entry)
+		name := LastSegment(deps, entry)
 		desc := ""
 		propsPath := entry + "/props.yaml"
 		if content, err := io.ReadFile(propsPath); err == nil {
@@ -94,7 +91,7 @@ func CollectExamples(deps *deps.Deps, io *smartio.SmartIO, side string) []Exampl
 		}
 		examples = append(examples, Example{Name: name, Description: desc})
 	}
-	sort.Slice(examples, func(i, j int) bool {
+	deps.Sortdeps.Slice(examples, func(i, j int) bool {
 		return examples[i].Name < examples[j].Name
 	})
 	return examples
@@ -105,7 +102,7 @@ func CollectExamples(deps *deps.Deps, io *smartio.SmartIO, side string) []Exampl
 // linked from a generated listing, so only letters, digits, dots, dashes and
 // underscores are allowed, and it is one segment — an example is never nested.
 func ValidateExampleName(deps *deps.Deps, name string) error {
-	name = strings.TrimSpace(name)
+	name = deps.Stringsdeps.TrimSpace(name)
 	if name == "" {
 		return deps.Std.Errorf("an example needs a name")
 	}

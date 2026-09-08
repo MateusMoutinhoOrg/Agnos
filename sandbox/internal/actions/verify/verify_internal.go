@@ -1,8 +1,6 @@
 package verify
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -33,5 +31,5 @@ func VerifyInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	return deps.Std.Errorf("verify found %d violation(s):\n  - %s",
-		len(violations), strings.Join(violations, "\n  - "))
+		len(violations), deps.Stringsdeps.Join(violations, "\n  - "))
 }

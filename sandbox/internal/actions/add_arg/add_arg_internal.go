@@ -26,10 +26,10 @@ func AddArgInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps) 
 		return deps.Std.Errorf("a positional arg cannot be boolean")
 	}
 
-	if utils.FindField(conf.Args, field.Key) >= 0 {
+	if utils.FindField(deps, conf.Args, field.Key) >= 0 {
 		return deps.Std.Errorf("command %q already has an arg named %q", props.Command, field.Key)
 	}
-	if utils.FindField(conf.Flags, field.Key) >= 0 {
+	if utils.FindField(deps, conf.Flags, field.Key) >= 0 {
 		return deps.Std.Errorf("command %q already has a flag named %q", props.Command, field.Key)
 	}
 
@@ -46,7 +46,7 @@ func AddArgInternal(deps *deps.Deps, io *smartio.SmartIO, props api.FieldProps) 
 		return deps.Std.Errorf("an array arg must be the last positional arg")
 	}
 
-	deps.Std.Log("add-arg adding %s to %s \n", field.Key, utils.CommandEntriesPath(props.Command))
+	deps.Std.Log("add-arg adding %s to %s \n", field.Key, utils.CommandEntriesPath(deps, props.Command))
 
 	conf.Args = utils.InsertField(conf.Args, field, position)
 	return utils.SaveCommandConf(deps, io, props.Command, conf)

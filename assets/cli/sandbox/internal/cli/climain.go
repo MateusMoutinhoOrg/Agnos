@@ -1,9 +1,6 @@
 package cli
 
 import (
-	"strconv"
-	"strings"
-
 	"{{.Module}}/sandbox/deps"
 	"{{.Module}}/sandbox/deps/argvdeps"
 	"{{.Module}}/sandbox/internal/config"
@@ -50,7 +47,7 @@ func CliMain(deps *deps.Deps, args []string) int {
 {{- end}}
 	}
 
-	deps.Std.Error("unknown command %q — run '%s help' to see the available commands\n", action, binaryName())
+	deps.Std.Error("unknown command %q — run '%s help' to see the available commands\n", action, binaryName(deps))
 	return ExitUsage
 }
 
@@ -61,8 +58,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 
 // binaryName is the executable's name as a user types it: the configured
 // project name, lowercased.
-func binaryName() string {
-	return strings.ToLower(config.ProjectName)
+func binaryName(deps *deps.Deps) string {
+	return deps.Stringsdeps.ToLower(config.ProjectName)
 }
 
 // silenceLogs turns off the progress channel for the rest of the process. It
@@ -106,7 +103,7 @@ func parseStringValue(deps *deps.Deps, subject string, name string, raw string) 
 // parseIntValue converts a raw command-line value to an int, reporting the
 // failure in the CLI's own words rather than the parser library's.
 func parseIntValue(deps *deps.Deps, subject string, name string, raw string) (int, bool) {
-	value, err := strconv.Atoi(raw)
+	value, err := deps.Stringsdeps.Atoi(raw)
 	if err != nil {
 		deps.Std.Error("%s '%s': %q is not a valid integer\n", subject, name, raw)
 		return 0, false
@@ -117,7 +114,7 @@ func parseIntValue(deps *deps.Deps, subject string, name string, raw string) (in
 // parseFloatValue converts a raw command-line value to a float64, reporting
 // the failure in the CLI's own words rather than the parser library's.
 func parseFloatValue(deps *deps.Deps, subject string, name string, raw string) (float64, bool) {
-	value, err := strconv.ParseFloat(raw, 64)
+	value, err := deps.Stringsdeps.ParseFloat(raw, 64)
 	if err != nil {
 		deps.Std.Error("%s '%s': %q is not a valid number\n", subject, name, raw)
 		return 0, false
@@ -130,10 +127,10 @@ func parseFloatValue(deps *deps.Deps, subject string, name string, raw string) (
 // would otherwise be ignored and leave the command running on a default.
 func checkUnknownFlags(deps *deps.Deps, verb argvdeps.Parser) bool {
 	for i, used := range verb.Used {
-		if used || !strings.HasPrefix(verb.Args[i], "-") {
+		if used || !deps.Stringsdeps.HasPrefix(verb.Args[i], "-") {
 			continue
 		}
-		deps.Std.Error("unknown flag %q — run '%s help' for the accepted flags\n", verb.Args[i], binaryName())
+		deps.Std.Error("unknown flag %q — run '%s help' for the accepted flags\n", verb.Args[i], binaryName(deps))
 		return false
 	}
 	return true

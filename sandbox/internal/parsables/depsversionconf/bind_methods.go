@@ -1,8 +1,6 @@
 package depsversionconf
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -12,7 +10,7 @@ func BindMethods(deps *deps.Deps, conf *DepsVersionConf) {
 		if !ok {
 			return "", "", false
 		}
-		at := strings.LastIndex(spec, "@")
+		at := deps.Stringsdeps.LastIndex(spec, "@")
 		if at < 0 {
 			return spec, "", true
 		}

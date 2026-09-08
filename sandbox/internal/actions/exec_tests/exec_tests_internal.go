@@ -1,11 +1,6 @@
 package exec_tests
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
-	"sort"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
@@ -85,7 +80,7 @@ func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) er
 
 	crossed := crossCheckedNames(runs)
 	for _, name := range crossed {
-		divergences := crossCheck(produced[utils.ExampleCliSide+"/"+name], produced[utils.ExampleLibSide+"/"+name])
+		divergences := crossCheck(deps, produced[utils.ExampleCliSide+"/"+name], produced[utils.ExampleLibSide+"/"+name])
 		if len(divergences) > 0 {
 			failed = append(failed, name)
 			report(deps, name+" (cli vs lib)", divergences)
@@ -96,7 +91,7 @@ func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) er
 
 	if len(failed) > 0 {
 		return deps.Std.Errorf("exec-test: %d of %d checks failed: %s",
-			len(failed), len(runs)+len(crossed), strings.Join(failed, ", "))
+			len(failed), len(runs)+len(crossed), deps.Stringsdeps.Join(failed, ", "))
 	}
 	return nil
 }
@@ -105,7 +100,7 @@ func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) er
 // by name, cli before lib. `only` narrows the plan to one name — both sides of
 // it — and is a usage error when no side declares that name.
 func planRuns(deps *deps.Deps, path string, only string) ([]exampleRun, error) {
-	only = strings.TrimSpace(only)
+	only = deps.Stringsdeps.TrimSpace(only)
 
 	names := []string{}
 	seen := map[string]bool{}
@@ -120,12 +115,12 @@ func planRuns(deps *deps.Deps, path string, only string) ([]exampleRun, error) {
 			}
 		}
 	}
-	sort.Strings(names)
+	deps.Sortdeps.Strings(names)
 
 	if only != "" {
 		if !seen[only] {
 			return nil, deps.Std.Errorf("exec-test: no example named %q (declared: %s)",
-				only, strings.Join(names, ", "))
+				only, deps.Stringsdeps.Join(names, ", "))
 		}
 		names = []string{only}
 	}
@@ -144,16 +139,16 @@ func planRuns(deps *deps.Deps, path string, only string) ([]exampleRun, error) {
 // listExamples lists one side's example names, sorted. It reads disk directly:
 // exec-test opens no SmartIO, so nothing here is filtered or buffered.
 func listExamples(deps *deps.Deps, path string, side string) []string {
-	dir := join(path, utils.ExampleSideDir(side))
+	dir := join(deps, path, utils.ExampleSideDir(side))
 	if !deps.Iodeps.IsDir(dir) {
 		return nil
 	}
 
 	var names []string
 	for _, entry := range deps.Iodeps.ListDirs(dir) {
-		names = append(names, utils.LastSegment(entry))
+		names = append(names, utils.LastSegment(deps, entry))
 	}
-	sort.Strings(names)
+	deps.Sortdeps.Strings(names)
 	return names
 }
 
@@ -185,7 +180,7 @@ func crossCheckedNames(runs []exampleRun) []string {
 // gathered into a result — the exit status and merged output of the run, plus
 // every file it copied out of TestDir into AssertDir.
 func execExample(deps *deps.Deps, path string, root string, prefix []string, run exampleRun) (*resultconf.ResultConf, error) {
-	dir := join(path, run.Dir)
+	dir := join(deps, path, run.Dir)
 
 	deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleTestDir)
 	deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleAssertDir)
@@ -202,7 +197,7 @@ func execExample(deps *deps.Deps, path string, root string, prefix []string, run
 	}
 
 	conf := resultconf.NewEmpty(deps)
-	conf.CliOutput = normalize(result.Output, root+"/"+run.Dir)
+	conf.CliOutput = normalize(deps, result.Output, root+"/"+run.Dir)
 	conf.ExitCode = result.ExitCode
 
 	for _, entry := range treeOf(deps, dir+"/"+utils.ExampleAssertDir) {
@@ -230,8 +225,8 @@ func treeOf(deps *deps.Deps, assert_dir string) []resultconf.TreeEntry {
 	var entries []resultconf.TreeEntry
 
 	for _, file := range deps.Iodeps.ListFilesRecursively(assert_dir) {
-		name := strings.TrimPrefix(strings.TrimPrefix(file, assert_dir), "/")
-		if name == "" || isVolatile(name) {
+		name := deps.Stringsdeps.TrimPrefix(deps.Stringsdeps.TrimPrefix(file, assert_dir), "/")
+		if name == "" || isVolatile(deps, name) {
 			continue
 		}
 
@@ -241,11 +236,10 @@ func treeOf(deps *deps.Deps, assert_dir string) []resultconf.TreeEntry {
 			continue
 		}
 
-		sum := sha256.Sum256(content)
-		entries = append(entries, resultconf.TreeEntry{File: name, Sha: hex.EncodeToString(sum[:])})
+		entries = append(entries, resultconf.TreeEntry{File: name, Sha: deps.Hashdeps.Sha256Hex(content)})
 	}
 
-	sort.SliceStable(entries, func(i, j int) bool {
+	deps.Sortdeps.SliceStable(entries, func(i, j int) bool {
 		return entries[i].File < entries[j].File
 	})
 	return entries
@@ -253,14 +247,14 @@ func treeOf(deps *deps.Deps, assert_dir string) []resultconf.TreeEntry {
 
 // isVolatile reports whether an AssertDir-relative path is one the tree leaves
 // out (see volatileFiles / volatileDirs).
-func isVolatile(name string) bool {
+func isVolatile(deps *deps.Deps, name string) bool {
 	for _, file := range volatileFiles {
 		if name == file {
 			return true
 		}
 	}
 	for _, dir := range volatileDirs {
-		if strings.HasPrefix(name, dir) {
+		if deps.Stringsdeps.HasPrefix(name, dir) {
 			return true
 		}
 	}
@@ -271,9 +265,9 @@ func isVolatile(name string) bool {
 // example ran in becomes <dir>, and carriage returns are dropped. Any other
 // absolute path, timestamp or resolved version left in the output belongs to
 // the machine that ran it, and the example carrying it is not a valid one.
-func normalize(output string, dir string) string {
-	output = strings.ReplaceAll(output, "\r\n", "\n")
-	return strings.ReplaceAll(output, dir, "<dir>")
+func normalize(deps *deps.Deps, output string, dir string) string {
+	output = deps.Stringsdeps.ReplaceAll(output, "\r\n", "\n")
+	return deps.Stringsdeps.ReplaceAll(output, dir, "<dir>")
 }
 
 // emptyAssertDir is what one example is told when it copied nothing out of its
@@ -290,7 +284,7 @@ func emptyAssertDir(run exampleRun) string {
 // rewritten in silence is a golden nobody read.
 func checkGolden(deps *deps.Deps, path string, run exampleRun, produced *resultconf.ResultConf, update bool) ([]string, error) {
 	rel := run.Dir + "/" + utils.ExampleResultFile
-	golden_path := join(path, rel)
+	golden_path := join(deps, path, rel)
 
 	if !deps.Iodeps.IsFile(golden_path) {
 		deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
@@ -303,8 +297,8 @@ func checkGolden(deps *deps.Deps, path string, run exampleRun, produced *resultc
 	}
 
 	divergences := diffExitCode(golden.ExitCode, produced.ExitCode)
-	divergences = append(divergences, diffOutput(golden.CliOutput, produced.CliOutput)...)
-	divergences = append(divergences, diffTree(golden.Tree, produced.Tree)...)
+	divergences = append(divergences, diffOutput(deps, golden.CliOutput, produced.CliOutput)...)
+	divergences = append(divergences, diffTree(deps, golden.Tree, produced.Tree)...)
 
 	if !update {
 		return divergences, nil
@@ -347,12 +341,12 @@ func reportUpdate(deps *deps.Deps, divergences []string) {
 // wrapper over the lib. cli-output is deliberately left out — each side has
 // its own text (a cli error on one, a panic on the other) and is checked
 // against its own golden.
-func crossCheck(cli *resultconf.ResultConf, lib *resultconf.ResultConf) []string {
+func crossCheck(deps *deps.Deps, cli *resultconf.ResultConf, lib *resultconf.ResultConf) []string {
 	if cli == nil || lib == nil {
 		return nil
 	}
 	divergences := diffExitCode(cli.ExitCode, lib.ExitCode)
-	return append(divergences, diffTree(cli.Tree, lib.Tree)...)
+	return append(divergences, diffTree(deps, cli.Tree, lib.Tree)...)
 }
 
 // diffExitCode reports a differing exit status.
@@ -365,13 +359,13 @@ func diffExitCode(expected int, got int) []string {
 
 // diffOutput reports the differing lines of the two outputs, `-` for the
 // expected line and `+` for the one produced.
-func diffOutput(expected string, got string) []string {
+func diffOutput(deps *deps.Deps, expected string, got string) []string {
 	if expected == got {
 		return nil
 	}
 
-	expected_lines := strings.Split(expected, "\n")
-	got_lines := strings.Split(got, "\n")
+	expected_lines := deps.Stringsdeps.Split(expected, "\n")
+	got_lines := deps.Stringsdeps.Split(got, "\n")
 
 	lines := []string{"cli-output:"}
 	for index := 0; index < len(expected_lines) || index < len(got_lines); index++ {
@@ -402,7 +396,7 @@ func lineAt(lines []string, index int) *string {
 // only the produced tree has, `-` for one only the expected tree has, and `~`
 // for one both have with a different sha. Saying only "failed" about two trees
 // of hundreds of files is no help at all.
-func diffTree(expected []resultconf.TreeEntry, got []resultconf.TreeEntry) []string {
+func diffTree(deps *deps.Deps, expected []resultconf.TreeEntry, got []resultconf.TreeEntry) []string {
 	expected_shas := shasOf(expected)
 	got_shas := shasOf(got)
 
@@ -426,7 +420,7 @@ func diffTree(expected []resultconf.TreeEntry, got []resultconf.TreeEntry) []str
 	if len(lines) == 0 {
 		return nil
 	}
-	sort.Strings(lines)
+	deps.Sortdeps.Strings(lines)
 	return append([]string{"tree:"}, lines...)
 }
 
@@ -461,7 +455,7 @@ func projectRoot(deps *deps.Deps, path string) (string, error) {
 	if result.ExitCode != 0 {
 		return "", deps.Std.Errorf("exec-test: could not resolve %s:\n%s", path, result.Output)
 	}
-	return strings.TrimRight(result.Output, "\r\n"), nil
+	return deps.Stringsdeps.TrimRight(result.Output, "\r\n"), nil
 }
 
 // writeCliAlias writes the executable an example types — named after the
@@ -472,7 +466,7 @@ func projectRoot(deps *deps.Deps, path string) (string, error) {
 // installed release. A project with no cli has nothing to alias and gets no
 // prefix.
 func writeCliAlias(deps *deps.Deps, path string, root string) ([]string, error) {
-	if !deps.Iodeps.IsDir(join(path, "cmd/main")) {
+	if !deps.Iodeps.IsDir(join(deps, path, "cmd/main")) {
 		return nil, nil
 	}
 
@@ -484,7 +478,7 @@ func writeCliAlias(deps *deps.Deps, path string, root string) ([]string, error) 
 	alias := aliasDir + "/" + conf.Name
 	script := "#!/bin/sh\nexec go run " + root + "/cmd/main \"$@\"\n"
 
-	if err := deps.Iodeps.WriteFile(join(path, alias), []byte(script)); err != nil {
+	if err := deps.Iodeps.WriteFile(join(deps, path, alias), []byte(script)); err != nil {
 		return nil, err
 	}
 
@@ -506,7 +500,7 @@ func writeCliAlias(deps *deps.Deps, path string, root string) ([]string, error) 
 func loadProjectConf(deps *deps.Deps, path string) (*projectconf.ProjectConf, error) {
 	rel := config.ProjectName + "Config/project.yaml"
 
-	content, err := deps.Iodeps.ReadFile(join(path, rel))
+	content, err := deps.Iodeps.ReadFile(join(deps, path, rel))
 	if err != nil {
 		return nil, deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
@@ -516,8 +510,8 @@ func loadProjectConf(deps *deps.Deps, path string) (*projectconf.ProjectConf, er
 // join is the project-relative path helper this action needs in place of the
 // SmartIO boundary it does without: "" and "." mean the current directory, so
 // they add no prefix.
-func join(path string, rel string) string {
-	path = strings.TrimSuffix(strings.TrimSpace(path), "/")
+func join(deps *deps.Deps, path string, rel string) string {
+	path = deps.Stringsdeps.TrimSuffix(deps.Stringsdeps.TrimSpace(path), "/")
 	if path == "" || path == "." {
 		return rel
 	}

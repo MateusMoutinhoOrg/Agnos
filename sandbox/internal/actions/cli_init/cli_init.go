@@ -9,10 +9,10 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-// CliInit installs the std and argv deps the CLI layer depends on and renders
+// CliInit installs the std, argv and strings deps the CLI layer depends on and renders
 // the "cli" asset group into the project, then runs build as a follow-up step.
 func CliInit(deps *deps.Deps, path string) error {
-	for _, dep := range []string{"std", "argvdeps"} {
+	for _, dep := range []string{"std", "argvdeps", "stringsdeps"} {
 		if err := depInstallAction.DepInstall(deps, path, dep); err != nil {
 			return err
 		}

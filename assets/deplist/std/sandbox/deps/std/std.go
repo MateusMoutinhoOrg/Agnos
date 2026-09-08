@@ -37,4 +37,13 @@ type Lib struct {
 
 	// Errorf formats an error message and returns it as an error.
 	Errorf func(format string, a ...any) error
+
+	// Sprintf formats a message and returns it as a string. It is the one
+	// formatting entry point the sandbox has: every string it builds out of
+	// values rather than out of concatenation goes through here.
+	Sprintf func(format string, a ...any) string
+
+	// Goos is the name of the operating system the process runs on, in the
+	// spelling the Go toolchain uses ("darwin", "linux", "windows", …).
+	Goos func() string
 }

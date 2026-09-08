@@ -1,8 +1,6 @@
 package build
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -49,7 +47,7 @@ func collectGroupDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]inte
 	var docs []utils.Doc
 
 	for _, file := range files {
-		dir, ok := generatedDocDir(file)
+		dir, ok := generatedDocDir(deps, file)
 		if !ok {
 			continue
 		}
@@ -91,8 +89,8 @@ func collectGroupDocs(deps *deps.Deps, io *smartio.SmartIO, vars map[string]inte
 // generatedDocDir reports the doc directory a group-relative asset path
 // declares, and whether the path is a first-level doc's props.yaml at all
 // ("docs/PublicApi/props.yaml" -> "PublicApi").
-func generatedDocDir(file string) (string, bool) {
-	parts := strings.Split(file, "/")
+func generatedDocDir(deps *deps.Deps, file string) (string, bool) {
+	parts := deps.Stringsdeps.Split(file, "/")
 	if len(parts) != 3 {
 		return "", false
 	}

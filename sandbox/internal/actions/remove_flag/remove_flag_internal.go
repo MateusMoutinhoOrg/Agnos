@@ -16,7 +16,7 @@ func RemoveFlagInternal(deps *deps.Deps, io *smartio.SmartIO, command string, na
 		return err
 	}
 
-	index := utils.FindField(conf.Flags, name)
+	index := utils.FindField(deps, conf.Flags, name)
 	if index < 0 {
 		index = findByIdentifier(conf, name)
 	}
@@ -24,7 +24,7 @@ func RemoveFlagInternal(deps *deps.Deps, io *smartio.SmartIO, command string, na
 		return deps.Std.Errorf("command %q has no flag named %q", command, name)
 	}
 
-	deps.Std.Log("remove-flag removing %s from %s \n", conf.Flags[index].Key, utils.CommandEntriesPath(command))
+	deps.Std.Log("remove-flag removing %s from %s \n", conf.Flags[index].Key, utils.CommandEntriesPath(deps, command))
 
 	conf.Flags = utils.RemoveField(conf.Flags, index)
 	return utils.SaveCommandConf(deps, io, command, conf)

@@ -330,6 +330,18 @@ Value is one name declared in a top-level `const` or `var` block.
 | `Value` | `string` | Value is the assigned expression rendered back to source, "" when the spec assigns nothing (a const repeating the previous expression, or a var declared by type alone). |
 | `Exported` | `bool` | Exported reports whether Name is exported. |
 
+## `deps.Hashdeps`
+
+`sandbox/deps/hashdeps`
+
+### `Lib`
+
+Lib is the hashing library injected whole as the Deps.Hashdeps field.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Sha256Hex` | `func(content []byte) string` | Sha256Hex returns the SHA-256 digest of content, lower-case hexadecimal. It is what every recorded example tree is compared by, so the encoding is part of the golden and may not change. |
+
 ## `deps.Iodeps`
 
 `sandbox/deps/iodeps`
@@ -353,6 +365,9 @@ Lib is the filesystem library injected whole as the Deps.IoLib field. Paths are 
 | `ListDirsRecursively` | `func(path string) []string` | ListDirsRecursively returns every directory at or below path, excluding path itself. |
 | `ListFilesRecursively` | `func(path string) []string` | ListFilesRecursively returns every file at or below path, at any depth. Directories are never reported. |
 | `ListAllRecursively` | `func(path string) []string` | ListAllRecursively returns every entry at or below path, directories and files alike, excluding path itself. |
+| `Join` | `func(elements ...string) string` | Join joins the given path elements with the separator the host operating system uses, cleaning the result. It is the only way the sandbox can build a host path, which is always separator-dependent — unlike the project-relative paths it otherwise passes, which are always slash-separated. |
+| `Dir` | `func(path string) string` | Dir returns path without its last element, the directory holding it. |
+| `UserHomeDir` | `func() (string, error)` | UserHomeDir returns the home directory of the user running the process. The error reports a home directory that could not be determined. |
 
 ## `deps.Rundeps`
 
@@ -437,6 +452,20 @@ Lib is the JSON/YAML codec injected whole as the Deps.Serializables field: const
 | `SerializeToJson` | `func(data *SerializibleObject) string` |
 | `SerializeToYaml` | `func(data *SerializibleObject) string` |
 
+## `deps.Sortdeps`
+
+`sandbox/deps/sortdeps`
+
+### `Lib`
+
+Lib is the sorting library injected whole as the Deps.Sortdeps field.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Strings` | `func(list []string)` | Strings sorts a slice of strings into increasing order. |
+| `Slice` | `func(slice any, less func(i int, j int) bool)` | Slice sorts slice given the less function, which reports whether the element at index i must sort before the one at index j. The sort is not guaranteed to be stable; use SliceStable when equal elements must keep their original order. |
+| `SliceStable` | `func(slice any, less func(i int, j int) bool)` | SliceStable sorts slice given the less function, keeping equal elements in their original order. |
+
 ## `deps.Std`
 
 `sandbox/deps/std`
@@ -452,3 +481,65 @@ Lib is the runtime library injected whole as the Deps.Std field.
 | `Log` | `func(format string, a ...any) (n int, err error)` | Log writes one formatted progress message to standard error. It is the channel every "… started with path …" notice goes through, so a caller can keep stdout free of log noise, and it is what --quiet turns off. |
 | `Error` | `func(format string, a ...any) (n int, err error)` | Error writes one formatted message to standard error. |
 | `Errorf` | `func(format string, a ...any) error` | Errorf formats an error message and returns it as an error. |
+| `Sprintf` | `func(format string, a ...any) string` | Sprintf formats a message and returns it as a string. It is the one formatting entry point the sandbox has: every string it builds out of values rather than out of concatenation goes through here. |
+| `Goos` | `func() string` | Goos is the name of the operating system the process runs on, in the spelling the Go toolchain uses ("darwin", "linux", "windows", …). |
+
+## `deps.Stringsdeps`
+
+`sandbox/deps/stringsdeps`
+
+### `Lib`
+
+Lib is the text library injected whole as the Deps.Stringsdeps field. The first group of fields is string manipulation, the second is conversion between strings and numbers.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `TrimSpace` | `func(s string) string` | TrimSpace returns s with leading and trailing white space removed. |
+| `Trim` | `func(s string, cutset string) string` | Trim returns s with every leading and trailing character contained in cutset removed. |
+| `TrimLeft` | `func(s string, cutset string) string` | TrimLeft returns s with every leading character contained in cutset removed. |
+| `TrimRight` | `func(s string, cutset string) string` | TrimRight returns s with every trailing character contained in cutset removed. |
+| `TrimPrefix` | `func(s string, prefix string) string` | TrimPrefix returns s without the given leading prefix. When s does not start with prefix, s is returned unchanged. |
+| `TrimSuffix` | `func(s string, suffix string) string` | TrimSuffix returns s without the given trailing suffix. When s does not end with suffix, s is returned unchanged. |
+| `HasPrefix` | `func(s string, prefix string) bool` | HasPrefix reports whether s begins with prefix. |
+| `HasSuffix` | `func(s string, suffix string) bool` | HasSuffix reports whether s ends with suffix. |
+| `Contains` | `func(s string, substr string) bool` | Contains reports whether substr is within s. |
+| `ContainsAny` | `func(s string, chars string) bool` | ContainsAny reports whether any character of chars is within s. |
+| `LastIndex` | `func(s string, substr string) int` | LastIndex returns the index of the last instance of substr in s, or -1 when substr is absent. |
+| `Count` | `func(s string, substr string) int` | Count returns the number of non-overlapping instances of substr in s. When substr is empty it returns one plus the number of runes in s. |
+| `Split` | `func(s string, sep string) []string` | Split slices s into every substring separated by sep. |
+| `Join` | `func(elems []string, sep string) string` | Join concatenates elems, placing sep between consecutive elements. |
+| `Fields` | `func(s string) []string` | Fields slices s around each run of white space, returning the substrings between them. |
+| `FieldsFunc` | `func(s string, f func(rune) bool) []string` | FieldsFunc slices s at each run of runes satisfying f, returning the substrings between them. |
+| `Repeat` | `func(s string, count int) string` | Repeat returns count copies of s concatenated. |
+| `ReplaceAll` | `func(s string, old string, new string) string` | ReplaceAll returns s with every non-overlapping instance of old replaced by new. |
+| `ToUpper` | `func(s string) string` | ToUpper returns s with every letter mapped to its upper case. |
+| `ToLower` | `func(s string) string` | ToLower returns s with every letter mapped to its lower case. |
+| `Quote` | `func(s string) string` | Quote returns s as a double-quoted Go string literal, escaping what the Go syntax requires. |
+| `Atoi` | `func(s string) (int, error)` | Atoi parses s as a decimal integer. The error reports a string that is not one. |
+| `ParseInt` | `func(s string, base int, bit_size int) (int64, error)` | ParseInt parses s as an integer in the given base with the given bit size. The error reports a string that is not one. |
+| `ParseFloat` | `func(s string, bit_size int) (float64, error)` | ParseFloat parses s as a floating-point number of the given bit size. The error reports a string that is not one. |
+| `FormatInt` | `func(value int64, base int) string` | FormatInt returns the string representation of value in the given base. |
+| `FormatFloat` | `func(value float64, format byte, precision int, bit_size int) string` | FormatFloat returns the string representation of value, formatted according to the format byte, the precision and the bit size — the same three controls the standard library takes. |
+
+## `deps.Templatedeps`
+
+`sandbox/deps/templatedeps`
+
+### `Lib`
+
+Lib is the template engine injected whole as the Deps.Templatedeps field.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Render` | `func(props RenderProps) (string, error)` | Render parses one template source and executes it over the given vars, returning the result. The error reports a source that does not parse or an execution that failed — a native function returning an error included. |
+
+### `RenderProps`
+
+RenderProps is the whole input of one render.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | Name is the template name, used in error messages only. |
+| `Source` | `string` | Source is the template text to parse and execute. |
+| `Vars` | `any` | Vars is the value the template renders over, reached as `.`. |
+| `Funcs` | `map[string]any` | Funcs are the native functions the template may call, by the name each is registered under. A value must be a function the engine accepts: one return value, or one return value and an error. |

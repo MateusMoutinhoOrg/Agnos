@@ -1,9 +1,6 @@
 package dep_remove
 
 import (
-	"sort"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/depsversionconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -31,7 +28,7 @@ func DepRemoveInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep st
 		io.RemoveDir(file)
 	}
 
-	for _, dir := range ancestorDirs(files) {
+	for _, dir := range ancestorDirs(deps, files) {
 		if len(io.ListAll(dir)) == 0 {
 			io.RemoveDir(dir)
 		}
@@ -69,21 +66,21 @@ func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) er
 
 // ancestorDirs returns every directory that contains one of the given files,
 // deepest first, so an emptied child is removed before its parent is tested.
-func ancestorDirs(files []string) []string {
+func ancestorDirs(deps *deps.Deps, files []string) []string {
 	seen := map[string]bool{}
 	var dirs []string
 	for _, file := range files {
-		parts := strings.Split(file, "/")
+		parts := deps.Stringsdeps.Split(file, "/")
 		for i := 1; i < len(parts); i++ {
-			dir := strings.Join(parts[:i], "/")
+			dir := deps.Stringsdeps.Join(parts[:i], "/")
 			if !seen[dir] {
 				seen[dir] = true
 				dirs = append(dirs, dir)
 			}
 		}
 	}
-	sort.Slice(dirs, func(i, j int) bool {
-		return strings.Count(dirs[i], "/") > strings.Count(dirs[j], "/")
+	deps.Sortdeps.Slice(dirs, func(i, j int) bool {
+		return deps.Stringsdeps.Count(dirs[i], "/") > deps.Stringsdeps.Count(dirs[j], "/")
 	})
 	return dirs
 }

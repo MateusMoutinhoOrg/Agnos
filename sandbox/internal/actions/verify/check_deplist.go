@@ -1,8 +1,6 @@
 package verify
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -32,11 +30,11 @@ func CheckDeplist(deps *deps.Deps, io *smartio.SmartIO, module string) []string 
 
 	for _, dep := range io.ListDirs(deplistDir) {
 		for _, asset := range io.ListFilesRecursively(dep) {
-			target := strings.TrimPrefix(asset, dep+"/")
+			target := deps.Stringsdeps.TrimPrefix(asset, dep+"/")
 			if !io.IsFile(target) {
 				continue
 			}
-			violations = append(violations, checkDeplistAsset(io, asset, target, module)...)
+			violations = append(violations, checkDeplistAsset(deps, io, asset, target, module)...)
 		}
 	}
 
@@ -46,7 +44,7 @@ func CheckDeplist(deps *deps.Deps, io *smartio.SmartIO, module string) []string 
 // checkDeplistAsset compares one rendered asset with the file it installs
 // over. A target that is absent from this project is not a violation: a dep
 // this project does not use has nothing here to drift from.
-func checkDeplistAsset(io *smartio.SmartIO, asset string, target string, module string) []string {
+func checkDeplistAsset(deps *deps.Deps, io *smartio.SmartIO, asset string, target string, module string) []string {
 	source, err := io.ReadFile(asset)
 	if err != nil {
 		return []string{asset + " could not be read"}
@@ -57,7 +55,7 @@ func checkDeplistAsset(io *smartio.SmartIO, asset string, target string, module 
 		return []string{target + " could not be read"}
 	}
 
-	if strings.ReplaceAll(string(source), moduleVar, module) == string(installed) {
+	if deps.Stringsdeps.ReplaceAll(string(source), moduleVar, module) == string(installed) {
 		return nil
 	}
 

@@ -1,8 +1,6 @@
 package update_tests
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -20,7 +18,7 @@ import (
 // The name is required. Without it the command is `exec-test --update` under
 // another spelling, and one golden at a time is the whole of it.
 func UpdateTest(deps *deps.Deps, path string, name string) error {
-	if strings.TrimSpace(name) == "" {
+	if deps.Stringsdeps.TrimSpace(name) == "" {
 		return deps.Std.Errorf("update-test: an example name is required (rewrite every golden with `exec-test --update`)")
 	}
 

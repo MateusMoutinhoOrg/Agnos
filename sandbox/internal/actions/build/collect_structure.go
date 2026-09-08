@@ -1,8 +1,6 @@
 package build
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -41,7 +39,7 @@ func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, e
 	labels := make([]string, len(nodes))
 	width := 0
 	for index, node := range nodes {
-		labels[index] = strings.Repeat(structureIndent, node.Depth) + node.Label
+		labels[index] = deps.Stringsdeps.Repeat(structureIndent, node.Depth) + node.Label
 		if len(labels[index]) > width {
 			width = len(labels[index])
 		}
@@ -50,7 +48,7 @@ func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, e
 	entries := make([]StructureEntry, 0, len(nodes))
 	for index, node := range nodes {
 		entries = append(entries, StructureEntry{
-			Line: structureLine(labels[index], width, node),
+			Line: structureLine(deps, labels[index], width, node),
 		})
 	}
 
@@ -61,10 +59,10 @@ func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, e
 // item's description, marking a generated file with the "(gen)" prefix every
 // page of the docs uses for one. An item with no description is just its
 // label, with no trailing spaces to diff against.
-func structureLine(label string, width int, node utils.StructureNode) string {
+func structureLine(deps *deps.Deps, label string, width int, node utils.StructureNode) string {
 	description := node.Description
 	if node.Gen {
-		description = strings.TrimSpace("(gen) " + description)
+		description = deps.Stringsdeps.TrimSpace("(gen) " + description)
 	}
 
 	if description == "" {
@@ -72,5 +70,5 @@ func structureLine(label string, width int, node utils.StructureNode) string {
 	}
 
 	padding := width - len(label) + structureGap
-	return label + strings.Repeat(" ", padding) + description
+	return label + deps.Stringsdeps.Repeat(" ", padding) + description
 }

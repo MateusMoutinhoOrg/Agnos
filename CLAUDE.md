@@ -97,7 +97,8 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 (reaches OS)    (closed)       (wires them)
 ```
 
-- **`sandbox/`** — the closed core. Imports nothing outside `sandbox/` and no OS packages.
+- **`sandbox/`** — the closed core. Outside `deps/`, it imports only `sandbox/` packages — the
+  stdlib included, so text, sorting, hashing and templating come from `deps.<Contract>` too.
   `api/` holds contracts only, `deps/` holds dependency contracts (stdlib imports only),
   `binds/` holds one function file per `api/` file, `internal/` holds the logic.
 - **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<x>/` exports

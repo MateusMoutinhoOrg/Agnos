@@ -6,10 +6,10 @@ import (
 
 func BindMethods(deps *deps.Deps, conf *ModuleConf) {
 	conf.AddRequire = func(require string) {
-		addRequire(conf, require)
+		addRequire(deps, conf, require)
 	}
 	conf.RemoveRequire = func(module string) {
-		removeRequire(conf, module)
+		removeRequire(deps, conf, module)
 	}
 	conf.Render = func() string {
 		return Render(deps, conf)

@@ -1,8 +1,6 @@
 package verify
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -34,7 +32,7 @@ func CheckAdapters(deps *deps.Deps, io *smartio.SmartIO) []string {
 	}
 
 	for _, dir := range io.ListDirs("adapters") {
-		name := lastSegment(dir)
+		name := lastSegment(deps, dir)
 		if !contains(adaptersAllowedDirs, name) {
 			violations = append(violations, "adapters/ contains unexpected directory "+name+
 				" (allowed: availables, libs)")
@@ -42,12 +40,12 @@ func CheckAdapters(deps *deps.Deps, io *smartio.SmartIO) []string {
 	}
 
 	for _, file := range io.ListFiles("adapters") {
-		violations = append(violations, "adapters/ contains unexpected file "+lastSegment(file)+
+		violations = append(violations, "adapters/ contains unexpected file "+lastSegment(deps, file)+
 			" (adapters/ may hold only the availables and libs directories)")
 	}
 
 	violations = append(violations, checkAdapterBinders(deps, io)...)
-	violations = append(violations, checkAdapterCoverage(io)...)
+	violations = append(violations, checkAdapterCoverage(deps, io)...)
 
 	return violations
 }
@@ -76,7 +74,7 @@ func checkAdapterBinders(deps *deps.Deps, io *smartio.SmartIO) []string {
 // that does not parse is reported by CheckContracts only for the contract
 // trees, so here an unparsable file simply carries no binder.
 func hasBinder(deps *deps.Deps, io *smartio.SmartIO, lib string) bool {
-	for _, file := range goFilesUnder(io, lib) {
+	for _, file := range goFilesUnder(deps, io, lib) {
 		content, err := io.ReadFile(file)
 		if err != nil {
 			continue
@@ -110,23 +108,23 @@ func isBinder(function goimportsdeps.Function) bool {
 // mentioning its Deps field. The field name is the title-cased contract
 // directory, the same spelling sandbox/deps/deps.go is generated with, and a
 // binder fills it either whole or field by field — both mention it.
-func checkAdapterCoverage(io *smartio.SmartIO) []string {
+func checkAdapterCoverage(deps *deps.Deps, io *smartio.SmartIO) []string {
 	var violations []string
 
 	if !io.IsDir(adapterLibsDir) || !io.IsDir("sandbox/deps") {
 		return violations
 	}
 
-	bound := adapterSources(io)
+	bound := adapterSources(deps, io)
 
 	for _, contract := range io.ListDirs("sandbox/deps") {
-		name := lastSegment(contract)
+		name := lastSegment(deps, contract)
 		if len(name) == 0 {
 			continue
 		}
-		field := strings.ToUpper(name[:1]) + name[1:]
+		field := deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
 
-		if strings.Contains(bound, "deps."+field) {
+		if deps.Stringsdeps.Contains(bound, "deps."+field) {
 			continue
 		}
 
@@ -140,16 +138,16 @@ func checkAdapterCoverage(io *smartio.SmartIO) []string {
 
 // adapterSources concatenates every Go source under adapters/libs, so one
 // scan answers the question for all contracts at once.
-func adapterSources(io *smartio.SmartIO) string {
-	var sources strings.Builder
+func adapterSources(deps *deps.Deps, io *smartio.SmartIO) string {
+	sources := ""
 
-	for _, file := range goFilesUnder(io, adapterLibsDir) {
+	for _, file := range goFilesUnder(deps, io, adapterLibsDir) {
 		content, err := io.ReadFile(file)
 		if err != nil {
 			continue
 		}
-		sources.Write(content)
+		sources += string(content)
 	}
 
-	return sources.String()
+	return sources
 }

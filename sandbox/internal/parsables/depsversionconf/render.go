@@ -1,8 +1,6 @@
 package depsversionconf
 
 import (
-	"sort"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -13,7 +11,7 @@ func Render(deps *deps.Deps, conf *DepsVersionConf) string {
 	for name := range conf.Deps {
 		names = append(names, name)
 	}
-	sort.Strings(names)
+	deps.Sortdeps.Strings(names)
 
 	for _, name := range names {
 		obj.AddItemToObject(name, conf.Deps[name])

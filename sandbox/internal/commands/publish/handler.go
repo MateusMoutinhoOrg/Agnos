@@ -1,11 +1,6 @@
 package publish
 
 import (
-	"fmt"
-	"os"
-	"path/filepath"
-	"regexp"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
@@ -32,11 +27,8 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 			return api.ExitFailure
 		}
 
-		re := regexp.MustCompile(`(?m)^version:\s*([^\s]+)`)
-		match := re.FindStringSubmatch(string(content))
-		if len(match) > 1 {
-			releaseName = match[1]
-		} else {
+		releaseName = versionOf(deps, string(content))
+		if releaseName == "" {
 			deps.Std.Error("could not find version in %s and no --release-name provided\n", rel)
 			return api.ExitFailure
 		}
@@ -60,10 +52,9 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	}
 
 	deps.Std.Printf("Gathering compiled binaries...\n")
-	releaseDir := filepath.Join(entries.Path, "release")
-	entriesInfo, err := os.ReadDir(releaseDir)
-	if err != nil {
-		deps.Std.Error("could not read release directory: %s\n", err.Error())
+	releaseDir := deps.Iodeps.Join(entries.Path, "release")
+	if !deps.Iodeps.IsDir(releaseDir) {
+		deps.Std.Error("could not read release directory: %s\n", releaseDir)
 		return api.ExitFailure
 	}
 
@@ -72,15 +63,11 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		args = append(args, "--draft")
 	}
 
-	args = append(args, "--title", fmt.Sprintf("Release %s", releaseName))
+	args = append(args, "--title", deps.Std.Sprintf("Release %s", releaseName))
 
 	// Default notes can be added, or leave to gh defaults
 
-	for _, e := range entriesInfo {
-		if !e.IsDir() {
-			args = append(args, filepath.Join(releaseDir, e.Name()))
-		}
-	}
+	args = append(args, deps.Iodeps.ListFiles(releaseDir)...)
 
 	deps.Std.Printf("Creating release %s with gh...\n", releaseName)
 	result, err := deps.Rundeps.Run(rundeps.RunProps{
@@ -100,4 +87,21 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 
 	deps.Std.Printf("Release %s created and published successfully!\n", releaseName)
 	return api.ExitOk
+}
+
+// versionOf reads the `version:` field out of a project.yaml, returning "" when
+// the file declares none. The whole file is scanned line by line rather than
+// parsed: publish runs before the config is otherwise needed, and the one field
+// it wants is a plain `key: value` at the start of a line.
+func versionOf(deps *deps.Deps, content string) string {
+	for _, line := range deps.Stringsdeps.Split(content, "\n") {
+		if !deps.Stringsdeps.HasPrefix(line, "version:") {
+			continue
+		}
+		fields := deps.Stringsdeps.Fields(deps.Stringsdeps.TrimPrefix(line, "version:"))
+		if len(fields) > 0 {
+			return fields[0]
+		}
+	}
+	return ""
 }

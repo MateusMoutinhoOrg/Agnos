@@ -1,8 +1,6 @@
 package moduleconf
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -15,26 +13,26 @@ func New(deps *deps.Deps, content string) (*ModuleConf, error) {
 		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	lines := strings.Split(content, "\n")
+	lines := deps.Stringsdeps.Split(content, "\n")
 	inRequireBlock := false
 	for _, line := range lines {
-		trimmed := strings.TrimSpace(line)
-		if trimmed == "" || strings.HasPrefix(trimmed, "//") {
+		trimmed := deps.Stringsdeps.TrimSpace(line)
+		if trimmed == "" || deps.Stringsdeps.HasPrefix(trimmed, "//") {
 			continue
 		}
 
-		if strings.HasPrefix(trimmed, "module ") {
-			module = strings.TrimSpace(strings.TrimPrefix(trimmed, "module "))
-		} else if strings.HasPrefix(trimmed, "go ") {
-			goversion = strings.TrimSpace(strings.TrimPrefix(trimmed, "go "))
-		} else if strings.HasPrefix(trimmed, "require (") {
+		if deps.Stringsdeps.HasPrefix(trimmed, "module ") {
+			module = deps.Stringsdeps.TrimSpace(deps.Stringsdeps.TrimPrefix(trimmed, "module "))
+		} else if deps.Stringsdeps.HasPrefix(trimmed, "go ") {
+			goversion = deps.Stringsdeps.TrimSpace(deps.Stringsdeps.TrimPrefix(trimmed, "go "))
+		} else if deps.Stringsdeps.HasPrefix(trimmed, "require (") {
 			inRequireBlock = true
 		} else if trimmed == ")" && inRequireBlock {
 			inRequireBlock = false
 		} else if inRequireBlock {
 			requires = append(requires, trimmed)
-		} else if strings.HasPrefix(trimmed, "require ") {
-			req := strings.TrimSpace(strings.TrimPrefix(trimmed, "require "))
+		} else if deps.Stringsdeps.HasPrefix(trimmed, "require ") {
+			req := deps.Stringsdeps.TrimSpace(deps.Stringsdeps.TrimPrefix(trimmed, "require "))
 			requires = append(requires, req)
 		}
 	}

@@ -1,8 +1,6 @@
 package build
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -11,11 +9,11 @@ import (
 
 // projectNameConst title-cases the configured project name for use as the
 // generated config.ProjectName constant (which names the <X>Config/ dir).
-func projectNameConst(name string) string {
+func projectNameConst(deps *deps.Deps, name string) string {
 	if len(name) == 0 {
 		return config.ProjectName
 	}
-	return strings.ToUpper(name[:1]) + name[1:]
+	return deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
 }
 
 func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
@@ -50,7 +48,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	if hasCli {
 		helpVars := map[string]interface{}{
 			"Module":      module_conf.Module,
-			"ProjectName": projectNameConst(project_conf.Name),
+			"ProjectName": projectNameConst(deps, project_conf.Name),
 		}
 		if err := GenerateHelpEntriesYaml(deps, io, helpVars); err != nil {
 			return err
@@ -111,7 +109,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	if err != nil {
 		return err
 	}
-	docs = MergeDocs(docs, generated_docs)
+	docs = MergeDocs(deps, docs, generated_docs)
 
 	if err := GenerateSubdocIndexes(deps, io, docs); err != nil {
 		return err
@@ -121,22 +119,22 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Module":            module_conf.Module,
 		"Name":              project_conf.Name,
 		"Version":           project_conf.Version,
-		"ProjectName":       projectNameConst(project_conf.Name),
+		"ProjectName":       projectNameConst(deps, project_conf.Name),
 		"ConfigDir":         config.ProjectName + "Config",
 		"StructureConfFile": utils.StructureConfFile,
 		"HasDeps":           hasDeps,
 		"HasCli":            hasCli,
 		"HasAssets":         hasAssets,
-		"Binds":             CollectBinds(io),
-		"Constructors":      CollectConstructors(io),
-		"DepsLibs":          CollectDepsLibs(io),
-		"AdapterLibs":       CollectAdapterLibs(io),
+		"Binds":             CollectBinds(deps, io),
+		"Constructors":      CollectConstructors(deps, io),
+		"DepsLibs":          CollectDepsLibs(deps, io),
+		"AdapterLibs":       CollectAdapterLibs(deps, io),
 		"CliExamples":       utils.CollectExamples(deps, io, utils.ExampleCliSide),
 		"LibExamples":       utils.CollectExamples(deps, io, utils.ExampleLibSide),
 		"Commands":          commands,
 		"CommandDocs":       command_docs,
 		"Themes":            themes_conf.Themes,
-		"DocIndex":          CollectDocIndex(docs, themes_conf.Themes),
+		"DocIndex":          CollectDocIndex(deps, docs, themes_conf.Themes),
 		"PublicApi":         public_api,
 		"Structure":         structure,
 		"DepsApi":           deps_api,

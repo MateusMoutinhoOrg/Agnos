@@ -1,10 +1,6 @@
 package commandconf
 
 import (
-	"sort"
-	"strconv"
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
@@ -75,7 +71,7 @@ func readFieldCollection(deps *deps.Deps, item *serializibles.SerializibleObject
 		return readFieldsFromArray(deps, item)
 	}
 	if item.IsObject() {
-		return readFieldsFromObject(item)
+		return readFieldsFromObject(deps, item)
 	}
 	return []Field{}, nil
 }
@@ -93,8 +89,8 @@ func readFieldsFromArray(deps *deps.Deps, arr *serializibles.SerializibleObject)
 			continue
 		}
 
-		field := readFieldEntry(entry)
-		field.Key = fieldKey(entry, field.Identifiers)
+		field := readFieldEntry(deps, entry)
+		field.Key = fieldKey(deps, entry, field.Identifiers)
 		if field.Key == "" {
 			return nil, deps.Std.Errorf("flags/args entry #%d needs a name (or a -- identifier)", i)
 		}
@@ -104,12 +100,12 @@ func readFieldsFromArray(deps *deps.Deps, arr *serializibles.SerializibleObject)
 	return fields, nil
 }
 
-func readFieldsFromObject(obj *serializibles.SerializibleObject) ([]Field, error) {
+func readFieldsFromObject(deps *deps.Deps, obj *serializibles.SerializibleObject) ([]Field, error) {
 	keys, err := obj.GetKeys()
 	if err != nil {
 		return nil, err
 	}
-	sort.Strings(keys)
+	deps.Sortdeps.Strings(keys)
 
 	fields := make([]Field, 0, len(keys))
 	for _, key := range keys {
@@ -117,7 +113,7 @@ func readFieldsFromObject(obj *serializibles.SerializibleObject) ([]Field, error
 		if item == nil || !item.IsObject() {
 			continue
 		}
-		field := readFieldEntry(item)
+		field := readFieldEntry(deps, item)
 		field.Key = key
 		fields = append(fields, field)
 	}
@@ -127,7 +123,7 @@ func readFieldsFromObject(obj *serializibles.SerializibleObject) ([]Field, error
 
 // readFieldEntry parses the attributes common to both shapes; the caller
 // assigns Key.
-func readFieldEntry(item *serializibles.SerializibleObject) Field {
+func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Field {
 	field := Field{
 		Identifiers: readStringArray(item, "identifiers"),
 		Examples:    readStringArray(item, "examples"),
@@ -146,7 +142,7 @@ func readFieldEntry(item *serializibles.SerializibleObject) Field {
 
 	if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
 		field.HasDefault = true
-		field.Default = anyToString(default_item)
+		field.Default = anyToString(deps, default_item)
 	}
 
 	// `required` is meaningless for a boolean (absent means false) or for a
@@ -162,17 +158,17 @@ func readFieldEntry(item *serializibles.SerializibleObject) Field {
 // fieldKey resolves the generated struct field name for a sequence entry:
 // an explicit `name`, else the first long `--identifier` with its dashes
 // stripped, else the first identifier.
-func fieldKey(entry *serializibles.SerializibleObject, identifiers []string) string {
+func fieldKey(deps *deps.Deps, entry *serializibles.SerializibleObject, identifiers []string) string {
 	if name := readString(entry, "name"); name != "" {
 		return name
 	}
 	for _, id := range identifiers {
-		if strings.HasPrefix(id, "--") {
-			return strings.TrimLeft(id, "-")
+		if deps.Stringsdeps.HasPrefix(id, "--") {
+			return deps.Stringsdeps.TrimLeft(id, "-")
 		}
 	}
 	for _, id := range identifiers {
-		return strings.TrimLeft(id, "-")
+		return deps.Stringsdeps.TrimLeft(id, "-")
 	}
 	return ""
 }
@@ -262,7 +258,7 @@ func readStringArray(obj *serializibles.SerializibleObject, key string) []string
 
 // anyToString renders a scalar yaml value as the string that will be baked
 // into the generated Go literal source.
-func anyToString(item *serializibles.SerializibleObject) string {
+func anyToString(deps *deps.Deps, item *serializibles.SerializibleObject) string {
 	if item.IsString() {
 		value, _ := item.GetString()
 		return value
@@ -275,11 +271,11 @@ func anyToString(item *serializibles.SerializibleObject) string {
 	}
 	if item.IsInt() {
 		value, _ := item.GetInt()
-		return strconv.FormatInt(value, 10)
+		return deps.Stringsdeps.FormatInt(value, 10)
 	}
 	if item.IsFloat() {
 		value, _ := item.GetFloat()
-		return strconv.FormatFloat(value, 'g', -1, 64)
+		return deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
 	}
 	return ""
 }

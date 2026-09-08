@@ -6,7 +6,7 @@ tree:
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
     - file: docs/DepList/doc.md
-      sha: c95e4b70a1880a1180db218b2c1d93ce4c200c3944ac5d6843279b1bc413e5d8
+      sha: f389ed30d4696943d00d987390cb6fb3e9488d8d39f17657c51a0374bdb92cac
     - file: docs/DepList/props.yaml
       sha: 0fe62c1dd4cd79a6c6b436e14164cd1178f4920df752872535decdb93bdb33e5
     - file: docs/EntriesYaml/doc.md
@@ -34,7 +34,7 @@ tree:
     - file: docs/Requirements/props.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: 055286d78c41afb16d7d42a9f786250033bbaf0d9b93941cf400417f11f3a9ba
+      sha: a9325c9e5a66d5f6586a4c3068e5b026e10d34cb2a58731b75bfed90b95d429e
     - file: docs/Rules/props.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md

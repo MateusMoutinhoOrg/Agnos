@@ -1,8 +1,6 @@
 package smartio
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -10,11 +8,11 @@ import (
 // value is handed to the real filesystem. It is idempotent: a path that is
 // already under Root is returned unchanged, so a listing result fed back into
 // another SmartIO call is never prefixed twice.
-func rootedPath(io *SmartIO, path string) string {
+func rootedPath(deps *deps.Deps, io *SmartIO, path string) string {
 	if io.Root == "" {
 		return path
 	}
-	if path == io.Root || strings.HasPrefix(path, io.Root+"/") {
+	if path == io.Root || io.deps.Stringsdeps.HasPrefix(path, io.Root+"/") {
 		return path
 	}
 	return io.Root + "/" + path
@@ -23,24 +21,24 @@ func rootedPath(io *SmartIO, path string) string {
 // unrootedPath is the inverse of rootedPath: it strips io.Root back off a
 // path the filesystem returned, so callers only ever see project-relative
 // paths.
-func unrootedPath(io *SmartIO, path string) string {
+func unrootedPath(deps *deps.Deps, io *SmartIO, path string) string {
 	if io.Root == "" {
 		return path
 	}
 	if path == io.Root {
 		return ""
 	}
-	if strings.HasPrefix(path, io.Root+"/") {
+	if io.deps.Stringsdeps.HasPrefix(path, io.Root+"/") {
 		return path[len(io.Root)+1:]
 	}
 	return path
 }
 
 // unrootedPaths maps unrootedPath over a slice.
-func unrootedPaths(io *SmartIO, paths []string) []string {
+func unrootedPaths(deps *deps.Deps, io *SmartIO, paths []string) []string {
 	out := make([]string, 0, len(paths))
 	for _, p := range paths {
-		out = append(out, unrootedPath(io, p))
+		out = append(out, unrootedPath(deps, io, p))
 	}
 	return out
 }
@@ -65,9 +63,9 @@ func filterIgnored(io *SmartIO, paths []string) []string {
 
 // isPendingRemoval checks if a path (or any of its parents) has been
 // scheduled for removal in the current transaction.
-func isPendingRemoval(io *SmartIO, path string) bool {
+func isPendingRemoval(deps *deps.Deps, io *SmartIO, path string) bool {
 	for _, removed := range io.PendingRemoveDirs {
-		if path == removed || strings.HasPrefix(path, removed+"/") {
+		if path == removed || io.deps.Stringsdeps.HasPrefix(path, removed+"/") {
 			return true
 		}
 	}
@@ -86,10 +84,10 @@ func isPendingCreate(io *SmartIO, path string) bool {
 }
 
 // filterPendingRemoved removes entries that are under a pending removal directory.
-func filterPendingRemoved(io *SmartIO, paths []string) []string {
+func filterPendingRemoved(deps *deps.Deps, io *SmartIO, paths []string) []string {
 	var result []string
 	for _, p := range paths {
-		if !isPendingRemoval(io, p) {
+		if !isPendingRemoval(deps, io, p) {
 			result = append(result, p)
 		}
 	}

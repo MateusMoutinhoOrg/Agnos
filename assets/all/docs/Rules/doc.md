@@ -27,7 +27,9 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 ## Layers
 
-- `sandbox/` is closed: it imports nothing outside `sandbox/` and no OS package. **(verify)**
+- `sandbox/` is closed: outside `sandbox/deps/`, a file there imports only `sandbox/` packages —
+  the stdlib included. A capability from outside (io, text, sorting, hashing, templating) is
+  restated as a contract under `sandbox/deps/` and reached as `deps.<Contract>`. **(verify)**
 - `sandbox/` holds only `api`, `binds`, `deps`, `internal` and `new.go`. **(verify)**
 - `sandbox/api/*` imports only `sandbox/api`. **(verify)**
 - `sandbox/deps/*` imports only the stdlib and `sandbox/deps`. **(verify)**
@@ -61,8 +63,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Only `CommandHandler(deps *deps.Deps, entries *Entries) int` is exported. `Entries` is
   generated from `entries.yaml` (flags first, then args, in declaration order), already typed,
   defaulted and range-checked.
-- Import nothing outside `sandbox/`. Every effect goes through `deps.<Contract>` — see
-  [PublicApi](../PublicApi/doc.md).
+- Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
+  through `deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
 - Return `api.ExitOk` or `api.ExitFailure`, never `api.ExitUsage`: the dispatch rejects bad
   input before the handler runs.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.

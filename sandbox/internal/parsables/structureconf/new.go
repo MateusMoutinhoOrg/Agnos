@@ -1,8 +1,6 @@
 package structureconf
 
 import (
-	"sort"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
@@ -78,7 +76,7 @@ func parseItems(deps *deps.Deps, node *serializibles.SerializibleObject, parent 
 		items = append(items, item)
 	}
 
-	sortItems(items)
+	sortItems(deps, items)
 	return items, nil
 }
 
@@ -145,8 +143,8 @@ func parseItem(deps *deps.Deps, item_specs *serializibles.SerializibleObject, na
 
 // sortItems orders siblings the way the tree renders them: by `order`, then by
 // name. An item with no `order` comes after every ordered one.
-func sortItems(items []Item) {
-	sort.SliceStable(items, func(i, j int) bool {
+func sortItems(deps *deps.Deps, items []Item) {
+	deps.Sortdeps.SliceStable(items, func(i, j int) bool {
 		left, right := items[i], items[j]
 		if left.HasOrder != right.HasOrder {
 			return left.HasOrder

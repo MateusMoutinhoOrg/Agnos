@@ -1,15 +1,13 @@
 package smartio
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/pathreplacerconf"
 )
 
-func joinPath(base string, name string) string {
-	if strings.HasSuffix(base, "/") || strings.HasSuffix(base, "\\") {
+func joinPath(deps *deps.Deps, base string, name string) string {
+	if deps.Stringsdeps.HasSuffix(base, "/") || deps.Stringsdeps.HasSuffix(base, "\\") {
 		return base + name
 	}
 	return base + "/" + name
@@ -18,11 +16,11 @@ func joinPath(base string, name string) string {
 // normalizeRoot collapses the spellings of "the current directory" ("", ".",
 // "./") to "" so rootedPath adds no prefix, and strips a trailing slash from
 // every other value so joins are uniform.
-func normalizeRoot(path string) string {
+func normalizeRoot(deps *deps.Deps, path string) string {
 	if path == "" || path == "." || path == "./" {
 		return ""
 	}
-	for strings.HasSuffix(path, "/") {
+	for deps.Stringsdeps.HasSuffix(path, "/") {
 		path = path[:len(path)-1]
 	}
 	return path
@@ -30,13 +28,14 @@ func normalizeRoot(path string) string {
 
 func New(deps *deps.Deps, path string, projectName string) *SmartIO {
 	io := &SmartIO{
-		Root:         normalizeRoot(path),
+		Root:         normalizeRoot(deps, path),
+		deps:         deps,
 		Transactions: make(map[string][]byte),
 	}
 
-	configDir := joinPath(path, projectName+"Config")
+	configDir := joinPath(deps, path, projectName+"Config")
 
-	ignorePath := joinPath(configDir, "ignore.yaml")
+	ignorePath := joinPath(deps, configDir, "ignore.yaml")
 	if deps.Iodeps.Exist(ignorePath) && deps.Iodeps.IsFile(ignorePath) {
 		content, err := deps.Iodeps.ReadFile(ignorePath)
 		if err == nil {
@@ -53,7 +52,7 @@ func New(deps *deps.Deps, path string, projectName string) *SmartIO {
 		io.Ignore = ignorableconf.NewEmpty(deps)
 	}
 
-	replacersPath := joinPath(configDir, "paths.yaml")
+	replacersPath := joinPath(deps, configDir, "paths.yaml")
 	if deps.Iodeps.Exist(replacersPath) && deps.Iodeps.IsFile(replacersPath) {
 		content, err := deps.Iodeps.ReadFile(replacersPath)
 		if err == nil {

@@ -1,8 +1,6 @@
 package dep_list
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -20,7 +18,7 @@ func DepListInternal(deps *deps.Deps, io *smartio.SmartIO, path string) ([]strin
 	seen := map[string]bool{}
 	deplist := []string{}
 	for _, file := range files {
-		name := strings.Split(file, "/")[0]
+		name := deps.Stringsdeps.Split(file, "/")[0]
 		if name == "" || seen[name] {
 			continue
 		}

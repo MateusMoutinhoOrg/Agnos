@@ -13,15 +13,15 @@ import (
 func CollectDepsApi(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, error) {
 
 	var contracts []map[string]any
-	for _, dir := range collectLibDirs(io, "sandbox/deps") {
+	for _, dir := range collectLibDirs(deps, io, "sandbox/deps") {
 
 		var files []map[string]any
-		for _, file := range goFilesOf(io, "sandbox/deps/"+dir["Name"]) {
+		for _, file := range goFilesOf(deps, io, "sandbox/deps/"+dir["Name"]) {
 			parsed, err := parseGoFile(deps, io, file)
 			if err != nil {
 				return nil, err
 			}
-			files = append(files, fileData(file, parsed))
+			files = append(files, fileData(deps, file, parsed))
 		}
 
 		contracts = append(contracts, map[string]any{

@@ -1,8 +1,6 @@
 package build
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
@@ -37,7 +35,7 @@ func RunRuntime(deps *deps.Deps, path string, runtime string) error {
 	}
 
 	for _, step := range steps {
-		command := step.Program + " " + strings.Join(step.Args, " ")
+		command := step.Program + " " + deps.Stringsdeps.Join(step.Args, " ")
 		deps.Std.Log("runtime %s: %s \n", runtime, command)
 
 		result, err := deps.Rundeps.Run(rundeps.RunProps{

@@ -1,8 +1,6 @@
 package set_command
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -22,13 +20,13 @@ func SetCommandInternal(deps *deps.Deps, io *smartio.SmartIO, props api.CommandP
 	}
 
 	changed := false
-	if help := strings.TrimSpace(props.Help); help != "" {
+	if help := deps.Stringsdeps.TrimSpace(props.Help); help != "" {
 		conf.Help, changed = help, true
 	}
-	if category := strings.TrimSpace(props.Category); category != "" {
+	if category := deps.Stringsdeps.TrimSpace(props.Category); category != "" {
 		conf.Category, changed = category, true
 	}
-	if long := strings.TrimSpace(props.LongDescription); long != "" {
+	if long := deps.Stringsdeps.TrimSpace(props.LongDescription); long != "" {
 		conf.LongDescription, changed = long, true
 	}
 	if props.Hidden {
@@ -47,7 +45,7 @@ func SetCommandInternal(deps *deps.Deps, io *smartio.SmartIO, props api.CommandP
 		return deps.Std.Errorf("set-command: nothing to change (pass --help, --category, --long-description, --hidden, --visible, --identifier or --example)")
 	}
 
-	deps.Std.Log("set-command updating %s \n", utils.CommandEntriesPath(props.Command))
+	deps.Std.Log("set-command updating %s \n", utils.CommandEntriesPath(deps, props.Command))
 
 	return utils.SaveCommandConf(deps, io, props.Command, conf)
 }

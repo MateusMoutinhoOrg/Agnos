@@ -20,7 +20,7 @@ import (
 // The project path is therefore joined here rather than at the SmartIO
 // boundary.
 func ExecTest(deps *deps.Deps, props api.ExecTestProps) error {
-	if !deps.Iodeps.IsDir(join(props.Path, utils.ExamplesDir)) {
+	if !deps.Iodeps.IsDir(join(deps, props.Path, utils.ExamplesDir)) {
 		return deps.Std.Errorf("exec-test: %s has no %s/ directory (create one with add-cli-example / add-lib-example)",
 			props.Path, utils.ExamplesDir)
 	}

@@ -1,8 +1,6 @@
 package start
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
@@ -31,7 +29,7 @@ func goVersion(deps *deps.Deps, path string) string {
 		return fallbackGoVersion
 	}
 
-	version := strings.TrimPrefix(strings.TrimSpace(result.Output), "go")
+	version := deps.Stringsdeps.TrimPrefix(deps.Stringsdeps.TrimSpace(result.Output), "go")
 	if version == "" {
 		return fallbackGoVersion
 	}

@@ -73,4 +73,19 @@ type Lib struct {
 	// ListAllRecursively returns every entry at or below path, directories
 	// and files alike, excluding path itself.
 	ListAllRecursively func(path string) []string
+
+	// Join joins the given path elements with the separator the host
+	// operating system uses, cleaning the result. It is the only way the
+	// sandbox can build a host path, which is always separator-dependent —
+	// unlike the project-relative paths it otherwise passes, which are
+	// always slash-separated.
+	Join func(elements ...string) string
+
+	// Dir returns path without its last element, the directory holding it.
+	Dir func(path string) string
+
+	// UserHomeDir returns the home directory of the user running the
+	// process. The error reports a home directory that could not be
+	// determined.
+	UserHomeDir func() (string, error)
 }

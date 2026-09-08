@@ -1,8 +1,6 @@
 package pathreplacerconf
 
 import (
-	"strings"
-
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -18,7 +16,7 @@ func BindMethods(deps *deps.Deps, conf *PathReplacerConf) {
 	conf.Format = func(path string) string {
 		result := path
 		for _, entry := range conf.Entries {
-			result = strings.ReplaceAll(result, entry.Original, entry.Replacement)
+			result = deps.Stringsdeps.ReplaceAll(result, entry.Original, entry.Replacement)
 		}
 		return result
 	}

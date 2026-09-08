@@ -8,7 +8,7 @@ func ReadFile(deps *deps.Deps, io *SmartIO, path string) ([]byte, error) {
 		return nil, err
 	}
 
-	if isPendingRemoval(io, p) {
+	if isPendingRemoval(deps, io, p) {
 		return nil, deps.Std.Errorf("file %q does not exist", p)
 	}
 
@@ -16,5 +16,5 @@ func ReadFile(deps *deps.Deps, io *SmartIO, path string) ([]byte, error) {
 		return content, nil
 	}
 
-	return deps.Iodeps.ReadFile(rootedPath(io, p))
+	return deps.Iodeps.ReadFile(rootedPath(deps, io, p))
 }
