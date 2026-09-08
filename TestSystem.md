@@ -1,71 +1,54 @@
 # Refatoracao do Sistema de Teste
 
-Nota de trabalho, nao doc. Deve ser removida no commit que terminar a implementacao.
+Nota de trabalho, nao doc. Remover no commit que terminar a implementacao.
 
-## Estado atual
+## Problema
 
-`exec-test` roda cada `examples/{cli,lib}/<name>/`, remove o `TestDir`, executa
-`example.sh` / `example.go` e grava em `result.yaml`: a saida mesclada, o exit code e o
-sha256 de **todo** arquivo do `TestDir` (`exec_tests_internal.go`, `treeOf`). `--update`
-reescreve todos os goldens de uma vez.
+`exec-test` grava em `result.yaml` a saida mesclada, o exit code e o sha256 de **todo**
+arquivo do `TestDir` (`exec_tests_internal.go`, `treeOf`). Daí:
 
-Dois problemas, independentes:
+1. A tree do golden guarda o projeto inteiro (~35 arquivos por exemplo): uma mudanca em
+   template de `start` quebra os 48 goldens de uma vez.
+2. `--update` regenera todos os goldens juntos, entao o que quebrou nao aparece.
 
-1. `--update` regenera tudo, entao o que quebrou nao aparece.
-2. A tree do golden guarda o projeto inteiro (~35 arquivos por exemplo), entao uma
-   mudanca em template de `start` quebra os 48 goldens de uma vez.
+A saida ja e desacoplada (preambulo roda com `-q`; ver `examples/cli/add-command/example.sh`).
+A tree tem que seguir a mesma ideia: **o exemplo declara o que e asserido**.
 
-A saida ja e desacoplada: o preambulo roda com `-q`, entao `cli-output` so guarda a saida
-do comando sob teste (ver `examples/cli/add-command/example.sh`). A tree tem que seguir a
-mesma ideia: **o exemplo declara o que e asserido**.
+## 1. AssertDir
 
-## 1. update-test
+Nome: **`AssertDir`** — subconjunto do `TestDir` sobre o qual se assere. Nao `GoldenDir`:
+o golden e o `result.yaml` (expectativa versionada), o `AssertDir` e resultado real,
+git-ignored, regerado a cada run.
 
-Comando novo `update-test <name>`, casca fina sobre a mesma acao `exec_tests` com
-`update = true`. Nao reimplementar a execucao: a logica continua em
-`ExecTestInternal(deps, path, only, update)`.
+- O exemplo escreve so no `TestDir`; no fim **copia** para `AssertDir/` os arquivos ligados
+  ao teste. Copia, nao move: o `TestDir` fica intacto para inspecao e nenhum passo seguinte
+  perde arquivo.
+- `exec-test` remove `AssertDir` antes de cada run, como ja faz com `TestDir`.
+- A tree do `result.yaml` passa a ser a do `AssertDir`.
+- `exec-test` **falha se o `AssertDir` estiver vazio** — senao esquecer uma copia faz o
+  exemplo passar sem assertar nada.
+- `assets/templates/example_cli.sh` e `assets/templates/example_lib.go` nascem com o par de
+  copia escrito. Os dois lados copiam o mesmo conjunto, ou o cross-check cli-vs-lib quebra
+  por motivo alheio ao codigo sob teste.
+- `.gitignore`: `AssertDir` no lugar de `AssignatureDir` (orfao, ja adicionado).
 
-- `<name>` e **obrigatorio** — sem nome e erro de uso. Nome + side, como
-  `--only` / `add-cli-example` / `remove-cli-example`; nao caminho.
-- Antes de sobrescrever, imprime o diff do golden: paths que entraram, sairam ou mudaram
-  de sha, e a saida antiga vs a nova. E isso que faz ver onde estao os erros; separar o
-  comando sozinho nao resolve nada.
-- `exec-test --update` continua existindo para o caso de mudanca de shape em massa, mas
-  deixa de ser o caminho normal.
+Descartado: `exec-test` gravar so o que difere de um baseline — "qual e o baseline" fica
+ambiguo quando o preambulo varia (`start` / `start + cli-init` / `start + deps-init`).
 
-## 2. AssertDir
+## 2. update-test
 
-Nome: **`AssertDir`** — e o subconjunto do `TestDir` sobre o qual se assere. Nao chamar de
-`GoldenDir`: o golden e o `result.yaml` (a expectativa gravada, versionada); o `AssertDir` e
-resultado real, git-ignored, regerado a cada run. Misturar os dois nomes apaga a distincao
-de que o sistema inteiro depende. Nada de `AssignatureDir` / `ComparationDir`: nao sao
-palavras em ingles e o doc anterior usava duas para a mesma coisa.
+Comando `update-test <name>`, casca fina sobre a acao `exec_tests` com `update = true`.
+A execucao continua em `ExecTestInternal(deps, path, only, update)`.
 
-Mecanica:
-
-- O exemplo continua escrevendo so no `TestDir`. No fim, `example.sh` / `example.go`
-  **copia** para `AssertDir/` os arquivos ligados aquele teste. Copia, nao move: o
-  `TestDir` fica intacto para inspecao quando um exemplo falha, e nenhum comando do
-  exemplo corre o risco de perder um arquivo que um passo seguinte ainda usa.
-- `exec-test` remove `AssertDir` antes de cada run, como ja faz com `TestDir` — senao
-  sobra da run anterior passa como resultado da atual.
-- A tree do `result.yaml` passa a ser a do `AssertDir`, nao a do `TestDir`.
-- `exec-test` **falha se o `AssertDir` estiver vazio**. Sem isso, esquecer uma copia faz o
-  exemplo passar sem assertar nada — o acoplamento cai junto com a cobertura, em silencio.
-- Os templates `assets/templates/example_cli.sh` e `assets/templates/example_lib.go`
-  nascem com o par de copia ja escrito. Os dois lados tem que copiar o mesmo conjunto, ou
-  o cross-check cli-vs-lib quebra por um motivo que nao e o codigo sob teste.
-- `AssertDir` entra no `.gitignore` no lugar de `AssignatureDir` (que ja foi adicionado e
-  esta orfao). So os shas do `result.yaml` sao versionados.
-
-Descartado: fazer o `exec-test` gravar sozinho so o que difere de um baseline. Nao exige
-bookkeeping por exemplo, mas "qual e o baseline" fica ambiguo quando o preambulo varia
-(`start` vs `start + cli-init` vs `start + deps-init`), e este repo prefere explicito a
-magico.
+- `<name>` obrigatorio (sem nome = erro de uso). Nome + side, como `--only` /
+  `add-cli-example` / `remove-cli-example`; nao caminho.
+- Antes de sobrescrever, imprime o diff do golden: paths que entraram, sairam ou mudaram de
+  sha, e saida antiga vs nova. Sem o diff o comando separado nao resolve nada.
+- `exec-test --update` continua, para mudanca de shape em massa; deixa de ser o caminho normal.
 
 ## Propagacao
 
-"sha256 de todo arquivo do TestDir" esta escrito em varios lugares e muda tudo junto:
+"sha256 de todo arquivo do TestDir" aparece em varios lugares e muda junto:
 
 - `sandbox/internal/commands/help/handler.go` — long-descriptions de `exec-test`,
   `remove-cli-example`, `remove-lib-example`
@@ -75,5 +58,5 @@ magico.
 - `sandbox/internal/utils/examples.go` — constante nova ao lado de `ExampleTestDir`
 - `remove_cli_example` / `remove_lib_example` — apagar tambem o `AssertDir`
 
-Ordem: `AssertDir` primeiro (muda todos os goldens de uma vez, com
-`exec-test --update`), `update-test` depois.
+Ordem: `AssertDir` primeiro (muda todos os goldens de uma vez, com `exec-test --update`),
+`update-test` depois.
