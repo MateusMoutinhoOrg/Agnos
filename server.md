@@ -95,42 +95,91 @@ Editar também: `assets/all/docs/DepList/doc.md` (uma linha na tabela) e
 
 `sandbox/internal/routes/<name>/route.yaml`. Escrito por `add-route` e reescrito por
 `add-field` / `remove-field` / `set-route` — **nunca à mão**, exatamente como `entries.yaml`.
-Diretório em snake_case para rota kebab-case (`create-user` -> `create_user/`).
+Diretório em snake_case para rota kebab-case (`get-user` -> `get_user/`).
+
+A declaração é lida de fora para dentro: **`paths`** diz qual URL casa, **`headers`** e
+**`params`** dizem o que é lido dela, **`body`** diz o que vem no corpo. Não existe chave
+`path` escrita à mão — o caminho registrado no mux é a concatenação, na ordem, dos segmentos
+de `paths`, e o collector é quem o deriva.
+
+Um segmento de `paths` é de um de dois tipos, distinguidos pela chave presente:
+
+| Segmento | Chave | Papel |
+|---|---|---|
+| **trigger** | `identifier` | literal na URL. O primeiro `identifier` da rota é o gatilho que identifica o handler — é ele que nomeia a rota em `docs/Routes` |
+| **captura** | `name` | segmento variável, vira campo de `Entries` e chega ao handler já convertido |
 
 ```yaml
-identifiers: ["create-user"]
+# sandbox/internal/routes/article/route.yaml -> GET /articles/{article-name}
+method: GET
+paths:
+  - identifier: "articles"
+  - name: "article-name"
+    type: string
+    required: true
+category: Articles
+help: Read one article by its slug
+examples:
+  - "curl -X GET http://[IP_ADDRESS]/articles/python-beginners-guide"
+```
+
+O mesmo `name` pode ser declarado em mais de uma origem — o campo de `Entries` é único e, em
+runtime, vence a **primeira origem declarada** que trouxer valor (`paths`, depois `headers`,
+depois `params`, na ordem do arquivo). `required` é satisfeito por qualquer uma delas; o
+tipo tem de ser o mesmo em todas (**(verify)**).
+
+```yaml
+# sandbox/internal/routes/get_user/route.yaml -> GET /get-user-by-username
+method: GET
+paths:
+  - identifier: "get-user-by-username"
+headers:
+  - name: "username"
+    type: string
+    required: true
+params:
+  # username está declarado nas duas origens: vale o header, que vem primeiro,
+  # e a query só responde quando o header não veio
+  - name: "username"
+    type: string
+    required: true
+examples:
+  - "curl -X GET http://[IP_ADDRESS]/get-user-by-username -H 'username: mateus'"
+```
+
+Exemplo completo, com corpo e schema:
+
+```yaml
+# sandbox/internal/routes/create_user/route.yaml -> POST /users/{tenant}/create
 method: POST
-path: /users/{tenant}
+paths:
+  - identifier: "users"
+  - name: "tenant"
+    type: string
+    required: true
+  - identifier: "create"
 category: Users
 help: Create a user under a tenant
 long-description: |
   Cria um usuário. Falha com 409 quando o e-mail já existe.
 examples:
-  - "curl -X POST localhost:8080/users/acme -d '{\"email\":\"a@b.c\",\"age\":30}'"
+  - "curl -X POST localhost:8080/users/acme/create -d '{\"email\":\"a@b.c\",\"age\":30}'"
 hidden: false
 headers:
   - name: authorization
-    identifier: Authorization
     description: bearer token
     type: string
     required: true
-  - name: trace-id
-    identifier: X-Trace-Id
+  - name: x-trace-id
     type: string
     default: ""
 params:
-  - name: tenant
-    in: path
-    type: string
-    required: true
   - name: page
-    in: query
     type: int
     default: "1"
     min: 1
     max: 100
   - name: tag
-    in: query
     type: string
     array: true
 body:
@@ -168,23 +217,32 @@ body:
 
 | Chave | Efeito |
 |---|---|
-| `identifiers` | nomes da rota; o primeiro é canônico em `docs/Routes` |
-| `method` | `GET`/`POST`/`PUT`/`PATCH`/`DELETE`/`HEAD`/`OPTIONS`. Obrigatório |
-| `path` | padrão registrado no mux; segmentos `{nome}` exigem um `params` com `in: path` de mesmo nome |
+| `paths` | sequência de segmentos da URL, na ordem. Obrigatória e não vazia; o primeiro `identifier` é o gatilho do handler |
+| `method` | `GET`/`POST`/`PUT`/`PATCH`/`DELETE`/`HEAD`/`OPTIONS`. Opcional, default `GET` |
 | `category`, `help`, `long-description`, `examples`, `hidden` | idêntico a `entries.yaml`; alimenta `docs/Routes` |
 | `headers` | sequência de campos lidos do cabeçalho |
-| `params` | sequência de campos lidos de path/query |
+| `params` | sequência de campos lidos da query string |
 | `body` | descrição do corpo (um objeto, não sequência) |
+
+### Chaves de segmento (`paths`)
+
+| Chave | Efeito |
+|---|---|
+| `identifier` | literal do segmento. Exclui `name` e todas as chaves de campo no mesmo item |
+| `name` | nome do segmento capturado; vira `{name}` no padrão do mux e campo de `Entries` |
+| `type` | `string`\|`boolean`\|`int`\|`float`. Default `string` |
+| `description`, `examples` | documentação, alimenta `docs/Routes` |
+| `min`, `max` | mesmos limites de `entries.yaml` |
+| `required` | sempre `true` num segmento capturado — `false` é erro de **(verify)** |
+
+`array` e `default` são proibidos num segmento: a URL casa ou não casa.
 
 ### Chaves de campo (`headers`, `params`)
 
 Mesmas de `entries.yaml` — `name`, `description`, `examples`, `type` (`string`|`boolean`|
-`int`|`float`), `default`, `required`, `array`, `min`, `max` — mais:
-
-| Chave | Efeito |
-|---|---|
-| `identifier` | grafia externa: nome do header (`X-Trace-Id`) ou do parâmetro na query. Default: `<name>` |
-| `in` | `path` \| `query`. Só em `params`. Um `in: path` é sempre `required` e nunca `array` |
+`int`|`float`), `default`, `required`, `array`, `min`, `max`. O `name` **é** a grafia externa:
+nome do header (casado sem diferenciar maiúsculas) ou chave na query string. `array: true` só
+em `params`, e lê todas as ocorrências da chave.
 
 ### Chaves de `body`
 
@@ -214,12 +272,14 @@ Fora do subconjunto (`$ref`, `oneOf`, `allOf`, `anyOf`, `patternProperties`) -> 
 
 | Arquivo | Conteúdo |
 |---|---|
-| `sandbox/internal/parsables/routeconf/api.go` | `RouteConf`, `Field` (com `Identifier`, `In`), `Body`, `Schema` |
+| `sandbox/internal/parsables/routeconf/api.go` | `RouteConf` (com `Paths []Segment`), `Segment` (`Identifier` ou `Field`), `Field`, `Body`, `Schema` |
 | `sandbox/internal/parsables/routeconf/new.go` | `New(deps, content) (*RouteConf, error)` |
 | `sandbox/internal/parsables/routeconf/new_empty.go` | `NewEmpty(deps) *RouteConf` |
 | `sandbox/internal/parsables/routeconf/bind_methods.go` | `BindMethods` (liga `Render`) |
 | `sandbox/internal/parsables/routeconf/render.go` | `Render` -> volta ao `route.yaml` canônico |
 
+`Segment` é `{Identifier string; Field *Field}` — exatamente um dos dois preenchido; o
+padrão do mux (`RouteConf.Pattern()`) é `/` + os segmentos na ordem, literal ou `{name}`.
 `Schema` é uma árvore recursiva (`Type`, `Properties []SchemaProperty`, `Items *Schema`,
 `Required []string`, bounds com o par valor/`Has…` como em `Field.Min`/`HasMin`).
 `Render` reemite as chaves na ordem canônica — determinismo/idempotência.
@@ -290,8 +350,10 @@ func ServerMain(deps *deps.Deps, props ServeProps) error {
 }
 ```
 
-mais um `handle<GoName>` por rota, que: lê e converte headers -> params -> body; aplica
-defaults; checa `required`, `min`/`max`, `array`; valida `content-type` e `max-bytes`; roda
+mais um `handle<GoName>` por rota, que: lê e converte os segmentos capturados de `paths` ->
+headers -> params -> body, na ordem de declaração e com a primeira origem que traz valor
+vencendo em nomes repetidos; aplica defaults; checa `required`, `min`/`max`, `array`; valida
+`content-type` e `max-bytes`; roda
 `validateSchema` quando há `json-schema`; monta `Entries`; e só então chama
 `routes_<name>.RouteHandler(deps, &entries, res)`. Qualquer falha responde antes, em JSON
 (`{"error": "...", "field": "..."}`), com o status da tabela abaixo, e registra em
@@ -325,7 +387,7 @@ func validateSchema(deps *deps.Deps, schema_json string, body []byte) (*serializ
 
 | Arquivo | Papel |
 |---|---|
-| `sandbox/internal/actions/build/collect_routes.go` | `CollectRoutes(deps, io)`: lê todo `sandbox/internal/routes/<name>/route.yaml` via `routeconf`, devolve `[]map[string]any` (`Name`, `GoName`, `Method`, `Path`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`) — cópia de `collect_commands.go` |
+| `sandbox/internal/actions/build/collect_routes.go` | `CollectRoutes(deps, io)`: lê todo `sandbox/internal/routes/<name>/route.yaml` via `routeconf`, devolve `[]map[string]any` (`Name`, `GoName`, `Method`, `Trigger`, `Path` — derivado de `paths` —, `Segments`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`) — cópia de `collect_commands.go` |
 | `sandbox/internal/actions/build/collect_route_docs.go` | alimenta `docs/Routes` — cópia de `collect_command_docs.go` |
 | `sandbox/internal/actions/build/generate_route_entries.go` | renderiza `assets/templates/route_entries.go` uma vez por rota em `sandbox/internal/routes/<name>/entries.go` |
 | `assets/templates/route_entries.go` | template do `Entries` de uma rota |
@@ -349,10 +411,10 @@ Edições em `sandbox/internal/actions/build/build_internal.go`:
 package create_user
 
 type Entries struct {
+	Tenant        string   // segmentos capturados de `paths`, na ordem declarada
 	Authorization string   // headers, na ordem declarada
-	TraceId       string
-	Tenant        string   // params, na ordem declarada
-	Page          int
+	XTraceId      string
+	Page          int      // params, na ordem declarada
 	Tag           []string
 	Body          Body     // body.type == json com schema de objeto
 }
@@ -398,13 +460,15 @@ Duas camadas por feature, como sempre: `<name>.go` (abre SmartIO, persiste, disp
 | `server_purge/` | `server_purge/` -> `server-purge` | remove os arquivos do grupo `server` + os diretórios `sandbox/internal/server` e `sandbox/internal/routes` inteiros (cópia de `cli_purge`) |
 | `add_route/` | `add_route/` -> `add-route` | escreve `route.yaml` + `handler.go` de uma rota nova (recusa sobrescrever) |
 | `remove_route/` | `remove_route/` -> `remove-route` | apaga o diretório da rota |
-| `set_route/` | `set_route/` -> `set-route` | reescreve as chaves de nível de rota (`method`, `path`, `help`, `category`, `long-description`, `hidden`, `identifiers`, `examples`) |
-| `add_field/` | `add_field/` -> `add-field` | acrescenta um campo em `headers`/`params`/`body`, conforme `--in header\|path\|query\|body` |
+| `set_route/` | `set_route/` -> `set-route` | reescreve as chaves de nível de rota (`method`, `help`, `category`, `long-description`, `hidden`, `examples`) |
+| `add_field/` | `add_field/` -> `add-field` | acrescenta um segmento ou campo, conforme `--in path\|header\|query\|body` |
 | `remove_field/` | `remove_field/` -> `remove-field` | remove um campo declarado |
 
-Um único par `add-field`/`remove-field` (e não um comando por origem) porque header, path,
-query e body diferem só pela origem — `--in` é o seletor. Para `--in body`, `--name` aceita
-caminho pontuado (`address.city`) e cria os objetos intermediários no `json-schema`.
+Um único par `add-field`/`remove-field` (e não um comando por origem) porque path, header,
+query e body diferem só pela origem — `--in` é o seletor. `--in path` acrescenta um segmento
+ao fim de `paths` (ou em `--position`): `--identifier <literal>` para um trigger,
+`--name <nome>` para uma captura. Para `--in body`, `--name` aceita caminho pontuado
+(`address.city`) e cria os objetos intermediários no `json-schema`.
 
 Cada `sandbox/internal/commands/<dir>/` traz `entries.yaml` (à mão, via `add-command` +
 `add-flag`/`add-arg`), `entries.go` (gerado) e `handler.go` (à mão).
@@ -414,9 +478,9 @@ Contratos a acrescentar em `sandbox/api/actions.go` (com doc comment em cada cam
 
 ```go
 type RouteProps struct {
-	Path, Route, Method, RoutePath, Help, Category, LongDescription string
+	Path, Route, Method, Help, Category, LongDescription string
 	Hidden, Visible bool
-	Identifiers, Examples []string
+	Examples []string
 }
 
 type RouteFieldProps struct {
@@ -430,7 +494,7 @@ type RouteFieldProps struct {
 // em Actions:
 ServerInit   func(path string) error
 ServerPurge  func(path string) error
-AddRoute     func(path string, name string, method string, route_path string, help string, category string) error
+AddRoute     func(path string, name string, method string, trigger string, help string, category string) error
 RemoveRoute  func(path string, name string) error
 SetRoute     func(props RouteProps) error
 AddField     func(props RouteFieldProps) error
@@ -446,12 +510,16 @@ Novo arquivo `sandbox/internal/actions/verify/check_routes.go`, com `CheckRoutes
 Regras (nenhuma escrita, uma string por violação):
 
 - todo `sandbox/internal/routes/<name>/` tem `route.yaml`, `entries.go` e `handler.go`
-- `route.yaml` parseia por `routeconf`; `method` é um verbo conhecido; `path` começa com `/`
-- todo `{segmento}` de `path` tem um `params` com `in: path` e mesmo `name`, e vice-versa
-- nenhum par (`method`, `path`) repetido entre rotas
+- `route.yaml` parseia por `routeconf`; `method` é um verbo conhecido
+- `paths` não é vazio, tem ao menos um `identifier`, e cada item traz `identifier` **ou**
+  `name`, nunca os dois; nenhum `identifier` com `/` ou vazio
+- num segmento capturado: `required` só `true`, nada de `array` nem `default`
+- nenhum `name` repetido dentro da mesma origem, e um `name` declarado em mais de uma origem
+  tem o mesmo `type` em todas
+- nenhum par (`method`, padrão derivado de `paths`) repetido entre rotas
 - `json-schema` só com `body.type: json`; só chaves do subconjunto suportado
-- `required`/`default` mutuamente exclusivos; `required` proibido em `boolean`; `array`
-  proibido em `in: path` (mesmas regras de `entries.yaml`)
+- `required`/`default` mutuamente exclusivos; `required` proibido em `boolean` (mesmas regras
+  de `entries.yaml`)
 - `handler.go` exporta `RouteHandler` com a assinatura canônica
 - projeto sem `sandbox/internal/routes/` -> nenhuma violação (mesmo padrão de `CheckStructure`)
 
@@ -488,8 +556,8 @@ Criados só por comando, nunca à mão; `result.yaml` só por `exec-test`/`updat
 
 - `examples/cli/server-init/example.sh` — `start` + `server-init`, copia
   `sandbox/api/server.go`, `sandbox/internal/server/`, `sandbox/internal/routes/health/`
-- `examples/cli/add-route/example.sh` — `add-route` + dois `add-field` (`--in header`,
-  `--in body`), copia o `route.yaml` e o `entries.go` da rota
+- `examples/cli/add-route/example.sh` — `add-route` + três `add-field` (`--in path`,
+  `--in header`, `--in body`), copia o `route.yaml` e o `entries.go` da rota
 - `examples/lib/server-route/example.go` — mesmo resultado pela API, copiando o mesmo conjunto
   (os dois lados de um mesmo nome têm de deixar a mesma árvore)
 
@@ -580,9 +648,9 @@ go build -o release/bootstrap.bin ./cmd/main
 
 ## 13. Decisões e pontos em aberto
 
-- **Casamento de rota no adapter, não no sandbox.** `ServeMux` do Go 1.25 já resolve
-  `{segmento}`; duplicar isso no sandbox seria lógica sem dono. O contrato expõe
-  `GetPathParam`, e só.
+- **Casamento de rota no adapter, não no sandbox.** O collector deriva de `paths` um padrão
+  `/articles/{article-name}`, que o `ServeMux` do Go 1.25 já resolve; duplicar isso no sandbox
+  seria lógica sem dono. O contrato expõe `GetPathParam`, e só.
 - **Schema validado em runtime, struct gerada em build.** A struct sai do `json-schema` no
   `build` (tipagem estática no handler) e o mesmo schema vai canonizado para
   `EntriesSchema`, validado por `jsonschema.go` a cada request. Uma só declaração, dois usos.
