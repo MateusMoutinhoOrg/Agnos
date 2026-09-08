@@ -6,6 +6,7 @@ user_test
 builder
 blackbox
 TestDir
+AssignatureDir
 local_test/
 release/
 user_test.sh
