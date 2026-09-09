@@ -40,6 +40,12 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	hasCli := io.IsDir("sandbox/internal/cli")
 	hasServer := io.IsDir("sandbox/internal/server")
 
+	// hasFront reports the html front layer, whose shared code is
+	// sandbox/internal/pageio — the same test one directory up that hasCli and
+	// hasServer make. The trigger is never assets/frontend/: that tree is the
+	// project's own content and may legitimately be empty.
+	hasFront := io.IsDir("sandbox/internal/pageio")
+
 	// hasAssets reports that the project carries its own agnos asset groups —
 	// it is itself a generator, like agnos. The docs of such a project have to
 	// name its templates and its own bootstrap; every other project has no
@@ -128,7 +134,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
-	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name, generatorName(deps)), GeneratedDocsGroups(hasCli, hasServer))
+	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name, generatorName(deps)), GeneratedDocsGroups(hasCli, hasServer, hasFront))
 	if err != nil {
 		return err
 	}
@@ -149,6 +155,8 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"HasDeps":           hasDeps,
 		"HasCli":            hasCli,
 		"HasServer":         hasServer,
+		"HasFront":          hasFront,
+		"StaticMount":       CollectFrontMount(deps, io),
 		"HasAssets":         hasAssets,
 		"Binds":             CollectBinds(deps, io),
 		"Constructors":      CollectConstructors(deps, io),
@@ -191,6 +199,12 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 			return err
 		}
 		if err := utils.RenderGroup(deps, io, "server", vars); err != nil {
+			return err
+		}
+	}
+
+	if hasFront {
+		if err := utils.RenderGroup(deps, io, "front", vars); err != nil {
 			return err
 		}
 	}

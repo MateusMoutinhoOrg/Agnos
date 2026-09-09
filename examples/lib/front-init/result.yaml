@@ -1,0 +1,15 @@
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndep-install started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep sortdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep serializables \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep serverdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep embeddeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep templatedeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndep-install started with path TestDir dep hashdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nfront-init started with path TestDir \nserver-init started with path TestDir \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+exit-code: 0
+tree:
+    - file: assets/frontend/static/scripts/main.js
+      sha: 092a48d1f45f5024d3307ee1d75af78a0d140b5f81600c2c51c12c0dd7c66a85
+    - file: assets/frontend/static/styles/main.css
+      sha: 735ddf9858cbe7853198c30e4b283a3d6ba2398dc3428765c45676b787d6eeef
+    - file: sandbox/internal/pageio/templates.go
+      sha: ea76f1bea29aef538ae9e1dda7e5e95a70553734d8cfc8fc4584c051d5ef376f
+    - file: sandbox/internal/routes/static/entries.go
+      sha: 862d196f94ff8d8b4510f4fe6b2163926781c1cd9f18e0aa11d64beb3c3754d3
+    - file: sandbox/internal/routes/static/handler.go
+      sha: 9be7acf907cd6ace6abfe19d3dfb25b5afede37c8bf6ab0a0cb46a019d5af143
+    - file: sandbox/internal/routes/static/route.yaml
+      sha: e0d90e91ba5f975a3a541fa0751a752dbfcb3abf6e8b599cc6efefcc1a899a92

@@ -11,6 +11,7 @@ import (
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_flag"
 	add_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_header"
 	add_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_lib_example"
+	add_page "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_page"
 	add_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_param"
 	add_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_route"
 	add_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_segment"
@@ -24,6 +25,8 @@ import (
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_purge"
 	exec_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/exec_test"
+	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_init"
+	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
@@ -35,6 +38,7 @@ import (
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
 	remove_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_header"
 	remove_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_lib_example"
+	remove_page "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_page"
 	remove_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_param"
 	remove_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_route"
 	remove_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_segment"
@@ -98,6 +102,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchAddHeader(deps, verb)
 	case action == "add-lib-example":
 		return dispatchAddLibExample(deps, verb)
+	case action == "add-page":
+		return dispatchAddPage(deps, verb)
 	case action == "add-param":
 		return dispatchAddParam(deps, verb)
 	case action == "add-route":
@@ -124,6 +130,10 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchDepsPurge(deps, verb)
 	case action == "exec-test":
 		return dispatchExecTest(deps, verb)
+	case action == "front-init":
+		return dispatchFrontInit(deps, verb)
+	case action == "front-purge":
+		return dispatchFrontPurge(deps, verb)
 	case action == "help" || action == "--help":
 		return dispatchHelp(deps, verb)
 	case action == "local-install":
@@ -146,6 +156,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchRemoveHeader(deps, verb)
 	case action == "remove-lib-example":
 		return dispatchRemoveLibExample(deps, verb)
+	case action == "remove-page":
+		return dispatchRemovePage(deps, verb)
 	case action == "remove-param":
 		return dispatchRemoveParam(deps, verb)
 	case action == "remove-route":
@@ -1075,6 +1087,77 @@ func dispatchAddLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
 	return add_lib_example.CommandHandler(deps, entries)
 }
 
+func dispatchAddPage(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_page.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if verb.GetOptionsSize([]string{"--trigger"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "trigger", []string{"--trigger"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "trigger", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Trigger = value
+	}
+	if verb.GetOptionsSize([]string{"--title"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "title", []string{"--title"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "title", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Title = value
+	}
+	if verb.GetOptionsSize([]string{"--help"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "help", []string{"--help"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "help", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Help = value
+	}
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_page.CommandHandler(deps, entries)
+}
+
 func dispatchAddParam(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_param.Entries{}
 	if verb.GetOptionsSize([]string{"--route"}) > 0 {
@@ -1772,6 +1855,62 @@ func dispatchExecTest(deps *deps.Deps, verb argvdeps.Parser) int {
 	return exec_test.CommandHandler(deps, entries)
 }
 
+func dispatchFrontInit(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &front_init.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return front_init.CommandHandler(deps, entries)
+}
+
+func dispatchFrontPurge(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &front_purge.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return front_purge.CommandHandler(deps, entries)
+}
+
 func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &help.Entries{}
 	if !checkUnknownFlags(deps, verb) {
@@ -2238,6 +2377,44 @@ func dispatchRemoveLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return remove_lib_example.CommandHandler(deps, entries)
+}
+
+func dispatchRemovePage(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_page.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_page.CommandHandler(deps, entries)
 }
 
 func dispatchRemoveParam(deps *deps.Deps, verb argvdeps.Parser) int {

@@ -20,6 +20,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `add-doc` | create a doc directory under docs/ | [example.sh](../../examples/cli/add-doc/example.sh) |
 | `add-flag` | declare one flag on a command | [example.sh](../../examples/cli/add-flag/example.sh) |
 | `add-lib-example` | create an example under examples/lib/ | [example.sh](../../examples/cli/add-lib-example/example.sh) |
+| `add-page` |  | [example.sh](../../examples/cli/add-page/example.sh) |
 | `add-rest-segment` |  | [example.sh](../../examples/cli/add-rest-segment/example.sh) |
 | `add-route` |  | [example.sh](../../examples/cli/add-route/example.sh) |
 | `build` | regenerate every generated file of a project | [example.sh](../../examples/cli/build/example.sh) |
@@ -31,12 +32,15 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `dep-remove` | uninstall one installed dep | [example.sh](../../examples/cli/dep-remove/example.sh) |
 | `deps-init` | add the dependency layer to a project that has none | [example.sh](../../examples/cli/deps-init/example.sh) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.sh](../../examples/cli/deps-purge/example.sh) |
+| `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
+| `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
 | `remove-arg` | delete one declared positional argument | [example.sh](../../examples/cli/remove-arg/example.sh) |
 | `remove-cli-example` | delete an example of examples/cli/ | [example.sh](../../examples/cli/remove-cli-example/example.sh) |
 | `remove-command` | delete a command and unwire its dispatch | [example.sh](../../examples/cli/remove-command/example.sh) |
 | `remove-doc` | delete a doc directory | [example.sh](../../examples/cli/remove-doc/example.sh) |
 | `remove-flag` | delete one declared flag | [example.sh](../../examples/cli/remove-flag/example.sh) |
 | `remove-lib-example` | delete an example of examples/lib/ | [example.sh](../../examples/cli/remove-lib-example/example.sh) |
+| `remove-page` |  | [example.sh](../../examples/cli/remove-page/example.sh) |
 | `server-init` |  | [example.sh](../../examples/cli/server-init/example.sh) |
 | `set-command` | rewrite the command-level keys of a command | [example.sh](../../examples/cli/set-command/example.sh) |
 | `start` | scaffold a new project | [example.sh](../../examples/cli/start/example.sh) |

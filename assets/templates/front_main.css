@@ -1,0 +1,25 @@
+:root {
+  color-scheme: light dark;
+  --ink: #1a1a19;
+  --ground: #faf9f5;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #f5f4ee;
+    --ground: #1a1a19;
+  }
+}
+
+body {
+  margin: 0;
+  padding: 3rem 1.5rem;
+  background: var(--ground);
+  color: var(--ink);
+  font: 16px/1.6 system-ui, -apple-system, "Segoe UI", sans-serif;
+}
+
+h1 {
+  margin: 0 0 0.5rem;
+  font-size: 1.75rem;
+}

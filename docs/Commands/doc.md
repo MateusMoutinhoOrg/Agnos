@@ -839,6 +839,97 @@ agnos remove-doc HandleReports
 agnos remove-doc PublicApi/api.AddDoc --path ./my-project
 ```
 
+## Front System
+
+### `add-page`
+
+Declare a new html page
+
+```bash
+agnos add-page [--path <path>] [--quiet] [--trigger <trigger>] [--title <title>] [--help <help>] <name>
+```
+
+Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--trigger` | string |  | the literal segment the page answers on, / included (defaults to /<name>) |
+| `--title` | string |  | the <title> the scaffolded page carries (defaults to the page name) |
+| `--help` | string |  | one-line description of the page, for docs/Routes (defaults to one derived from the name) |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the page name (becomes the route, its Go package and the html file) |
+
+```bash
+agnos add-page home --trigger / --title Home
+agnos add-page about --title About
+```
+
+### `front-init`
+
+Add the html front layer to the project
+
+```bash
+agnos front-init [--path <path>] [--quiet]
+```
+
+Installs the deps the front layer needs, renders sandbox/internal/pageio and writes, once, the route serving assets/frontend/static and that tree's skeleton. A project with no server layer is given one first: a page is answered over http.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos front-init
+agnos front-init --path ./my-project
+```
+
+### `front-purge`
+
+Remove the html front layer from the project
+
+```bash
+agnos front-purge [--path <path>] [--quiet]
+```
+
+Removes sandbox/internal/pageio, the static route and the route of every declared page, then rebuilds. assets/frontend/ is left untouched: pages, styles and scripts are hand-written content, so front-init followed by add-page puts the routes back over it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos front-purge
+```
+
+### `remove-page`
+
+Remove an html page
+
+```bash
+agnos remove-page [--path <path>] [--quiet] <name>
+```
+
+Deletes the page's route package and its html template both. A route with no html beside it is not a page: remove-route is the editor for those.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the page to remove |
+
+```bash
+agnos remove-page about
+```
+
 ## Core Commands
 
 ### `build`

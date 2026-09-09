@@ -1,0 +1,14 @@
+category: Front
+help: Serves one file from the embedded static assets
+method: GET
+params:
+    - description: the digest staticref stamped on the url; when it matches the asset the answer is cacheable forever
+      name: sha
+      type: string
+paths:
+    - identifier: /static
+    - array: true
+      description: the asset path under assets/frontend/static, one or more segments
+      name: item
+      required: true
+      type: string

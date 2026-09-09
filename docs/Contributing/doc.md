@@ -24,7 +24,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 
 ## Add a command to agnos
 
-Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
+Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
 
 ```bash
 ./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"
@@ -38,24 +38,28 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 ## Add a layer (cli, server, …)
 
-A layer is an asset group plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one:
+A layer is an asset group plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one. The front layer is the third column: it declares no unit of its own, because a page **is** a route.
 
-| Concept | CLI | Server |
-|---|---|---|
-| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
-| Surface + bind | `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `sandbox/api/server.go`, `sandbox/binds/server.go` |
-| Generated dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` |
-| Declared unit | `commands/<name>/entries.yaml` | `routes/<name>/route.yaml` |
-| Parsable | `parsables/commandconf/` | `parsables/routeconf/` |
-| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` |
-| Per-unit generator | `generate_command_entries.go` | `generate_route_entries.go` |
-| Asset group | `assets/cli/` | `assets/server/` |
-| Build trigger | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` |
-| Verify | `check_sandbox.go` et al | `check_routes.go` |
+| Concept | CLI | Server | Front |
+|---|---|---|---|
+| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) |
+| Surface + bind | `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `sandbox/api/server.go`, `sandbox/binds/server.go` | — (served through the server's) |
+| Generated dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
+| Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` |
+| Declared unit | `commands/<name>/entries.yaml` | `routes/<name>/route.yaml` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
+| Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) |
+| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `collect_front_mount.go` |
+| Per-unit generator | `generate_command_entries.go` | `generate_route_entries.go` | — (`generate_route_entries.go`) |
+| Asset group | `assets/cli/` | `assets/server/` | `assets/front/` |
+| Build trigger | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` | `hasFront := io.IsDir("sandbox/internal/pageio")` |
+| Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` |
+| Verify | `check_sandbox.go` et al | `check_routes.go` | — (`check_routes.go`) |
 
-Both halves of the pair go in `GeneratedDocsGroups`, in the vars map of `build_internal.go`, and in the `{{ if .Has<X> }}` blocks of `assets/all/docs/{Rules,GeneratedFiles,Workflow}/doc.md`. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init` — so there is no intermediate `Persist` and no intermediate `build`.
+Both halves of the pair go in `GeneratedDocsGroups`, in the vars map of `build_internal.go`, and in the `{{ if .Has<X> }}` blocks of `assets/all/docs/{Rules,GeneratedFiles,Workflow}/doc.md`. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` renders assets and writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.
 
-`sandbox/internal/routeio/` exists because `servermain.go` imports every route, so a route cannot import `internal/server` back: shared route code goes in a third package both may import.
+The build trigger is never the content tree: `assets/frontend/` is the project's own and may legitimately be empty, so `hasFront` reads `pageio/`. `hasAssets` stays `assets/all`, so a front project does not read as a generator.
+
+`sandbox/internal/routeio/` exists because `servermain.go` imports every route, so a route cannot import `internal/server` back: shared route code goes in a third package both may import. `sandbox/internal/pageio/` is the same shape one layer up.
 
 ## Add a contract + adapter lib
 
@@ -69,7 +73,7 @@ The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency). Per-call 
 
 ## Add a template or collector
 
-- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `start`. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/all/docs/GeneratedFiles/doc.md`.
+- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `server`, `front`, `start`. A scaffold that renders to a file which is itself a template — `page_html.html`, or any `{{` inside `front_main.js` — escapes its own braces (`{{ "{{ .Title }}" }}`), or the outer render eats them. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/all/docs/GeneratedFiles/doc.md`.
 - Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(deps, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(deps, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
 - Bootstrap twice; the second run must change nothing.
 

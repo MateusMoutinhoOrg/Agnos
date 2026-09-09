@@ -18,11 +18,13 @@ var serverDeps = []string{"std", "stringsdeps", "sortdeps", "serializables", "se
 // only when this project has no cli layer yet.
 const cliDep = "argvdeps"
 
-// ServerInit installs the deps the server layer depends on and renders the
-// "server" asset group into the project, then runs build as a follow-up step.
-// A server needs an entry point that starts it and that entry point is a
-// command, so a project with no cli layer gets one first.
-func ServerInit(deps *deps.Deps, path string) error {
+// InstallDeps installs the contracts the server layer calls into, plus the one
+// the implicit cli-init needs when the project has no cli layer yet.
+//
+// It is exported because a layer that composes ServerInitInternal into its own
+// transaction — front-init does — still has to install this set first: the
+// internal half renders assets and writes nothing to go.mod.
+func InstallDeps(deps *deps.Deps, path string) error {
 	install := serverDeps
 	if !smartio.New(deps, path, config.ProjectName).IsDir(cliDir) {
 		install = append(install, cliDep)
@@ -32,6 +34,18 @@ func ServerInit(deps *deps.Deps, path string) error {
 		if err := depInstallAction.DepInstall(deps, path, dep); err != nil {
 			return err
 		}
+	}
+
+	return nil
+}
+
+// ServerInit installs the deps the server layer depends on and renders the
+// "server" asset group into the project, then runs build as a follow-up step.
+// A server needs an entry point that starts it and that entry point is a
+// command, so a project with no cli layer gets one first.
+func ServerInit(deps *deps.Deps, path string) error {
+	if err := InstallDeps(deps, path); err != nil {
+		return err
 	}
 
 	io := smartio.New(deps, path, config.ProjectName)

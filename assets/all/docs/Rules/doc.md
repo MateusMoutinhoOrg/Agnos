@@ -105,6 +105,27 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A failure is written by `routeio.WriteError` alone, so every route answers one JSON shape.
 
 Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
+{{ end }}{{ if .HasFront }}
+## Pages
+
+- A page is a route with an html template beside it: `assets/frontend/pages/<page>.html` is
+  the whole of what tells one from any other route, and `add-page` / `remove-page` are its
+  editors — `remove-route` refuses a route that has one, so no html is ever orphaned.
+- A page's route and its html are written once and then the project's, `add-page` keeping an
+  html that is already there. Only `sandbox/internal/pageio/` is rewritten by every build, so
+  a fix to the scaffolded route or page reaches a project by
+  `remove-page <p> && add-page <p>`, never on its own.
+- Everything under `assets/frontend/` is hand-written content and survives `front-purge`; the
+  routes reading it do not, because their handlers import `pageio`.
+- A page renders through `pageio.Render` alone, which is what registers `staticref`, `cssref`,
+  `jsref`, `dirref`, `inline` and `include`. A helper pointed at an asset that is not there
+  fails the render, so a dead link is a `500` and never a silent `404`.
+- `pageio.StaticMount` is generated from the `identifier` of the first segment of the `static`
+  route: the mount is declared in one place, and renaming it moves every link.
+- Whoever edits `sandbox/internal/routes/static/handler.go` keeps `safeSegments`: it is the
+  only thing between a caller's path and the rest of the embedded asset tree.
+
+Every helper and every var is in [FrontUsage](../FrontUsage/doc.md).
 {{ end }}
 ## Output channels
 

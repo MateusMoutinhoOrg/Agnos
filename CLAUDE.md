@@ -23,8 +23,9 @@ README and a doc). Start with
 
 `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,LibExamples,PublicApi}/`
 are rendered from `assets/all/docs/` into **every** agnos project, this one included,
-`docs/{CliInstall,CliExamples}/` from `assets/cli/docs/` and
-`docs/{RouteYaml,Routes,ServerUsage}/` from `assets/server/docs/`: editing one means editing that
+`docs/{CliInstall,CliExamples}/` from `assets/cli/docs/`,
+`docs/{RouteYaml,Routes,ServerUsage}/` from `assets/server/docs/` and `docs/FrontUsage/` from
+`assets/front/docs/`: editing one means editing that
 template, and it has to read correctly in a scaffolded project, not only here. Guard a line
 that holds for this repo alone with `{{ if .HasAssets }}`.
 
@@ -114,8 +115,10 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 - **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<x>/` exports
   `Bind(deps *deps.Deps)`; `availables/standard/new.go` is generated from that dir listing.
 - **`assets/`** — every generated file's template. Groups `start`, `all`, `deps`, `cli`,
-  `server` render `assets/<group>/<path>` to `<path>`; `deplist/<dep>/**` is one installable dep;
-  `templates/*` are single-file scaffolds rendered with `utils.RenderTemplateToDest`.
+  `server`, `front` render `assets/<group>/<path>` to `<path>`; `deplist/<dep>/**` is one
+  installable dep; `templates/*` are single-file scaffolds rendered with
+  `utils.RenderTemplateToDest`. A scaffold rendering to a file that is *itself* a template
+  (`page_html.html`) escapes its own braces: `{{ "{{ .Title }}" }}`.
 - **`cmd/main/`** — generated; wires an adapter into the sandbox, holds no logic.
 - **`AgnosConfig/`** — written once by `start`, read by every `build`.
 - **`examples/`** — one directory per example, on the `cli` and the `lib` side; `exec-test` runs
@@ -140,6 +143,17 @@ rendered when `sandbox/internal/server/` exists, exactly as the cli group is ren
 before a handler runs; the body is read on demand by the generated `Entries.ReadBody`.
 `sandbox/internal/routeio/` holds what both `servermain.go` and the routes need, because
 `servermain.go` imports every route and a route may not import it back.
+
+The **front layer** is the third column, and declares no unit of its own: a page **is** a
+route. `sandbox/internal/pageio/` (generated; `Render` plus the `staticref`/`cssref`/`jsref`/
+`dirref`/`inline`/`include` helpers) mirrors `routeio/` and is what `build` reads `hasFront`
+from — never `assets/frontend/`, which is the project's own content and may be empty.
+`assets/front/` is the group, `front-init`/`front-purge` the pair, and a page is
+`routes/<page>/route.yaml` plus `assets/frontend/pages/<page>.html`, written by
+`add-page`/`remove-page`. Both halves are written **once** and are then the project's; only
+`pageio` and `docs/FrontUsage` are rewritten by every build. `pageio.StaticMount` is rendered
+from the first segment of the `static` route's declaration (`collect_front_mount.go`), so
+renaming the mount moves every generated link instead of breaking it in silence.
 
 **SmartIO** (`sandbox/internal/smartio/`) is a transactional filesystem rooted at `--path`.
 Actions pass project-relative paths only; `Root` is joined at the `deps.Iodeps` boundary.
@@ -167,6 +181,10 @@ change a rule there and nowhere else. The ones most easily broken:
   When declaring one of agnos's own flags, never pass a value that is exactly one of
   `add-flag`'s own spellings (`--identifier --example`) — the argv parser counts it as an
   occurrence and pollutes the declaration.
+- A page is a route with `assets/frontend/pages/<page>.html` beside it — that file is the whole
+  of what tells one from any other route. `add-page`/`remove-page` are its editors, and
+  `remove-route` refuses a route that has one. `front-purge` drops the routes (their handlers
+  import `pageio`) and never `assets/frontend/`.
 - Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
   segment is always `required: true`. `array: true` on the last capture makes it take every
   segment left in the path (`[]T`, one or more), and only there. Match order is by specificity

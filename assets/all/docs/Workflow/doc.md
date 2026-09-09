@@ -120,6 +120,44 @@ route and `{{.GeneratorName}} add-segment` / `add-header` / `add-param` / `add-b
 project with no CLI gets one first: a server needs a command that starts it.
 `{{.GeneratorName}} server-purge` removes the layer again.
 {{- end }}
+
+{{ if .HasFront }}
+## Change the page surface
+
+```bash
+{{.GeneratorName}} add-page <name> --trigger /<path> --title "One Line"
+{{.GeneratorName}} remove-page <name>                             # the route and the html both
+```
+
+`add-page` writes the route that answers the page (`route.yaml` + a `handler.go` rendering
+through `pageio`) and `assets/frontend/pages/<name>.html`, then generates `entries.go` and the
+match/handle pair of the dispatch. A page **is** a route, so every editor of
+[RouteYaml](../RouteYaml/doc.md) works on its declaration and [Routes](../Routes/doc.md)
+documents it.
+
+Then write the html, naming assets rather than hardcoding links:
+
+```html
+{{"{{ dirref \"styles\" }}"}}
+<h1>{{"{{ .Title }}"}}</h1>
+```
+
+Every `{{"{{ .Field }}"}}` of the page is one exported field of the `pageVars` struct in its
+handler, so a new variable is a compile error until it is declared.
+[FrontUsage](../FrontUsage/doc.md) is the whole recipe.
+{{- else }}
+## Add the front layer
+
+```bash
+{{.GeneratorName}} front-init                  # pageio, the static route, assets/frontend/
+{{.GeneratorName}} add-page home --trigger /   # a page answering GET /
+{{.Name}} start-server             # serves it
+```
+
+From there `{{.GeneratorName}} add-page <name>` declares a page and `remove-page` drops it,
+html included. A project with no server layer gets one first: a page is answered over http.
+`{{.GeneratorName}} front-purge` removes the layer again, leaving `assets/frontend/` alone.
+{{- end }}
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No
@@ -202,6 +240,9 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 {{- end }}
 {{- if .HasServer }}
 | `sandbox/internal/routes/<name>/handler.go` | a route answers something |
+{{- end }}
+{{- if .HasFront }}
+| `assets/frontend/pages/<page>.html`, `assets/frontend/static/**` | a page looks like something |
 {{- end }}
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/binds/<x>.go` | a new api surface |

@@ -152,16 +152,20 @@ assets:
       order: 5
       dir: true
       description: rendered when sandbox/internal/server/ exists
-    deplist/<dep>:
+    front:
       order: 6
+      dir: true
+      description: rendered when sandbox/internal/pageio/ exists
+    deplist/<dep>:
+      order: 7
       dir: true
       description: one installable dep, mirroring the target layout
     templates:
-      order: 7
-      dir: true
-      description: single-file scaffolds (entries.go, command_*, route_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
-    depsversion.yaml:
       order: 8
+      dir: true
+      description: single-file scaffolds (entries.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+    depsversion.yaml:
+      order: 9
       description: "<dep>: <module>@<version>"
 cmd/main/main.go:
   order: 5

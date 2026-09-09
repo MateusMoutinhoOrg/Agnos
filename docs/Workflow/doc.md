@@ -66,6 +66,19 @@ From there `agnos add-route <name> --trigger /<path> --help "..." --category "..
 route and `agnos add-segment` / `add-header` / `add-param` / `add-body-field` its fields. A
 project with no CLI gets one first: a server needs a command that starts it.
 `agnos server-purge` removes the layer again.
+
+
+## Add the front layer
+
+```bash
+agnos front-init                  # pageio, the static route, assets/frontend/
+agnos add-page home --trigger /   # a page answering GET /
+agnos start-server             # serves it
+```
+
+From there `agnos add-page <name>` declares a page and `remove-page` drops it,
+html included. A project with no server layer gets one first: a page is answered over http.
+`agnos front-purge` removes the layer again, leaving `assets/frontend/` alone.
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No

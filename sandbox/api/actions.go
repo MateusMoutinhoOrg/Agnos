@@ -172,6 +172,19 @@ type RouteBodyFieldProps struct {
 	NoAdditionalProperties bool
 }
 
+// PageProps describes one html page to declare: the project directory, the
+// name the page carries (it becomes the route, its Go package and the html
+// file), the literal path segment it answers on ("" defaults to /<name>), the
+// <title> the scaffolded html carries ("" defaults to the name) and the
+// one-line help its route.yaml is declared with ("" derives one from the name).
+type PageProps struct {
+	Path    string
+	Name    string
+	Trigger string
+	Title   string
+	Help    string
+}
+
 // DocProps describes one doc to create under docs/. Name is the doc's
 // directory, optionally nested under its parent ("PublicApi/api.Actions").
 // Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs
@@ -302,6 +315,23 @@ type Actions struct {
 	// RemoveBodyField deletes one property from a route's body
 	// json-schema.
 	RemoveBodyField func(path string, route string, name string) error
+
+	// FrontInit adds the html front layer (sandbox/internal/pageio, the
+	// route serving assets/frontend/static and that tree's skeleton) to a
+	// project that has none, installing the server layer first when it is
+	// missing.
+	FrontInit func(path string) error
+
+	// FrontPurge removes the front layer, the static route and the route of
+	// every declared page, leaving assets/frontend/ untouched.
+	FrontPurge func(path string) error
+
+	// AddPage declares a new html page: the route that answers it and the
+	// html template under assets/frontend/pages/ that it renders.
+	AddPage func(props PageProps) error
+
+	// RemovePage deletes one page, its route and its html template both.
+	RemovePage func(path string, name string) error
 
 	// AddDoc creates one doc directory under docs/, with its props.yaml and
 	// a doc.md to fill in.

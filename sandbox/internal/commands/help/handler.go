@@ -247,6 +247,24 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{"add-page"},
+		Category:        "Front System",
+		Description:     "Declare a new html page",
+		LongDescription: "Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge.",
+		Examples:        []string{"add-page home --trigger / --title Home", "add-page about --title About"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{}, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{"--trigger"}, Description: "the literal segment the page answers on, / included (defaults to /<name>)", Examples: []string{}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--title"}, Description: "the <title> the scaffolded page carries (defaults to the page name)", Examples: []string{}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--help"}, Description: "one-line description of the page, for docs/Routes (defaults to one derived from the name)", Examples: []string{}, Type: "string", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the page name (becomes the route, its Go package and the html file)", Examples: []string{}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{"add-param"},
 		Category:        "Server System",
 		Description:     "Declare a query parameter on a route",
@@ -454,6 +472,32 @@ var helpCommands = []helpCommand{
 		Args: []helpField{},
 	},
 	{
+		Identifiers:     []string{"front-init"},
+		Category:        "Front System",
+		Description:     "Add the html front layer to the project",
+		LongDescription: "Installs the deps the front layer needs, renders sandbox/internal/pageio and writes, once, the route serving assets/frontend/static and that tree's skeleton. A project with no server layer is given one first: a page is answered over http.",
+		Examples:        []string{"front-init", "front-init --path ./my-project"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{},
+	},
+	{
+		Identifiers:     []string{"front-purge"},
+		Category:        "Front System",
+		Description:     "Remove the html front layer from the project",
+		LongDescription: "Removes sandbox/internal/pageio, the static route and the route of every declared page, then rebuilds. assets/frontend/ is left untouched: pages, styles and scripts are hand-written content, so front-init followed by add-page puts the routes back over it.",
+		Examples:        []string{"front-purge"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{},
+	},
+	{
 		Identifiers:     []string{"help", "--help"},
 		Category:        "Info",
 		Description:     "Display help for a command",
@@ -616,6 +660,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the example directory under examples/lib/", Examples: []string{"remove-lib-example start"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"remove-page"},
+		Category:        "Front System",
+		Description:     "Remove an html page",
+		LongDescription: "Deletes the page's route package and its html template both. A route with no html beside it is not a page: remove-route is the editor for those.",
+		Examples:        []string{"remove-page about"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "name", Description: "the page to remove", Examples: []string{}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

@@ -1,0 +1,21 @@
+category: Front System
+examples:
+    - front-init
+    - front-init --path ./my-project
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Add the html front layer to the project
+identifiers:
+    - front-init
+long-description: 'Installs the deps the front layer needs, renders sandbox/internal/pageio and writes, once, the route serving assets/frontend/static and that tree''s skeleton. A project with no server layer is given one first: a page is answered over http.'

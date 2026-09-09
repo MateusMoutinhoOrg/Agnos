@@ -11,6 +11,7 @@ import (
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
 	addHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_header"
 	addLibExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_lib_example"
+	addPageAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_page"
 	addParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_param"
 	addRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_route"
 	addSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_segment"
@@ -24,6 +25,8 @@ import (
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
+	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
+	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
 	removeBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_body_field"
 	removeCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_cli_example"
@@ -32,6 +35,7 @@ import (
 	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_flag"
 	removeHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_header"
 	removeLibExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_lib_example"
+	removePageAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_page"
 	removeParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_param"
 	removeRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_route"
 	removeSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_segment"
@@ -141,6 +145,18 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	}
 	sandbox.Actions.RemoveBodyField = func(path string, route string, name string) error {
 		return removeBodyFieldAction.RemoveBodyField(deps, path, route, name)
+	}
+	sandbox.Actions.FrontInit = func(path string) error {
+		return frontInitAction.FrontInit(deps, path)
+	}
+	sandbox.Actions.FrontPurge = func(path string) error {
+		return frontPurgeAction.FrontPurge(deps, path)
+	}
+	sandbox.Actions.AddPage = func(props api.PageProps) error {
+		return addPageAction.AddPage(deps, props)
+	}
+	sandbox.Actions.RemovePage = func(path string, name string) error {
+		return removePageAction.RemovePage(deps, path, name)
 	}
 	sandbox.Actions.AddDoc = func(props api.DocProps) error {
 		return addDocAction.AddDoc(deps, props)

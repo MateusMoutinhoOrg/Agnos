@@ -1,0 +1,15 @@
+cli-output: "front-purge started with path TestDir \nfront-purge kept assets/frontend/pages: pages, styles and scripts are yours \nbuild started with path TestDir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: assets/frontend/pages/home.html
+      sha: a642c3b25062f971d6d28625d24303c6feedf96134f2c1c753a441943fbd4b4b
+    - file: assets/frontend/static/scripts/main.js
+      sha: 092a48d1f45f5024d3307ee1d75af78a0d140b5f81600c2c51c12c0dd7c66a85
+    - file: assets/frontend/static/styles/main.css
+      sha: 735ddf9858cbe7853198c30e4b283a3d6ba2398dc3428765c45676b787d6eeef
+    - file: sandbox/internal/routes/health/entries.go
+      sha: 8b1b5f50403c9f2adba70764447c3f9ba4b531620a9096d115e88d5c25ec9131
+    - file: sandbox/internal/routes/health/handler.go
+      sha: 08504db57f8d3caecb146f5c7cfc9336a34f25f7789ef59f0c3bde1b63f1c356
+    - file: sandbox/internal/routes/health/route.yaml
+      sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da

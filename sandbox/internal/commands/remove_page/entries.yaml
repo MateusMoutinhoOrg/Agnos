@@ -1,0 +1,25 @@
+args:
+    - description: the page to remove
+      name: name
+      required: true
+      type: string
+category: Front System
+examples:
+    - remove-page about
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Remove an html page
+identifiers:
+    - remove-page
+long-description: 'Deletes the page''s route package and its html template both. A route with no html beside it is not a page: remove-route is the editor for those.'

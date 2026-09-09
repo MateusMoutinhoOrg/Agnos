@@ -189,6 +189,18 @@ RouteBodyFieldProps describes one property of a route's body json-schema. Name i
 | `AdditionalProperties` | `bool` |
 | `NoAdditionalProperties` | `bool` |
 
+### `PageProps`
+
+PageProps describes one html page to declare: the project directory, the name the page carries (it becomes the route, its Go package and the html file), the literal path segment it answers on ("" defaults to /<name>), the <title> the scaffolded html carries ("" defaults to the name) and the one-line help its route.yaml is declared with ("" derives one from the name).
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+| `Trigger` | `string` |
+| `Title` | `string` |
+| `Help` | `string` |
+
 ### `DocProps`
 
 DocProps describes one doc to create under docs/. Name is the doc's directory, optionally nested under its parent ("PublicApi/api.Actions"). Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs to: required on a first-level doc, forbidden on a sub-doc.
@@ -238,6 +250,10 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetBody` | `func(props RouteBodyProps) error` | SetBody rewrites the body keys of one route's route.yaml. |
 | `AddBodyField` | `func(props RouteBodyFieldProps) error` | AddBodyField declares one property of a route's body json-schema, at the dotted path props.Name. |
 | `RemoveBodyField` | `func(path string, route string, name string) error` | RemoveBodyField deletes one property from a route's body json-schema. |
+| `FrontInit` | `func(path string) error` | FrontInit adds the html front layer (sandbox/internal/pageio, the route serving assets/frontend/static and that tree's skeleton) to a project that has none, installing the server layer first when it is missing. |
+| `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer, the static route and the route of every declared page, leaving assets/frontend/ untouched. |
+| `AddPage` | `func(props PageProps) error` | AddPage declares a new html page: the route that answers it and the html template under assets/frontend/pages/ that it renders. |
+| `RemovePage` | `func(path string, name string) error` | RemovePage deletes one page, its route and its html template both. |
 | `AddDoc` | `func(props DocProps) error` | AddDoc creates one doc directory under docs/, with its props.yaml and a doc.md to fill in. |
 | `RemoveDoc` | `func(path string, name string) error` | RemoveDoc deletes one doc directory and everything under it. |
 | `AddCliExample` | `func(path string, name string) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |

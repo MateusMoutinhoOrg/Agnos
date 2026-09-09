@@ -44,6 +44,14 @@
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
 {{- end }}
+{{- if .HasFront }}
+| `sandbox/internal/pageio/templates.go` | `build` | always. `Render` + the asset helpers; `StaticMount` from the `static` route's first segment |
+| `docs/FrontUsage/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `sandbox/internal/routes/static/{route.yaml,handler.go}` | `front-init` | once. Keep `safeSegments` if you edit it |
+| `assets/frontend/static/{styles/main.css,scripts/main.js}` | `front-init` | once |
+| `sandbox/internal/routes/<page>/{route.yaml,handler.go}` | `add-page` | once |
+| `assets/frontend/pages/<page>.html` | `add-page` | once. Kept as is by a second `add-page` |
+{{- end }}
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |
 {{- if .HasCli }}
 | `examples/cli/<name>/example.sh` | `add-cli-example` | once. A stub that already runs |

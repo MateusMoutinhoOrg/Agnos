@@ -8,15 +8,18 @@ import (
 )
 
 // GeneratedDocsGroups returns the asset groups whose docs this build writes:
-// `all` always, `cli` when the project has a cli and `server` when it has a
-// server, exactly as the groups are rendered.
-func GeneratedDocsGroups(has_cli bool, has_server bool) []string {
+// `all` always, then `cli`, `server` and `front` for each layer the project
+// carries, exactly as the groups are rendered.
+func GeneratedDocsGroups(has_cli bool, has_server bool, has_front bool) []string {
 	groups := []string{"all"}
 	if has_cli {
 		groups = append(groups, "cli")
 	}
 	if has_server {
 		groups = append(groups, "server")
+	}
+	if has_front {
+		groups = append(groups, "front")
 	}
 	return groups
 }
