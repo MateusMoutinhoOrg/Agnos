@@ -338,7 +338,7 @@ Declare a query parameter on a route
 agnos add-param --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
 ```
 
-Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array is accepted here and nowhere else: every occurrence of the key is collected into a []T field.
+Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array collects every occurrence of the key into a []T field; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -396,10 +396,10 @@ agnos add-route create-user --trigger /users --method POST --help "Create a user
 Add a segment to a route's path
 
 ```bash
-agnos add-segment --route <route> [--identifier <identifier>] [--type <type>] [--description <description>] [--example <example>...] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [<name>]
+agnos add-segment --route <route> [--identifier <identifier>] [--type <type>] [--description <description>] [--example <example>...] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [<name>]
 ```
 
-Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted.
+Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted. --array makes that capture take every segment left in the path into a []T field, which only the last segment of a route may do.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -408,6 +408,7 @@ Appends one segment to the route's paths and runs build so entries.go and the di
 | `--type` | string | `string` | the value type of a captured segment: string, boolean, int or float |
 | `--description` | string |  | help text shown for the captured segment |
 | `--example` | string, repeatable |  | an usage example for the segment (repeatable) |
+| `--array` | boolean |  | take every segment left in the path into a []T field (the last segment only) |
 | `--min` | string |  | smallest accepted value (int/float only) |
 | `--max` | string |  | largest accepted value (int/float only) |
 | `--position` | int | `-1` | zero-based index to insert the segment at (defaults to the end) |
@@ -422,6 +423,7 @@ Appends one segment to the route's paths and runs build so entries.go and the di
 agnos add-segment --route create-user --identifier /users
 agnos add-segment tenant --route create-user --description "the tenant the user belongs to"
 agnos add-segment page --route list-users --type int --min 1
+agnos add-segment rest --route static --array
 ```
 
 ### `remove-body-field`

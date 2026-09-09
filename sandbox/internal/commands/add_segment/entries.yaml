@@ -9,6 +9,7 @@ examples:
     - add-segment --route create-user --identifier /users
     - add-segment tenant --route create-user --description "the tenant the user belongs to"
     - add-segment page --route list-users --type int --min 1
+    - add-segment rest --route static --array
 flags:
     - description: the route (identifier or package name) that receives the segment
       examples:
@@ -48,6 +49,13 @@ flags:
         - --example
       name: example
       type: string
+    - description: take every segment left in the path into a []T field (the last segment only)
+      examples:
+        - add-segment rest --route static --array
+      identifiers:
+        - --array
+      name: array
+      type: boolean
     - description: smallest accepted value (int/float only)
       examples:
         - add-segment page --route list-users --type int --min 1
@@ -87,4 +95,4 @@ flags:
 help: Add a segment to a route's path
 identifiers:
     - add-segment
-long-description: Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted.
+long-description: Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted. --array makes that capture take every segment left in the path into a []T field, which only the last segment of a route may do.

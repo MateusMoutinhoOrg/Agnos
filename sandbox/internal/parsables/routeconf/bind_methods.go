@@ -24,11 +24,16 @@ func BindMethods(deps *deps.Deps, conf *RouteConf) {
 
 // Pattern is the route's path as docs and messages spell it: every segment in
 // order, a trigger bringing its own leading slash and a capture entering as
-// "/{name}". A route with no segment at all reads as "/".
+// "/{name}" — or "/{name...}" for the last one, when it takes every segment
+// left in the path. A route with no segment at all reads as "/".
 func Pattern(conf *RouteConf) string {
 	pattern := ""
 	for _, segment := range conf.Paths {
 		if segment.Field != nil {
+			if segment.Field.Array {
+				pattern += "/{" + segment.Field.Key + "...}"
+				continue
+			}
 			pattern += "/{" + segment.Field.Key + "}"
 			continue
 		}

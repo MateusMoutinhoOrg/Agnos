@@ -90,16 +90,18 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Every `identifier` of `paths` starts with `/` and spells exactly one segment; `/` alone is
   the root. A route declares at least one of them, and every entry of `paths` carries an
   `identifier` or a `name`, never both. **(verify)**
-- A captured segment is always `required: true`, and never `array` or defaulted: it is present
-  whenever the route matched. **(verify)**
+- A captured segment is always `required: true` and never defaulted: it is present whenever
+  the route matched. `array: true` on it takes every segment left in the path into a `[]T`
+  field, which only the last entry of `paths` may do, and which needs at least one segment to
+  match — so its name is declared nowhere else. **(verify)**
 - A name is declared once per origin, and the origins declaring the same name agree on its
   type — the `Entries` field is written once. **(verify)**
 - No two routes declare the same method and path pattern. **(verify)**
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
   subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
 - Match order is the collector's, not the directory's: most `identifier`s first, then the
-  longest ones, then the pattern alphabetically. Without it a route on `/` would swallow one
-  on `/home`.
+  longest ones, then the routes of fixed length before the ones taking the rest of the path,
+  then the pattern alphabetically. Without it a route on `/` would swallow one on `/home`.
 - A failure is written by `routeio.WriteError` alone, so every route answers one JSON shape.
 
 Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).

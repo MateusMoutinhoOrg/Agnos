@@ -160,8 +160,10 @@ change a rule there and nowhere else. The ones most easily broken:
   `add-flag`'s own spellings (`--identifier --example`) — the argv parser counts it as an
   occurrence and pollutes the declaration.
 - Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
-  segment is always `required: true`. Match order is by specificity (most identifiers, then
-  longest), settled by the collector, not the template.
+  segment is always `required: true`. `array: true` on the last capture makes it take every
+  segment left in the path (`[]T`, one or more), and only there. Match order is by specificity
+  (most identifiers, then longest, then fixed length before catch-all), settled by the
+  collector, not the template.
 - Every exported declaration of `sandbox/api/` and `sandbox/deps/` carries a doc comment —
   `docs/PublicApi/doc.md` is generated from those comments, and `verify` fails without them.
 - `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.

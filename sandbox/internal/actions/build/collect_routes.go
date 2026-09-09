@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // routesDir holds one declared route per sub-directory, the server layer's
@@ -40,6 +41,10 @@ func CollectRoutes(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, erro
 			return nil, err
 		}
 
+		if err := checkRoutePaths(deps, name, conf); err != nil {
+			return nil, err
+		}
+
 		routes = append(routes, routeData(deps, name, conf))
 	}
 
@@ -49,7 +54,8 @@ func CollectRoutes(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, erro
 
 // sortRoutes puts the routes in the order the dispatch tests them: the route
 // fixing the most literal segments first, then the one whose literals spell
-// the most characters, then by pattern for a stable tie-break. The ordering is
+// the most characters, then the one of fixed length before the one taking the
+// rest of the path, then by pattern for a stable tie-break. The ordering is
 // the collector's, so servermain.go's template only has to range in order.
 func sortRoutes(deps *deps.Deps, routes []map[string]any) {
 	deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
@@ -59,6 +65,9 @@ func sortRoutes(deps *deps.Deps, routes []map[string]any) {
 		}
 		if left["IdentifierLen"] != right["IdentifierLen"] {
 			return left["IdentifierLen"].(int) > right["IdentifierLen"].(int)
+		}
+		if left["HasRest"] != right["HasRest"] {
+			return !left["HasRest"].(bool)
 		}
 		return left["Pattern"].(string) < right["Pattern"].(string)
 	})
@@ -88,9 +97,47 @@ func schemaUnknownKeys(schema *routeconf.Schema) []string {
 	return unknown
 }
 
+// checkRoutePaths refuses a `paths` a matcher cannot be generated from: the
+// segment taking the rest of the path only reads as a suffix if it is the last
+// one, and its Entries field is a []T, which no header or query parameter of
+// the same name could fill.
+func checkRoutePaths(deps *deps.Deps, name string, conf *routeconf.RouteConf) error {
+	at := utils.RouteRestIndex(conf.Paths)
+	if at < 0 {
+		return nil
+	}
+
+	if at != len(conf.Paths)-1 {
+		return deps.Std.Errorf("routes/%s/route.yaml: the captured segment %q is an array before the end of `paths`; only the last segment takes the rest of the path", name, conf.Paths[at].Field.Key)
+	}
+
+	key := conf.Paths[at].Field.Key
+	for _, origin := range []struct {
+		label  string
+		fields []routeconf.Field
+	}{{"header", conf.Headers}, {"query parameter", conf.Params}} {
+		if utils.FindRouteField(deps, origin.fields, key) >= 0 {
+			return deps.Std.Errorf("routes/%s/route.yaml: %q is both the segment taking the rest of the path and a declared %s; the two cannot fill one Entries field", name, key, origin.label)
+		}
+	}
+
+	return nil
+}
+
+// arityOp is the comparison match<Route> refuses a path with. A route of fixed
+// length wants exactly the segments it declares; one taking the rest of the
+// path wants strictly more, because that last capture is required like any
+// other.
+func arityOp(rest_index int) string {
+	if rest_index < 0 {
+		return "!="
+	}
+	return "<="
+}
+
 // routeData is one route as both templates read it.
 func routeData(deps *deps.Deps, name string, conf *routeconf.RouteConf) map[string]any {
-	bindings, parts, count := routeBindings(deps, conf)
+	bindings, parts, count, rest_index := routeBindings(deps, conf)
 
 	return map[string]any{
 		"Name":            name,
@@ -101,6 +148,8 @@ func routeData(deps *deps.Deps, name string, conf *routeconf.RouteConf) map[stri
 		"IdentifierCount": conf.IdentifierCount(),
 		"IdentifierLen":   conf.IdentifierLen(),
 		"SegmentCount":    count,
+		"HasRest":         rest_index >= 0,
+		"ArityOp":         arityOp(rest_index),
 		"MatchParts":      parts,
 		"Bindings":        bindings,
 		"Category":        conf.Category,
@@ -127,17 +176,19 @@ func routeTrigger(conf *routeconf.RouteConf) string {
 }
 
 // routeBindings resolves the route's whole input surface into one entry per
-// generated Entries field, the URL segments the dispatch matches on, and how
-// many segments a matching path has.
+// generated Entries field, the URL segments the dispatch matches on, how many
+// segments a matching path fixes, and the position the last capture takes the
+// rest of the path from (-1 when the route fixes its whole length).
 //
 // The same name may be declared in more than one origin: the field is written
 // once and filled by the first origin, in declaration order, that brings a
 // value.
-func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any, []map[string]any, int) {
+func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any, []map[string]any, int, int) {
 	var bindings []map[string]any
 	var parts []map[string]any
 	index := map[string]int{}
 	position := 0
+	rest_index := -1
 
 	for _, segment := range conf.Paths {
 		if segment.Field == nil {
@@ -155,6 +206,15 @@ func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any
 			position++
 			continue
 		}
+		if segment.Field.Array {
+			// The segment taking the rest of the path fixes no position
+			// of its own: it opens the suffix, so it adds nothing to
+			// match on and closes the sequence.
+			rest_index = position
+			bindings = addBinding(deps, bindings, index, *segment.Field, "path", position)
+			break
+		}
+
 		parts = append(parts, map[string]any{
 			"Index":     position,
 			"IsCapture": true,
@@ -171,7 +231,7 @@ func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any
 		bindings = addBinding(deps, bindings, index, field, "query", 0)
 	}
 
-	return bindings, parts, position
+	return bindings, parts, position, rest_index
 }
 
 // addBinding records one declared origin against the Entries field its name
@@ -219,6 +279,8 @@ func addBinding(deps *deps.Deps, bindings []map[string]any, index map[string]int
 		"Sources":        []map[string]any{source},
 	}
 	binding["HasPath"] = kind == "path"
+	binding["IsRest"] = kind == "path" && field.Array
+	binding["RestIndex"] = position
 	setBindingArity(binding, 1)
 	return append(bindings, binding)
 }

@@ -1,0 +1,9 @@
+cli-output: "add-segment adding a segment to sandbox/internal/routes/static/route.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+exit-code: 0
+tree:
+    - file: sandbox/internal/routes/static/entries.go
+      sha: 8a9b799b110e2273df9ca4cd5d8b1211005d125ee5d73c78104364774d3bc0fa
+    - file: sandbox/internal/routes/static/route.yaml
+      sha: 6d27f47456e0ffd71c403e294b0bf82637f6a1ab10ae12a014b5c84216dba206
+    - file: sandbox/internal/server/servermain.go
+      sha: 112a52caad66fb43d837dc98ee22260785bc6763beed5d1a4859d287b2b39e3b

@@ -139,10 +139,11 @@ func parseBoolValue(deps *deps.Deps, response serverdeps.Response, subject strin
 }
 {{range .Routes}}{{$route := .}}
 // match{{.GoName}} reports whether a request path binds to {{.Pattern}}: the
-// segment count has to be exact, every literal segment has to be the one
+// segment count has to be {{if .HasRest}}above the {{.SegmentCount}} it fixes, since its last
+// capture takes every segment left{{else}}exact{{end}}, every literal segment has to be the one
 // declared, and a capture takes whatever sits in its place.
 func match{{.GoName}}(segments []string) bool {
-	if len(segments) != {{.SegmentCount}} {
+	if len(segments) {{.ArityOp}} {{.SegmentCount}} {
 		return false
 	}
 {{- range .MatchParts}}
@@ -164,7 +165,16 @@ func handle{{.GoName}}(deps *deps.Deps, request serverdeps.Request, response ser
 	entries := routes_{{.Name}}.Entries{}
 	entries.Request = request
 {{- range .Bindings}}{{$binding := .}}
-{{- if .IsArray}}
+{{- if .IsRest}}
+
+	for _, raw := range segments[{{.RestIndex}}:] {
+		value, ok := {{.ParseFunc}}(deps, response, "{{.Subject}}", "{{.Key}}", raw)
+		if !ok {
+			return
+		}
+		entries.{{.GoField}} = append(entries.{{.GoField}}, value)
+	}
+{{- else if .IsArray}}
 
 	for _, raw := range request.GetQueryAll("{{.Key}}") {
 		value, ok := {{.ParseFunc}}(deps, response, "{{.Subject}}", "{{.Key}}", raw)

@@ -127,22 +127,27 @@ func routeDocField(deps *deps.Deps, field routeconf.Field, in string) RouteDocFi
 	return RouteDocField{
 		Key:         field.Key,
 		In:          in,
-		Type:        routeFieldTypeLabel(deps, field),
+		Type:        routeFieldTypeLabel(deps, field, in),
 		Default:     value,
 		Description: docCell(deps, field.Description),
 	}
 }
 
 // routeFieldTypeLabel is the one cell carrying everything the type of a field
-// implies: its kind, whether it repeats, whether it must be given, and the
-// bounds a numeric field declares.
-func routeFieldTypeLabel(deps *deps.Deps, field routeconf.Field) string {
+// implies: its kind, whether it holds more than one value, whether it must be
+// given, and the bounds a numeric field declares. An array reads by its
+// origin: a query key repeats, a path segment takes what is left of the URL.
+func routeFieldTypeLabel(deps *deps.Deps, field routeconf.Field, in string) string {
 	label := field.Type
 	if label == "" {
 		label = "string"
 	}
 	if field.Array {
-		label += ", repeatable"
+		if in == "path" {
+			label += ", the rest of the path"
+		} else {
+			label += ", repeatable"
+		}
 	}
 	if field.Required {
 		label += ", required"

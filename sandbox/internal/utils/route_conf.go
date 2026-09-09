@@ -115,8 +115,9 @@ const (
 
 // NewRouteField builds a routeconf.Field from the raw values typed on the
 // command line, holding to the rules of the origin it is declared in: a
-// captured segment is always required and never repeats or defaults, and only
-// a query parameter may be an array.
+// captured segment is always required and never defaults, and a header never
+// repeats. An array is a query parameter collecting every occurrence of its
+// key, or the last path segment taking every segment left in the path.
 func NewRouteField(deps *deps.Deps, props api.RouteFieldProps, in string) (routeconf.Field, error) {
 	field := routeconf.Field{
 		Key:         RouteFieldName(deps, props.Name),
@@ -135,8 +136,8 @@ func NewRouteField(deps *deps.Deps, props api.RouteFieldProps, in string) (route
 	}
 	field.Type = kind
 
-	if field.Array && in != RouteFieldInQuery {
-		return field, deps.Std.Errorf("only a query parameter may be an array")
+	if field.Array && in == RouteFieldInHeader {
+		return field, deps.Std.Errorf("only a query parameter or the last path segment may be an array")
 	}
 	if field.Required && kind == "boolean" {
 		return field, deps.Std.Errorf("a boolean field cannot be required (its absence already means false)")
@@ -205,6 +206,19 @@ func FindRouteSegment(deps *deps.Deps, segments []routeconf.Segment, name string
 	key := RouteFieldName(deps, name)
 	for i, segment := range segments {
 		if segment.Field != nil && segment.Field.Key == key {
+			return i
+		}
+	}
+	return -1
+}
+
+// RouteRestIndex returns the index of the segment that takes the rest of the
+// path — the one capture declared `array: true` — or -1 when the route fixes
+// its length. It is the one reading of that rule, shared by the editor, the
+// collector and verify.
+func RouteRestIndex(segments []routeconf.Segment) int {
+	for i, segment := range segments {
+		if segment.Field != nil && segment.Field.Array {
 			return i
 		}
 	}

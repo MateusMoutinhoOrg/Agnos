@@ -250,7 +250,7 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"add-param"},
 		Category:        "Server System",
 		Description:     "Declare a query parameter on a route",
-		LongDescription: "Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array is accepted here and nowhere else: every occurrence of the key is collected into a []T field.",
+		LongDescription: "Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array collects every occurrence of the key into a []T field; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path.",
 		Examples:        []string{"add-param page --route list-users --type int --default 1 --min 1", "add-param tag --route list-users --array"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -294,8 +294,8 @@ var helpCommands = []helpCommand{
 		Identifiers:     []string{"add-segment"},
 		Category:        "Server System",
 		Description:     "Add a segment to a route's path",
-		LongDescription: "Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted.",
-		Examples:        []string{"add-segment --route create-user --identifier /users", "add-segment tenant --route create-user --description \"the tenant the user belongs to\"", "add-segment page --route list-users --type int --min 1"},
+		LongDescription: "Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted. --array makes that capture take every segment left in the path into a []T field, which only the last segment of a route may do.",
+		Examples:        []string{"add-segment --route create-user --identifier /users", "add-segment tenant --route create-user --description \"the tenant the user belongs to\"", "add-segment page --route list-users --type int --min 1", "add-segment rest --route static --array"},
 		Hidden:          false,
 		Flags: []helpField{
 			{Identifiers: []string{"--route"}, Description: "the route (identifier or package name) that receives the segment", Examples: []string{"add-segment tenant --route create-user"}, Type: "string", Default: "", Required: true},
@@ -303,6 +303,7 @@ var helpCommands = []helpCommand{
 			{Identifiers: []string{"--type"}, Description: "the value type of a captured segment: string, boolean, int or float", Examples: []string{"add-segment page --route list-users --type int"}, Type: "string", Default: "string", Required: false},
 			{Identifiers: []string{"--description"}, Description: "help text shown for the captured segment", Examples: []string{"add-segment tenant --route create-user --description \"the tenant the user belongs to\""}, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{"--example"}, Description: "an usage example for the segment (repeatable)", Examples: []string{"add-segment tenant --route create-user --example /acme"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--array"}, Description: "take every segment left in the path into a []T field (the last segment only)", Examples: []string{"add-segment rest --route static --array"}, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{"--min"}, Description: "smallest accepted value (int/float only)", Examples: []string{"add-segment page --route list-users --type int --min 1"}, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{"--max"}, Description: "largest accepted value (int/float only)", Examples: []string{"add-segment page --route list-users --type int --max 100"}, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{"--position"}, Description: "zero-based index to insert the segment at (defaults to the end)", Examples: []string{"add-segment tenant --route create-user --position 0"}, Type: "int", Default: "-1", Required: false},

@@ -63,18 +63,40 @@ kinds.
 | `name` | A captured segment: it matches anything and becomes an `Entries` field, already converted |
 | `type` | `string` (default), `boolean`, `int`, `float` |
 | `description`, `examples`, `min`, `max` | As in [EntriesYaml](../EntriesYaml/doc.md#field-keys) |
-| `required` | Always `true` on a capture — `false` is a `verify` violation, and `array`/`default` are refused |
+| `required` | Always `true` on a capture — `false` is a `verify` violation, and `default` is refused |
+| `array` | The capture takes **every segment left** in the path, as a `[]T` field. Only on the last entry of `paths`, and its name is declared nowhere else |
 
 The first `identifier` is the trigger that names the route. Match order is by specificity, not
-by directory: most `identifier`s first, then the longest `identifier`s, then the pattern
-alphabetically — without which a route on `/` would swallow one on `/home`.
+by directory: most `identifier`s first, then the longest `identifier`s, then the routes of
+fixed length before the ones taking the rest of the path, then the pattern alphabetically —
+without which a route on `/` would swallow one on `/home`.
+
+A route ending in an `array` capture matches **one or more** remaining segments, never zero:
+the capture is required like any other, so `/static` does not reach `/static/{rest...}`.
+
+```yaml
+method: GET
+paths:
+  - identifier: "/static"
+  - name: rest
+    type: string
+    required: true
+    array: true
+```
+
+```
+GET /static          404
+GET /static/a        Rest = ["a"]
+GET /static/a/b.png  Rest = ["a", "b.png"]
+```
 
 ## Field keys
 
 `headers` and `params` take the field keys of [EntriesYaml](../EntriesYaml/doc.md#field-keys)
 (`name`, `description`, `examples`, `type`, `default`, `required`, `array`, `min`, `max`), with
 two differences: `name` **is** the external spelling — the header name, matched without regard
-to case, or the query key — and `array: true` is accepted in `params` only.
+to case, or the query key — and `array: true` is refused in `headers` (in `params` it collects
+every occurrence of the key; in `paths` it takes the rest of the path).
 
 One `name` may be declared in more than one place. The `Entries` field is written once and
 filled by the first origin, in `paths` → `headers` → `params` order, that brings a value; any

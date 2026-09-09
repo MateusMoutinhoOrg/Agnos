@@ -101,4 +101,4 @@ flags:
 help: Declare a query parameter on a route
 identifiers:
     - add-param
-long-description: 'Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array is accepted here and nowhere else: every occurrence of the key is collected into a []T field.'
+long-description: Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array collects every occurrence of the key into a []T field; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path.

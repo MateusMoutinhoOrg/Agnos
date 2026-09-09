@@ -15,6 +15,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		Description: entries.Description,
 		Examples:    entries.Example,
 		Type:        entries.Type,
+		Array:       entries.Array,
 		Min:         entries.Min,
 		Max:         entries.Max,
 		Position:    entries.Position,

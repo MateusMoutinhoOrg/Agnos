@@ -104,9 +104,11 @@ type RouteProps struct {
 // covers the three origins that read a value off the request line — a captured
 // path segment, a header and a query parameter — which differ only in where
 // the entry lands. Identifier declares a literal path segment instead of a
-// captured one, and is normalized to start with "/". Default, Min and Max are
-// the raw literals typed on the command line ("" means unset); Position is the
-// index to insert at (< 0 appends).
+// captured one, and is normalized to start with "/". Array collects a []T
+// field: every occurrence of a query key, or — on the last segment of the
+// path, and there alone — every segment left in the URL. Default, Min and Max
+// are the raw literals typed on the command line ("" means unset); Position is
+// the index to insert at (< 0 appends).
 type RouteFieldProps struct {
 	Path        string
 	Route       string
@@ -270,7 +272,8 @@ type Actions struct {
 	SetRoute func(props RouteProps) error
 
 	// AddSegment appends one segment to a route's path: a literal one when
-	// props.Identifier is set, a captured one otherwise.
+	// props.Identifier is set, a captured one otherwise — and, with
+	// props.Array, one taking every segment left in the path.
 	AddSegment func(props RouteFieldProps) error
 
 	// RemoveSegment deletes one segment from a route's path, named either

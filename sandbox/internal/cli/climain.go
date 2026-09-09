@@ -1362,6 +1362,7 @@ func dispatchAddSegment(deps *deps.Deps, verb argvdeps.Parser) int {
 		}
 		entries.Example = append(entries.Example, value)
 	}
+	entries.Array = verb.IsPresent([]string{"--array"})
 	if verb.GetOptionsSize([]string{"--min"}) > 0 {
 		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
 		if !rawOk {

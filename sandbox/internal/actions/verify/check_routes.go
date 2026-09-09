@@ -6,6 +6,7 @@ import (
 	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // routesDir holds one declared route per sub-directory.
@@ -153,13 +154,13 @@ func checkRouteDeclaration(deps *deps.Deps, name string, conf *routeconf.RouteCo
 	}
 
 	triggers := 0
-	for _, segment := range conf.Paths {
+	for i, segment := range conf.Paths {
 		if segment.Field == nil {
 			triggers++
 			violations = append(violations, checkRouteIdentifier(deps, name, segment.Identifier)...)
 			continue
 		}
-		violations = append(violations, checkRouteCapture(name, *segment.Field)...)
+		violations = append(violations, checkRouteCapture(name, *segment.Field, i == len(conf.Paths)-1)...)
 	}
 	if len(conf.Paths) > 0 && triggers == 0 {
 		violations = append(violations, routeViolation(name,
@@ -167,6 +168,36 @@ func checkRouteDeclaration(deps *deps.Deps, name string, conf *routeconf.RouteCo
 	}
 
 	violations = append(violations, checkRouteNames(deps, name, conf)...)
+	violations = append(violations, checkRouteRestName(deps, name, conf)...)
+
+	return violations
+}
+
+// checkRouteRestName keeps the segment taking the rest of the path out of the
+// name merging every other origin takes part in: its Entries field is a []T,
+// which a header or a query parameter of the same name could not fill.
+func checkRouteRestName(deps *deps.Deps, name string, conf *routeconf.RouteConf) []string {
+	at := utils.RouteRestIndex(conf.Paths)
+	if at < 0 {
+		return nil
+	}
+
+	var violations []string
+	key := conf.Paths[at].Field.Key
+	origins := []struct {
+		label  string
+		fields []routeconf.Field
+	}{
+		{"header", conf.Headers},
+		{"query", conf.Params},
+	}
+
+	for _, origin := range origins {
+		if utils.FindRouteField(deps, origin.fields, key) >= 0 {
+			violations = append(violations, routeViolation(name,
+				"declares "+key+" as both the segment taking the rest of the path and a "+origin.label+" field; the two cannot fill one Entries field"))
+		}
+	}
 
 	return violations
 }
@@ -192,18 +223,19 @@ func checkRouteIdentifier(deps *deps.Deps, name string, identifier string) []str
 }
 
 // checkRouteCapture enforces what a captured segment may declare: it is always
-// present when the route matches, so it is always required and never repeats
-// or defaults.
-func checkRouteCapture(name string, field routeconf.Field) []string {
+// present when the route matches, so it is always required and never defaults.
+// `array: true` makes it take every segment left in the path, which only reads
+// as a suffix on the last entry of `paths`.
+func checkRouteCapture(name string, field routeconf.Field, is_last bool) []string {
 	var violations []string
 
 	if !field.Required {
 		violations = append(violations, routeViolation(name,
 			"declares the captured segment "+field.Key+" without `required: true`; a captured segment is always present"))
 	}
-	if field.Array {
+	if field.Array && !is_last {
 		violations = append(violations, routeViolation(name,
-			"declares the captured segment "+field.Key+" as an array; a segment holds one value"))
+			"declares the captured segment "+field.Key+" as an array before the end of `paths`; only the last segment takes the rest of the path"))
 	}
 	if field.HasDefault {
 		violations = append(violations, routeViolation(name,

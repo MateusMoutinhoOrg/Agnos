@@ -129,7 +129,7 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 
 ### `RouteFieldProps`
 
-RouteFieldProps describes one field to add to a route's route.yaml. It covers the three origins that read a value off the request line — a captured path segment, a header and a query parameter — which differ only in where the entry lands. Identifier declares a literal path segment instead of a captured one, and is normalized to start with "/". Default, Min and Max are the raw literals typed on the command line ("" means unset); Position is the index to insert at (< 0 appends).
+RouteFieldProps describes one field to add to a route's route.yaml. It covers the three origins that read a value off the request line — a captured path segment, a header and a query parameter — which differ only in where the entry lands. Identifier declares a literal path segment instead of a captured one, and is normalized to start with "/". Array collects a []T field: every occurrence of a query key, or — on the last segment of the path, and there alone — every segment left in the URL. Default, Min and Max are the raw literals typed on the command line ("" means unset); Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
@@ -229,7 +229,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `AddRoute` | `func(path string, name string, method string, trigger string, help string, category string) error` | AddRoute declares a new route: its route.yaml, its generated entries.go and a handler.go to fill in. |
 | `RemoveRoute` | `func(path string, name string) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
 | `SetRoute` | `func(props RouteProps) error` | SetRoute rewrites the route-level keys of one route's route.yaml. |
-| `AddSegment` | `func(props RouteFieldProps) error` | AddSegment appends one segment to a route's path: a literal one when props.Identifier is set, a captured one otherwise. |
+| `AddSegment` | `func(props RouteFieldProps) error` | AddSegment appends one segment to a route's path: a literal one when props.Identifier is set, a captured one otherwise — and, with props.Array, one taking every segment left in the path. |
 | `RemoveSegment` | `func(path string, route string, name string) error` | RemoveSegment deletes one segment from a route's path, named either by its capture name or by the identifier it spells. |
 | `AddHeader` | `func(props RouteFieldProps) error` | AddHeader declares one request header on a route. |
 | `RemoveHeader` | `func(path string, route string, name string) error` | RemoveHeader deletes one declared header from a route. |

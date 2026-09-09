@@ -11,6 +11,7 @@ type Entries struct {
 	Type        string
 	Description string
 	Example     []string
+	Array       bool
 	Min         string
 	Max         string
 	Position    int

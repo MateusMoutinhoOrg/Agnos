@@ -30,12 +30,36 @@ func AddSegmentInternal(deps *deps.Deps, io *smartio.SmartIO, props api.RouteFie
 	deps.Std.Log("add-segment adding a segment to %s \n", utils.RouteConfPath(deps, props.Route))
 
 	conf.Paths = utils.InsertRouteSegment(conf.Paths, segment, position)
+	if err := checkRestLast(deps, conf, position); err != nil {
+		return err
+	}
 	return utils.SaveRouteConf(deps, io, props.Route, conf)
+}
+
+// checkRestLast refuses a `paths` the new segment left in a shape no matcher
+// can be generated from: the segment taking the rest of the path only reads as
+// a suffix while it is the last one. Which of the two segments moved decides
+// what the message asks for.
+func checkRestLast(deps *deps.Deps, conf *routeconf.RouteConf, position int) error {
+	at := utils.RouteRestIndex(conf.Paths)
+	if at < 0 || at == len(conf.Paths)-1 {
+		return nil
+	}
+
+	if at == position {
+		return deps.Std.Errorf(
+			"the captured segment %q takes the rest of the path, so it is always the last one: leave --position out to append it",
+			conf.Paths[at].Field.Key)
+	}
+	return deps.Std.Errorf(
+		"the captured segment %q takes the rest of the path, so it is always the last one: put the new segment before it with --position %d",
+		conf.Paths[at].Field.Key, at)
 }
 
 // newSegment builds the segment the flags describe: a trigger, normalized to
 // start with "/", when --identifier is given, and a captured field named on
-// the command line otherwise.
+// the command line otherwise. --array makes that capture take every segment
+// left in the path, which only the last segment may do.
 func newSegment(deps *deps.Deps, conf *routeconf.RouteConf, props api.RouteFieldProps) (routeconf.Segment, error) {
 	identifier := deps.Stringsdeps.TrimSpace(props.Identifier)
 	named := utils.RouteFieldName(deps, props.Name) != ""
@@ -45,6 +69,9 @@ func newSegment(deps *deps.Deps, conf *routeconf.RouteConf, props api.RouteField
 	if identifier != "" {
 		if named {
 			return routeconf.Segment{}, deps.Std.Errorf("a segment is either a literal (--identifier) or a capture (a name), never both")
+		}
+		if props.Array {
+			return routeconf.Segment{}, deps.Std.Errorf("--array belongs to a capture, which becomes a []T field: a literal segment spells one segment of the URL")
 		}
 		spelling, err := utils.RouteIdentifierSegment(deps, identifier)
 		if err != nil {

@@ -53,7 +53,10 @@ each with its `remove-` inverse — so every key of [RouteYaml](../RouteYaml/doc
 from the command line and `route.yaml` is never edited by hand.
 
 `add-segment` takes `--identifier /users` for a literal segment, or a name for a capture; an
-identifier is normalized to start with `/`, and an inner or trailing slash is refused.
+identifier is normalized to start with `/`, and an inner or trailing slash is refused. With
+`--array` the capture takes every segment left in the path into a `[]T` field
+(`{{.Name}} add-segment rest --route static --array` matches `/static/a/b.png`), which only the
+last segment of a route may do.
 `add-body-field` takes a dotted path (`address.city`), creating the intervening objects in the
 `json-schema`.
 

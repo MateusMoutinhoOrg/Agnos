@@ -73,6 +73,7 @@ From there `agnos add-command <name> --help "..." --category "..."` declares a c
 agnos add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
 agnos set-route <route> --method PUT --example "curl localhost:8080/users"
 agnos add-segment <name> --route <route>            # a capture; --identifier /users for a literal
+agnos add-segment <name> --route <route> --array    # the last one, taking the rest of the path
 agnos add-header <name> --route <route> --required
 agnos add-param <name> --route <route> --type int --default 1 --min 1
 agnos set-body <route> --type json --required --max-bytes 2097152
