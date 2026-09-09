@@ -1,4 +1,4 @@
-category: Front
+category: Assets
 help: Serves one file from the embedded static assets
 method: GET
 params:

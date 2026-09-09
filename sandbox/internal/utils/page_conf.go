@@ -11,13 +11,18 @@ import (
 // one place that pairing is spelled, so add-page, remove-page, remove-route
 // and front-purge all read it the same way.
 
-// PagesDir is the directory of the embedded asset tree holding one html
-// template per declared page.
-const PagesDir = "assets/frontend/pages"
+// FrontendDir is the root of the asset tree the front layer reads. Everything
+// under it is the project's own content: no build writes there, and front-purge
+// leaves it whole.
+const FrontendDir = "assets/frontend"
 
-// StaticAssetsDir is the directory of the embedded asset tree the static
-// route serves, and the one the pageio helpers build their links against.
-const StaticAssetsDir = "assets/frontend/static"
+// PagesDir is the directory of that tree holding one html template per
+// declared page.
+const PagesDir = FrontendDir + "/pages"
+
+// StaticAssetsDir is the directory the static route serves, and the one the
+// pageio helpers build their links against.
+const StaticAssetsDir = FrontendDir + "/static"
 
 // StaticRouteName is the route front-init writes to serve StaticAssetsDir. It
 // is a page's one reserved name: a page of that name would take the mount over

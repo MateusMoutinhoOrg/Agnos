@@ -60,7 +60,7 @@ func FrontPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error
 		io.RemoveDir(dir)
 	}
 
-	deps.Std.Log("front-purge kept %s: pages, styles and scripts are yours \n", utils.PagesDir)
+	deps.Std.Log("front-purge kept %s: pages, styles and scripts are yours \n", utils.FrontendDir)
 
 	for _, dir := range ancestorDirs(deps, files) {
 		if len(io.ListAll(dir)) == 0 {
