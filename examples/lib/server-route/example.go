@@ -9,10 +9,11 @@ import (
 )
 
 // The server-route example: add the server layer, declare a route and one
-// field of each origin.
+// entry of every place its declaration holds something.
 //
-// It calls the same actions `agnos server-init`, `agnos add-route` and
-// `agnos add-field` call, and writes only inside TestDir.
+// It calls the same actions `agnos server-init`, `agnos add-route`,
+// `agnos add-segment`, `agnos add-header`, `agnos add-param`, `agnos set-body`
+// and `agnos add-body-field` call, and writes only inside TestDir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -35,15 +36,34 @@ func main() {
 		panic(err)
 	}
 
-	fields := []api.RouteFieldProps{
-		{Path: "TestDir", Route: "create-user", Name: "tenant", In: "path", Type: "string", Required: true, Position: -1},
-		{Path: "TestDir", Route: "create-user", Name: "authorization", In: "header", Type: "string", Required: true, Position: -1},
-		{Path: "TestDir", Route: "create-user", Name: "email", In: "body", Type: "string", Required: true, Format: "email", Position: -1},
+	if err := lib.Actions.AddSegment(api.RouteFieldProps{
+		Path: "TestDir", Route: "create-user", Name: "tenant", Type: "string", Position: -1,
+	}); err != nil {
+		panic(err)
 	}
-	for _, field := range fields {
-		if err := lib.Actions.AddField(field); err != nil {
-			panic(err)
-		}
+
+	if err := lib.Actions.AddHeader(api.RouteFieldProps{
+		Path: "TestDir", Route: "create-user", Name: "authorization", Type: "string", Required: true, Position: -1,
+	}); err != nil {
+		panic(err)
+	}
+
+	if err := lib.Actions.AddParam(api.RouteFieldProps{
+		Path: "TestDir", Route: "create-user", Name: "page", Type: "int", Default: "1", Min: "1", Position: -1,
+	}); err != nil {
+		panic(err)
+	}
+
+	if err := lib.Actions.SetBody(api.RouteBodyProps{
+		Path: "TestDir", Route: "create-user", Type: "json", Required: true, MaxBytes: -1,
+	}); err != nil {
+		panic(err)
+	}
+
+	if err := lib.Actions.AddBodyField(api.RouteBodyFieldProps{
+		Path: "TestDir", Route: "create-user", Name: "email", Type: "string", Required: true, Format: "email",
+	}); err != nil {
+		panic(err)
 	}
 
 	// What result.yaml records: the declaration this example wrote and the

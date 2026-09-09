@@ -1,0 +1,38 @@
+args:
+    - description: 'the segment to drop: the captured segment''s name, or the identifier of a literal one'
+      examples:
+        - remove-segment /users --route create-user
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - remove-segment tenant --route create-user
+    - remove-segment /users --route create-user
+flags:
+    - description: the route (identifier or package name) the segment is declared on
+      examples:
+        - remove-segment tenant --route create-user
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-segment tenant --route create-user --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one segment from a route's path
+identifiers:
+    - remove-segment
+long-description: 'Drops one segment from the route''s paths, the exact inverse of add-segment: a capture by its name, a literal by the identifier it spells. The build renders only: dropping a segment may leave hand-written code referring to what is gone.'

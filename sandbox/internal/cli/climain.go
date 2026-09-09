@@ -4,13 +4,16 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
 	add_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_arg"
+	add_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_body_field"
 	add_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_cli_example"
 	add_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_command"
 	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_doc"
-	add_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_field"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_flag"
+	add_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_header"
 	add_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_lib_example"
+	add_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_param"
 	add_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_route"
+	add_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_segment"
 	build "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/build"
 	cli_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_init"
 	cli_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_purge"
@@ -25,15 +28,19 @@ import (
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
+	remove_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_body_field"
 	remove_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_cli_example"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_command"
 	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_doc"
-	remove_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_field"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
+	remove_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_header"
 	remove_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_lib_example"
+	remove_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_param"
 	remove_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_route"
+	remove_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_segment"
 	server_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server_init"
 	server_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server_purge"
+	set_body "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_body"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
 	set_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_route"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
@@ -77,20 +84,26 @@ func CliMain(deps *deps.Deps, args []string) int {
 	switch {
 	case action == "add-arg":
 		return dispatchAddArg(deps, verb)
+	case action == "add-body-field":
+		return dispatchAddBodyField(deps, verb)
 	case action == "add-cli-example":
 		return dispatchAddCliExample(deps, verb)
 	case action == "add-command":
 		return dispatchAddCommand(deps, verb)
 	case action == "add-doc":
 		return dispatchAddDoc(deps, verb)
-	case action == "add-field":
-		return dispatchAddField(deps, verb)
 	case action == "add-flag":
 		return dispatchAddFlag(deps, verb)
+	case action == "add-header":
+		return dispatchAddHeader(deps, verb)
 	case action == "add-lib-example":
 		return dispatchAddLibExample(deps, verb)
+	case action == "add-param":
+		return dispatchAddParam(deps, verb)
 	case action == "add-route":
 		return dispatchAddRoute(deps, verb)
+	case action == "add-segment":
+		return dispatchAddSegment(deps, verb)
 	case action == "build":
 		return dispatchBuild(deps, verb)
 	case action == "cli-init":
@@ -119,24 +132,32 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchPublish(deps, verb)
 	case action == "remove-arg":
 		return dispatchRemoveArg(deps, verb)
+	case action == "remove-body-field":
+		return dispatchRemoveBodyField(deps, verb)
 	case action == "remove-cli-example":
 		return dispatchRemoveCliExample(deps, verb)
 	case action == "remove-command":
 		return dispatchRemoveCommand(deps, verb)
 	case action == "remove-doc":
 		return dispatchRemoveDoc(deps, verb)
-	case action == "remove-field":
-		return dispatchRemoveField(deps, verb)
 	case action == "remove-flag":
 		return dispatchRemoveFlag(deps, verb)
+	case action == "remove-header":
+		return dispatchRemoveHeader(deps, verb)
 	case action == "remove-lib-example":
 		return dispatchRemoveLibExample(deps, verb)
+	case action == "remove-param":
+		return dispatchRemoveParam(deps, verb)
 	case action == "remove-route":
 		return dispatchRemoveRoute(deps, verb)
+	case action == "remove-segment":
+		return dispatchRemoveSegment(deps, verb)
 	case action == "server-init":
 		return dispatchServerInit(deps, verb)
 	case action == "server-purge":
 		return dispatchServerPurge(deps, verb)
+	case action == "set-body":
+		return dispatchSetBody(deps, verb)
 	case action == "set-command":
 		return dispatchSetCommand(deps, verb)
 	case action == "set-route":
@@ -388,6 +409,187 @@ func dispatchAddArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	return add_arg.CommandHandler(deps, entries)
 }
 
+func dispatchAddBodyField(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_body_field.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--type"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "type", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Type = value
+	} else {
+		entries.Type = "string"
+	}
+	entries.Required = verb.IsPresent([]string{"--required"})
+	entries.Array = verb.IsPresent([]string{"--array"})
+	if verb.GetOptionsSize([]string{"--min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "min", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Min = value
+	}
+	if verb.GetOptionsSize([]string{"--max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "max", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Max = value
+	}
+	if verb.GetOptionsSize([]string{"--exclusive-min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "exclusive-min", []string{"--exclusive-min"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "exclusive-min", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.ExclusiveMin = value
+	}
+	if verb.GetOptionsSize([]string{"--exclusive-max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "exclusive-max", []string{"--exclusive-max"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "exclusive-max", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.ExclusiveMax = value
+	}
+	if verb.GetOptionsSize([]string{"--format"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "format", []string{"--format"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "format", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Format = value
+	}
+	if verb.GetOptionsSize([]string{"--pattern"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "pattern", []string{"--pattern"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "pattern", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Pattern = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--enum"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "enum", []string{"--enum"}, occurrence)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "enum", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Enum = append(entries.Enum, value)
+	}
+	if verb.GetOptionsSize([]string{"--const"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "const", []string{"--const"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "const", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Const = value
+	}
+	entries.Nullable = verb.IsPresent([]string{"--nullable"})
+	if verb.GetOptionsSize([]string{"--min-items"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min-items", []string{"--min-items"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "min-items", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.MinItems = value
+	}
+	if verb.GetOptionsSize([]string{"--max-items"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max-items", []string{"--max-items"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "max-items", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.MaxItems = value
+	}
+	entries.UniqueItems = verb.IsPresent([]string{"--unique-items"})
+	entries.AdditionalProperties = verb.IsPresent([]string{"--additional-properties"})
+	entries.NoAdditionalProperties = verb.IsPresent([]string{"--no-additional-properties"})
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_body_field.CommandHandler(deps, entries)
+}
+
 func dispatchAddCliExample(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_cli_example.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -555,184 +757,6 @@ func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 	return add_doc.CommandHandler(deps, entries)
 }
 
-func dispatchAddField(deps *deps.Deps, verb argvdeps.Parser) int {
-	entries := &add_field.Entries{}
-	if verb.GetOptionsSize([]string{"--route"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "route", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Route = value
-	} else {
-		deps.Std.Error("required flag 'route' not provided\n")
-		return ExitUsage
-	}
-	if verb.GetOptionsSize([]string{"--in"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "in", []string{"--in"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "in", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.In = value
-	} else {
-		entries.In = "query"
-	}
-	if verb.GetOptionsSize([]string{"--identifier"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "identifier", []string{"--identifier"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "identifier", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Identifier = value
-	}
-	if verb.GetOptionsSize([]string{"--type"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "type", []string{"--type"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "type", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Type = value
-	} else {
-		entries.Type = "string"
-	}
-	if verb.GetOptionsSize([]string{"--description"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "description", []string{"--description"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "description", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Description = value
-	}
-	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example"}); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "example", []string{"--example"}, occurrence)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "example", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Example = append(entries.Example, value)
-	}
-	if verb.GetOptionsSize([]string{"--default"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "default", []string{"--default"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "default", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Default = value
-	}
-	entries.Required = verb.IsPresent([]string{"--required"})
-	entries.Array = verb.IsPresent([]string{"--array"})
-	if verb.GetOptionsSize([]string{"--min"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "min", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Min = value
-	}
-	if verb.GetOptionsSize([]string{"--max"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "max", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Max = value
-	}
-	if verb.GetOptionsSize([]string{"--position"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "position", []string{"--position"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseIntValue(deps, "flag", "position", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Position = value
-	} else {
-		entries.Position = -1
-	}
-	if verb.GetOptionsSize([]string{"--format"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "format", []string{"--format"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "format", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Format = value
-	}
-	if verb.GetOptionsSize([]string{"--pattern"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "pattern", []string{"--pattern"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "pattern", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Pattern = value
-	}
-	if verb.GetOptionsSize([]string{"--path"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "path", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Path = value
-	} else {
-		entries.Path = "."
-	}
-	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
-	if entries.Quiet {
-		silenceLogs(deps)
-	}
-	if !checkUnknownFlags(deps, verb) {
-		return ExitUsage
-	}
-	if raw, rawOk := nextArgValue(verb); rawOk {
-		value, valueOk := parseStringValue(deps, "arg", "name", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Name = value
-	}
-	if !checkUnusedArgs(deps, verb) {
-		return ExitUsage
-	}
-	return add_field.CommandHandler(deps, entries)
-}
-
 func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_flag.Entries{}
 	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--identifier", "-i"}); occurrence++ {
@@ -879,6 +903,140 @@ func dispatchAddFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	return add_flag.CommandHandler(deps, entries)
 }
 
+func dispatchAddHeader(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_header.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--type"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "type", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Type = value
+	} else {
+		entries.Type = "string"
+	}
+	if verb.GetOptionsSize([]string{"--description"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{"--description"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "description", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Description = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "example", []string{"--example"}, occurrence)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "example", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Example = append(entries.Example, value)
+	}
+	if verb.GetOptionsSize([]string{"--default"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "default", []string{"--default"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "default", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Default = value
+	}
+	entries.Required = verb.IsPresent([]string{"--required"})
+	if verb.GetOptionsSize([]string{"--min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "min", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Min = value
+	}
+	if verb.GetOptionsSize([]string{"--max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "max", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Max = value
+	}
+	if verb.GetOptionsSize([]string{"--position"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "position", []string{"--position"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseIntValue(deps, "flag", "position", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Position = value
+	} else {
+		entries.Position = -1
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_header.CommandHandler(deps, entries)
+}
+
 func dispatchAddLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &add_lib_example.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -915,6 +1073,141 @@ func dispatchAddLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_lib_example.CommandHandler(deps, entries)
+}
+
+func dispatchAddParam(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_param.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--type"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "type", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Type = value
+	} else {
+		entries.Type = "string"
+	}
+	if verb.GetOptionsSize([]string{"--description"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{"--description"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "description", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Description = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "example", []string{"--example"}, occurrence)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "example", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Example = append(entries.Example, value)
+	}
+	if verb.GetOptionsSize([]string{"--default"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "default", []string{"--default"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "default", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Default = value
+	}
+	entries.Required = verb.IsPresent([]string{"--required"})
+	entries.Array = verb.IsPresent([]string{"--array"})
+	if verb.GetOptionsSize([]string{"--min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "min", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Min = value
+	}
+	if verb.GetOptionsSize([]string{"--max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "max", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Max = value
+	}
+	if verb.GetOptionsSize([]string{"--position"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "position", []string{"--position"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseIntValue(deps, "flag", "position", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Position = value
+	} else {
+		entries.Position = -1
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_param.CommandHandler(deps, entries)
 }
 
 func dispatchAddRoute(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -1005,6 +1298,136 @@ func dispatchAddRoute(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_route.CommandHandler(deps, entries)
+}
+
+func dispatchAddSegment(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_segment.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--identifier"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "identifier", []string{"--identifier"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "identifier", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Identifier = value
+	}
+	if verb.GetOptionsSize([]string{"--type"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "type", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Type = value
+	} else {
+		entries.Type = "string"
+	}
+	if verb.GetOptionsSize([]string{"--description"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "description", []string{"--description"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "description", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Description = value
+	}
+	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{"--example"}); occurrence++ {
+		raw, rawOk := optionValue(deps, verb, "example", []string{"--example"}, occurrence)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "example", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Example = append(entries.Example, value)
+	}
+	if verb.GetOptionsSize([]string{"--min"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "min", []string{"--min"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "min", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Min = value
+	}
+	if verb.GetOptionsSize([]string{"--max"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max", []string{"--max"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "max", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Max = value
+	}
+	if verb.GetOptionsSize([]string{"--position"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "position", []string{"--position"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseIntValue(deps, "flag", "position", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Position = value
+	} else {
+		entries.Position = -1
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_segment.CommandHandler(deps, entries)
 }
 
 func dispatchBuild(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -1508,6 +1931,58 @@ func dispatchRemoveArg(deps *deps.Deps, verb argvdeps.Parser) int {
 	return remove_arg.CommandHandler(deps, entries)
 }
 
+func dispatchRemoveBodyField(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_body_field.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_body_field.CommandHandler(deps, entries)
+}
+
 func dispatchRemoveCliExample(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_cli_example.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -1622,71 +2097,6 @@ func dispatchRemoveDoc(deps *deps.Deps, verb argvdeps.Parser) int {
 	return remove_doc.CommandHandler(deps, entries)
 }
 
-func dispatchRemoveField(deps *deps.Deps, verb argvdeps.Parser) int {
-	entries := &remove_field.Entries{}
-	if verb.GetOptionsSize([]string{"--route"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "route", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Route = value
-	} else {
-		deps.Std.Error("required flag 'route' not provided\n")
-		return ExitUsage
-	}
-	if verb.GetOptionsSize([]string{"--in"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "in", []string{"--in"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "in", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.In = value
-	} else {
-		entries.In = "query"
-	}
-	if verb.GetOptionsSize([]string{"--path"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "path", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Path = value
-	} else {
-		entries.Path = "."
-	}
-	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
-	if entries.Quiet {
-		silenceLogs(deps)
-	}
-	if !checkUnknownFlags(deps, verb) {
-		return ExitUsage
-	}
-	if raw, rawOk := nextArgValue(verb); rawOk {
-		value, valueOk := parseStringValue(deps, "arg", "name", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Name = value
-	} else {
-		deps.Std.Error("required arg 'name' not provided\n")
-		return ExitUsage
-	}
-	if !checkUnusedArgs(deps, verb) {
-		return ExitUsage
-	}
-	return remove_field.CommandHandler(deps, entries)
-}
-
 func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_flag.Entries{}
 	if verb.GetOptionsSize([]string{"--command", "-c"}) > 0 {
@@ -1739,6 +2149,58 @@ func dispatchRemoveFlag(deps *deps.Deps, verb argvdeps.Parser) int {
 	return remove_flag.CommandHandler(deps, entries)
 }
 
+func dispatchRemoveHeader(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_header.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_header.CommandHandler(deps, entries)
+}
+
 func dispatchRemoveLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_lib_example.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -1777,6 +2239,58 @@ func dispatchRemoveLibExample(deps *deps.Deps, verb argvdeps.Parser) int {
 	return remove_lib_example.CommandHandler(deps, entries)
 }
 
+func dispatchRemoveParam(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_param.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_param.CommandHandler(deps, entries)
+}
+
 func dispatchRemoveRoute(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &remove_route.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -1813,6 +2327,58 @@ func dispatchRemoveRoute(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return remove_route.CommandHandler(deps, entries)
+}
+
+func dispatchRemoveSegment(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_segment.Entries{}
+	if verb.GetOptionsSize([]string{"--route"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "route", []string{"--route"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required flag 'route' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "name", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Name = value
+	} else {
+		deps.Std.Error("required arg 'name' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_segment.CommandHandler(deps, entries)
 }
 
 func dispatchServerInit(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -1869,6 +2435,82 @@ func dispatchServerPurge(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return server_purge.CommandHandler(deps, entries)
+}
+
+func dispatchSetBody(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &set_body.Entries{}
+	if verb.GetOptionsSize([]string{"--type"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "type", []string{"--type"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "type", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Type = value
+	}
+	entries.Required = verb.IsPresent([]string{"--required"})
+	entries.Optional = verb.IsPresent([]string{"--optional"})
+	if verb.GetOptionsSize([]string{"--max-bytes"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "max-bytes", []string{"--max-bytes"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseIntValue(deps, "flag", "max-bytes", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.MaxBytes = value
+	} else {
+		entries.MaxBytes = -1
+	}
+	if verb.GetOptionsSize([]string{"--content-type"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "content-type", []string{"--content-type"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "content-type", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.ContentType = value
+	}
+	entries.DropSchema = verb.IsPresent([]string{"--drop-schema"})
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "route", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Route = value
+	} else {
+		deps.Std.Error("required arg 'route' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return set_body.CommandHandler(deps, entries)
 }
 
 func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {

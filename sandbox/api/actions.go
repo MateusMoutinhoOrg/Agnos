@@ -100,19 +100,18 @@ type RouteProps struct {
 	Examples        []string
 }
 
-// RouteFieldProps describes one field to add to a route's route.yaml. In is
-// the origin it is declared in — "path", "header", "query" or "body" — and is
-// the only thing that differs between the origins, which is why one pair of
-// actions covers all four. Identifier declares a trigger segment instead of a
+// RouteFieldProps describes one field to add to a route's route.yaml. It
+// covers the three origins that read a value off the request line — a captured
+// path segment, a header and a query parameter — which differ only in where
+// the entry lands. Identifier declares a literal path segment instead of a
 // captured one, and is normalized to start with "/". Default, Min and Max are
 // the raw literals typed on the command line ("" means unset); Position is the
-// index to insert at (< 0 appends); Format and Pattern apply to "body" alone.
+// index to insert at (< 0 appends).
 type RouteFieldProps struct {
 	Path        string
 	Route       string
 	Name        string
 	Identifier  string
-	In          string
 	Description string
 	Examples    []string
 	Type        string
@@ -122,8 +121,53 @@ type RouteFieldProps struct {
 	Min         string
 	Max         string
 	Position    int
-	Format      string
-	Pattern     string
+}
+
+// RouteBodyProps describes the body envelope of one route — everything about
+// the request body but the json-schema, which is grown property by property
+// with AddBodyField. Type is "none", "raw", "text" or "json"; Required and
+// Optional are the two sides of one switch, as are the empty strings and
+// MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared
+// json-schema.
+type RouteBodyProps struct {
+	Path        string
+	Route       string
+	Type        string
+	Required    bool
+	Optional    bool
+	MaxBytes    int
+	ContentType string
+	DropSchema  bool
+}
+
+// RouteBodyFieldProps describes one property of a route's body json-schema.
+// Name is the dotted path it sits at ("address.city"), and every other field
+// is one keyword of the supported subset: the raw literals typed on the
+// command line, where "" means unset. Type is "string", "boolean", "int",
+// "float" or "object", and Array wraps the whole of it in an array schema.
+// AdditionalProperties and NoAdditionalProperties are the two sides of one
+// switch.
+type RouteBodyFieldProps struct {
+	Path                   string
+	Route                  string
+	Name                   string
+	Type                   string
+	Required               bool
+	Array                  bool
+	Min                    string
+	Max                    string
+	ExclusiveMin           string
+	ExclusiveMax           string
+	Format                 string
+	Pattern                string
+	Enum                   []string
+	Const                  string
+	Nullable               bool
+	MinItems               string
+	MaxItems               string
+	UniqueItems            bool
+	AdditionalProperties   bool
+	NoAdditionalProperties bool
 }
 
 // DocProps describes one doc to create under docs/. Name is the doc's
@@ -225,13 +269,36 @@ type Actions struct {
 	// SetRoute rewrites the route-level keys of one route's route.yaml.
 	SetRoute func(props RouteProps) error
 
-	// AddField declares one field on a route, in the origin named by
-	// props.In.
-	AddField func(props RouteFieldProps) error
+	// AddSegment appends one segment to a route's path: a literal one when
+	// props.Identifier is set, a captured one otherwise.
+	AddSegment func(props RouteFieldProps) error
 
-	// RemoveField deletes one declared field from a route, from the origin
-	// named by in.
-	RemoveField func(path string, route string, in string, name string) error
+	// RemoveSegment deletes one segment from a route's path, named either
+	// by its capture name or by the identifier it spells.
+	RemoveSegment func(path string, route string, name string) error
+
+	// AddHeader declares one request header on a route.
+	AddHeader func(props RouteFieldProps) error
+
+	// RemoveHeader deletes one declared header from a route.
+	RemoveHeader func(path string, route string, name string) error
+
+	// AddParam declares one query-string parameter on a route.
+	AddParam func(props RouteFieldProps) error
+
+	// RemoveParam deletes one declared query parameter from a route.
+	RemoveParam func(path string, route string, name string) error
+
+	// SetBody rewrites the body keys of one route's route.yaml.
+	SetBody func(props RouteBodyProps) error
+
+	// AddBodyField declares one property of a route's body json-schema, at
+	// the dotted path props.Name.
+	AddBodyField func(props RouteBodyFieldProps) error
+
+	// RemoveBodyField deletes one property from a route's body
+	// json-schema.
+	RemoveBodyField func(path string, route string, name string) error
 
 	// AddDoc creates one doc directory under docs/, with its props.yaml and
 	// a doc.md to fill in.

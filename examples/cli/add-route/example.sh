@@ -1,4 +1,5 @@
-# The add-route example: declare a route and one field of each origin
+# The add-route example: declare a route and one entry of every place its
+# declaration holds something
 #
 # `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
 # The example writes only inside TestDir.
@@ -7,9 +8,11 @@ agnos start --path TestDir --project-name Test --module Test -q
 agnos server-init --path TestDir -q
 
 agnos add-route create-user --trigger /users --method POST --help "Create a user under a tenant" --category Users --path TestDir -q
-agnos add-field tenant --route create-user --in path --required --path TestDir -q
-agnos add-field authorization --route create-user --in header --required --path TestDir -q
-agnos add-field email --route create-user --in body --required --format email --path TestDir
+agnos add-segment tenant --route create-user --path TestDir -q
+agnos add-header authorization --route create-user --required --path TestDir -q
+agnos add-param page --route create-user --type int --default 1 --min 1 --path TestDir -q
+agnos set-body create-user --type json --required --path TestDir -q
+agnos add-body-field email --route create-user --required --format email --path TestDir
 
 # What result.yaml records: the declaration this example wrote and the struct
 # build generated from it. The lib side copies the same set.

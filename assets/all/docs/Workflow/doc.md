@@ -71,20 +71,24 @@ From there `agnos add-command <name> --help "..." --category "..."` declares a c
 
 ```bash
 agnos add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
-agnos add-field <name> --route <route> --in path   [--identifier /users | --required]
-agnos add-field <name> --route <route> --in header --required
-agnos add-field <name> --route <route> --in query  --type int --default 1 --min 1
-agnos add-field <name> --route <route> --in body   --type string --format email --required
 agnos set-route <route> --method PUT --example "curl localhost:8080/users"
-agnos remove-field <name> --route <route> --in query
+agnos add-segment <name> --route <route>            # a capture; --identifier /users for a literal
+agnos add-header <name> --route <route> --required
+agnos add-param <name> --route <route> --type int --default 1 --min 1
+agnos set-body <route> --type json --required --max-bytes 2097152
+agnos add-body-field <dotted.name> --route <route> --format email --required
+agnos remove-segment <name> --route <route>         # and remove-header / remove-param /
+agnos remove-body-field <dotted.name> --route <route>
 agnos remove-route <route>
 ```
 
 `add-route` writes `sandbox/internal/routes/<name>/route.yaml` (the declaration) and a stub
 `handler.go` (yours), then generates `entries.go` and the match/handle pair of the dispatch.
-Every key these editors write is in [RouteYaml](../RouteYaml/doc.md); never edit `route.yaml`
-by hand. `--in body` takes a dotted path (`address.city`) and creates the objects it passes
-through.
+One editor per place the declaration holds something, so every key of
+[RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
+edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
+it passes through; `set-body` covers the envelope around the schema — how the body is read,
+whether it is required, its size limit and its content-type.
 
 Then write `handler.go` — the whole hand-written half of a route:
 

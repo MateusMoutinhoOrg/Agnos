@@ -129,7 +129,7 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 
 ### `RouteFieldProps`
 
-RouteFieldProps describes one field to add to a route's route.yaml. In is the origin it is declared in — "path", "header", "query" or "body" — and is the only thing that differs between the origins, which is why one pair of actions covers all four. Identifier declares a trigger segment instead of a captured one, and is normalized to start with "/". Default, Min and Max are the raw literals typed on the command line ("" means unset); Position is the index to insert at (< 0 appends); Format and Pattern apply to "body" alone.
+RouteFieldProps describes one field to add to a route's route.yaml. It covers the three origins that read a value off the request line — a captured path segment, a header and a query parameter — which differ only in where the entry lands. Identifier declares a literal path segment instead of a captured one, and is normalized to start with "/". Default, Min and Max are the raw literals typed on the command line ("" means unset); Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
@@ -137,7 +137,6 @@ RouteFieldProps describes one field to add to a route's route.yaml. In is the or
 | `Route` | `string` |
 | `Name` | `string` |
 | `Identifier` | `string` |
-| `In` | `string` |
 | `Description` | `string` |
 | `Examples` | `[]string` |
 | `Type` | `string` |
@@ -147,8 +146,48 @@ RouteFieldProps describes one field to add to a route's route.yaml. In is the or
 | `Min` | `string` |
 | `Max` | `string` |
 | `Position` | `int` |
+
+### `RouteBodyProps`
+
+RouteBodyProps describes the body envelope of one route — everything about the request body but the json-schema, which is grown property by property with AddBodyField. Type is "none", "raw", "text" or "json"; Required and Optional are the two sides of one switch, as are the empty strings and MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared json-schema.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Optional` | `bool` |
+| `MaxBytes` | `int` |
+| `ContentType` | `string` |
+| `DropSchema` | `bool` |
+
+### `RouteBodyFieldProps`
+
+RouteBodyFieldProps describes one property of a route's body json-schema. Name is the dotted path it sits at ("address.city"), and every other field is one keyword of the supported subset: the raw literals typed on the command line, where "" means unset. Type is "string", "boolean", "int", "float" or "object", and Array wraps the whole of it in an array schema. AdditionalProperties and NoAdditionalProperties are the two sides of one switch.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Array` | `bool` |
+| `Min` | `string` |
+| `Max` | `string` |
+| `ExclusiveMin` | `string` |
+| `ExclusiveMax` | `string` |
 | `Format` | `string` |
 | `Pattern` | `string` |
+| `Enum` | `[]string` |
+| `Const` | `string` |
+| `Nullable` | `bool` |
+| `MinItems` | `string` |
+| `MaxItems` | `string` |
+| `UniqueItems` | `bool` |
+| `AdditionalProperties` | `bool` |
+| `NoAdditionalProperties` | `bool` |
 
 ### `DocProps`
 
@@ -190,8 +229,15 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `AddRoute` | `func(path string, name string, method string, trigger string, help string, category string) error` | AddRoute declares a new route: its route.yaml, its generated entries.go and a handler.go to fill in. |
 | `RemoveRoute` | `func(path string, name string) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
 | `SetRoute` | `func(props RouteProps) error` | SetRoute rewrites the route-level keys of one route's route.yaml. |
-| `AddField` | `func(props RouteFieldProps) error` | AddField declares one field on a route, in the origin named by props.In. |
-| `RemoveField` | `func(path string, route string, in string, name string) error` | RemoveField deletes one declared field from a route, from the origin named by in. |
+| `AddSegment` | `func(props RouteFieldProps) error` | AddSegment appends one segment to a route's path: a literal one when props.Identifier is set, a captured one otherwise. |
+| `RemoveSegment` | `func(path string, route string, name string) error` | RemoveSegment deletes one segment from a route's path, named either by its capture name or by the identifier it spells. |
+| `AddHeader` | `func(props RouteFieldProps) error` | AddHeader declares one request header on a route. |
+| `RemoveHeader` | `func(path string, route string, name string) error` | RemoveHeader deletes one declared header from a route. |
+| `AddParam` | `func(props RouteFieldProps) error` | AddParam declares one query-string parameter on a route. |
+| `RemoveParam` | `func(path string, route string, name string) error` | RemoveParam deletes one declared query parameter from a route. |
+| `SetBody` | `func(props RouteBodyProps) error` | SetBody rewrites the body keys of one route's route.yaml. |
+| `AddBodyField` | `func(props RouteBodyFieldProps) error` | AddBodyField declares one property of a route's body json-schema, at the dotted path props.Name. |
+| `RemoveBodyField` | `func(path string, route string, name string) error` | RemoveBodyField deletes one property from a route's body json-schema. |
 | `AddDoc` | `func(props DocProps) error` | AddDoc creates one doc directory under docs/, with its props.yaml and a doc.md to fill in. |
 | `RemoveDoc` | `func(path string, name string) error` | RemoveDoc deletes one doc directory and everything under it. |
 | `AddCliExample` | `func(path string, name string) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |

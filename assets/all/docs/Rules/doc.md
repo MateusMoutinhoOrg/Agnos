@@ -82,8 +82,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   exported from a route. It returns the status it answered with, and reaches `400`/`413`/`415`
   only by propagating one from `ReadBody`: the dispatch settles everything but the body before
   the handler runs. **(verify)**
-- A route's `route.yaml` is written by `add-route` and rewritten by `add-field` /
-  `remove-field` / `set-route`, never by hand: they re-render it with keys in alphabetical
+- A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
+  `add-segment` / `remove-segment`, `add-header` / `remove-header`, `add-param` /
+  `remove-param`, `set-body` and `add-body-field` / `remove-body-field` — one editor per place
+  the file holds something, and never by hand: they re-render it with keys in alphabetical
   order and drop comments.
 - Every `identifier` of `paths` starts with `/` and spells exactly one segment; `/` alone is
   the root. A route declares at least one of them, and every entry of `paths` carries an

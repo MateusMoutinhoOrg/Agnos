@@ -152,7 +152,10 @@ change a rule there and nowhere else. The ones most easily broken:
 - Generated files are never edited — change the template under `assets/` and bootstrap.
   `docs/GeneratedFiles/doc.md` lists which files are rewritten by every build.
 - Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The
-  same holds for a route's `route.yaml`: `add-route`, `add-field`, `remove-field`, `set-route`.
+  same holds for a route's `route.yaml`: `add-route`/`remove-route`, `set-route`,
+  `add-segment`/`remove-segment`, `add-header`/`remove-header`, `add-param`/`remove-param`,
+  `set-body`, `add-body-field`/`remove-body-field` — one editor per place the file holds
+  something, so no key of the declaration needs a hand edit.
   When declaring one of agnos's own flags, never pass a value that is exactly one of
   `add-flag`'s own spellings (`--identifier --example`) — the argv parser counts it as an
   occurrence and pollutes the declaration.

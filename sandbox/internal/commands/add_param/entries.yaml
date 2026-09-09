@@ -1,0 +1,104 @@
+args:
+    - description: the query key
+      examples:
+        - add-param page --route list-users
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - add-param page --route list-users --type int --default 1 --min 1
+    - add-param tag --route list-users --array
+flags:
+    - description: the route (identifier or package name) that receives the parameter
+      examples:
+        - add-param page --route list-users
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: string
+      description: 'the value type: string, boolean, int or float (defaults to string)'
+      examples:
+        - add-param page --route list-users --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: help text shown for the parameter
+      examples:
+        - add-param page --route list-users --description "the page to read"
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - array: true
+      description: an usage example for the parameter (repeatable)
+      examples:
+        - add-param page --route list-users --example "?page=2"
+      identifiers:
+        - --example
+      name: example
+      type: string
+    - description: the literal assigned when the parameter is absent (cannot be combined with --required)
+      examples:
+        - add-param page --route list-users --type int --default 1
+      identifiers:
+        - --default
+      name: default
+      type: string
+    - description: answer 400 when the parameter is not provided (not for booleans or parameters with --default)
+      examples:
+        - add-param query --route list-users --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: collect every occurrence into a []T field instead of a single value
+      examples:
+        - add-param tag --route list-users --array
+      identifiers:
+        - --array
+      name: array
+      type: boolean
+    - description: smallest accepted value (int/float only)
+      examples:
+        - add-param page --route list-users --type int --min 1
+      identifiers:
+        - --min
+      name: min
+      type: string
+    - description: largest accepted value (int/float only)
+      examples:
+        - add-param page --route list-users --type int --max 100
+      identifiers:
+        - --max
+      name: max
+      type: string
+    - default: "-1"
+      description: zero-based index to insert the parameter at (defaults to the end)
+      examples:
+        - add-param page --route list-users --position 0
+      identifiers:
+        - --position
+      name: position
+      type: int
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-param page --route list-users --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare a query parameter on a route
+identifiers:
+    - add-param
+long-description: 'Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array is accepted here and nowhere else: every occurrence of the key is collected into a []T field.'

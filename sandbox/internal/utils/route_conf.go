@@ -101,35 +101,17 @@ func RouteIdentifierSegment(deps *deps.Deps, raw string) (string, error) {
 	return "/" + inner, nil
 }
 
-// RouteFieldIn is one of the four places a field may be declared in. The
-// selector is what tells `add-field` and `remove-field` which of them to edit,
-// so the same pair covers every origin.
+// RouteFieldIn names the three origins that read a value off the request line.
+// They share one Field shape and one set of editors, and differ only in the
+// rules NewRouteField holds each of them to.
 const (
-	// RouteFieldInPath appends a segment to the route's `paths`.
+	// RouteFieldInPath is a captured segment of the route's `paths`.
 	RouteFieldInPath = "path"
-	// RouteFieldInHeader declares a request header.
+	// RouteFieldInHeader is a declared request header.
 	RouteFieldInHeader = "header"
-	// RouteFieldInQuery declares a query-string parameter.
+	// RouteFieldInQuery is a declared query-string parameter.
 	RouteFieldInQuery = "query"
-	// RouteFieldInBody declares a property of the body's json-schema.
-	RouteFieldInBody = "body"
 )
-
-// RouteFieldOrigin normalizes the --in selector, listing the accepted values
-// when it is not one of them.
-func RouteFieldOrigin(deps *deps.Deps, raw string) (string, error) {
-	switch deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(raw)) {
-	case "", RouteFieldInQuery, "param", "params":
-		return RouteFieldInQuery, nil
-	case RouteFieldInPath, "paths":
-		return RouteFieldInPath, nil
-	case RouteFieldInHeader, "headers":
-		return RouteFieldInHeader, nil
-	case RouteFieldInBody:
-		return RouteFieldInBody, nil
-	}
-	return "", deps.Std.Errorf("unknown --in %q (use path, header, query or body)", raw)
-}
 
 // NewRouteField builds a routeconf.Field from the raw values typed on the
 // command line, holding to the rules of the origin it is declared in: a

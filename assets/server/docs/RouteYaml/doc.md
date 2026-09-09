@@ -2,9 +2,18 @@
 
 `sandbox/internal/routes/<name>/route.yaml` declares one http route. `agnos build` generates
 `entries.go` (the `Entries` struct and its `ReadBody`) and a match/handle pair in
-`sandbox/internal/server/servermain.go` from it. Grow it with
-`add-field` / `remove-field` / `set-route` ([Workflow](../Workflow/doc.md#change-the-route-surface)),
-not by hand: the editors re-render it with keys in alphabetical order and drop comments.
+`sandbox/internal/server/servermain.go` from it. Grow it with the editors of
+[Workflow](../Workflow/doc.md#change-the-route-surface) — one per place this file holds
+something — not by hand: they re-render it with keys in alphabetical order and drop comments.
+
+| Section | Editors |
+|---|---|
+| route-level keys | `set-route` |
+| `paths` | `add-segment` / `remove-segment` |
+| `headers` | `add-header` / `remove-header` |
+| `params` | `add-param` / `remove-param` |
+| `body` | `set-body` |
+| `body.json-schema` | `add-body-field` / `remove-body-field` |
 
 ```yaml
 method: POST

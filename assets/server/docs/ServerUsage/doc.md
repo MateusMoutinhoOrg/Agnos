@@ -37,22 +37,25 @@ err := sandbox.Server.Serve(api.ServeProps{Addr: ":8080", ReadTimeoutMs: 10000, 
 
 ```bash
 {{.Name}} add-route create-user --trigger /users --method POST --help "Create a user" --category Users
-{{.Name}} add-field tenant --route create-user --in path --required
-{{.Name}} add-field authorization --route create-user --in header --required
-{{.Name}} add-field page --route create-user --in query --type int --default 1 --min 1
-{{.Name}} add-field email --route create-user --in body --type string --format email --required
-{{.Name}} remove-field page --route create-user --in query
+{{.Name}} add-segment tenant --route create-user
+{{.Name}} add-header authorization --route create-user --required
+{{.Name}} add-param page --route create-user --type int --default 1 --min 1
+{{.Name}} set-body create-user --type json --required
+{{.Name}} add-body-field email --route create-user --format email --required
+{{.Name}} remove-param page --route create-user
 {{.Name}} remove-route create-user
 ```
 
 `add-route` writes `route.yaml` (the declaration) and a stub `handler.go` (yours); `build`
-generates `entries.go` and the dispatch arm. Every key these editors write is in
-[RouteYaml](../RouteYaml/doc.md); never edit `route.yaml` by hand.
+generates `entries.go` and the dispatch arm. One editor per place the declaration holds
+something — `add-segment`, `add-header`, `add-param`, `set-body`, `add-body-field`, `set-route`,
+each with its `remove-` inverse — so every key of [RouteYaml](../RouteYaml/doc.md) is reachable
+from the command line and `route.yaml` is never edited by hand.
 
-`--in path` appends a segment: `--identifier /users` for a literal, or `--name tenant` for a
-capture. An identifier is normalized to start with `/`, and an inner or trailing slash is
-refused. `--in body` takes a dotted path (`address.city`), creating the intervening objects in
-the `json-schema`.
+`add-segment` takes `--identifier /users` for a literal segment, or a name for a capture; an
+identifier is normalized to start with `/`, and an inner or trailing slash is refused.
+`add-body-field` takes a dotted path (`address.city`), creating the intervening objects in the
+`json-schema`.
 
 ## Write the handler
 

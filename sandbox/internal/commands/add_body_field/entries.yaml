@@ -1,0 +1,161 @@
+args:
+    - description: the dotted path of the property (address.city); the objects it passes through are created as needed
+      examples:
+        - add-body-field address.city --route create-user
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - add-body-field email --route create-user --format email --max 254 --required
+    - add-body-field address.city --route create-user --required
+    - add-body-field role --route create-user --enum admin --enum member
+    - add-body-field tags --route create-user --array --unique-items --max-items 10
+flags:
+    - description: the route (identifier or package name) that receives the property
+      examples:
+        - add-body-field email --route create-user
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: string
+      description: 'the value type: string, boolean, int, float or object (defaults to string)'
+      examples:
+        - add-body-field age --route create-user --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: list the property in its parent object's required set
+      examples:
+        - add-body-field email --route create-user --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: declare an array of the type instead of a single value
+      examples:
+        - add-body-field tags --route create-user --array
+      identifiers:
+        - --array
+      name: array
+      type: boolean
+    - description: minimum for a number, minLength for a string
+      examples:
+        - add-body-field age --route create-user --type int --min 0
+      identifiers:
+        - --min
+      name: min
+      type: string
+    - description: maximum for a number, maxLength for a string
+      examples:
+        - add-body-field age --route create-user --type int --max 130
+      identifiers:
+        - --max
+      name: max
+      type: string
+    - description: exclusiveMinimum for a number property
+      examples:
+        - add-body-field score --route create-user --type float --exclusive-min 0
+      identifiers:
+        - --exclusive-min
+      name: exclusive-min
+      type: string
+    - description: exclusiveMaximum for a number property
+      examples:
+        - add-body-field score --route create-user --type float --exclusive-max 1
+      identifiers:
+        - --exclusive-max
+      name: exclusive-max
+      type: string
+    - description: 'json-schema format for a string property: email, uuid, date-time or uri'
+      examples:
+        - add-body-field email --route create-user --format email
+      identifiers:
+        - --format
+      name: format
+      type: string
+    - description: regular expression a string property must match
+      examples:
+        - add-body-field zip --route create-user --pattern "^[0-9]{5}$"
+      identifiers:
+        - --pattern
+      name: pattern
+      type: string
+    - array: true
+      description: an accepted value of the property (repeatable; declares the enum set)
+      examples:
+        - add-body-field role --route create-user --enum admin --enum member
+      identifiers:
+        - --enum
+      name: enum
+      type: string
+    - description: the single value the property must carry
+      examples:
+        - add-body-field kind --route create-user --const user
+      identifiers:
+        - --const
+      name: const
+      type: string
+    - description: accept null as well as the declared type
+      examples:
+        - add-body-field nickname --route create-user --nullable
+      identifiers:
+        - --nullable
+      name: nullable
+      type: boolean
+    - description: shortest accepted array (--array only)
+      examples:
+        - add-body-field tags --route create-user --array --min-items 1
+      identifiers:
+        - --min-items
+      name: min-items
+      type: string
+    - description: longest accepted array (--array only)
+      examples:
+        - add-body-field tags --route create-user --array --max-items 10
+      identifiers:
+        - --max-items
+      name: max-items
+      type: string
+    - description: refuse an array holding the same value twice (--array only)
+      examples:
+        - add-body-field tags --route create-user --array --unique-items
+      identifiers:
+        - --unique-items
+      name: unique-items
+      type: boolean
+    - description: accept undeclared keys inside an object property
+      examples:
+        - add-body-field meta --route create-user --type object --additional-properties
+      identifiers:
+        - --additional-properties
+      name: additional-properties
+      type: boolean
+    - description: refuse undeclared keys inside an object property
+      examples:
+        - add-body-field meta --route create-user --type object --no-additional-properties
+      identifiers:
+        - --no-additional-properties
+      name: no-additional-properties
+      type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-body-field email --route create-user --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare a property of a route's body json-schema
+identifiers:
+    - add-body-field
+long-description: Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and EntriesSchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.

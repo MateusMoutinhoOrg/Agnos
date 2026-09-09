@@ -40,7 +40,7 @@
 | `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/routes/<name>/entries.go` | `build` | always. The `Entries` struct and `ReadBody` of that route |
 | `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `props.yaml` |
-| `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `add-field` / `remove-field` / `set-route` — never by hand |
+| `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-segment` / `add-header` / `add-param` / `set-body` / `add-body-field` and their inverses — never by hand |
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
 {{- end }}

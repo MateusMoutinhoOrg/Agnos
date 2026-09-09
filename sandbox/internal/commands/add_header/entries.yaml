@@ -1,0 +1,97 @@
+args:
+    - description: the header name, matched without regard to case
+      examples:
+        - add-header authorization --route create-user
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - add-header authorization --route create-user --required
+    - add-header x-retries --route create-user --type int --default 1 --max 5
+flags:
+    - description: the route (identifier or package name) that receives the header
+      examples:
+        - add-header authorization --route create-user
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: string
+      description: 'the value type: string, boolean, int or float (defaults to string)'
+      examples:
+        - add-header x-retries --route create-user --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: help text shown for the header
+      examples:
+        - add-header authorization --route create-user --description "the bearer token"
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - array: true
+      description: an usage example for the header (repeatable)
+      examples:
+        - add-header authorization --route create-user --example "Bearer abc"
+      identifiers:
+        - --example
+      name: example
+      type: string
+    - description: the literal assigned when the header is absent (cannot be combined with --required)
+      examples:
+        - add-header x-retries --route create-user --type int --default 1
+      identifiers:
+        - --default
+      name: default
+      type: string
+    - description: answer 400 when the header is not provided (not for booleans or headers with --default)
+      examples:
+        - add-header authorization --route create-user --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: smallest accepted value (int/float only)
+      examples:
+        - add-header x-retries --route create-user --type int --min 0
+      identifiers:
+        - --min
+      name: min
+      type: string
+    - description: largest accepted value (int/float only)
+      examples:
+        - add-header x-retries --route create-user --type int --max 5
+      identifiers:
+        - --max
+      name: max
+      type: string
+    - default: "-1"
+      description: zero-based index to insert the header at (defaults to the end)
+      examples:
+        - add-header authorization --route create-user --position 0
+      identifiers:
+        - --position
+      name: position
+      type: int
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-header authorization --route create-user --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare a request header on a route
+identifiers:
+    - add-header
+long-description: Declares one request header on a route and runs build so entries.go and the dispatch arm pick it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs.

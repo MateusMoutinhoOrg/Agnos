@@ -19,7 +19,7 @@ um arquivo *cli* que já existe (regra "Every file is an instance of a pattern")
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` |
 | Grupo de assets | `assets/cli/` | `assets/server/` |
 | Instalação / remoção | `cli-init` / `cli-purge` | `server-init` / `server-purge` |
-| Editores da declaração | `add-command`, `add-flag`, `add-arg`, `set-command` | `add-route`, `add-field`, `remove-field`, `set-route`, `remove-route` |
+| Editores da declaração | `add-command`, `add-flag`, `add-arg`, `set-command` | `add-route`, `set-route`, `add-segment`, `add-header`, `add-param`, `set-body`, `add-body-field` (+ inversos) |
 | Gatilho no build | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` |
 
 Invariantes:
@@ -90,8 +90,9 @@ Editar também `assets/all/docs/DepList/doc.md` (uma linha).
 
 ## 3. Fase 2 — `route.yaml`, a declaração
 
-`sandbox/internal/routes/<name>/route.yaml`, escrito por `add-route` e reescrito por
-`add-field` / `remove-field` / `set-route` — **nunca à mão**. Diretório snake_case para rota
+`sandbox/internal/routes/<name>/route.yaml`, escrito por `add-route` e reescrito por um editor
+por lugar que o arquivo guarda algo — `set-route`, `add-segment`, `add-header`, `add-param`,
+`set-body`, `add-body-field` e seus inversos — **nunca à mão**. Diretório snake_case para rota
 kebab-case (`get-user` -> `get_user/`).
 
 Não existe chave `path`: o caminho é a concatenação dos segmentos de `paths`, derivada pelo
@@ -451,14 +452,19 @@ Duas camadas por feature: `<name>.go` (abre SmartIO, persiste, dispara `build`) 
 | `add_route` -> `add-route` | escreve `route.yaml` + `handler.go` (recusa sobrescrever) |
 | `remove_route` -> `remove-route` | apaga o diretório da rota |
 | `set_route` -> `set-route` | reescreve chaves de nível de rota (`method`, `help`, `category`, `long-description`, `hidden`, `examples`) |
-| `add_field` -> `add-field` | acrescenta segmento ou campo conforme `--in path\|header\|query\|body` |
-| `remove_field` -> `remove-field` | remove um campo declarado |
+| `add_segment` / `remove_segment` | acrescenta ou remove um segmento de `paths` |
+| `add_header` / `remove_header` | declara ou remove um header de requisição |
+| `add_param` / `remove_param` | declara ou remove um parâmetro de query |
+| `set_body` -> `set-body` | reescreve o envelope do corpo (`type`, `required`, `max-bytes`, `content-type`, `--drop-schema`) |
+| `add_body_field` / `remove_body_field` | declara ou remove uma propriedade do `json-schema` |
 
-Um único par `add-field`/`remove-field`: as origens diferem só pelo seletor `--in`. `--in path`
-acrescenta ao fim de `paths` (ou em `--position`), com `--identifier` para trigger ou `--name`
-para captura. `--identifier` normaliza o valor para começar com `/` (`users` -> `/users`) e
-recusa `/` interno ou final. `--in body` aceita caminho pontuado (`address.city`), criando os
-objetos intermediários no `json-schema`.
+Um editor por origem, espelhando `add-flag`/`add-arg` do lado cli: nenhuma chave da declaração
+precisa de edição à mão. `add-segment` acrescenta ao fim de `paths` (ou em `--position`), com
+`--identifier` para trigger ou um nome para captura; `--identifier` normaliza o valor para
+começar com `/` (`users` -> `/users`) e recusa `/` interno ou final. `add-body-field` aceita
+caminho pontuado (`address.city`), criando os objetos intermediários no `json-schema`, e cobre
+todo o subconjunto de keywords (`enum`, `const`, `nullable`, `additionalProperties`, os limites
+exclusivos e os de lista).
 
 ### `server-init` implica CLI
 
@@ -562,8 +568,15 @@ ServerPurge func(path string) error
 AddRoute    func(path string, name string, method string, trigger string, help string, category string) error
 RemoveRoute func(path string, name string) error
 SetRoute    func(props RouteProps) error
-AddField    func(props RouteFieldProps) error
-RemoveField func(path string, route string, in string, name string) error
+AddSegment      func(props RouteFieldProps) error
+RemoveSegment   func(path string, route string, name string) error
+AddHeader       func(props RouteFieldProps) error
+RemoveHeader    func(path string, route string, name string) error
+AddParam        func(props RouteFieldProps) error
+RemoveParam     func(path string, route string, name string) error
+SetBody         func(props RouteBodyProps) error
+AddBodyField    func(props RouteBodyFieldProps) error
+RemoveBodyField func(path string, route string, name string) error
 ```
 
 `trigger` (em `AddRoute`) e `Identifier` (em `RouteFieldProps`) são normalizados para começar
@@ -597,7 +610,7 @@ em `verify_internal.go`. Nenhuma escrita, uma string por violação:
 |---|---|
 | `assets/server/docs/RouteYaml/` | toda chave do `route.yaml` (irmão de `assets/all/docs/EntriesYaml/`) |
 | `assets/server/docs/Routes/` | tabela de `{{range .RouteDocs}}` (irmão de `docs/Commands`) |
-| `assets/server/docs/ServerUsage/` | subir o servidor; ciclo `add-route` -> `add-field` -> `build` |
+| `assets/server/docs/ServerUsage/` | subir o servidor; ciclo `add-route` -> editores -> `build` |
 | `assets/all/docs/Rules/doc.md` | seção `## Routes` sob `{{ if .HasServer }}` |
 | `assets/all/docs/GeneratedFiles/doc.md` | bloco `{{- if .HasServer }}`: `api/server.go`, `binds/server.go`, `internal/server/*.go`, `routes/<name>/entries.go` (always), `route.yaml`/`handler.go` (once) |
 | `assets/all/docs/Workflow/doc.md` | `## Add the server layer`, `## Change the route surface` |
@@ -625,8 +638,8 @@ Criados só por comando; `result.yaml` só por `exec-test`/`update-test`.
 - `cli/server-init` — `start` + `server-init`; copia `sandbox/api/server.go`,
   `sandbox/internal/server/`, `sandbox/internal/routes/health/` e
   `sandbox/internal/commands/start_server/` (prova de que o `cli-init` implícito rodou)
-- `cli/add-route` — `add-route` + três `add-field` (`--in path`, `--in header`, `--in body`);
-  copia o `route.yaml` e o `entries.go` da rota
+- `cli/add-route` — `add-route` + `add-segment` + `add-header` + `add-param` + `set-body` +
+  `add-body-field`; copia o `route.yaml` e o `entries.go` da rota
 - `lib/server-route` — mesmo resultado pela API, copiando o mesmo conjunto
 
 ---

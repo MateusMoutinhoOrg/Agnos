@@ -1,0 +1,37 @@
+args:
+    - description: the query parameter to drop
+      examples:
+        - remove-param page --route list-users
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - remove-param page --route list-users
+flags:
+    - description: the route (identifier or package name) the parameter is declared on
+      examples:
+        - remove-param page --route list-users
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-param page --route list-users --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one declared query parameter from a route
+identifiers:
+    - remove-param
+long-description: 'Drops one declared query parameter from a route, the exact inverse of add-param. The build renders only: dropping a parameter may leave hand-written code referring to what is gone.'
