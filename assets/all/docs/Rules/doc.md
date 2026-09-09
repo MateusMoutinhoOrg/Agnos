@@ -14,7 +14,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   same filenames, same function names, same ordering. If no pattern fits, define and document
   the pattern first — `verify` and the collectors read shape by convention, so a one-off
   breaks them.
-- **Deterministic and idempotent.** Same input, same bytes out: `agnos build` run twice must
+- **Deterministic and idempotent.** Same input, same bytes out: `{{.GeneratorName}} build` run twice must
   leave the tree unchanged.
 - A generated file is never edited — the `always` rows of
   [GeneratedFiles](../GeneratedFiles/doc.md), `(gen)` in [Structure](../Structure/doc.md).

@@ -16,6 +16,14 @@ func projectNameConst(deps *deps.Deps, name string) string {
 	return deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
 }
 
+// generatorName is the cli name of the binary running this build — the
+// generator, never the project being generated. Docs that spell a command of
+// the generator ("agnos add-route") render it from here, while a command of the
+// generated project ("<name> start-server") renders from the project's own Name.
+func generatorName(deps *deps.Deps) string {
+	return deps.Stringsdeps.ToLower(config.ProjectName)
+}
+
 func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	deps.Std.Log("build started with path %s \n", path)
 
@@ -120,7 +128,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
-	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name), GeneratedDocsGroups(hasCli, hasServer))
+	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name, generatorName(deps)), GeneratedDocsGroups(hasCli, hasServer))
 	if err != nil {
 		return err
 	}
@@ -135,6 +143,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Name":              project_conf.Name,
 		"Version":           project_conf.Version,
 		"ProjectName":       projectNameConst(deps, project_conf.Name),
+		"GeneratorName":     generatorName(deps),
 		"ConfigDir":         config.ProjectName + "Config",
 		"StructureConfFile": utils.StructureConfFile,
 		"HasDeps":           hasDeps,

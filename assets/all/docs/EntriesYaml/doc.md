@@ -1,6 +1,6 @@
 # EntriesYaml
 
-`sandbox/internal/commands/<name>/entries.yaml` declares one command. `agnos build` generates
+`sandbox/internal/commands/<name>/entries.yaml` declares one command. `{{.GeneratorName}} build` generates
 `entries.go` (the `Entries` struct) and a dispatch arm from it. Grow it with
 `add-flag` / `add-arg` / `set-command` ([Workflow](../Workflow/doc.md#change-the-command-surface)),
 not by hand: the editors re-render it with keys in alphabetical order and drop comments.

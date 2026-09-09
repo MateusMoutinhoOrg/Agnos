@@ -2,6 +2,6 @@ cli-output: "remove-cli-example removing examples/cli/greet \nbuild started with
 exit-code: 0
 tree:
     - file: docs/CliExamples/doc.md
-      sha: 863a18d39415ad7065c6ed167b0aa4cc3453949305e18e6a66b55cbdd7890e63
+      sha: 4ad6bc8336d693fe05cf360a7366d535e4b42f2e56d0b9ab4f39b3e30f9f55cd
     - file: docs/CliExamples/props.yaml
       sha: b419645e7cf90ba5ad94f21d423b6d67bb08b0ea3712ab9bf00239feddbee412

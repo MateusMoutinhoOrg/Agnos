@@ -28,6 +28,14 @@ are rendered from `assets/all/docs/` into **every** agnos project, this one incl
 template, and it has to read correctly in a scaffolded project, not only here. Guard a line
 that holds for this repo alone with `{{ if .HasAssets }}`.
 
+**Two names, never swapped.** `{{.GeneratorName}}` is the cli running the build — agnos — and
+prefixes every command agnos owns (`agnos build`, `agnos add-command`, `agnos add-route`,
+`agnos dep-install`, `agnos exec-test`). `{{.Name}}` is the project being generated and prefixes
+only what that project answers itself (`<name> help`, `<name> version`, `<name> start-server`,
+and whatever its own `add-command` declared). Never hardcode `agnos` in a template, and never
+use `{{.Name}}` to spell an agnos command: in this repo both render `agnos`, so the mistake is
+invisible here and surfaces only in a scaffolded project.
+
 ## Audience: LLMs, not humans
 
 The primary reader and writer of this repo is an LLM. Every choice — code shape, docs,

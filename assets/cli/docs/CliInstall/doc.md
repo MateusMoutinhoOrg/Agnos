@@ -65,6 +65,6 @@ curl.exe -sL https://{{.Module}}/releases/latest/download/windowsi32.exe -o "$di
 go build -o {{.Name}} ./cmd/main && sudo mv {{.Name}} /usr/local/bin/
 ```
 
-The released binaries are the ones `agnos compile --target all` builds and `agnos publish`
+The released binaries are the ones `{{.GeneratorName}} compile --target all` builds and `{{.GeneratorName}} publish`
 uploads. `{{.Name}} version` prints the `version` of `{{.ConfigDir}}/project.yaml`,
 `{{.Name}} help` every command — each one is listed in [Commands](../Commands/doc.md).

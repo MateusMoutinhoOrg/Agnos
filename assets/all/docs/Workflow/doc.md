@@ -1,14 +1,14 @@
 # Workflow
 
-Every change this project takes and the command that makes it. `agnos` owns every generated
+Every change this project takes and the command that makes it. `{{.GeneratorName}}` owns every generated
 file; what stays hand-written is listed in [GeneratedFiles](../GeneratedFiles/doc.md), and the
 rules each recipe holds to are in [Rules](../Rules/doc.md).
 
 ## The loop
 
 ```bash
-agnos build      # verify + regenerate every generated file + go mod tidy + compile
-agnos verify     # the schema check alone, writes nothing
+{{.GeneratorName}} build      # verify + regenerate every generated file + go mod tidy + compile
+{{.GeneratorName}} verify     # the schema check alone, writes nothing
 ```
 
 `build` is the only thing that regenerates{{ if .HasCli }} the dispatch,{{ end }} the wiring,
@@ -17,7 +17,7 @@ the tree unchanged. Every command below takes `--path <dir>` (default `.`) and `
 `build` for you.
 {{- if .HasAssets }}
 
-This project carries its own `assets/` template tree, so an installed `agnos` would rewrite it
+This project carries its own `assets/` template tree, so an installed `{{.GeneratorName}}` would rewrite it
 to that older binary's shape. Build it with a binary compiled from this tree instead.
 {{- end }}
 
@@ -27,13 +27,13 @@ No recipe below asks for a Go file to be created by hand except the cases listed
 ## Change the command surface
 
 ```bash
-agnos add-command <name> --help "one line" --category "Core"
-agnos add-flag <name> --command <cmd> --type string --description "..." [--default . | --required]
-agnos add-arg  <name> --command <cmd> --type int --min 1 --description "..."
-agnos set-command <cmd> --long-description "..." --example "<cmd> --flag v" --identifier <alias>
-agnos remove-flag <name> --command <cmd>
-agnos remove-arg  <name> --command <cmd>
-agnos remove-command <cmd>
+{{.GeneratorName}} add-command <name> --help "one line" --category "Core"
+{{.GeneratorName}} add-flag <name> --command <cmd> --type string --description "..." [--default . | --required]
+{{.GeneratorName}} add-arg  <name> --command <cmd> --type int --min 1 --description "..."
+{{.GeneratorName}} set-command <cmd> --long-description "..." --example "<cmd> --flag v" --identifier <alias>
+{{.GeneratorName}} remove-flag <name> --command <cmd>
+{{.GeneratorName}} remove-arg  <name> --command <cmd>
+{{.GeneratorName}} remove-command <cmd>
 ```
 
 `add-command` writes `sandbox/internal/commands/<name>/entries.yaml` (the declaration) and a
@@ -59,28 +59,28 @@ handler ran. [Commands](../Commands/doc.md) documents the command on the next bu
 ## Add the CLI layer
 
 ```bash
-agnos cli-init     # sandbox/internal/cli, cmd/main, the help and version commands, argvdeps + std
+{{.GeneratorName}} cli-init     # sandbox/internal/cli, cmd/main, the help and version commands, argvdeps + std
 ```
 
-From there `agnos add-command <name> --help "..." --category "..."` declares a command and
-`agnos add-flag` / `add-arg` its fields. `agnos cli-purge` removes the layer again.
+From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."` declares a command and
+`{{.GeneratorName}} add-flag` / `add-arg` its fields. `{{.GeneratorName}} cli-purge` removes the layer again.
 {{- end }}
 
 {{ if .HasServer }}
 ## Change the route surface
 
 ```bash
-agnos add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
-agnos set-route <route> --method PUT --example "curl localhost:8080/users"
-agnos add-segment <name> --route <route>            # a capture; --identifier /users for a literal
-agnos add-segment <name> --route <route> --array    # the last one, taking the rest of the path
-agnos add-header <name> --route <route> --required
-agnos add-param <name> --route <route> --type int --default 1 --min 1
-agnos set-body <route> --type json --required --max-bytes 2097152
-agnos add-body-field <dotted.name> --route <route> --format email --required
-agnos remove-segment <name> --route <route>         # and remove-header / remove-param /
-agnos remove-body-field <dotted.name> --route <route>
-agnos remove-route <route>
+{{.GeneratorName}} add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
+{{.GeneratorName}} set-route <route> --method PUT --example "curl localhost:8080/users"
+{{.GeneratorName}} add-segment <name> --route <route>            # a capture; --identifier /users for a literal
+{{.GeneratorName}} add-segment <name> --route <route> --array    # the last one, taking the rest of the path
+{{.GeneratorName}} add-header <name> --route <route> --required
+{{.GeneratorName}} add-param <name> --route <route> --type int --default 1 --min 1
+{{.GeneratorName}} set-body <route> --type json --required --max-bytes 2097152
+{{.GeneratorName}} add-body-field <dotted.name> --route <route> --format email --required
+{{.GeneratorName}} remove-segment <name> --route <route>         # and remove-header / remove-param /
+{{.GeneratorName}} remove-body-field <dotted.name> --route <route>
+{{.GeneratorName}} remove-route <route>
 ```
 
 `add-route` writes `sandbox/internal/routes/<name>/route.yaml` (the declaration) and a stub
@@ -111,13 +111,14 @@ it. [Routes](../Routes/doc.md) documents the route on the next build, and
 ## Add the server layer
 
 ```bash
-agnos server-init      # serverdeps, sandbox/internal/server, the health route, start-server
-agnos start-server     # listens on :8080
+{{.GeneratorName}} server-init      # serverdeps, sandbox/internal/server, the health route, start-server
+{{.Name}} start-server  # listens on :8080
 ```
 
-From there `agnos add-route <name> --trigger /<path> --help "..." --category "..."` declares a
-route and `agnos add-field` its fields. A project with no CLI gets one first: a server needs a
-command that starts it. `agnos server-purge` removes the layer again.
+From there `{{.GeneratorName}} add-route <name> --trigger /<path> --help "..." --category "..."` declares a
+route and `{{.GeneratorName}} add-segment` / `add-header` / `add-param` / `add-body-field` its fields. A
+project with no CLI gets one first: a server needs a command that starts it.
+`{{.GeneratorName}} server-purge` removes the layer again.
 {{- end }}
 ## Add reusable logic
 
@@ -143,9 +144,9 @@ Everything the sandbox is not allowed to do itself — filesystem, clock, networ
 arrives through `deps.Deps`. Install a ready-made one:
 
 ```bash
-agnos dep-list                 # every installable contract
-agnos dep-install <dep>        # sandbox/deps/<dep>/ + adapters/libs/<lib>/ + the go.mod require
-agnos dep-remove <dep>
+{{.GeneratorName}} dep-list                 # every installable contract
+{{.GeneratorName}} dep-install <dep>        # sandbox/deps/<dep>/ + adapters/libs/<lib>/ + the go.mod require
+{{.GeneratorName}} dep-remove <dep>
 ```
 
 [DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves and
@@ -158,15 +159,15 @@ agnos dep-remove <dep>
 Reach it as `deps.<X>` from anywhere inside `sandbox/`.
 {{- if not .HasDeps }}
 
-This project has no `sandbox/deps/` yet: `agnos deps-init` creates it (`deps-purge` removes it).
+This project has no `sandbox/deps/` yet: `{{.GeneratorName}} deps-init` creates it (`deps-purge` removes it).
 {{- end }}
 
 ## Add a doc
 
 ```bash
-agnos add-doc <Name> --theme <id> --description "one line"    # themes: {{.ConfigDir}}/themes.yaml
-agnos add-doc <Name>/<Sub> --description "one line"           # sub-doc, no theme
-agnos remove-doc <Name>
+{{.GeneratorName}} add-doc <Name> --theme <id> --description "one line"    # themes: {{.ConfigDir}}/themes.yaml
+{{.GeneratorName}} add-doc <Name>/<Sub> --description "one line"           # sub-doc, no theme
+{{.GeneratorName}} remove-doc <Name>
 ```
 
 Write `docs/<Name>/doc.md`; `README.md`'s index, and the parent `Index.md` of a sub-doc, are
@@ -176,14 +177,14 @@ file is what renders [Structure](../Structure/doc.md).
 ## Add an example
 
 ```bash
-{{ if .HasCli }}agnos add-cli-example <name>       # examples/cli/<name>/example.sh
-{{ end }}agnos add-lib-example <name>       # examples/lib/<name>/example.go
-agnos exec-test                    # run them all, check each against its golden
-agnos exec-test --only <name>      # one example, both sides
-agnos update-test <name>           # rewrite that one golden with what it produces now
-agnos exec-test --update           # rewrite every golden at once
-{{ if .HasCli }}agnos remove-cli-example <name>
-{{ end }}agnos remove-lib-example <name>
+{{ if .HasCli }}{{.GeneratorName}} add-cli-example <name>       # examples/cli/<name>/example.sh
+{{ end }}{{.GeneratorName}} add-lib-example <name>       # examples/lib/<name>/example.go
+{{.GeneratorName}} exec-test                    # run them all, check each against its golden
+{{.GeneratorName}} exec-test --only <name>      # one example, both sides
+{{.GeneratorName}} update-test <name>           # rewrite that one golden with what it produces now
+{{.GeneratorName}} exec-test --update           # rewrite every golden at once
+{{ if .HasCli }}{{.GeneratorName}} remove-cli-example <name>
+{{ end }}{{.GeneratorName}} remove-lib-example <name>
 ```
 
 Write the example itself, ending with the copy out of `TestDir` into `AssertDir` that says what
@@ -213,8 +214,8 @@ its License section — put whatever license you want there.
 ## Ship
 {{ if .HasCli }}
 ```bash
-agnos compile --target all   # cross-compile ./cmd/main into release/
-agnos publish                # build, compile, then a gh release
+{{.GeneratorName}} compile --target all   # cross-compile ./cmd/main into release/
+{{.GeneratorName}} publish                # build, compile, then a gh release
 ```
 
 `go build -o release/{{.Name}} ./cmd/main` is the plain local binary.
@@ -224,5 +225,5 @@ first. `compile` targets: `linux86`, `linuxarm64`, `linuxi32`, `mac86`, `macarm6
 {{- else }}
 This project has no `cmd/main` to compile: it ships as the Go module other programs import
 (see [LibUsage](../LibUsage/doc.md)). Bump `version` in `{{.ConfigDir}}/project.yaml` and tag
-the repository; `agnos cli-init` adds a binary if you want one.
+the repository; `{{.GeneratorName}} cli-init` adds a binary if you want one.
 {{- end }}

@@ -6,7 +6,7 @@ so it can be read as documentation and copied as a starting point. It ends by co
 `TestDir` into `AssertDir` the paths it asserts — `os.CopyFS(dst, os.DirFS(src))`, one call per
 path, each keeping the place it holds in the tree.
 
-`{{.Name}} exec-test` runs them all and checks each against the `result.yaml` beside it — the
+`{{.GeneratorName}} exec-test` runs them all and checks each against the `result.yaml` beside it — the
 golden holding the output, the exit code and the sha256 of every `AssertDir` file, written by
 `exec-test` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
 remove one{{ if .HasCli }}; the cli side is [CliExamples](../CliExamples/doc.md){{ end }}.
@@ -18,5 +18,5 @@ remove one{{ if .HasCli }}; the cli side is [CliExamples](../CliExamples/doc.md)
 {{- end }}
 {{ else }}
 No example is declared yet: `examples/lib/` is created by the first
-`{{.Name}} add-lib-example`.
+`{{.GeneratorName}} add-lib-example`.
 {{ end }}

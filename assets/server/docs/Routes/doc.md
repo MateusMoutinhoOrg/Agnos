@@ -42,7 +42,7 @@ Body: {{ . }}
 {{- end }}
 {{- end }}
 {{- else }}
-No route is declared yet. Run `{{.Name}} add-route <name> --trigger /<path> --help "..." --category "..."`,
+No route is declared yet. Run `{{.GeneratorName}} add-route <name> --trigger /<path> --help "..." --category "..."`,
 and every route lands on this page on the next build.
 {{- end }}
 

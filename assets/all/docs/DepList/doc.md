@@ -1,6 +1,6 @@
 # DepList
 
-What `agnos dep-install <dep>` renders into this project. A dep is named after the contract it
+What `{{.GeneratorName}} dep-install <dep>` renders into this project. A dep is named after the contract it
 installs under `sandbox/deps/<dep>/`; the `Deps` field is the title-cased dir name, and the
 adapter lib filling it lands under `adapters/libs/`. Signatures of the ones already installed
 are in [PublicApi](../PublicApi/doc.md#dependency-contracts).
@@ -22,7 +22,7 @@ are in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 | `stringsdeps` | `Stringsdeps` | `stringsdeps` | `strings`, `strconv` | Text manipulation and string/number conversion |
 | `templatedeps` | `Templatedeps` | `templatedeps` | `text/template` | Parse and execute one template over vars, with native funcs |
 
-`agnos dep-list` prints the same names; `agnos dep-remove <dep>` takes one back out. Writing a
+`{{.GeneratorName}} dep-list` prints the same names; `{{.GeneratorName}} dep-remove <dep>` takes one back out. Writing a
 contract of your own instead is in
 [Workflow](../Workflow/doc.md#add-a-dependency).
 

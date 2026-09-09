@@ -118,9 +118,10 @@ func docPropsOf(deps *deps.Deps, content string, group string, file string) (*do
 // props.yaml may use. The full var map cannot be handed over here: it carries
 // the doc index, which is what these docs are being collected to build. A
 // props.yaml that reaches for anything else renders it empty.
-func docsVars(module string, name string) map[string]interface{} {
+func docsVars(module string, name string, generator_name string) map[string]interface{} {
 	return map[string]interface{}{
-		"Module": module,
-		"Name":   name,
+		"Module":        module,
+		"Name":          name,
+		"GeneratorName": generator_name,
 	}
 }

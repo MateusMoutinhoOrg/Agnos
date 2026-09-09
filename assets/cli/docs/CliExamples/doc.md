@@ -7,7 +7,7 @@ resolves to the code in this tree. It ends by copying out of `TestDir` into `Ass
 paths it asserts — `mkdir -p AssertDir/<path>` then `cp -R TestDir/<path>/. AssertDir/<path>/`,
 each keeping the place it holds in the tree.
 
-`{{.Name}} exec-test` runs them all and checks each against the `result.yaml` beside it — the
+`{{.GeneratorName}} exec-test` runs them all and checks each against the `result.yaml` beside it — the
 golden holding the output, the exit code and the sha256 of every `AssertDir` file, written by
 `exec-test` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
 remove one; the lib side is [LibExamples](../LibExamples/doc.md).
@@ -19,5 +19,5 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 {{- end }}
 {{ else }}
 No example is declared yet: `examples/cli/` is created by the first
-`{{.Name}} add-cli-example`.
+`{{.GeneratorName}} add-cli-example`.
 {{ end }}

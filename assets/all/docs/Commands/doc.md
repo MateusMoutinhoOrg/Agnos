@@ -51,8 +51,8 @@ build.
 {{- end }}
 {{- end }}
 {{- else }}
-No command is declared yet — this project has no CLI surface. Run `agnos cli-init`, then
-`agnos add-command <name> --help "..." --category "..."`, and every command lands on this page
+No command is declared yet — this project has no CLI surface. Run `{{.GeneratorName}} cli-init`, then
+`{{.GeneratorName}} add-command <name> --help "..." --category "..."`, and every command lands on this page
 on the next build.
 {{- end }}
 

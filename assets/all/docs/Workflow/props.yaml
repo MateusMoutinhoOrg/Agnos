@@ -1,4 +1,4 @@
-description: "Every change this project takes and the agnos command that makes it"
+description: "Every change this project takes and the {{.GeneratorName}} command that makes it"
 name: "Workflow"
 order: 1
 themes:

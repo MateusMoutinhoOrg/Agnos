@@ -59,12 +59,13 @@ handler ran. [Commands](../Commands/doc.md) documents the command on the next bu
 
 ```bash
 agnos server-init      # serverdeps, sandbox/internal/server, the health route, start-server
-agnos start-server     # listens on :8080
+agnos start-server  # listens on :8080
 ```
 
 From there `agnos add-route <name> --trigger /<path> --help "..." --category "..."` declares a
-route and `agnos add-field` its fields. A project with no CLI gets one first: a server needs a
-command that starts it. `agnos server-purge` removes the layer again.
+route and `agnos add-segment` / `add-header` / `add-param` / `add-body-field` its fields. A
+project with no CLI gets one first: a server needs a command that starts it.
+`agnos server-purge` removes the layer again.
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No

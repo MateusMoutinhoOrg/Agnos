@@ -2,7 +2,7 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: docs/LibExamples/doc.md
-      sha: 74eb49a5b04b552439cbd4dfdfec7f55fac5eba848e4f34d47dc357fea5e6a4b
+      sha: 6baeb8506d96a176831d7cb537abb5c41bac2e4f7b6abbc45aad23c22bd1e2f4
     - file: docs/LibExamples/props.yaml
       sha: 12e3e2ce4605e04a1d13db3a014bb0416be1793c8bc39d85daa2cc6f29eb0767
     - file: examples/lib/greet/example.go

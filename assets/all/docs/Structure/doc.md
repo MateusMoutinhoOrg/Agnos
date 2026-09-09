@@ -20,7 +20,7 @@ directory, `gen: true` on a file `build` rewrites, and `order:` to place it amon
 ```
 {{- else }}
 Nothing is described yet: add entries to `{{.ConfigDir}}/{{.StructureConfFile}}` and run
-`agnos build`.
+`{{.GeneratorName}} build`.
 {{- end }}
 
 Every rule this shape has to hold to — layers, naming, generated files, docs — is in

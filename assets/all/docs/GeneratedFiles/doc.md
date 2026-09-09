@@ -1,7 +1,7 @@
 # GeneratedFiles
 
 `once` = written the first time, then yours to edit. `always` = rewritten by every
-`agnos build`, so an edit to it is lost — change the declaration it is rendered from instead.
+`{{.GeneratorName}} build`, so an edit to it is lost — change the declaration it is rendered from instead.
 
 | File | Written by | Rewrite |
 |---|---|---|

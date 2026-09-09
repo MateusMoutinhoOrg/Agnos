@@ -4,12 +4,12 @@ Two tools, nothing else. Every recipe of [Workflow](../Workflow/doc.md) assumes 
 
 | Tool | Version | Needed for |
 | --- | --- | --- |
-| Go | 1.25+ | compiling this project; `agnos build` ends in a `go mod tidy` and a compile |
-| agnos | latest | every generated file — the tree cannot be maintained by hand |
+| Go | 1.25+ | compiling this project; `{{.GeneratorName}} build` ends in a `go mod tidy` and a compile |
+| {{.GeneratorName}} | latest | every generated file — the tree cannot be maintained by hand |
 
 ```bash
 go version      # go1.25.0 or newer
-agnos version
+{{.GeneratorName}} version
 ```
 
 ## Go 1.25+
@@ -34,7 +34,7 @@ go version
 An existing Go is replaced, never upgraded in place: delete `/usr/local/go` (or the old
 `.pkg` / `.msi` install) before unpacking a new one.
 
-## agnos
+## {{.GeneratorName}}
 
 A single static binary — no runtime, no dependencies. Pick the platform's asset:
 
@@ -51,16 +51,16 @@ A single static binary — no runtime, no dependencies. Pick the platform's asse
 **macOS / Linux** — replace `<binary>`:
 
 ```bash
-curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o agnos
-chmod +x agnos && sudo mv agnos /usr/local/bin/
-agnos version
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o {{.GeneratorName}}
+chmod +x {{.GeneratorName}} && sudo mv {{.GeneratorName}} /usr/local/bin/
+{{.GeneratorName}} version
 ```
 
 **Windows** — PowerShell, replace `<binary>`:
 
 ```powershell
 $dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null
-curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o "$dir\agnos.exe"
+curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o "$dir\{{.GeneratorName}}.exe"
 [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
 ```
 
@@ -74,7 +74,7 @@ go run ./cmd/main local-install
 
 ## This repository
 
-This project carries its own `assets/` template tree, so an installed `agnos` would rewrite it
+This project carries its own `assets/` template tree, so an installed `{{.GeneratorName}}` would rewrite it
 to that older binary's shape. Never run one here — build the binary from this tree instead:
 
 ```bash

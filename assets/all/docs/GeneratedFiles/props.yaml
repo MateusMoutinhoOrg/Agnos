@@ -1,4 +1,4 @@
-description: "Every file agnos writes into this project and whether build overwrites it"
+description: "Every file {{.GeneratorName}} writes into this project and whether build overwrites it"
 name: "GeneratedFiles"
 order: 3
 themes:

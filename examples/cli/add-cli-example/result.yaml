@@ -2,7 +2,7 @@ cli-output: "add-cli-example creating examples/cli/greet \nbuild started with pa
 exit-code: 0
 tree:
     - file: docs/CliExamples/doc.md
-      sha: 19f283c08b72b665d53036e6311af0bdf69c792c0897edfd908854f689d30c86
+      sha: 5465a6a6f1370487402a1c260d53c23b1fd97188679cdeb548e59d5bca542aa1
     - file: docs/CliExamples/props.yaml
       sha: b419645e7cf90ba5ad94f21d423b6d67bb08b0ea3712ab9bf00239feddbee412
     - file: examples/cli/greet/example.sh
