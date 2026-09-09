@@ -1,4 +1,4 @@
-cli-output: "front-purge started with path TestDir \nfront-purge kept assets/frontend/pages: pages, styles and scripts are yours \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "front-purge started with path TestDir \nfront-purge kept assets/frontend: pages, styles and scripts are yours \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: assets/frontend/pages/home.html
