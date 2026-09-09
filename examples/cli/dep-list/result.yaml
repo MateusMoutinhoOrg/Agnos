@@ -1,4 +1,4 @@
-cli-output: "dep-list started with path TestDir \nargvdeps\ndbdeps\nembeddeps\ngoimportsdeps\nhashdeps\niodeps\nrequestdeps\nrundeps\nserializables\nsortdeps\nstd\nstringsdeps\ntemplatedeps\n"
+cli-output: "dep-list started with path TestDir \nargvdeps\ndbdeps\nembeddeps\ngoimportsdeps\nhashdeps\niodeps\nrequestdeps\nrundeps\nserializables\nserverdeps\nsortdeps\nstd\nstringsdeps\ntemplatedeps\n"
 exit-code: 0
 tree:
     - file: adapters/availables/standard/new.go

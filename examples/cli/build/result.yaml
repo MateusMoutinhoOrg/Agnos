@@ -12,13 +12,13 @@ tree:
     - file: AgnosConfig/structure.yaml
       sha: e310eb47afd196099ed102bb56b3fb4052ca6f3f1441975e72fd3ecd23eb5196
     - file: AgnosConfig/themes.yaml
-      sha: f40d60abbb046efc5e32317a8d9129644b73e85e6328f0550ffee8766151c6d9
+      sha: bfca54d2e915fa19bd69f60491160116d280bea07e6ff3c1896fb959c1c3e388
     - file: docs/Commands/doc.md
       sha: e56fd3987f43615bf06da7eb48501c7fe05e1219ac030625e89f8b227ee58c2f
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
     - file: docs/DepList/doc.md
-      sha: f389ed30d4696943d00d987390cb6fb3e9488d8d39f17657c51a0374bdb92cac
+      sha: dae7f6cab462b9eb0c8bb164d2361591be966a2338efd4d1850b699a6b0850b0
     - file: docs/DepList/props.yaml
       sha: 0fe62c1dd4cd79a6c6b436e14164cd1178f4920df752872535decdb93bdb33e5
     - file: docs/EntriesYaml/doc.md
@@ -54,6 +54,6 @@ tree:
     - file: docs/Structure/props.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 144f050e873a98ce3c0db824d9728f8a07c12a61845d22eb1a924b7fa0021e69
+      sha: e8007351abe946b7747096c1583eb510e72a2a036c9d641bbf403bda7515ed03
     - file: docs/Workflow/props.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b

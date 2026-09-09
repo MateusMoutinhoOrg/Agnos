@@ -1,0 +1,23 @@
+category: Server System
+examples:
+    - server-init
+    - server-init --path ./my-project
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - server-init --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Add the http server layer to the project
+identifiers:
+    - server-init
+long-description: 'Installs the deps the server layer needs, renders sandbox/internal/server, the routeio package and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.'

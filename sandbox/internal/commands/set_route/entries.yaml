@@ -1,0 +1,80 @@
+args:
+    - description: the route to edit (identifier or package name)
+      examples:
+        - set-route create-user --help "Create a user"
+      name: route
+      required: true
+      type: string
+category: Server System
+examples:
+    - set-route create-user --method POST --example "curl -X POST localhost:8080/users"
+flags:
+    - description: the http method the route answers
+      examples:
+        - --method POST
+      identifiers:
+        - --method
+        - -m
+      name: method
+      type: string
+    - description: one-line description of the route
+      examples:
+        - --help "Create a user"
+      identifiers:
+        - --help
+      name: help
+      type: string
+    - description: the heading the route is listed under in docs/Routes
+      examples:
+        - --category Users
+      identifiers:
+        - --category
+      name: category
+      type: string
+    - description: the paragraph docs/Routes prints under the route
+      examples:
+        - --long-description "Creates one user under a tenant."
+      identifiers:
+        - --long-description
+      name: long-description
+      type: string
+    - description: drop the route from docs/Routes, still dispatched
+      examples:
+        - --hidden
+      identifiers:
+        - --hidden
+      name: hidden
+      type: boolean
+    - description: list the route again in docs/Routes
+      examples:
+        - --visible
+      identifiers:
+        - --visible
+      name: visible
+      type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - set-route --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+    - array: true
+      description: an usage example for the route (repeatable)
+      examples:
+        - set-route create-user --example "curl localhost:8080/users"
+      identifiers:
+        - --example
+      name: example
+      type: string
+help: Rewrite the route-level keys of a route.yaml
+identifiers:
+    - set-route
+long-description: Overwrites method, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --example appends.

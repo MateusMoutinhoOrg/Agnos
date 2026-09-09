@@ -1,0 +1,61 @@
+args:
+    - description: the route name (becomes the directory sandbox/internal/routes/<name> and its Go package)
+      examples:
+        - add-route create-user
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - add-route create-user --trigger /users --method POST --help "Create a user" --category Users
+flags:
+    - description: the first literal segment of the path, always starting with / (defaults to /<name>)
+      examples:
+        - --trigger /users
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
+    - default: GET
+      description: 'the http method the route answers: GET, POST, PUT, PATCH, DELETE, HEAD or OPTIONS'
+      examples:
+        - --method POST
+      identifiers:
+        - --method
+        - -m
+      name: method
+      type: string
+    - description: one-line description of the route
+      examples:
+        - --help "Create a user"
+      identifiers:
+        - --help
+      name: help
+      required: true
+      type: string
+    - description: the heading the route is listed under in docs/Routes
+      examples:
+        - --category Users
+      identifiers:
+        - --category
+      name: category
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-route --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare a new http route
+identifiers:
+    - add-route
+long-description: Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so entries.go and the dispatch arm are generated. The trigger is normalized to start with /, and defaults to /<name>.

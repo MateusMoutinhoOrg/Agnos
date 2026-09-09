@@ -22,6 +22,7 @@ func VerifyInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	violations = append(violations, CheckContracts(deps, io)...)
 	violations = append(violations, CheckAdapters(deps, io)...)
 	violations = append(violations, CheckDeplist(deps, io, module_conf.Module)...)
+	violations = append(violations, CheckRoutes(deps, io)...)
 	violations = append(violations, CheckDocs(deps, io)...)
 	violations = append(violations, CheckStructure(deps, io)...)
 

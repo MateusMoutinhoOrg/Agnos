@@ -85,6 +85,47 @@ type CommandProps struct {
 	Examples        []string
 }
 
+// RouteProps carries the route-level keys of route.yaml that set-route may
+// rewrite. Empty strings leave the current value alone; Examples are appended
+// (deduplicated), and Hidden / Visible are the two sides of one switch.
+type RouteProps struct {
+	Path            string
+	Route           string
+	Method          string
+	Help            string
+	Category        string
+	LongDescription string
+	Hidden          bool
+	Visible         bool
+	Examples        []string
+}
+
+// RouteFieldProps describes one field to add to a route's route.yaml. In is
+// the origin it is declared in — "path", "header", "query" or "body" — and is
+// the only thing that differs between the origins, which is why one pair of
+// actions covers all four. Identifier declares a trigger segment instead of a
+// captured one, and is normalized to start with "/". Default, Min and Max are
+// the raw literals typed on the command line ("" means unset); Position is the
+// index to insert at (< 0 appends); Format and Pattern apply to "body" alone.
+type RouteFieldProps struct {
+	Path        string
+	Route       string
+	Name        string
+	Identifier  string
+	In          string
+	Description string
+	Examples    []string
+	Type        string
+	Default     string
+	Required    bool
+	Array       bool
+	Min         string
+	Max         string
+	Position    int
+	Format      string
+	Pattern     string
+}
+
 // DocProps describes one doc to create under docs/. Name is the doc's
 // directory, optionally nested under its parent ("PublicApi/api.Actions").
 // Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs
@@ -164,6 +205,33 @@ type Actions struct {
 
 	// RemoveArg deletes one declared positional argument from a command.
 	RemoveArg func(path string, command string, name string) error
+
+	// ServerInit adds the http server layer (sandbox/internal/server, the
+	// routeio package, the health route and the start-server command) to a
+	// project that has none, installing the CLI layer first when it is
+	// missing.
+	ServerInit func(path string) error
+
+	// ServerPurge removes the server layer and every route declared in it.
+	ServerPurge func(path string) error
+
+	// AddRoute declares a new route: its route.yaml, its generated
+	// entries.go and a handler.go to fill in.
+	AddRoute func(path string, name string, method string, trigger string, help string, category string) error
+
+	// RemoveRoute deletes one route and unwires it from the dispatch.
+	RemoveRoute func(path string, name string) error
+
+	// SetRoute rewrites the route-level keys of one route's route.yaml.
+	SetRoute func(props RouteProps) error
+
+	// AddField declares one field on a route, in the origin named by
+	// props.In.
+	AddField func(props RouteFieldProps) error
+
+	// RemoveField deletes one declared field from a route, from the origin
+	// named by in.
+	RemoveField func(path string, route string, in string, name string) error
 
 	// AddDoc creates one doc directory under docs/, with its props.yaml and
 	// a doc.md to fill in.

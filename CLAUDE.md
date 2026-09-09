@@ -22,8 +22,9 @@ README and a doc). Start with
 `docs/Contributing/doc.md` (what is specific to changing agnos itself).
 
 `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,LibExamples,PublicApi}/`
-are rendered from `assets/all/docs/` into **every** agnos project, this one included, and
-`docs/{CliInstall,CliExamples}/` from `assets/cli/docs/`: editing one means editing that
+are rendered from `assets/all/docs/` into **every** agnos project, this one included,
+`docs/{CliInstall,CliExamples}/` from `assets/cli/docs/` and
+`docs/{RouteYaml,Routes,ServerUsage}/` from `assets/server/docs/`: editing one means editing that
 template, and it has to read correctly in a scaffolded project, not only here. Guard a line
 that holds for this repo alone with `{{ if .HasAssets }}`.
 
@@ -104,8 +105,8 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   `binds/` holds one function file per `api/` file, `internal/` holds the logic.
 - **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<x>/` exports
   `Bind(deps *deps.Deps)`; `availables/standard/new.go` is generated from that dir listing.
-- **`assets/`** — every generated file's template. Groups `start`, `all`, `deps`, `cli` render
-  `assets/<group>/<path>` to `<path>`; `deplist/<dep>/**` is one installable dep;
+- **`assets/`** — every generated file's template. Groups `start`, `all`, `deps`, `cli`,
+  `server` render `assets/<group>/<path>` to `<path>`; `deplist/<dep>/**` is one installable dep;
   `templates/*` are single-file scaffolds rendered with `utils.RenderTemplateToDest`.
 - **`cmd/main/`** — generated; wires an adapter into the sandbox, holds no logic.
 - **`AgnosConfig/`** — written once by `start`, read by every `build`.
@@ -119,6 +120,18 @@ an already-open SmartIO), and a **command**
 (generated) and `handler.go` (hand-written). Both directories are snake_case for a kebab-case
 command (`add-command` -> `add_command/`). Only `handler.go` and contract/adapter pairs are
 written by hand; everything else is generated.
+
+The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
+layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` mirrors `api/cli.go`,
+`internal/server/servermain.go` mirrors `internal/cli/climain.go`, `internal/routes/<name>/`
+(`route.yaml` + generated `entries.go` + hand-written `handler.go` -> `RouteHandler`) mirrors
+`internal/commands/<name>/`, `parsables/routeconf/` mirrors `commandconf/`, `assets/server/`
+mirrors `assets/cli/`, and `server-init`/`server-purge` mirror `cli-init`/`cli-purge`. It is
+rendered when `sandbox/internal/server/` exists, exactly as the cli group is rendered when
+`sandbox/internal/cli/` does. The dispatch settles everything but the body (404/405/415/413/400)
+before a handler runs; the body is read on demand by the generated `Entries.ReadBody`.
+`sandbox/internal/routeio/` holds what both `servermain.go` and the routes need, because
+`servermain.go` imports every route and a route may not import it back.
 
 **SmartIO** (`sandbox/internal/smartio/`) is a transactional filesystem rooted at `--path`.
 Actions pass project-relative paths only; `Root` is joined at the `deps.Iodeps` boundary.
@@ -138,7 +151,14 @@ change a rule there and nowhere else. The ones most easily broken:
   `CommandHandler(deps *deps.Deps, entries *Entries) int`.
 - Generated files are never edited — change the template under `assets/` and bootstrap.
   `docs/GeneratedFiles/doc.md` lists which files are rewritten by every build.
-- Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`.
+- Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The
+  same holds for a route's `route.yaml`: `add-route`, `add-field`, `remove-field`, `set-route`.
+  When declaring one of agnos's own flags, never pass a value that is exactly one of
+  `add-flag`'s own spellings (`--identifier --example`) — the argv parser counts it as an
+  occurrence and pollutes the declaration.
+- Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
+  segment is always `required: true`. Match order is by specificity (most identifiers, then
+  longest), settled by the collector, not the template.
 - Every exported declaration of `sandbox/api/` and `sandbox/deps/` carries a doc comment —
   `docs/PublicApi/doc.md` is generated from those comments, and `verify` fails without them.
 - `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.

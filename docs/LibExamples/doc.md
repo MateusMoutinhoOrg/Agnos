@@ -34,6 +34,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `remove-doc` | delete a doc directory | [example.go](../../examples/lib/remove-doc/example.go) |
 | `remove-flag` | delete one declared flag | [example.go](../../examples/lib/remove-flag/example.go) |
 | `remove-lib-example` | delete an example of examples/lib/ | [example.go](../../examples/lib/remove-lib-example/example.go) |
+| `server-route` |  | [example.go](../../examples/lib/server-route/example.go) |
 | `set-command` | rewrite the command-level keys of a command | [example.go](../../examples/lib/set-command/example.go) |
 | `start` | scaffold a new project | [example.go](../../examples/lib/start/example.go) |
 | `verify` | check a project against the schema, writing nothing | [example.go](../../examples/lib/verify/example.go) |

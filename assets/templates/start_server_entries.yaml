@@ -1,0 +1,31 @@
+identifiers: ["start-server"]
+category: Server
+help: Starts the http server
+long-description: |
+  Opens the port and serves every route declared under
+  sandbox/internal/routes, until the process is stopped.
+examples:
+  - "start-server"
+  - "start-server --addr :3000"
+flags:
+  - name: addr
+    identifiers: ["--addr"]
+    description: the address the server listens on
+    examples:
+      - "start-server --addr :3000"
+    type: string
+    default: ":8080"
+  - name: read_timeout_ms
+    identifiers: ["--read-timeout-ms"]
+    description: how long a request has to arrive, in milliseconds
+    examples:
+      - "start-server --read-timeout-ms 30000"
+    type: int
+    default: "10000"
+  - name: write_timeout_ms
+    identifiers: ["--write-timeout-ms"]
+    description: how long a response has to be written, in milliseconds
+    examples:
+      - "start-server --write-timeout-ms 30000"
+    type: int
+    default: "10000"

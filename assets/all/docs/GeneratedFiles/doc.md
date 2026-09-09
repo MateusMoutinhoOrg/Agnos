@@ -33,6 +33,17 @@
 | `sandbox/internal/commands/<name>/entries.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command` — never by hand |
 | `sandbox/internal/commands/<name>/handler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 {{- end }}
+{{- if .HasServer }}
+| `sandbox/api/server.go`, `sandbox/binds/server.go` | `build` | always |
+| `sandbox/internal/server/servermain.go` | `build` | always. `ServerMain` + one `match<Name>`/`handle<Name>` per route |
+| `sandbox/internal/routeio/*.go` | `build` | always |
+| `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
+| `sandbox/internal/routes/<name>/entries.go` | `build` | always. The `Entries` struct and `ReadBody` of that route |
+| `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `add-field` / `remove-field` / `set-route` — never by hand |
+| `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
+| `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
+{{- end }}
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |
 {{- if .HasCli }}
 | `examples/cli/<name>/example.sh` | `add-cli-example` | once. A stub that already runs |

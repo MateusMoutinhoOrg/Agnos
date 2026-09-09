@@ -1,6 +1,9 @@
 - description: Driving the CLI from a terminal - install, commands, flags, exit codes
   id: cli-usage
   name: CliUsage
+- description: Serving http - bring the server up, declare routes, read a body
+  id: server-usage
+  name: ServerUsage
 - description: Using the project as a Go module - wiring the deps, calling the sandbox
   id: lib-usage
   name: LibUsage

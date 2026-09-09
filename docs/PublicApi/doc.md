@@ -111,6 +111,45 @@ CommandProps carries the command-level keys of entries.yaml that set-command may
 | `Identifiers` | `[]string` |
 | `Examples` | `[]string` |
 
+### `RouteProps`
+
+RouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Method` | `string` |
+| `Help` | `string` |
+| `Category` | `string` |
+| `LongDescription` | `string` |
+| `Hidden` | `bool` |
+| `Visible` | `bool` |
+| `Examples` | `[]string` |
+
+### `RouteFieldProps`
+
+RouteFieldProps describes one field to add to a route's route.yaml. In is the origin it is declared in — "path", "header", "query" or "body" — and is the only thing that differs between the origins, which is why one pair of actions covers all four. Identifier declares a trigger segment instead of a captured one, and is normalized to start with "/". Default, Min and Max are the raw literals typed on the command line ("" means unset); Position is the index to insert at (< 0 appends); Format and Pattern apply to "body" alone.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+| `Identifier` | `string` |
+| `In` | `string` |
+| `Description` | `string` |
+| `Examples` | `[]string` |
+| `Type` | `string` |
+| `Default` | `string` |
+| `Required` | `bool` |
+| `Array` | `bool` |
+| `Min` | `string` |
+| `Max` | `string` |
+| `Position` | `int` |
+| `Format` | `string` |
+| `Pattern` | `string` |
+
 ### `DocProps`
 
 DocProps describes one doc to create under docs/. Name is the doc's directory, optionally nested under its parent ("PublicApi/api.Actions"). Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs to: required on a first-level doc, forbidden on a sub-doc.
@@ -146,6 +185,13 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `RemoveFlag` | `func(path string, command string, name string) error` | RemoveFlag deletes one declared flag from a command. |
 | `AddArg` | `func(props FieldProps) error` | AddArg declares one positional argument on a command. |
 | `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared positional argument from a command. |
+| `ServerInit` | `func(path string) error` | ServerInit adds the http server layer (sandbox/internal/server, the routeio package, the health route and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
+| `ServerPurge` | `func(path string) error` | ServerPurge removes the server layer and every route declared in it. |
+| `AddRoute` | `func(path string, name string, method string, trigger string, help string, category string) error` | AddRoute declares a new route: its route.yaml, its generated entries.go and a handler.go to fill in. |
+| `RemoveRoute` | `func(path string, name string) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
+| `SetRoute` | `func(props RouteProps) error` | SetRoute rewrites the route-level keys of one route's route.yaml. |
+| `AddField` | `func(props RouteFieldProps) error` | AddField declares one field on a route, in the origin named by props.In. |
+| `RemoveField` | `func(path string, route string, in string, name string) error` | RemoveField deletes one declared field from a route, from the origin named by in. |
 | `AddDoc` | `func(props DocProps) error` | AddDoc creates one doc directory under docs/, with its props.yaml and a doc.md to fill in. |
 | `RemoveDoc` | `func(path string, name string) error` | RemoveDoc deletes one doc directory and everything under it. |
 | `AddCliExample` | `func(path string, name string) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |
@@ -452,6 +498,62 @@ Lib is the JSON/YAML codec injected whole as the Deps.Serializables field: const
 | `SerializeToJson` | `func(data *SerializibleObject) string` |
 | `SerializeToYaml` | `func(data *SerializibleObject) string` |
 
+## `deps.Serverdeps`
+
+`sandbox/deps/serverdeps`
+
+### `Lib`
+
+Lib is the http-server library injected whole as the Deps.Serverdeps field. A server is bound to one address and one handler, so it is created per call rather than injected once: what the sandbox holds is this one-field struct.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `NewServer` | `func(props ServerProps) Server` | NewServer builds a server over the given props. It binds nothing until Server.Listen is called. |
+
+### `ServerProps`
+
+ServerProps is everything one server needs to run: where to listen, how long a request and a response may take, and the single function every request is handed to.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Addr` | `string` | Addr is the address to listen on, in the host:port spelling (":8080", "127.0.0.1:3000"). |
+| `ReadTimeoutMs` | `int` | ReadTimeoutMs is how long a request has to arrive, in milliseconds. Zero means no timeout. |
+| `WriteTimeoutMs` | `int` | WriteTimeoutMs is how long a response has to be written, in milliseconds. Zero means no timeout. |
+| `Handler` | `func(request Request, response Response)` | Handler is called once per request, whatever the method or the path. Everything the request needs to be answered is reachable from the two arguments; the handler returns once the response is written. |
+
+### `Server`
+
+Server is one built-but-not-yet-listening http server.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Listen` | `func() error` | Listen binds the address and serves until Shutdown is called or the server fails. It blocks. |
+| `Shutdown` | `func() error` | Shutdown stops the server, letting the requests in flight finish. |
+
+### `Request`
+
+Request is one incoming http request, read through function fields only: the sandbox never holds the library's own request type.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `GetMethod` | `func() string` | GetMethod returns the http method in upper case ("GET", "POST"). |
+| `GetPath` | `func() string` | GetPath returns the raw request path, query string excluded ("/users/acme/create"). Slicing it into segments is the sandbox's business. |
+| `GetHeader` | `func(key string) string` | GetHeader returns the first value of the named header, matched without regard to case, or "" when it is absent. |
+| `GetQueryParam` | `func(name string) string` | GetQueryParam returns the first value of the named query parameter, or "" when it is absent. |
+| `GetQueryAll` | `func(name string) []string` | GetQueryAll returns every value of the named query parameter, in the order they appear, for a field declared `array: true`. |
+| `ReadBody` | `func(limit int) ([]byte, error)` | ReadBody reads at most limit bytes of the request body (-1 reads it whole) and reports an error when the body is longer than limit or cannot be read. The body is read once: a second call returns what the first one read. |
+| `GetRemoteAddr` | `func() string` | GetRemoteAddr returns the address the request came from, in the host:port spelling. |
+
+### `Response`
+
+Response is the one http response being written, through function fields only. Headers and status are set before the first Write.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `SetHeader` | `func(key string, value string)` | SetHeader sets one response header, replacing whatever value it had. |
+| `SetStatus` | `func(code int)` | SetStatus writes the status line. It is called at most once, before any Write; without it the status is 200. |
+| `Write` | `func(body []byte) error` | Write appends bytes to the response body. |
+
 ## `deps.Sortdeps`
 
 `sandbox/deps/sortdeps`
@@ -515,6 +617,7 @@ Lib is the text library injected whole as the Deps.Stringsdeps field. The first 
 | `ToUpper` | `func(s string) string` | ToUpper returns s with every letter mapped to its upper case. |
 | `ToLower` | `func(s string) string` | ToLower returns s with every letter mapped to its lower case. |
 | `Quote` | `func(s string) string` | Quote returns s as a double-quoted Go string literal, escaping what the Go syntax requires. |
+| `MatchPattern` | `func(pattern string, s string) (bool, error)` | MatchPattern reports whether s is matched by the regular expression pattern, and errors when the pattern itself does not compile. It is the one matching primitive the sandbox has: `regexp` lives on the adapter side like every other standard package. |
 | `Atoi` | `func(s string) (int, error)` | Atoi parses s as a decimal integer. The error reports a string that is not one. |
 | `ParseInt` | `func(s string, base int, bit_size int) (int64, error)` | ParseInt parses s as an integer in the given base with the given bit size. The error reports a string that is not one. |
 | `ParseFloat` | `func(s string, bit_size int) (float64, error)` | ParseFloat parses s as a floating-point number of the given bit size. The error reports a string that is not one. |

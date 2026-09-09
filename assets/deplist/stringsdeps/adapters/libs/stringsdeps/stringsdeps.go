@@ -1,6 +1,7 @@
 package stringsdeps
 
 import (
+	"regexp"
 	"strconv"
 	"strings"
 
@@ -76,6 +77,9 @@ func Bind(deps *deps.Deps) {
 		},
 		Quote: func(s string) string {
 			return strconv.Quote(s)
+		},
+		MatchPattern: func(pattern string, s string) (bool, error) {
+			return regexp.MatchString(pattern, s)
 		},
 		Atoi: func(s string) (int, error) {
 			return strconv.Atoi(s)

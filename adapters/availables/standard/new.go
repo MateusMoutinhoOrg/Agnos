@@ -7,6 +7,7 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/iodeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serializables"
+	serverdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serverdeps"
 	sortdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/sortdeps"
 	std "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/std"
 	stringsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/stringsdeps"
@@ -23,6 +24,7 @@ func New() deps.Deps {
 	iodeps.Bind(&deps)
 	rundeps.Bind(&deps)
 	serializables.Bind(&deps)
+	serverdeps.Bind(&deps)
 	sortdeps.Bind(&deps)
 	std.Bind(&deps)
 	stringsdeps.Bind(&deps)

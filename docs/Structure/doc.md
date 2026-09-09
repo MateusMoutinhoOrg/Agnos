@@ -53,8 +53,9 @@ assets/                          Go text/templates embedded by asset.go; never `
   all/                           rendered by every `build`
   deps/                          rendered when sandbox/deps/ exists
   cli/                           rendered when sandbox/internal/cli/ exists
+  server/                        rendered when sandbox/internal/server/ exists
   deplist/<dep>/                 one installable dep, mirroring the target layout
-  templates/                     single-file scaffolds (entries.go, command_*, help_entries.yaml, doc_doc.md, *_index.md)
+  templates/                     single-file scaffolds (entries.go, command_*, route_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
   depsversion.yaml               <dep>: <module>@<version>
 cmd/main/main.go                 (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
 docs/                            one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all

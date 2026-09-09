@@ -66,6 +66,54 @@ From there `agnos add-command <name> --help "..." --category "..."` declares a c
 `agnos add-flag` / `add-arg` its fields. `agnos cli-purge` removes the layer again.
 {{- end }}
 
+{{ if .HasServer }}
+## Change the route surface
+
+```bash
+agnos add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
+agnos add-field <name> --route <route> --in path   [--identifier /users | --required]
+agnos add-field <name> --route <route> --in header --required
+agnos add-field <name> --route <route> --in query  --type int --default 1 --min 1
+agnos add-field <name> --route <route> --in body   --type string --format email --required
+agnos set-route <route> --method PUT --example "curl localhost:8080/users"
+agnos remove-field <name> --route <route> --in query
+agnos remove-route <route>
+```
+
+`add-route` writes `sandbox/internal/routes/<name>/route.yaml` (the declaration) and a stub
+`handler.go` (yours), then generates `entries.go` and the match/handle pair of the dispatch.
+Every key these editors write is in [RouteYaml](../RouteYaml/doc.md); never edit `route.yaml`
+by hand. `--in body` takes a dotted path (`address.city`) and creates the objects it passes
+through.
+
+Then write `handler.go` — the whole hand-written half of a route:
+
+```go
+func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int {
+	body, status := entries.ReadBody(deps, response)
+	if status != api.StatusOk {
+		return status
+	}
+	return writeJson(deps, response, api.StatusCreated, create(deps, entries.Tenant, body))
+}
+```
+
+`Entries` arrives bound, converted and range-checked: a bad request was already answered `400`
+before the handler ran. The body is the exception — it is read only when `ReadBody` asks for
+it. [Routes](../Routes/doc.md) documents the route on the next build, and
+[ServerUsage](../ServerUsage/doc.md) is the whole recipe.
+{{- else }}
+## Add the server layer
+
+```bash
+agnos server-init      # serverdeps, sandbox/internal/server, the health route, start-server
+agnos start-server     # listens on :8080
+```
+
+From there `agnos add-route <name> --trigger /<path> --help "..." --category "..."` declares a
+route and `agnos add-field` its fields. A project with no CLI gets one first: a server needs a
+command that starts it. `agnos server-purge` removes the layer again.
+{{- end }}
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No
@@ -145,6 +193,9 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | --- | --- |
 {{- if .HasCli }}
 | `sandbox/internal/commands/<name>/handler.go` | a command does something |
+{{- end }}
+{{- if .HasServer }}
+| `sandbox/internal/routes/<name>/handler.go` | a route answers something |
 {{- end }}
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/binds/<x>.go` | a new api surface |

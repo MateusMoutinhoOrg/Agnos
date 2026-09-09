@@ -1,0 +1,46 @@
+args:
+    - description: 'the field to drop: its name, the identifier of a path segment, or the dotted path of a body property'
+      examples:
+        - remove-field page --route create-user --in query
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - remove-field page --route create-user --in query
+    - remove-field /users --route create-user --in path
+flags:
+    - description: the route (identifier or package name) the field is declared on
+      examples:
+        - remove-field page --route create-user --in query
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: query
+      description: 'where the field is declared: path, header, query or body'
+      examples:
+        - remove-field authorization --route create-user --in header
+      identifiers:
+        - --in
+      name: in
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-field --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one declared field from a route
+identifiers:
+    - remove-field
+long-description: 'Drops the named field from the origin --in names, the exact inverse of add-field. The build renders only: dropping a field may leave hand-written code referring to what is gone.'

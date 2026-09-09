@@ -88,6 +88,12 @@ type Lib struct {
 	// the Go syntax requires.
 	Quote func(s string) string
 
+	// MatchPattern reports whether s is matched by the regular expression
+	// pattern, and errors when the pattern itself does not compile. It is the
+	// one matching primitive the sandbox has: `regexp` lives on the adapter
+	// side like every other standard package.
+	MatchPattern func(pattern string, s string) (bool, error)
+
 	// Atoi parses s as a decimal integer. The error reports a string that is
 	// not one.
 	Atoi func(s string) (int, error)

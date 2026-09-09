@@ -72,6 +72,35 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.
 - A command's `entries.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
   hand: they re-render it with keys in alphabetical order and drop comments.
+{{ end }}{{ if .HasServer }}
+## Routes
+
+- A route is `sandbox/internal/routes/<name>/`, holding `route.yaml` (the declaration),
+  `entries.go` (generated) and `handler.go` (hand-written) — the server layer's mirror of a
+  command package, snake_case for a kebab-case name. **(verify)**
+- Only `RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int` is
+  exported from a route. It returns the status it answered with, and reaches `400`/`413`/`415`
+  only by propagating one from `ReadBody`: the dispatch settles everything but the body before
+  the handler runs. **(verify)**
+- A route's `route.yaml` is written by `add-route` and rewritten by `add-field` /
+  `remove-field` / `set-route`, never by hand: they re-render it with keys in alphabetical
+  order and drop comments.
+- Every `identifier` of `paths` starts with `/` and spells exactly one segment; `/` alone is
+  the root. A route declares at least one of them, and every entry of `paths` carries an
+  `identifier` or a `name`, never both. **(verify)**
+- A captured segment is always `required: true`, and never `array` or defaulted: it is present
+  whenever the route matched. **(verify)**
+- A name is declared once per origin, and the origins declaring the same name agree on its
+  type — the `Entries` field is written once. **(verify)**
+- No two routes declare the same method and path pattern. **(verify)**
+- A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
+  subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
+- Match order is the collector's, not the directory's: most `identifier`s first, then the
+  longest ones, then the pattern alphabetically. Without it a route on `/` would swallow one
+  on `/home`.
+- A failure is written by `routeio.WriteError` alone, so every route answers one JSON shape.
+
+Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
 {{ end }}
 ## Output channels
 

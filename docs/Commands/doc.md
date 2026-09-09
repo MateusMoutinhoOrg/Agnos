@@ -444,6 +444,193 @@ agnos remove-doc HandleReports
 agnos remove-doc PublicApi/api.AddDoc --path ./my-project
 ```
 
+## Server System
+
+### `add-field`
+
+Add a field to a route's route.yaml
+
+```bash
+agnos add-field --route <route> [--in <in>] [--identifier <identifier>] [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--format <format>] [--pattern <pattern>] [--path <path>] [--quiet] [<name>]
+```
+
+Declares one field on a route and runs build so entries.go and the dispatch arm pick it up. --in says where it is read from: path appends a segment (--identifier for a literal, --name for a capture), header and query declare a request field, body declares a property of the json-schema at a dotted path.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--route` | string, required |  | the route (identifier or package name) that receives the field |
+| `--in` | string | `query` | where the field is read from: path, header, query or body |
+| `--identifier` | string |  | declare a literal path segment instead of a capture, always starting with / (--in path only) |
+| `--type` | string | `string` | the value type: string, boolean, int or float (defaults to string) |
+| `--description` | string |  | help text shown for the field |
+| `--example` | string, repeatable |  | an usage example for the field (repeatable) |
+| `--default` | string |  | the literal assigned when the field is absent (cannot be combined with --required) |
+| `--required` | boolean |  | answer 400 when the field is not provided (not for booleans or fields with --default) |
+| `--array` | boolean |  | collect every occurrence into a []T field instead of a single value (query only) |
+| `--min` | string |  | smallest accepted value, or shortest accepted text for a body string |
+| `--max` | string |  | largest accepted value, or longest accepted text for a body string |
+| `--position` | int | `-1` | zero-based index to insert the field at (defaults to the end) |
+| `--format` | string |  | json-schema format for a body string: email, uuid, date-time or uri (--in body only) |
+| `--pattern` | string |  | regular expression a body string must match (--in body only) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string |  | the field name: the captured segment, the header name, the query key, or the dotted path of a body property (omitted when --identifier declares a literal path segment) |
+
+```bash
+agnos add-field tenant --route create-user --in path --required
+agnos add-field authorization --route create-user --in header --required
+agnos add-field page --route create-user --in query --type int --default 1 --min 1
+agnos add-field address.city --route create-user --in body --required
+```
+
+### `add-route`
+
+Declare a new http route
+
+```bash
+agnos add-route [--trigger <trigger>] [--method <method>] --help <help> --category <category> [--path <path>] [--quiet] <name>
+```
+
+Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so entries.go and the dispatch arm are generated. The trigger is normalized to start with /, and defaults to /<name>.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--trigger` | string |  | the first literal segment of the path, always starting with / (defaults to /<name>) |
+| `--method`, `-m` | string | `GET` | the http method the route answers: GET, POST, PUT, PATCH, DELETE, HEAD or OPTIONS |
+| `--help` | string, required |  | one-line description of the route |
+| `--category` | string, required |  | the heading the route is listed under in docs/Routes |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the route name (becomes the directory sandbox/internal/routes/<name> and its Go package) |
+
+```bash
+agnos add-route create-user --trigger /users --method POST --help "Create a user" --category Users
+```
+
+### `remove-field`
+
+Delete one declared field from a route
+
+```bash
+agnos remove-field --route <route> [--in <in>] [--path <path>] [--quiet] <name>
+```
+
+Drops the named field from the origin --in names, the exact inverse of add-field. The build renders only: dropping a field may leave hand-written code referring to what is gone.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--route` | string, required |  | the route (identifier or package name) the field is declared on |
+| `--in` | string | `query` | where the field is declared: path, header, query or body |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the field to drop: its name, the identifier of a path segment, or the dotted path of a body property |
+
+```bash
+agnos remove-field page --route create-user --in query
+agnos remove-field /users --route create-user --in path
+```
+
+### `remove-route`
+
+Delete one declared route
+
+```bash
+agnos remove-route [--path <path>] [--quiet] <name>
+```
+
+Removes sandbox/internal/routes/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the route to delete (identifier or package name) |
+
+```bash
+agnos remove-route create-user
+```
+
+### `server-init`
+
+Add the http server layer to the project
+
+```bash
+agnos server-init [--path <path>] [--quiet]
+```
+
+Installs the deps the server layer needs, renders sandbox/internal/server, the routeio package and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos server-init
+agnos server-init --path ./my-project
+```
+
+### `server-purge`
+
+Remove the http server layer and every route in it
+
+```bash
+agnos server-purge [--path <path>] [--quiet]
+```
+
+Drops sandbox/internal/{server,routes,routeio} and the start-server command, then re-renders. The cli layer and the installed deps are left in place.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos server-purge
+```
+
+### `set-route`
+
+Rewrite the route-level keys of a route.yaml
+
+```bash
+agnos set-route [--method <method>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--path <path>] [--quiet] [--example <example>...] <route>
+```
+
+Overwrites method, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --example appends.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--method`, `-m` | string |  | the http method the route answers |
+| `--help` | string |  | one-line description of the route |
+| `--category` | string |  | the heading the route is listed under in docs/Routes |
+| `--long-description` | string |  | the paragraph docs/Routes prints under the route |
+| `--hidden` | boolean |  | drop the route from docs/Routes, still dispatched |
+| `--visible` | boolean |  | list the route again in docs/Routes |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--example` | string, repeatable |  | an usage example for the route (repeatable) |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `route` | string, required |  | the route to edit (identifier or package name) |
+
+```bash
+agnos set-route create-user --method POST --example "curl -X POST localhost:8080/users"
+```
+
 ## Core Commands
 
 ### `build`

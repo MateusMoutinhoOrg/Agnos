@@ -1,0 +1,134 @@
+args:
+    - description: 'the field name: the captured segment, the header name, the query key, or the dotted path of a body property (omitted when --identifier declares a literal path segment)'
+      examples:
+        - add-field tenant --route create-user --in path
+      name: name
+      type: string
+category: Server System
+examples:
+    - add-field tenant --route create-user --in path --required
+    - add-field authorization --route create-user --in header --required
+    - add-field page --route create-user --in query --type int --default 1 --min 1
+    - add-field address.city --route create-user --in body --required
+flags:
+    - description: the route (identifier or package name) that receives the field
+      examples:
+        - add-field tenant --route create-user --in path
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: query
+      description: 'where the field is read from: path, header, query or body'
+      examples:
+        - add-field authorization --route create-user --in header
+      identifiers:
+        - --in
+      name: in
+      type: string
+    - description: declare a literal path segment instead of a capture, always starting with / (--in path only)
+      examples:
+        - add-field --route create-user --in path --identifier /users
+      identifiers:
+        - --identifier
+      name: identifier
+      type: string
+    - default: string
+      description: 'the value type: string, boolean, int or float (defaults to string)'
+      examples:
+        - add-field page --route create-user --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: help text shown for the field
+      examples:
+        - add-field tenant --route create-user --description "the tenant the user belongs to"
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - array: true
+      description: an usage example for the field (repeatable)
+      examples:
+        - add-field page --route create-user --example "?page=2"
+      identifiers:
+        - --example
+      name: example
+      type: string
+    - description: the literal assigned when the field is absent (cannot be combined with --required)
+      examples:
+        - add-field page --route create-user --type int --default 1
+      identifiers:
+        - --default
+      name: default
+      type: string
+    - description: answer 400 when the field is not provided (not for booleans or fields with --default)
+      examples:
+        - add-field tenant --route create-user --in path --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: collect every occurrence into a []T field instead of a single value (query only)
+      examples:
+        - add-field tag --route create-user --in query --array
+      identifiers:
+        - --array
+      name: array
+      type: boolean
+    - description: smallest accepted value, or shortest accepted text for a body string
+      examples:
+        - add-field page --route create-user --type int --min 1
+      identifiers:
+        - --min
+      name: min
+      type: string
+    - description: largest accepted value, or longest accepted text for a body string
+      examples:
+        - add-field page --route create-user --type int --max 100
+      identifiers:
+        - --max
+      name: max
+      type: string
+    - default: "-1"
+      description: zero-based index to insert the field at (defaults to the end)
+      examples:
+        - add-field tenant --route create-user --in path --position 0
+      identifiers:
+        - --position
+      name: position
+      type: int
+    - description: 'json-schema format for a body string: email, uuid, date-time or uri (--in body only)'
+      examples:
+        - add-field email --route create-user --in body --format email
+      identifiers:
+        - --format
+      name: format
+      type: string
+    - description: regular expression a body string must match (--in body only)
+      examples:
+        - add-field zip --route create-user --in body --pattern "^[0-9]{5}$"
+      identifiers:
+        - --pattern
+      name: pattern
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-field --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Add a field to a route's route.yaml
+identifiers:
+    - add-field
+long-description: 'Declares one field on a route and runs build so entries.go and the dispatch arm pick it up. --in says where it is read from: path appends a segment (--identifier for a literal, --name for a capture), header and query declare a request field, body declares a property of the json-schema at a dotted path.'

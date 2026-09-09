@@ -16,6 +16,7 @@ are in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 | `requestdeps` | `Requestdeps` | `requestdeps` | `net/http` (30s timeout) | Per-call HTTP request |
 | `rundeps` | `Rundeps` | `rundeps` | `os/exec` | Run a program to completion; stdout+stderr merged; non-zero exit is `Result.ExitCode`, not an error |
 | `serializables` | `Serializables` | `serializables` | `gopkg.in/yaml.v3`, `encoding/json` | Generic JSON/YAML values |
+| `serverdeps` | `Serverdeps` | `serverdeps` | `net/http` | Http server: opens the port, applies timeouts, hands every request to one handler. Installed by `server-init` |
 | `sortdeps` | `Sortdeps` | `sortdeps` | `sort` | Sort a string slice, or any slice by a less function |
 | `std` | `Std` | `std` | `time`, `fmt`, `runtime`, `os.Stdout/Stderr` | Clock, `Sprintf`, the host `Goos` and the three output channels. Installed by `cli-init` |
 | `stringsdeps` | `Stringsdeps` | `stringsdeps` | `strings`, `strconv` | Text manipulation and string/number conversion |

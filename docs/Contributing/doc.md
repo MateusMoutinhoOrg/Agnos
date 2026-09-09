@@ -24,7 +24,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 
 ## Add a command to agnos
 
-Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
+Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
 
 ```bash
 ./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"
@@ -33,6 +33,29 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 ```
 
 `handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
+
+`add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
+
+## Add a layer (cli, server, …)
+
+A layer is an asset group plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one:
+
+| Concept | CLI | Server |
+|---|---|---|
+| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
+| Surface + bind | `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `sandbox/api/server.go`, `sandbox/binds/server.go` |
+| Generated dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` |
+| Declared unit | `commands/<name>/entries.yaml` | `routes/<name>/route.yaml` |
+| Parsable | `parsables/commandconf/` | `parsables/routeconf/` |
+| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` |
+| Per-unit generator | `generate_command_entries.go` | `generate_route_entries.go` |
+| Asset group | `assets/cli/` | `assets/server/` |
+| Build trigger | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` |
+| Verify | `check_sandbox.go` et al | `check_routes.go` |
+
+Both halves of the pair go in `GeneratedDocsGroups`, in the vars map of `build_internal.go`, and in the `{{ if .Has<X> }}` blocks of `assets/all/docs/{Rules,GeneratedFiles,Workflow}/doc.md`. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init` — so there is no intermediate `Persist` and no intermediate `build`.
+
+`sandbox/internal/routeio/` exists because `servermain.go` imports every route, so a route cannot import `internal/server` back: shared route code goes in a third package both may import.
 
 ## Add a contract + adapter lib
 

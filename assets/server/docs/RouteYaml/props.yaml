@@ -1,0 +1,5 @@
+description: "Every key of a route's route.yaml and what the generated code does with it"
+name: "RouteYaml"
+order: 4
+themes:
+  - reference

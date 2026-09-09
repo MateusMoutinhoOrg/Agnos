@@ -8,13 +8,17 @@ import (
 )
 
 // GeneratedDocsGroups returns the asset groups whose docs this build writes:
-// `all` always, `cli` when the project has a cli, exactly as the groups are
-// rendered.
-func GeneratedDocsGroups(has_cli bool) []string {
+// `all` always, `cli` when the project has a cli and `server` when it has a
+// server, exactly as the groups are rendered.
+func GeneratedDocsGroups(has_cli bool, has_server bool) []string {
+	groups := []string{"all"}
 	if has_cli {
-		return []string{"all", "cli"}
+		groups = append(groups, "cli")
 	}
-	return []string{"all"}
+	if has_server {
+		groups = append(groups, "server")
+	}
+	return groups
 }
 
 // CollectGeneratedDocs returns the first-level docs the given groups write on

@@ -1,0 +1,5 @@
+description: "Every route of {{.Name}}, generated from the route declarations"
+name: "Routes"
+order: 2
+themes:
+  - server-usage

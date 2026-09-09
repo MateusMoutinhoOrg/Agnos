@@ -70,6 +70,7 @@ The contracts available to patch:
 | `deps.Iodeps` | `sandbox/deps/iodeps` |
 | `deps.Rundeps` | `sandbox/deps/rundeps` |
 | `deps.Serializables` | `sandbox/deps/serializables` |
+| `deps.Serverdeps` | `sandbox/deps/serverdeps` |
 | `deps.Sortdeps` | `sandbox/deps/sortdeps` |
 | `deps.Std` | `sandbox/deps/std` |
 | `deps.Stringsdeps` | `sandbox/deps/stringsdeps` |
@@ -86,6 +87,7 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 | `adapters/libs/iodeps` | `iodeps.Bind(&deps)` |
 | `adapters/libs/rundeps` | `rundeps.Bind(&deps)` |
 | `adapters/libs/serializables` | `serializables.Bind(&deps)` |
+| `adapters/libs/serverdeps` | `serverdeps.Bind(&deps)` |
 | `adapters/libs/sortdeps` | `sortdeps.Bind(&deps)` |
 | `adapters/libs/std` | `std.Bind(&deps)` |
 | `adapters/libs/stringsdeps` | `stringsdeps.Bind(&deps)` |

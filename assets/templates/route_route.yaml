@@ -1,0 +1,5 @@
+method: {{.Method}}
+paths:
+  - identifier: {{printf "%q" .Trigger}}
+category: {{printf "%q" .Category}}
+help: {{printf "%q" .Help}}

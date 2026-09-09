@@ -148,16 +148,20 @@ assets:
       order: 4
       dir: true
       description: rendered when sandbox/internal/cli/ exists
-    deplist/<dep>:
+    server:
       order: 5
+      dir: true
+      description: rendered when sandbox/internal/server/ exists
+    deplist/<dep>:
+      order: 6
       dir: true
       description: one installable dep, mirroring the target layout
     templates:
-      order: 6
-      dir: true
-      description: single-file scaffolds (entries.go, command_*, help_entries.yaml, doc_doc.md, *_index.md)
-    depsversion.yaml:
       order: 7
+      dir: true
+      description: single-file scaffolds (entries.go, command_*, route_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+    depsversion.yaml:
+      order: 8
       description: "<dep>: <module>@<version>"
 cmd/main/main.go:
   order: 5

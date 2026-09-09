@@ -8,6 +8,7 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serverdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serverdeps"
 	sortdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/sortdeps"
 	std "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/std"
 	stringsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/stringsdeps"
@@ -25,6 +26,7 @@ type Deps struct {
 	Iodeps        iodeps.Lib
 	Rundeps       rundeps.Lib
 	Serializables serializables.Lib
+	Serverdeps    serverdeps.Lib
 	Sortdeps      sortdeps.Lib
 	Std           std.Lib
 	Stringsdeps   stringsdeps.Lib

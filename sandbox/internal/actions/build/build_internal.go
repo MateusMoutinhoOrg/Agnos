@@ -30,6 +30,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 
 	hasDeps := io.IsDir("sandbox/deps")
 	hasCli := io.IsDir("sandbox/internal/cli")
+	hasServer := io.IsDir("sandbox/internal/server")
 
 	// hasAssets reports that the project carries its own agnos asset groups —
 	// it is itself a generator, like agnos. The docs of such a project have to
@@ -56,6 +57,13 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	commands, err := CollectCommands(deps, io)
+	if err != nil {
+		return err
+	}
+
+	// The server layer's mirror of CollectCommands: one entry per declared
+	// route, already ordered for matching so servermain.go only has to range.
+	routes, err := CollectRoutes(deps, io)
 	if err != nil {
 		return err
 	}
@@ -102,10 +110,17 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	// docs/Routes is rendered from the route declarations themselves, the
+	// same way docs/Commands is rendered from the command ones.
+	route_docs, err := CollectRouteDocs(deps, io)
+	if err != nil {
+		return err
+	}
+
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
-	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name), GeneratedDocsGroups(hasCli))
+	generated_docs, err := CollectGeneratedDocs(deps, io, docsVars(module_conf.Module, project_conf.Name), GeneratedDocsGroups(hasCli, hasServer))
 	if err != nil {
 		return err
 	}
@@ -124,6 +139,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"StructureConfFile": utils.StructureConfFile,
 		"HasDeps":           hasDeps,
 		"HasCli":            hasCli,
+		"HasServer":         hasServer,
 		"HasAssets":         hasAssets,
 		"Binds":             CollectBinds(deps, io),
 		"Constructors":      CollectConstructors(deps, io),
@@ -133,6 +149,8 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"LibExamples":       utils.CollectExamples(deps, io, utils.ExampleLibSide),
 		"Commands":          commands,
 		"CommandDocs":       command_docs,
+		"Routes":            routes,
+		"RouteDocs":         route_docs,
 		"Themes":            themes_conf.Themes,
 		"DocIndex":          CollectDocIndex(deps, docs, themes_conf.Themes),
 		"PublicApi":         public_api,
@@ -155,6 +173,15 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 			return err
 		}
 		if err := utils.RenderGroup(deps, io, "cli", vars); err != nil {
+			return err
+		}
+	}
+
+	if hasServer {
+		if err := GenerateRouteEntries(deps, io, routes, module_conf.Module); err != nil {
+			return err
+		}
+		if err := utils.RenderGroup(deps, io, "server", vars); err != nil {
 			return err
 		}
 	}
