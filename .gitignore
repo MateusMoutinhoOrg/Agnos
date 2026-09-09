@@ -5,6 +5,7 @@ install.sh
 user_test
 builder
 blackbox
+front-model
 TestDir
 AssertDir
 local_test/
