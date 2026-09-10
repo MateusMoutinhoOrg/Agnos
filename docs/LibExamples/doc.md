@@ -23,6 +23,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `add-flag` | declare one flag on a command | [example.go](../../examples/lib/add-flag/example.go) |
 | `add-lib-example` | create an example under examples/lib/ | [example.go](../../examples/lib/add-lib-example/example.go) |
 | `add-page` |  | [example.go](../../examples/lib/add-page/example.go) |
+| `add-remote-dep` |  | [example.go](../../examples/lib/add-remote-dep/example.go) |
 | `build` | regenerate every generated file of a project | [example.go](../../examples/lib/build/example.go) |
 | `cli-init` | add the cli layer to a project that has none | [example.go](../../examples/lib/cli-init/example.go) |
 | `cli-purge` | remove the cli layer and every command in it | [example.go](../../examples/lib/cli-purge/example.go) |
@@ -47,6 +48,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `server-route` |  | [example.go](../../examples/lib/server-route/example.go) |
 | `set-adapter` |  | [example.go](../../examples/lib/set-adapter/example.go) |
 | `set-command` | rewrite the command-level keys of a command | [example.go](../../examples/lib/set-command/example.go) |
+| `set-dep` |  | [example.go](../../examples/lib/set-dep/example.go) |
 | `start` | scaffold a new project | [example.go](../../examples/lib/start/example.go) |
 | `verify` | check a project against the schema, writing nothing | [example.go](../../examples/lib/verify/example.go) |
 

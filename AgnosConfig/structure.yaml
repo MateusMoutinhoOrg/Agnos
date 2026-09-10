@@ -104,12 +104,16 @@ sandbox:
           order: 8
           dir: true
           description: api.go, new.go, new_empty.go, bind_methods.go, render.go
-        smartio:
+        apishape:
           order: 9
+          dir: true
+          description: the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from
+        smartio:
+          order: 10
           dir: true
           description: transactional fs rooted at --path
         utils:
-          order: 10
+          order: 11
           dir: true
           description: RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
 adapters:

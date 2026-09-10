@@ -63,7 +63,7 @@ agnos add-available lambda
 Installs one dep of the embedded catalog into the project
 
 ```bash
-agnos add-dep [--adapter <adapter>] [--path <path>] [--quiet] <dep>
+agnos add-dep [--adapter <adapter>] [--path <path>] [--quiet] [--as <as>] [--remote-available <remote-available>] <dep>
 ```
 
 Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.
@@ -73,6 +73,8 @@ Renders the contract of assets/deplist/<dep> and the adapter that fills it, then
 | `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--as` | string |  | the name the copied contract takes under sandbox/deps/ (remote deps only; defaults to the last segment of the module path) |
+| `--remote-available` | string |  | the available of the remote repo the generated shim builds its sandbox from |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -256,6 +258,31 @@ Rewrites one available.yaml so the named adapter is the one bound for that dep, 
 ```bash
 agnos set-adapter serverdeps awslambda
 agnos set-adapter serverdeps awslambda --available lambda
+```
+
+### `set-dep`
+
+Moves one remote dep to another version of its module
+
+```bash
+agnos set-dep --version <version> [--remote-available <remote-available>] [--path <path>] [--quiet] <dep>
+```
+
+Re-copies the remote repo's sandbox/api into sandbox/deps/<dep>/ at the given version and regenerates the shim that converts it, then calls build. The module comes from the shim's own adapter.yaml.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--version` | string, required |  | the module version to copy the contract from |
+| `--remote-available` | string |  | the available of the remote repo the regenerated shim builds its sandbox from |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dep` | string, required |  | the remote dep to move |
+
+```bash
+agnos set-dep mathlib --version v1.3.0
 ```
 
 ## Cli System

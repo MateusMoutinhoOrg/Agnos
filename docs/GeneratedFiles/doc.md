@@ -21,6 +21,8 @@
 | `adapters/availables/<name>/available.yaml` | `deps-init` | once, then rewritten by `add-dep` / `remove-dep` — never by hand |
 | `sandbox/deps/<dep>/*.go`, `adapters/libs/<adapter>/*.go` | `add-dep` | once |
 | `adapters/libs/<adapter>/adapter.yaml` | `add-dep` | once |
+| `sandbox/deps/<dep>/*.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; a copy of that module's `sandbox/api/` |
+| `adapters/libs/<dep>/<dep>.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; the generated shim |
 | `assets/asset.go` | `add-dep embeddeps` | once |
 | `cmd/main/main.go` | `build` | always |
 | `docs/{CliInstall,CliExamples}/` | `build` | always. Both `doc.md` and `props.yaml` |

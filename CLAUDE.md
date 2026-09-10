@@ -167,7 +167,16 @@ many adapters; `verify` demands every available fill every field exactly once â€
 first use, two overwrite in silence. `add-dep`/`remove-dep` own the contract, `add-adapter`/
 `remove-adapter` one implementation, `set-adapter` the choice, `add-available`/`remove-available`
 the selection itself. `cmd/main/main.go` imports one available, and that import is how a program
-picks its implementations.
+picks its implementations. Another agnos repo installs as a dep too: `add-dep
+<module>@<version> --as <name>` copies its `sandbox/api/` (which imports nothing,
+so the copy is self-contained) into `sandbox/deps/<name>/` with only the package
+clause changed, and **generates** `adapters/libs/<name>/` â€” the shim that builds
+the remote sandbox from the remote repo's own adapters and converts it, because
+a top-level cast cannot work (Go's type identity is not recursive through named
+types) and the conversion names a type whose import path lives in the consumer.
+`sandbox/internal/apishape/` holds the convertibility rule and the converter
+plan; `verify` applies that rule to every repo's `sandbox/api/` unconditionally,
+which is what makes every agnos repo installable by construction.
 
 **SmartIO** (`sandbox/internal/smartio/`) is a transactional filesystem rooted at `--path`.
 Actions pass project-relative paths only; `Root` is joined at the `deps.Iodeps` boundary.

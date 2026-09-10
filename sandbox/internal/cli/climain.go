@@ -52,6 +52,7 @@ import (
 	set_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_adapter"
 	set_body "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_body"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
+	set_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_dep"
 	set_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_route"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
 	update_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/update_test"
@@ -190,6 +191,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchSetBody(deps, verb)
 	case action == "set-command":
 		return dispatchSetCommand(deps, verb)
+	case action == "set-dep":
+		return dispatchSetDep(deps, verb)
 	case action == "set-route":
 		return dispatchSetRoute(deps, verb)
 	case action == "start":
@@ -838,6 +841,28 @@ func dispatchAddDep(deps *deps.Deps, verb argvdeps.Parser) int {
 		entries.Path = "."
 	}
 	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if verb.GetOptionsSize([]string{"--as"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "as", []string{"--as"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "as", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.As = value
+	}
+	if verb.GetOptionsSize([]string{"--remote-available"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "remote-available", []string{"--remote-available"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "remote-available", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.RemoteAvailable = value
+	}
 	if entries.Quiet {
 		silenceLogs(deps)
 	}
@@ -3064,6 +3089,69 @@ func dispatchSetCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return set_command.CommandHandler(deps, entries)
+}
+
+func dispatchSetDep(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &set_dep.Entries{}
+	if verb.GetOptionsSize([]string{"--version"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "version", []string{"--version"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "version", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Version = value
+	} else {
+		deps.Std.Error("required flag 'version' not provided\n")
+		return ExitUsage
+	}
+	if verb.GetOptionsSize([]string{"--remote-available"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "remote-available", []string{"--remote-available"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "remote-available", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.RemoteAvailable = value
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "dep", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Dep = value
+	} else {
+		deps.Std.Error("required arg 'dep' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return set_dep.CommandHandler(deps, entries)
 }
 
 func dispatchSetRoute(deps *deps.Deps, verb argvdeps.Parser) int {

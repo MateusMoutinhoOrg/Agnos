@@ -33,6 +33,20 @@ flags:
         - -q
       name: quiet
       type: boolean
+    - description: the name the copied contract takes under sandbox/deps/ (remote deps only; defaults to the last segment of the module path)
+      examples:
+        - add-dep github.com/user/MathLib@v1.2.0 --as mathlib
+      identifiers:
+        - --as
+      name: as
+      type: string
+    - description: the available of the remote repo the generated shim builds its sandbox from
+      examples:
+        - add-dep github.com/user/MathLib@v1.2.0 --remote-available standard
+      identifiers:
+        - --remote-available
+      name: remote-available
+      type: string
 help: Installs one dep of the embedded catalog into the project
 identifiers:
     - add-dep

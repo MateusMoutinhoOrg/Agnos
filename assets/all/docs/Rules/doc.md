@@ -49,6 +49,12 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `adapters/availables/<name>/available.yaml` is the only place the choice of adapter is
   recorded; `set-adapter` is its only editor. An available with no `available.yaml` is
   hand-written and no build touches it.
+- Every type of `sandbox/api/` is convertible: its underlying type is identical
+  in a copy of the package made elsewhere, or it is a struct the generator can
+  write a converter for. No generics, no `chan`, no anonymous struct or
+  interface, no embedded field, and no identifier that is neither predeclared
+  nor declared in the package. This is what makes every agnos repo installable
+  as a dep. **(verify)**
 - `cmd/main/` wires an adapter into the sandbox and holds no logic.
 {{- if .HasAssets }}
 - Every `assets/deplist/<dep>/<path>` and `assets/adapterlist/<adapter>/<path>`, rendered with

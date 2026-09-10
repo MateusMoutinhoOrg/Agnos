@@ -77,13 +77,26 @@ ExecTestProps describes one run of the project's example suite: the directory ho
 
 ### `AddDepProps`
 
-AddDepProps describes one dep to install: the directory holding the project, the dep of the embedded catalog, and the adapter to fill its contract with ("" installs the dep's declared default-adapter).
+AddDepProps describes one dep to install. Dep is either a name of the embedded catalog or, when it holds a "/", the module path of another agnos repo — the same disambiguation `go get` makes. Adapter picks which implementation of a catalog dep fills the contract ("" takes the dep's declared default-adapter); As names the copied contract of a remote one ("" takes the last segment of the module path); RemoteAvailable is the available of the remote repo the generated shim builds its sandbox from ("" is standard).
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Dep` | `string` |
 | `Adapter` | `string` |
+| `As` | `string` |
+| `RemoteAvailable` | `string` |
+
+### `SetDepProps`
+
+SetDepProps describes one remote dep to move to another version of the module it was copied from. RemoteAvailable is the available of the remote repo the regenerated shim builds its sandbox from ("" is standard).
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Dep` | `string` |
+| `Version` | `string` |
+| `RemoteAvailable` | `string` |
 
 ### `RemoveDepProps`
 
@@ -295,6 +308,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `AddDep` | `func(props AddDepProps) error` | AddDep installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |
 | `RemoveDep` | `func(props RemoveDepProps) error` | RemoveDep uninstalls one installed dep: its adapters, their requires, and then the contract itself. It refuses a dep that still has an adapter installed unless props.WithAdapters says to take those too. |
 | `ListDeps` | `func(path string) ([]DepInfo, error)` | ListDeps returns one row per dep of the embedded catalog, saying which the project has installed and which adapters fill each one. |
+| `SetDep` | `func(props SetDepProps) error` | SetDep re-copies one remote dep at another version of its module and regenerates the shim that converts it. |
 | `AddAdapter` | `func(props AddAdapterProps) error` | AddAdapter installs one further implementation of a contract the project already has, and — when props.Available names one — switches that available to it. |
 | `RemoveAdapter` | `func(path string, adapter string) error` | RemoveAdapter uninstalls one adapter, its require and its files. It refuses one that an available still binds, and one written by the generator as half of a remote dep. |
 | `SetAdapter` | `func(props SetAdapterProps) error` | SetAdapter changes which adapter fills one dep's field in one available, the only place that choice is recorded. |

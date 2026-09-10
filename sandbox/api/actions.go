@@ -50,13 +50,30 @@ type ExecTestProps struct {
 	Update bool
 }
 
-// AddDepProps describes one dep to install: the directory holding the
-// project, the dep of the embedded catalog, and the adapter to fill its
-// contract with ("" installs the dep's declared default-adapter).
+// AddDepProps describes one dep to install. Dep is either a name of the
+// embedded catalog or, when it holds a "/", the module path of another agnos
+// repo — the same disambiguation `go get` makes. Adapter picks which
+// implementation of a catalog dep fills the contract ("" takes the dep's
+// declared default-adapter); As names the copied contract of a remote one (""
+// takes the last segment of the module path); RemoteAvailable is the available
+// of the remote repo the generated shim builds its sandbox from ("" is
+// standard).
 type AddDepProps struct {
-	Path    string
-	Dep     string
-	Adapter string
+	Path            string
+	Dep             string
+	Adapter         string
+	As              string
+	RemoteAvailable string
+}
+
+// SetDepProps describes one remote dep to move to another version of the
+// module it was copied from. RemoteAvailable is the available of the remote
+// repo the regenerated shim builds its sandbox from ("" is standard).
+type SetDepProps struct {
+	Path            string
+	Dep             string
+	Version         string
+	RemoteAvailable string
 }
 
 // RemoveDepProps describes one dep to uninstall. A dep with adapters
@@ -299,6 +316,10 @@ type Actions struct {
 	// ListDeps returns one row per dep of the embedded catalog, saying which
 	// the project has installed and which adapters fill each one.
 	ListDeps func(path string) ([]DepInfo, error)
+
+	// SetDep re-copies one remote dep at another version of its module and
+	// regenerates the shim that converts it.
+	SetDep func(props SetDepProps) error
 
 	// AddAdapter installs one further implementation of a contract the
 	// project already has, and — when props.Available names one — switches

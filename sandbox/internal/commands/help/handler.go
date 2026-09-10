@@ -206,6 +206,8 @@ var helpCommands = []helpCommand{
 			{Identifiers: []string{"--adapter"}, Description: "the adapter to fill the dep's contract with (defaults to the dep's default-adapter)", Examples: []string{"add-dep serverdeps --adapter nethttp"}, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-dep --path ./my-project"}, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-dep embeddeps -q"}, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{"--as"}, Description: "the name the copied contract takes under sandbox/deps/ (remote deps only; defaults to the last segment of the module path)", Examples: []string{"add-dep github.com/user/MathLib@v1.2.0 --as mathlib"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--remote-available"}, Description: "the available of the remote repo the generated shim builds its sandbox from", Examples: []string{"add-dep github.com/user/MathLib@v1.2.0 --remote-available standard"}, Type: "string", Default: "", Required: false},
 		},
 		Args: []helpField{
 			{Name: "dep", Description: "the dep to install from assets/deplist", Examples: []string{"add-dep embeddeps"}, Type: "string", Default: "", Required: true},
@@ -884,6 +886,23 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the command to update (identifier or package name)", Examples: []string{"set-command exec --help \"run the thing\""}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"set-dep"},
+		Category:        "Deps System",
+		Description:     "Moves one remote dep to another version of its module",
+		LongDescription: "Re-copies the remote repo's sandbox/api into sandbox/deps/<dep>/ at the given version and regenerates the shim that converts it, then calls build. The module comes from the shim's own adapter.yaml.",
+		Examples:        []string{"set-dep mathlib --version v1.3.0"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--version"}, Description: "the module version to copy the contract from", Examples: []string{"set-dep mathlib --version v1.3.0"}, Type: "string", Default: "", Required: true},
+			{Identifiers: []string{"--remote-available"}, Description: "the available of the remote repo the regenerated shim builds its sandbox from", Examples: []string{"set-dep mathlib --version v1.3.0 --remote-available standard"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"set-dep mathlib --version v1.3.0 --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"set-dep mathlib --version v1.3.0 -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "dep", Description: "the remote dep to move", Examples: []string{"set-dep mathlib --version v1.3.0"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

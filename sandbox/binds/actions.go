@@ -49,6 +49,7 @@ import (
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
 	setBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
+	setDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_dep"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
 	updateTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_tests"
@@ -82,6 +83,9 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	}
 	sandbox.Actions.ListDeps = func(path string) ([]api.DepInfo, error) {
 		return listDepsAction.ListDeps(deps, path)
+	}
+	sandbox.Actions.SetDep = func(props api.SetDepProps) error {
+		return setDepAction.SetDep(deps, props)
 	}
 	sandbox.Actions.AddAdapter = func(props api.AddAdapterProps) error {
 		return addAdapterAction.AddAdapter(deps, props)

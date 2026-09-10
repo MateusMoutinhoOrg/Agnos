@@ -68,3 +68,24 @@ func DepField(deps *deps.Deps, dep string) string {
 	}
 	return deps.Stringsdeps.ToUpper(dep[:1]) + dep[1:]
 }
+
+// ValidateDepName rejects a name that could not be a directory under
+// sandbox/deps/ and a Go package clause at the same time — the same check
+// ValidateAvailableName makes, for the same reason: the name is propagated
+// straight into `package <name>` of the copied contract.
+func ValidateDepName(deps *deps.Deps, dep string) error {
+	if dep == "" {
+		return deps.Std.Errorf("a dep needs a name")
+	}
+	if dep[0] < 'a' || dep[0] > 'z' {
+		return deps.Std.Errorf("invalid dep name %q: a dep name must start with a lowercase letter", dep)
+	}
+	for _, letter := range dep {
+		if (letter >= 'a' && letter <= 'z') || (letter >= '0' && letter <= '9') {
+			continue
+		}
+		return deps.Std.Errorf("invalid dep name %q: only lowercase letters and digits are allowed (it becomes the directory %s/%s and a Go package name)",
+			dep, ContractsDir, dep)
+	}
+	return nil
+}

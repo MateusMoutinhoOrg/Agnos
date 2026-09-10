@@ -8,9 +8,11 @@ import (
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	install_error := addDepAction.AddDep(deps, api.AddDepProps{
-		Path:    entries.Path,
-		Dep:     entries.Dep,
-		Adapter: entries.Adapter,
+		Path:            entries.Path,
+		Dep:             entries.Dep,
+		Adapter:         entries.Adapter,
+		As:              entries.As,
+		RemoteAvailable: entries.RemoteAvailable,
 	})
 
 	if install_error != nil {

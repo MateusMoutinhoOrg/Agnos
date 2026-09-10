@@ -42,6 +42,7 @@ sandbox/                            closed: imports nothing outside sandbox/, no
     actions/build/generate_*.go     entries.go per command, help entries.yaml, doc indexes
     actions/verify/check_*.go       one rule set per file, each returns []string
     parsables/<name>conf/           api.go, new.go, new_empty.go, bind_methods.go, render.go
+    apishape/                       the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from
     smartio/                        transactional fs rooted at --path
     utils/                          RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
 adapters/                           the only place OS-bound and third-party code lives

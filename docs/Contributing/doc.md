@@ -67,6 +67,8 @@ The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency), the three
 
 A second implementation of a contract that already exists is an adapter alone: only step 2 below, plus `add-adapter` and `set-adapter` to bind it.
 
+Whatever you put in `sandbox/api/` has to stay convertible — `verify` runs `check_api_shape.go` on every run, because another repo may install this one as a dep and copy that package. The rule and the converter planner are in `sandbox/internal/apishape/`; the shim is rendered from `assets/templates/remote_shim.go`.
+
 ## Add an installable dep
 
 The catalog is two catalogs: `assets/deplist/<dep>/` holds the contract, `assets/adapterlist/<adapter>/` holds one implementation of it, so a dep can gain a second adapter without moving.

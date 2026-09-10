@@ -21,5 +21,21 @@ func Render(deps *deps.Deps, conf *ModuleConf) string {
 		builder += ")\n"
 	}
 
+	for index, directive := range conf.Directives {
+		if index == 0 {
+			builder = separate(deps, builder)
+		}
+		builder += directive + "\n"
+	}
+
 	return builder
+}
+
+// separate leaves exactly one blank line between what is written and the
+// directives that follow, however many the sections above happened to end with.
+func separate(deps *deps.Deps, builder string) string {
+	for deps.Stringsdeps.HasSuffix(builder, "\n") {
+		builder = builder[:len(builder)-1]
+	}
+	return builder + "\n\n"
 }

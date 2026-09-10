@@ -52,7 +52,9 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Deps install
 
-`add-dep`: read `deplist/<dep>/dep.yaml` in embedded assets (missing = unknown dep), pick `--adapter` or its `default-adapter`, read `adapterlist/<adapter>/adapter.yaml` (its `dep:` must match), `RenderGroupExcept` both catalogs minus their own declaration, write the adapter's declaration to `adapters/libs/<adapter>/adapter.yaml`, add the `require` its `module:` pins, persist, then `build`. `remove-dep` is the inverse: every adapter whose declaration names the dep, then the contract.
+`add-dep <name>`: read `deplist/<dep>/dep.yaml` in embedded assets (missing = unknown dep), pick `--adapter` or its `default-adapter`, read `adapterlist/<adapter>/adapter.yaml` (its `dep:` must match), `RenderGroupExcept` both catalogs minus their own declaration, write the adapter's declaration to `adapters/libs/<adapter>/adapter.yaml`, add the `require` its `module:` pins, enroll the adapter in every available, persist, then `build`. `remove-dep` is the inverse: every adapter whose declaration names the dep, then the contract.
+
+`add-dep <module>` (an argument holding a `/`): resolve the module through `go list -m -json` and, failing that, `go mod download -json` (`RemoteModule`); parse `<dir>/sandbox/api/*.go` into an `apishape.Api`; reject it with `apishape.Violations`; copy each file to `sandbox/deps/<name>/` with only the package clause rewritten, then `Format`; plan the converters with `apishape.Converters` and render `templates/remote_shim.go` to `adapters/libs/<name>/<name>.go`; write its `adapter.yaml` with `origin: generated`; `AddRequire`; enroll; `build`. `set-dep <name> --version` reads the module back out of that `adapter.yaml` and runs the same path again.
 
 ## Dispatch (`climain.go`)
 

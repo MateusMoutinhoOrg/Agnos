@@ -1,0 +1,46 @@
+args:
+    - description: the remote dep to move
+      examples:
+        - set-dep mathlib --version v1.3.0
+      name: dep
+      required: true
+      type: string
+category: Deps System
+examples:
+    - set-dep mathlib --version v1.3.0
+flags:
+    - description: the module version to copy the contract from
+      examples:
+        - set-dep mathlib --version v1.3.0
+      identifiers:
+        - --version
+      name: version
+      required: true
+      type: string
+    - description: the available of the remote repo the regenerated shim builds its sandbox from
+      examples:
+        - set-dep mathlib --version v1.3.0 --remote-available standard
+      identifiers:
+        - --remote-available
+      name: remote-available
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - set-dep mathlib --version v1.3.0 --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - set-dep mathlib --version v1.3.0 -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Moves one remote dep to another version of its module
+identifiers:
+    - set-dep
+long-description: Re-copies the remote repo's sandbox/api into sandbox/deps/<dep>/ at the given version and regenerates the shim that converts it, then calls build. The module comes from the shim's own adapter.yaml.

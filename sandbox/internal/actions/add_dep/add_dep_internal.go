@@ -8,7 +8,12 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// AddDepInternal installs one dep of the embedded catalog: the contract under
+// AddDepInternal installs one dep. An argument holding a "/" is the module
+// path of another agnos repo and takes the remote route — the same
+// disambiguation `go get` makes between a package name and a module path.
+// Everything else is a name of the embedded catalog.
+//
+// The catalog route installs the contract under
 // sandbox/deps/<dep>/ from assets/deplist/<dep>, and one adapter filling it
 // from assets/adapterlist/<adapter> — the dep's declared default-adapter
 // unless the caller names another. The two halves are separate catalogs, so
@@ -17,6 +22,10 @@ import (
 // The adapter is enrolled in every available: nothing else fills that field
 // yet, and an available that leaves one empty is a nil func waiting to panic.
 func AddDepInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddDepProps) error {
+	if deps.Stringsdeps.Contains(props.Dep, "/") {
+		return AddRemoteDepInternal(deps, io, props)
+	}
+
 	deps.Std.Log("add-dep started with path %s dep %s \n", props.Path, props.Dep)
 
 	dep_conf, err := utils.LoadCatalogDepConf(deps, props.Dep)

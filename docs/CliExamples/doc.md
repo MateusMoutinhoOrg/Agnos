@@ -24,6 +24,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `add-flag` | declare one flag on a command | [example.sh](../../examples/cli/add-flag/example.sh) |
 | `add-lib-example` | create an example under examples/lib/ | [example.sh](../../examples/cli/add-lib-example/example.sh) |
 | `add-page` |  | [example.sh](../../examples/cli/add-page/example.sh) |
+| `add-remote-dep` |  | [example.sh](../../examples/cli/add-remote-dep/example.sh) |
 | `add-rest-segment` |  | [example.sh](../../examples/cli/add-rest-segment/example.sh) |
 | `add-route` |  | [example.sh](../../examples/cli/add-route/example.sh) |
 | `build` | regenerate every generated file of a project | [example.sh](../../examples/cli/build/example.sh) |
@@ -49,6 +50,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `server-init` |  | [example.sh](../../examples/cli/server-init/example.sh) |
 | `set-adapter` |  | [example.sh](../../examples/cli/set-adapter/example.sh) |
 | `set-command` | rewrite the command-level keys of a command | [example.sh](../../examples/cli/set-command/example.sh) |
+| `set-dep` |  | [example.sh](../../examples/cli/set-dep/example.sh) |
 | `start` | scaffold a new project | [example.sh](../../examples/cli/start/example.sh) |
 | `verify` | check a project against the schema, writing nothing | [example.sh](../../examples/cli/verify/example.sh) |
 

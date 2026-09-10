@@ -1,0 +1,17 @@
+cli-output: "set-dep started with path TestDir/app dep remote version v0.0.1 \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: c47436e286fa8e3c76565b464080774687d73b588ca9969d469b37e69b236469
+    - file: adapters/availables/standard/new.go
+      sha: a48746894fdcf3bce2ff7ac373e5cd3a77d506eb1b7be89f1d06e1765858170c
+    - file: adapters/libs/remote/adapter.yaml
+      sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
+    - file: adapters/libs/remote/remote.go
+      sha: 89ceed064cd56624508370e0cd6efe76b87bfeebdf8ebc72534d4d5fc3e946c8
+    - file: sandbox/deps/deps.go
+      sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
+    - file: sandbox/deps/remote/greeter.go
+      sha: 7e9ff865e2bb0e38400b846c8c6cf1fe7f35dc52f38bbb6d6b7fd3214a65a2fb
+    - file: sandbox/deps/remote/sandbox.go
+      sha: 3d313ba6fc5a88e824e392f09aa13e2aa0937f2edafec6342e67b056835b1123

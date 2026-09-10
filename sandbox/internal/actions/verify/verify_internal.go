@@ -20,9 +20,11 @@ func VerifyInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	var violations []string
 	violations = append(violations, CheckSandbox(deps, io, module_conf.Module)...)
 	violations = append(violations, CheckContracts(deps, io)...)
+	violations = append(violations, CheckApiShape(deps, io)...)
 	violations = append(violations, CheckAdapters(deps, io)...)
 	violations = append(violations, CheckDeplist(deps, io, module_conf.Module)...)
 	violations = append(violations, CheckAdapterlist(deps, io, module_conf.Module)...)
+	violations = append(violations, CheckRemoteDeps(deps, io, path)...)
 	violations = append(violations, CheckRoutes(deps, io)...)
 	violations = append(violations, CheckDocs(deps, io)...)
 	violations = append(violations, CheckStructure(deps, io)...)
