@@ -87,39 +87,47 @@ adapters: [iodeps, std, verb, nethttp]
 O `adapter.yaml` copiado para dentro de `adapters/libs/<adapter>/` é o que diz qual dep aquele
 adapter preenche — é o que torna o invariante da §2 verificável sem parsear o corpo do `Bind`.
 
-### 3.3 Registro do projeto
+### 3.3 Nada de registro: a árvore é o registro
 
-`AgnosConfig/deps.yaml`, escrito pelos comandos, lido por `list-deps`, `remove-dep` e `verify`:
+Não existe `AgnosConfig/deps.yaml` nem manifesto equivalente. Depois da separação da §3.1 cada
+unidade é **exatamente um diretório**, e toda pergunta que um registro responderia já está
+respondida pela árvore:
 
-```yaml
-deps:
-  - name: serverdeps
-    origin: embedded
-  - name: mathlib
-    origin: module
-    module: github.com/user/MathLib
-    version: v1.2.0
-    files:                       # sha256 de cada arquivo copiado
-      mathlib.go: 3f2a...
-adapters:
-  - name: nethttp
-    dep: serverdeps
-    origin: embedded
-  - name: mathlib
-    dep: mathlib
-    origin: generated            # shim escrito pelo agnos
-```
+| Pergunta | Respondida por |
+|---|---|
+| Que deps estão instaladas? | os diretórios de `sandbox/deps/` |
+| Que adapters estão instalados? | os diretórios de `adapters/libs/` |
+| Que dep cada adapter preenche? | `dep:` do `adapters/libs/<adapter>/adapter.yaml` |
+| Qual adapter vence? | `available.yaml` de cada `adapters/availables/<nome>/` |
+| Que módulo o adapter pina? | `module:` do mesmo `adapter.yaml` |
+| De onde veio uma dep copiada de repo remoto? | `origin: generated` + `module:` do shim que a acompanha |
 
-**Por que é obrigatório:** `dep-remove` hoje deriva a lista de arquivos de
-`assets/deplist/<dep>` — impossível para uma dep remota, que não está no binário. E `dep-list`
-hoje lista o catálogo porque não tem registro do que está instalado. O registro resolve os dois.
+O que hoje força um manifesto é só o straddle: `assets/deplist/<dep>/` cruza duas árvores, então
+`dep-remove` precisa da lista de arquivos do pacote para saber o que apagar. Partido o catálogo,
+remover uma dep é remover `sandbox/deps/<dep>/` e remover um adapter é remover
+`adapters/libs/<adapter>/` — diretório inteiro, sem lista. E o require sai do `go.mod` lendo o
+`module:` do `adapter.yaml` que está sendo removido, em vez do `depsversion.yaml` global.
+
+Vale para a dep remota também. `add-dep github.com/user/MathLib@v1.2.0 --as mathlib` escreve
+`module: github.com/user/MathLib@v1.2.0` e `origin: generated` no `adapter.yaml` do shim — o
+mesmo campo que um adapter embutido já usa para o pin dele. `set-dep mathlib --version v1.3.0`
+lê dali, e `list-deps` monta a tabela inteira varrendo os dois diretórios.
+
+Também não há sha256 gravado. O module cache é imutável por versão e o `go.sum` já garante o
+conteúdo dele, então a checagem de drift compara `sandbox/deps/<nome>/` byte a byte com
+`<cache>/sandbox/api/` diretamente — a mesma regra do `check_deplist`, com o cache no lugar de
+`assets/`. Gravar um hash seria uma segunda fonte de verdade para algo que o Go já assina.
+
+O único preço é uma regra de guarda: `remove-adapter` **recusa** um adapter com
+`origin: generated`, porque esse shim é metade de uma dep copiada — quem a remove é `remove-dep`,
+e quem a re-gera é `set-dep`.
 
 ## 4. Superfície de comandos
 
 | Comando | Faz |
 |---|---|
 | `deps-init` / `deps-purge` | a camada (inalterado; par irmão de `cli-init`, `server-init`, `front-init`) |
-| `add-dep <dep> [--adapter <a>]` | contrato + adapter default (ou o escolhido) + registro no available |
+| `add-dep <dep> [--adapter <a>]` | contrato + adapter default (ou o escolhido) + inscrição no available |
 | `remove-dep <dep> [--with-adapters]` | **recusa** se houver adapter instalado; lista quem a segura |
 | `add-adapter <adapter> [--available <a>]` | mais um adapter para uma dep já instalada |
 | `remove-adapter <adapter>` | só o adapter; recusa se for o único que preenche o campo num available |
@@ -163,8 +171,7 @@ Com isso o prefixo `dep-` deixa de existir e a colisão de um `s` entre `deps-in
 5. **gera** `adapters/libs/mathlib/mathlib.go` — o shim da §5.2 — e o `adapter.yaml` com
    `origin: generated`;
 6. `AddRequire` do módulo no `go.mod`;
-7. registra dep e adapter em `AgnosConfig/deps.yaml`, com o sha256 de cada arquivo copiado;
-8. inscreve o adapter no `available.yaml` e chama `build`.
+7. inscreve o adapter no `available.yaml` e chama `build`.
 
 Duas propriedades do repo tornam isso quase gratuito:
 
@@ -176,7 +183,7 @@ Duas propriedades do repo tornam isso quase gratuito:
   `mathlib.Sandbox` pela mesma convenção de sempre (campo = dir title-cased).
 
 `set-dep mathlib --version v1.3.0` re-copia e regenera. `remove-dep mathlib` apaga
-`sandbox/deps/mathlib/`, `adapters/libs/mathlib/`, o require e a entrada do registro.
+`sandbox/deps/mathlib/`, `adapters/libs/mathlib/`, o require e a linha do `available.yaml`.
 
 ### 5.2 O adapter gerado: **cast direto não funciona**
 
@@ -303,7 +310,6 @@ diff.
 
 ### Fase 4 — multi-adapter
 
-- `AgnosConfig/deps.yaml` e seu `parsables/depsconf/`; `add-dep` passa a registrar;
 - comandos novos: `add-adapter`, `remove-adapter`, `set-adapter`, `list-adapters`,
   `add-available`, `remove-available`;
 - `remove-dep` recusa com adapter instalado, `--with-adapters` cascateia;
@@ -319,8 +325,8 @@ diff.
   `sandbox/internal/actions/add_dep/generate_shim.go`;
 - `set-dep <nome> --version`;
 - `installable: true` + `check_installable_api.go`;
-- `check_remote_deps.go`: compara o sha256 registrado com a cópia no module cache quando ela
-  está disponível, espelhando a regra byte-a-byte do `check_deplist`;
+- `check_remote_deps.go`: compara `sandbox/deps/<nome>/` com `<cache>/sandbox/api/` byte a byte
+  quando o cache está disponível, espelhando a regra do `check_deplist`;
 - exemplo com um repo agnos mínimo fixado por versão.
 
 ## 7. Docs a atualizar
@@ -331,7 +337,7 @@ diff.
 | `assets/all/docs/Adapters/doc.md` | novo (`agnos add-doc`), tema `development` |
 | `assets/all/docs/Workflow/doc.md` | "Add a dependency" reescrito com o par dep/adapter |
 | `assets/all/docs/Rules/doc.md` | regra do invariante "um adapter por campo por available"; regra da convertibilidade |
-| `assets/all/docs/GeneratedFiles/doc.md` | `new.go` gerado do yaml; `deps.yaml` é `once` |
+| `assets/all/docs/GeneratedFiles/doc.md` | `new.go` gerado do yaml; `adapter.yaml` e `available.yaml` são `once` |
 | `assets/all/docs/Structure/doc.md` | via `AgnosConfig/structure.yaml` |
 | `docs/Contributing/doc.md` | espelhar o padrão, no mesmo commit |
 | `CLAUDE.md` | seção Architecture: as três unidades |
@@ -346,7 +352,7 @@ troca só aparece num projeto scaffoldado.
 | Risco | Mitigação |
 |---|---|
 | Fase 1 move 14 deps de uma vez; um erro de byte quebra `check_deplist` | fazer um dep por commit, `verify` entre cada um |
-| A cópia da api remota fica desatualizada em relação ao módulo | sha256 no registro + `check_remote_deps.go` |
+| A cópia da api remota fica desatualizada em relação ao módulo | `check_remote_deps.go` compara com o module cache, que o `go.sum` já assina |
 | Repo remoto com api não conversível | rejeitado na instalação com lista de violações; `installable: true` pega antes de publicar |
 | Diamante de versões no `go.mod` | `go mod tidy` do próprio `build` resolve; conflito real vira erro do toolchain, não silêncio |
 | Ordem alfabética de `libs/` sumindo muda a ordem de bind em `new.go` | ordem passa a ser a do `available.yaml`; goldens de `start` e `deps-init` se movem uma vez, na Fase 2 |
