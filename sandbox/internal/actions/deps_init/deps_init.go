@@ -13,11 +13,8 @@ func DepsInit(deps *deps.Deps, path string) error {
 	if err := DepsInitInternal(deps, io, path); err != nil {
 		return err
 	}
-	if err := buildAction.BuildInternal(deps, io, path); err != nil {
-		return err
-	}
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.RunRuntime(deps, path, api.RuntimeGo)
+	return buildAction.Build(deps, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

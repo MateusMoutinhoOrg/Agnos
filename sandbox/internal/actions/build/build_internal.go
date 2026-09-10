@@ -108,6 +108,14 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		return err
 	}
 
+	// An available is a declared selection, not a directory listing: two
+	// adapters may implement the same contract, so which one binds is read
+	// from adapters/availables/<name>/available.yaml and nowhere else.
+	availables, err := CollectAvailables(deps, io)
+	if err != nil {
+		return err
+	}
+
 	// docs/Structure's tree is rendered from the project's own structure.yaml,
 	// so the page describes the shape its author declared rather than one
 	// typed into the doc by hand. `verify` rejects an item whose path is gone.
@@ -162,6 +170,7 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Constructors":      CollectConstructors(deps, io),
 		"DepsLibs":          CollectDepsLibs(deps, io),
 		"AdapterLibs":       CollectAdapterLibs(deps, io),
+		"Availables":        availables,
 		"CliExamples":       utils.CollectExamples(deps, io, utils.ExampleCliSide),
 		"LibExamples":       utils.CollectExamples(deps, io, utils.ExampleLibSide),
 		"Commands":          commands,
@@ -180,6 +189,9 @@ func BuildInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	if hasDeps {
+		if err := GenerateAvailableNews(deps, io, availables, module_conf.Module); err != nil {
+			return err
+		}
 		if err := utils.RenderGroup(deps, io, "deps", vars); err != nil {
 			return err
 		}

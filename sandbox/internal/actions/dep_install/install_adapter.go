@@ -13,7 +13,8 @@ import (
 // answers by itself which dep that adapter fills. The versioned module the
 // adapter imports — "" for one that needs nothing beyond the stdlib — is
 // pinned in go.mod here, where the import actually is, rather than under the
-// name of the contract.
+// name of the contract. The adapter is then enrolled in every available, since
+// a contract nothing binds is a nil func waiting to panic.
 func InstallAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter_conf *adapterconf.AdapterConf, module_conf *moduleconf.ModuleConf, vars map[string]interface{}) error {
 
 	group := utils.AdapterlistGroup + "/" + adapter_conf.Name
@@ -22,6 +23,10 @@ func InstallAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter_conf *adapterc
 	}
 
 	if err := io.WriteFileOverwrite(utils.AdapterConfPath(adapter_conf.Name), []byte(adapter_conf.Render())); err != nil {
+		return err
+	}
+
+	if err := utils.EnrollAdapter(deps, io, adapter_conf.Name); err != nil {
 		return err
 	}
 

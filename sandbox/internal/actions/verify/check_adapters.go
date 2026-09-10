@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // adaptersAllowedDirs is the fixed set of sub-directories the adapters/ tree
@@ -12,7 +13,7 @@ var adaptersAllowedDirs = []string{"availables", "libs"}
 
 // adapterLibsDir holds one package per contract, each exporting the binder
 // adapters/availables/standard/new.go is generated to call.
-const adapterLibsDir = "adapters/libs"
+const adapterLibsDir = utils.AdaptersDir
 
 // binderParamType is the single parameter every adapter binder takes. The
 // generated standard adapter calls <lib>.Bind(&deps) for every directory it
@@ -104,31 +105,100 @@ func isBinder(function goimportsdeps.Function) bool {
 		function.Params[0].Type == binderParamType
 }
 
-// checkAdapterCoverage reports every sandbox/deps contract with no adapter lib
-// mentioning its Deps field. The field name is the title-cased contract
-// directory, the same spelling sandbox/deps/deps.go is generated with, and a
-// binder fills it either whole or field by field — both mention it.
+// checkAdapterCoverage enforces the one invariant an available exists for:
+// every field of Deps is filled exactly once. Zero is a nil func that panics
+// on first use; two is a silent overwrite in which the last binder wins, which
+// no compiler and no test catches. Which adapter fills which field is read
+// from the adapter's own declaration, never from the body of its Bind.
+//
+// A project whose availables are all hand-written declares no selection, so
+// there is nothing to resolve; it falls back to the weaker question — is every
+// contract mentioned by some adapter at all.
 func checkAdapterCoverage(deps *deps.Deps, io *smartio.SmartIO) []string {
-	var violations []string
-
-	if !io.IsDir(adapterLibsDir) || !io.IsDir("sandbox/deps") {
-		return violations
+	if !io.IsDir(adapterLibsDir) || !io.IsDir(utils.ContractsDir) {
+		return nil
 	}
 
-	bound := adapterSources(deps, io)
+	availables := utils.DeclaredAvailables(deps, io)
+	if len(availables) == 0 {
+		return checkAdapterMentions(deps, io)
+	}
 
-	for _, contract := range io.ListDirs("sandbox/deps") {
+	var violations []string
+	for _, available := range availables {
+		violations = append(violations, checkAvailableCoverage(deps, io, available)...)
+	}
+
+	return violations
+}
+
+// checkAvailableCoverage resolves one available's selection into the fields it
+// fills and reports both ways it can be wrong.
+func checkAvailableCoverage(deps *deps.Deps, io *smartio.SmartIO, available string) []string {
+	var violations []string
+
+	conf, err := utils.LoadAvailableConf(deps, io, available)
+	if err != nil {
+		return []string{err.Error()}
+	}
+
+	filled := map[string][]string{}
+	for _, adapter := range conf.Adapters {
+		adapter_conf, err := utils.LoadAdapterConf(deps, io, adapter)
+		if err != nil {
+			violations = append(violations, utils.AvailableConfPath(available)+" binds "+adapter+
+				", which is not installed under "+adapterLibsDir+"/")
+			continue
+		}
+		field := utils.DepField(deps, adapter_conf.Dep)
+		filled[field] = append(filled[field], adapter)
+	}
+
+	for _, contract := range io.ListDirs(utils.ContractsDir) {
 		name := lastSegment(deps, contract)
 		if len(name) == 0 {
 			continue
 		}
-		field := deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
+		field := utils.DepField(deps, name)
+
+		switch len(filled[field]) {
+		case 1:
+			continue
+		case 0:
+			violations = append(violations, "available "+available+" fills deps."+field+
+				" with no adapter (an unfilled Deps field is a nil func that panics on first use)")
+		default:
+			violations = append(violations, "available "+available+" fills deps."+field+
+				" with "+deps.Stringsdeps.Join(filled[field], " and ")+
+				" (two binders of one field is a silent overwrite: the last one bound wins)")
+		}
+	}
+
+	return violations
+}
+
+// checkAdapterMentions is the coverage question a project with no declared
+// available can still answer: does some adapter mention each contract's Deps
+// field at all. The field name is the title-cased contract directory, the same
+// spelling sandbox/deps/deps.go is generated with, and a binder fills it either
+// whole or field by field — both mention it.
+func checkAdapterMentions(deps *deps.Deps, io *smartio.SmartIO) []string {
+	var violations []string
+
+	bound := adapterSources(deps, io)
+
+	for _, contract := range io.ListDirs(utils.ContractsDir) {
+		name := lastSegment(deps, contract)
+		if len(name) == 0 {
+			continue
+		}
+		field := utils.DepField(deps, name)
 
 		if deps.Stringsdeps.Contains(bound, "deps."+field) {
 			continue
 		}
 
-		violations = append(violations, "contract sandbox/deps/"+name+
+		violations = append(violations, "contract "+utils.ContractsDir+"/"+name+
 			" has no adapter filling deps."+field+
 			" (an unfilled Deps field is a nil func that panics on first use)")
 	}

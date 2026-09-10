@@ -1,0 +1,13 @@
+adapters:
+    - embeddeps
+    - goimportsdeps
+    - hashdeps
+    - iodeps
+    - rundeps
+    - serializables
+    - serverdeps
+    - sortdeps
+    - std
+    - stringsdeps
+    - templatedeps
+    - verb

@@ -18,9 +18,11 @@
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
 {{- if .HasDeps }}
 | `sandbox/deps/deps.go` | `build` | always. One `<Title> <dir>.Sandbox` per dir of `sandbox/deps/` |
-| `adapters/availables/standard/new.go` | `build` | always. One `<lib>.Bind(&deps)` per dir of `adapters/libs/` |
+| `adapters/availables/<name>/new.go` | `build` | always. One `<adapter>.Bind(&deps)` per entry of that available's `available.yaml`; an available with no `available.yaml` is hand-written and left alone |
 {{- end }}
-| `sandbox/deps/<dep>/*.go`, `adapters/libs/<lib>/*.go` | `dep-install` | once |
+| `adapters/availables/<name>/available.yaml` | `deps-init` | once, then rewritten by `dep-install` / `dep-remove` — never by hand |
+| `sandbox/deps/<dep>/*.go`, `adapters/libs/<adapter>/*.go` | `dep-install` | once |
+| `adapters/libs/<adapter>/adapter.yaml` | `dep-install` | once |
 | `assets/asset.go` | `dep-install embeddeps` | once |
 {{- if .HasCli }}
 | `cmd/main/main.go` | `build` | always |

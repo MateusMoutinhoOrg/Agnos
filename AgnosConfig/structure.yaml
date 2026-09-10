@@ -123,13 +123,13 @@ adapters:
     libs/<adapter>/adapter.yaml:
       order: 2
       description: which dep the adapter fills, which module it pins  (adapterconf)
-    availables/standard/new.go:
+    availables/<name>/available.yaml:
       order: 3
-      gen: true
-      description: New() deps.Deps calling every lib's Bind
+      description: which adapters this available binds, one per Deps field  (availableconf)
     availables/<name>/new.go:
       order: 4
-      description: hand-written mix, left alone
+      gen: true
+      description: New() deps.Deps calling the Bind of every adapter declared; an available with no available.yaml is hand-written and left alone
 assets:
   order: 4
   dir: true

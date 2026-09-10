@@ -1,13 +1,13 @@
-package standard
+package {{.Name}}
 
-import ({{range .AdapterLibs}}
+import ({{range .Adapters}}
 	{{.Name}} "{{$.Module}}/adapters/libs/{{.Name}}"{{end}}
 	deps "{{.Module}}/sandbox/deps"
 )
 
 func New() deps.Deps {
 	deps := deps.Deps{}
-{{- range .AdapterLibs}}
+{{- range .Adapters}}
 	{{.Name}}.Bind(&deps)
 {{- end}}
 	return deps

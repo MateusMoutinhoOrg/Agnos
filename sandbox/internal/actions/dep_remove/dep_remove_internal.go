@@ -28,13 +28,17 @@ func DepRemoveInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep st
 	return nil
 }
 
-// RemoveAdapter drops one installed adapter: its package directory, the extra
-// files the embedded catalog installs alongside it, and the require its
-// declaration pins.
+// RemoveAdapter drops one installed adapter: its enrollment in every
+// available, its package directory, the extra files the embedded catalog
+// installs alongside it, and the require its declaration pins.
 func RemoveAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter string) error {
 
 	adapter_conf, err := utils.LoadAdapterConf(deps, io, adapter)
 	if err != nil {
+		return err
+	}
+
+	if err := utils.UnenrollAdapter(deps, io, adapter); err != nil {
 		return err
 	}
 

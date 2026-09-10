@@ -14,7 +14,8 @@
 | `CollectBinds` | `sandbox/binds/*.go` | `Binds` | `sandbox/new.go` |
 | `CollectConstructors` | `sandbox/api/*` | `Constructors` | `sandbox/api/sandbox.go` |
 | `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
-| `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `adapters/availables/standard/new.go` |
+| `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `docs/LibUsage/doc.md` |
+| `CollectAvailables` | `adapters/availables/<x>/available.yaml` | `Availables` (`Name`, `Adapters`) | `GenerateAvailableNews` -> `adapters/availables/<x>/new.go` |
 | `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (rich map: identifiers, category, help, `Flags`/`Args` with Go names, types, getters, defaults, `RangeCheck`) | `climain.go`, `help/handler.go`, `entries.go` |
 | `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
 | `CollectGeneratedDocs` | `assets/{all,cli,server}/docs/*/props.yaml` (`cli` only when `HasCli`, `server` only when `HasServer`), rendered | merged into the doc tree | same |
