@@ -1,0 +1,5 @@
+dep: argvdeps
+help: Argv parser over github.com/MateusMoutinhoOrg/Verb
+module: github.com/MateusMoutinhoOrg/Verb@v0.0.1
+name: verb
+origin: catalog

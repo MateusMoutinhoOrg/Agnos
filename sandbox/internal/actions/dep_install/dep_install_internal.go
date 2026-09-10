@@ -1,27 +1,36 @@
 package dep_install
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/depsversionconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// DepInstallInternal renders every embedded asset under assets/deplist/<dep>
-// into the target project at the path it holds inside that dep, using the
-// same Module variable the build step derives from go.mod.
-func DepInstallInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) error {
-	deps.Std.Log("dep-install started with path %s dep %s \n", path, dep)
+// DepInstallInternal installs one dep of the embedded catalog: the contract
+// under sandbox/deps/<dep>/ from assets/deplist/<dep>, and one adapter filling
+// it from assets/adapterlist/<adapter> — the dep's declared default-adapter
+// unless the caller names another. The two halves are separate catalogs, so
+// the same contract can later be filled by a second implementation.
+func DepInstallInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DepInstallProps) error {
+	deps.Std.Log("dep-install started with path %s dep %s \n", props.Path, props.Dep)
 
-	group := "deplist/" + dep
-
-	files, err := deps.Embeddeps.ListFilesRecursively(group)
+	dep_conf, err := utils.LoadCatalogDepConf(deps, props.Dep)
 	if err != nil {
 		return err
 	}
-	if len(files) == 0 {
-		return deps.Std.Errorf("unknown dep %q", dep)
+
+	adapter := props.Adapter
+	if adapter == "" {
+		adapter = dep_conf.DefaultAdapter
+	}
+
+	adapter_conf, err := utils.LoadCatalogAdapterConf(deps, adapter)
+	if err != nil {
+		return err
+	}
+	if adapter_conf.Dep != dep_conf.Name {
+		return deps.Std.Errorf("adapter %q fills dep %q, not %q", adapter, adapter_conf.Dep, dep_conf.Name)
 	}
 
 	module_conf, err := utils.LoadModuleConf(deps, io)
@@ -29,36 +38,14 @@ func DepInstallInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep s
 		return err
 	}
 
-	if err := syncGoMod(deps, io, path, dep, module_conf); err != nil {
-		return err
-	}
-
 	vars := map[string]interface{}{
 		"Module": module_conf.Module,
 	}
 
-	return utils.RenderGroup(deps, io, group, vars)
-}
-
-// syncGoMod adds the require entry pinned for dep in assets/depsversion.yaml
-// to the target project's go.mod, if that dep is listed there. Deps that
-// bundle only sandbox-copy code (no external module) are absent from the file
-// and leave go.mod untouched.
-func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string, module_conf *moduleconf.ModuleConf) error {
-	versions_content, err := deps.Embeddeps.ReadFile("depsversion.yaml")
-	if err != nil {
-		return err
-	}
-	versions_conf, err := depsversionconf.New(deps, string(versions_content))
-	if err != nil {
+	group := utils.DeplistGroup + "/" + dep_conf.Name
+	if err := utils.RenderGroupExcept(deps, io, group, vars, []string{utils.DepConfFile}); err != nil {
 		return err
 	}
 
-	module, version, ok := versions_conf.Get(dep)
-	if !ok {
-		return nil
-	}
-
-	module_conf.AddRequire(module + " " + version)
-	return io.WriteFileOverwrite("go.mod", []byte(module_conf.Render()))
+	return InstallAdapter(deps, io, adapter_conf, module_conf, vars)
 }

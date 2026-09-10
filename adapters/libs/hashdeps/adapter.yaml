@@ -1,0 +1,5 @@
+dep: hashdeps
+help: SHA-256 over crypto/sha256 and encoding/hex
+module: ""
+name: hashdeps
+origin: catalog

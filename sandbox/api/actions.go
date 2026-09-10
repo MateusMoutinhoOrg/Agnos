@@ -50,6 +50,15 @@ type ExecTestProps struct {
 	Update bool
 }
 
+// DepInstallProps describes one dep to install: the directory holding the
+// project, the dep of the embedded catalog, and the adapter to fill its
+// contract with ("" installs the dep's declared default-adapter).
+type DepInstallProps struct {
+	Path    string
+	Dep     string
+	Adapter string
+}
+
 // FieldProps describes one flag or positional arg to add to a command's
 // entries.yaml. Default, Min and Max are the raw literals typed on the
 // command line ("" means unset) so the action can tell "not given" from a
@@ -226,8 +235,9 @@ type Actions struct {
 	DepsPurge func(path string) error
 
 	// DepInstall installs one dep of the built-in list: its contract under
-	// sandbox/deps/, its adapter under adapters/libs/ and its go.mod require.
-	DepInstall func(path string, dep string) error
+	// sandbox/deps/, one adapter filling it under adapters/libs/ and that
+	// adapter's go.mod require.
+	DepInstall func(props DepInstallProps) error
 
 	// DepRemove uninstalls one installed dep, contract, adapter and require.
 	DepRemove func(path string, dep string) error

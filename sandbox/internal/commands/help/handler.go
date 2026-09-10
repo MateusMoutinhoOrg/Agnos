@@ -395,6 +395,7 @@ var helpCommands = []helpCommand{
 		Examples:        []string{"dep-install embeddeps", "dep-install embeddeps --path ./my-project"},
 		Hidden:          false,
 		Flags: []helpField{
+			{Identifiers: []string{"--adapter"}, Description: "the adapter to fill the dep's contract with (defaults to the dep's default-adapter)", Examples: []string{"dep-install serverdeps --adapter nethttp"}, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"dep-install --path ./my-project"}, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"dep-install embeddeps -q"}, Type: "boolean", Default: "", Required: false},
 		},

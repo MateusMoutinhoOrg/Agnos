@@ -1,0 +1,5 @@
+dep: goimportsdeps
+help: Go source reader over go/parser
+module: ""
+name: goimportsdeps
+origin: catalog

@@ -1,0 +1,4 @@
+default-adapter: stringsdeps
+field: Stringsdeps
+help: Text manipulation and string/number conversion
+name: stringsdeps

@@ -1657,6 +1657,17 @@ func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
 
 func dispatchDepInstall(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &dep_install.Entries{}
+	if verb.GetOptionsSize([]string{"--adapter"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "adapter", []string{"--adapter"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "adapter", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Adapter = value
+	}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
 		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
 		if !rawOk {

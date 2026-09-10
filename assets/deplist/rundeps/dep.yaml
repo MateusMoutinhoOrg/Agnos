@@ -1,0 +1,4 @@
+default-adapter: rundeps
+field: Rundeps
+help: Run a program to completion
+name: rundeps

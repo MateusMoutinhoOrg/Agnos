@@ -1,0 +1,4 @@
+default-adapter: templatedeps
+field: Templatedeps
+help: Parse and execute one template over vars
+name: templatedeps

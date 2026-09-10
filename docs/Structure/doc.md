@@ -45,7 +45,8 @@ sandbox/                         closed: imports nothing outside sandbox/, no OS
     smartio/                     transactional fs rooted at --path
     utils/                       RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
 adapters/                        the only place OS-bound and third-party code lives
-  libs/<lib>/<lib>.go            one package per contract, exports Bind(deps *deps.Deps)
+  libs/<adapter>/<adapter>.go    one package per adapter, exports Bind(deps *deps.Deps)
+  libs/<adapter>/adapter.yaml    which dep the adapter fills, which module it pins  (adapterconf)
   availables/standard/new.go     (gen) New() deps.Deps calling every lib's Bind
   availables/<name>/new.go       hand-written mix, left alone
 assets/                          Go text/templates embedded by asset.go; never `go build ./...`
@@ -55,9 +56,9 @@ assets/                          Go text/templates embedded by asset.go; never `
   cli/                           rendered when sandbox/internal/cli/ exists
   server/                        rendered when sandbox/internal/server/ exists
   front/                         rendered when sandbox/internal/pageio/ exists
-  deplist/<dep>/                 one installable dep, mirroring the target layout
+  deplist/<dep>/                 one installable contract, dep.yaml beside the target layout it mirrors
+  adapterlist/<adapter>/         one installable adapter, adapter.yaml beside the target layout it mirrors
   templates/                     single-file scaffolds (entries.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
-  depsversion.yaml               <dep>: <module>@<version>
 cmd/main/main.go                 (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
 docs/                            one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
   **/Index.md                    (gen) written for every doc that has sub-docs

@@ -1,0 +1,4 @@
+default-adapter: requestdeps
+field: Requestdeps
+help: Per-call HTTP request
+name: requestdeps

@@ -1,0 +1,4 @@
+default-adapter: embeddeps
+field: Embeddeps
+help: Read and render files compiled into the binary
+name: embeddeps

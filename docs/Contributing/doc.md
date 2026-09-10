@@ -67,9 +67,13 @@ The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency). Per-call 
 
 ## Add an installable dep
 
-1. Mirror the two files under `assets/deplist/<contract>/sandbox/deps/<contract>/` and `assets/deplist/<contract>/adapters/libs/<lib>/`, replacing this module path with `{{.Module}}`.
-2. If it pulls a module: `assets/depsversion.yaml` `<dep>: <module>@<version>`.
+The catalog is two catalogs: `assets/deplist/<dep>/` holds the contract, `assets/adapterlist/<adapter>/` holds one implementation of it, so a dep can gain a second adapter without moving.
+
+1. Mirror the contract under `assets/deplist/<dep>/sandbox/deps/<dep>/`, replacing this module path with `{{.Module}}`, and write `assets/deplist/<dep>/dep.yaml` (`name`, `field`, `help`, `default-adapter`).
+2. Mirror the adapter under `assets/adapterlist/<adapter>/adapters/libs/<adapter>/`, same substitution, and write `assets/adapterlist/<adapter>/adapter.yaml` (`name`, `dep`, `help`, `module` — `""` when it needs nothing beyond the stdlib — and `origin: catalog`).
 3. Bootstrap, test with `dep-install`/`dep-remove` on a scratch project. Add a row to [DepList](../DepList/doc.md).
+
+Neither `dep.yaml` nor `adapter.yaml` is part of the mirror: the first is installed nowhere, and the second is installed to `adapters/libs/<adapter>/adapter.yaml`, which is what tells the tree later which dep that adapter fills.
 
 ## Add a template or collector
 

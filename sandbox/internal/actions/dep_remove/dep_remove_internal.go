@@ -2,55 +2,47 @@ package dep_remove
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/depsversionconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// DepRemoveInternal removes from the target project every file that
-// assets/deplist/<dep> would have installed, at the path it holds inside
-// that dep, then drops any directory the removal left empty so the build
-// collectors stop enumerating it.
+// DepRemoveInternal uninstalls one dep: every adapter whose declaration names
+// it, then the contract itself. An adapter is a directory, so removing one is
+// removing adapters/libs/<adapter>/ — plus, for an adapter of the embedded
+// catalog, whatever that catalog installs outside its own package.
 func DepRemoveInternal(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) error {
 	deps.Std.Log("dep-remove started with path %s dep %s \n", path, dep)
 
-	group := "deplist/" + dep
-
-	files, err := deps.Embeddeps.ListFilesRecursively(group)
-	if err != nil {
-		return err
-	}
-	if len(files) == 0 {
-		return deps.Std.Errorf("unknown dep %q", dep)
+	contract := utils.ContractsDir + "/" + dep
+	if !io.IsDir(contract) {
+		return deps.Std.Errorf("dep %q is not installed", dep)
 	}
 
-	for _, file := range files {
-		io.RemoveDir(file)
-	}
-
-	for _, dir := range ancestorDirs(deps, files) {
-		if len(io.ListAll(dir)) == 0 {
-			io.RemoveDir(dir)
+	for _, adapter := range utils.AdaptersFillingDep(deps, io, dep) {
+		if err := RemoveAdapter(deps, io, adapter); err != nil {
+			return err
 		}
 	}
 
-	return syncGoMod(deps, io, path, dep)
+	removeTree(deps, io, []string{contract})
+	return nil
 }
 
-// syncGoMod drops the require entry pinned for dep in assets/depsversion.yaml
-// from the target project's go.mod, mirroring dep-install's addition. Deps
-// absent from depsversion.yaml leave go.mod untouched.
-func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) error {
-	versions_content, err := deps.Embeddeps.ReadFile("depsversion.yaml")
-	if err != nil {
-		return err
-	}
-	versions_conf, err := depsversionconf.New(deps, string(versions_content))
+// RemoveAdapter drops one installed adapter: its package directory, the extra
+// files the embedded catalog installs alongside it, and the require its
+// declaration pins.
+func RemoveAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter string) error {
+
+	adapter_conf, err := utils.LoadAdapterConf(deps, io, adapter)
 	if err != nil {
 		return err
 	}
 
-	module, _, ok := versions_conf.Get(dep)
+	removed := []string{utils.AdapterDir(adapter)}
+	removed = append(removed, catalogExtras(deps, adapter)...)
+	removeTree(deps, io, removed)
+
+	module, _, ok := adapter_conf.ModuleSpec()
 	if !ok {
 		return nil
 	}
@@ -64,13 +56,51 @@ func syncGoMod(deps *deps.Deps, io *smartio.SmartIO, path string, dep string) er
 	return io.WriteFileOverwrite("go.mod", []byte(module_conf.Render()))
 }
 
-// ancestorDirs returns every directory that contains one of the given files,
+// catalogExtras returns the files assets/adapterlist/<adapter> installs
+// outside the adapter's own package — the embed directive of `embeddeps` is
+// one — so uninstalling takes back everything installing wrote. An adapter
+// with no catalog entry (a generated shim) has none.
+func catalogExtras(deps *deps.Deps, adapter string) []string {
+	files, err := deps.Embeddeps.ListFilesRecursively(utils.AdapterlistGroup + "/" + adapter)
+	if err != nil {
+		return nil
+	}
+
+	var extras []string
+	for _, file := range files {
+		if file == utils.AdapterConfFile {
+			continue
+		}
+		if deps.Stringsdeps.HasPrefix(file, utils.AdaptersDir+"/") {
+			continue
+		}
+		extras = append(extras, file)
+	}
+
+	return extras
+}
+
+// removeTree removes each given path and then every directory the removal
+// left empty, so the build collectors stop enumerating it.
+func removeTree(deps *deps.Deps, io *smartio.SmartIO, paths []string) {
+	for _, path := range paths {
+		io.RemoveDir(path)
+	}
+
+	for _, dir := range ancestorDirs(deps, paths) {
+		if len(io.ListAll(dir)) == 0 {
+			io.RemoveDir(dir)
+		}
+	}
+}
+
+// ancestorDirs returns every directory that contains one of the given paths,
 // deepest first, so an emptied child is removed before its parent is tested.
-func ancestorDirs(deps *deps.Deps, files []string) []string {
+func ancestorDirs(deps *deps.Deps, paths []string) []string {
 	seen := map[string]bool{}
 	var dirs []string
-	for _, file := range files {
-		parts := deps.Stringsdeps.Split(file, "/")
+	for _, path := range paths {
+		parts := deps.Stringsdeps.Split(path, "/")
 		for i := 1; i < len(parts); i++ {
 			dir := deps.Stringsdeps.Join(parts[:i], "/")
 			if !seen[dir] {

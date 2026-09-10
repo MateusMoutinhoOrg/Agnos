@@ -68,8 +68,8 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.DepsPurge = func(path string) error {
 		return depsPurgeAction.DepsPurge(deps, path)
 	}
-	sandbox.Actions.DepInstall = func(path string, dep string) error {
-		return depInstallAction.DepInstall(deps, path, dep)
+	sandbox.Actions.DepInstall = func(props api.DepInstallProps) error {
+		return depInstallAction.DepInstall(deps, props)
 	}
 	sandbox.Actions.DepRemove = func(path string, dep string) error {
 		return depRemoveAction.DepRemove(deps, path, dep)

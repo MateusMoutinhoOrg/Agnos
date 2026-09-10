@@ -7,7 +7,11 @@ import (
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	install_error := depInstallAction.DepInstall(deps, entries.Path, entries.Dep)
+	install_error := depInstallAction.DepInstall(deps, api.DepInstallProps{
+		Path:    entries.Path,
+		Dep:     entries.Dep,
+		Adapter: entries.Adapter,
+	})
 
 	if install_error != nil {
 		deps.Std.Error("%s\n", install_error.Error())

@@ -1,0 +1,5 @@
+dep: stringsdeps
+help: Text manipulation over strings and strconv
+module: ""
+name: stringsdeps
+origin: catalog

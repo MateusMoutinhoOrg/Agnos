@@ -1,0 +1,4 @@
+default-adapter: goimportsdeps
+field: Goimportsdeps
+help: Go source reader (package, imports, declarations)
+name: goimportsdeps

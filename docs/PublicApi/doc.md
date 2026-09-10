@@ -75,6 +75,16 @@ ExecTestProps describes one run of the project's example suite: the directory ho
 | `Only` | `string` |
 | `Update` | `bool` |
 
+### `DepInstallProps`
+
+DepInstallProps describes one dep to install: the directory holding the project, the dep of the embedded catalog, and the adapter to fill its contract with ("" installs the dep's declared default-adapter).
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Dep` | `string` |
+| `Adapter` | `string` |
+
 ### `FieldProps`
 
 FieldProps describes one flag or positional arg to add to a command's entries.yaml. Default, Min and Max are the raw literals typed on the command line ("" means unset) so the action can tell "not given" from a zero value; Position is the index to insert at (< 0 appends).
@@ -224,7 +234,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `Start` | `func(props StartProps) error` | Start scaffolds a new project: the config directory, go.mod, the sandbox skeleton and a first build. |
 | `DepsInit` | `func(path string) error` | DepsInit adds the dependency layer (sandbox/deps/ and adapters/availables/standard/) to a project that has none. |
 | `DepsPurge` | `func(path string) error` | DepsPurge removes the dependency layer and every installed dep with it. |
-| `DepInstall` | `func(path string, dep string) error` | DepInstall installs one dep of the built-in list: its contract under sandbox/deps/, its adapter under adapters/libs/ and its go.mod require. |
+| `DepInstall` | `func(props DepInstallProps) error` | DepInstall installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |
 | `DepRemove` | `func(path string, dep string) error` | DepRemove uninstalls one installed dep, contract, adapter and require. |
 | `DepList` | `func(path string) ([]string, error)` | DepList returns the names of the deps installed in the project. |
 | `CliInit` | `func(path string) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |

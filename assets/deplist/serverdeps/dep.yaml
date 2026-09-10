@@ -1,0 +1,4 @@
+default-adapter: serverdeps
+field: Serverdeps
+help: Http server contract
+name: serverdeps

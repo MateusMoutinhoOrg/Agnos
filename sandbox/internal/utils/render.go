@@ -129,6 +129,15 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 // same vars, and every file may call the `render` native function (see
 // templateFuncs) to embed another template of the target project.
 func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interface{}) error {
+	return RenderGroupExcept(deps, io, group, vars, nil)
+}
+
+// RenderGroupExcept renders a group the way RenderGroup does, skipping every
+// asset whose group-relative path is listed in except. The dep and adapter
+// catalogs carry their declaration at the root of the group — a file that
+// describes the package rather than one the package installs — so it is
+// rendered nowhere.
+func RenderGroupExcept(deps *deps.Deps, io *smartio.SmartIO, group string, vars interface{}, except []string) error {
 
 	files, err := deps.Embeddeps.ListFilesRecursively(group)
 	if err != nil {
@@ -136,6 +145,9 @@ func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interf
 	}
 
 	for _, file := range files {
+		if containsPath(except, file) {
+			continue
+		}
 		src, err := deps.Embeddeps.ReadFile(group + "/" + file)
 		if err != nil {
 			return err
@@ -153,4 +165,15 @@ func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interf
 	}
 
 	return nil
+}
+
+// containsPath reports whether paths holds path, the membership test
+// RenderGroupExcept skips an asset with.
+func containsPath(paths []string, path string) bool {
+	for _, candidate := range paths {
+		if candidate == path {
+			return true
+		}
+	}
+	return false
 }

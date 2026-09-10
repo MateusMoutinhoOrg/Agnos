@@ -1,0 +1,4 @@
+default-adapter: serializables
+field: Serializables
+help: Generic JSON/YAML values
+name: serializables

@@ -1,0 +1,4 @@
+default-adapter: iodeps
+field: Iodeps
+help: Filesystem access
+name: iodeps

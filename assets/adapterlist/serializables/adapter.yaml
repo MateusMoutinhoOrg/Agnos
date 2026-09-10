@@ -1,0 +1,5 @@
+dep: serializables
+help: JSON/YAML values over gopkg.in/yaml.v3 and encoding/json
+module: gopkg.in/yaml.v3@v3.0.1
+name: serializables
+origin: catalog

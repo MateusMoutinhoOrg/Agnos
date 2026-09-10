@@ -1,0 +1,4 @@
+default-adapter: hashdeps
+field: Hashdeps
+help: SHA-256 of a byte slice, lower-case hex
+name: hashdeps

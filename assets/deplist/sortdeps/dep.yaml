@@ -1,0 +1,4 @@
+default-adapter: sortdeps
+field: Sortdeps
+help: Sort a string slice, or any slice by a less function
+name: sortdeps

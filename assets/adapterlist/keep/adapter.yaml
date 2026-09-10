@@ -1,0 +1,5 @@
+dep: dbdeps
+help: Schema database over github.com/MateusMoutinhoOrg/Keep
+module: github.com/MateusMoutinhoOrg/Keep@v0.0.4
+name: keep
+origin: catalog

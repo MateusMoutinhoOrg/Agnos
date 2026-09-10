@@ -13,7 +13,7 @@ import (
 // the "cli" asset group into the project, then runs build as a follow-up step.
 func CliInit(deps *deps.Deps, path string) error {
 	for _, dep := range []string{"std", "argvdeps", "stringsdeps"} {
-		if err := depInstallAction.DepInstall(deps, path, dep); err != nil {
+		if err := depInstallAction.DepInstall(deps, api.DepInstallProps{Path: path, Dep: dep}); err != nil {
 			return err
 		}
 	}

@@ -1,0 +1,5 @@
+dep: requestdeps
+help: HTTP client over net/http, 30s timeout
+module: ""
+name: requestdeps
+origin: catalog

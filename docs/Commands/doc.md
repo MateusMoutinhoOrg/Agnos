@@ -1061,13 +1061,14 @@ agnos verify
 Installs an embedded dep into the project
 
 ```bash
-agnos dep-install [--path <path>] [--quiet] <dep>
+agnos dep-install [--adapter <adapter>] [--path <path>] [--quiet] <dep>
 ```
 
 Renders every file under assets/deplist/<dep> into the project at the path it holds inside that dep, then calls build.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
 

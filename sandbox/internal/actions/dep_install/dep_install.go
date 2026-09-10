@@ -8,13 +8,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-func DepInstall(deps *deps.Deps, path string, dep string) error {
-	io := smartio.New(deps, path, config.ProjectName)
-	if err := DepInstallInternal(deps, io, path, dep); err != nil {
+func DepInstall(deps *deps.Deps, props api.DepInstallProps) error {
+	io := smartio.New(deps, props.Path, config.ProjectName)
+	if err := DepInstallInternal(deps, io, props); err != nil {
 		return err
 	}
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(deps, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.Build(deps, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

@@ -3,14 +3,15 @@ package verify
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// deplistDir is the tree `dep-install` renders from: one directory per
-// installable dep, each mirroring the layout of the project it is rendered
-// into.
-const deplistDir = "assets/deplist"
+// deplistDir is the tree `dep-install` renders the contract half from: one
+// directory per installable dep, each holding its dep.yaml beside a mirror of
+// the layout it is rendered into.
+const deplistDir = "assets/" + utils.DeplistGroup
 
-// moduleVar is the only template variable a deplist asset may use, so
+// moduleVar is the only template variable a catalog asset may use, so
 // rendering one is a plain substitution of the target module path.
 const moduleVar = "{{.Module}}"
 
@@ -30,21 +31,25 @@ func CheckDeplist(deps *deps.Deps, io *smartio.SmartIO, module string) []string 
 
 	for _, dep := range io.ListDirs(deplistDir) {
 		for _, asset := range io.ListFilesRecursively(dep) {
-			target := deps.Stringsdeps.TrimPrefix(asset, dep+"/")
-			if !io.IsFile(target) {
+			relative := deps.Stringsdeps.TrimPrefix(asset, dep+"/")
+			if relative == utils.DepConfFile {
 				continue
 			}
-			violations = append(violations, checkDeplistAsset(deps, io, asset, target, module)...)
+			violations = append(violations, checkCatalogAsset(deps, io, asset, relative, module)...)
 		}
 	}
 
 	return violations
 }
 
-// checkDeplistAsset compares one rendered asset with the file it installs
-// over. A target that is absent from this project is not a violation: a dep
-// this project does not use has nothing here to drift from.
-func checkDeplistAsset(deps *deps.Deps, io *smartio.SmartIO, asset string, target string, module string) []string {
+// checkCatalogAsset compares one rendered catalog asset with the file it
+// installs over. A target that is absent from this project is not a violation:
+// a dep or an adapter this project does not use has nothing here to drift from.
+func checkCatalogAsset(deps *deps.Deps, io *smartio.SmartIO, asset string, target string, module string) []string {
+	if !io.IsFile(target) {
+		return nil
+	}
+
 	source, err := io.ReadFile(asset)
 	if err != nil {
 		return []string{asset + " could not be read"}

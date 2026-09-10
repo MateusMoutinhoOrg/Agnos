@@ -31,7 +31,7 @@ func main() {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepInstall("TestDir", "iodeps"); err != nil {
+	if err := lib.Actions.DepInstall(api.DepInstallProps{Path: "TestDir", Dep: "iodeps"}); err != nil {
 		panic(err)
 	}
 

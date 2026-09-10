@@ -1,0 +1,4 @@
+default-adapter: std
+field: Std
+help: Clock, formatting and the three output channels
+name: std

@@ -30,7 +30,7 @@ func FrontInit(deps *deps.Deps, path string) error {
 	}
 
 	for _, dep := range frontDeps {
-		if err := depInstallAction.DepInstall(deps, path, dep); err != nil {
+		if err := depInstallAction.DepInstall(deps, api.DepInstallProps{Path: path, Dep: dep}); err != nil {
 			return err
 		}
 	}
