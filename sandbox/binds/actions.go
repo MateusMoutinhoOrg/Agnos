@@ -19,9 +19,9 @@ import (
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	cliPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_purge"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
-	depInstallAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_install"
-	depListAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_list"
-	depRemoveAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_remove"
+	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
+	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
+	removeDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_dep"
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
@@ -68,14 +68,14 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.DepsPurge = func(path string) error {
 		return depsPurgeAction.DepsPurge(deps, path)
 	}
-	sandbox.Actions.DepInstall = func(props api.DepInstallProps) error {
-		return depInstallAction.DepInstall(deps, props)
+	sandbox.Actions.AddDep = func(props api.AddDepProps) error {
+		return addDepAction.AddDep(deps, props)
 	}
-	sandbox.Actions.DepRemove = func(path string, dep string) error {
-		return depRemoveAction.DepRemove(deps, path, dep)
+	sandbox.Actions.RemoveDep = func(path string, dep string) error {
+		return removeDepAction.RemoveDep(deps, path, dep)
 	}
-	sandbox.Actions.DepList = func(path string) ([]string, error) {
-		return depListAction.DepList(deps, path)
+	sandbox.Actions.ListDeps = func(path string) ([]string, error) {
+		return listDepsAction.ListDeps(deps, path)
 	}
 	sandbox.Actions.CliInit = func(path string) error {
 		return cliInitAction.CliInit(deps, path)

@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 Agnos (`agnos`) is a Go CLI that **scaffolds and regenerates other Go CLIs**. `agnos start`
 writes a project skeleton; `agnos build` re-renders every generated file from `text/template`
-assets embedded in the binary; commands like `add-command`, `add-flag`, `dep-install` declare
+assets embedded in the binary; commands like `add-command`, `add-flag`, `add-dep` declare
 the project's command surface without a file being hand-edited.
 
 Agnos is built with itself: `agnos build` regenerates this repo in place, and the result must
@@ -31,7 +31,7 @@ that holds for this repo alone with `{{ if .HasAssets }}`.
 
 **Two names, never swapped.** `{{.GeneratorName}}` is the cli running the build — agnos — and
 prefixes every command agnos owns (`agnos build`, `agnos add-command`, `agnos add-route`,
-`agnos dep-install`, `agnos exec-test`). `{{.Name}}` is the project being generated and prefixes
+`agnos add-dep`, `agnos exec-test`). `{{.Name}}` is the project being generated and prefixes
 only what that project answers itself (`<name> help`, `<name> version`, `<name> start-server`,
 and whatever its own `add-command` declared). Never hardcode `agnos` in a template, and never
 use `{{.Name}}` to spell an agnos command: in this repo both render `agnos`, so the mistake is

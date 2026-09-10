@@ -17,8 +17,10 @@
 | `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
 | `sandbox/deps/deps.go` | `build` | always. One `<Title> <dir>.Sandbox` per dir of `sandbox/deps/` |
-| `adapters/availables/standard/new.go` | `build` | always. One `<lib>.Bind(&deps)` per dir of `adapters/libs/` |
-| `sandbox/deps/<dep>/*.go`, `adapters/libs/<lib>/*.go` | `dep-install` | once |
+| `adapters/availables/<name>/new.go` | `build` | always. One `<adapter>.Bind(&deps)` per entry of that available's `available.yaml`; an available with no `available.yaml` is hand-written and left alone |
+| `adapters/availables/<name>/available.yaml` | `deps-init` | once, then rewritten by `dep-install` / `dep-remove` — never by hand |
+| `sandbox/deps/<dep>/*.go`, `adapters/libs/<adapter>/*.go` | `dep-install` | once |
+| `adapters/libs/<adapter>/adapter.yaml` | `dep-install` | once |
 | `assets/asset.go` | `dep-install embeddeps` | once |
 | `cmd/main/main.go` | `build` | always |
 | `docs/{CliInstall,CliExamples}/` | `build` | always. Both `doc.md` and `props.yaml` |

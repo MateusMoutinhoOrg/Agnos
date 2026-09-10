@@ -6,7 +6,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// deplistDir is the tree `dep-install` renders the contract half from: one
+// deplistDir is the tree `add-dep` renders the contract half from: one
 // directory per installable dep, each holding its dep.yaml beside a mirror of
 // the layout it is rendered into.
 const deplistDir = "assets/" + utils.DeplistGroup

@@ -4,7 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	depInstallAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/dep_install"
+	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -13,7 +13,7 @@ import (
 // the "cli" asset group into the project, then runs build as a follow-up step.
 func CliInit(deps *deps.Deps, path string) error {
 	for _, dep := range []string{"std", "argvdeps", "stringsdeps"} {
-		if err := depInstallAction.DepInstall(deps, api.DepInstallProps{Path: path, Dep: dep}); err != nil {
+		if err := addDepAction.AddDep(deps, api.AddDepProps{Path: path, Dep: dep}); err != nil {
 			return err
 		}
 	}

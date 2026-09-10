@@ -787,6 +787,116 @@ agnos update-test start
 agnos update-test add-command --path ./my-project
 ```
 
+## Deps System
+
+### `add-dep`
+
+Installs one dep of the embedded catalog into the project
+
+```bash
+agnos add-dep [--adapter <adapter>] [--path <path>] [--quiet] <dep>
+```
+
+Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dep` | string, required |  | the dep to install from assets/deplist |
+
+```bash
+agnos add-dep embeddeps
+agnos add-dep embeddeps --path ./my-project
+```
+
+### `deps-init`
+
+Initializes the dependency-injection subsystem for the project
+
+```bash
+agnos deps-init [--path <path>] [--quiet]
+```
+
+Creates the sandbox/deps and adapters directories and calls build. Run this once before using add-dep.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos deps-init
+agnos deps-init --path ./my-project
+```
+
+### `deps-purge`
+
+Removes the dependency-injection subsystem from the project
+
+```bash
+agnos deps-purge [--path <path>] [--quiet]
+```
+
+Removes the sandbox/deps and adapters directories and calls build.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos deps-purge
+agnos deps-purge --path ./my-project
+```
+
+### `list-deps`
+
+Lists the deps the embedded catalog can install
+
+```bash
+agnos list-deps [--path <path>] [--quiet]
+```
+
+Lists the name of every dep under assets/deplist that add-dep can render into a project.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos list-deps
+```
+
+### `remove-dep`
+
+Uninstalls one dep from the project
+
+```bash
+agnos remove-dep [--path <path>] [--quiet] <dep>
+```
+
+Removes every adapter whose declaration names the dep, its require and its enrollment in every available, then the contract itself, then calls build.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dep` | string, required |  | the dep to remove from the project |
+
+```bash
+agnos remove-dep embeddeps
+agnos remove-dep embeddeps --path ./my-project
+```
+
 ## Documentation
 
 ### `add-doc`
@@ -1052,118 +1162,6 @@ Verifies the structural rules the harness depends on: sandbox/ imports stay insi
 
 ```bash
 agnos verify
-```
-
-## Dependencies
-
-### `dep-install`
-
-Installs an embedded dep into the project
-
-```bash
-agnos dep-install [--adapter <adapter>] [--path <path>] [--quiet] <dep>
-```
-
-Renders every file under assets/deplist/<dep> into the project at the path it holds inside that dep, then calls build.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `dep` | string, required |  | the dep to install from assets/deplist |
-
-```bash
-agnos dep-install embeddeps
-agnos dep-install embeddeps --path ./my-project
-```
-
-### `dep-list`
-
-Lists the embedded deps available to install
-
-```bash
-agnos dep-list [--path <path>] [--quiet]
-```
-
-Lists the name of every dep under assets/deplist that dep-install can render into a project.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-```bash
-agnos dep-list
-```
-
-### `dep-remove`
-
-Removes an embedded dep from the project
-
-```bash
-agnos dep-remove [--path <path>] [--quiet] <dep>
-```
-
-Removes every file that assets/deplist/<dep> installs into the project, then calls build.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `dep` | string, required |  | the dep to remove from the project |
-
-```bash
-agnos dep-remove embeddeps
-agnos dep-remove embeddeps --path ./my-project
-```
-
-## Dependency System
-
-### `deps-init`
-
-Initializes the dependency-injection subsystem for the project
-
-```bash
-agnos deps-init [--path <path>] [--quiet]
-```
-
-Creates the sandbox/deps and adapters directories and calls build. Run this once before using dep-install.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-```bash
-agnos deps-init
-agnos deps-init --path ./my-project
-```
-
-### `deps-purge`
-
-Removes the dependency-injection subsystem from the project
-
-```bash
-agnos deps-purge [--path <path>] [--quiet]
-```
-
-Removes the sandbox/deps and adapters directories and calls build.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-```bash
-agnos deps-purge
-agnos deps-purge --path ./my-project
 ```
 
 ## Info

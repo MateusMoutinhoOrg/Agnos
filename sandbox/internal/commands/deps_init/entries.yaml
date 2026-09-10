@@ -1,23 +1,27 @@
-identifiers: ["deps-init"]
-category: Dependency System
-help: Initializes the dependency-injection subsystem for the project
-long-description: |
-  Creates the sandbox/deps and adapters directories and calls build.
-  Run this once before using dep-install.
+category: Deps System
 examples:
-  - "deps-init"
-  - "deps-init --path ./my-project"
+    - deps-init
+    - deps-init --path ./my-project
 flags:
-  - name: path
-    identifiers: ["--path"]
-    description: the dir holding the project (defaults to the current directory)
-    examples:
-      - "deps-init --path ./my-project"
-    type: string
-    default: "."
-  - name: quiet
-    identifiers: ["--quiet", "-q"]
-    description: Quiets the cli output
-    examples:
-      - "deps-init -q"
-    type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - deps-init --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - deps-init -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Initializes the dependency-injection subsystem for the project
+identifiers:
+    - deps-init
+long-description: |-
+    Creates the sandbox/deps and adapters directories and calls build.
+    Run this once before using add-dep.

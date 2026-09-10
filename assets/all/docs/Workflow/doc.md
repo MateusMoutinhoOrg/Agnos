@@ -182,9 +182,9 @@ Everything the sandbox is not allowed to do itself — filesystem, clock, networ
 arrives through `deps.Deps`. Install a ready-made one:
 
 ```bash
-{{.GeneratorName}} dep-list                 # every installable contract
-{{.GeneratorName}} dep-install <dep>        # sandbox/deps/<dep>/ + adapters/libs/<lib>/ + the go.mod require
-{{.GeneratorName}} dep-remove <dep>
+{{.GeneratorName}} list-deps                 # every installable contract
+{{.GeneratorName}} add-dep <dep>        # sandbox/deps/<dep>/ + adapters/libs/<lib>/ + the go.mod require
+{{.GeneratorName}} remove-dep <dep>
 ```
 
 [DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves and

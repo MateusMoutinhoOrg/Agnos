@@ -1,0 +1,39 @@
+args:
+    - description: the dep to install from assets/deplist
+      examples:
+        - add-dep embeddeps
+      name: dep
+      required: true
+      type: string
+category: Deps System
+examples:
+    - add-dep embeddeps
+    - add-dep embeddeps --path ./my-project
+flags:
+    - description: the adapter to fill the dep's contract with (defaults to the dep's default-adapter)
+      examples:
+        - add-dep serverdeps --adapter nethttp
+      identifiers:
+        - --adapter
+      name: adapter
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-dep --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - add-dep embeddeps -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Installs one dep of the embedded catalog into the project
+identifiers:
+    - add-dep
+long-description: Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.

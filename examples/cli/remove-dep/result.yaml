@@ -1,0 +1,9 @@
+cli-output: "remove-dep started with path TestDir dep iodeps \nbuild started with path TestDir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: 3a150d843a1c249764e0a44169bca6e40c86178e9e910d7f5538acfdb606d9a8
+    - file: adapters/availables/standard/new.go
+      sha: ccd6a67cccf8e841a864c82967167d0f74c0eff72f6c489c0b9e8a242c37817b
+    - file: sandbox/deps/deps.go
+      sha: 7da1577bfa460f6e1bacac113232b5d87cee11124e468c69d39747e62b25c349

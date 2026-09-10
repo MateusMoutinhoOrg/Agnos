@@ -75,9 +75,9 @@ ExecTestProps describes one run of the project's example suite: the directory ho
 | `Only` | `string` |
 | `Update` | `bool` |
 
-### `DepInstallProps`
+### `AddDepProps`
 
-DepInstallProps describes one dep to install: the directory holding the project, the dep of the embedded catalog, and the adapter to fill its contract with ("" installs the dep's declared default-adapter).
+AddDepProps describes one dep to install: the directory holding the project, the dep of the embedded catalog, and the adapter to fill its contract with ("" installs the dep's declared default-adapter).
 
 | Field | Type |
 | --- | --- |
@@ -234,9 +234,9 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `Start` | `func(props StartProps) error` | Start scaffolds a new project: the config directory, go.mod, the sandbox skeleton and a first build. |
 | `DepsInit` | `func(path string) error` | DepsInit adds the dependency layer (sandbox/deps/ and adapters/availables/standard/) to a project that has none. |
 | `DepsPurge` | `func(path string) error` | DepsPurge removes the dependency layer and every installed dep with it. |
-| `DepInstall` | `func(props DepInstallProps) error` | DepInstall installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |
-| `DepRemove` | `func(path string, dep string) error` | DepRemove uninstalls one installed dep, contract, adapter and require. |
-| `DepList` | `func(path string) ([]string, error)` | DepList returns the names of the deps installed in the project. |
+| `AddDep` | `func(props AddDepProps) error` | AddDep installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |
+| `RemoveDep` | `func(path string, dep string) error` | RemoveDep uninstalls one installed dep: every adapter whose declaration names it, their requires, and then the contract itself. |
+| `ListDeps` | `func(path string) ([]string, error)` | ListDeps returns the name of every dep the embedded catalog can install. |
 | `CliInit` | `func(path string) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
 | `CliPurge` | `func(path string) error` | CliPurge removes the CLI layer and every command declared in it. |
 | `AddCommand` | `func(path string, name string, help string, category string) error` | AddCommand declares a new command: its entries.yaml, its generated entries.go and a handler.go to fill in. |

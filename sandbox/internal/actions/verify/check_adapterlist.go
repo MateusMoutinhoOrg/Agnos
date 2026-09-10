@@ -6,7 +6,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// adapterlistDir is the tree `dep-install` renders the implementation half
+// adapterlistDir is the tree `add-dep` renders the implementation half
 // from: one directory per installable adapter, each holding its adapter.yaml
 // beside a mirror of the layout it is rendered into.
 const adapterlistDir = "assets/" + utils.AdapterlistGroup

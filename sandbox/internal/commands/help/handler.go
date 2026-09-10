@@ -165,6 +165,22 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{"add-dep"},
+		Category:        "Deps System",
+		Description:     "Installs one dep of the embedded catalog into the project",
+		LongDescription: "Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.",
+		Examples:        []string{"add-dep embeddeps", "add-dep embeddeps --path ./my-project"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--adapter"}, Description: "the adapter to fill the dep's contract with (defaults to the dep's default-adapter)", Examples: []string{"add-dep serverdeps --adapter nethttp"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-dep --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-dep embeddeps -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "dep", Description: "the dep to install from assets/deplist", Examples: []string{"add-dep embeddeps"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{"add-doc"},
 		Category:        "Documentation",
 		Description:     "Scaffold a new doc directory under docs/",
@@ -388,54 +404,10 @@ var helpCommands = []helpCommand{
 		Args: []helpField{},
 	},
 	{
-		Identifiers:     []string{"dep-install"},
-		Category:        "Dependencies",
-		Description:     "Installs an embedded dep into the project",
-		LongDescription: "Renders every file under assets/deplist/<dep> into the project\nat the path it holds inside that dep, then calls build.\n",
-		Examples:        []string{"dep-install embeddeps", "dep-install embeddeps --path ./my-project"},
-		Hidden:          false,
-		Flags: []helpField{
-			{Identifiers: []string{"--adapter"}, Description: "the adapter to fill the dep's contract with (defaults to the dep's default-adapter)", Examples: []string{"dep-install serverdeps --adapter nethttp"}, Type: "string", Default: "", Required: false},
-			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"dep-install --path ./my-project"}, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"dep-install embeddeps -q"}, Type: "boolean", Default: "", Required: false},
-		},
-		Args: []helpField{
-			{Name: "dep", Description: "the dep to install from assets/deplist", Examples: []string{"dep-install embeddeps"}, Type: "string", Default: "", Required: true},
-		},
-	},
-	{
-		Identifiers:     []string{"dep-list"},
-		Category:        "Dependencies",
-		Description:     "Lists the embedded deps available to install",
-		LongDescription: "Lists the name of every dep under assets/deplist that dep-install\ncan render into a project.\n",
-		Examples:        []string{"dep-list"},
-		Hidden:          false,
-		Flags: []helpField{
-			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"dep-list --path ./my-project"}, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"dep-list -q"}, Type: "boolean", Default: "", Required: false},
-		},
-		Args: []helpField{},
-	},
-	{
-		Identifiers:     []string{"dep-remove"},
-		Category:        "Dependencies",
-		Description:     "Removes an embedded dep from the project",
-		LongDescription: "Removes every file that assets/deplist/<dep> installs into the\nproject, then calls build.\n",
-		Examples:        []string{"dep-remove embeddeps", "dep-remove embeddeps --path ./my-project"},
-		Hidden:          false,
-		Flags: []helpField{
-			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"dep-remove --path ./my-project"}, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"dep-remove embeddeps -q"}, Type: "boolean", Default: "", Required: false},
-		},
-		Args: []helpField{
-			{Name: "dep", Description: "the dep to remove from the project", Examples: []string{"dep-remove embeddeps"}, Type: "string", Default: "", Required: true},
-		},
-	},
-	{
 		Identifiers:     []string{"deps-init"},
-		Category:        "Dependency System",
+		Category:        "Deps System",
 		Description:     "Initializes the dependency-injection subsystem for the project",
-		LongDescription: "Creates the sandbox/deps and adapters directories and calls build.\nRun this once before using dep-install.\n",
+		LongDescription: "Creates the sandbox/deps and adapters directories and calls build.\nRun this once before using add-dep.",
 		Examples:        []string{"deps-init", "deps-init --path ./my-project"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -446,7 +418,7 @@ var helpCommands = []helpCommand{
 	},
 	{
 		Identifiers:     []string{"deps-purge"},
-		Category:        "Dependency System",
+		Category:        "Deps System",
 		Description:     "Removes the dependency-injection subsystem from the project",
 		LongDescription: "Removes the sandbox/deps and adapters directories and calls build.\n",
 		Examples:        []string{"deps-purge", "deps-purge --path ./my-project"},
@@ -509,6 +481,19 @@ var helpCommands = []helpCommand{
 		Args: []helpField{
 			{Name: "command", Description: "The command to describe; omit it to list every command", Examples: []string{"help start"}, Type: "string", Default: "", Required: false},
 		},
+	},
+	{
+		Identifiers:     []string{"list-deps"},
+		Category:        "Deps System",
+		Description:     "Lists the deps the embedded catalog can install",
+		LongDescription: "Lists the name of every dep under assets/deplist that add-dep can render into a project.",
+		Examples:        []string{"list-deps"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"list-deps --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"list-deps -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{},
 	},
 	{
 		Identifiers:     []string{"local-install"},
@@ -599,6 +584,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the command to delete (identifier or package name)", Examples: []string{"remove-command my-feature"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"remove-dep"},
+		Category:        "Deps System",
+		Description:     "Uninstalls one dep from the project",
+		LongDescription: "Removes every adapter whose declaration names the dep, its require and its enrollment in every available, then the contract itself, then calls build.",
+		Examples:        []string{"remove-dep embeddeps", "remove-dep embeddeps --path ./my-project"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-dep --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-dep embeddeps -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "dep", Description: "the dep to remove from the project", Examples: []string{"remove-dep embeddeps"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

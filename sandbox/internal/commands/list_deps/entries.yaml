@@ -1,0 +1,24 @@
+category: Deps System
+examples:
+    - list-deps
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - list-deps --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - list-deps -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Lists the deps the embedded catalog can install
+identifiers:
+    - list-deps
+long-description: Lists the name of every dep under assets/deplist that add-dep can render into a project.

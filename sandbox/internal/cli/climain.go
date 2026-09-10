@@ -7,6 +7,7 @@ import (
 	add_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_body_field"
 	add_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_cli_example"
 	add_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_command"
+	add_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_dep"
 	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_doc"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_flag"
 	add_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_header"
@@ -19,21 +20,20 @@ import (
 	cli_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_init"
 	cli_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli_purge"
 	compile "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/compile"
-	dep_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_install"
-	dep_list "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_list"
-	dep_remove "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/dep_remove"
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_purge"
 	exec_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/exec_test"
 	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_init"
 	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
+	list_deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_deps"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
 	remove_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_body_field"
 	remove_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_cli_example"
 	remove_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_command"
+	remove_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_dep"
 	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_doc"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
 	remove_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_header"
@@ -94,6 +94,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchAddCliExample(deps, verb)
 	case action == "add-command":
 		return dispatchAddCommand(deps, verb)
+	case action == "add-dep":
+		return dispatchAddDep(deps, verb)
 	case action == "add-doc":
 		return dispatchAddDoc(deps, verb)
 	case action == "add-flag":
@@ -118,12 +120,6 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchCliPurge(deps, verb)
 	case action == "compile":
 		return dispatchCompile(deps, verb)
-	case action == "dep-install":
-		return dispatchDepInstall(deps, verb)
-	case action == "dep-list":
-		return dispatchDepList(deps, verb)
-	case action == "dep-remove":
-		return dispatchDepRemove(deps, verb)
 	case action == "deps-init":
 		return dispatchDepsInit(deps, verb)
 	case action == "deps-purge":
@@ -136,6 +132,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchFrontPurge(deps, verb)
 	case action == "help" || action == "--help":
 		return dispatchHelp(deps, verb)
+	case action == "list-deps":
+		return dispatchListDeps(deps, verb)
 	case action == "local-install":
 		return dispatchLocalInstall(deps, verb)
 	case action == "publish":
@@ -148,6 +146,8 @@ func CliMain(deps *deps.Deps, args []string) int {
 		return dispatchRemoveCliExample(deps, verb)
 	case action == "remove-command":
 		return dispatchRemoveCommand(deps, verb)
+	case action == "remove-dep":
+		return dispatchRemoveDep(deps, verb)
 	case action == "remove-doc":
 		return dispatchRemoveDoc(deps, verb)
 	case action == "remove-flag":
@@ -704,6 +704,55 @@ func dispatchAddCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return add_command.CommandHandler(deps, entries)
+}
+
+func dispatchAddDep(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &add_dep.Entries{}
+	if verb.GetOptionsSize([]string{"--adapter"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "adapter", []string{"--adapter"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "adapter", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Adapter = value
+	}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "dep", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Dep = value
+	} else {
+		deps.Std.Error("required arg 'dep' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return add_dep.CommandHandler(deps, entries)
 }
 
 func dispatchAddDoc(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -1655,121 +1704,6 @@ func dispatchCompile(deps *deps.Deps, verb argvdeps.Parser) int {
 	return compile.CommandHandler(deps, entries)
 }
 
-func dispatchDepInstall(deps *deps.Deps, verb argvdeps.Parser) int {
-	entries := &dep_install.Entries{}
-	if verb.GetOptionsSize([]string{"--adapter"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "adapter", []string{"--adapter"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "adapter", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Adapter = value
-	}
-	if verb.GetOptionsSize([]string{"--path"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "path", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Path = value
-	} else {
-		entries.Path = "."
-	}
-	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
-	if entries.Quiet {
-		silenceLogs(deps)
-	}
-	if !checkUnknownFlags(deps, verb) {
-		return ExitUsage
-	}
-	if raw, rawOk := nextArgValue(verb); rawOk {
-		value, valueOk := parseStringValue(deps, "arg", "dep", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Dep = value
-	} else {
-		deps.Std.Error("required arg 'dep' not provided\n")
-		return ExitUsage
-	}
-	if !checkUnusedArgs(deps, verb) {
-		return ExitUsage
-	}
-	return dep_install.CommandHandler(deps, entries)
-}
-
-func dispatchDepList(deps *deps.Deps, verb argvdeps.Parser) int {
-	entries := &dep_list.Entries{}
-	if verb.GetOptionsSize([]string{"--path"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "path", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Path = value
-	} else {
-		entries.Path = "."
-	}
-	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
-	if entries.Quiet {
-		silenceLogs(deps)
-	}
-	if !checkUnknownFlags(deps, verb) {
-		return ExitUsage
-	}
-	if !checkUnusedArgs(deps, verb) {
-		return ExitUsage
-	}
-	return dep_list.CommandHandler(deps, entries)
-}
-
-func dispatchDepRemove(deps *deps.Deps, verb argvdeps.Parser) int {
-	entries := &dep_remove.Entries{}
-	if verb.GetOptionsSize([]string{"--path"}) > 0 {
-		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
-		if !rawOk {
-			return ExitUsage
-		}
-		value, valueOk := parseStringValue(deps, "flag", "path", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Path = value
-	} else {
-		entries.Path = "."
-	}
-	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
-	if entries.Quiet {
-		silenceLogs(deps)
-	}
-	if !checkUnknownFlags(deps, verb) {
-		return ExitUsage
-	}
-	if raw, rawOk := nextArgValue(verb); rawOk {
-		value, valueOk := parseStringValue(deps, "arg", "dep", raw)
-		if !valueOk {
-			return ExitUsage
-		}
-		entries.Dep = value
-	} else {
-		deps.Std.Error("required arg 'dep' not provided\n")
-		return ExitUsage
-	}
-	if !checkUnusedArgs(deps, verb) {
-		return ExitUsage
-	}
-	return dep_remove.CommandHandler(deps, entries)
-}
-
 func dispatchDepsInit(deps *deps.Deps, verb argvdeps.Parser) int {
 	entries := &deps_init.Entries{}
 	if verb.GetOptionsSize([]string{"--path"}) > 0 {
@@ -1938,6 +1872,34 @@ func dispatchHelp(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return help.CommandHandler(deps, entries)
+}
+
+func dispatchListDeps(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &list_deps.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return list_deps.CommandHandler(deps, entries)
 }
 
 func dispatchLocalInstall(deps *deps.Deps, verb argvdeps.Parser) int {
@@ -2208,6 +2170,44 @@ func dispatchRemoveCommand(deps *deps.Deps, verb argvdeps.Parser) int {
 		return ExitUsage
 	}
 	return remove_command.CommandHandler(deps, entries)
+}
+
+func dispatchRemoveDep(deps *deps.Deps, verb argvdeps.Parser) int {
+	entries := &remove_dep.Entries{}
+	if verb.GetOptionsSize([]string{"--path"}) > 0 {
+		raw, rawOk := optionValue(deps, verb, "path", []string{"--path"}, 0)
+		if !rawOk {
+			return ExitUsage
+		}
+		value, valueOk := parseStringValue(deps, "flag", "path", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Path = value
+	} else {
+		entries.Path = "."
+	}
+	entries.Quiet = verb.IsPresent([]string{"--quiet", "-q"})
+	if entries.Quiet {
+		silenceLogs(deps)
+	}
+	if !checkUnknownFlags(deps, verb) {
+		return ExitUsage
+	}
+	if raw, rawOk := nextArgValue(verb); rawOk {
+		value, valueOk := parseStringValue(deps, "arg", "dep", raw)
+		if !valueOk {
+			return ExitUsage
+		}
+		entries.Dep = value
+	} else {
+		deps.Std.Error("required arg 'dep' not provided\n")
+		return ExitUsage
+	}
+	if !checkUnusedArgs(deps, verb) {
+		return ExitUsage
+	}
+	return remove_dep.CommandHandler(deps, entries)
 }
 
 func dispatchRemoveDoc(deps *deps.Deps, verb argvdeps.Parser) int {

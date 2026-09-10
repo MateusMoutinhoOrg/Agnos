@@ -1,0 +1,32 @@
+args:
+    - description: the dep to remove from the project
+      examples:
+        - remove-dep embeddeps
+      name: dep
+      required: true
+      type: string
+category: Deps System
+examples:
+    - remove-dep embeddeps
+    - remove-dep embeddeps --path ./my-project
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-dep --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - remove-dep embeddeps -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Uninstalls one dep from the project
+identifiers:
+    - remove-dep
+long-description: Removes every adapter whose declaration names the dep, its require and its enrollment in every available, then the contract itself, then calls build.

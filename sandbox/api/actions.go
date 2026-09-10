@@ -50,10 +50,10 @@ type ExecTestProps struct {
 	Update bool
 }
 
-// DepInstallProps describes one dep to install: the directory holding the
+// AddDepProps describes one dep to install: the directory holding the
 // project, the dep of the embedded catalog, and the adapter to fill its
 // contract with ("" installs the dep's declared default-adapter).
-type DepInstallProps struct {
+type AddDepProps struct {
 	Path    string
 	Dep     string
 	Adapter string
@@ -234,16 +234,17 @@ type Actions struct {
 	// DepsPurge removes the dependency layer and every installed dep with it.
 	DepsPurge func(path string) error
 
-	// DepInstall installs one dep of the built-in list: its contract under
+	// AddDep installs one dep of the built-in list: its contract under
 	// sandbox/deps/, one adapter filling it under adapters/libs/ and that
 	// adapter's go.mod require.
-	DepInstall func(props DepInstallProps) error
+	AddDep func(props AddDepProps) error
 
-	// DepRemove uninstalls one installed dep, contract, adapter and require.
-	DepRemove func(path string, dep string) error
+	// RemoveDep uninstalls one installed dep: every adapter whose declaration
+	// names it, their requires, and then the contract itself.
+	RemoveDep func(path string, dep string) error
 
-	// DepList returns the names of the deps installed in the project.
-	DepList func(path string) ([]string, error)
+	// ListDeps returns the name of every dep the embedded catalog can install.
+	ListDeps func(path string) ([]string, error)
 
 	// CliInit adds the CLI layer (cmd/main, the dispatcher and the help and
 	// version commands) to a project that has none.

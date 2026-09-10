@@ -52,7 +52,7 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Deps install
 
-`dep-install`: read `deplist/<dep>/dep.yaml` in embedded assets (missing = unknown dep), pick `--adapter` or its `default-adapter`, read `adapterlist/<adapter>/adapter.yaml` (its `dep:` must match), `RenderGroupExcept` both catalogs minus their own declaration, write the adapter's declaration to `adapters/libs/<adapter>/adapter.yaml`, add the `require` its `module:` pins, persist, then `build`. `dep-remove` is the inverse: every adapter whose declaration names the dep, then the contract.
+`add-dep`: read `deplist/<dep>/dep.yaml` in embedded assets (missing = unknown dep), pick `--adapter` or its `default-adapter`, read `adapterlist/<adapter>/adapter.yaml` (its `dep:` must match), `RenderGroupExcept` both catalogs minus their own declaration, write the adapter's declaration to `adapters/libs/<adapter>/adapter.yaml`, add the `require` its `module:` pins, persist, then `build`. `remove-dep` is the inverse: every adapter whose declaration names the dep, then the contract.
 
 ## Dispatch (`climain.go`)
 

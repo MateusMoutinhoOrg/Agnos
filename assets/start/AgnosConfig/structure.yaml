@@ -25,7 +25,7 @@ docs:
   description: one dir per doc, holding doc.md + props.yaml. README.md indexes them all
 go.mod:
   order: 4
-  description: written by `start`; dep-install and dep-remove edit its require block
+  description: written by `start`; add-dep and remove-dep edit its require block
 README.md:
   order: 5
   gen: true

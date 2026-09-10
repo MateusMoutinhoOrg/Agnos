@@ -1,0 +1,15 @@
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep iodeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nlist-deps started with path TestDir \nargvdeps\ndbdeps\nembeddeps\ngoimportsdeps\nhashdeps\niodeps\nrequestdeps\nrundeps\nserializables\nserverdeps\nsortdeps\nstd\nstringsdeps\ntemplatedeps\n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: af87d6319f4d0d0d4f6381d041d7459eacae19332a0e50ba9c4053d138b537be
+    - file: adapters/availables/standard/new.go
+      sha: 64010d6bec68d81f6df653254bc3463f57de81093077b2a416a9a6d08db7440a
+    - file: adapters/libs/iodeps/adapter.yaml
+      sha: 8b5305508734802df92ad2ec1b34fc04c618371aeb9d6965fa29f75c3f6e016e
+    - file: adapters/libs/iodeps/iodeps.go
+      sha: 3b66e41119f908b360b512e4d074fcfc8639691f4db711673b7b5475d55250fa
+    - file: sandbox/deps/deps.go
+      sha: 5bda98268925268a852f90780f55a5c96299dace4015cf954f0bdb1f92ccebac
+    - file: sandbox/deps/iodeps/iodeps.go
+      sha: 8e038a4cc5ae9b737d7ffec8e81c981176f5baeaeb159611c81b3f3aae821dcf

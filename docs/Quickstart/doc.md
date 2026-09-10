@@ -5,7 +5,7 @@ Every command takes the project dir via `--path` (default `.`). Every step ends 
 ```bash
 agnos start --project-name my-tool --module github.com/you/my-tool   # AgnosConfig/, go.mod, sandbox skeleton
 agnos deps-init                                                       # sandbox/deps/ + adapters/
-agnos dep-install iodeps                                              # any name from `agnos dep-list`
+agnos add-dep iodeps                                              # any name from `agnos list-deps`
 agnos cli-init                                                        # cmd/main, dispatch, help, version (installs std + argvdeps)
 agnos add-command greet --help "Say hello" --category Demo
 agnos add-flag name --command greet --identifier --name --identifier -n --required --description "who to greet"
