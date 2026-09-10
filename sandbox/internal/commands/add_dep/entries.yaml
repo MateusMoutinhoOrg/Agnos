@@ -12,7 +12,7 @@ examples:
 flags:
     - description: the adapter to fill the dep's contract with (defaults to the dep's default-adapter)
       examples:
-        - add-dep serverdeps --adapter nethttp
+        - add-dep sortdeps --adapter reflectsort
       identifiers:
         - --adapter
       name: adapter

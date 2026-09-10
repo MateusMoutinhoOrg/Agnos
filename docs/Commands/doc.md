@@ -31,8 +31,8 @@ Renders assets/adapterlist/<adapter> into the project and writes its declaration
 | `adapter` | string, required |  | the adapter to install from assets/adapterlist |
 
 ```bash
-agnos add-adapter nethttp
-agnos add-adapter awslambda --available lambda
+agnos add-adapter reflectsort
+agnos add-adapter reflectsort --available lambda
 ```
 
 ### `add-available`
@@ -183,7 +183,7 @@ Removes adapters/libs/<adapter>/ and the require its declaration pins. Refuses a
 | `adapter` | string, required |  | the adapter to remove from the project |
 
 ```bash
-agnos remove-adapter awslambda
+agnos remove-adapter reflectsort
 ```
 
 ### `remove-available`
@@ -256,8 +256,8 @@ Rewrites one available.yaml so the named adapter is the one bound for that dep, 
 | `adapter` | string, required |  | the installed adapter that should fill it |
 
 ```bash
-agnos set-adapter serverdeps awslambda
-agnos set-adapter serverdeps awslambda --available lambda
+agnos set-adapter sortdeps reflectsort
+agnos set-adapter sortdeps reflectsort --available lambda
 ```
 
 ### `set-dep`

@@ -79,15 +79,15 @@ var helpCommands = []helpCommand{
 		Category:        "Deps System",
 		Description:     "Installs one further adapter for a contract the project already has",
 		LongDescription: "Renders assets/adapterlist/<adapter> into the project and writes its declaration to adapters/libs/<adapter>/adapter.yaml. The contract it fills has to be installed already. Installing changes no selection: an available binds one adapter per field, so --available names the one that switches to it.",
-		Examples:        []string{"add-adapter nethttp", "add-adapter awslambda --available lambda"},
+		Examples:        []string{"add-adapter reflectsort", "add-adapter reflectsort --available lambda"},
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{"--available"}, Description: "the available that should switch to this adapter (installs only when absent)", Examples: []string{"add-adapter awslambda --available lambda"}, Type: "string", Default: "", Required: false},
-			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-adapter --path ./my-project"}, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-adapter nethttp -q"}, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{"--available"}, Description: "the available that should switch to this adapter (installs only when absent)", Examples: []string{"add-adapter reflectsort --available lambda"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-adapter reflectsort --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-adapter reflectsort -q"}, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
-			{Name: "adapter", Description: "the adapter to install from assets/adapterlist", Examples: []string{"add-adapter nethttp"}, Type: "string", Default: "", Required: true},
+			{Name: "adapter", Description: "the adapter to install from assets/adapterlist", Examples: []string{"add-adapter reflectsort"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -203,7 +203,7 @@ var helpCommands = []helpCommand{
 		Examples:        []string{"add-dep embeddeps", "add-dep embeddeps --path ./my-project"},
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{"--adapter"}, Description: "the adapter to fill the dep's contract with (defaults to the dep's default-adapter)", Examples: []string{"add-dep serverdeps --adapter nethttp"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--adapter"}, Description: "the adapter to fill the dep's contract with (defaults to the dep's default-adapter)", Examples: []string{"add-dep sortdeps --adapter reflectsort"}, Type: "string", Default: "", Required: false},
 			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-dep --path ./my-project"}, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-dep embeddeps -q"}, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{"--as"}, Description: "the name the copied contract takes under sandbox/deps/ (remote deps only; defaults to the last segment of the module path)", Examples: []string{"add-dep github.com/user/MathLib@v1.2.0 --as mathlib"}, Type: "string", Default: "", Required: false},
@@ -575,14 +575,14 @@ var helpCommands = []helpCommand{
 		Category:        "Deps System",
 		Description:     "Uninstalls one adapter, leaving the contract it filled",
 		LongDescription: "Removes adapters/libs/<adapter>/ and the require its declaration pins. Refuses an adapter an available still binds — point that available at another adapter first — and refuses one the generator wrote as the shim of a remote dep.",
-		Examples:        []string{"remove-adapter awslambda"},
+		Examples:        []string{"remove-adapter reflectsort"},
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-adapter --path ./my-project"}, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-adapter awslambda -q"}, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-adapter reflectsort --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-adapter reflectsort -q"}, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
-			{Name: "adapter", Description: "the adapter to remove from the project", Examples: []string{"remove-adapter awslambda"}, Type: "string", Default: "", Required: true},
+			{Name: "adapter", Description: "the adapter to remove from the project", Examples: []string{"remove-adapter reflectsort"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -833,16 +833,16 @@ var helpCommands = []helpCommand{
 		Category:        "Deps System",
 		Description:     "Changes which adapter an available binds for one dep",
 		LongDescription: "Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.",
-		Examples:        []string{"set-adapter serverdeps awslambda", "set-adapter serverdeps awslambda --available lambda"},
+		Examples:        []string{"set-adapter sortdeps reflectsort", "set-adapter sortdeps reflectsort --available lambda"},
 		Hidden:          false,
 		Flags: []helpField{
-			{Identifiers: []string{"--available"}, Description: "the available to change (defaults to standard)", Examples: []string{"set-adapter serverdeps awslambda --available lambda"}, Type: "string", Default: "", Required: false},
-			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"set-adapter --path ./my-project"}, Type: "string", Default: ".", Required: false},
-			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"set-adapter serverdeps awslambda -q"}, Type: "boolean", Default: "", Required: false},
+			{Identifiers: []string{"--available"}, Description: "the available to change (defaults to standard)", Examples: []string{"set-adapter sortdeps reflectsort --available lambda"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"set-adapter sortdeps reflectsort --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"set-adapter sortdeps reflectsort -q"}, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{
-			{Name: "dep", Description: "the dep whose field is being filled", Examples: []string{"set-adapter serverdeps awslambda"}, Type: "string", Default: "", Required: true},
-			{Name: "adapter", Description: "the installed adapter that should fill it", Examples: []string{"set-adapter serverdeps awslambda"}, Type: "string", Default: "", Required: true},
+			{Name: "dep", Description: "the dep whose field is being filled", Examples: []string{"set-adapter sortdeps reflectsort"}, Type: "string", Default: "", Required: true},
+			{Name: "adapter", Description: "the installed adapter that should fill it", Examples: []string{"set-adapter sortdeps reflectsort"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{

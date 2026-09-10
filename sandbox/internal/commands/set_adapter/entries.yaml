@@ -1,24 +1,24 @@
 args:
     - description: the dep whose field is being filled
       examples:
-        - set-adapter serverdeps awslambda
+        - set-adapter sortdeps reflectsort
       name: dep
       required: true
       type: string
     - description: the installed adapter that should fill it
       examples:
-        - set-adapter serverdeps awslambda
+        - set-adapter sortdeps reflectsort
       name: adapter
       required: true
       type: string
 category: Deps System
 examples:
-    - set-adapter serverdeps awslambda
-    - set-adapter serverdeps awslambda --available lambda
+    - set-adapter sortdeps reflectsort
+    - set-adapter sortdeps reflectsort --available lambda
 flags:
     - description: the available to change (defaults to standard)
       examples:
-        - set-adapter serverdeps awslambda --available lambda
+        - set-adapter sortdeps reflectsort --available lambda
       identifiers:
         - --available
       name: available
@@ -26,14 +26,14 @@ flags:
     - default: .
       description: the dir holding the project (defaults to the current directory)
       examples:
-        - set-adapter --path ./my-project
+        - set-adapter sortdeps reflectsort --path ./my-project
       identifiers:
         - --path
       name: path
       type: string
     - description: Quiets the cli output
       examples:
-        - set-adapter serverdeps awslambda -q
+        - set-adapter sortdeps reflectsort -q
       identifiers:
         - --quiet
         - -q

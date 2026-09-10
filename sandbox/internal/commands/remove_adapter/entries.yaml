@@ -1,25 +1,25 @@
 args:
     - description: the adapter to remove from the project
       examples:
-        - remove-adapter awslambda
+        - remove-adapter reflectsort
       name: adapter
       required: true
       type: string
 category: Deps System
 examples:
-    - remove-adapter awslambda
+    - remove-adapter reflectsort
 flags:
     - default: .
       description: the dir holding the project (defaults to the current directory)
       examples:
-        - remove-adapter --path ./my-project
+        - remove-adapter reflectsort --path ./my-project
       identifiers:
         - --path
       name: path
       type: string
     - description: Quiets the cli output
       examples:
-        - remove-adapter awslambda -q
+        - remove-adapter reflectsort -q
       identifiers:
         - --quiet
         - -q
