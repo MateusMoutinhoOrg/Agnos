@@ -85,6 +85,64 @@ AddDepProps describes one dep to install: the directory holding the project, the
 | `Dep` | `string` |
 | `Adapter` | `string` |
 
+### `RemoveDepProps`
+
+RemoveDepProps describes one dep to uninstall. A dep with adapters installed is refused, because which of them was meant is not a question the tree can answer; WithAdapters is the caller saying "all of them".
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Dep` | `string` |
+| `WithAdapters` | `bool` |
+
+### `AddAdapterProps`
+
+AddAdapterProps describes one further implementation to install for a contract the project already has. Available names the available that should switch to it; "" installs the package and leaves every selection alone.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Adapter` | `string` |
+| `Available` | `string` |
+
+### `SetAdapterProps`
+
+SetAdapterProps describes one selection to change: which adapter fills a dep's field in one available. Available is the standard one when empty.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Dep` | `string` |
+| `Adapter` | `string` |
+| `Available` | `string` |
+
+### `DepInfo`
+
+DepInfo is one row of ListDeps: a dep of the embedded catalog, and what the project holds of it.
+
+| Field | Type |
+| --- | --- |
+| `Name` | `string` |
+| `Field` | `string` |
+| `Help` | `string` |
+| `DefaultAdapter` | `string` |
+| `Installed` | `bool` |
+| `Adapters` | `[]string` |
+
+### `AdapterInfo`
+
+AdapterInfo is one row of ListAdapters: an adapter of the embedded catalog or one installed in the project, and which availables bind it. Origin is "catalog" for one the catalog installs and "generated" for the shim of a dep copied from a remote repo.
+
+| Field | Type |
+| --- | --- |
+| `Name` | `string` |
+| `Dep` | `string` |
+| `Help` | `string` |
+| `Module` | `string` |
+| `Origin` | `string` |
+| `Installed` | `bool` |
+| `Availables` | `[]string` |
+
 ### `FieldProps`
 
 FieldProps describes one flag or positional arg to add to a command's entries.yaml. Default, Min and Max are the raw literals typed on the command line ("" means unset) so the action can tell "not given" from a zero value; Position is the index to insert at (< 0 appends).
@@ -235,8 +293,14 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `DepsInit` | `func(path string) error` | DepsInit adds the dependency layer (sandbox/deps/ and adapters/availables/standard/) to a project that has none. |
 | `DepsPurge` | `func(path string) error` | DepsPurge removes the dependency layer and every installed dep with it. |
 | `AddDep` | `func(props AddDepProps) error` | AddDep installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |
-| `RemoveDep` | `func(path string, dep string) error` | RemoveDep uninstalls one installed dep: every adapter whose declaration names it, their requires, and then the contract itself. |
-| `ListDeps` | `func(path string) ([]string, error)` | ListDeps returns the name of every dep the embedded catalog can install. |
+| `RemoveDep` | `func(props RemoveDepProps) error` | RemoveDep uninstalls one installed dep: its adapters, their requires, and then the contract itself. It refuses a dep that still has an adapter installed unless props.WithAdapters says to take those too. |
+| `ListDeps` | `func(path string) ([]DepInfo, error)` | ListDeps returns one row per dep of the embedded catalog, saying which the project has installed and which adapters fill each one. |
+| `AddAdapter` | `func(props AddAdapterProps) error` | AddAdapter installs one further implementation of a contract the project already has, and — when props.Available names one — switches that available to it. |
+| `RemoveAdapter` | `func(path string, adapter string) error` | RemoveAdapter uninstalls one adapter, its require and its files. It refuses one that an available still binds, and one written by the generator as half of a remote dep. |
+| `SetAdapter` | `func(props SetAdapterProps) error` | SetAdapter changes which adapter fills one dep's field in one available, the only place that choice is recorded. |
+| `ListAdapters` | `func(path string) ([]AdapterInfo, error)` | ListAdapters returns one row per adapter, of the embedded catalog and of the project, with the availables that bind each one. |
+| `AddAvailable` | `func(path string, available string) error` | AddAvailable creates one further available, seeded with the standard available's selection so it starts filling every field. |
+| `RemoveAvailable` | `func(path string, available string) error` | RemoveAvailable deletes one available. The standard one is refused: it is what cmd/main/main.go imports. |
 | `CliInit` | `func(path string) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
 | `CliPurge` | `func(path string) error` | CliPurge removes the CLI layer and every command declared in it. |
 | `AddCommand` | `func(path string, name string, help string, category string) error` | AddCommand declares a new command: its entries.yaml, its generated entries.go and a handler.go to fill in. |

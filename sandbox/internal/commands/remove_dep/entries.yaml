@@ -10,6 +10,13 @@ examples:
     - remove-dep embeddeps
     - remove-dep embeddeps --path ./my-project
 flags:
+    - description: also remove every adapter that fills the dep (without it, a dep with adapters installed is refused)
+      examples:
+        - remove-dep serverdeps --with-adapters
+      identifiers:
+        - --with-adapters
+      name: with-adapters
+      type: boolean
     - default: .
       description: the dir holding the project (defaults to the current directory)
       examples:

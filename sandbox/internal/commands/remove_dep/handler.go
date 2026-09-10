@@ -7,7 +7,11 @@ import (
 )
 
 func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	remove_error := removeDepAction.RemoveDep(deps, entries.Path, entries.Dep)
+	remove_error := removeDepAction.RemoveDep(deps, api.RemoveDepProps{
+		Path:         entries.Path,
+		Dep:          entries.Dep,
+		WithAdapters: entries.WithAdapters,
+	})
 
 	if remove_error != nil {
 		deps.Std.Error("%s\n", remove_error.Error())

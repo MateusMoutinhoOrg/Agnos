@@ -1,0 +1,45 @@
+args:
+    - description: the dep whose field is being filled
+      examples:
+        - set-adapter serverdeps awslambda
+      name: dep
+      required: true
+      type: string
+    - description: the installed adapter that should fill it
+      examples:
+        - set-adapter serverdeps awslambda
+      name: adapter
+      required: true
+      type: string
+category: Deps System
+examples:
+    - set-adapter serverdeps awslambda
+    - set-adapter serverdeps awslambda --available lambda
+flags:
+    - description: the available to change (defaults to standard)
+      examples:
+        - set-adapter serverdeps awslambda --available lambda
+      identifiers:
+        - --available
+      name: available
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - set-adapter --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - set-adapter serverdeps awslambda -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Changes which adapter an available binds for one dep
+identifiers:
+    - set-adapter
+long-description: Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.

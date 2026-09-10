@@ -7,7 +7,7 @@
 |---|---|---|
 | `AgnosConfig/{project,themes,structure,ignore,paths}.yaml` | `start` | once |
 | `AgnosConfig/docs/ReadmeHeader.md` | `start` | once. The whole of `README.md` above the doc index, itself a template |
-| `go.mod` | `start` | once. `dep-install` / `dep-remove` edit `require` |
+| `go.mod` | `start` | once. `add-dep` / `remove-dep` edit `require` |
 | `go.sum` | `go mod tidy` | - |
 | `LICENSE` | `start` | once. A placeholder; its text is pasted into `README.md`'s License section |
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
@@ -18,10 +18,10 @@
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
 | `sandbox/deps/deps.go` | `build` | always. One `<Title> <dir>.Sandbox` per dir of `sandbox/deps/` |
 | `adapters/availables/<name>/new.go` | `build` | always. One `<adapter>.Bind(&deps)` per entry of that available's `available.yaml`; an available with no `available.yaml` is hand-written and left alone |
-| `adapters/availables/<name>/available.yaml` | `deps-init` | once, then rewritten by `dep-install` / `dep-remove` — never by hand |
-| `sandbox/deps/<dep>/*.go`, `adapters/libs/<adapter>/*.go` | `dep-install` | once |
-| `adapters/libs/<adapter>/adapter.yaml` | `dep-install` | once |
-| `assets/asset.go` | `dep-install embeddeps` | once |
+| `adapters/availables/<name>/available.yaml` | `deps-init` | once, then rewritten by `add-dep` / `remove-dep` — never by hand |
+| `sandbox/deps/<dep>/*.go`, `adapters/libs/<adapter>/*.go` | `add-dep` | once |
+| `adapters/libs/<adapter>/adapter.yaml` | `add-dep` | once |
+| `assets/asset.go` | `add-dep embeddeps` | once |
 | `cmd/main/main.go` | `build` | always |
 | `docs/{CliInstall,CliExamples}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `build` | always |

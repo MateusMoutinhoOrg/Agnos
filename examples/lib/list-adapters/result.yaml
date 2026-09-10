@@ -1,0 +1,11 @@
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep sortdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nlist-adapters started with path TestDir \nembeddeps embeddeps false []\ngoimportsdeps goimportsdeps false []\nhashdeps hashdeps false []\niodeps iodeps false []\nkeep dbdeps false []\nreflectsort sortdeps false []\nrequestdeps requestdeps false []\nrundeps rundeps false []\nserializables serializables false []\nserverdeps serverdeps false []\nsortdeps sortdeps true [standard]\nstd std false []\nstringsdeps stringsdeps false []\ntemplatedeps templatedeps false []\nverb argvdeps false []\n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: bfe69b2d34623e3596cdab48c484604bb9a5bf69c312fbf561dde0115ce22639
+    - file: adapters/availables/standard/new.go
+      sha: c70533aee77829f509368ee0538452d730866ae4cbb12a3506cb6387c14bd02b
+    - file: adapters/libs/sortdeps/adapter.yaml
+      sha: 2f5dd3feb4c4328d39531c6d4fb8b91c32e815566e8609e9bbca0859a793d3bb
+    - file: adapters/libs/sortdeps/sortdeps.go
+      sha: 938364f9047d7ce33ab7dddc33258760573decd3c66e9f8a21375f49dd568bbf

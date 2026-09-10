@@ -13,7 +13,9 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 
 | Example | Description | Source |
 |---|---|---|
+| `add-adapter` |  | [example.go](../../examples/lib/add-adapter/example.go) |
 | `add-arg` | declare one positional argument on a command | [example.go](../../examples/lib/add-arg/example.go) |
+| `add-available` |  | [example.go](../../examples/lib/add-available/example.go) |
 | `add-cli-example` | create an example under examples/cli/ | [example.go](../../examples/lib/add-cli-example/example.go) |
 | `add-command` | declare a new command | [example.go](../../examples/lib/add-command/example.go) |
 | `add-dep` |  | [example.go](../../examples/lib/add-dep/example.go) |
@@ -29,8 +31,11 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `deps-purge` | remove the dependency layer and every installed dep | [example.go](../../examples/lib/deps-purge/example.go) |
 | `front-init` |  | [example.go](../../examples/lib/front-init/example.go) |
 | `front-purge` |  | [example.go](../../examples/lib/front-purge/example.go) |
+| `list-adapters` |  | [example.go](../../examples/lib/list-adapters/example.go) |
 | `list-deps` |  | [example.go](../../examples/lib/list-deps/example.go) |
+| `remove-adapter` |  | [example.go](../../examples/lib/remove-adapter/example.go) |
 | `remove-arg` | delete one declared positional argument | [example.go](../../examples/lib/remove-arg/example.go) |
+| `remove-available` |  | [example.go](../../examples/lib/remove-available/example.go) |
 | `remove-cli-example` | delete an example of examples/cli/ | [example.go](../../examples/lib/remove-cli-example/example.go) |
 | `remove-command` | delete a command and unwire its dispatch | [example.go](../../examples/lib/remove-command/example.go) |
 | `remove-dep` |  | [example.go](../../examples/lib/remove-dep/example.go) |
@@ -40,6 +45,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `remove-page` |  | [example.go](../../examples/lib/remove-page/example.go) |
 | `server-rest-route` |  | [example.go](../../examples/lib/server-rest-route/example.go) |
 | `server-route` |  | [example.go](../../examples/lib/server-route/example.go) |
+| `set-adapter` |  | [example.go](../../examples/lib/set-adapter/example.go) |
 | `set-command` | rewrite the command-level keys of a command | [example.go](../../examples/lib/set-command/example.go) |
 | `start` | scaffold a new project | [example.go](../../examples/lib/start/example.go) |
 | `verify` | check a project against the schema, writing nothing | [example.go](../../examples/lib/verify/example.go) |

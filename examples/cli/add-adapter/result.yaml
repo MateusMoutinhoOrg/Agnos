@@ -1,0 +1,15 @@
+cli-output: "add-adapter started with path TestDir adapter reflectsort \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: bfe69b2d34623e3596cdab48c484604bb9a5bf69c312fbf561dde0115ce22639
+    - file: adapters/availables/standard/new.go
+      sha: c70533aee77829f509368ee0538452d730866ae4cbb12a3506cb6387c14bd02b
+    - file: adapters/libs/reflectsort/adapter.yaml
+      sha: 5d5c98be9b69a44dfcbc057e35268050fbab62e26d0ae8d04c416d168ffba747
+    - file: adapters/libs/reflectsort/reflectsort.go
+      sha: af3b2920ce451ecc3f5a705bb01a8ee5b79c7cae82ebed88b3d626a54672c540
+    - file: adapters/libs/sortdeps/adapter.yaml
+      sha: 2f5dd3feb4c4328d39531c6d4fb8b91c32e815566e8609e9bbca0859a793d3bb
+    - file: adapters/libs/sortdeps/sortdeps.go
+      sha: 938364f9047d7ce33ab7dddc33258760573decd3c66e9f8a21375f49dd568bbf

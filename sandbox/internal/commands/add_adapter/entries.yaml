@@ -1,0 +1,39 @@
+args:
+    - description: the adapter to install from assets/adapterlist
+      examples:
+        - add-adapter nethttp
+      name: adapter
+      required: true
+      type: string
+category: Deps System
+examples:
+    - add-adapter nethttp
+    - add-adapter awslambda --available lambda
+flags:
+    - description: the available that should switch to this adapter (installs only when absent)
+      examples:
+        - add-adapter awslambda --available lambda
+      identifiers:
+        - --available
+      name: available
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-adapter --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - add-adapter nethttp -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Installs one further adapter for a contract the project already has
+identifiers:
+    - add-adapter
+long-description: 'Renders assets/adapterlist/<adapter> into the project and writes its declaration to adapters/libs/<adapter>/adapter.yaml. The contract it fills has to be installed already. Installing changes no selection: an available binds one adapter per field, so --available names the one that switches to it.'

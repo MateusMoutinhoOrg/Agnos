@@ -75,6 +75,22 @@ type helpCommand struct {
 
 var helpCommands = []helpCommand{
 	{
+		Identifiers:     []string{"add-adapter"},
+		Category:        "Deps System",
+		Description:     "Installs one further adapter for a contract the project already has",
+		LongDescription: "Renders assets/adapterlist/<adapter> into the project and writes its declaration to adapters/libs/<adapter>/adapter.yaml. The contract it fills has to be installed already. Installing changes no selection: an available binds one adapter per field, so --available names the one that switches to it.",
+		Examples:        []string{"add-adapter nethttp", "add-adapter awslambda --available lambda"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--available"}, Description: "the available that should switch to this adapter (installs only when absent)", Examples: []string{"add-adapter awslambda --available lambda"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-adapter --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-adapter nethttp -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "adapter", Description: "the adapter to install from assets/adapterlist", Examples: []string{"add-adapter nethttp"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{"add-arg"},
 		Category:        "Cli System",
 		Description:     "Add a positional arg to a command's entries.yaml",
@@ -97,6 +113,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the arg name (becomes the generated struct field)", Examples: []string{"add-arg file --command exec"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"add-available"},
+		Category:        "Deps System",
+		Description:     "Declares one further available",
+		LongDescription: "Creates adapters/availables/<name>/available.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --available.",
+		Examples:        []string{"add-available lambda"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"add-available --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"add-available lambda -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "available", Description: "the name of the new available (it becomes one directory under adapters/availables/)", Examples: []string{"add-available lambda"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -483,10 +514,23 @@ var helpCommands = []helpCommand{
 		},
 	},
 	{
+		Identifiers:     []string{"list-adapters"},
+		Category:        "Deps System",
+		Description:     "Lists the adapters of the catalog and of the project",
+		LongDescription: "One row per adapter: the name, the dep it fills, whether it is installed, the availables binding it, and what backs it.",
+		Examples:        []string{"list-adapters"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"list-adapters --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"list-adapters -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{},
+	},
+	{
 		Identifiers:     []string{"list-deps"},
 		Category:        "Deps System",
 		Description:     "Lists the deps the embedded catalog can install",
-		LongDescription: "Lists the name of every dep under assets/deplist that add-dep can render into a project.",
+		LongDescription: "One row per dep of the embedded catalog: the name, whether the project has the contract installed, the adapters filling it (or the catalog's default-adapter when none is), and what it provides.",
 		Examples:        []string{"list-deps"},
 		Hidden:          false,
 		Flags: []helpField{
@@ -525,6 +569,21 @@ var helpCommands = []helpCommand{
 		Args: []helpField{},
 	},
 	{
+		Identifiers:     []string{"remove-adapter"},
+		Category:        "Deps System",
+		Description:     "Uninstalls one adapter, leaving the contract it filled",
+		LongDescription: "Removes adapters/libs/<adapter>/ and the require its declaration pins. Refuses an adapter an available still binds — point that available at another adapter first — and refuses one the generator wrote as the shim of a remote dep.",
+		Examples:        []string{"remove-adapter awslambda"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-adapter --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-adapter awslambda -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "adapter", Description: "the adapter to remove from the project", Examples: []string{"remove-adapter awslambda"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
 		Identifiers:     []string{"remove-arg"},
 		Category:        "Cli System",
 		Description:     "Remove a positional arg from a command's entries.yaml",
@@ -538,6 +597,21 @@ var helpCommands = []helpCommand{
 		},
 		Args: []helpField{
 			{Name: "name", Description: "the arg name", Examples: []string{"remove-arg file --command exec"}, Type: "string", Default: "", Required: true},
+		},
+	},
+	{
+		Identifiers:     []string{"remove-available"},
+		Category:        "Deps System",
+		Description:     "Deletes one available",
+		LongDescription: "Removes adapters/availables/<name>/ whole. The standard available is refused: cmd/main/main.go imports it.",
+		Examples:        []string{"remove-available lambda"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-available --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-available lambda -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "available", Description: "the available to remove", Examples: []string{"remove-available lambda"}, Type: "string", Default: "", Required: true},
 		},
 	},
 	{
@@ -594,6 +668,7 @@ var helpCommands = []helpCommand{
 		Examples:        []string{"remove-dep embeddeps", "remove-dep embeddeps --path ./my-project"},
 		Hidden:          false,
 		Flags: []helpField{
+			{Identifiers: []string{"--with-adapters"}, Description: "also remove every adapter that fills the dep (without it, a dep with adapters installed is refused)", Examples: []string{"remove-dep serverdeps --with-adapters"}, Type: "boolean", Default: "", Required: false},
 			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"remove-dep --path ./my-project"}, Type: "string", Default: ".", Required: false},
 			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"remove-dep embeddeps -q"}, Type: "boolean", Default: "", Required: false},
 		},
@@ -750,6 +825,23 @@ var helpCommands = []helpCommand{
 			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{}, Type: "boolean", Default: "", Required: false},
 		},
 		Args: []helpField{},
+	},
+	{
+		Identifiers:     []string{"set-adapter"},
+		Category:        "Deps System",
+		Description:     "Changes which adapter an available binds for one dep",
+		LongDescription: "Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.",
+		Examples:        []string{"set-adapter serverdeps awslambda", "set-adapter serverdeps awslambda --available lambda"},
+		Hidden:          false,
+		Flags: []helpField{
+			{Identifiers: []string{"--available"}, Description: "the available to change (defaults to standard)", Examples: []string{"set-adapter serverdeps awslambda --available lambda"}, Type: "string", Default: "", Required: false},
+			{Identifiers: []string{"--path"}, Description: "the dir holding the project (defaults to the current directory)", Examples: []string{"set-adapter --path ./my-project"}, Type: "string", Default: ".", Required: false},
+			{Identifiers: []string{"--quiet", "-q"}, Description: "Quiets the cli output", Examples: []string{"set-adapter serverdeps awslambda -q"}, Type: "boolean", Default: "", Required: false},
+		},
+		Args: []helpField{
+			{Name: "dep", Description: "the dep whose field is being filled", Examples: []string{"set-adapter serverdeps awslambda"}, Type: "string", Default: "", Required: true},
+			{Name: "adapter", Description: "the installed adapter that should fill it", Examples: []string{"set-adapter serverdeps awslambda"}, Type: "string", Default: "", Required: true},
+		},
 	},
 	{
 		Identifiers:     []string{"set-body"},

@@ -1,0 +1,11 @@
+cli-output: "remove-adapter started with path TestDir adapter reflectsort \nbuild started with path TestDir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: bfe69b2d34623e3596cdab48c484604bb9a5bf69c312fbf561dde0115ce22639
+    - file: adapters/availables/standard/new.go
+      sha: c70533aee77829f509368ee0538452d730866ae4cbb12a3506cb6387c14bd02b
+    - file: adapters/libs/sortdeps/adapter.yaml
+      sha: 2f5dd3feb4c4328d39531c6d4fb8b91c32e815566e8609e9bbca0859a793d3bb
+    - file: adapters/libs/sortdeps/sortdeps.go
+      sha: 938364f9047d7ce33ab7dddc33258760573decd3c66e9f8a21375f49dd568bbf

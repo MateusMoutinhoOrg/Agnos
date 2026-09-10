@@ -1,0 +1,11 @@
+cli-output: "list-adapters started with path TestDir \nembeddeps        embeddeps        -          -                Embedded assets over embed and text/template\ngoimportsdeps    goimportsdeps    -          -                Go source reader over go/parser\nhashdeps         hashdeps         -          -                SHA-256 over crypto/sha256 and encoding/hex\niodeps           iodeps           -          -                Filesystem over os and path/filepath\nkeep             dbdeps           -          -                Schema database over github.com/MateusMoutinhoOrg/Keep\nreflectsort      sortdeps         -          -                Insertion sort over reflect, no stdlib sort\nrequestdeps      requestdeps      -          -                HTTP client over net/http, 30s timeout\nrundeps          rundeps          -          -                Process runner over os/exec\nserializables    serializables    -          -                JSON/YAML values over gopkg.in/yaml.v3 and encoding/json\nserverdeps       serverdeps       -          -                Http server over net/http\nsortdeps         sortdeps         installed  standard         Sorting over sort\nstd              std              -          -                Clock, formatting and output over time, fmt, runtime and os\nstringsdeps      stringsdeps      -          -                Text manipulation over strings and strconv\ntemplatedeps     templatedeps     -          -                Templating over text/template\nverb             argvdeps         -          -                Argv parser over github.com/MateusMoutinhoOrg/Verb\n"
+exit-code: 0
+tree:
+    - file: adapters/availables/standard/available.yaml
+      sha: bfe69b2d34623e3596cdab48c484604bb9a5bf69c312fbf561dde0115ce22639
+    - file: adapters/availables/standard/new.go
+      sha: c70533aee77829f509368ee0538452d730866ae4cbb12a3506cb6387c14bd02b
+    - file: adapters/libs/sortdeps/adapter.yaml
+      sha: 2f5dd3feb4c4328d39531c6d4fb8b91c32e815566e8609e9bbca0859a793d3bb
+    - file: adapters/libs/sortdeps/sortdeps.go
+      sha: 938364f9047d7ce33ab7dddc33258760573decd3c66e9f8a21375f49dd568bbf

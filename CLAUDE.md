@@ -112,11 +112,15 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   `api/` holds contracts only, `deps/` holds dependency contracts (each `deps/<x>/` imports
   nothing at all; only the loose `deps/deps.go` names them),
   `binds/` holds one function file per `api/` file, `internal/` holds the logic.
-- **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<x>/` exports
-  `Bind(deps *deps.Deps)`; `availables/standard/new.go` is generated from that dir listing.
+- **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<adapter>/`
+  exports `Bind(deps *deps.Deps)` beside an `adapter.yaml` naming the dep it fills;
+  `availables/<name>/new.go` is generated from `availables/<name>/available.yaml`, never from a
+  dir listing.
 - **`assets/`** — every generated file's template. Groups `start`, `all`, `deps`, `cli`,
   `server`, `front` render `assets/<group>/<path>` to `<path>`; `deplist/<dep>/**` is one
-  installable dep; `templates/*` are single-file scaffolds rendered with
+  installable contract and `adapterlist/<adapter>/**` one installable adapter, each with its
+  own declaration at the root of the group and installed nowhere (`dep.yaml`) or into the
+  package (`adapter.yaml`); `templates/*` are single-file scaffolds rendered with
   `utils.RenderTemplateToDest`. A scaffold rendering to a file that is *itself* a template
   (`page_html.html`) escapes its own braces: `{{ "{{ .Title }}" }}`.
 - **`cmd/main/`** — generated; wires an adapter into the sandbox, holds no logic.
@@ -154,6 +158,16 @@ from — never `assets/frontend/`, which is the project's own content and may be
 `pageio` and `docs/FrontUsage` are rewritten by every build. `pageio.StaticMount` is rendered
 from the first segment of the `static` route's declaration (`collect_front_mount.go`), so
 renaming the mount moves every generated link instead of breaking it in silence.
+
+The **deps layer** is three units, not one: a **dep** is the contract (`sandbox/deps/<dep>/`,
+one field of `deps.Deps`), an **adapter** is one implementation of it
+(`adapters/libs/<adapter>/`, `adapter.yaml` says which dep), and an **available** is a selection
+(`adapters/availables/<name>/available.yaml`, exactly one adapter per field). One dep may have
+many adapters; `verify` demands every available fill every field exactly once — zero panics on
+first use, two overwrite in silence. `add-dep`/`remove-dep` own the contract, `add-adapter`/
+`remove-adapter` one implementation, `set-adapter` the choice, `add-available`/`remove-available`
+the selection itself. `cmd/main/main.go` imports one available, and that import is how a program
+picks its implementations.
 
 **SmartIO** (`sandbox/internal/smartio/`) is a transactional filesystem rooted at `--path`.
 Actions pass project-relative paths only; `Root` is joined at the `deps.Iodeps` boundary.

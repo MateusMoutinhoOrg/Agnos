@@ -21,4 +21,4 @@ flags:
 help: Lists the deps the embedded catalog can install
 identifiers:
     - list-deps
-long-description: Lists the name of every dep under assets/deplist that add-dep can render into a project.
+long-description: 'One row per dep of the embedded catalog: the name, whether the project has the contract installed, the adapters filling it (or the catalog''s default-adapter when none is), and what it provides.'

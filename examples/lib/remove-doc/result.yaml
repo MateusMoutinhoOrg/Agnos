@@ -1,14 +1,18 @@
 cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-doc creating docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nremove-doc removing docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
+    - file: docs/Adapters/doc.md
+      sha: f3d8ba9658d228684778cdc7bbb5ea0da35d83de8786290619cfc74cd3444909
+    - file: docs/Adapters/props.yaml
+      sha: 358d3f1dfa734fbad170a428773afc67c618522e8e295438475bdaec7d76ffb9
     - file: docs/Commands/doc.md
       sha: e56fd3987f43615bf06da7eb48501c7fe05e1219ac030625e89f8b227ee58c2f
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
     - file: docs/DepList/doc.md
-      sha: 14e1c29f8dfd1518eea44a814f07011858e7c830b90ab243b8ead9321fd2a99f
+      sha: e8b1315f42d1eaaea8d5d84d4218e96fade49d7691fa51fa7861094ca39e4600
     - file: docs/DepList/props.yaml
-      sha: 37575cc084932c5e7fb65aa4737f88b564fb2e674a14b6579a4b7fdfcfc5a138
+      sha: 2cc46fc3b38a91764ba6ec7d5e8bb661ee7dac155f5782369459e4cd1dd29468
     - file: docs/EntriesYaml/doc.md
       sha: 83c089328395dc2ce9a93a1d987191af2e584bb343960df64e2d8f6a6e0448a8
     - file: docs/EntriesYaml/props.yaml
@@ -34,7 +38,7 @@ tree:
     - file: docs/Requirements/props.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: 38c1106acae854996d775b9cd15d2ae2bd2b8b3a5d1b0b4a9f94ae725eaec787
+      sha: 4306f0729e4e32422b701b27437b415972850f4254b82718c3a28010da3867c3
     - file: docs/Rules/props.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md
@@ -42,6 +46,6 @@ tree:
     - file: docs/Structure/props.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 5bdb161a47ba03f783c5c96967f6611335330817f7a1d671cc085d260163f1a4
+      sha: ccbc7c8d6eaf65756e805291356422371b66b9958ce7a832aa6ad4efe7f197ae
     - file: docs/Workflow/props.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b

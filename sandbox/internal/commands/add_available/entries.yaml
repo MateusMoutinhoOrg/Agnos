@@ -1,0 +1,31 @@
+args:
+    - description: the name of the new available (it becomes one directory under adapters/availables/)
+      examples:
+        - add-available lambda
+      name: available
+      required: true
+      type: string
+category: Deps System
+examples:
+    - add-available lambda
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-available --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - add-available lambda -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declares one further available
+identifiers:
+    - add-available
+long-description: Creates adapters/availables/<name>/available.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --available.

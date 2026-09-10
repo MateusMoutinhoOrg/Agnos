@@ -1,15 +1,39 @@
 package list_deps
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// ListDepsInternal returns the name of every dep of the embedded catalog, one
-// entry per assets/deplist/ sub-directory, in listing order.
-func ListDepsInternal(deps *deps.Deps, io *smartio.SmartIO, path string) ([]string, error) {
+// ListDepsInternal returns one row per dep of the embedded catalog, in listing
+// order, saying which the project has installed and which adapters fill each
+// one — the two halves the catalog was split into, answered together.
+func ListDepsInternal(deps *deps.Deps, io *smartio.SmartIO, path string) ([]api.DepInfo, error) {
 	deps.Std.Log("list-deps started with path %s \n", path)
 
-	return utils.CatalogDeps(deps)
+	catalog, err := utils.CatalogDeps(deps)
+	if err != nil {
+		return nil, err
+	}
+
+	deplist := []api.DepInfo{}
+	for _, name := range catalog {
+		conf, err := utils.LoadCatalogDepConf(deps, name)
+		if err != nil {
+			return nil, err
+		}
+
+		deplist = append(deplist, api.DepInfo{
+			Name:           name,
+			Field:          conf.Field,
+			Help:           conf.Help,
+			DefaultAdapter: conf.DefaultAdapter,
+			Installed:      io.IsDir(utils.ContractsDir + "/" + name),
+			Adapters:       utils.AdaptersFillingDep(deps, io, name),
+		})
+	}
+
+	return deplist, nil
 }

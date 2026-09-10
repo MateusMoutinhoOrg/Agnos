@@ -7,7 +7,7 @@ agnos start --path TestDir --project-name Test --module Test -q
 agnos deps-init --path TestDir -q
 agnos add-dep iodeps --path TestDir -q
 
-agnos remove-dep iodeps --path TestDir
+agnos remove-dep iodeps --with-adapters --path TestDir
 
 # What result.yaml records: the paths this example asserts, copied out of
 # TestDir. The lib side copies the same set.

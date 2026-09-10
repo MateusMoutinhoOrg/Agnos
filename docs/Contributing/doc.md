@@ -63,7 +63,9 @@ The build trigger is never the content tree: `assets/frontend/` is the project's
 
 ## Add a contract + adapter lib
 
-The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency). Per-call objects use a constructor field (`New func(...) Thing`) like `argvdeps`/`requestdeps`. Doc-comment every exported declaration and every field you want described in [PublicApi](../PublicApi/doc.md). To make it installable elsewhere, mirror it into `assets/deplist/` below.
+The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency), the three units they belong to in [Adapters](../Adapters/doc.md). Per-call objects use a constructor field (`New func(...) Thing`) like `argvdeps`/`requestdeps`. Doc-comment every exported declaration and every field you want described in [PublicApi](../PublicApi/doc.md). To make it installable elsewhere, mirror it into `assets/deplist/` below.
+
+A second implementation of a contract that already exists is an adapter alone: only step 2 below, plus `add-adapter` and `set-adapter` to bind it.
 
 ## Add an installable dep
 

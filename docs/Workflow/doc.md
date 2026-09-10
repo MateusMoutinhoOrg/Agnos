@@ -103,19 +103,23 @@ Everything the sandbox is not allowed to do itself — filesystem, clock, networ
 arrives through `deps.Deps`. Install a ready-made one:
 
 ```bash
-agnos dep-list                 # every installable contract
-agnos dep-install <dep>        # sandbox/deps/<dep>/ + adapters/libs/<lib>/ + the go.mod require
-agnos dep-remove <dep>
+agnos list-deps                 # every installable contract
+agnos add-dep <dep>             # sandbox/deps/<dep>/ + its default adapter + the go.mod require
+agnos add-dep <dep> --adapter <adapter>
+agnos remove-dep <dep> [--with-adapters]
 ```
 
-[DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves and
-`build` picks them up from the directory listing:
+[DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves:
 
 1. `sandbox/deps/<x>/<x>.go` — `type Sandbox struct { ... }` of function fields, no import at all.
 2. `adapters/libs/<x>/<x>.go` — `func Bind(deps *deps.Deps) { deps.<X> = <x>.Sandbox{...} }`, any
-   import allowed.
+   import allowed, beside an `adapter.yaml` saying `dep: <x>`.
 
-Reach it as `deps.<X>` from anywhere inside `sandbox/`.
+Then bind it: add `<x>` to `adapters/availables/standard/available.yaml`, or let
+`agnos add-dep` do both for a dep of the catalogue. Reach it as `deps.<X>` from
+anywhere inside `sandbox/`.
+
+One contract may have several adapters — see [Adapters](../Adapters/doc.md).
 
 ## Add a doc
 
@@ -155,7 +159,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | `sandbox/internal/commands/<name>/handler.go` | a command does something |
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/binds/<x>.go` | a new api surface |
-| `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` | a new dependency |
+| `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `AgnosConfig/docs/ReadmeHeader.md`
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into

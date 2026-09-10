@@ -1,0 +1,31 @@
+args:
+    - description: the adapter to remove from the project
+      examples:
+        - remove-adapter awslambda
+      name: adapter
+      required: true
+      type: string
+category: Deps System
+examples:
+    - remove-adapter awslambda
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-adapter --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - remove-adapter awslambda -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Uninstalls one adapter, leaving the contract it filled
+identifiers:
+    - remove-adapter
+long-description: Removes adapters/libs/<adapter>/ and the require its declaration pins. Refuses an adapter an available still binds — point that available at another adapter first — and refuses one the generator wrote as the shim of a remote dep.

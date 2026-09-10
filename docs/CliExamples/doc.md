@@ -14,7 +14,9 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 
 | Example | Description | Source |
 |---|---|---|
+| `add-adapter` |  | [example.sh](../../examples/cli/add-adapter/example.sh) |
 | `add-arg` | declare one positional argument on a command | [example.sh](../../examples/cli/add-arg/example.sh) |
+| `add-available` |  | [example.sh](../../examples/cli/add-available/example.sh) |
 | `add-cli-example` | create an example under examples/cli/ | [example.sh](../../examples/cli/add-cli-example/example.sh) |
 | `add-command` | declare a new command | [example.sh](../../examples/cli/add-command/example.sh) |
 | `add-dep` |  | [example.sh](../../examples/cli/add-dep/example.sh) |
@@ -32,8 +34,11 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `deps-purge` | remove the dependency layer and every installed dep | [example.sh](../../examples/cli/deps-purge/example.sh) |
 | `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
 | `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
+| `list-adapters` |  | [example.sh](../../examples/cli/list-adapters/example.sh) |
 | `list-deps` |  | [example.sh](../../examples/cli/list-deps/example.sh) |
+| `remove-adapter` |  | [example.sh](../../examples/cli/remove-adapter/example.sh) |
 | `remove-arg` | delete one declared positional argument | [example.sh](../../examples/cli/remove-arg/example.sh) |
+| `remove-available` |  | [example.sh](../../examples/cli/remove-available/example.sh) |
 | `remove-cli-example` | delete an example of examples/cli/ | [example.sh](../../examples/cli/remove-cli-example/example.sh) |
 | `remove-command` | delete a command and unwire its dispatch | [example.sh](../../examples/cli/remove-command/example.sh) |
 | `remove-dep` |  | [example.sh](../../examples/cli/remove-dep/example.sh) |
@@ -42,6 +47,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `remove-lib-example` | delete an example of examples/lib/ | [example.sh](../../examples/cli/remove-lib-example/example.sh) |
 | `remove-page` |  | [example.sh](../../examples/cli/remove-page/example.sh) |
 | `server-init` |  | [example.sh](../../examples/cli/server-init/example.sh) |
+| `set-adapter` |  | [example.sh](../../examples/cli/set-adapter/example.sh) |
 | `set-command` | rewrite the command-level keys of a command | [example.sh](../../examples/cli/set-command/example.sh) |
 | `start` | scaffold a new project | [example.sh](../../examples/cli/start/example.sh) |
 | `verify` | check a project against the schema, writing nothing | [example.sh](../../examples/cli/verify/example.sh) |

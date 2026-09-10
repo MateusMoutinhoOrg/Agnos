@@ -1,0 +1,5 @@
+dep: sortdeps
+help: Insertion sort over reflect, no stdlib sort
+module: ""
+name: reflectsort
+origin: catalog

@@ -69,6 +69,14 @@ Using Agnos as a Go module - deps injection, actions, public API
 | [PublicApi](docs/PublicApi/doc.md) | Every exported symbol of agnos, generated from the contract sources and their doc comments |
 | [LibExamples](docs/LibExamples/doc.md) | Index of every runnable example of agnos as a Go module |
 
+### Architecture
+
+How the project is put together - layers, boundaries, data flow
+
+| Doc | Description |
+| --- | --- |
+| [Adapters](docs/Adapters/doc.md) | Contract, adapter and available: three units, one field of Deps, and who fills it |
+
 ### Development
 
 Changing this repository - schema, build mechanics, recipes
@@ -90,7 +98,7 @@ Lookup tables - schemas, file formats, generated file listings
 | Doc | Description |
 | --- | --- |
 | [EntriesYaml](docs/EntriesYaml/doc.md) | Every key of a command's entries.yaml and what the generated code does with it |
-| [DepList](docs/DepList/doc.md) | Every dep `agnos dep-install` can add, the contract and adapter lib it brings, and what backs it |
+| [DepList](docs/DepList/doc.md) | Every dep `agnos add-dep` can add, the adapters that fill it, and what backs each one |
 | [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into this project and whether build overwrites it |
 | [LibExamples](docs/LibExamples/doc.md) | Index of every runnable example of agnos as a Go module |
 | [CliExamples](docs/CliExamples/doc.md) | Index of every runnable example of the agnos cli |

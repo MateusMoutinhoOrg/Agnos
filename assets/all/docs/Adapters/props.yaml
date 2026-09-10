@@ -1,0 +1,5 @@
+description: "Contract, adapter and available: three units, one field of Deps, and who fills it"
+name: "Adapters"
+order: 6
+themes:
+  - architecture

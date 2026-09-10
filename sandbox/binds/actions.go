@@ -3,10 +3,13 @@ package binds
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
 	addArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_arg"
+	addAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_available"
 	addBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_body_field"
 	addCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_cli_example"
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_command"
+	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	addDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_doc"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
 	addHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_header"
@@ -19,18 +22,20 @@ import (
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	cliPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_purge"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
-	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
-	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
-	removeDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_dep"
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
+	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
+	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
+	removeAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_adapter"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
+	removeAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_available"
 	removeBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_body_field"
 	removeCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_cli_example"
 	removeCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_command"
+	removeDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_dep"
 	removeDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_doc"
 	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_flag"
 	removeHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_header"
@@ -41,6 +46,7 @@ import (
 	removeSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_segment"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	serverPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_purge"
+	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
 	setBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
@@ -71,11 +77,29 @@ func ActionsBind(deps *deps.Deps, sandbox *api.Sandbox) {
 	sandbox.Actions.AddDep = func(props api.AddDepProps) error {
 		return addDepAction.AddDep(deps, props)
 	}
-	sandbox.Actions.RemoveDep = func(path string, dep string) error {
-		return removeDepAction.RemoveDep(deps, path, dep)
+	sandbox.Actions.RemoveDep = func(props api.RemoveDepProps) error {
+		return removeDepAction.RemoveDep(deps, props)
 	}
-	sandbox.Actions.ListDeps = func(path string) ([]string, error) {
+	sandbox.Actions.ListDeps = func(path string) ([]api.DepInfo, error) {
 		return listDepsAction.ListDeps(deps, path)
+	}
+	sandbox.Actions.AddAdapter = func(props api.AddAdapterProps) error {
+		return addAdapterAction.AddAdapter(deps, props)
+	}
+	sandbox.Actions.RemoveAdapter = func(path string, adapter string) error {
+		return removeAdapterAction.RemoveAdapter(deps, path, adapter)
+	}
+	sandbox.Actions.SetAdapter = func(props api.SetAdapterProps) error {
+		return setAdapterAction.SetAdapter(deps, props)
+	}
+	sandbox.Actions.ListAdapters = func(path string) ([]api.AdapterInfo, error) {
+		return listAdaptersAction.ListAdapters(deps, path)
+	}
+	sandbox.Actions.AddAvailable = func(path string, available string) error {
+		return addAvailableAction.AddAvailable(deps, path, available)
+	}
+	sandbox.Actions.RemoveAvailable = func(path string, available string) error {
+		return removeAvailableAction.RemoveAvailable(deps, path, available)
 	}
 	sandbox.Actions.CliInit = func(path string) error {
 		return cliInitAction.CliInit(deps, path)

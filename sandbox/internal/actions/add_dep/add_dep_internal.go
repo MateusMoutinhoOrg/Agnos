@@ -3,15 +3,19 @@ package add_dep
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// AddDepInternal installs one dep of the embedded catalog: the contract
-// under sandbox/deps/<dep>/ from assets/deplist/<dep>, and one adapter filling
-// it from assets/adapterlist/<adapter> — the dep's declared default-adapter
+// AddDepInternal installs one dep of the embedded catalog: the contract under
+// sandbox/deps/<dep>/ from assets/deplist/<dep>, and one adapter filling it
+// from assets/adapterlist/<adapter> — the dep's declared default-adapter
 // unless the caller names another. The two halves are separate catalogs, so
 // the same contract can later be filled by a second implementation.
+//
+// The adapter is enrolled in every available: nothing else fills that field
+// yet, and an available that leaves one empty is a nil func waiting to panic.
 func AddDepInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddDepProps) error {
 	deps.Std.Log("add-dep started with path %s dep %s \n", props.Path, props.Dep)
 
@@ -47,5 +51,9 @@ func AddDepInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddDepProps)
 		return err
 	}
 
-	return InstallAdapter(deps, io, adapter_conf, module_conf, vars)
+	if err := addAdapterAction.InstallAdapter(deps, io, adapter_conf, module_conf, vars); err != nil {
+		return err
+	}
+
+	return utils.EnrollAdapter(deps, io, adapter_conf.Name)
 }

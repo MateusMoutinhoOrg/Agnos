@@ -41,23 +41,31 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   those comments. **(verify)**
 - `adapters/` is the only place OS-bound and third-party code lives, and holds only
   `availables` and `libs`. **(verify)**
-- Every `adapters/libs/<lib>/` exports `Bind(deps *deps.Deps)`, and every `sandbox/deps/<x>`
-  contract has a lib filling its `deps.<X>` field. **(verify)**
+- Every `adapters/libs/<adapter>/` exports `Bind(deps *deps.Deps)` and carries the
+  `adapter.yaml` naming the dep it fills. **(verify)**
+- Every available fills every field of `Deps` **exactly once**: zero is a nil func that panics
+  on first use, two is a silent overwrite in which the last binder wins. Which adapter fills
+  which field is read from `adapter.yaml`, never from the body of a `Bind`. **(verify)**
+- `adapters/availables/<name>/available.yaml` is the only place the choice of adapter is
+  recorded; `set-adapter` is its only editor. An available with no `available.yaml` is
+  hand-written and no build touches it.
 - `cmd/main/` wires an adapter into the sandbox and holds no logic.
 {{- if .HasAssets }}
-- Every `assets/deplist/<dep>/<path>`, rendered with this module, equals `<path>` whenever that
-  file exists here — re-mirror whenever either side changes. **(verify)**
+- Every `assets/deplist/<dep>/<path>` and `assets/adapterlist/<adapter>/<path>`, rendered with
+  this module, equals `<path>` whenever that file exists here — re-mirror whenever either side
+  changes. **(verify)**
 {{- end }}
 
 ## Naming
 
 - A `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always
   use that spelling; an added contract never renames an existing one.
-- An adapter lib's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<lib>/<lib>.go`.
+- An adapter's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<adapter>/<adapter>.go`.
 - A command handler is always `CommandHandler(deps *deps.Deps, entries *Entries) int`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
-- A dep is named after the contract it installs, not after its lib (`argvdeps`, lib `verb`).
+- A dep is named after the contract it installs; an adapter after what backs it (`argvdeps`,
+  adapter `verb`). The two are separate names because one dep may have several adapters.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, one directory per concern.
 {{ if .HasCli }}
 ## Handlers

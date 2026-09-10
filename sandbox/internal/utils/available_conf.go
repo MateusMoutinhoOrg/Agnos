@@ -126,3 +126,83 @@ func writeAvailable(deps *deps.Deps, io *smartio.SmartIO, name string, conf *ava
 
 	return io.WriteFileOverwrite(AvailableConfPath(name), []byte(conf.Render()))
 }
+
+// SelectAdapter makes adapter the one this available binds for the dep it
+// fills, dropping whichever other adapter filled that same field. It is the
+// single place the "exactly one adapter per field per available" invariant is
+// maintained, so a contract with two implementations can never end up with
+// both bound.
+func SelectAdapter(deps *deps.Deps, io *smartio.SmartIO, available string, adapter string) error {
+
+	conf, err := LoadAvailableConf(deps, io, available)
+	if err != nil {
+		return err
+	}
+
+	target, err := LoadAdapterConf(deps, io, adapter)
+	if err != nil {
+		return err
+	}
+
+	bound := append([]string{}, conf.Adapters...)
+	changed := conf.Add(adapter)
+
+	for _, other := range bound {
+		if other == adapter {
+			continue
+		}
+		other_conf, err := LoadAdapterConf(deps, io, other)
+		if err != nil || other_conf.Dep != target.Dep {
+			continue
+		}
+		if conf.Remove(other) {
+			changed = true
+		}
+	}
+
+	if !changed {
+		return nil
+	}
+
+	return io.WriteFileOverwrite(AvailableConfPath(available), []byte(conf.Render()))
+}
+
+// AvailablesBinding returns the name of every available that binds adapter, in
+// listing order. It is what `remove-adapter` refuses on and what
+// `list-adapters` shows.
+func AvailablesBinding(deps *deps.Deps, io *smartio.SmartIO, adapter string) []string {
+	var binding []string
+
+	for _, name := range DeclaredAvailables(deps, io) {
+		conf, err := LoadAvailableConf(deps, io, name)
+		if err != nil {
+			continue
+		}
+		if conf.Has(adapter) {
+			binding = append(binding, name)
+		}
+	}
+
+	return binding
+}
+
+// ValidateAvailableName rejects a name that could not be a directory under
+// adapters/availables/ and a Go package clause at the same time — the same
+// check ValidateCommandName makes, for the same reason: the name is
+// propagated straight into `package <name>` of the generated new.go.
+func ValidateAvailableName(deps *deps.Deps, available string) error {
+	if available == "" {
+		return deps.Std.Errorf("an available needs a name")
+	}
+	if available[0] < 'a' || available[0] > 'z' {
+		return deps.Std.Errorf("invalid available name %q: an available name must start with a lowercase letter", available)
+	}
+	for _, letter := range available {
+		if (letter >= 'a' && letter <= 'z') || (letter >= '0' && letter <= '9') {
+			continue
+		}
+		return deps.Std.Errorf("invalid available name %q: only lowercase letters and digits are allowed (it becomes the directory %s and a Go package name)",
+			available, AvailableDir(available))
+	}
+	return nil
+}

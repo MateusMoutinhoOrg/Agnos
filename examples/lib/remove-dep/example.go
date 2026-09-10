@@ -33,7 +33,11 @@ func main() {
 		panic(err)
 	}
 
-	if err := lib.Actions.RemoveDep("TestDir", "iodeps"); err != nil {
+	if err := lib.Actions.RemoveDep(api.RemoveDepProps{
+		Path:         "TestDir",
+		Dep:          "iodeps",
+		WithAdapters: true,
+	}); err != nil {
 		panic(err)
 	}
 

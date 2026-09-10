@@ -8,6 +8,256 @@ bind in order after them. A `repeatable` field is given once per value. Every se
 rendered from that command's `entries.yaml` ([EntriesYaml](../EntriesYaml/doc.md)) on each
 build.
 
+## Deps System
+
+### `add-adapter`
+
+Installs one further adapter for a contract the project already has
+
+```bash
+agnos add-adapter [--available <available>] [--path <path>] [--quiet] <adapter>
+```
+
+Renders assets/adapterlist/<adapter> into the project and writes its declaration to adapters/libs/<adapter>/adapter.yaml. The contract it fills has to be installed already. Installing changes no selection: an available binds one adapter per field, so --available names the one that switches to it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--available` | string |  | the available that should switch to this adapter (installs only when absent) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `adapter` | string, required |  | the adapter to install from assets/adapterlist |
+
+```bash
+agnos add-adapter nethttp
+agnos add-adapter awslambda --available lambda
+```
+
+### `add-available`
+
+Declares one further available
+
+```bash
+agnos add-available [--path <path>] [--quiet] <available>
+```
+
+Creates adapters/availables/<name>/available.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --available.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `available` | string, required |  | the name of the new available (it becomes one directory under adapters/availables/) |
+
+```bash
+agnos add-available lambda
+```
+
+### `add-dep`
+
+Installs one dep of the embedded catalog into the project
+
+```bash
+agnos add-dep [--adapter <adapter>] [--path <path>] [--quiet] <dep>
+```
+
+Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dep` | string, required |  | the dep to install from assets/deplist |
+
+```bash
+agnos add-dep embeddeps
+agnos add-dep embeddeps --path ./my-project
+```
+
+### `deps-init`
+
+Initializes the dependency-injection subsystem for the project
+
+```bash
+agnos deps-init [--path <path>] [--quiet]
+```
+
+Creates the sandbox/deps and adapters directories and calls build. Run this once before using add-dep.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos deps-init
+agnos deps-init --path ./my-project
+```
+
+### `deps-purge`
+
+Removes the dependency-injection subsystem from the project
+
+```bash
+agnos deps-purge [--path <path>] [--quiet]
+```
+
+Removes the sandbox/deps and adapters directories and calls build.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos deps-purge
+agnos deps-purge --path ./my-project
+```
+
+### `list-adapters`
+
+Lists the adapters of the catalog and of the project
+
+```bash
+agnos list-adapters [--path <path>] [--quiet]
+```
+
+One row per adapter: the name, the dep it fills, whether it is installed, the availables binding it, and what backs it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos list-adapters
+```
+
+### `list-deps`
+
+Lists the deps the embedded catalog can install
+
+```bash
+agnos list-deps [--path <path>] [--quiet]
+```
+
+One row per dep of the embedded catalog: the name, whether the project has the contract installed, the adapters filling it (or the catalog's default-adapter when none is), and what it provides.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos list-deps
+```
+
+### `remove-adapter`
+
+Uninstalls one adapter, leaving the contract it filled
+
+```bash
+agnos remove-adapter [--path <path>] [--quiet] <adapter>
+```
+
+Removes adapters/libs/<adapter>/ and the require its declaration pins. Refuses an adapter an available still binds — point that available at another adapter first — and refuses one the generator wrote as the shim of a remote dep.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `adapter` | string, required |  | the adapter to remove from the project |
+
+```bash
+agnos remove-adapter awslambda
+```
+
+### `remove-available`
+
+Deletes one available
+
+```bash
+agnos remove-available [--path <path>] [--quiet] <available>
+```
+
+Removes adapters/availables/<name>/ whole. The standard available is refused: cmd/main/main.go imports it.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `available` | string, required |  | the available to remove |
+
+```bash
+agnos remove-available lambda
+```
+
+### `remove-dep`
+
+Uninstalls one dep from the project
+
+```bash
+agnos remove-dep [--with-adapters] [--path <path>] [--quiet] <dep>
+```
+
+Removes every adapter whose declaration names the dep, its require and its enrollment in every available, then the contract itself, then calls build.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--with-adapters` | boolean |  | also remove every adapter that fills the dep (without it, a dep with adapters installed is refused) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dep` | string, required |  | the dep to remove from the project |
+
+```bash
+agnos remove-dep embeddeps
+agnos remove-dep embeddeps --path ./my-project
+```
+
+### `set-adapter`
+
+Changes which adapter an available binds for one dep
+
+```bash
+agnos set-adapter [--available <available>] [--path <path>] [--quiet] <dep> <adapter>
+```
+
+Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--available` | string |  | the available to change (defaults to standard) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `dep` | string, required |  | the dep whose field is being filled |
+| `adapter` | string, required |  | the installed adapter that should fill it |
+
+```bash
+agnos set-adapter serverdeps awslambda
+agnos set-adapter serverdeps awslambda --available lambda
+```
+
 ## Cli System
 
 ### `add-arg`
@@ -785,116 +1035,6 @@ Runs one example by name, both sides, and writes what it produced over its resul
 ```bash
 agnos update-test start
 agnos update-test add-command --path ./my-project
-```
-
-## Deps System
-
-### `add-dep`
-
-Installs one dep of the embedded catalog into the project
-
-```bash
-agnos add-dep [--adapter <adapter>] [--path <path>] [--quiet] <dep>
-```
-
-Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `dep` | string, required |  | the dep to install from assets/deplist |
-
-```bash
-agnos add-dep embeddeps
-agnos add-dep embeddeps --path ./my-project
-```
-
-### `deps-init`
-
-Initializes the dependency-injection subsystem for the project
-
-```bash
-agnos deps-init [--path <path>] [--quiet]
-```
-
-Creates the sandbox/deps and adapters directories and calls build. Run this once before using add-dep.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-```bash
-agnos deps-init
-agnos deps-init --path ./my-project
-```
-
-### `deps-purge`
-
-Removes the dependency-injection subsystem from the project
-
-```bash
-agnos deps-purge [--path <path>] [--quiet]
-```
-
-Removes the sandbox/deps and adapters directories and calls build.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-```bash
-agnos deps-purge
-agnos deps-purge --path ./my-project
-```
-
-### `list-deps`
-
-Lists the deps the embedded catalog can install
-
-```bash
-agnos list-deps [--path <path>] [--quiet]
-```
-
-Lists the name of every dep under assets/deplist that add-dep can render into a project.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-```bash
-agnos list-deps
-```
-
-### `remove-dep`
-
-Uninstalls one dep from the project
-
-```bash
-agnos remove-dep [--path <path>] [--quiet] <dep>
-```
-
-Removes every adapter whose declaration names the dep, its require and its enrollment in every available, then the contract itself, then calls build.
-
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-
-| Argument | Type | Default | Description |
-| --- | --- | --- | --- |
-| `dep` | string, required |  | the dep to remove from the project |
-
-```bash
-agnos remove-dep embeddeps
-agnos remove-dep embeddeps --path ./my-project
 ```
 
 ## Documentation

@@ -59,6 +59,58 @@ type AddDepProps struct {
 	Adapter string
 }
 
+// RemoveDepProps describes one dep to uninstall. A dep with adapters
+// installed is refused, because which of them was meant is not a question the
+// tree can answer; WithAdapters is the caller saying "all of them".
+type RemoveDepProps struct {
+	Path         string
+	Dep          string
+	WithAdapters bool
+}
+
+// AddAdapterProps describes one further implementation to install for a
+// contract the project already has. Available names the available that should
+// switch to it; "" installs the package and leaves every selection alone.
+type AddAdapterProps struct {
+	Path      string
+	Adapter   string
+	Available string
+}
+
+// SetAdapterProps describes one selection to change: which adapter fills a
+// dep's field in one available. Available is the standard one when empty.
+type SetAdapterProps struct {
+	Path      string
+	Dep       string
+	Adapter   string
+	Available string
+}
+
+// DepInfo is one row of ListDeps: a dep of the embedded catalog, and what the
+// project holds of it.
+type DepInfo struct {
+	Name           string
+	Field          string
+	Help           string
+	DefaultAdapter string
+	Installed      bool
+	Adapters       []string
+}
+
+// AdapterInfo is one row of ListAdapters: an adapter of the embedded catalog
+// or one installed in the project, and which availables bind it. Origin is
+// "catalog" for one the catalog installs and "generated" for the shim of a dep
+// copied from a remote repo.
+type AdapterInfo struct {
+	Name       string
+	Dep        string
+	Help       string
+	Module     string
+	Origin     string
+	Installed  bool
+	Availables []string
+}
+
 // FieldProps describes one flag or positional arg to add to a command's
 // entries.yaml. Default, Min and Max are the raw literals typed on the
 // command line ("" means unset) so the action can tell "not given" from a
@@ -239,12 +291,40 @@ type Actions struct {
 	// adapter's go.mod require.
 	AddDep func(props AddDepProps) error
 
-	// RemoveDep uninstalls one installed dep: every adapter whose declaration
-	// names it, their requires, and then the contract itself.
-	RemoveDep func(path string, dep string) error
+	// RemoveDep uninstalls one installed dep: its adapters, their requires,
+	// and then the contract itself. It refuses a dep that still has an
+	// adapter installed unless props.WithAdapters says to take those too.
+	RemoveDep func(props RemoveDepProps) error
 
-	// ListDeps returns the name of every dep the embedded catalog can install.
-	ListDeps func(path string) ([]string, error)
+	// ListDeps returns one row per dep of the embedded catalog, saying which
+	// the project has installed and which adapters fill each one.
+	ListDeps func(path string) ([]DepInfo, error)
+
+	// AddAdapter installs one further implementation of a contract the
+	// project already has, and — when props.Available names one — switches
+	// that available to it.
+	AddAdapter func(props AddAdapterProps) error
+
+	// RemoveAdapter uninstalls one adapter, its require and its files. It
+	// refuses one that an available still binds, and one written by the
+	// generator as half of a remote dep.
+	RemoveAdapter func(path string, adapter string) error
+
+	// SetAdapter changes which adapter fills one dep's field in one
+	// available, the only place that choice is recorded.
+	SetAdapter func(props SetAdapterProps) error
+
+	// ListAdapters returns one row per adapter, of the embedded catalog and
+	// of the project, with the availables that bind each one.
+	ListAdapters func(path string) ([]AdapterInfo, error)
+
+	// AddAvailable creates one further available, seeded with the standard
+	// available's selection so it starts filling every field.
+	AddAvailable func(path string, available string) error
+
+	// RemoveAvailable deletes one available. The standard one is refused: it
+	// is what cmd/main/main.go imports.
+	RemoveAvailable func(path string, available string) error
 
 	// CliInit adds the CLI layer (cmd/main, the dispatcher and the help and
 	// version commands) to a project that has none.

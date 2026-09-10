@@ -183,18 +183,22 @@ arrives through `deps.Deps`. Install a ready-made one:
 
 ```bash
 {{.GeneratorName}} list-deps                 # every installable contract
-{{.GeneratorName}} add-dep <dep>        # sandbox/deps/<dep>/ + adapters/libs/<lib>/ + the go.mod require
-{{.GeneratorName}} remove-dep <dep>
+{{.GeneratorName}} add-dep <dep>             # sandbox/deps/<dep>/ + its default adapter + the go.mod require
+{{.GeneratorName}} add-dep <dep> --adapter <adapter>
+{{.GeneratorName}} remove-dep <dep> [--with-adapters]
 ```
 
-[DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves and
-`build` picks them up from the directory listing:
+[DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves:
 
 1. `sandbox/deps/<x>/<x>.go` — `type Sandbox struct { ... }` of function fields, no import at all.
 2. `adapters/libs/<x>/<x>.go` — `func Bind(deps *deps.Deps) { deps.<X> = <x>.Sandbox{...} }`, any
-   import allowed.
+   import allowed, beside an `adapter.yaml` saying `dep: <x>`.
 
-Reach it as `deps.<X>` from anywhere inside `sandbox/`.
+Then bind it: add `<x>` to `adapters/availables/standard/available.yaml`, or let
+`{{.GeneratorName}} add-dep` do both for a dep of the catalogue. Reach it as `deps.<X>` from
+anywhere inside `sandbox/`.
+
+One contract may have several adapters — see [Adapters](../Adapters/doc.md).
 {{- if not .HasDeps }}
 
 This project has no `sandbox/deps/` yet: `{{.GeneratorName}} deps-init` creates it (`deps-purge` removes it).
@@ -246,7 +250,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 {{- end }}
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/binds/<x>.go` | a new api surface |
-| `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` | a new dependency |
+| `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `{{.ConfigDir}}/docs/ReadmeHeader.md`
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into
