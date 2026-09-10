@@ -159,21 +159,29 @@ Com isso o prefixo `dep-` deixa de existir e a colisão de um `s` entre `deps-in
 
 ## 5. Dep remota: outro repo agnos
 
-### 5.1 Mecânica
+### 5.1 O que o repo remoto fornece
 
-`add-dep github.com/user/MathLib@v1.2.0 --as mathlib`:
+Todo repo agnos já é instalável por construção — não há nada a declarar nem a ativar:
 
-1. resolve o módulo pelo `rundeps` (`go mod download -json`) e acha o path no cache;
-2. lê `<cache>/sandbox/api/*.go`;
-3. **valida** contra a regra de convertibilidade da §5.3, e aborta com a lista de violações;
-4. copia cada arquivo para `sandbox/deps/mathlib/`, trocando só a cláusula
-   `package api` → `package mathlib`, e passa o resultado por `goimportsdeps.Format`;
-5. **gera** `adapters/libs/mathlib/mathlib.go` — o shim da §5.2 — e o `adapter.yaml` com
-   `origin: generated`;
-6. `AddRequire` do módulo no `go.mod`;
-7. inscreve o adapter no `available.yaml` e chama `build`.
+| Metade | É | Vira, no consumidor |
+|---|---|---|
+| contrato | `sandbox/api/`, sem um único import, por regra do repo | `sandbox/deps/<nome>/`, cópia com a cláusula `package` trocada |
+| adapter | `sandbox.New` sobre um `adapters/availables/<x>/` | nada — roda compilado, do módulo remoto |
 
-Duas propriedades do repo tornam isso quase gratuito:
+O `Bind` do lado do consumidor não reimplementa nada: constrói o sandbox remoto com os adapters
+do próprio repo remoto.
+
+```go
+func Bind(deps *deps.Deps) {
+    rdeps := remotestd.New()                 // github.com/user/MathLib/adapters/availables/standard
+    remote := remotelib.New(&rdeps)          // github.com/user/MathLib/sandbox
+    deps.Mathlib = convSandbox(*remote)
+}
+```
+
+Qual available do repo remoto usar é o flag `--remote-available` (default `standard`).
+
+Duas propriedades do repo tornam a cópia do contrato quase gratuita:
 
 - **`sandbox/api/` não importa nada.** É a regra do repo (api guarda só contratos), então a
   cópia é auto-contida — nenhum import a reescrever.
@@ -182,12 +190,22 @@ Duas propriedades do repo tornam isso quase gratuito:
   `type Sandbox struct`. A cópia cai no lugar sem renomear nada, e `deps.Mathlib` é do tipo
   `mathlib.Sandbox` pela mesma convenção de sempre (campo = dir title-cased).
 
-`set-dep mathlib --version v1.3.0` re-copia e regenera. `remove-dep mathlib` apaga
-`sandbox/deps/mathlib/`, `adapters/libs/mathlib/`, o require e a linha do `available.yaml`.
+### 5.2 Por que a ponte é do lado do consumidor
 
-### 5.2 O adapter gerado: **cast direto não funciona**
+A única peça que o repo remoto **não** pode fornecer é a conversão `remoteapi.Sandbox` →
+`mathlib.Sandbox`, e a razão é mecânica:
 
-Verificado com o compilador, não presumido:
+> `mathlib.Sandbox` mora em `github.com/CONSUMIDOR/proj/sandbox/deps/mathlib` — um import path
+> que o repo remoto não conhece na hora em que publica.
+
+Qualquer Go que **nomeie** esse tipo tem que compilar dentro do módulo do consumidor. O remoto
+só poderia mandar um template, e aí a pergunta deixaria de ser "onde mora o adapter" e viraria
+"quem escreve a conversão: o gerador, ou o autor remoto à mão" — que a regra
+*generate over hand-write* já responde, ainda mais sendo a conversão inteiramente derivável da
+cópia que o passo anterior acabou de escrever.
+
+E a conversão é mesmo necessária: **cast direto de topo não compila.** Verificado com o
+compilador, não presumido:
 
 ```go
 type Props struct{ Addr string }
@@ -195,17 +213,48 @@ type Inner struct{ Do func(p Props) int }
 type Sandbox struct { Cli func(args []string) int; Inner Inner }
 ```
 
-- `b.Props(aProps)` → **compila**. Só builtins, tipos idênticos.
+- `b.Props(aProps)` → **compila**. Underlying type idêntico.
 - `b.Sandbox(aSandbox)` → **falha**: `cannot convert x (variable of struct type a.Sandbox) to
   type b.Sandbox`.
 
-A regra do Go é identidade de tipo subjacente, e ela **não é recursiva através de tipos
-nomeados**: `a.Inner` e `b.Inner` são tipos nomeados distintos, então os structs que os contêm
-não são idênticos. Como `api.Sandbox` tem campos `Actions Actions` e `Cli Cli`, o cast de topo
-sempre falha para qualquer api real.
+A identidade de tipo do Go **não é recursiva através de tipos nomeados**: `a.Inner` e `b.Inner`
+são tipos nomeados distintos, então os structs que os contêm não são idênticos. Como
+`api.Sandbox` tem campos `Actions Actions` e `Cli Cli`, o cast de topo sempre falha para
+qualquer api real.
 
-A solução é um **shim gerado, um conversor por tipo nomeado, recursivo** — que é exatamente o
-tipo de código que o agnos existe para escrever. Forma verificada como compilável:
+### 5.3 Regra de convertibilidade
+
+Um critério só — identidade de underlying type entre os dois pacotes — e as formas derivam
+dele. Não é uma lista de keywords proibidas:
+
+| Forma | Tratamento |
+|---|---|
+| underlying idêntico: builtin, slice/map/ponteiro de builtin, `any`, `error`, `func` só de builtins, interface nomeada de métodos builtin-only | atribuição ou conversão direta |
+| struct com campo de **tipo nomeado do próprio pacote** | conversor gerado, campo a campo — **o único caso que gera código** |
+| campo `func` cujos params ou results caem no caso acima | closure, params na direção inversa |
+| slice/map de tipo nomeado conversível | loop gerado |
+| tipo de um pacote de fora (`time.Time`, `io.Reader`) | impossível, e já barrado por "api não importa nada" |
+| generics, `chan`, campo embedded de tipo nomeado | rejeitado — fora do escopo do gerador, não do Go |
+
+Verificado no compilador: `b.Reader(r)` com `type Reader interface{ Read(p []byte) (int, error) }`
+compila, e um struct de campos `any`, `error` e `func(string) error` também. A primeira linha é
+bem maior do que parece, e é por isso que o gerador emite conversor só para a segunda.
+
+Isto **não é uma regra nova** — é a disciplina que os contratos de `sandbox/deps/` já enunciam
+("Only builtin types cross this boundary — no `time.Time`, no `io.Reader`, no type of the
+concrete library", em `serverdeps.go`), estendida a `sandbox/api/` e tornada verificável.
+
+**Não há flag `installable`.** A checagem é incondicional: um `check_api_shape.go` novo em
+`verify` aplica a tabela acima em todo repo, sempre — na prática, a extensão natural do check de
+layers que já garante que `sandbox/api/` não importa nada. O que varia entre repos não é um
+booleano declarado e sim o shape da api, e shape se verifica, não se declara; um opt-in com
+default `false` deixaria a violação reaparecer no consumidor na hora de instalar, que é
+exatamente o que a checagem existe para evitar. A api deste repo já passa hoje: zero imports,
+zero `chan`, zero generics, zero embedded em `sandbox/api/`.
+
+### 5.4 O shim gerado
+
+Forma verificada como compilável:
 
 ```go
 func convSandbox(v remoteapi.Sandbox) mathlib.Sandbox {
@@ -227,41 +276,28 @@ Note a contravariância: um campo `func` precisa do conversor no sentido remoto�
 resultados e local→remoto para os parâmetros. O gerador emite o par `conv<T>`/`rev<T>` só para
 os tipos que cada direção alcança.
 
-O `Bind` fecha o ciclo construindo o sandbox remoto com os adapters **dele**:
-
-```go
-func Bind(deps *deps.Deps) {
-    rdeps := remotestd.New()                 // github.com/user/MathLib/adapters/availables/standard
-    remote := remotelib.New(&rdeps)          // github.com/user/MathLib/sandbox
-    deps.Mathlib = convSandbox(*remote)
-}
-```
-
-Qual available do repo remoto usar é o flag `--remote-available` (default `standard`).
-
 O gerador tem tudo que precisa em `goimportsdeps`: `File.Types` já traz `Kind`
 (`struct`/`interface`/`alias`/`other`), `Fields` com `Name`/`Type`, e `Underlying`. Nenhum dep
 novo.
 
-### 5.3 Regra de convertibilidade
+### 5.5 Mecânica
 
-| Forma | Tratamento |
-|---|---|
-| builtin, e slice/map/ponteiro de builtin | atribuição direta |
-| struct nomeada do mesmo pacote | conversor gerado, campo a campo |
-| campo `func` com params e results conversíveis | closure, params na direção inversa |
-| slice/map de tipo nomeado conversível | loop gerado |
-| `interface`, `chan`, generics, campo embedded | **rejeitado** |
-| tipo importado de fora (`time.Time`, `io.Reader`) | **rejeitado** (impossível: api não importa nada) |
+`add-dep github.com/user/MathLib@v1.2.0 --as mathlib`:
 
-Isto **não é uma regra nova** — é a disciplina que os contratos de `sandbox/deps/` já enunciam
-("Only builtin types cross this boundary — no `time.Time`, no `io.Reader`, no type of the
-concrete library", em `serverdeps.go`). O plano só a estende a `sandbox/api/` de um repo que
-queira ser instalável, e a torna verificável.
+1. resolve o módulo pelo `rundeps` (`go mod download -json`) e acha o path no cache;
+2. lê `<cache>/sandbox/api/*.go`;
+3. **valida** contra a §5.3, e aborta com a lista de violações — que o autor remoto já viu no
+   `verify` dele, porque a checagem não é opcional de nenhum lado;
+4. copia cada arquivo para `sandbox/deps/mathlib/`, trocando só a cláusula
+   `package api` → `package mathlib`, e passa o resultado por `goimportsdeps.Format`;
+5. **gera** `adapters/libs/mathlib/mathlib.go` — o shim da §5.4 — e o `adapter.yaml` com
+   `origin: generated`;
+6. `AddRequire` do módulo no `go.mod`;
+7. inscreve o adapter no `available.yaml` e chama `build`.
 
-Um repo se declara instalável com `installable: true` em `AgnosConfig/project.yaml`; um
-`check_installable_api.go` novo em `verify` aplica a tabela acima, para que o autor descubra a
-violação **antes** de publicar, e não o consumidor na hora de instalar.
+`set-dep mathlib --version v1.3.0` re-copia e regenera. `remove-dep mathlib` apaga
+`sandbox/deps/mathlib/`, `adapters/libs/mathlib/`, o require e a linha do `available.yaml`.
+
 
 ## 6. Fases
 
@@ -321,10 +357,11 @@ diff.
 - `add-dep <module>@<version> --as <nome>` (o argumento com `/` é module path; sem `/` é nome
   do catálogo — mesma desambiguação do `go get`);
 - copiador de `sandbox/api/` → `sandbox/deps/<nome>/`;
-- validador da §5.3 e gerador de shim da §5.2, em
+- validador da §5.3 e gerador de shim da §5.4, em
   `sandbox/internal/actions/add_dep/generate_shim.go`;
 - `set-dep <nome> --version`;
-- `installable: true` + `check_installable_api.go`;
+- `check_api_shape.go`: a tabela da §5.3 aplicada a `sandbox/api/` em todo `verify`, sem flag
+  nenhum — não depende de nada mais da Fase 5 e pode aterrissar antes, junto da Fase 1;
 - `check_remote_deps.go`: compara `sandbox/deps/<nome>/` com `<cache>/sandbox/api/` byte a byte
   quando o cache está disponível, espelhando a regra do `check_deplist`;
 - exemplo com um repo agnos mínimo fixado por versão.
@@ -336,7 +373,7 @@ diff.
 | `assets/all/docs/DepList/doc.md` | vira a tabela de deps; ganha a coluna de adapters |
 | `assets/all/docs/Adapters/doc.md` | novo (`agnos add-doc`), tema `development` |
 | `assets/all/docs/Workflow/doc.md` | "Add a dependency" reescrito com o par dep/adapter |
-| `assets/all/docs/Rules/doc.md` | regra do invariante "um adapter por campo por available"; regra da convertibilidade |
+| `assets/all/docs/Rules/doc.md` | regra do invariante "um adapter por campo por available"; regra do shape de `sandbox/api/` (§5.3), que vale para todo repo |
 | `assets/all/docs/GeneratedFiles/doc.md` | `new.go` gerado do yaml; `adapter.yaml` e `available.yaml` são `once` |
 | `assets/all/docs/Structure/doc.md` | via `AgnosConfig/structure.yaml` |
 | `docs/Contributing/doc.md` | espelhar o padrão, no mesmo commit |
@@ -353,6 +390,6 @@ troca só aparece num projeto scaffoldado.
 |---|---|
 | Fase 1 move 14 deps de uma vez; um erro de byte quebra `check_deplist` | fazer um dep por commit, `verify` entre cada um |
 | A cópia da api remota fica desatualizada em relação ao módulo | `check_remote_deps.go` compara com o module cache, que o `go.sum` já assina |
-| Repo remoto com api não conversível | rejeitado na instalação com lista de violações; `installable: true` pega antes de publicar |
+| Repo remoto com api não conversível | `check_api_shape.go` roda em todo `verify`, então o autor pega antes de publicar; a instalação ainda rejeita com a lista de violações |
 | Diamante de versões no `go.mod` | `go mod tidy` do próprio `build` resolve; conflito real vira erro do toolchain, não silêncio |
 | Ordem alfabética de `libs/` sumindo muda a ordem de bind em `new.go` | ordem passa a ser a do `available.yaml`; goldens de `start` e `deps-init` se movem uma vez, na Fase 2 |
