@@ -19,16 +19,16 @@ import (
 // per sub-contract directory of sandbox/deps/. An adapter fills the fields; the
 // sandbox only calls them, which is what keeps it free of OS packages.
 type Deps struct {
-	Argvdeps      argvdeps.Lib
-	Embeddeps     embeddeps.Lib
-	Goimportsdeps goimportsdeps.Lib
-	Hashdeps      hashdeps.Lib
-	Iodeps        iodeps.Lib
-	Rundeps       rundeps.Lib
-	Serializables serializables.Lib
-	Serverdeps    serverdeps.Lib
-	Sortdeps      sortdeps.Lib
-	Std           std.Lib
-	Stringsdeps   stringsdeps.Lib
-	Templatedeps  templatedeps.Lib
+	Argvdeps      argvdeps.Sandbox
+	Embeddeps     embeddeps.Sandbox
+	Goimportsdeps goimportsdeps.Sandbox
+	Hashdeps      hashdeps.Sandbox
+	Iodeps        iodeps.Sandbox
+	Rundeps       rundeps.Sandbox
+	Serializables serializables.Sandbox
+	Serverdeps    serverdeps.Sandbox
+	Sortdeps      sortdeps.Sandbox
+	Std           std.Sandbox
+	Stringsdeps   stringsdeps.Sandbox
+	Templatedeps  templatedeps.Sandbox
 }

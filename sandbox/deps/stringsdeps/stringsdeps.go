@@ -10,10 +10,10 @@ package stringsdeps
 // same semantics; the adapter is a straight delegation, so a caller can read
 // the standard library documentation for the behaviour of any of them.
 
-// Lib is the text library injected whole as the Deps.Stringsdeps field. The
+// Sandbox is the text library injected whole as the Deps.Stringsdeps field. The
 // first group of fields is string manipulation, the second is conversion
 // between strings and numbers.
-type Lib struct {
+type Sandbox struct {
 	// TrimSpace returns s with leading and trailing white space removed.
 	TrimSpace func(s string) string
 

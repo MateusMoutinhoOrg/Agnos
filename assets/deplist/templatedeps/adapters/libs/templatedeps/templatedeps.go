@@ -9,7 +9,7 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// render fills templatedeps.Lib.Render, parsing the source as a Go
+// render fills templatedeps.Sandbox.Render, parsing the source as a Go
 // text/template with the given native functions registered and executing it
 // over the given vars.
 func render(props templatedeps.RenderProps) (string, error) {
@@ -28,7 +28,7 @@ func render(props templatedeps.RenderProps) (string, error) {
 
 // Bind fills deps.Deps.Templatedeps with the standard library's text/template.
 func Bind(deps *deps.Deps) {
-	deps.Templatedeps = templatedeps.Lib{
+	deps.Templatedeps = templatedeps.Sandbox{
 		Render: func(props templatedeps.RenderProps) (string, error) {
 			return render(props)
 		},

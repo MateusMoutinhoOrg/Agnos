@@ -17,7 +17,7 @@
 | `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
 {{- if .HasDeps }}
-| `sandbox/deps/deps.go` | `build` | always. One `<Title> <dir>.Lib` per dir of `sandbox/deps/` |
+| `sandbox/deps/deps.go` | `build` | always. One `<Title> <dir>.Sandbox` per dir of `sandbox/deps/` |
 | `adapters/availables/standard/new.go` | `build` | always. One `<lib>.Bind(&deps)` per dir of `adapters/libs/` |
 {{- end }}
 | `sandbox/deps/<dep>/*.go`, `adapters/libs/<lib>/*.go` | `dep-install` | once |

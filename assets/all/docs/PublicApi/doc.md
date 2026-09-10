@@ -35,7 +35,7 @@ struct of function fields, filled by a binder.
 # Dependency contracts
 
 `deps.Deps` has one field per directory of `sandbox/deps/`, named by title-casing it. Each
-field is that package's `Lib` struct, filled by `adapters/libs/<name>.Bind(&deps)`.
+field is that package's `Sandbox` struct, filled by `adapters/libs/<name>.Bind(&deps)`.
 {{- range .DepsApi }}
 
 ## `deps.{{ .Title }}`

@@ -12,7 +12,7 @@ import (
 // is a straight delegation: the contract restates the standard library api so
 // the sandbox can call it without importing it.
 func Bind(deps *deps.Deps) {
-	deps.Sortdeps = sortdeps.Lib{
+	deps.Sortdeps = sortdeps.Sandbox{
 		Strings: func(list []string) {
 			sort.Strings(list)
 		},

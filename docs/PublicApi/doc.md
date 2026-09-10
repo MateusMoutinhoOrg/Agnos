@@ -282,15 +282,15 @@ Cli is the CLI surface of the sandbox. CliMain is the generated dispatch-and-par
 # Dependency contracts
 
 `deps.Deps` has one field per directory of `sandbox/deps/`, named by title-casing it. Each
-field is that package's `Lib` struct, filled by `adapters/libs/<name>.Bind(&deps)`.
+field is that package's `Sandbox` struct, filled by `adapters/libs/<name>.Bind(&deps)`.
 
 ## `deps.Argvdeps`
 
 `sandbox/deps/argvdeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the argv-parser constructor injected whole as the Deps.ArgvLib field — the same mechanic as requestdeps.Lib. A parser is bound to one argument vector, so it is created per call rather than injected once: what the sandbox holds is this one-field struct, and the adapter — which lives outside the sandbox — fills New over a concrete argv-parser library.
+Sandbox is the argv-parser constructor injected whole as the Deps.ArgvLib field — the same mechanic as requestdeps.Sandbox. A parser is bound to one argument vector, so it is created per call rather than injected once: what the sandbox holds is this one-field struct, and the adapter — which lives outside the sandbox — fills New over a concrete argv-parser library.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -328,9 +328,9 @@ Parser mirrors the concrete argv-parser library's api.Lib — an argument-vector
 
 `sandbox/deps/embeddeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the embedded-asset library injected whole as the Deps.EmbedDeps field. It is read-only by design: assets ship with the program, and nothing in the library ever writes one back. Every path is slash-separated and relative to the root of the asset tree the adapter serves — "report.tmpl", "templates/invoice.tmpl" — never an absolute path and never a path reaching outside that root, so the same call means the same asset whatever the adapter is backed by.
+Sandbox is the embedded-asset library injected whole as the Deps.EmbedDeps field. It is read-only by design: assets ship with the program, and nothing in the library ever writes one back. Every path is slash-separated and relative to the root of the asset tree the adapter serves — "report.tmpl", "templates/invoice.tmpl" — never an absolute path and never a path reaching outside that root, so the same call means the same asset whatever the adapter is backed by.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -343,9 +343,9 @@ Lib is the embedded-asset library injected whole as the Deps.EmbedDeps field. It
 
 `sandbox/deps/goimportsdeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the Go-source parser injected whole as the Deps.Goimportsdeps field. Every field errors when the given content is not parsable Go.
+Sandbox is the Go-source parser injected whole as the Deps.Goimportsdeps field. Every field errors when the given content is not parsable Go.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -442,9 +442,9 @@ Value is one name declared in a top-level `const` or `var` block.
 
 `sandbox/deps/hashdeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the hashing library injected whole as the Deps.Hashdeps field.
+Sandbox is the hashing library injected whole as the Deps.Hashdeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -454,9 +454,9 @@ Lib is the hashing library injected whole as the Deps.Hashdeps field.
 
 `sandbox/deps/iodeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the filesystem library injected whole as the Deps.IoLib field. Paths are whatever the host operating system accepts, resolved by the adapter — unlike embeddeps.Lib, which is always slash-separated and rooted at an asset tree. The listing functions report paths that already include the directory they were given, so a result can be passed straight back in. The predicates report false rather than an error: a path that cannot be stat'd is not a directory and is not a file, which is the answer the caller wanted either way.
+Sandbox is the filesystem library injected whole as the Deps.IoLib field. Paths are whatever the host operating system accepts, resolved by the adapter — unlike embeddeps.Sandbox, which is always slash-separated and rooted at an asset tree. The listing functions report paths that already include the directory they were given, so a result can be passed straight back in. The predicates report false rather than an error: a path that cannot be stat'd is not a directory and is not a file, which is the answer the caller wanted either way.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -481,9 +481,9 @@ Lib is the filesystem library injected whole as the Deps.IoLib field. Paths are 
 
 `sandbox/deps/rundeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the process runner injected whole as the Deps.Rundeps field. It is what the build action reaches for when it has to hand the rendered project to a real toolchain (`go mod tidy`, `go build ./...`) and report whether that toolchain accepted it.
+Sandbox is the process runner injected whole as the Deps.Rundeps field. It is what the build action reaches for when it has to hand the rendered project to a real toolchain (`go mod tidy`, `go build ./...`) and report whether that toolchain accepted it.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -516,7 +516,7 @@ Result is what one finished invocation produced.
 
 ### `SerializibleObject`
 
-SerializibleObject is one node of a parsed document — a scalar, an object or an array — and the whole tree is navigated and edited through its function fields. The same struct is what the Create* constructors of Lib return, so a document can be built in memory and serialized without ever being parsed.
+SerializibleObject is one node of a parsed document — a scalar, an object or an array — and the whole tree is navigated and edited through its function fields. The same struct is what the Create* constructors of Sandbox return, so a document can be built in memory and serialized without ever being parsed.
 
 | Field | Type |
 | --- | --- |
@@ -542,9 +542,9 @@ SerializibleObject is one node of a parsed document — a scalar, an object or a
 | `AddItemToArray` | `func(item any) error` |
 | `DeleteItemFromArray` | `func(index int) error` |
 
-### `Lib`
+### `Sandbox`
 
-Lib is the JSON/YAML codec injected whole as the Deps.Serializables field: constructors for every node kind, the two parsers and the two serializers.
+Sandbox is the JSON/YAML codec injected whole as the Deps.Serializables field: constructors for every node kind, the two parsers and the two serializers.
 
 | Field | Type |
 | --- | --- |
@@ -564,9 +564,9 @@ Lib is the JSON/YAML codec injected whole as the Deps.Serializables field: const
 
 `sandbox/deps/serverdeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the http-server library injected whole as the Deps.Serverdeps field. A server is bound to one address and one handler, so it is created per call rather than injected once: what the sandbox holds is this one-field struct.
+Sandbox is the http-server library injected whole as the Deps.Serverdeps field. A server is bound to one address and one handler, so it is created per call rather than injected once: what the sandbox holds is this one-field struct.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -620,9 +620,9 @@ Response is the one http response being written, through function fields only. H
 
 `sandbox/deps/sortdeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the sorting library injected whole as the Deps.Sortdeps field.
+Sandbox is the sorting library injected whole as the Deps.Sortdeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -634,9 +634,9 @@ Lib is the sorting library injected whole as the Deps.Sortdeps field.
 
 `sandbox/deps/std`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the runtime library injected whole as the Deps.Std field.
+Sandbox is the runtime library injected whole as the Deps.Std field.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -652,9 +652,9 @@ Lib is the runtime library injected whole as the Deps.Std field.
 
 `sandbox/deps/stringsdeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the text library injected whole as the Deps.Stringsdeps field. The first group of fields is string manipulation, the second is conversion between strings and numbers.
+Sandbox is the text library injected whole as the Deps.Stringsdeps field. The first group of fields is string manipulation, the second is conversion between strings and numbers.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -690,9 +690,9 @@ Lib is the text library injected whole as the Deps.Stringsdeps field. The first 
 
 `sandbox/deps/templatedeps`
 
-### `Lib`
+### `Sandbox`
 
-Lib is the template engine injected whole as the Deps.Templatedeps field.
+Sandbox is the template engine injected whole as the Deps.Templatedeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |

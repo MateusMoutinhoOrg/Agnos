@@ -11,8 +11,8 @@ package templatedeps
 // not immediately execute, so parse and execute are one call and no parsed
 // template ever crosses the boundary.
 
-// Lib is the template engine injected whole as the Deps.Templatedeps field.
-type Lib struct {
+// Sandbox is the template engine injected whole as the Deps.Templatedeps field.
+type Sandbox struct {
 	// Render parses one template source and executes it over the given vars,
 	// returning the result. The error reports a source that does not parse or
 	// an execution that failed — a native function returning an error

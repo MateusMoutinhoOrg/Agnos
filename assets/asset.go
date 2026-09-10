@@ -18,7 +18,7 @@ package assets
 // to the assets themselves. It holds no behavior and no state beyond the
 // embedded filesystem, and only code outside the sandbox may import it — the
 // embed lib does, in adapters/libs/embeddeps/embeddeps.go, and wraps it into the
-// embeddeps.Lib contract the sandbox reads through.
+// embeddeps.Sandbox contract the sandbox reads through.
 
 import "embed"
 

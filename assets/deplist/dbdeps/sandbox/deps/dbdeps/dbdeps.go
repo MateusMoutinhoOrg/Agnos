@@ -9,7 +9,7 @@ package dbdeps
 // Copying is cheap precisely because the concrete library exposes structs
 // of function fields instead of interfaces: an adapter assigns the real
 // library's fields straight into the copy. Where a field hands back
-// another api struct — Lib.NewDatabase, DatabaseHandle.GetSchema,
+// another api struct — Sandbox.NewDatabase, DatabaseHandle.GetSchema,
 // SchemaInstance.NewItem — the adapter wraps it in a closure that copies
 // the returned struct too, so nothing of the concrete library ever reaches
 // the sandbox.
@@ -138,13 +138,13 @@ type DatabaseHandle struct {
 	GetSchema func(name string) (SchemaInstance, bool)
 }
 
-// Lib mirrors the concrete schema-database library's api.Lib — a schema
+// Sandbox mirrors the concrete schema-database library's api.Lib — a schema
 // database over an injected single-key storage backend. It is injected whole
-// as the Deps.DatabaseLib field — the same mechanic as requestdeps.Lib — and
+// as the Deps.DatabaseLib field — the same mechanic as requestdeps.Sandbox — and
 // the adapter, which lives outside the sandbox, fills it over the concrete
 // library. A database is rooted at Props.Path, so no per-base-path
 // constructor is needed.
-type Lib struct {
+type Sandbox struct {
 	// NewDatabase creates a database from a Props description, rooted at
 	// Props.Path.
 	NewDatabase func(props Props) DatabaseHandle

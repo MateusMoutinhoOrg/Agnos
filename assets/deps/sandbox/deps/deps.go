@@ -9,6 +9,6 @@ import ({{range .DepsLibs}}
 // sandbox only calls them, which is what keeps it free of OS packages.
 type Deps struct {
 {{- range .DepsLibs}}
-	{{.Title}} {{.Name}}.Lib
+	{{.Title}} {{.Name}}.Sandbox
 {{- end}}
 }

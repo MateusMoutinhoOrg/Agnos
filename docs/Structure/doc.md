@@ -31,8 +31,8 @@ sandbox/                         closed: imports nothing outside sandbox/, no OS
     actions.go                   ActionsBind(deps, sandbox): one assignment per action
     cli.go                       (gen) CliBind
   deps/                          contracts; each <x>/ imports nothing at all
-    deps.go                      (gen) Deps struct, one <Title> <dir>.Lib per dir
-    <x>/<x>.go                   type Lib struct of func fields
+    deps.go                      (gen) Deps struct, one <Title> <dir>.Sandbox per dir
+    <x>/<x>.go                   type Sandbox struct of func fields
   internal/                      the logic; unreachable from outside the sandbox
     config/config.go             (gen) ProjectName, Version
     cli/climain.go               (gen) CliMain + dispatch<Name> per command

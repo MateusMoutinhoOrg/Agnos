@@ -8,12 +8,12 @@ package std
 // which lives outside the sandbox — is what fills it.
 //
 // deps.Deps itself carries no function fields: every capability it exposes
-// is a library struct (iodeps.Lib, embeddeps.Lib, …). The loose runtime
+// is a library struct (iodeps.Sandbox, embeddeps.Sandbox, …). The loose runtime
 // functions the sandbox needs are gathered into this one struct and
 // injected whole as the Deps.Std field.
 
-// Lib is the runtime library injected whole as the Deps.Std field.
-type Lib struct {
+// Sandbox is the runtime library injected whole as the Deps.Std field.
+type Sandbox struct {
 	// Now returns the current wall-clock time as nanoseconds since the
 	// Unix epoch, UTC. The sandbox may not name a `time.Time`, so an
 	// instant crosses this boundary as a plain integer.

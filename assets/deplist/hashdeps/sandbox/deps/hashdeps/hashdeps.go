@@ -7,8 +7,8 @@ package hashdeps
 // appear inside it. The contract is restated here, and the adapter — which
 // lives outside the sandbox — is what fills it.
 
-// Lib is the hashing library injected whole as the Deps.Hashdeps field.
-type Lib struct {
+// Sandbox is the hashing library injected whole as the Deps.Hashdeps field.
+type Sandbox struct {
 	// Sha256Hex returns the SHA-256 digest of content, lower-case
 	// hexadecimal. It is what every recorded example tree is compared by, so
 	// the encoding is part of the golden and may not change.

@@ -66,10 +66,10 @@ sandbox:
         deps.go:
           order: 1
           gen: true
-          description: Deps struct, one <Title> <dir>.Lib per dir
+          description: Deps struct, one <Title> <dir>.Sandbox per dir
         <x>/<x>.go:
           order: 2
-          description: type Lib struct of func fields
+          description: type Sandbox struct of func fields
     internal:
       order: 5
       dir: true

@@ -6,11 +6,11 @@ package rundeps
 // so `os/exec` may not appear inside the sandbox. The contract is restated
 // here, and the adapter — which lives outside the sandbox — is what fills it.
 
-// Lib is the process runner injected whole as the Deps.Rundeps field. It is
+// Sandbox is the process runner injected whole as the Deps.Rundeps field. It is
 // what the build action reaches for when it has to hand the rendered project
 // to a real toolchain (`go mod tidy`, `go build ./...`) and report whether
 // that toolchain accepted it.
-type Lib struct {
+type Sandbox struct {
 	// Run executes one program to completion and returns what it wrote.
 	// A non-zero exit status is reported in Result.ExitCode, not as the
 	// error: the error is reserved for a program that could not be started

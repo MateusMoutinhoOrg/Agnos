@@ -12,17 +12,17 @@ package iodeps
 // a derived library that must touch the filesystem directly finds the
 // contract already declared and already wired. See the Deps.IoLib field.
 
-// Lib is the filesystem library injected whole as the Deps.IoLib field.
+// Sandbox is the filesystem library injected whole as the Deps.IoLib field.
 //
 // Paths are whatever the host operating system accepts, resolved by the
-// adapter — unlike embeddeps.Lib, which is always slash-separated and rooted
+// adapter — unlike embeddeps.Sandbox, which is always slash-separated and rooted
 // at an asset tree. The listing functions report paths that already include
 // the directory they were given, so a result can be passed straight back in.
 //
 // The predicates report false rather than an error: a path that cannot be
 // stat'd is not a directory and is not a file, which is the answer the caller
 // wanted either way.
-type Lib struct {
+type Sandbox struct {
 	// ReadFile returns the whole content of the file at path. The error
 	// reports a file that does not exist or could not be read.
 	ReadFile func(path string) ([]byte, error)

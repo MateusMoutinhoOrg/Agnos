@@ -9,8 +9,8 @@ package sortdeps
 // Every field sorts in place and returns nothing, exactly like the standard
 // library function of the same name.
 
-// Lib is the sorting library injected whole as the Deps.Sortdeps field.
-type Lib struct {
+// Sandbox is the sorting library injected whole as the Deps.Sortdeps field.
+type Sandbox struct {
 	// Strings sorts a slice of strings into increasing order.
 	Strings func(list []string)
 

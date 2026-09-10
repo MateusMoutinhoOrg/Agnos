@@ -13,10 +13,10 @@ package serverdeps
 // Only builtin types cross this boundary — no `time.Time`, no `io.Reader`, no
 // type of the concrete library.
 
-// Lib is the http-server library injected whole as the Deps.Serverdeps field.
+// Sandbox is the http-server library injected whole as the Deps.Serverdeps field.
 // A server is bound to one address and one handler, so it is created per call
 // rather than injected once: what the sandbox holds is this one-field struct.
-type Lib struct {
+type Sandbox struct {
 	// NewServer builds a server over the given props. It binds nothing until
 	// Server.Listen is called.
 	NewServer func(props ServerProps) Server

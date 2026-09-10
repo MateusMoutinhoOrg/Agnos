@@ -14,7 +14,7 @@ import (
 // strconv. Every field is a straight delegation: the contract restates the
 // standard library api so the sandbox can call it without importing it.
 func Bind(deps *deps.Deps) {
-	deps.Stringsdeps = stringsdeps.Lib{
+	deps.Stringsdeps = stringsdeps.Sandbox{
 		TrimSpace: func(s string) string {
 			return strings.TrimSpace(s)
 		},

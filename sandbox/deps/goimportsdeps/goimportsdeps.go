@@ -7,9 +7,9 @@ package goimportsdeps
 // sandbox. The contract is restated here, and the adapter — which lives outside
 // the sandbox — is what fills it.
 
-// Lib is the Go-source parser injected whole as the Deps.Goimportsdeps field.
+// Sandbox is the Go-source parser injected whole as the Deps.Goimportsdeps field.
 // Every field errors when the given content is not parsable Go.
-type Lib struct {
+type Sandbox struct {
 	// Parse parses a whole Go source file into a File describing its package
 	// clause, imports and top-level declarations (functions, methods, types,
 	// constants and variables).

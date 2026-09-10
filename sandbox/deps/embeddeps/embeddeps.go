@@ -19,7 +19,7 @@ package embeddeps
 // contract is filled anyway, as a standing capability of the template: see
 // the Deps.EmbedDeps field for why.
 
-// Lib is the embedded-asset library injected whole as the Deps.EmbedDeps
+// Sandbox is the embedded-asset library injected whole as the Deps.EmbedDeps
 // field. It is read-only by design: assets ship with the program, and nothing
 // in the library ever writes one back.
 //
@@ -27,7 +27,7 @@ package embeddeps
 // the adapter serves — "report.tmpl", "templates/invoice.tmpl" — never an
 // absolute path and never a path reaching outside that root, so the same call
 // means the same asset whatever the adapter is backed by.
-type Lib struct {
+type Sandbox struct {
 	// ReadFile returns the whole content of one asset. The error reports an
 	// asset that does not exist or could not be read; callers inside the
 	// sandbox report it rather than assuming the bytes are there, because a

@@ -12,7 +12,7 @@ import (
 // Bind fills deps.Deps.Serializables, providing the capability to
 // create, parse, and serialize generic JSON/YAML structures.
 func Bind(deps *deps.Deps) {
-	deps.Serializables = serializibles.Lib{
+	deps.Serializables = serializibles.Sandbox{
 		CreateString: func(value string) *serializibles.SerializibleObject {
 			var v any = value
 			return wrapValue(&v)

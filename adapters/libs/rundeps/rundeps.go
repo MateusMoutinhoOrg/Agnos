@@ -14,12 +14,12 @@ import (
 // Bind fills deps.Deps.Rundeps, providing the capability to run one external
 // program to completion over the standard library's os/exec.
 func Bind(deps *deps.Deps) {
-	deps.Rundeps = rundeps.Lib{
+	deps.Rundeps = rundeps.Sandbox{
 		Run: run,
 	}
 }
 
-// run fills rundeps.Lib.Run, executing the program in props.Dir and merging
+// run fills rundeps.Sandbox.Run, executing the program in props.Dir and merging
 // its standard output and standard error into one buffer. A non-zero exit
 // status comes back in Result.ExitCode; only a program that could not be
 // started at all is reported as an error.

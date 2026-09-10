@@ -17,7 +17,7 @@ import (
 // Bind fills deps.Deps.Goimportsdeps, providing the capability to parse a Go
 // source file into its package clause, imports and top-level declarations.
 func Bind(deps *deps.Deps) {
-	deps.Goimportsdeps = goimportsdeps.Lib{
+	deps.Goimportsdeps = goimportsdeps.Sandbox{
 		Parse:          parse,
 		GetPackageName: getPackageName,
 		GetImports:     getImports,
@@ -25,7 +25,7 @@ func Bind(deps *deps.Deps) {
 	}
 }
 
-// formatSource fills goimportsdeps.Lib.Format over go/format, which is the
+// formatSource fills goimportsdeps.Sandbox.Format over go/format, which is the
 // same pass the gofmt command runs: it parses the source and prints it back
 // in canonical form, so unparsable input errors instead of being mangled.
 func formatSource(content string) (string, error) {
@@ -36,7 +36,7 @@ func formatSource(content string) (string, error) {
 	return string(formatted), nil
 }
 
-// getImports fills goimportsdeps.Lib.GetImports, parsing only the import
+// getImports fills goimportsdeps.Sandbox.GetImports, parsing only the import
 // section of the given Go source and unquoting each import path.
 func getImports(content string) ([]string, error) {
 	fset := token.NewFileSet()
@@ -57,7 +57,7 @@ func getImports(content string) ([]string, error) {
 	return imports, nil
 }
 
-// getPackageName fills goimportsdeps.Lib.GetPackageName, parsing only the
+// getPackageName fills goimportsdeps.Sandbox.GetPackageName, parsing only the
 // package clause of the given Go source.
 func getPackageName(content string) (string, error) {
 	fset := token.NewFileSet()
@@ -68,7 +68,7 @@ func getPackageName(content string) (string, error) {
 	return file.Name.Name, nil
 }
 
-// parse fills goimportsdeps.Lib.Parse, parsing the whole Go source (with
+// parse fills goimportsdeps.Sandbox.Parse, parsing the whole Go source (with
 // comments) and flattening its declarations into a goimportsdeps.File.
 func parse(content string) (*goimportsdeps.File, error) {
 	fset := token.NewFileSet()

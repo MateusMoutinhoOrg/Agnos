@@ -12,7 +12,7 @@ import (
 // Bind fills deps.Deps.Iodeps with the filesystem implementation built on
 // the standard library's os and filepath packages.
 func Bind(deps *deps.Deps) {
-	deps.Iodeps = iodeps.Lib{
+	deps.Iodeps = iodeps.Sandbox{
 		ReadFile: func(path string) ([]byte, error) {
 			return os.ReadFile(path)
 		},
