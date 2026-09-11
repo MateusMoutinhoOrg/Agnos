@@ -4,6 +4,7 @@ package api
 // sandbox/api/, each filled by its binder. sandbox.New returns it, and nothing
 // callable lives outside of it.
 type Sandbox struct {
-	Actions Actions
-	Cli     Cli
+	Commands []Command
+	Actions  Actions
+	Cli      Cli
 }
