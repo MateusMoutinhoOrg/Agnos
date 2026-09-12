@@ -1,7 +1,7 @@
 package add_dep
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/apishape"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -35,14 +35,14 @@ type ShimProps struct {
 // remote sandbox out of the remote repo's own adapters and hands it over as the
 // local contract, plus the converters that carry every value between the two
 // copies of the api.
-func GenerateShim(deps *deps.Deps, io *smartio.SmartIO, remote *apishape.Api, props ShimProps) error {
+func GenerateShim(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.Api, props ShimProps) error {
 
-	plan, err := apishape.Converters(deps, remote, props.Dep, remoteApiAlias)
+	plan, err := apishape.Converters(sandbox, remote, props.Dep, remoteApiAlias)
 	if err != nil {
 		return err
 	}
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func GenerateShim(deps *deps.Deps, io *smartio.SmartIO, remote *apishape.Api, pr
 	vars := map[string]any{
 		"Adapter":      props.Dep,
 		"Dep":          props.Dep,
-		"Field":        utils.DepField(deps, props.Dep),
+		"Field":        utils.DepField(sandbox, props.Dep),
 		"Module":       module_conf.Module,
 		"RemoteModule": props.Module,
 		"RemoteApi":    remoteApiAlias,
@@ -60,6 +60,6 @@ func GenerateShim(deps *deps.Deps, io *smartio.SmartIO, remote *apishape.Api, pr
 		"Converters":   plan.Converters,
 	}
 
-	return utils.RenderTemplateToDest(deps, io, "templates/remote_shim.go", vars,
+	return utils.RenderTemplateToDest(sandbox, io, "templates/remote_shim.go", vars,
 		utils.AdapterDir(props.Dep)+"/"+props.Dep+".go")
 }

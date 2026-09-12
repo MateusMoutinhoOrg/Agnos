@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -17,14 +17,14 @@ import (
 // It must run before CollectCommands, so the declaration is already in the
 // transaction when the collector reads it and help flows through the same
 // entries.go / climain.go / help-metadata generation as any other command.
-func GenerateHelpEntriesYaml(deps *deps.Deps, io *smartio.SmartIO, vars map[string]interface{}) error {
+func GenerateHelpEntriesYaml(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
 	if io.Exist("sandbox/internal/commands/help/entries.yaml") {
 		return nil
 	}
 
 	io.CreateDir("sandbox/internal/commands/help")
 	return utils.RenderTemplateToDest(
-		deps, io,
+		sandbox, io,
 		"templates/help_entries.yaml",
 		vars,
 		"sandbox/internal/commands/help/entries.yaml",

@@ -2,12 +2,11 @@ package add_body_field
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_body_field"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	add_error := addBodyFieldAction.AddBodyField(deps, api.RouteBodyFieldProps{
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	add_error := addBodyFieldAction.AddBodyField(sandbox, api.RouteBodyFieldProps{
 		Path:                   entries.Path,
 		Route:                  entries.Route,
 		Name:                   entries.Name,
@@ -30,7 +29,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		NoAdditionalProperties: entries.NoAdditionalProperties,
 	})
 	if add_error != nil {
-		deps.Std.Error("%s\n", add_error.Error())
+		sandbox.Deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

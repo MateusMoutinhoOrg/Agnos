@@ -1,18 +1,18 @@
 package smartio
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // rootedPath joins io.Root onto a project-relative path, right before the
 // value is handed to the real filesystem. It is idempotent: a path that is
 // already under Root is returned unchanged, so a listing result fed back into
 // another SmartIO call is never prefixed twice.
-func rootedPath(deps *deps.Deps, io *SmartIO, path string) string {
+func rootedPath(sandbox *api.Sandbox, io *SmartIO, path string) string {
 	if io.Root == "" {
 		return path
 	}
-	if path == io.Root || io.deps.Stringsdeps.HasPrefix(path, io.Root+"/") {
+	if path == io.Root || io.sandbox.Deps.Stringsdeps.HasPrefix(path, io.Root+"/") {
 		return path
 	}
 	return io.Root + "/" + path
@@ -21,32 +21,32 @@ func rootedPath(deps *deps.Deps, io *SmartIO, path string) string {
 // unrootedPath is the inverse of rootedPath: it strips io.Root back off a
 // path the filesystem returned, so callers only ever see project-relative
 // paths.
-func unrootedPath(deps *deps.Deps, io *SmartIO, path string) string {
+func unrootedPath(sandbox *api.Sandbox, io *SmartIO, path string) string {
 	if io.Root == "" {
 		return path
 	}
 	if path == io.Root {
 		return ""
 	}
-	if io.deps.Stringsdeps.HasPrefix(path, io.Root+"/") {
+	if io.sandbox.Deps.Stringsdeps.HasPrefix(path, io.Root+"/") {
 		return path[len(io.Root)+1:]
 	}
 	return path
 }
 
 // unrootedPaths maps unrootedPath over a slice.
-func unrootedPaths(deps *deps.Deps, io *SmartIO, paths []string) []string {
+func unrootedPaths(sandbox *api.Sandbox, io *SmartIO, paths []string) []string {
 	out := make([]string, 0, len(paths))
 	for _, p := range paths {
-		out = append(out, unrootedPath(deps, io, p))
+		out = append(out, unrootedPath(sandbox, io, p))
 	}
 	return out
 }
 
-func processInputPath(deps *deps.Deps, io *SmartIO, path string) (string, error) {
+func processInputPath(sandbox *api.Sandbox, io *SmartIO, path string) (string, error) {
 	p := io.Replacers.Format(path)
 	if io.Ignore.IsIgnorable(p) {
-		return p, deps.Std.Errorf("path %q is ignorable", p)
+		return p, sandbox.Deps.Std.Errorf("path %q is ignorable", p)
 	}
 	return p, nil
 }
@@ -63,9 +63,9 @@ func filterIgnored(io *SmartIO, paths []string) []string {
 
 // isPendingRemoval checks if a path (or any of its parents) has been
 // scheduled for removal in the current transaction.
-func isPendingRemoval(deps *deps.Deps, io *SmartIO, path string) bool {
+func isPendingRemoval(sandbox *api.Sandbox, io *SmartIO, path string) bool {
 	for _, removed := range io.PendingRemoveDirs {
-		if path == removed || io.deps.Stringsdeps.HasPrefix(path, removed+"/") {
+		if path == removed || io.sandbox.Deps.Stringsdeps.HasPrefix(path, removed+"/") {
 			return true
 		}
 	}
@@ -84,10 +84,10 @@ func isPendingCreate(io *SmartIO, path string) bool {
 }
 
 // filterPendingRemoved removes entries that are under a pending removal directory.
-func filterPendingRemoved(deps *deps.Deps, io *SmartIO, paths []string) []string {
+func filterPendingRemoved(sandbox *api.Sandbox, io *SmartIO, paths []string) []string {
 	var result []string
 	for _, p := range paths {
-		if !isPendingRemoval(deps, io, p) {
+		if !isPendingRemoval(sandbox, io, p) {
 			result = append(result, p)
 		}
 	}

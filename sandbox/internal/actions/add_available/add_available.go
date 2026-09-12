@@ -2,19 +2,18 @@ package add_available
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-func AddAvailable(deps *deps.Deps, path string, available string) error {
-	io := smartio.New(deps, path, config.ProjectName)
-	if err := AddAvailableInternal(deps, io, path, available); err != nil {
+func AddAvailable(sandbox *api.Sandbox, path string, available string) error {
+	io := smartio.New(sandbox, path, config.ProjectName)
+	if err := AddAvailableInternal(sandbox, io, path, available); err != nil {
 		return err
 	}
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(deps, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

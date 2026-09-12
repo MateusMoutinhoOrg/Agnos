@@ -19,13 +19,12 @@ package greet
 
 import (
 	"github.com/you/my-tool/sandbox/api"
-	"github.com/you/my-tool/sandbox/deps"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	deps.Std.Log("greeting %s\n", entries.Name)          // stderr, silenced by --quiet
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	sandbox.Deps.Std.Log("greeting %s\n", entries.Name)        // stderr, silenced by --quiet
 	for i := 0; i < entries.Times; i++ {
-		deps.Std.Printf("hello, %s\n", entries.Name)     // stdout, the result
+		sandbox.Deps.Std.Printf("hello, %s\n", entries.Name)   // stdout, the result
 	}
 	return api.ExitOk
 }

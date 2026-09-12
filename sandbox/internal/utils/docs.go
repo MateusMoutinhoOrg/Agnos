@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
@@ -48,31 +48,31 @@ type Doc struct {
 // LoadThemesConf reads <ProjectName>Config/themes.yaml through the
 // transaction-aware io. Like project.yaml it is written by `agnos start`, so a
 // missing or unparsable file is a hard error rather than an empty fallback.
-func LoadThemesConf(deps *deps.Deps, io *smartio.SmartIO) (*themesconf.ThemesConf, error) {
+func LoadThemesConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*themesconf.ThemesConf, error) {
 	rel := config.ProjectName + "Config/themes.yaml"
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
+		return nil, sandbox.Deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
 
-	return themesconf.New(deps, string(content))
+	return themesconf.New(sandbox, string(content))
 }
 
 // LoadDocProps reads and parses one doc directory's props.yaml. A missing or
 // unparsable file is an error: the doc tree is indexed from these files, so a
 // doc without them cannot be listed anywhere.
-func LoadDocProps(deps *deps.Deps, io *smartio.SmartIO, doc_path string) (*docpropsconf.DocPropsConf, error) {
+func LoadDocProps(sandbox *api.Sandbox, io *smartio.SmartIO, doc_path string) (*docpropsconf.DocPropsConf, error) {
 	rel := doc_path + "/" + DocPropsFile
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, deps.Std.Errorf("%s is missing", rel)
+		return nil, sandbox.Deps.Std.Errorf("%s is missing", rel)
 	}
 
-	conf, err := docpropsconf.New(deps, string(content))
+	conf, err := docpropsconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, deps.Std.Errorf("%s: %w", rel, err)
+		return nil, sandbox.Deps.Std.Errorf("%s: %w", rel, err)
 	}
 	return conf, nil
 }
@@ -81,20 +81,20 @@ func LoadDocProps(deps *deps.Deps, io *smartio.SmartIO, doc_path string) (*docpr
 // its sub-docs recursively. Every directory is a doc — the reserved first-level
 // Index/ aside — so a missing props.yaml is an error. A project with no docs/
 // directory yields an empty tree and no error.
-func CollectDocTree(deps *deps.Deps, io *smartio.SmartIO) ([]Doc, error) {
+func CollectDocTree(sandbox *api.Sandbox, io *smartio.SmartIO) ([]Doc, error) {
 	if !io.IsDir(DocsDir) {
 		return nil, nil
 	}
-	return collectDocsIn(deps, io, DocsDir, true)
+	return collectDocsIn(sandbox, io, DocsDir, true)
 }
 
 // collectDocsIn collects the docs directly under parent_path. first_level
 // marks the docs/ directory itself, where Index/ is reserved.
-func collectDocsIn(deps *deps.Deps, io *smartio.SmartIO, parent_path string, first_level bool) ([]Doc, error) {
+func collectDocsIn(sandbox *api.Sandbox, io *smartio.SmartIO, parent_path string, first_level bool) ([]Doc, error) {
 	var docs []Doc
 
 	for _, dir := range io.ListDirs(parent_path) {
-		name := LastSegment(deps, dir)
+		name := LastSegment(sandbox, dir)
 		if name == "" {
 			continue
 		}
@@ -103,12 +103,12 @@ func collectDocsIn(deps *deps.Deps, io *smartio.SmartIO, parent_path string, fir
 		}
 
 		doc_path := parent_path + "/" + name
-		props, err := LoadDocProps(deps, io, doc_path)
+		props, err := LoadDocProps(sandbox, io, doc_path)
 		if err != nil {
 			return nil, err
 		}
 
-		subdocs, err := collectDocsIn(deps, io, doc_path, false)
+		subdocs, err := collectDocsIn(sandbox, io, doc_path, false)
 		if err != nil {
 			return nil, err
 		}
@@ -130,14 +130,14 @@ func collectDocsIn(deps *deps.Deps, io *smartio.SmartIO, parent_path string, fir
 		docs = append(docs, doc)
 	}
 
-	SortDocs(deps, docs)
+	SortDocs(sandbox, docs)
 	return docs, nil
 }
 
 // SortDocs orders docs the way every index lists them: by `order`, then by
 // name. A doc with no `order` comes after every ordered one.
-func SortDocs(deps *deps.Deps, docs []Doc) {
-	deps.Sortdeps.SliceStable(docs, func(i, j int) bool {
+func SortDocs(sandbox *api.Sandbox, docs []Doc) {
+	sandbox.Deps.Sortdeps.SliceStable(docs, func(i, j int) bool {
 		left, right := docs[i], docs[j]
 		if left.HasOrder != right.HasOrder {
 			return left.HasOrder
@@ -153,10 +153,10 @@ func SortDocs(deps *deps.Deps, docs []Doc) {
 // names under docs/ ("PublicApi/api.Actions" -> ["PublicApi", "api.Actions"]).
 // Empty segments — a leading, trailing or doubled slash — are dropped, so the
 // result is the doc's path relative to docs/.
-func DocSegments(deps *deps.Deps, name string) []string {
+func DocSegments(sandbox *api.Sandbox, name string) []string {
 	var segments []string
-	for _, segment := range deps.Stringsdeps.Split(deps.Stringsdeps.TrimSpace(name), "/") {
-		segment = deps.Stringsdeps.TrimSpace(segment)
+	for _, segment := range sandbox.Deps.Stringsdeps.Split(sandbox.Deps.Stringsdeps.TrimSpace(name), "/") {
+		segment = sandbox.Deps.Stringsdeps.TrimSpace(segment)
 		if segment != "" {
 			segments = append(segments, segment)
 		}
@@ -168,15 +168,15 @@ func DocSegments(deps *deps.Deps, name string) []string {
 // directory path under docs/. Each segment becomes a directory name and is
 // linked from a generated index, so only letters, digits, dots, dashes and
 // underscores are allowed, and Index is reserved at the first level.
-func ValidateDocName(deps *deps.Deps, name string) error {
-	segments := DocSegments(deps, name)
+func ValidateDocName(sandbox *api.Sandbox, name string) error {
+	segments := DocSegments(sandbox, name)
 	if len(segments) == 0 {
-		return deps.Std.Errorf("a doc needs a name")
+		return sandbox.Deps.Std.Errorf("a doc needs a name")
 	}
 
 	for index, segment := range segments {
 		if index == 0 && segment == DocsIndexName {
-			return deps.Std.Errorf("invalid doc name %q: %s is reserved", name, DocsIndexName)
+			return sandbox.Deps.Std.Errorf("invalid doc name %q: %s is reserved", name, DocsIndexName)
 		}
 		for _, letter := range segment {
 			valid := (letter >= 'a' && letter <= 'z') ||
@@ -184,9 +184,9 @@ func ValidateDocName(deps *deps.Deps, name string) error {
 				(letter >= '0' && letter <= '9') ||
 				letter == '.' || letter == '-' || letter == '_'
 			if !valid {
-				return deps.Std.Errorf(
+				return sandbox.Deps.Std.Errorf(
 					"invalid doc name %q: only letters, digits, dots, dashes, underscores and / are allowed (it becomes the directory %s)",
-					name, DocDir(deps, name))
+					name, DocDir(sandbox, name))
 			}
 		}
 	}
@@ -195,32 +195,32 @@ func ValidateDocName(deps *deps.Deps, name string) error {
 
 // DocDir is the project-relative directory holding a doc
 // ("PublicApi/api.Actions" -> "docs/PublicApi/api.Actions").
-func DocDir(deps *deps.Deps, name string) string {
-	return DocsDir + "/" + deps.Stringsdeps.Join(DocSegments(deps, name), "/")
+func DocDir(sandbox *api.Sandbox, name string) string {
+	return DocsDir + "/" + sandbox.Deps.Stringsdeps.Join(DocSegments(sandbox, name), "/")
 }
 
 // DocParentDir is the project-relative directory holding a doc's parent — the
 // docs/ directory itself for a first-level doc.
-func DocParentDir(deps *deps.Deps, name string) string {
-	segments := DocSegments(deps, name)
+func DocParentDir(sandbox *api.Sandbox, name string) string {
+	segments := DocSegments(sandbox, name)
 	if len(segments) < 2 {
 		return DocsDir
 	}
-	return DocsDir + "/" + deps.Stringsdeps.Join(segments[:len(segments)-1], "/")
+	return DocsDir + "/" + sandbox.Deps.Stringsdeps.Join(segments[:len(segments)-1], "/")
 }
 
 // DocTitle is the human-readable name a new doc is declared with: its last
 // segment, with CamelCase split into words ("HandleDocuments" -> "Handle
 // Documents"). A segment already carrying its own punctuation — a dot, dash,
 // underscore or space, as in "api.Actions" — is kept verbatim.
-func DocTitle(deps *deps.Deps, name string) string {
-	segments := DocSegments(deps, name)
+func DocTitle(sandbox *api.Sandbox, name string) string {
+	segments := DocSegments(sandbox, name)
 	if len(segments) == 0 {
 		return ""
 	}
 	title := segments[len(segments)-1]
 
-	if deps.Stringsdeps.ContainsAny(title, ".-_ ") {
+	if sandbox.Deps.Stringsdeps.ContainsAny(title, ".-_ ") {
 		return title
 	}
 
@@ -242,7 +242,7 @@ func DocTitle(deps *deps.Deps, name string) string {
 
 // LastSegment is the final element of a project-relative path
 // ("docs/PublicApi" -> "PublicApi").
-func LastSegment(deps *deps.Deps, path string) string {
-	parts := deps.Stringsdeps.Split(path, "/")
+func LastSegment(sandbox *api.Sandbox, path string) string {
+	parts := sandbox.Deps.Stringsdeps.Split(path, "/")
 	return parts[len(parts)-1]
 }

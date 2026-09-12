@@ -1,7 +1,7 @@
 package routeio
 
 import (
-	"{{.Module}}/sandbox/deps"
+	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
@@ -12,16 +12,16 @@ import (
 // as it is written.
 //
 // It returns the status it wrote, so a caller answers and reports in one line.
-func WriteError(deps *deps.Deps, response serverdeps.Response, status int, field string, message string) int {
-	deps.Std.Log("route error %d %s %s \n", status, field, message)
+func WriteError(sandbox *api.Sandbox, response serverdeps.Response, status int, field string, message string) int {
+	sandbox.Deps.Std.Log("route error %d %s %s \n", status, field, message)
 
-	body := deps.Serializables.CreateObject()
+	body := sandbox.Deps.Serializables.CreateObject()
 	body.AddItemToObject("error", message)
 	body.AddItemToObject("field", field)
 
 	response.SetHeader("Content-Type", "application/json")
 	response.SetStatus(status)
-	response.Write([]byte(deps.Serializables.SerializeToJson(body)))
+	response.Write([]byte(sandbox.Deps.Serializables.SerializeToJson(body)))
 
 	return status
 }

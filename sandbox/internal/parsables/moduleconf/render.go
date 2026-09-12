@@ -1,10 +1,10 @@
 package moduleconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func Render(deps *deps.Deps, conf *ModuleConf) string {
+func Render(sandbox *api.Sandbox, conf *ModuleConf) string {
 	builder := ""
 	if conf.Module != "" {
 		builder += "module " + conf.Module + "\n\n"
@@ -23,7 +23,7 @@ func Render(deps *deps.Deps, conf *ModuleConf) string {
 
 	for index, directive := range conf.Directives {
 		if index == 0 {
-			builder = separate(deps, builder)
+			builder = separate(sandbox, builder)
 		}
 		builder += directive + "\n"
 	}
@@ -33,8 +33,8 @@ func Render(deps *deps.Deps, conf *ModuleConf) string {
 
 // separate leaves exactly one blank line between what is written and the
 // directives that follow, however many the sections above happened to end with.
-func separate(deps *deps.Deps, builder string) string {
-	for deps.Stringsdeps.HasSuffix(builder, "\n") {
+func separate(sandbox *api.Sandbox, builder string) string {
+	for sandbox.Deps.Stringsdeps.HasSuffix(builder, "\n") {
 		builder = builder[:len(builder)-1]
 	}
 	return builder + "\n\n"

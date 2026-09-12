@@ -6,19 +6,19 @@ package apishape
 // on both sides and crosses untouched, and everything else is either a plain
 // Go conversion or a generated function.
 func convert(plan *planner, expr string, direction string, value string) string {
-	if !References(plan.api, expr) {
+	if !References(plan.shape, expr) {
 		return value
 	}
 
-	if Declares(plan.api, expr) {
-		if IsStruct(plan.api, expr) {
+	if Declares(plan.shape, expr) {
+		if IsStruct(plan.shape, expr) {
 			return converterFor(plan, expr, direction) + "(" + value + ")"
 		}
 		_, to := qualifiers(plan, direction)
-		return Qualify(plan.api, expr, to) + "(" + value + ")"
+		return Qualify(plan.shape, expr, to) + "(" + value + ")"
 	}
 
-	if signature, ok := ParseSignature(plan.deps, expr); ok {
+	if signature, ok := ParseSignature(plan.sandbox, expr); ok {
 		return closure(plan, signature, direction, value)
 	}
 
@@ -32,7 +32,7 @@ func convert(plan *planner, expr string, direction string, value string) string 
 		return converterFor(plan, expr, direction) + "(" + value + ")"
 	}
 
-	plan.err = plan.deps.Std.Errorf("cannot convert %s: only a named type, a slice, a map, a pointer and a func of convertible types can cross", expr)
+	plan.err = plan.sandbox.Deps.Std.Errorf("cannot convert %s: only a named type, a slice, a map, a pointer and a func of convertible types can cross", expr)
 	return value
 }
 
@@ -48,7 +48,7 @@ func closure(plan *planner, signature Signature, direction string, value string)
 	params := ""
 	arguments := ""
 	for index, param := range signature.Params {
-		name := "p" + plan.deps.Stringsdeps.FormatInt(int64(index), 10)
+		name := "p" + plan.sandbox.Deps.Stringsdeps.FormatInt(int64(index), 10)
 
 		if index > 0 {
 			params += ", "
@@ -57,8 +57,8 @@ func closure(plan *planner, signature Signature, direction string, value string)
 
 		element, variadic := variadicElement(param.Type)
 		if variadic {
-			if References(plan.api, element) {
-				plan.err = plan.deps.Std.Errorf("cannot convert %s: a variadic parameter of a type of the api has no element to convert one by one", param.Type)
+			if References(plan.shape, element) {
+				plan.err = plan.sandbox.Deps.Std.Errorf("cannot convert %s: a variadic parameter of a type of the api has no element to convert one by one", param.Type)
 				return value
 			}
 			params += name + " ..." + element
@@ -66,7 +66,7 @@ func closure(plan *planner, signature Signature, direction string, value string)
 			continue
 		}
 
-		params += name + " " + Qualify(plan.api, param.Type, from)
+		params += name + " " + Qualify(plan.shape, param.Type, from)
 		arguments += convert(plan, param.Type, flipped, name)
 	}
 
@@ -76,7 +76,7 @@ func closure(plan *planner, signature Signature, direction string, value string)
 	case 0:
 		return "func(" + params + ") { " + call + " }"
 	case 1:
-		result := Qualify(plan.api, signature.Results[0].Type, to)
+		result := Qualify(plan.shape, signature.Results[0].Type, to)
 		return "func(" + params + ") " + result + " { return " + convert(plan, signature.Results[0].Type, direction, call) + " }"
 	}
 
@@ -84,13 +84,13 @@ func closure(plan *planner, signature Signature, direction string, value string)
 	names := ""
 	returns := ""
 	for index, result := range signature.Results {
-		name := "r" + plan.deps.Stringsdeps.FormatInt(int64(index), 10)
+		name := "r" + plan.sandbox.Deps.Stringsdeps.FormatInt(int64(index), 10)
 		if index > 0 {
 			results += ", "
 			names += ", "
 			returns += ", "
 		}
-		results += Qualify(plan.api, result.Type, to)
+		results += Qualify(plan.shape, result.Type, to)
 		names += name
 		returns += convert(plan, result.Type, direction, name)
 	}

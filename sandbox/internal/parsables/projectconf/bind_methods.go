@@ -1,11 +1,11 @@
 package projectconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, project_conf *ProjectConf) {
+func BindMethods(sandbox *api.Sandbox, project_conf *ProjectConf) {
 	project_conf.Render = func() string {
-		return Render(deps, project_conf)
+		return Render(sandbox, project_conf)
 	}
 }

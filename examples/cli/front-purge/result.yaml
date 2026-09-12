@@ -10,6 +10,6 @@ tree:
     - file: sandbox/internal/routes/health/entries.go
       sha: 8b1b5f50403c9f2adba70764447c3f9ba4b531620a9096d115e88d5c25ec9131
     - file: sandbox/internal/routes/health/handler.go
-      sha: 08504db57f8d3caecb146f5c7cfc9336a34f25f7789ef59f0c3bde1b63f1c356
+      sha: b08e9a93f4719a9a5c8db8fb75f45defde994a8442199e5e020eb9922d911e75
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da

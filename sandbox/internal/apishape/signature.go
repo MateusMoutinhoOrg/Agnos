@@ -1,7 +1,7 @@
 package apishape
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // Param is one parameter or result of a func type expression, read back apart.
@@ -21,13 +21,13 @@ type Signature struct {
 
 // ParseSignature reads a func type expression into its parameters and results,
 // and reports whether expr is a func type at all.
-func ParseSignature(deps *deps.Deps, expr string) (Signature, bool) {
-	rest := deps.Stringsdeps.TrimSpace(expr)
+func ParseSignature(sandbox *api.Sandbox, expr string) (Signature, bool) {
+	rest := sandbox.Deps.Stringsdeps.TrimSpace(expr)
 
-	if !deps.Stringsdeps.HasPrefix(rest, "func") {
+	if !sandbox.Deps.Stringsdeps.HasPrefix(rest, "func") {
 		return Signature{}, false
 	}
-	rest = deps.Stringsdeps.TrimSpace(rest[len("func"):])
+	rest = sandbox.Deps.Stringsdeps.TrimSpace(rest[len("func"):])
 
 	if len(rest) == 0 || rest[0] != '(' {
 		return Signature{}, false
@@ -38,15 +38,15 @@ func ParseSignature(deps *deps.Deps, expr string) (Signature, bool) {
 		return Signature{}, false
 	}
 
-	signature := Signature{Params: splitParams(deps, rest[1:close_index])}
+	signature := Signature{Params: splitParams(sandbox, rest[1:close_index])}
 
-	results := deps.Stringsdeps.TrimSpace(rest[close_index+1:])
+	results := sandbox.Deps.Stringsdeps.TrimSpace(rest[close_index+1:])
 	if results == "" {
 		return signature, true
 	}
 
 	if results[0] == '(' && matching(results, 0) == len(results)-1 {
-		signature.Results = splitParams(deps, results[1:len(results)-1])
+		signature.Results = splitParams(sandbox, results[1:len(results)-1])
 		return signature, true
 	}
 
@@ -56,15 +56,15 @@ func ParseSignature(deps *deps.Deps, expr string) (Signature, bool) {
 
 // splitParams cuts one parameter or result list at its top-level commas and
 // reads each item.
-func splitParams(deps *deps.Deps, list string) []Param {
+func splitParams(sandbox *api.Sandbox, list string) []Param {
 	var params []Param
 
 	for _, chunk := range splitTop(list, ',') {
-		chunk = deps.Stringsdeps.TrimSpace(chunk)
+		chunk = sandbox.Deps.Stringsdeps.TrimSpace(chunk)
 		if chunk == "" {
 			continue
 		}
-		params = append(params, readParam(deps, chunk))
+		params = append(params, readParam(sandbox, chunk))
 	}
 
 	return params
@@ -72,14 +72,14 @@ func splitParams(deps *deps.Deps, list string) []Param {
 
 // readParam tells `props StartProps` from `[]string`: a name is a bare
 // identifier followed by the type it binds, and a type on its own never is.
-func readParam(deps *deps.Deps, chunk string) Param {
+func readParam(sandbox *api.Sandbox, chunk string) Param {
 	space := indexTop(chunk, ' ')
 	if space < 0 {
 		return Param{Type: chunk}
 	}
 
 	name := chunk[:space]
-	rest := deps.Stringsdeps.TrimSpace(chunk[space:])
+	rest := sandbox.Deps.Stringsdeps.TrimSpace(chunk[space:])
 
 	if rest == "" || !isIdentifier(name) {
 		return Param{Type: chunk}

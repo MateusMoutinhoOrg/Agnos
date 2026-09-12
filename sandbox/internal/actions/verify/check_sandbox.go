@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -13,29 +13,29 @@ var sandboxAllowedFiles = []string{"new.go"}
 
 // CheckSandbox runs every sandbox-layer rule and returns one string per
 // violation, in a stable order.
-func CheckSandbox(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
+func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	if !io.IsDir("sandbox") {
 		return violations
 	}
 
-	violations = append(violations, checkSandboxContents(deps, io)...)
-	violations = append(violations, checkSandboxImports(deps, io, module)...)
-	violations = append(violations, checkSandboxApi(deps, io)...)
-	violations = append(violations, checkSandboxDeps(deps, io, module)...)
-	violations = append(violations, checkSandboxBinds(deps, io)...)
+	violations = append(violations, checkSandboxContents(sandbox, io)...)
+	violations = append(violations, checkSandboxImports(sandbox, io, module)...)
+	violations = append(violations, checkSandboxApi(sandbox, io, module)...)
+	violations = append(violations, checkSandboxDeps(sandbox, io, module)...)
+	violations = append(violations, checkSandboxBinds(sandbox, io)...)
 
 	return violations
 }
 
 // checkSandboxContents enforces that sandbox/ holds only the api, binds, deps
 // and internal directories plus a loose new.go.
-func checkSandboxContents(deps *deps.Deps, io *smartio.SmartIO) []string {
+func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
 	for _, dir := range io.ListDirs("sandbox") {
-		name := lastSegment(deps, dir)
+		name := lastSegment(sandbox, dir)
 		if !contains(sandboxAllowedDirs, name) {
 			violations = append(violations, "sandbox/ contains unexpected directory "+name+
 				" (allowed: api, binds, deps, internal)")
@@ -43,7 +43,7 @@ func checkSandboxContents(deps *deps.Deps, io *smartio.SmartIO) []string {
 	}
 
 	for _, file := range io.ListFiles("sandbox") {
-		name := lastSegment(deps, file)
+		name := lastSegment(sandbox, file)
 		if !contains(sandboxAllowedFiles, name) {
 			violations = append(violations, "sandbox/ contains unexpected file "+name+
 				" (allowed: new.go)")
@@ -62,14 +62,14 @@ func checkSandboxContents(deps *deps.Deps, io *smartio.SmartIO) []string {
 //
 // sandbox/deps/ is the one exception, being the contracts themselves;
 // checkSandboxDeps is what constrains those.
-func checkSandboxImports(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
+func checkSandboxImports(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
-	for _, file := range goFilesUnder(deps, io, "sandbox") {
+	for _, file := range goFilesUnder(sandbox, io, "sandbox") {
 		if isUnder(file, "sandbox/deps") {
 			continue
 		}
-		for _, imp := range fileImports(deps, io, file) {
+		for _, imp := range fileImports(sandbox, io, file) {
 			if isUnder(imp, module+"/sandbox") {
 				continue
 			}
@@ -82,18 +82,27 @@ func checkSandboxImports(deps *deps.Deps, io *smartio.SmartIO, module string) []
 	return violations
 }
 
-// checkSandboxApi enforces that sandbox/api/* imports nothing at all — no
-// stdlib, no external module, not sandbox/deps and not another sandbox/api
-// package. api is pure contract: every type it declares is written in Go's
-// own builtin types, so an import there is always a contract leaking a shape
-// it does not own.
-func checkSandboxApi(deps *deps.Deps, io *smartio.SmartIO) []string {
+// checkSandboxApi enforces that sandbox/api/* imports nothing but the loose
+// sandbox/deps package — no stdlib, no external module, no other sandbox
+// package. api is pure contract: every type it declares is written in Go's own
+// builtin types, so any other import is a contract leaking a shape it does not
+// own.
+//
+// sandbox/deps is the one exception, and it buys exactly one field:
+// Sandbox.Deps, the capability set every function of the sandbox is handed
+// along with the api itself. That field is this repo's own wiring rather than
+// part of what it offers, so apishape.DepsField keeps it out of the copy a
+// consumer installs — which is what leaves the contract as portable as it was.
+func checkSandboxApi(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
-	for _, file := range goFilesUnder(deps, io, "sandbox/api") {
-		for _, imp := range fileImports(deps, io, file) {
+	for _, file := range goFilesUnder(sandbox, io, "sandbox/api") {
+		for _, imp := range fileImports(sandbox, io, file) {
+			if imp == module+"/sandbox/deps" {
+				continue
+			}
 			violations = append(violations,
-				file+" imports "+imp+"; sandbox/api/* may import nothing at all")
+				file+" imports "+imp+"; sandbox/api/* may import nothing but "+module+"/sandbox/deps")
 		}
 	}
 
@@ -108,12 +117,12 @@ func checkSandboxApi(deps *deps.Deps, io *smartio.SmartIO) []string {
 //
 // The loose files directly in sandbox/deps/ are the one exception. deps.go
 // composes the contracts into deps.Deps, so it names them and nothing else.
-func checkSandboxDeps(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
+func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
-	for _, file := range goFilesUnder(deps, io, "sandbox/deps") {
-		for _, imp := range fileImports(deps, io, file) {
-			if isDirectChild(deps, file, "sandbox/deps") {
+	for _, file := range goFilesUnder(sandbox, io, "sandbox/deps") {
+		for _, imp := range fileImports(sandbox, io, file) {
+			if isDirectChild(sandbox, file, "sandbox/deps") {
 				if isUnder(imp, module+"/sandbox/deps") {
 					continue
 				}
@@ -131,24 +140,24 @@ func checkSandboxDeps(deps *deps.Deps, io *smartio.SmartIO, module string) []str
 
 // checkSandboxBinds enforces that every file in sandbox/binds mirrors a file
 // of the same name in sandbox/api and declares only functions.
-func checkSandboxBinds(deps *deps.Deps, io *smartio.SmartIO) []string {
+func checkSandboxBinds(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
 	apiFiles := map[string]bool{}
 	for _, file := range io.ListFiles("sandbox/api") {
-		apiFiles[lastSegment(deps, file)] = true
+		apiFiles[lastSegment(sandbox, file)] = true
 	}
 
 	for _, file := range io.ListFiles("sandbox/binds") {
-		name := lastSegment(deps, file)
-		if !deps.Stringsdeps.HasSuffix(name, ".go") {
+		name := lastSegment(sandbox, file)
+		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
 			continue
 		}
 		if !apiFiles[name] {
 			violations = append(violations,
 				"sandbox/binds/"+name+" has no matching file in sandbox/api/")
 		}
-		for _, decl := range topLevelNonFuncDecls(deps, io, file) {
+		for _, decl := range topLevelNonFuncDecls(sandbox, io, file) {
 			violations = append(violations,
 				"sandbox/binds/"+name+" declares "+decl+"; sandbox/binds/ may contain only functions")
 		}
@@ -159,8 +168,8 @@ func checkSandboxBinds(deps *deps.Deps, io *smartio.SmartIO) []string {
 
 // topLevelNonFuncDecls returns a label for every top-level declaration in the
 // file that is not a function, types first, then constants, then variables.
-func topLevelNonFuncDecls(deps *deps.Deps, io *smartio.SmartIO, file string) []string {
-	parsed := parseFile(deps, io, file)
+func topLevelNonFuncDecls(sandbox *api.Sandbox, io *smartio.SmartIO, file string) []string {
+	parsed := parseFile(sandbox, io, file)
 	if parsed == nil {
 		return nil
 	}
@@ -179,8 +188,8 @@ func topLevelNonFuncDecls(deps *deps.Deps, io *smartio.SmartIO, file string) []s
 }
 
 // fileImports returns the import paths of one Go file, sorted.
-func fileImports(deps *deps.Deps, io *smartio.SmartIO, file string) []string {
-	parsed := parseFile(deps, io, file)
+func fileImports(sandbox *api.Sandbox, io *smartio.SmartIO, file string) []string {
+	parsed := parseFile(sandbox, io, file)
 	if parsed == nil {
 		return nil
 	}
@@ -189,18 +198,18 @@ func fileImports(deps *deps.Deps, io *smartio.SmartIO, file string) []string {
 	for _, spec := range parsed.Imports {
 		imports = append(imports, spec.Path)
 	}
-	deps.Sortdeps.Strings(imports)
+	sandbox.Deps.Sortdeps.Strings(imports)
 	return imports
 }
 
 // parseFile reads file through the transaction-aware io and parses it. A file
 // that cannot be read or parsed yields nil (the compiler reports those).
-func parseFile(deps *deps.Deps, io *smartio.SmartIO, file string) *goimportsdeps.File {
+func parseFile(sandbox *api.Sandbox, io *smartio.SmartIO, file string) *goimportsdeps.File {
 	content, err := io.ReadFile(file)
 	if err != nil {
 		return nil
 	}
-	parsed, err := deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
 	if err != nil {
 		return nil
 	}
@@ -208,18 +217,18 @@ func parseFile(deps *deps.Deps, io *smartio.SmartIO, file string) *goimportsdeps
 }
 
 // goFilesUnder lists every .go file at or below dir, in listing order.
-func goFilesUnder(deps *deps.Deps, io *smartio.SmartIO, dir string) []string {
+func goFilesUnder(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []string {
 	var files []string
 	for _, file := range io.ListFilesRecursively(dir) {
-		if deps.Stringsdeps.HasSuffix(file, ".go") {
+		if sandbox.Deps.Stringsdeps.HasSuffix(file, ".go") {
 			files = append(files, file)
 		}
 	}
 	return files
 }
 
-func lastSegment(deps *deps.Deps, path string) string {
-	parts := deps.Stringsdeps.Split(path, "/")
+func lastSegment(sandbox *api.Sandbox, path string) string {
+	parts := sandbox.Deps.Stringsdeps.Split(path, "/")
 	return parts[len(parts)-1]
 }
 
@@ -239,7 +248,7 @@ func isUnder(imp string, prefix string) bool {
 
 // isDirectChild reports whether path is a loose entry of dir rather than of a
 // directory below it.
-func isDirectChild(deps *deps.Deps, path string, dir string) bool {
+func isDirectChild(sandbox *api.Sandbox, path string, dir string) bool {
 	return isUnder(path, dir) &&
-		len(deps.Stringsdeps.Split(path, "/")) == len(deps.Stringsdeps.Split(dir, "/"))+1
+		len(sandbox.Deps.Stringsdeps.Split(path, "/")) == len(sandbox.Deps.Stringsdeps.Split(dir, "/"))+1
 }

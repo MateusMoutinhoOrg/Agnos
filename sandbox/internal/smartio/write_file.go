@@ -1,14 +1,14 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func WriteFile(deps *deps.Deps, io *SmartIO, path string, content []byte) error {
-	p, err := processInputPath(deps, io, path)
+func WriteFile(sandbox *api.Sandbox, io *SmartIO, path string, content []byte) error {
+	p, err := processInputPath(sandbox, io, path)
 	if err != nil {
 		return err
 	}
-	if deps.Iodeps.Exist(rootedPath(deps, io, p)) {
-		return deps.Std.Errorf("file %q already exists", p)
+	if sandbox.Deps.Iodeps.Exist(rootedPath(sandbox, io, p)) {
+		return sandbox.Deps.Std.Errorf("file %q already exists", p)
 	}
 	io.Transactions[p] = content
 	return nil

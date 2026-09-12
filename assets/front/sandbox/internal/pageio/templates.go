@@ -1,7 +1,7 @@
 package pageio
 
 // The project's own render layer, sitting on top of the two 0-opinionated
-// contracts it composes: deps.Embeddeps reads the asset, deps.Templatedeps
+// contracts it composes: sandbox.Deps.Embeddeps reads the asset, sandbox.Deps.Templatedeps
 // executes it. What this package adds is the opinion neither contract may
 // hold — a fixed set of native functions every page is rendered with, so a
 // template names an asset by path and gets back a link that is checked at
@@ -13,13 +13,13 @@ package pageio
 // front layer, the way sandbox/internal/server tells it about the server one.
 
 import (
-	"{{.Module}}/sandbox/deps"
+	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/templatedeps"
 )
 
 const (
 	// StaticRoot is the directory of the embedded asset tree every static
-	// helper reads from, as deps.Embeddeps spells a path: slash-separated
+	// helper reads from, as sandbox.Deps.Embeddeps spells a path: slash-separated
 	// and relative to the root of the assets package, so
 	// "assets/frontend/static" on disk.
 	StaticRoot = "frontend/static"
@@ -45,22 +45,22 @@ const (
 // Render reads one template out of the embedded asset tree and executes it
 // over vars with every helper of this package registered.
 //
-// path is spelled as deps.Embeddeps spells one — slash-separated and relative
+// path is spelled as sandbox.Deps.Embeddeps spells one — slash-separated and relative
 // to the root of the assets package, so "frontend/pages/home.html". The error
 // reports an asset that could not be read, a template that does not parse, or
 // a helper that failed: all three are authoring or packaging mistakes, so a
 // caller answers 500 rather than serving a half-rendered page.
-func Render(d *deps.Deps, path string, vars any) ([]byte, error) {
-	source, err := d.Embeddeps.ReadFile(path)
+func Render(sandbox *api.Sandbox, path string, vars any) ([]byte, error) {
+	source, err := sandbox.Deps.Embeddeps.ReadFile(path)
 	if err != nil {
 		return nil, err
 	}
 
-	rendered, err := d.Templatedeps.Render(templatedeps.RenderProps{
+	rendered, err := sandbox.Deps.Templatedeps.Render(templatedeps.RenderProps{
 		Name:   path,
 		Source: string(source),
 		Vars:   vars,
-		Funcs:  funcMap(d, vars),
+		Funcs:  funcMap(sandbox, vars),
 	})
 	if err != nil {
 		return nil, err
@@ -73,8 +73,8 @@ func Render(d *deps.Deps, path string, vars any) ([]byte, error) {
 // compares an incoming `?sha=` against. Both sides truncate here rather than
 // each on its own: a mismatch in length would send every request down the
 // revalidate branch, which is a silent loss of caching rather than a failure.
-func ShortSha(d *deps.Deps, content []byte) string {
-	digest := d.Hashdeps.Sha256Hex(content)
+func ShortSha(sandbox *api.Sandbox, content []byte) string {
+	digest := sandbox.Deps.Hashdeps.Sha256Hex(content)
 	if len(digest) < ShaLength {
 		return digest
 	}
@@ -88,25 +88,25 @@ func ShortSha(d *deps.Deps, content []byte) string {
 //
 // vars is threaded through so `include` renders a partial over the same
 // values the page itself is rendered over.
-func funcMap(d *deps.Deps, vars any) map[string]any {
+func funcMap(sandbox *api.Sandbox, vars any) map[string]any {
 	return map[string]any{
 		"staticref": func(relative string) (string, error) {
-			return staticRef(d, relative)
+			return staticRef(sandbox, relative)
 		},
 		"cssref": func(relative string) (string, error) {
-			return cssRef(d, relative)
+			return cssRef(sandbox, relative)
 		},
 		"jsref": func(relative string) (string, error) {
-			return jsRef(d, relative)
+			return jsRef(sandbox, relative)
 		},
 		"dirref": func(dir string) (string, error) {
-			return dirRef(d, dir)
+			return dirRef(sandbox, dir)
 		},
 		"inline": func(relative string) (string, error) {
-			return inline(d, relative)
+			return inline(sandbox, relative)
 		},
 		"include": func(path string) (string, error) {
-			content, err := Render(d, path, vars)
+			content, err := Render(sandbox, path, vars)
 			if err != nil {
 				return "", err
 			}
@@ -119,17 +119,17 @@ func funcMap(d *deps.Deps, vars any) map[string]any {
 // stamped with the digest of the bytes it currently holds. An asset that
 // cannot be read is reported rather than linked, which is what turns a typo in
 // a page into a failing render instead of a 404 in the browser.
-func staticRef(d *deps.Deps, relative string) (string, error) {
-	content, err := readStatic(d, relative)
+func staticRef(sandbox *api.Sandbox, relative string) (string, error) {
+	content, err := readStatic(sandbox, relative)
 	if err != nil {
 		return "", err
 	}
-	return StaticMount + "/" + relative + "?sha=" + ShortSha(d, content), nil
+	return StaticMount + "/" + relative + "?sha=" + ShortSha(sandbox, content), nil
 }
 
 // cssRef is the `cssref` helper: the whole stylesheet tag for one asset.
-func cssRef(d *deps.Deps, relative string) (string, error) {
-	href, err := staticRef(d, relative)
+func cssRef(sandbox *api.Sandbox, relative string) (string, error) {
+	href, err := staticRef(sandbox, relative)
 	if err != nil {
 		return "", err
 	}
@@ -139,8 +139,8 @@ func cssRef(d *deps.Deps, relative string) (string, error) {
 // jsRef is the `jsref` helper: the whole script tag for one asset. It is
 // deferred, so a page may declare its scripts in the head and still parse
 // before any of them runs.
-func jsRef(d *deps.Deps, relative string) (string, error) {
-	src, err := staticRef(d, relative)
+func jsRef(sandbox *api.Sandbox, relative string) (string, error) {
+	src, err := staticRef(sandbox, relative)
 	if err != nil {
 		return "", err
 	}
@@ -153,32 +153,32 @@ func jsRef(d *deps.Deps, relative string) (string, error) {
 // same tree always renders the same bytes. An extension neither side claims is
 // skipped: an image or a font is referenced by the markup that uses it, not by
 // a tag of its own. "" and "." both name StaticRoot itself.
-func dirRef(d *deps.Deps, dir string) (string, error) {
-	prefix, err := staticPrefix(d, dir)
+func dirRef(sandbox *api.Sandbox, dir string) (string, error) {
+	prefix, err := staticPrefix(sandbox, dir)
 	if err != nil {
 		return "", err
 	}
 
-	listed, err := d.Embeddeps.ListFilesRecursively(StaticRoot + "/" + prefix)
+	listed, err := sandbox.Deps.Embeddeps.ListFilesRecursively(StaticRoot + "/" + prefix)
 	if err != nil {
 		return "", err
 	}
-	d.Sortdeps.Strings(listed)
+	sandbox.Deps.Sortdeps.Strings(listed)
 
 	styles := []string{}
 	scripts := []string{}
 	for _, name := range listed {
 		relative := prefix + name
 
-		switch d.Stringsdeps.ToLower(extensionOf(d, name)) {
+		switch sandbox.Deps.Stringsdeps.ToLower(extensionOf(sandbox, name)) {
 		case ".css":
-			tag, err := cssRef(d, relative)
+			tag, err := cssRef(sandbox, relative)
 			if err != nil {
 				return "", err
 			}
 			styles = append(styles, tag)
 		case ".js", ".mjs":
-			tag, err := jsRef(d, relative)
+			tag, err := jsRef(sandbox, relative)
 			if err != nil {
 				return "", err
 			}
@@ -186,15 +186,15 @@ func dirRef(d *deps.Deps, dir string) (string, error) {
 		}
 	}
 
-	return d.Stringsdeps.Join(append(styles, scripts...), "\n"), nil
+	return sandbox.Deps.Stringsdeps.Join(append(styles, scripts...), "\n"), nil
 }
 
 // inline is the `inline` helper: the content of one asset written straight
 // into the page. It carries no digest and no tag, because nothing is fetched —
 // it is for critical css, an icon, or a script small enough that a second
 // request costs more than the bytes.
-func inline(d *deps.Deps, relative string) (string, error) {
-	content, err := readStatic(d, relative)
+func inline(sandbox *api.Sandbox, relative string) (string, error) {
+	content, err := readStatic(sandbox, relative)
 	if err != nil {
 		return "", err
 	}
@@ -203,25 +203,25 @@ func inline(d *deps.Deps, relative string) (string, error) {
 
 // readStatic reads one asset under StaticRoot, refusing a path that could name
 // something outside it.
-func readStatic(d *deps.Deps, relative string) ([]byte, error) {
-	if err := checkRelative(d, relative); err != nil {
+func readStatic(sandbox *api.Sandbox, relative string) ([]byte, error) {
+	if err := checkRelative(sandbox, relative); err != nil {
 		return nil, err
 	}
-	return d.Embeddeps.ReadFile(StaticRoot + "/" + relative)
+	return sandbox.Deps.Embeddeps.ReadFile(StaticRoot + "/" + relative)
 }
 
 // staticPrefix resolves the directory one helper was pointed at into what has
 // to be put back in front of every name the listing returns, so a listed
 // "app.js" becomes the "scripts/app.js" the other helpers take. "" and "."
 // both name StaticRoot itself, whose prefix is empty.
-func staticPrefix(d *deps.Deps, dir string) (string, error) {
+func staticPrefix(sandbox *api.Sandbox, dir string) (string, error) {
 	if dir == "" || dir == "." {
 		return "", nil
 	}
-	if err := checkRelative(d, dir); err != nil {
+	if err := checkRelative(sandbox, dir); err != nil {
 		return "", err
 	}
-	return d.Stringsdeps.TrimSuffix(dir, "/") + "/", nil
+	return sandbox.Deps.Stringsdeps.TrimSuffix(dir, "/") + "/", nil
 }
 
 // checkRelative refuses a path that does not stay under the directory it is
@@ -229,18 +229,18 @@ func staticPrefix(d *deps.Deps, dir string) (string, error) {
 // never come from a request, so this is not the static route's defence against
 // a caller — it is what keeps a helper unable to reach the rest of the asset
 // tree by mistake.
-func checkRelative(d *deps.Deps, relative string) error {
+func checkRelative(sandbox *api.Sandbox, relative string) error {
 	if relative == "" {
-		return d.Std.Errorf("asset path is empty")
+		return sandbox.Deps.Std.Errorf("asset path is empty")
 	}
-	if d.Stringsdeps.HasPrefix(relative, "/") {
-		return d.Std.Errorf("asset path %s is absolute", relative)
+	if sandbox.Deps.Stringsdeps.HasPrefix(relative, "/") {
+		return sandbox.Deps.Std.Errorf("asset path %s is absolute", relative)
 	}
-	if d.Stringsdeps.Contains(relative, "..") {
-		return d.Std.Errorf("asset path %s climbs out of %s", relative, StaticRoot)
+	if sandbox.Deps.Stringsdeps.Contains(relative, "..") {
+		return sandbox.Deps.Std.Errorf("asset path %s climbs out of %s", relative, StaticRoot)
 	}
-	if d.Stringsdeps.ContainsAny(relative, "\\\x00") {
-		return d.Std.Errorf("asset path %s is not slash-separated", relative)
+	if sandbox.Deps.Stringsdeps.ContainsAny(relative, "\\\x00") {
+		return sandbox.Deps.Std.Errorf("asset path %s is not slash-separated", relative)
 	}
 	return nil
 }
@@ -248,8 +248,8 @@ func checkRelative(d *deps.Deps, relative string) error {
 // extensionOf returns the asset's extension, dot included, or "" when it has
 // none. It reads the last dot of the whole path, which is safe here because
 // every path a helper resolves is slash-separated and already checked.
-func extensionOf(d *deps.Deps, name string) string {
-	cut := d.Stringsdeps.LastIndex(name, ".")
+func extensionOf(sandbox *api.Sandbox, name string) string {
+	cut := sandbox.Deps.Stringsdeps.LastIndex(name, ".")
 	if cut < 0 {
 		return ""
 	}

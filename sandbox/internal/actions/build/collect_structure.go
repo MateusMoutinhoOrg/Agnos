@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -28,8 +28,8 @@ type StructureEntry struct {
 //
 // A project with no structure.yaml collects no lines, and its Structure doc
 // renders an empty tree.
-func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, error) {
-	structure_conf, err := utils.LoadStructureConf(deps, io)
+func CollectStructure(sandbox *api.Sandbox, io *smartio.SmartIO) ([]StructureEntry, error) {
+	structure_conf, err := utils.LoadStructureConf(sandbox, io)
 	if err != nil {
 		return nil, err
 	}
@@ -39,7 +39,7 @@ func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, e
 	labels := make([]string, len(nodes))
 	width := 0
 	for index, node := range nodes {
-		labels[index] = deps.Stringsdeps.Repeat(structureIndent, node.Depth) + node.Label
+		labels[index] = sandbox.Deps.Stringsdeps.Repeat(structureIndent, node.Depth) + node.Label
 		if len(labels[index]) > width {
 			width = len(labels[index])
 		}
@@ -48,7 +48,7 @@ func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, e
 	entries := make([]StructureEntry, 0, len(nodes))
 	for index, node := range nodes {
 		entries = append(entries, StructureEntry{
-			Line: structureLine(deps, labels[index], width, node),
+			Line: structureLine(sandbox, labels[index], width, node),
 		})
 	}
 
@@ -59,10 +59,10 @@ func CollectStructure(deps *deps.Deps, io *smartio.SmartIO) ([]StructureEntry, e
 // item's description, marking a generated file with the "(gen)" prefix every
 // page of the docs uses for one. An item with no description is just its
 // label, with no trailing spaces to diff against.
-func structureLine(deps *deps.Deps, label string, width int, node utils.StructureNode) string {
+func structureLine(sandbox *api.Sandbox, label string, width int, node utils.StructureNode) string {
 	description := node.Description
 	if node.Gen {
-		description = deps.Stringsdeps.TrimSpace("(gen) " + description)
+		description = sandbox.Deps.Stringsdeps.TrimSpace("(gen) " + description)
 	}
 
 	if description == "" {
@@ -70,5 +70,5 @@ func structureLine(deps *deps.Deps, label string, width int, node utils.Structur
 	}
 
 	padding := width - len(label) + structureGap
-	return label + deps.Stringsdeps.Repeat(" ", padding) + description
+	return label + sandbox.Deps.Stringsdeps.Repeat(" ", padding) + description
 }

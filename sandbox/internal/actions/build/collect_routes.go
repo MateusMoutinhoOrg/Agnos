@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -18,11 +18,11 @@ const routesDir = "sandbox/internal/routes"
 //
 // The list comes back ordered for matching, not in listing order: the most
 // specific route first, so a route fixing "/" can never swallow "/home".
-func CollectRoutes(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, error) {
+func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 	var routes []map[string]any
 
 	for _, dir := range io.ListDirs(routesDir) {
-		name := lastSegmentOf(deps, dir)
+		name := lastSegmentOf(sandbox, dir)
 		if name == "" {
 			continue
 		}
@@ -32,23 +32,23 @@ func CollectRoutes(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, erro
 			continue
 		}
 
-		conf, err := routeconf.New(deps, string(content))
+		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, deps.Std.Errorf("routes/%s/route.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("routes/%s/route.yaml: %w", name, err)
 		}
 
-		if err := checkRouteSchema(deps, name, conf); err != nil {
+		if err := checkRouteSchema(sandbox, name, conf); err != nil {
 			return nil, err
 		}
 
-		if err := checkRoutePaths(deps, name, conf); err != nil {
+		if err := checkRoutePaths(sandbox, name, conf); err != nil {
 			return nil, err
 		}
 
-		routes = append(routes, routeData(deps, name, conf))
+		routes = append(routes, routeData(sandbox, name, conf))
 	}
 
-	sortRoutes(deps, routes)
+	sortRoutes(sandbox, routes)
 	return routes, nil
 }
 
@@ -57,8 +57,8 @@ func CollectRoutes(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, erro
 // the most characters, then the one of fixed length before the one taking the
 // rest of the path, then by pattern for a stable tie-break. The ordering is
 // the collector's, so servermain.go's template only has to range in order.
-func sortRoutes(deps *deps.Deps, routes []map[string]any) {
-	deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
+func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
+	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
 		left, right := routes[i], routes[j]
 		if left["IdentifierCount"] != right["IdentifierCount"] {
 			return left["IdentifierCount"].(int) > right["IdentifierCount"].(int)
@@ -76,9 +76,9 @@ func sortRoutes(deps *deps.Deps, routes []map[string]any) {
 // checkRouteSchema refuses a json-schema that reaches outside the declared
 // subset. Silently dropping $ref or oneOf would generate a validator that
 // accepts what the declaration means to reject.
-func checkRouteSchema(deps *deps.Deps, name string, conf *routeconf.RouteConf) error {
+func checkRouteSchema(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) error {
 	for _, key := range schemaUnknownKeys(conf.Body.Schema) {
-		return deps.Std.Errorf("routes/%s/route.yaml: json-schema key %q is outside the supported subset", name, key)
+		return sandbox.Deps.Std.Errorf("routes/%s/route.yaml: json-schema key %q is outside the supported subset", name, key)
 	}
 	return nil
 }
@@ -101,14 +101,14 @@ func schemaUnknownKeys(schema *routeconf.Schema) []string {
 // segment taking the rest of the path only reads as a suffix if it is the last
 // one, and its Entries field is a []T, which no header or query parameter of
 // the same name could fill.
-func checkRoutePaths(deps *deps.Deps, name string, conf *routeconf.RouteConf) error {
+func checkRoutePaths(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) error {
 	at := utils.RouteRestIndex(conf.Paths)
 	if at < 0 {
 		return nil
 	}
 
 	if at != len(conf.Paths)-1 {
-		return deps.Std.Errorf("routes/%s/route.yaml: the captured segment %q is an array before the end of `paths`; only the last segment takes the rest of the path", name, conf.Paths[at].Field.Key)
+		return sandbox.Deps.Std.Errorf("routes/%s/route.yaml: the captured segment %q is an array before the end of `paths`; only the last segment takes the rest of the path", name, conf.Paths[at].Field.Key)
 	}
 
 	key := conf.Paths[at].Field.Key
@@ -116,8 +116,8 @@ func checkRoutePaths(deps *deps.Deps, name string, conf *routeconf.RouteConf) er
 		label  string
 		fields []routeconf.Field
 	}{{"header", conf.Headers}, {"query parameter", conf.Params}} {
-		if utils.FindRouteField(deps, origin.fields, key) >= 0 {
-			return deps.Std.Errorf("routes/%s/route.yaml: %q is both the segment taking the rest of the path and a declared %s; the two cannot fill one Entries field", name, key, origin.label)
+		if utils.FindRouteField(sandbox, origin.fields, key) >= 0 {
+			return sandbox.Deps.Std.Errorf("routes/%s/route.yaml: %q is both the segment taking the rest of the path and a declared %s; the two cannot fill one Entries field", name, key, origin.label)
 		}
 	}
 
@@ -136,12 +136,12 @@ func arityOp(rest_index int) string {
 }
 
 // routeData is one route as both templates read it.
-func routeData(deps *deps.Deps, name string, conf *routeconf.RouteConf) map[string]any {
-	bindings, parts, count, rest_index := routeBindings(deps, conf)
+func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map[string]any {
+	bindings, parts, count, rest_index := routeBindings(sandbox, conf)
 
 	return map[string]any{
 		"Name":            name,
-		"GoName":          exportedName(deps, name),
+		"GoName":          exportedName(sandbox, name),
 		"Method":          conf.Method,
 		"Trigger":         routeTrigger(conf),
 		"Pattern":         conf.Pattern(),
@@ -157,10 +157,10 @@ func routeData(deps *deps.Deps, name string, conf *routeconf.RouteConf) map[stri
 		"LongDescription": conf.LongDescription,
 		"Examples":        conf.Examples,
 		"Hidden":          conf.Hidden,
-		"Body":            bodyData(deps, conf),
+		"Body":            bodyData(sandbox, conf),
 		"HasBody":         conf.Body.Type != routeconf.BodyNone,
 		"SchemaJson":      conf.SchemaJson(),
-		"BodyStructs":     bodyStructs(deps, conf),
+		"BodyStructs":     bodyStructs(sandbox, conf),
 	}
 }
 
@@ -183,7 +183,7 @@ func routeTrigger(conf *routeconf.RouteConf) string {
 // The same name may be declared in more than one origin: the field is written
 // once and filled by the first origin, in declaration order, that brings a
 // value.
-func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any, []map[string]any, int, int) {
+func routeBindings(sandbox *api.Sandbox, conf *routeconf.RouteConf) ([]map[string]any, []map[string]any, int, int) {
 	var bindings []map[string]any
 	var parts []map[string]any
 	index := map[string]int{}
@@ -194,7 +194,7 @@ func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any
 		if segment.Field == nil {
 			// The root identifier "/" fixes the empty path: it names no
 			// segment of its own, so it adds nothing to match on.
-			literal := deps.Stringsdeps.Trim(segment.Identifier, "/")
+			literal := sandbox.Deps.Stringsdeps.Trim(segment.Identifier, "/")
 			if literal == "" {
 				continue
 			}
@@ -211,7 +211,7 @@ func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any
 			// of its own: it opens the suffix, so it adds nothing to
 			// match on and closes the sequence.
 			rest_index = position
-			bindings = addBinding(deps, bindings, index, *segment.Field, "path", position)
+			bindings = addBinding(sandbox, bindings, index, *segment.Field, "path", position)
 			break
 		}
 
@@ -220,15 +220,15 @@ func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any
 			"IsCapture": true,
 			"Literal":   "",
 		})
-		bindings = addBinding(deps, bindings, index, *segment.Field, "path", position)
+		bindings = addBinding(sandbox, bindings, index, *segment.Field, "path", position)
 		position++
 	}
 
 	for _, field := range conf.Headers {
-		bindings = addBinding(deps, bindings, index, field, "header", 0)
+		bindings = addBinding(sandbox, bindings, index, field, "header", 0)
 	}
 	for _, field := range conf.Params {
-		bindings = addBinding(deps, bindings, index, field, "query", 0)
+		bindings = addBinding(sandbox, bindings, index, field, "query", 0)
 	}
 
 	return bindings, parts, position, rest_index
@@ -236,12 +236,12 @@ func routeBindings(deps *deps.Deps, conf *routeconf.RouteConf) ([]map[string]any
 
 // addBinding records one declared origin against the Entries field its name
 // resolves to, creating that field the first time the name is seen.
-func addBinding(deps *deps.Deps, bindings []map[string]any, index map[string]int, field routeconf.Field, kind string, position int) []map[string]any {
+func addBinding(sandbox *api.Sandbox, bindings []map[string]any, index map[string]int, field routeconf.Field, kind string, position int) []map[string]any {
 	source := map[string]any{
 		"Kind":   kind,
 		"Index":  position,
 		"Key":    field.Key,
-		"Getter": sourceGetter(deps, kind, field.Key),
+		"Getter": sourceGetter(sandbox, kind, field.Key),
 	}
 
 	if at, seen := index[field.Key]; seen {
@@ -252,7 +252,7 @@ func addBinding(deps *deps.Deps, bindings []map[string]any, index map[string]int
 		}
 		if field.HasDefault && !binding["HasDefault"].(bool) {
 			binding["HasDefault"] = true
-			binding["DefaultLiteral"] = routeDefaultLiteral(deps, field.Type, field.Default)
+			binding["DefaultLiteral"] = routeDefaultLiteral(sandbox, field.Type, field.Default)
 		}
 		setBindingArity(binding, len(binding["Sources"].([]map[string]any)))
 		return bindings
@@ -261,7 +261,7 @@ func addBinding(deps *deps.Deps, bindings []map[string]any, index map[string]int
 	index[field.Key] = len(bindings)
 	binding := map[string]any{
 		"Key":            field.Key,
-		"GoField":        exportedName(deps, field.Key),
+		"GoField":        exportedName(sandbox, field.Key),
 		"GoType":         goType(field.Type, field.Array),
 		"Type":           field.Type,
 		"IsArray":        field.Array,
@@ -269,13 +269,13 @@ func addBinding(deps *deps.Deps, bindings []map[string]any, index map[string]int
 		"ParseFunc":      routeParseFunc(field.Type),
 		"Required":       field.Required,
 		"HasDefault":     field.HasDefault,
-		"DefaultLiteral": routeDefaultLiteral(deps, field.Type, field.Default),
+		"DefaultLiteral": routeDefaultLiteral(sandbox, field.Type, field.Default),
 		"Description":    field.Description,
 		"Examples":       field.Examples,
 		"Default":        field.Default,
-		"MinLabel":       routeNumberLabel(deps, field.Type, field.Min, field.HasMin),
-		"MaxLabel":       routeNumberLabel(deps, field.Type, field.Max, field.HasMax),
-		"RangeCheck":     routeRangeCheck(deps, field, kind),
+		"MinLabel":       routeNumberLabel(sandbox, field.Type, field.Min, field.HasMin),
+		"MaxLabel":       routeNumberLabel(sandbox, field.Type, field.Max, field.HasMax),
+		"RangeCheck":     routeRangeCheck(sandbox, field, kind),
 		"Sources":        []map[string]any{source},
 	}
 	binding["HasPath"] = kind == "path"
@@ -297,12 +297,12 @@ func setBindingArity(binding map[string]any, sources int) {
 
 // sourceGetter is the expression the generated dispatch reads one origin's raw
 // value with. A path capture is read by index instead, so it has none.
-func sourceGetter(deps *deps.Deps, kind string, key string) string {
+func sourceGetter(sandbox *api.Sandbox, kind string, key string) string {
 	switch kind {
 	case "header":
-		return "request.GetHeader(" + deps.Stringsdeps.Quote(key) + ")"
+		return "request.GetHeader(" + sandbox.Deps.Stringsdeps.Quote(key) + ")"
 	case "query":
-		return "request.GetQueryParam(" + deps.Stringsdeps.Quote(key) + ")"
+		return "request.GetQueryParam(" + sandbox.Deps.Stringsdeps.Quote(key) + ")"
 	default:
 		return ""
 	}
@@ -337,18 +337,18 @@ func routeParseFunc(kind string) string {
 
 // routeNumberLabel renders a min/max bound as the literal it has in
 // route.yaml ("" when the bound is unset).
-func routeNumberLabel(deps *deps.Deps, kind string, value float64, has bool) string {
+func routeNumberLabel(sandbox *api.Sandbox, kind string, value float64, has bool) string {
 	if !has {
 		return ""
 	}
 	if kind == "int" {
-		return deps.Stringsdeps.FormatInt(int64(value), 10)
+		return sandbox.Deps.Stringsdeps.FormatInt(int64(value), 10)
 	}
-	return deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+	return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
 }
 
 // routeDefaultLiteral is the Go literal a declared default is assigned as.
-func routeDefaultLiteral(deps *deps.Deps, kind string, value string) string {
+func routeDefaultLiteral(sandbox *api.Sandbox, kind string, value string) string {
 	switch kind {
 	case "boolean":
 		if value == "true" {
@@ -361,7 +361,7 @@ func routeDefaultLiteral(deps *deps.Deps, kind string, value string) string {
 		}
 		return value
 	default:
-		return deps.Stringsdeps.Quote(value)
+		return sandbox.Deps.Stringsdeps.Quote(value)
 	}
 }
 
@@ -369,7 +369,7 @@ func routeDefaultLiteral(deps *deps.Deps, kind string, value string) string {
 // numeric field has been bound, to enforce its min/max bounds. It returns ""
 // for fields that carry no bound (or are not int/float scalars). The body is
 // indented one tab — the depth of the block it is spliced into.
-func routeRangeCheck(deps *deps.Deps, field routeconf.Field, kind string) string {
+func routeRangeCheck(sandbox *api.Sandbox, field routeconf.Field, kind string) string {
 	if field.Array || (field.Type != "int" && field.Type != "float") {
 		return ""
 	}
@@ -378,36 +378,36 @@ func routeRangeCheck(deps *deps.Deps, field routeconf.Field, kind string) string
 	}
 
 	subject := subjectLabel(kind)
-	goField := exportedName(deps, field.Key)
+	goField := exportedName(sandbox, field.Key)
 
 	b := ""
 	// failOp is the comparison that means "out of range"; wantOp is what the
 	// message tells the caller to satisfy.
 	guard := func(failOp, wantOp, bound string) {
-		b += deps.Std.Sprintf(
+		b += sandbox.Deps.Std.Sprintf(
 			"\tif entries.%s %s %s {\n"+
-				"\t\trouteio.WriteError(deps, response, api.StatusBadRequest, %q, \"%s '%s' must be %s %s\")\n"+
+				"\t\trouteio.WriteError(sandbox, response, api.StatusBadRequest, %q, \"%s '%s' must be %s %s\")\n"+
 				"\t\treturn\n"+
 				"\t}\n",
 			goField, failOp, bound, field.Key, subject, field.Key, wantOp, bound)
 	}
 	if field.HasMin {
-		guard("<", ">=", routeNumberLabel(deps, field.Type, field.Min, true))
+		guard("<", ">=", routeNumberLabel(sandbox, field.Type, field.Min, true))
 	}
 	if field.HasMax {
-		guard(">", "<=", routeNumberLabel(deps, field.Type, field.Max, true))
+		guard(">", "<=", routeNumberLabel(sandbox, field.Type, field.Max, true))
 	}
-	return deps.Stringsdeps.TrimRight(b, "\n")
+	return sandbox.Deps.Stringsdeps.TrimRight(b, "\n")
 }
 
 // bodyData is the route's body declaration as the two templates read it.
-func bodyData(deps *deps.Deps, conf *routeconf.RouteConf) map[string]any {
+func bodyData(sandbox *api.Sandbox, conf *routeconf.RouteConf) map[string]any {
 	body := conf.Body
 	return map[string]any{
 		"Type":         body.Type,
 		"Required":     body.Required,
 		"MaxBytes":     body.MaxBytes,
-		"MaxBytesText": deps.Stringsdeps.FormatInt(int64(body.MaxBytes), 10),
+		"MaxBytesText": sandbox.Deps.Stringsdeps.FormatInt(int64(body.MaxBytes), 10),
 		"ContentType":  body.ContentType,
 		"HasSchema":    body.HasSchema,
 		"IsRaw":        body.Type == "raw",
@@ -439,24 +439,24 @@ func bodyGoType(body routeconf.Body) string {
 // bodyStructs flattens the declared json-schema into the Go structs the
 // generated entries.go declares: Body for the root object, Body<Path> for a
 // nested object and Body<Path>Item for the object an array holds.
-func bodyStructs(deps *deps.Deps, conf *routeconf.RouteConf) []map[string]any {
+func bodyStructs(sandbox *api.Sandbox, conf *routeconf.RouteConf) []map[string]any {
 	body := conf.Body
 	if body.Type != "json" || !body.HasSchema || body.Schema == nil || body.Schema.Type != "object" {
 		return nil
 	}
-	return appendBodyStruct(deps, nil, "Body", body.Schema)
+	return appendBodyStruct(sandbox, nil, "Body", body.Schema)
 }
 
 // appendBodyStruct emits one struct for schema and, depth first, one for every
 // object nested under it. The parent is appended before its children so the
 // generated file reads outside in.
-func appendBodyStruct(deps *deps.Deps, structs []map[string]any, name string, schema *routeconf.Schema) []map[string]any {
+func appendBodyStruct(sandbox *api.Sandbox, structs []map[string]any, name string, schema *routeconf.Schema) []map[string]any {
 	fields := make([]map[string]any, 0, len(schema.Properties))
 	var nested []*routeconf.Schema
 	var nested_names []string
 
 	for _, property := range schema.Properties {
-		go_field := exportedName(deps, property.Name)
+		go_field := exportedName(sandbox, property.Name)
 		child := property.Schema
 		field := map[string]any{
 			"Key":     property.Name,
@@ -505,7 +505,7 @@ func appendBodyStruct(deps *deps.Deps, structs []map[string]any, name string, sc
 	})
 
 	for i, child := range nested {
-		structs = appendBodyStruct(deps, structs, nested_names[i], child)
+		structs = appendBodyStruct(sandbox, structs, nested_names[i], child)
 	}
 
 	return structs

@@ -2,12 +2,11 @@ package add_flag
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	add_error := addFlagAction.AddFlag(deps, api.FieldProps{
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	add_error := addFlagAction.AddFlag(sandbox, api.FieldProps{
 		Path:        entries.Path,
 		Command:     entries.Command,
 		Name:        entries.Name,
@@ -23,7 +22,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		Position:    entries.Position,
 	})
 	if add_error != nil {
-		deps.Std.Error("%s\n", add_error.Error())
+		sandbox.Deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

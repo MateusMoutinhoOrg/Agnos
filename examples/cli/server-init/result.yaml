@@ -8,12 +8,12 @@ tree:
     - file: sandbox/internal/commands/start_server/entries.yaml
       sha: d463ba2aad26659c3f79bf8b2b54c901220f1c24be7b131fc58bd19d0e8d191d
     - file: sandbox/internal/commands/start_server/handler.go
-      sha: f551c0fbd05c28b718e8d9abae771e35959680797c77b1da515af1ccc67720e8
+      sha: 33f98f84134086835d7258aaa12a81b58b7c00ceea0b886bc8185cff4a97db7b
     - file: sandbox/internal/routes/health/entries.go
       sha: 8b1b5f50403c9f2adba70764447c3f9ba4b531620a9096d115e88d5c25ec9131
     - file: sandbox/internal/routes/health/handler.go
-      sha: 08504db57f8d3caecb146f5c7cfc9336a34f25f7789ef59f0c3bde1b63f1c356
+      sha: b08e9a93f4719a9a5c8db8fb75f45defde994a8442199e5e020eb9922d911e75
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da
     - file: sandbox/internal/server/servermain.go
-      sha: e847ff9f80b7044913339d428e8eeb52c0585217688f3b7deec2ec6028352478
+      sha: 0da1f208dc0e6d294ac96986506ec52f8ff57b8347ba98456b57b5eaf99fdc89

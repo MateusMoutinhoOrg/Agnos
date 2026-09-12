@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -11,12 +11,12 @@ import (
 // order is the declaration's, not the listing of adapters/libs: an available
 // is a selection, and two adapters may implement the same contract, so which
 // one binds cannot be read off a directory listing.
-func CollectAvailables(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, error) {
+func CollectAvailables(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 
 	var availables []map[string]any
-	for _, name := range utils.DeclaredAvailables(deps, io) {
+	for _, name := range utils.DeclaredAvailables(sandbox, io) {
 
-		conf, err := utils.LoadAvailableConf(deps, io, name)
+		conf, err := utils.LoadAvailableConf(sandbox, io, name)
 		if err != nil {
 			return nil, err
 		}
@@ -25,7 +25,7 @@ func CollectAvailables(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, 
 		for _, adapter := range conf.Adapters {
 			adapters = append(adapters, map[string]string{
 				"Name":  adapter,
-				"Title": utils.DepField(deps, adapter),
+				"Title": utils.DepField(sandbox, adapter),
 			})
 		}
 

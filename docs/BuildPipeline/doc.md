@@ -58,7 +58,7 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Dispatch (`climain.go`)
 
-`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against every command's identifiers; unknown -> exit 2. `dispatch<Name>`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `CommandHandler(deps, &entries)`.
+`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against every command's identifiers; unknown -> exit 2. `dispatch<Name>`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `sandbox.Deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `CommandHandler(sandbox, &entries)`.
 
 ## Self-hosting
 

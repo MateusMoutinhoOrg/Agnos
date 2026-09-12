@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -10,18 +10,18 @@ import (
 // the {{range .DepsApi}} loop in the generated docs/PublicApi/doc.md. A
 // contract may be split over several files; each one becomes an entry of the
 // directory's Files list, so the doc keeps the source's own grouping.
-func CollectDepsApi(deps *deps.Deps, io *smartio.SmartIO) ([]map[string]any, error) {
+func CollectDepsApi(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 
 	var contracts []map[string]any
-	for _, dir := range collectLibDirs(deps, io, "sandbox/deps") {
+	for _, dir := range collectLibDirs(sandbox, io, "sandbox/deps") {
 
 		var files []map[string]any
-		for _, file := range goFilesOf(deps, io, "sandbox/deps/"+dir["Name"]) {
-			parsed, err := parseGoFile(deps, io, file)
+		for _, file := range goFilesOf(sandbox, io, "sandbox/deps/"+dir["Name"]) {
+			parsed, err := parseGoFile(sandbox, io, file)
 			if err != nil {
 				return nil, err
 			}
-			files = append(files, fileData(deps, file, parsed))
+			files = append(files, fileData(sandbox, file, parsed))
 		}
 
 		contracts = append(contracts, map[string]any{

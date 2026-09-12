@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -18,7 +18,7 @@ const adapterlistDir = "assets/" + utils.AdapterlistGroup
 // so it is compared against the copy install writes into the package.
 //
 // A project with no assets/adapterlist has nothing to check.
-func CheckAdapterlist(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
+func CheckAdapterlist(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	if !io.IsDir(adapterlistDir) {
@@ -26,17 +26,17 @@ func CheckAdapterlist(deps *deps.Deps, io *smartio.SmartIO, module string) []str
 	}
 
 	for _, dir := range io.ListDirs(adapterlistDir) {
-		adapter := lastSegment(deps, dir)
+		adapter := lastSegment(sandbox, dir)
 
 		for _, asset := range io.ListFilesRecursively(dir) {
-			relative := deps.Stringsdeps.TrimPrefix(asset, dir+"/")
+			relative := sandbox.Deps.Stringsdeps.TrimPrefix(asset, dir+"/")
 
 			target := relative
 			if relative == utils.AdapterConfFile {
 				target = utils.AdapterConfPath(adapter)
 			}
 
-			violations = append(violations, checkCatalogAsset(deps, io, asset, target, module)...)
+			violations = append(violations, checkCatalogAsset(sandbox, io, asset, target, module)...)
 		}
 	}
 

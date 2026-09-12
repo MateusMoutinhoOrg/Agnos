@@ -1,7 +1,7 @@
 package apishape
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The two directions a conversion runs in. A field carries values out of the
@@ -38,13 +38,13 @@ type Plan struct {
 // planner carries what every step of the walk needs: the api being converted
 // and the two package qualifiers its types are spelled with on each side.
 type planner struct {
-	deps   *deps.Deps
-	api    *Api
-	local  string
-	remote string
-	names  map[string]bool
-	order  []Converter
-	err    error
+	sandbox *api.Sandbox
+	shape   *Api
+	local   string
+	remote  string
+	names   map[string]bool
+	order   []Converter
+	err     error
 }
 
 // Converters plans the conversion of one api package between two copies of
@@ -56,12 +56,12 @@ type planner struct {
 // else — builtins, slices and maps of builtins, `any`, `error`, a named
 // interface of builtin-only methods — has an identical underlying type in both
 // copies and crosses with an assignment or a plain conversion.
-func Converters(deps *deps.Deps, api *Api, local string, remote string) (*Plan, error) {
-	if !IsStruct(api, "Sandbox") {
-		return nil, deps.Std.Errorf("the remote api declares no Sandbox struct: there is nothing to convert")
+func Converters(sandbox *api.Sandbox, shape *Api, local string, remote string) (*Plan, error) {
+	if !IsStruct(shape, "Sandbox") {
+		return nil, sandbox.Deps.Std.Errorf("the remote api declares no Sandbox struct: there is nothing to convert")
 	}
 
-	plan := &planner{deps: deps, api: api, local: local, remote: remote, names: map[string]bool{}}
+	plan := &planner{sandbox: sandbox, shape: shape, local: local, remote: remote, names: map[string]bool{}}
 
 	entry := converterFor(plan, "Sandbox", Out)
 	if plan.err != nil {
@@ -93,7 +93,7 @@ func flip(direction string) string {
 // planned is returned as it is, which is also what stops a recursive type from
 // walking forever.
 func converterFor(plan *planner, expr string, direction string) string {
-	name := direction + expressionName(plan.deps, expr)
+	name := direction + expressionName(plan.sandbox, expr)
 
 	if plan.names[name] {
 		return name
@@ -103,8 +103,8 @@ func converterFor(plan *planner, expr string, direction string) string {
 	from, to := qualifiers(plan, direction)
 	converter := Converter{
 		Name: name,
-		From: Qualify(plan.api, expr, from),
-		To:   Qualify(plan.api, expr, to),
+		From: Qualify(plan.shape, expr, from),
+		To:   Qualify(plan.shape, expr, to),
 	}
 
 	// The entry is reserved before the body is built: the body may reach the
@@ -120,9 +120,9 @@ func converterFor(plan *planner, expr string, direction string) string {
 // converts.
 func converterBody(plan *planner, expr string, direction string) string {
 	_, to := qualifiers(plan, direction)
-	destination := Qualify(plan.api, expr, to)
+	destination := Qualify(plan.shape, expr, to)
 
-	if Declares(plan.api, expr) {
+	if Declares(plan.shape, expr) {
 		return structBody(plan, expr, direction, destination)
 	}
 
@@ -138,7 +138,7 @@ func converterBody(plan *planner, expr string, direction string) string {
 		return mapBody(plan, key, inner, direction, destination)
 	}
 
-	plan.err = plan.deps.Std.Errorf("cannot convert %s: only a named struct, a slice, a map, a pointer and a func of convertible types can cross", expr)
+	plan.err = plan.sandbox.Deps.Std.Errorf("cannot convert %s: only a named struct, a slice, a map, a pointer and a func of convertible types can cross", expr)
 	return ""
 }
 
@@ -146,10 +146,13 @@ func converterBody(plan *planner, expr string, direction string) string {
 // two copies are never identical types, because Go's type identity does not
 // reach through the named types a struct's fields are declared with.
 func structBody(plan *planner, name string, direction string, destination string) string {
-	entry := plan.api.ByName[name]
+	entry := plan.shape.ByName[name]
 
 	body := "\treturn " + destination + "{\n"
 	for _, field := range entry.Fields {
+		if IsDepsWiring(name, field.Name) {
+			continue
+		}
 		body += "\t\t" + field.Name + ": " + convert(plan, field.Type, direction, "v."+field.Name) + ",\n"
 	}
 	return body + "\t}"

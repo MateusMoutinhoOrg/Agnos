@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -18,21 +18,21 @@ import (
 // the family may be empty, but the directory it would live in has to exist.
 //
 // A project with no structure.yaml describes nothing and has nothing to check.
-func CheckStructure(deps *deps.Deps, io *smartio.SmartIO) []string {
+func CheckStructure(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
 	if !io.IsFile(utils.StructureConfPath()) {
 		return violations
 	}
 
-	structure_conf, err := utils.LoadStructureConf(deps, io)
+	structure_conf, err := utils.LoadStructureConf(sandbox, io)
 	if err != nil {
 		return append(violations, err.Error())
 	}
 
 	for _, node := range utils.FlattenStructure(structure_conf.Items) {
-		if utils.IsStructurePattern(deps, node.Path) {
-			parent := utils.StructureParentPath(deps, node.Path)
+		if utils.IsStructurePattern(sandbox, node.Path) {
+			parent := utils.StructureParentPath(sandbox, node.Path)
 			if parent != "" && !io.IsDir(parent) {
 				violations = append(violations, ghostSpec(node.Path,
 					"the directory "+parent+" it would live in does not exist"))

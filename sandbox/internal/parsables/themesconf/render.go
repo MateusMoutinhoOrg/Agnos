@@ -1,14 +1,14 @@
 package themesconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func Render(deps *deps.Deps, themes_conf *ThemesConf) string {
-	new_themes_specs := deps.Serializables.CreateArray()
+func Render(sandbox *api.Sandbox, themes_conf *ThemesConf) string {
+	new_themes_specs := sandbox.Deps.Serializables.CreateArray()
 
 	for _, theme := range themes_conf.Themes {
-		theme_obj := deps.Serializables.CreateObject()
+		theme_obj := sandbox.Deps.Serializables.CreateObject()
 		theme_obj.AddItemToObject("name", theme.Name)
 		theme_obj.AddItemToObject("id", theme.Id)
 		theme_obj.AddItemToObject("description", theme.Description)
@@ -16,5 +16,5 @@ func Render(deps *deps.Deps, themes_conf *ThemesConf) string {
 		new_themes_specs.AddItemToArray(theme_obj)
 	}
 
-	return deps.Serializables.SerializeToYaml(new_themes_specs)
+	return sandbox.Deps.Serializables.SerializeToYaml(new_themes_specs)
 }

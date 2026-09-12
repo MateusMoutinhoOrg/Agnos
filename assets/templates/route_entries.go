@@ -3,7 +3,6 @@ package {{.Name}}
 import (
 {{- if .HasBody}}
 	"{{.Module}}/sandbox/api"
-	"{{.Module}}/sandbox/deps"
 {{- end}}
 {{- if .Body.IsJson}}
 	serializables "{{.Module}}/sandbox/deps/serializables"
@@ -64,7 +63,7 @@ const EntriesSchema = {{printf "%q" .SchemaJson}}
 //
 // It returns api.StatusOk when the body passed; on any other status the error
 // response has already been written, and the handler only has to return it.
-func (entries *Entries) ReadBody(deps *deps.Deps, response serverdeps.Response) ({{.Body.GoType}}, int) {
+func (entries *Entries) ReadBody(sandbox *api.Sandbox, response serverdeps.Response) ({{.Body.GoType}}, int) {
 	if entries.body_read {
 		return entries.body_value, entries.body_status
 	}
@@ -73,14 +72,14 @@ func (entries *Entries) ReadBody(deps *deps.Deps, response serverdeps.Response) 
 
 	raw, err := entries.Request.ReadBody(MaxBodyBytes)
 	if err != nil {
-		entries.body_status = routeio.WriteError(deps, response, api.StatusPayloadTooLarge, "",
+		entries.body_status = routeio.WriteError(sandbox, response, api.StatusPayloadTooLarge, "",
 			"the request body is larger than {{.Body.MaxBytesText}} bytes")
 		return entries.body_value, entries.body_status
 	}
 
 	if len(raw) == 0 {
 {{- if .Body.Required}}
-		entries.body_status = routeio.WriteError(deps, response, api.StatusBadRequest, "",
+		entries.body_status = routeio.WriteError(sandbox, response, api.StatusBadRequest, "",
 			"this route requires a request body")
 {{- end}}
 		return entries.body_value, entries.body_status
@@ -93,9 +92,9 @@ func (entries *Entries) ReadBody(deps *deps.Deps, response serverdeps.Response) 
 	entries.body_value = string(raw)
 {{- else}}
 
-	parsed, field, message, ok := routeio.ValidateSchema(deps, {{if .SchemaJson}}EntriesSchema{{else}}""{{end}}, raw)
+	parsed, field, message, ok := routeio.ValidateSchema(sandbox, {{if .SchemaJson}}EntriesSchema{{else}}""{{end}}, raw)
 	if !ok {
-		entries.body_status = routeio.WriteError(deps, response, api.StatusBadRequest, field, message)
+		entries.body_status = routeio.WriteError(sandbox, response, api.StatusBadRequest, field, message)
 		return entries.body_value, entries.body_status
 	}
 {{- if .Body.IsObject}}

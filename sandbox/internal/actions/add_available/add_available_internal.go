@@ -1,7 +1,7 @@
 package add_available
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -14,20 +14,20 @@ import (
 // available has to fill every field, so an empty one would be a tree that
 // fails `verify` the moment it is written. Point it at another adapter with
 // `set-adapter --available <name>`.
-func AddAvailableInternal(deps *deps.Deps, io *smartio.SmartIO, path string, available string) error {
-	deps.Std.Log("add-available started with path %s available %s \n", path, available)
+func AddAvailableInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string, available string) error {
+	sandbox.Deps.Std.Log("add-available started with path %s available %s \n", path, available)
 
-	if err := utils.ValidateAvailableName(deps, available); err != nil {
+	if err := utils.ValidateAvailableName(sandbox, available); err != nil {
 		return err
 	}
 
 	if io.IsDir(utils.AvailableDir(available)) {
-		return deps.Std.Errorf("available %q already exists", available)
+		return sandbox.Deps.Std.Errorf("available %q already exists", available)
 	}
 
-	conf, err := utils.LoadAvailableConf(deps, io, utils.StandardAvailable)
+	conf, err := utils.LoadAvailableConf(sandbox, io, utils.StandardAvailable)
 	if err != nil {
-		return deps.Std.Errorf("no %s available to copy the selection from: run `agnos deps-init` first", utils.StandardAvailable)
+		return sandbox.Deps.Std.Errorf("no %s available to copy the selection from: run `agnos deps-init` first", utils.StandardAvailable)
 	}
 
 	return io.WriteFile(utils.AvailableConfPath(available), []byte(conf.Render()))

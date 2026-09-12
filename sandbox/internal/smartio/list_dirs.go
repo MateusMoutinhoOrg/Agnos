@@ -1,11 +1,11 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func ListDirs(deps *deps.Deps, io *SmartIO, path string) []string {
-	p, err := processInputPath(deps, io, path)
+func ListDirs(sandbox *api.Sandbox, io *SmartIO, path string) []string {
+	p, err := processInputPath(sandbox, io, path)
 	if err != nil {
 		return nil
 	}
-	return filterPendingRemoved(deps, io, filterIgnored(io, unrootedPaths(deps, io, deps.Iodeps.ListDirs(rootedPath(deps, io, p)))))
+	return filterPendingRemoved(sandbox, io, filterIgnored(io, unrootedPaths(sandbox, io, sandbox.Deps.Iodeps.ListDirs(rootedPath(sandbox, io, p)))))
 }

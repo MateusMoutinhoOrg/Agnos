@@ -1,7 +1,7 @@
 package front_purge
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -34,10 +34,10 @@ var frontDirs = []string{
 //
 // The server layer is deliberately left in place, and so are the deps the
 // front layer pulled in: other code may use them.
-func FrontPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Log("front-purge started with path %s \n", path)
+func FrontPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
+	sandbox.Deps.Std.Log("front-purge started with path %s \n", path)
 
-	files, err := deps.Embeddeps.ListFilesRecursively("front")
+	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively("front")
 	if err != nil {
 		return err
 	}
@@ -48,7 +48,7 @@ func FrontPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error
 
 	owned := make([]string, 0, len(frontDirs))
 	owned = append(owned, frontDirs...)
-	owned = append(owned, pageDirs(deps, io)...)
+	owned = append(owned, pageDirs(sandbox, io)...)
 
 	for _, dir := range owned {
 		if !io.IsDir(dir) {
@@ -60,9 +60,9 @@ func FrontPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error
 		io.RemoveDir(dir)
 	}
 
-	deps.Std.Log("front-purge kept %s: pages, styles and scripts are yours \n", utils.FrontendDir)
+	sandbox.Deps.Std.Log("front-purge kept %s: pages, styles and scripts are yours \n", utils.FrontendDir)
 
-	for _, dir := range ancestorDirs(deps, files) {
+	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {
 			io.RemoveDir(dir)
 		}
@@ -73,12 +73,12 @@ func FrontPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error
 
 // pageDirs returns the route package of every declared page — every route with
 // an html template beside it, the same test remove-page makes.
-func pageDirs(deps *deps.Deps, io *smartio.SmartIO) []string {
+func pageDirs(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var dirs []string
 
 	for _, dir := range io.ListDirs(routesDir) {
-		name := lastSegmentOf(deps, dir)
-		if name == "" || !utils.IsPage(deps, io, name) {
+		name := lastSegmentOf(sandbox, dir)
+		if name == "" || !utils.IsPage(sandbox, io, name) {
 			continue
 		}
 		dirs = append(dirs, routesDir+"/"+name)
@@ -89,28 +89,28 @@ func pageDirs(deps *deps.Deps, io *smartio.SmartIO) []string {
 
 // lastSegmentOf is the final slash-separated segment of a listed path, which
 // is the route's directory name whether the listing came back rooted or not.
-func lastSegmentOf(deps *deps.Deps, path string) string {
-	segments := deps.Stringsdeps.Split(path, "/")
+func lastSegmentOf(sandbox *api.Sandbox, path string) string {
+	segments := sandbox.Deps.Stringsdeps.Split(path, "/")
 	return segments[len(segments)-1]
 }
 
 // ancestorDirs returns every directory that contains one of the given files,
 // deepest first, so an emptied child is removed before its parent is tested.
-func ancestorDirs(deps *deps.Deps, files []string) []string {
+func ancestorDirs(sandbox *api.Sandbox, files []string) []string {
 	seen := map[string]bool{}
 	var dirs []string
 	for _, file := range files {
-		parts := deps.Stringsdeps.Split(file, "/")
+		parts := sandbox.Deps.Stringsdeps.Split(file, "/")
 		for i := 1; i < len(parts); i++ {
-			dir := deps.Stringsdeps.Join(parts[:i], "/")
+			dir := sandbox.Deps.Stringsdeps.Join(parts[:i], "/")
 			if !seen[dir] {
 				seen[dir] = true
 				dirs = append(dirs, dir)
 			}
 		}
 	}
-	deps.Sortdeps.Slice(dirs, func(i int, j int) bool {
-		return deps.Stringsdeps.Count(dirs[i], "/") > deps.Stringsdeps.Count(dirs[j], "/")
+	sandbox.Deps.Sortdeps.Slice(dirs, func(i int, j int) bool {
+		return sandbox.Deps.Stringsdeps.Count(dirs[i], "/") > sandbox.Deps.Stringsdeps.Count(dirs[j], "/")
 	})
 	return dirs
 }

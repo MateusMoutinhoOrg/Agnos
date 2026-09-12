@@ -1,11 +1,11 @@
 package commandconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, conf *CommandConf) {
+func BindMethods(sandbox *api.Sandbox, conf *CommandConf) {
 	conf.Render = func() string {
-		return Render(deps, conf)
+		return Render(sandbox, conf)
 	}
 }

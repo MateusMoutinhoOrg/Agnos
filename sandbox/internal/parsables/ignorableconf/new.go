@@ -1,22 +1,22 @@
 package ignorableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
+func New(sandbox *api.Sandbox, content string) (*IgnorableConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !specs.IsArray() {
-		return nil, deps.Std.Errorf("ignore config is not an array")
+		return nil, sandbox.Deps.Std.Errorf("ignore config is not an array")
 	}
 
 	items := &IgnorableConf{
@@ -25,7 +25,7 @@ func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
 
 	size, err := specs.GetArraySize()
 	if err != nil {
-		return nil, deps.Std.Errorf("could not get ignore array size")
+		return nil, sandbox.Deps.Std.Errorf("could not get ignore array size")
 	}
 
 	for i := 0; i < size; i++ {
@@ -36,12 +36,12 @@ func New(deps *deps.Deps, content string) (*IgnorableConf, error) {
 
 		path, str_err := item.GetString()
 		if str_err != nil {
-			return nil, deps.Std.Errorf("ignore item at index %d is not a string", i)
+			return nil, sandbox.Deps.Std.Errorf("ignore item at index %d is not a string", i)
 		}
 
 		items.Paths = append(items.Paths, path)
 	}
 
-	BindMethods(deps, items)
+	BindMethods(sandbox, items)
 	return items, nil
 }

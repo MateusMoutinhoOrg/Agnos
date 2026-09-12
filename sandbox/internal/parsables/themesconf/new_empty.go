@@ -1,13 +1,13 @@
 package themesconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *ThemesConf {
+func NewEmpty(sandbox *api.Sandbox) *ThemesConf {
 	themes_conf := &ThemesConf{
 		Themes: make([]Theme, 0),
 	}
-	BindMethods(deps, themes_conf)
+	BindMethods(sandbox, themes_conf)
 	return themes_conf
 }

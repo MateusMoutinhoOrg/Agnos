@@ -1,7 +1,7 @@
 package remove_segment
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -11,36 +11,36 @@ import (
 // segment from `paths` and writes the file back. It is the exact inverse of
 // add-segment: a capture answers to its name, a literal to the identifier it
 // spells.
-func RemoveSegmentInternal(deps *deps.Deps, io *smartio.SmartIO, route string, name string) error {
-	conf, err := utils.LoadRouteConf(deps, io, route)
+func RemoveSegmentInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string, name string) error {
+	conf, err := utils.LoadRouteConf(sandbox, io, route)
 	if err != nil {
 		return err
 	}
 
-	key := utils.RouteFieldName(deps, name)
+	key := utils.RouteFieldName(sandbox, name)
 	if key == "" {
-		return deps.Std.Errorf("remove-segment needs the name of the segment to drop")
+		return sandbox.Deps.Std.Errorf("remove-segment needs the name of the segment to drop")
 	}
 
-	index := findSegment(deps, conf, key)
+	index := findSegment(sandbox, conf, key)
 	if index < 0 {
-		return deps.Std.Errorf("route %q declares no path segment named %q", route, key)
+		return sandbox.Deps.Std.Errorf("route %q declares no path segment named %q", route, key)
 	}
 
-	deps.Std.Log("remove-segment removing %s from %s \n", key, utils.RouteConfPath(deps, route))
+	sandbox.Deps.Std.Log("remove-segment removing %s from %s \n", key, utils.RouteConfPath(sandbox, route))
 
 	conf.Paths = utils.RemoveRouteSegment(conf.Paths, index)
-	return utils.SaveRouteConf(deps, io, route, conf)
+	return utils.SaveRouteConf(sandbox, io, route, conf)
 }
 
 // findSegment locates the segment key names, looking it up as a capture first
 // and as a literal identifier second, or returns -1.
-func findSegment(deps *deps.Deps, conf *routeconf.RouteConf, key string) int {
-	if index := utils.FindRouteSegment(deps, conf.Paths, key); index >= 0 {
+func findSegment(sandbox *api.Sandbox, conf *routeconf.RouteConf, key string) int {
+	if index := utils.FindRouteSegment(sandbox, conf.Paths, key); index >= 0 {
 		return index
 	}
 
-	identifier, err := utils.RouteIdentifierSegment(deps, key)
+	identifier, err := utils.RouteIdentifierSegment(sandbox, key)
 	if err != nil {
 		return -1
 	}

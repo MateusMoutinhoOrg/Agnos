@@ -1,11 +1,11 @@
 package depconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *DepConf {
+func NewEmpty(sandbox *api.Sandbox) *DepConf {
 	dep_conf := &DepConf{}
-	BindMethods(deps, dep_conf)
+	BindMethods(sandbox, dep_conf)
 	return dep_conf
 }

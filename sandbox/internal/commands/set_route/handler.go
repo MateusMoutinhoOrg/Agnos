@@ -2,12 +2,11 @@ package set_route
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	set_error := setRouteAction.SetRoute(deps, api.RouteProps{
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	set_error := setRouteAction.SetRoute(sandbox, api.RouteProps{
 		Path:            entries.Path,
 		Route:           entries.Route,
 		Method:          entries.Method,
@@ -19,7 +18,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		Examples:        entries.Example,
 	})
 	if set_error != nil {
-		deps.Std.Error("%s\n", set_error.Error())
+		sandbox.Deps.Std.Error("%s\n", set_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

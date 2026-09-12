@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 )
 
@@ -15,8 +15,8 @@ var RouteBodyTypes = []string{"none", "raw", "text", "json"}
 
 // RouteBodyType normalizes a body type, taking the aliases the parser takes
 // ("bytes" for raw, "string" for text) and refusing anything else.
-func RouteBodyType(deps *deps.Deps, raw string) (string, error) {
-	switch deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(raw)) {
+func RouteBodyType(sandbox *api.Sandbox, raw string) (string, error) {
+	switch sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) {
 	case routeconf.BodyNone:
 		return routeconf.BodyNone, nil
 	case "raw", "bytes":
@@ -26,7 +26,7 @@ func RouteBodyType(deps *deps.Deps, raw string) (string, error) {
 	case "json":
 		return "json", nil
 	}
-	return "", deps.Std.Errorf("unknown body type %q (use %s)", raw, deps.Stringsdeps.Join(RouteBodyTypes, ", "))
+	return "", sandbox.Deps.Std.Errorf("unknown body type %q (use %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteBodyTypes, ", "))
 }
 
 // RouteSchemaFormats is every `format` a string property may declare.
@@ -34,8 +34,8 @@ var RouteSchemaFormats = []string{"email", "uuid", "date-time", "uri"}
 
 // RouteSchemaFormat normalizes a --format, listing the accepted values when it
 // is not one of them.
-func RouteSchemaFormat(deps *deps.Deps, raw string) (string, error) {
-	format := deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(raw))
+func RouteSchemaFormat(sandbox *api.Sandbox, raw string) (string, error) {
+	format := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
 	if format == "" {
 		return "", nil
 	}
@@ -44,19 +44,19 @@ func RouteSchemaFormat(deps *deps.Deps, raw string) (string, error) {
 			return format, nil
 		}
 	}
-	return "", deps.Std.Errorf("unknown format %q (use %s)", raw, deps.Stringsdeps.Join(RouteSchemaFormats, ", "))
+	return "", sandbox.Deps.Std.Errorf("unknown format %q (use %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteSchemaFormats, ", "))
 }
 
 // RouteSchemaKind normalizes the --type of a body property: the four field
 // types a request line carries, plus "object" — which a body has and a header
 // or a query key cannot.
-func RouteSchemaKind(deps *deps.Deps, raw string) (string, error) {
-	if deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(raw)) == "object" {
+func RouteSchemaKind(sandbox *api.Sandbox, raw string) (string, error) {
+	if sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) == "object" {
 		return "object", nil
 	}
-	kind, ok := FieldType(deps, raw)
+	kind, ok := FieldType(sandbox, raw)
 	if !ok {
-		return "", deps.Std.Errorf("unknown type %q (use string, boolean, int, float or object)", raw)
+		return "", sandbox.Deps.Std.Errorf("unknown type %q (use string, boolean, int, float or object)", raw)
 	}
 	return kind, nil
 }
@@ -79,8 +79,8 @@ func RouteSchemaType(kind string) string {
 
 // SplitSchemaPath breaks a dotted property path ("address.city") into the
 // segments it names.
-func SplitSchemaPath(deps *deps.Deps, name string) []string {
-	return deps.Stringsdeps.Split(RouteFieldName(deps, name), ".")
+func SplitSchemaPath(sandbox *api.Sandbox, name string) []string {
+	return sandbox.Deps.Stringsdeps.Split(RouteFieldName(sandbox, name), ".")
 }
 
 // SchemaPropertyOf returns the named property of an object schema, or nil.

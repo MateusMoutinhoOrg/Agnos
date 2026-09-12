@@ -1,15 +1,15 @@
 package adapterconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, adapter_conf *AdapterConf) {
+func BindMethods(sandbox *api.Sandbox, adapter_conf *AdapterConf) {
 	adapter_conf.ModuleSpec = func() (string, string, bool) {
 		if adapter_conf.Module == "" {
 			return "", "", false
 		}
-		at := deps.Stringsdeps.LastIndex(adapter_conf.Module, "@")
+		at := sandbox.Deps.Stringsdeps.LastIndex(adapter_conf.Module, "@")
 		if at < 0 {
 			return adapter_conf.Module, "", true
 		}
@@ -17,6 +17,6 @@ func BindMethods(deps *deps.Deps, adapter_conf *AdapterConf) {
 	}
 
 	adapter_conf.Render = func() string {
-		return Render(deps, adapter_conf)
+		return Render(sandbox, adapter_conf)
 	}
 }

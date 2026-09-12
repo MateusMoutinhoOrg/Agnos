@@ -1,23 +1,22 @@
 package structureconf
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
-func Render(deps *deps.Deps, structure_conf *StructureConf) string {
-	return deps.Serializables.SerializeToYaml(renderItems(deps, structure_conf.Items))
+func Render(sandbox *api.Sandbox, structure_conf *StructureConf) string {
+	return sandbox.Deps.Serializables.SerializeToYaml(renderItems(sandbox, structure_conf.Items))
 }
 
 // renderItems writes one set of siblings back as an object keyed by item name,
 // recursing into the children of every item that has some. Keys are written in
 // the order the items are held, which New has already sorted.
-func renderItems(deps *deps.Deps, items []Item) *serializibles.SerializibleObject {
-	items_obj := deps.Serializables.CreateObject()
+func renderItems(sandbox *api.Sandbox, items []Item) *serializibles.SerializibleObject {
+	items_obj := sandbox.Deps.Serializables.CreateObject()
 
 	for _, item := range items {
-		item_obj := deps.Serializables.CreateObject()
+		item_obj := sandbox.Deps.Serializables.CreateObject()
 		item_obj.AddItemToObject("description", item.Description)
 
 		if item.Dir {
@@ -33,7 +32,7 @@ func renderItems(deps *deps.Deps, items []Item) *serializibles.SerializibleObjec
 		}
 
 		if len(item.Children) > 0 {
-			item_obj.AddItemToObject("children", renderItems(deps, item.Children))
+			item_obj.AddItemToObject("children", renderItems(sandbox, item.Children))
 		}
 
 		items_obj.AddItemToObject(item.Name, item_obj)

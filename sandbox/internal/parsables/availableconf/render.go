@@ -1,17 +1,17 @@
 package availableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func Render(deps *deps.Deps, available_conf *AvailableConf) string {
-	obj := deps.Serializables.CreateObject()
+func Render(sandbox *api.Sandbox, available_conf *AvailableConf) string {
+	obj := sandbox.Deps.Serializables.CreateObject()
 
-	adapters := deps.Serializables.CreateArray()
+	adapters := sandbox.Deps.Serializables.CreateArray()
 	for _, adapter := range available_conf.Adapters {
 		adapters.AddItemToArray(adapter)
 	}
 
 	obj.AddItemToObject("adapters", adapters)
-	return deps.Serializables.SerializeToYaml(obj)
+	return sandbox.Deps.Serializables.SerializeToYaml(obj)
 }

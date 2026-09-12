@@ -40,15 +40,33 @@ type ParsedFile struct {
 
 // Declares reports whether name is a type this package declares — the one test
 // that tells a type of the contract from a predeclared one.
-func Declares(api *Api, name string) bool {
-	_, ok := api.ByName[name]
+func Declares(shape *Api, name string) bool {
+	_, ok := shape.ByName[name]
 	return ok
 }
 
 // IsStruct reports whether name is a struct type of this package. A struct is
 // the only kind that needs a generated converter: its underlying type names
 // the package's own types, so the two copies are never identical.
-func IsStruct(api *Api, name string) bool {
-	entry, ok := api.ByName[name]
+func IsStruct(shape *Api, name string) bool {
+	entry, ok := shape.ByName[name]
 	return ok && entry.Kind == "struct"
+}
+
+// SandboxType is the root type of an api package: the one a consumer converts,
+// and the one the converter plan is walked from.
+const SandboxType = "Sandbox"
+
+// DepsField is the field of Sandbox holding the repo's own dependency set. It
+// is the one declaration of an api package that does not cross into a
+// consumer: it names sandbox/deps, which is how this repo reaches the outside
+// world and not part of what it offers. So the copy drops it, the shape rule
+// skips it and no converter is written for it — a consumer installs the api of
+// a repo, never its wiring.
+const DepsField = "Deps"
+
+// IsDepsWiring reports whether a field of a type is Sandbox.Deps, the one
+// field that stays behind when the api is copied into a consumer.
+func IsDepsWiring(typeName string, fieldName string) bool {
+	return typeName == SandboxType && fieldName == DepsField
 }

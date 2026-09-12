@@ -1,10 +1,10 @@
 package ignorableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, items *IgnorableConf) {
+func BindMethods(sandbox *api.Sandbox, items *IgnorableConf) {
 
 	items.AddPath = func(path string) {
 		items.Paths = append(items.Paths, path)
@@ -20,6 +20,6 @@ func BindMethods(deps *deps.Deps, items *IgnorableConf) {
 	}
 
 	items.Render = func() string {
-		return Render(deps, items)
+		return Render(sandbox, items)
 	}
 }

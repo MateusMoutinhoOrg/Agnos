@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -10,7 +10,7 @@ import (
 // declared available into adapters/availables/<name>/new.go — the New() that
 // binds exactly the adapters that available.yaml selects. An available with no
 // declaration is a hand-written mix and is not touched.
-func GenerateAvailableNews(deps *deps.Deps, io *smartio.SmartIO, availables []map[string]any, module string) error {
+func GenerateAvailableNews(sandbox *api.Sandbox, io *smartio.SmartIO, availables []map[string]any, module string) error {
 	for _, available := range availables {
 		name, _ := available["Name"].(string)
 		if name == "" {
@@ -23,7 +23,7 @@ func GenerateAvailableNews(deps *deps.Deps, io *smartio.SmartIO, availables []ma
 		}
 
 		dest := utils.AvailableDir(name) + "/new.go"
-		if err := utils.RenderTemplateToDest(deps, io, "templates/available_new.go", vars, dest); err != nil {
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/available_new.go", vars, dest); err != nil {
 			return err
 		}
 	}

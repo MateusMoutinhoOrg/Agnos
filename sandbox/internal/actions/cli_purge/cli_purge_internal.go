@@ -1,7 +1,7 @@
 package cli_purge
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -20,10 +20,10 @@ var cliDirs = []string{
 // plus the directories the cli layer owns whole, then drops any directory the
 // removal left empty. The deps the cli layer pulled in (sandbox/deps/argvdeps,
 // sandbox/deps/std) are deliberately left in place: other code may use them.
-func CliPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Log("cli-purge started with path %s \n", path)
+func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
+	sandbox.Deps.Std.Log("cli-purge started with path %s \n", path)
 
-	files, err := deps.Embeddeps.ListFilesRecursively("cli")
+	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively("cli")
 	if err != nil {
 		return err
 	}
@@ -42,7 +42,7 @@ func CliPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		io.RemoveDir(dir)
 	}
 
-	for _, dir := range ancestorDirs(deps, files) {
+	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {
 			io.RemoveDir(dir)
 		}
@@ -53,21 +53,21 @@ func CliPurgeInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 
 // ancestorDirs returns every directory that contains one of the given files,
 // deepest first, so an emptied child is removed before its parent is tested.
-func ancestorDirs(deps *deps.Deps, files []string) []string {
+func ancestorDirs(sandbox *api.Sandbox, files []string) []string {
 	seen := map[string]bool{}
 	var dirs []string
 	for _, file := range files {
-		parts := deps.Stringsdeps.Split(file, "/")
+		parts := sandbox.Deps.Stringsdeps.Split(file, "/")
 		for i := 1; i < len(parts); i++ {
-			dir := deps.Stringsdeps.Join(parts[:i], "/")
+			dir := sandbox.Deps.Stringsdeps.Join(parts[:i], "/")
 			if !seen[dir] {
 				seen[dir] = true
 				dirs = append(dirs, dir)
 			}
 		}
 	}
-	deps.Sortdeps.Slice(dirs, func(i, j int) bool {
-		return deps.Stringsdeps.Count(dirs[i], "/") > deps.Stringsdeps.Count(dirs[j], "/")
+	sandbox.Deps.Sortdeps.Slice(dirs, func(i, j int) bool {
+		return sandbox.Deps.Stringsdeps.Count(dirs[i], "/") > sandbox.Deps.Stringsdeps.Count(dirs[j], "/")
 	})
 	return dirs
 }

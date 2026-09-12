@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -14,19 +14,19 @@ import (
 // not a violation: it simply renders no section in README.md's index.
 //
 // A project with no docs/ directory has nothing to check.
-func CheckDocs(deps *deps.Deps, io *smartio.SmartIO) []string {
+func CheckDocs(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
 	if !io.IsDir(utils.DocsDir) {
 		return violations
 	}
 
-	themes_conf, err := utils.LoadThemesConf(deps, io)
+	themes_conf, err := utils.LoadThemesConf(sandbox, io)
 	if err != nil {
 		return append(violations, err.Error())
 	}
 
-	docs, err := utils.CollectDocTree(deps, io)
+	docs, err := utils.CollectDocTree(sandbox, io)
 	if err != nil {
 		return append(violations, err.Error())
 	}

@@ -1,7 +1,7 @@
 package apishape
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 )
 
@@ -23,15 +23,15 @@ import (
 // shape of the api, and a shape is verified, not declared; an installable
 // switch defaulting to off would only move the violation to the consumer's
 // install, which is where it hurts.
-func Violations(deps *deps.Deps, api *Api) []string {
+func Violations(sandbox *api.Sandbox, shape *Api) []string {
 	var violations []string
 
-	for _, file := range api.Files {
+	for _, file := range shape.Files {
 		for _, entry := range file.Parsed.Types {
-			violations = append(violations, typeViolations(deps, api, file.Name, entry)...)
+			violations = append(violations, typeViolations(sandbox, shape, file.Name, entry)...)
 		}
 		for _, entry := range file.Parsed.Functions {
-			violations = append(violations, signatureViolations(deps, api, file.Name, "function "+entry.Name, entry)...)
+			violations = append(violations, signatureViolations(sandbox, shape, file.Name, "function "+entry.Name, entry)...)
 		}
 	}
 
@@ -41,7 +41,7 @@ func Violations(deps *deps.Deps, api *Api) []string {
 // typeViolations checks one type declaration, in the terms of its kind: a
 // struct through its fields, an interface through its methods, anything else
 // through its underlying type.
-func typeViolations(deps *deps.Deps, api *Api, file string, entry goimportsdeps.Type) []string {
+func typeViolations(sandbox *api.Sandbox, shape *Api, file string, entry goimportsdeps.Type) []string {
 	var violations []string
 
 	where := "type " + entry.Name
@@ -49,19 +49,22 @@ func typeViolations(deps *deps.Deps, api *Api, file string, entry goimportsdeps.
 	switch entry.Kind {
 	case "struct":
 		for _, field := range entry.Fields {
+			if IsDepsWiring(entry.Name, field.Name) {
+				continue
+			}
 			if field.Name == "" {
 				violations = append(violations, violation(file, where,
 					"embeds "+field.Type+"; an embedded field has no name to convert through, so give it one"))
 				continue
 			}
-			violations = append(violations, exprViolations(deps, api, file, where+" field "+field.Name, field.Type)...)
+			violations = append(violations, exprViolations(sandbox, shape, file, where+" field "+field.Name, field.Type)...)
 		}
 	case "interface":
 		for _, method := range entry.Methods {
-			violations = append(violations, signatureViolations(deps, api, file, where+" method "+method.Name, method)...)
+			violations = append(violations, signatureViolations(sandbox, shape, file, where+" method "+method.Name, method)...)
 		}
 	default:
-		violations = append(violations, exprViolations(deps, api, file, where, entry.Underlying)...)
+		violations = append(violations, exprViolations(sandbox, shape, file, where, entry.Underlying)...)
 	}
 
 	return violations
@@ -69,14 +72,14 @@ func typeViolations(deps *deps.Deps, api *Api, file string, entry goimportsdeps.
 
 // signatureViolations checks every parameter and result of one function or
 // method declaration.
-func signatureViolations(deps *deps.Deps, api *Api, file string, where string, entry goimportsdeps.Function) []string {
+func signatureViolations(sandbox *api.Sandbox, shape *Api, file string, where string, entry goimportsdeps.Function) []string {
 	var violations []string
 
 	for _, param := range entry.Params {
-		violations = append(violations, exprViolations(deps, api, file, where+" parameter", param.Type)...)
+		violations = append(violations, exprViolations(sandbox, shape, file, where+" parameter", param.Type)...)
 	}
 	for _, result := range entry.Results {
-		violations = append(violations, exprViolations(deps, api, file, where+" result", result.Type)...)
+		violations = append(violations, exprViolations(sandbox, shape, file, where+" result", result.Type)...)
 	}
 
 	return violations
@@ -86,7 +89,7 @@ func signatureViolations(deps *deps.Deps, api *Api, file string, where string, e
 // the expression as tokens rather than re-parsing it: every question it asks —
 // is this identifier known, is it instantiated, is it a channel, is it an
 // anonymous struct — is answered by an identifier and the character after it.
-func exprViolations(deps *deps.Deps, api *Api, file string, where string, expr string) []string {
+func exprViolations(sandbox *api.Sandbox, shape *Api, file string, where string, expr string) []string {
 	var violations []string
 
 	tokens := tokenize(expr)
@@ -120,7 +123,7 @@ func exprViolations(deps *deps.Deps, api *Api, file string, where string, expr s
 			continue
 		}
 
-		if isBinding(tokens, index) || isPredeclared(item.Text) || Declares(api, item.Text) {
+		if isBinding(tokens, index) || isPredeclared(item.Text) || Declares(shape, item.Text) {
 			continue
 		}
 

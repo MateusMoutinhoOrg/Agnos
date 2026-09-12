@@ -1,7 +1,7 @@
 package cli
 
 import (
-	"{{.Module}}/sandbox/deps"
+	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/argvdeps"
 	"{{.Module}}/sandbox/internal/config"
 {{- range .Commands}}
@@ -25,29 +25,29 @@ const (
 // `help` is dispatched through that same path — it is a declared command whose
 // three files agnos happens to write itself — and is reached directly only for
 // the empty command line below.
-func CliMain(deps *deps.Deps, args []string) int {
+func CliMain(sandbox *api.Sandbox, args []string) int {
 
 	if len(args) == 0 {
-		help.PrintGeneralHelp(deps)
+		help.PrintGeneralHelp(sandbox)
 		return ExitUsage
 	}
 
-	verb := deps.Argvdeps.New(args)
+	verb := sandbox.Deps.Argvdeps.New(args)
 
 	action, err := verb.GetNextStringArg()
 	if err != nil {
-		help.PrintGeneralHelp(deps)
+		help.PrintGeneralHelp(sandbox)
 		return ExitUsage
 	}
 
 	switch {
 {{- range .Commands}}
 	case {{.MatchExpr}}:
-		return dispatch{{.GoName}}(deps, verb)
+		return dispatch{{.GoName}}(sandbox, verb)
 {{- end}}
 	}
 
-	deps.Std.Error("unknown command %q — run '%s help' to see the available commands\n", action, binaryName(deps))
+	sandbox.Deps.Std.Error("unknown command %q — run '%s help' to see the available commands\n", action, binaryName(sandbox))
 	return ExitUsage
 }
 
@@ -58,25 +58,25 @@ func CliMain(deps *deps.Deps, args []string) int {
 
 // binaryName is the executable's name as a user types it: the configured
 // project name, lowercased.
-func binaryName(deps *deps.Deps) string {
-	return deps.Stringsdeps.ToLower(config.ProjectName)
+func binaryName(sandbox *api.Sandbox) string {
+	return sandbox.Deps.Stringsdeps.ToLower(config.ProjectName)
 }
 
 // silenceLogs turns off the progress channel for the rest of the process. It
 // backs the --quiet flag: results (Printf) and errors (Error) still go out,
 // only the "… started with path …" notices stop.
-func silenceLogs(deps *deps.Deps) {
-	deps.Std.Log = func(format string, a ...any) (int, error) {
+func silenceLogs(sandbox *api.Sandbox) {
+	sandbox.Deps.Std.Log = func(format string, a ...any) (int, error) {
 		return 0, nil
 	}
 }
 
 // optionValue reads the occurrence-th value of a value flag, reporting a
 // clean usage error when the flag was given with nothing after it.
-func optionValue(deps *deps.Deps, verb argvdeps.Parser, name string, flags []string, occurrence int) (string, bool) {
+func optionValue(sandbox *api.Sandbox, verb argvdeps.Parser, name string, flags []string, occurrence int) (string, bool) {
 	raw, err := verb.GetStringOption(flags, occurrence)
 	if err != nil {
-		deps.Std.Error("flag '%s': expected a value after %s\n", name, flags[0])
+		sandbox.Deps.Std.Error("flag '%s': expected a value after %s\n", name, flags[0])
 		return "", false
 	}
 	return raw, true
@@ -96,16 +96,16 @@ func nextArgValue(verb argvdeps.Parser) (string, bool) {
 // parseStringValue is the string arm of the parse* family. Every raw value is
 // already a string, so it only exists to keep the generated dispatch uniform
 // across the four field types.
-func parseStringValue(deps *deps.Deps, subject string, name string, raw string) (string, bool) {
+func parseStringValue(sandbox *api.Sandbox, subject string, name string, raw string) (string, bool) {
 	return raw, true
 }
 
 // parseIntValue converts a raw command-line value to an int, reporting the
 // failure in the CLI's own words rather than the parser library's.
-func parseIntValue(deps *deps.Deps, subject string, name string, raw string) (int, bool) {
-	value, err := deps.Stringsdeps.Atoi(raw)
+func parseIntValue(sandbox *api.Sandbox, subject string, name string, raw string) (int, bool) {
+	value, err := sandbox.Deps.Stringsdeps.Atoi(raw)
 	if err != nil {
-		deps.Std.Error("%s '%s': %q is not a valid integer\n", subject, name, raw)
+		sandbox.Deps.Std.Error("%s '%s': %q is not a valid integer\n", subject, name, raw)
 		return 0, false
 	}
 	return value, true
@@ -113,10 +113,10 @@ func parseIntValue(deps *deps.Deps, subject string, name string, raw string) (in
 
 // parseFloatValue converts a raw command-line value to a float64, reporting
 // the failure in the CLI's own words rather than the parser library's.
-func parseFloatValue(deps *deps.Deps, subject string, name string, raw string) (float64, bool) {
-	value, err := deps.Stringsdeps.ParseFloat(raw, 64)
+func parseFloatValue(sandbox *api.Sandbox, subject string, name string, raw string) (float64, bool) {
+	value, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64)
 	if err != nil {
-		deps.Std.Error("%s '%s': %q is not a valid number\n", subject, name, raw)
+		sandbox.Deps.Std.Error("%s '%s': %q is not a valid number\n", subject, name, raw)
 		return 0, false
 	}
 	return value, true
@@ -125,12 +125,12 @@ func parseFloatValue(deps *deps.Deps, subject string, name string, raw string) (
 // checkUnknownFlags reports the first argument that still looks like a flag
 // after every declared flag has been read — a typo such as --pathh, which
 // would otherwise be ignored and leave the command running on a default.
-func checkUnknownFlags(deps *deps.Deps, verb argvdeps.Parser) bool {
+func checkUnknownFlags(sandbox *api.Sandbox, verb argvdeps.Parser) bool {
 	for i, used := range verb.Used {
-		if used || !deps.Stringsdeps.HasPrefix(verb.Args[i], "-") {
+		if used || !sandbox.Deps.Stringsdeps.HasPrefix(verb.Args[i], "-") {
 			continue
 		}
-		deps.Std.Error("unknown flag %q — run '%s help' for the accepted flags\n", verb.Args[i], binaryName(deps))
+		sandbox.Deps.Std.Error("unknown flag %q — run '%s help' for the accepted flags\n", verb.Args[i], binaryName(sandbox))
 		return false
 	}
 	return true
@@ -138,29 +138,29 @@ func checkUnknownFlags(deps *deps.Deps, verb argvdeps.Parser) bool {
 
 // checkUnusedArgs reports the first argument left over once every declared
 // flag and positional arg has been read.
-func checkUnusedArgs(deps *deps.Deps, verb argvdeps.Parser) bool {
+func checkUnusedArgs(sandbox *api.Sandbox, verb argvdeps.Parser) bool {
 	for i, used := range verb.Used {
 		if used {
 			continue
 		}
-		deps.Std.Error("unexpected argument %q\n", verb.Args[i])
+		sandbox.Deps.Std.Error("unexpected argument %q\n", verb.Args[i])
 		return false
 	}
 	return true
 }
 {{range .Commands}}
-func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
+func dispatch{{.GoName}}(sandbox *api.Sandbox, verb argvdeps.Parser) int {
 	entries := &{{.Name}}.Entries{}
 {{- range .Flags}}
 {{- if .IsBool}}
 	entries.{{.GoField}} = verb.IsPresent([]string{ {{.IdentifiersGo}} })
 {{- else if .IsArray}}
 	for occurrence := 0; occurrence < verb.GetOptionsSize([]string{ {{.IdentifiersGo}} }); occurrence++ {
-		raw, rawOk := optionValue(deps, verb, "{{.Key}}", []string{ {{.IdentifiersGo}} }, occurrence)
+		raw, rawOk := optionValue(sandbox, verb, "{{.Key}}", []string{ {{.IdentifiersGo}} }, occurrence)
 		if !rawOk {
 			return ExitUsage
 		}
-		value, valueOk := {{.ParseFunc}}(deps, "flag", "{{.Key}}", raw)
+		value, valueOk := {{.ParseFunc}}(sandbox, "flag", "{{.Key}}", raw)
 		if !valueOk {
 			return ExitUsage
 		}
@@ -168,17 +168,17 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 	}
 {{- if .Required}}
 	if len(entries.{{.GoField}}) == 0 {
-		deps.Std.Error("required flag '{{.Key}}' not provided\n")
+		sandbox.Deps.Std.Error("required flag '{{.Key}}' not provided\n")
 		return ExitUsage
 	}
 {{- end}}
 {{- else}}
 	if verb.GetOptionsSize([]string{ {{.IdentifiersGo}} }) > 0 {
-		raw, rawOk := optionValue(deps, verb, "{{.Key}}", []string{ {{.IdentifiersGo}} }, 0)
+		raw, rawOk := optionValue(sandbox, verb, "{{.Key}}", []string{ {{.IdentifiersGo}} }, 0)
 		if !rawOk {
 			return ExitUsage
 		}
-		value, valueOk := {{.ParseFunc}}(deps, "flag", "{{.Key}}", raw)
+		value, valueOk := {{.ParseFunc}}(sandbox, "flag", "{{.Key}}", raw)
 		if !valueOk {
 			return ExitUsage
 		}
@@ -188,7 +188,7 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 {{- end}}
 {{- if .Required}}
 	} else {
-		deps.Std.Error("required flag '{{.Key}}' not provided\n")
+		sandbox.Deps.Std.Error("required flag '{{.Key}}' not provided\n")
 		return ExitUsage
 	}
 {{- else if .HasDefault}}
@@ -202,10 +202,10 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 {{- end}}
 {{- if .QuietField}}
 	if entries.{{.QuietField}} {
-		silenceLogs(deps)
+		silenceLogs(sandbox)
 	}
 {{- end}}
-	if !checkUnknownFlags(deps, verb) {
+	if !checkUnknownFlags(sandbox, verb) {
 		return ExitUsage
 	}
 {{- range .Args}}
@@ -215,7 +215,7 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 		if !rawOk {
 			break
 		}
-		value, valueOk := {{.ParseFunc}}(deps, "arg", "{{.Key}}", raw)
+		value, valueOk := {{.ParseFunc}}(sandbox, "arg", "{{.Key}}", raw)
 		if !valueOk {
 			return ExitUsage
 		}
@@ -223,13 +223,13 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 	}
 {{- if .Required}}
 	if len(entries.{{.GoField}}) == 0 {
-		deps.Std.Error("required arg '{{.Key}}' not provided\n")
+		sandbox.Deps.Std.Error("required arg '{{.Key}}' not provided\n")
 		return ExitUsage
 	}
 {{- end}}
 {{- else}}
 	if raw, rawOk := nextArgValue(verb); rawOk {
-		value, valueOk := {{.ParseFunc}}(deps, "arg", "{{.Key}}", raw)
+		value, valueOk := {{.ParseFunc}}(sandbox, "arg", "{{.Key}}", raw)
 		if !valueOk {
 			return ExitUsage
 		}
@@ -239,7 +239,7 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 {{- end}}
 {{- if .Required}}
 	} else {
-		deps.Std.Error("required arg '{{.Key}}' not provided\n")
+		sandbox.Deps.Std.Error("required arg '{{.Key}}' not provided\n")
 		return ExitUsage
 	}
 {{- else if .HasDefault}}
@@ -251,9 +251,9 @@ func dispatch{{.GoName}}(deps *deps.Deps, verb argvdeps.Parser) int {
 {{- end}}
 {{- end}}
 {{- end}}
-	if !checkUnusedArgs(deps, verb) {
+	if !checkUnusedArgs(sandbox, verb) {
 		return ExitUsage
 	}
-	return {{.Name}}.CommandHandler(deps, entries)
+	return {{.Name}}.CommandHandler(sandbox, entries)
 }
 {{end}}

@@ -1,22 +1,22 @@
 package depconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func New(deps *deps.Deps, content string) (*DepConf, error) {
+func New(sandbox *api.Sandbox, content string) (*DepConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	dep_specs, parse_error := deps.Serializables.ParseYaml(content)
+	dep_specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !dep_specs.IsObject() {
-		return nil, deps.Std.Errorf("dep_specs is not an object")
+		return nil, sandbox.Deps.Std.Errorf("dep_specs is not an object")
 	}
 
 	dep_conf := &DepConf{}
@@ -36,11 +36,11 @@ func New(deps *deps.Deps, content string) (*DepConf, error) {
 		}
 		value, err := item.GetString()
 		if err != nil {
-			return nil, deps.Std.Errorf("%s is not a string", field.key)
+			return nil, sandbox.Deps.Std.Errorf("%s is not a string", field.key)
 		}
 		*field.target = value
 	}
 
-	BindMethods(deps, dep_conf)
+	BindMethods(sandbox, dep_conf)
 	return dep_conf, nil
 }

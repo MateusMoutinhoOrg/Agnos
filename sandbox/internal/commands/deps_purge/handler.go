@@ -2,15 +2,14 @@ package deps_purge
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	purge_error := depsPurgeAction.DepsPurge(deps, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	purge_error := depsPurgeAction.DepsPurge(sandbox, entries.Path)
 
 	if purge_error != nil {
-		deps.Std.Error("%s\n", purge_error.Error())
+		sandbox.Deps.Std.Error("%s\n", purge_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

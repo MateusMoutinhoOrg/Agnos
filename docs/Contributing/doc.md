@@ -17,8 +17,8 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 
 ## Add an action
 
-1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(deps, io *smartio.SmartIO, ...) error`. Project-relative paths only. Log via `deps.Std.Log`, fail via `deps.Std.Errorf`, never `Printf`.
-2. `<name>.go`: `func <Name>(deps, ...) error` = `smartio.New(deps, path, config.ProjectName)` -> internal -> `io.Persist()` -> `buildAction.Build(deps, api.BuildProps{Path, Runtime})` (`RuntimeGo` if it adds, `RuntimeNone` if it removes). Props with more than three values go in a struct in `sandbox/api/actions.go`.
+1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(sandbox, io *smartio.SmartIO, ...) error`. Project-relative paths only. Log via `sandbox.Deps.Std.Log`, fail via `sandbox.Deps.Std.Errorf`, never `Printf`.
+2. `<name>.go`: `func <Name>(sandbox, ...) error` = `smartio.New(sandbox, path, config.ProjectName)` -> internal -> `io.Persist()` -> `buildAction.Build(sandbox, api.BuildProps{Path, Runtime})` (`RuntimeGo` if it adds, `RuntimeNone` if it removes). Props with more than three values go in a struct in `sandbox/api/actions.go`.
 3. Add the field to `api.Actions` and the assignment to `sandbox/binds/actions.go`.
 4. Comment the new field: its row in [PublicApi](../PublicApi/doc.md) is generated from that comment.
 
@@ -82,7 +82,7 @@ Neither `dep.yaml` nor `adapter.yaml` is part of the mirror: the first is instal
 ## Add a template or collector
 
 - Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). Groups: `all`, `deps`, `cli`, `server`, `front`, `start`. A scaffold that renders to a file which is itself a template — `page_html.html`, or any `{{` inside `front_main.js` — escapes its own braces (`{{ "{{ .Title }}" }}`), or the outer render eats them. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/all/docs/GeneratedFiles/doc.md`.
-- Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(deps, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(deps, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
+- Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(sandbox, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(sandbox, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `sandbox.Deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
 - Bootstrap twice; the second run must change nothing.
 
 ## Add an example to agnos
@@ -101,7 +101,7 @@ What each example asserts is the set it copies into `AssertDir`, and only `start
 
 ## Add a parsable
 
-`sandbox/internal/parsables/<name>conf/`: `api.go` (struct: data fields, func fields, `Render` last), `new.go` (`New(deps, content) (*T, error)` via `deps.Serializables.ParseYaml`), `new_empty.go` (`NewEmpty(deps) *T`), `bind_methods.go` (`bindMethods(deps, self)`), `render.go` (`SerializeToYaml`). `Render` must round-trip through `New`. Shared loaders go in `utils/` (`LoadXConf`/`SaveXConf`).
+`sandbox/internal/parsables/<name>conf/`: `api.go` (struct: data fields, func fields, `Render` last), `new.go` (`New(sandbox, content) (*T, error)` via `sandbox.Deps.Serializables.ParseYaml`), `new_empty.go` (`NewEmpty(sandbox) *T`), `bind_methods.go` (`bindMethods(sandbox, self)`), `render.go` (`SerializeToYaml`). `Render` must round-trip through `New`. Shared loaders go in `utils/` (`LoadXConf`/`SaveXConf`).
 
 ## Docs
 

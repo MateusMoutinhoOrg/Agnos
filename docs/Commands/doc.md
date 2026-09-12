@@ -1319,7 +1319,7 @@ Checks the project keeps the sandbox/adapter schema
 agnos verify [--path <path>] [--runtime <runtime>] [--quiet]
 ```
 
-Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, binds, deps, internal and new.go, sandbox/api and sandbox/deps import nothing external, every sandbox/binds file mirrors a sandbox/api file and declares only functions, and adapters/ holds only availables and libs. `agnos build` runs this as a gate unless --unsafe is passed.
+Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, binds, deps, internal and new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps imports nothing external, every sandbox/binds file mirrors a sandbox/api file and declares only functions, and adapters/ holds only availables and libs. `agnos build` runs this as a gate unless --unsafe is passed.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

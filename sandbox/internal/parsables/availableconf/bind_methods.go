@@ -1,10 +1,10 @@
 package availableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, available_conf *AvailableConf) {
+func BindMethods(sandbox *api.Sandbox, available_conf *AvailableConf) {
 	available_conf.Has = func(adapter string) bool {
 		for _, candidate := range available_conf.Adapters {
 			if candidate == adapter {
@@ -19,7 +19,7 @@ func BindMethods(deps *deps.Deps, available_conf *AvailableConf) {
 			return false
 		}
 		available_conf.Adapters = append(available_conf.Adapters, adapter)
-		deps.Sortdeps.Strings(available_conf.Adapters)
+		sandbox.Deps.Sortdeps.Strings(available_conf.Adapters)
 		return true
 	}
 
@@ -38,6 +38,6 @@ func BindMethods(deps *deps.Deps, available_conf *AvailableConf) {
 	}
 
 	available_conf.Render = func() string {
-		return Render(deps, available_conf)
+		return Render(sandbox, available_conf)
 	}
 }

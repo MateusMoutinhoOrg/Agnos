@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -12,7 +12,7 @@ import (
 // derived from that route's route.yaml. It is the server layer's
 // GenerateCommandEntries; the module path is merged in because a route's
 // entries.go imports the project's own packages.
-func GenerateRouteEntries(deps *deps.Deps, io *smartio.SmartIO, routes []map[string]any, module string) error {
+func GenerateRouteEntries(sandbox *api.Sandbox, io *smartio.SmartIO, routes []map[string]any, module string) error {
 	for _, route := range routes {
 		name, _ := route["Name"].(string)
 		if name == "" {
@@ -25,7 +25,7 @@ func GenerateRouteEntries(deps *deps.Deps, io *smartio.SmartIO, routes []map[str
 		}
 
 		dest := routesDir + "/" + name + "/entries.go"
-		if err := utils.RenderTemplateToDest(deps, io, "templates/route_entries.go", vars, dest); err != nil {
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/route_entries.go", vars, dest); err != nil {
 			return err
 		}
 	}

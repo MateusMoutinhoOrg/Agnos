@@ -8,9 +8,9 @@ import (
 )
 
 func New(deps *deps.Deps) *api.Sandbox {
-	self := api.Sandbox{}
-	binds.ActionsBind(deps, &self)
-	binds.CliBind(deps, &self)
+	self := api.Sandbox{Deps: deps}
+	binds.ActionsBind(&self)
+	binds.CliBind(&self)
 
 	return &self
 }

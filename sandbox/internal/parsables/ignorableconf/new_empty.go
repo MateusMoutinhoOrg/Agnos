@@ -1,13 +1,13 @@
 package ignorableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *IgnorableConf {
+func NewEmpty(sandbox *api.Sandbox) *IgnorableConf {
 	items := &IgnorableConf{
 		Paths: make([]string, 0),
 	}
-	BindMethods(deps, items)
+	BindMethods(sandbox, items)
 	return items
 }

@@ -2,7 +2,6 @@ package add_page
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_route"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -33,78 +32,78 @@ const (
 // An existing html template, on the other hand, is kept. That is the way back
 // from a front-purge, which drops a page's route and leaves its content: this
 // is the one file of a page that holds work nobody can regenerate.
-func AddPageInternal(deps *deps.Deps, io *smartio.SmartIO, props api.PageProps) error {
-	if err := utils.ValidateRouteName(deps, props.Name); err != nil {
+func AddPageInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PageProps) error {
+	if err := utils.ValidateRouteName(sandbox, props.Name); err != nil {
 		return err
 	}
 
-	identifier := utils.RouteIdentifier(deps, props.Name)
+	identifier := utils.RouteIdentifier(sandbox, props.Name)
 
 	if identifier == utils.StaticRouteName {
-		return deps.Std.Errorf("%q is the route serving the static assets and cannot be a page", utils.StaticRouteName)
+		return sandbox.Deps.Std.Errorf("%q is the route serving the static assets and cannot be a page", utils.StaticRouteName)
 	}
 	if !io.IsDir(pageioDir) {
-		return deps.Std.Errorf("the project has no front layer: run front-init before declaring a page")
+		return sandbox.Deps.Std.Errorf("the project has no front layer: run front-init before declaring a page")
 	}
 
-	trigger := deps.Stringsdeps.TrimSpace(props.Trigger)
+	trigger := sandbox.Deps.Stringsdeps.TrimSpace(props.Trigger)
 	if trigger == "" {
 		trigger = "/" + identifier
 	}
 
-	help := deps.Stringsdeps.TrimSpace(props.Help)
+	help := sandbox.Deps.Stringsdeps.TrimSpace(props.Help)
 	if help == "" {
 		help = "Renders the " + identifier + " page from the embedded html template"
 	}
 
-	if err := addRouteAction.AddRouteInternal(deps, io, props.Name, pageMethod, trigger, help, pageCategory); err != nil {
+	if err := addRouteAction.AddRouteInternal(sandbox, io, props.Name, pageMethod, trigger, help, pageCategory); err != nil {
 		return err
 	}
 
-	return writePage(deps, io, props, identifier, trigger)
+	return writePage(sandbox, io, props, identifier, trigger)
 }
 
 // writePage overwrites the stub handler add-route just left with one that
 // renders the page, and writes the html template beside it.
-func writePage(deps *deps.Deps, io *smartio.SmartIO, props api.PageProps, identifier string, trigger string) error {
-	segment, err := utils.RouteIdentifierSegment(deps, trigger)
+func writePage(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PageProps, identifier string, trigger string) error {
+	segment, err := utils.RouteIdentifierSegment(sandbox, trigger)
 	if err != nil {
 		return err
 	}
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
 
-	title := deps.Stringsdeps.TrimSpace(props.Title)
+	title := sandbox.Deps.Stringsdeps.TrimSpace(props.Title)
 	if title == "" {
 		title = identifier
 	}
 
 	vars := map[string]interface{}{
 		"Identifier": identifier,
-		"Package":    utils.RoutePackage(deps, props.Name),
+		"Package":    utils.RoutePackage(sandbox, props.Name),
 		"Module":     module_conf.Module,
 		"Method":     pageMethod,
 		"Trigger":    segment,
 		"Title":      title,
 	}
 
-	handler := utils.RouteDir(deps, props.Name) + "/handler.go"
-	if err := utils.RenderTemplateToDest(deps, io, "templates/page_handler.go", vars, handler); err != nil {
+	handler := utils.RouteDir(sandbox, props.Name) + "/handler.go"
+	if err := utils.RenderTemplateToDest(sandbox, io, "templates/page_handler.go", vars, handler); err != nil {
 		return err
 	}
 
-	page := utils.PageAsset(deps, props.Name)
+	page := utils.PageAsset(sandbox, props.Name)
 	if io.IsFile(page) {
-		deps.Std.Log("add-page: %s already exists, keeping it \n", page)
+		sandbox.Deps.Std.Log("add-page: %s already exists, keeping it \n", page)
 		return nil
 	}
 
-	deps.Std.Log("add-page creating %s \n", page)
+	sandbox.Deps.Std.Log("add-page creating %s \n", page)
 
-	content, err := deps.Embeddeps.RenderTemplate("templates/page_html.html", vars)
+	content, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/page_html.html", vars)
 	if err != nil {
 		return err
 	}

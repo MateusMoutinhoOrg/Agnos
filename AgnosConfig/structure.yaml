@@ -33,7 +33,7 @@ sandbox:
     api:
       order: 2
       dir: true
-      description: contracts only; imports nothing at all
+      description: contracts only; imports nothing but sandbox/deps, for Sandbox.Deps
       children:
         sandbox.go:
           order: 1
@@ -53,7 +53,7 @@ sandbox:
       children:
         actions.go:
           order: 1
-          description: "ActionsBind(deps, sandbox): one assignment per action"
+          description: "ActionsBind(sandbox): one assignment per action"
         cli.go:
           order: 2
           gen: true

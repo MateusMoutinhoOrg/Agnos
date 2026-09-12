@@ -1,7 +1,7 @@
 package remove_route
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -12,33 +12,33 @@ import (
 // route with an html template beside it — that is a page, and dropping its
 // route alone would leave the html orphaned, so remove-page is the editor for
 // it.
-func RemoveRouteInternal(deps *deps.Deps, io *smartio.SmartIO, name string) error {
-	if err := utils.ValidateRouteName(deps, name); err != nil {
+func RemoveRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
 	}
-	pkg := utils.RoutePackage(deps, name)
+	pkg := utils.RoutePackage(sandbox, name)
 	if pkg == "health" {
-		return deps.Std.Errorf("the health route is generated and cannot be removed")
+		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be removed")
 	}
-	if utils.IsPage(deps, io, name) {
-		return deps.Std.Errorf("route %q is a page (%s is beside it): remove it with remove-page, which drops the html too",
-			utils.RouteIdentifier(deps, name), utils.PageAsset(deps, name))
+	if utils.IsPage(sandbox, io, name) {
+		return sandbox.Deps.Std.Errorf("route %q is a page (%s is beside it): remove it with remove-page, which drops the html too",
+			utils.RouteIdentifier(sandbox, name), utils.PageAsset(sandbox, name))
 	}
 
-	return RemoveRoutePackage(deps, io, name)
+	return RemoveRoutePackage(sandbox, io, name)
 }
 
 // RemoveRoutePackage is the deletion itself, without the checks that decide
 // whether this route is remove-route's to drop. It is exported for remove-page,
 // which owns the routes RemoveRouteInternal refuses and removes the html in the
 // same transaction.
-func RemoveRoutePackage(deps *deps.Deps, io *smartio.SmartIO, name string) error {
-	dir := utils.RouteDir(deps, name)
+func RemoveRoutePackage(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	dir := utils.RouteDir(sandbox, name)
 	if !io.IsDir(dir) {
-		return deps.Std.Errorf("route %q not found", utils.RouteIdentifier(deps, name))
+		return sandbox.Deps.Std.Errorf("route %q not found", utils.RouteIdentifier(sandbox, name))
 	}
 
-	deps.Std.Log("remove-route removing %s \n", dir)
+	sandbox.Deps.Std.Log("remove-route removing %s \n", dir)
 
 	for _, file := range io.ListAllRecursively(dir) {
 		io.RemoveDir(file)

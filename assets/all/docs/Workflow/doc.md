@@ -43,12 +43,12 @@ editors write is in [EntriesYaml](../EntriesYaml/doc.md); never edit `entries.ya
 Then write `handler.go` — the whole hand-written half of a command:
 
 ```go
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	if err := something(deps, entries.Path); err != nil {
-		deps.Std.Error("%s\n", err.Error())
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	if err := something(sandbox, entries.Path); err != nil {
+		sandbox.Deps.Std.Error("%s\n", err.Error())
 		return api.ExitFailure
 	}
-	deps.Std.Printf("%s\n", result)
+	sandbox.Deps.Std.Printf("%s\n", result)
 	return api.ExitOk
 }
 ```
@@ -94,12 +94,12 @@ whether it is required, its size limit and its content-type.
 Then write `handler.go` — the whole hand-written half of a route:
 
 ```go
-func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int {
-	body, status := entries.ReadBody(deps, response)
+func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
+	body, status := entries.ReadBody(sandbox, response)
 	if status != api.StatusOk {
 		return status
 	}
-	return writeJson(deps, response, api.StatusCreated, create(deps, entries.Tenant, body))
+	return writeJson(sandbox, response, api.StatusCreated, create(sandbox, entries.Tenant, body))
 }
 ```
 
@@ -173,13 +173,13 @@ around them:
    after the file, every declaration doc-commented (those comments render
    [PublicApi](../PublicApi/doc.md)). It becomes the `api.Sandbox` field `<X>`.
 2. `sandbox/internal/<x>/` — the implementation.
-3. `sandbox/binds/<x>.go` — `func <X>Bind(deps *deps.Deps, sandbox *api.Sandbox)`, assigning
+3. `sandbox/binds/<x>.go` — `func <X>Bind(sandbox *api.Sandbox)`, assigning
    each field of `sandbox.<X>`. One binds file per api file, functions only.
 
 ## Add a dependency
 
 Everything the sandbox is not allowed to do itself — filesystem, clock, network, subprocess —
-arrives through `deps.Deps`. Install a ready-made one:
+arrives through `sandbox.Deps`. Install a ready-made one:
 
 ```bash
 {{.GeneratorName}} list-deps                 # every installable contract
@@ -195,8 +195,8 @@ arrives through `deps.Deps`. Install a ready-made one:
    import allowed, beside an `adapter.yaml` saying `dep: <x>`.
 
 Then bind it: add `<x>` to `adapters/availables/standard/available.yaml`, or let
-`{{.GeneratorName}} add-dep` do both for a dep of the catalogue. Reach it as `deps.<X>` from
-anywhere inside `sandbox/`.
+`{{.GeneratorName}} add-dep` do both for a dep of the catalogue. Reach it as `sandbox.Deps.<X>`
+from anywhere inside `sandbox/`.
 
 One contract may have several adapters — see [Adapters](../Adapters/doc.md).
 {{- if not .HasDeps }}

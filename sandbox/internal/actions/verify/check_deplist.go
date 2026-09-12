@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -22,7 +22,7 @@ const moduleVar = "{{.Module}}"
 // otherwise go on being installed without it.
 //
 // A project with no assets/deplist has nothing to check.
-func CheckDeplist(deps *deps.Deps, io *smartio.SmartIO, module string) []string {
+func CheckDeplist(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	if !io.IsDir(deplistDir) {
@@ -31,11 +31,11 @@ func CheckDeplist(deps *deps.Deps, io *smartio.SmartIO, module string) []string 
 
 	for _, dep := range io.ListDirs(deplistDir) {
 		for _, asset := range io.ListFilesRecursively(dep) {
-			relative := deps.Stringsdeps.TrimPrefix(asset, dep+"/")
+			relative := sandbox.Deps.Stringsdeps.TrimPrefix(asset, dep+"/")
 			if relative == utils.DepConfFile {
 				continue
 			}
-			violations = append(violations, checkCatalogAsset(deps, io, asset, relative, module)...)
+			violations = append(violations, checkCatalogAsset(sandbox, io, asset, relative, module)...)
 		}
 	}
 
@@ -45,7 +45,7 @@ func CheckDeplist(deps *deps.Deps, io *smartio.SmartIO, module string) []string 
 // checkCatalogAsset compares one rendered catalog asset with the file it
 // installs over. A target that is absent from this project is not a violation:
 // a dep or an adapter this project does not use has nothing here to drift from.
-func checkCatalogAsset(deps *deps.Deps, io *smartio.SmartIO, asset string, target string, module string) []string {
+func checkCatalogAsset(sandbox *api.Sandbox, io *smartio.SmartIO, asset string, target string, module string) []string {
 	if !io.IsFile(target) {
 		return nil
 	}
@@ -60,7 +60,7 @@ func checkCatalogAsset(deps *deps.Deps, io *smartio.SmartIO, asset string, targe
 		return []string{target + " could not be read"}
 	}
 
-	if deps.Stringsdeps.ReplaceAll(string(source), moduleVar, module) == string(installed) {
+	if sandbox.Deps.Stringsdeps.ReplaceAll(string(source), moduleVar, module) == string(installed) {
 		return nil
 	}
 

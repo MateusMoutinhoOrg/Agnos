@@ -1,24 +1,24 @@
 package commandconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
 
 // New parses one entries.yaml body into a CommandConf.
-func New(deps *deps.Deps, content string) (*CommandConf, error) {
+func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !specs.IsObject() {
-		return nil, deps.Std.Errorf("entries.yaml is not an object")
+		return nil, sandbox.Deps.Std.Errorf("entries.yaml is not an object")
 	}
 
 	conf := &CommandConf{
@@ -37,7 +37,7 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 
 	flags_item, _ := specs.GetObjectItem("flags")
 	if flags_item != nil {
-		fields, err := readFieldCollection(deps, flags_item)
+		fields, err := readFieldCollection(sandbox, flags_item)
 		if err != nil {
 			return nil, err
 		}
@@ -46,14 +46,14 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 
 	args_item, _ := specs.GetObjectItem("args")
 	if args_item != nil {
-		fields, err := readFieldCollection(deps, args_item)
+		fields, err := readFieldCollection(sandbox, args_item)
 		if err != nil {
 			return nil, err
 		}
 		conf.Args = fields
 	}
 
-	BindMethods(deps, conf)
+	BindMethods(sandbox, conf)
 	return conf, nil
 }
 
@@ -66,17 +66,17 @@ func New(deps *deps.Deps, content string) (*CommandConf, error) {
 //   - a YAML mapping (legacy) — the key names the field. Mappings are
 //     unordered, so the keys are sorted for a deterministic result; declare
 //     positional args as a sequence when order matters.
-func readFieldCollection(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Field, error) {
+func readFieldCollection(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Field, error) {
 	if item.IsArray() {
-		return readFieldsFromArray(deps, item)
+		return readFieldsFromArray(sandbox, item)
 	}
 	if item.IsObject() {
-		return readFieldsFromObject(deps, item)
+		return readFieldsFromObject(sandbox, item)
 	}
 	return []Field{}, nil
 }
 
-func readFieldsFromArray(deps *deps.Deps, arr *serializibles.SerializibleObject) ([]Field, error) {
+func readFieldsFromArray(sandbox *api.Sandbox, arr *serializibles.SerializibleObject) ([]Field, error) {
 	size, err := arr.GetArraySize()
 	if err != nil {
 		return nil, err
@@ -89,10 +89,10 @@ func readFieldsFromArray(deps *deps.Deps, arr *serializibles.SerializibleObject)
 			continue
 		}
 
-		field := readFieldEntry(deps, entry)
-		field.Key = fieldKey(deps, entry, field.Identifiers)
+		field := readFieldEntry(sandbox, entry)
+		field.Key = fieldKey(sandbox, entry, field.Identifiers)
 		if field.Key == "" {
-			return nil, deps.Std.Errorf("flags/args entry #%d needs a name (or a -- identifier)", i)
+			return nil, sandbox.Deps.Std.Errorf("flags/args entry #%d needs a name (or a -- identifier)", i)
 		}
 		fields = append(fields, field)
 	}
@@ -100,12 +100,12 @@ func readFieldsFromArray(deps *deps.Deps, arr *serializibles.SerializibleObject)
 	return fields, nil
 }
 
-func readFieldsFromObject(deps *deps.Deps, obj *serializibles.SerializibleObject) ([]Field, error) {
+func readFieldsFromObject(sandbox *api.Sandbox, obj *serializibles.SerializibleObject) ([]Field, error) {
 	keys, err := obj.GetKeys()
 	if err != nil {
 		return nil, err
 	}
-	deps.Sortdeps.Strings(keys)
+	sandbox.Deps.Sortdeps.Strings(keys)
 
 	fields := make([]Field, 0, len(keys))
 	for _, key := range keys {
@@ -113,7 +113,7 @@ func readFieldsFromObject(deps *deps.Deps, obj *serializibles.SerializibleObject
 		if item == nil || !item.IsObject() {
 			continue
 		}
-		field := readFieldEntry(deps, item)
+		field := readFieldEntry(sandbox, item)
 		field.Key = key
 		fields = append(fields, field)
 	}
@@ -123,7 +123,7 @@ func readFieldsFromObject(deps *deps.Deps, obj *serializibles.SerializibleObject
 
 // readFieldEntry parses the attributes common to both shapes; the caller
 // assigns Key.
-func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Field {
+func readFieldEntry(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Field {
 	field := Field{
 		Identifiers: readStringArray(item, "identifiers"),
 		Examples:    readStringArray(item, "examples"),
@@ -142,7 +142,7 @@ func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Fie
 
 	if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
 		field.HasDefault = true
-		field.Default = anyToString(deps, default_item)
+		field.Default = anyToString(sandbox, default_item)
 	}
 
 	// `required` is meaningless for a boolean (absent means false) or for a
@@ -158,17 +158,17 @@ func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Fie
 // fieldKey resolves the generated struct field name for a sequence entry:
 // an explicit `name`, else the first long `--identifier` with its dashes
 // stripped, else the first identifier.
-func fieldKey(deps *deps.Deps, entry *serializibles.SerializibleObject, identifiers []string) string {
+func fieldKey(sandbox *api.Sandbox, entry *serializibles.SerializibleObject, identifiers []string) string {
 	if name := readString(entry, "name"); name != "" {
 		return name
 	}
 	for _, id := range identifiers {
-		if deps.Stringsdeps.HasPrefix(id, "--") {
-			return deps.Stringsdeps.TrimLeft(id, "-")
+		if sandbox.Deps.Stringsdeps.HasPrefix(id, "--") {
+			return sandbox.Deps.Stringsdeps.TrimLeft(id, "-")
 		}
 	}
 	for _, id := range identifiers {
-		return deps.Stringsdeps.TrimLeft(id, "-")
+		return sandbox.Deps.Stringsdeps.TrimLeft(id, "-")
 	}
 	return ""
 }
@@ -258,7 +258,7 @@ func readStringArray(obj *serializibles.SerializibleObject, key string) []string
 
 // anyToString renders a scalar yaml value as the string that will be baked
 // into the generated Go literal source.
-func anyToString(deps *deps.Deps, item *serializibles.SerializibleObject) string {
+func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) string {
 	if item.IsString() {
 		value, _ := item.GetString()
 		return value
@@ -271,11 +271,11 @@ func anyToString(deps *deps.Deps, item *serializibles.SerializibleObject) string
 	}
 	if item.IsInt() {
 		value, _ := item.GetInt()
-		return deps.Stringsdeps.FormatInt(value, 10)
+		return sandbox.Deps.Stringsdeps.FormatInt(value, 10)
 	}
 	if item.IsFloat() {
 		value, _ := item.GetFloat()
-		return deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+		return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
 	}
 	return ""
 }

@@ -2,12 +2,11 @@ package set_command
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	set_error := setCommandAction.SetCommand(deps, api.CommandProps{
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	set_error := setCommandAction.SetCommand(sandbox, api.CommandProps{
 		Path:            entries.Path,
 		Command:         entries.Name,
 		Help:            entries.Help,
@@ -19,7 +18,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		Examples:        entries.Example,
 	})
 	if set_error != nil {
-		deps.Std.Error("%s\n", set_error.Error())
+		sandbox.Deps.Std.Error("%s\n", set_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

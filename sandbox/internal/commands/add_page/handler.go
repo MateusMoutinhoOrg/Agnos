@@ -2,12 +2,11 @@ package add_page
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addPageAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_page"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	add_error := addPageAction.AddPage(deps, api.PageProps{
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	add_error := addPageAction.AddPage(sandbox, api.PageProps{
 		Path:    entries.Path,
 		Name:    entries.Name,
 		Trigger: entries.Trigger,
@@ -16,7 +15,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 	})
 
 	if add_error != nil {
-		deps.Std.Error("%s\n", add_error.Error())
+		sandbox.Deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

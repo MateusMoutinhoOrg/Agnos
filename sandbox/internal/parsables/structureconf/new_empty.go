@@ -1,13 +1,13 @@
 package structureconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *StructureConf {
+func NewEmpty(sandbox *api.Sandbox) *StructureConf {
 	structure_conf := &StructureConf{
 		Items: make([]Item, 0),
 	}
-	BindMethods(deps, structure_conf)
+	BindMethods(sandbox, structure_conf)
 	return structure_conf
 }

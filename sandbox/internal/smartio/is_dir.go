@@ -1,17 +1,17 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func IsDir(deps *deps.Deps, io *SmartIO, path string) bool {
-	p, err := processInputPath(deps, io, path)
+func IsDir(sandbox *api.Sandbox, io *SmartIO, path string) bool {
+	p, err := processInputPath(sandbox, io, path)
 	if err != nil {
 		return false
 	}
-	if isPendingRemoval(deps, io, p) {
+	if isPendingRemoval(sandbox, io, p) {
 		return false
 	}
 	if isPendingCreate(io, p) {
 		return true
 	}
-	return deps.Iodeps.IsDir(rootedPath(deps, io, p))
+	return sandbox.Deps.Iodeps.IsDir(rootedPath(sandbox, io, p))
 }

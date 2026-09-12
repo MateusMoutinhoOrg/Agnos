@@ -2,7 +2,6 @@ package start
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/moduleconf"
@@ -19,8 +18,8 @@ const fallbackGoVersion = "1.25.0"
 // go.mod does not pin a release older than the compiler that will build it.
 // `go env GOVERSION` answers "go1.26.0"; anything unexpected (no toolchain,
 // no such directory yet) falls back to the constant above.
-func goVersion(deps *deps.Deps, path string) string {
-	result, err := deps.Rundeps.Run(rundeps.RunProps{
+func goVersion(sandbox *api.Sandbox, path string) string {
+	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     path,
 		Program: "go",
 		Args:    []string{"env", "GOVERSION"},
@@ -29,16 +28,16 @@ func goVersion(deps *deps.Deps, path string) string {
 		return fallbackGoVersion
 	}
 
-	version := deps.Stringsdeps.TrimPrefix(deps.Stringsdeps.TrimSpace(result.Output), "go")
+	version := sandbox.Deps.Stringsdeps.TrimPrefix(sandbox.Deps.Stringsdeps.TrimSpace(result.Output), "go")
 	if version == "" {
 		return fallbackGoVersion
 	}
 	return version
 }
 
-func StartInternal(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) error {
+func StartInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.StartProps) error {
 
-	project_conf := projectconf.NewEmpty(deps)
+	project_conf := projectconf.NewEmpty(sandbox)
 	project_conf.Name = props.ProjectName
 
 	vars := map[string]interface{}{
@@ -47,7 +46,7 @@ func StartInternal(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) e
 		"ConfigDir": config.ProjectName + "Config",
 	}
 
-	if err := utils.RenderGroup(deps, io, "start", vars); err != nil {
+	if err := utils.RenderGroup(sandbox, io, "start", vars); err != nil {
 		return err
 	}
 
@@ -57,15 +56,15 @@ func StartInternal(deps *deps.Deps, io *smartio.SmartIO, props api.StartProps) e
 			write = io.WriteFileOverwrite
 		}
 
-		module_conf := moduleconf.NewEmpty(deps)
+		module_conf := moduleconf.NewEmpty(sandbox)
 		module_conf.Module = *props.Module
-		module_conf.GoVersion = goVersion(deps, props.Path)
+		module_conf.GoVersion = goVersion(sandbox, props.Path)
 
 		if err := write("go.mod", []byte(module_conf.Render())); err != nil {
 			return err
 		}
 	}
 
-	deps.Std.Log("started with path %s \n", props.Path)
+	sandbox.Deps.Std.Log("started with path %s \n", props.Path)
 	return nil
 }

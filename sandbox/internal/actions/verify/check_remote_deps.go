@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/adapterconf"
@@ -19,11 +19,11 @@ import (
 // go.sum already signs its content, so the comparison is against the cache
 // itself. The check is skipped when the module is not in the cache — it runs
 // with the proxy off, so a verify never reaches the network to answer it.
-func CheckRemoteDeps(deps *deps.Deps, io *smartio.SmartIO, path string) []string {
+func CheckRemoteDeps(sandbox *api.Sandbox, io *smartio.SmartIO, path string) []string {
 	var violations []string
 
-	for _, adapter := range utils.InstalledAdapters(deps, io) {
-		adapter_conf, err := utils.LoadAdapterConf(deps, io, adapter)
+	for _, adapter := range utils.InstalledAdapters(sandbox, io) {
+		adapter_conf, err := utils.LoadAdapterConf(sandbox, io, adapter)
 		if err != nil || adapter_conf.Origin != adapterconf.OriginGenerated {
 			continue
 		}
@@ -33,12 +33,12 @@ func CheckRemoteDeps(deps *deps.Deps, io *smartio.SmartIO, path string) []string
 			continue
 		}
 
-		dir, ok := cachedModuleDir(deps, path, module)
+		dir, ok := cachedModuleDir(sandbox, path, module)
 		if !ok {
 			continue
 		}
 
-		violations = append(violations, checkRemoteCopy(deps, io, adapter_conf.Dep, dir)...)
+		violations = append(violations, checkRemoteCopy(sandbox, io, adapter_conf.Dep, dir)...)
 	}
 
 	return violations
@@ -46,8 +46,8 @@ func CheckRemoteDeps(deps *deps.Deps, io *smartio.SmartIO, path string) []string
 
 // cachedModuleDir asks the go toolchain where a module's source is, with the
 // proxy off so the answer can only come from what is already on this machine.
-func cachedModuleDir(deps *deps.Deps, path string, module string) (string, bool) {
-	result, err := deps.Rundeps.Run(rundeps.RunProps{
+func cachedModuleDir(sandbox *api.Sandbox, path string, module string) (string, bool) {
+	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     path,
 		Program: "go",
 		Args:    []string{"list", "-m", "-json", module},
@@ -57,7 +57,7 @@ func cachedModuleDir(deps *deps.Deps, path string, module string) (string, bool)
 		return "", false
 	}
 
-	parsed, err := deps.Serializables.ParseJson(result.Output)
+	parsed, err := sandbox.Deps.Serializables.ParseJson(result.Output)
 	if err != nil {
 		return "", false
 	}
@@ -78,8 +78,8 @@ func cachedModuleDir(deps *deps.Deps, path string, module string) (string, bool)
 // checkRemoteCopy compares one copied contract with the module it came from,
 // rendering the module's own api the way the copy was written: the package
 // clause rewritten, then formatted.
-func checkRemoteCopy(deps *deps.Deps, io *smartio.SmartIO, dep string, dir string) []string {
-	remote, err := add_dep.ReadRemoteApi(deps, dir)
+func checkRemoteCopy(sandbox *api.Sandbox, io *smartio.SmartIO, dep string, dir string) []string {
+	remote, err := add_dep.ReadRemoteApi(sandbox, dir)
 	if err != nil {
 		return []string{"dep " + dep + " could not be compared with the module it was copied from: " + err.Error()}
 	}
@@ -96,10 +96,10 @@ func checkRemoteCopy(deps *deps.Deps, io *smartio.SmartIO, dep string, dir strin
 			continue
 		}
 
-		expected := deps.Stringsdeps.ReplaceAll(file.Content,
+		expected := sandbox.Deps.Stringsdeps.ReplaceAll(file.Content,
 			"package "+file.Parsed.Package+"\n", "package "+dep+"\n")
 
-		formatted, err := deps.Goimportsdeps.Format(expected)
+		formatted, err := sandbox.Deps.Goimportsdeps.Format(expected)
 		if err != nil {
 			violations = append(violations, target+" could not be compared: "+err.Error())
 			continue

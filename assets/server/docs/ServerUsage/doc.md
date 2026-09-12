@@ -63,16 +63,16 @@ last segment of a route may do.
 ## Write the handler
 
 ```go
-func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int {
+func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
 	// the body has not been read yet — refuse early if you can
-	if !isAuthorized(deps, entries.Authorization) {
-		return routeio.WriteError(deps, response, api.StatusFailure, "", "not authorized")
+	if !isAuthorized(sandbox, entries.Authorization) {
+		return routeio.WriteError(sandbox, response, api.StatusFailure, "", "not authorized")
 	}
-	body, status := entries.ReadBody(deps, response)
+	body, status := entries.ReadBody(sandbox, response)
 	if status != api.StatusOk {
 		return status
 	}
-	return writeJson(deps, response, api.StatusCreated, createUser(deps, entries.Tenant, body))
+	return writeJson(sandbox, response, api.StatusCreated, createUser(sandbox, entries.Tenant, body))
 }
 ```
 

@@ -1,7 +1,7 @@
 package routeconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
 
@@ -21,19 +21,19 @@ const DefaultJsonContentType = "application/json"
 const BodyNone = "none"
 
 // New parses one route.yaml body into a RouteConf.
-func New(deps *deps.Deps, content string) (*RouteConf, error) {
+func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !specs.IsObject() {
-		return nil, deps.Std.Errorf("route.yaml is not an object")
+		return nil, sandbox.Deps.Std.Errorf("route.yaml is not an object")
 	}
 
 	conf := &RouteConf{
@@ -44,7 +44,7 @@ func New(deps *deps.Deps, content string) (*RouteConf, error) {
 		Body:     Body{Type: BodyNone, MaxBytes: DefaultMaxBytes},
 	}
 
-	conf.Method = normalizeMethod(deps, readString(specs, "method"))
+	conf.Method = normalizeMethod(sandbox, readString(specs, "method"))
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
 	conf.Help = readString(specs, "help")
@@ -53,7 +53,7 @@ func New(deps *deps.Deps, content string) (*RouteConf, error) {
 
 	paths_item, _ := specs.GetObjectItem("paths")
 	if paths_item != nil {
-		segments, err := readSegments(deps, paths_item)
+		segments, err := readSegments(sandbox, paths_item)
 		if err != nil {
 			return nil, err
 		}
@@ -62,7 +62,7 @@ func New(deps *deps.Deps, content string) (*RouteConf, error) {
 
 	headers_item, _ := specs.GetObjectItem("headers")
 	if headers_item != nil {
-		fields, err := readFieldCollection(deps, headers_item)
+		fields, err := readFieldCollection(sandbox, headers_item)
 		if err != nil {
 			return nil, err
 		}
@@ -71,7 +71,7 @@ func New(deps *deps.Deps, content string) (*RouteConf, error) {
 
 	params_item, _ := specs.GetObjectItem("params")
 	if params_item != nil {
-		fields, err := readFieldCollection(deps, params_item)
+		fields, err := readFieldCollection(sandbox, params_item)
 		if err != nil {
 			return nil, err
 		}
@@ -80,10 +80,10 @@ func New(deps *deps.Deps, content string) (*RouteConf, error) {
 
 	body_item, _ := specs.GetObjectItem("body")
 	if body_item != nil && body_item.IsObject() {
-		conf.Body = readBody(deps, body_item)
+		conf.Body = readBody(sandbox, body_item)
 	}
 
-	BindMethods(deps, conf)
+	BindMethods(sandbox, conf)
 	return conf, nil
 }
 
@@ -91,12 +91,12 @@ func New(deps *deps.Deps, content string) (*RouteConf, error) {
 // is matched against. Each entry carries either an `identifier` (a trigger) or
 // a `name` (a capture); an entry carrying both, or neither, is refused here
 // rather than generating a route nothing can match.
-func readSegments(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Segment, error) {
+func readSegments(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Segment, error) {
 	if item.IsNull() {
 		return []Segment{}, nil
 	}
 	if !item.IsArray() {
-		return nil, deps.Std.Errorf("`paths` must be a sequence of segments")
+		return nil, sandbox.Deps.Std.Errorf("`paths` must be a sequence of segments")
 	}
 
 	size, err := item.GetArraySize()
@@ -108,17 +108,17 @@ func readSegments(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Se
 	for i := 0; i < size; i++ {
 		entry := item.GetArrayItem(i)
 		if entry == nil || !entry.IsObject() {
-			return nil, deps.Std.Errorf("`paths` entry #%d is not an object", i)
+			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d is not an object", i)
 		}
 
 		identifier := readString(entry, "identifier")
 		name := readString(entry, "name")
 
 		if identifier != "" && name != "" {
-			return nil, deps.Std.Errorf("`paths` entry #%d declares both `identifier` and `name`", i)
+			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d declares both `identifier` and `name`", i)
 		}
 		if identifier == "" && name == "" {
-			return nil, deps.Std.Errorf("`paths` entry #%d needs an `identifier` or a `name`", i)
+			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `identifier` or a `name`", i)
 		}
 
 		if identifier != "" {
@@ -126,7 +126,7 @@ func readSegments(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Se
 			continue
 		}
 
-		field := readFieldEntry(deps, entry)
+		field := readFieldEntry(sandbox, entry)
 		field.Key = name
 		segments = append(segments, Segment{Field: &field})
 	}
@@ -137,12 +137,12 @@ func readSegments(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Se
 // readFieldCollection parses a headers/params declaration into an ordered
 // slice of Field. Only the canonical YAML sequence is accepted: a header and a
 // query key are external spellings, so each entry carries an explicit `name`.
-func readFieldCollection(deps *deps.Deps, item *serializibles.SerializibleObject) ([]Field, error) {
+func readFieldCollection(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Field, error) {
 	if item.IsNull() {
 		return []Field{}, nil
 	}
 	if !item.IsArray() {
-		return nil, deps.Std.Errorf("`headers` and `params` must be sequences of fields")
+		return nil, sandbox.Deps.Std.Errorf("`headers` and `params` must be sequences of fields")
 	}
 
 	size, err := item.GetArraySize()
@@ -157,10 +157,10 @@ func readFieldCollection(deps *deps.Deps, item *serializibles.SerializibleObject
 			continue
 		}
 
-		field := readFieldEntry(deps, entry)
+		field := readFieldEntry(sandbox, entry)
 		field.Key = readString(entry, "name")
 		if field.Key == "" {
-			return nil, deps.Std.Errorf("headers/params entry #%d needs a name", i)
+			return nil, sandbox.Deps.Std.Errorf("headers/params entry #%d needs a name", i)
 		}
 		fields = append(fields, field)
 	}
@@ -170,7 +170,7 @@ func readFieldCollection(deps *deps.Deps, item *serializibles.SerializibleObject
 
 // readFieldEntry parses the attributes shared by every field shape; the caller
 // assigns Key.
-func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Field {
+func readFieldEntry(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Field {
 	field := Field{
 		Examples:    readStringArray(item, "examples"),
 		Description: readString(item, "description"),
@@ -188,7 +188,7 @@ func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Fie
 
 	if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
 		field.HasDefault = true
-		field.Default = anyToString(deps, default_item)
+		field.Default = anyToString(sandbox, default_item)
 	}
 
 	// `required` is meaningless for a boolean (absent means false) or for a
@@ -203,7 +203,7 @@ func readFieldEntry(deps *deps.Deps, item *serializibles.SerializibleObject) Fie
 
 // readBody parses the `body` object, filling in the defaults a declaration
 // leaves out: no body at all, one mebibyte, and application/json for json.
-func readBody(deps *deps.Deps, item *serializibles.SerializibleObject) Body {
+func readBody(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Body {
 	body := Body{
 		Type:        normalizeBodyType(readString(item, "type")),
 		Required:    readBool(item, "required"),
@@ -222,7 +222,7 @@ func readBody(deps *deps.Deps, item *serializibles.SerializibleObject) Body {
 	}
 
 	if schema_item, _ := item.GetObjectItem("json-schema"); schema_item != nil && schema_item.IsObject() {
-		body.Schema = readSchema(deps, schema_item)
+		body.Schema = readSchema(sandbox, schema_item)
 		body.HasSchema = true
 	}
 
@@ -242,7 +242,7 @@ var schemaKeys = []string{
 // readSchema parses one node of the declared json-schema, recursing through
 // `properties` and `items`. Property order is alphabetical, so the generated
 // struct and the canonical schema JSON come out the same on every build.
-func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema {
+func readSchema(sandbox *api.Sandbox, item *serializibles.SerializibleObject) *Schema {
 	schema := &Schema{
 		Type:        readString(item, "type"),
 		Format:      readString(item, "format"),
@@ -253,7 +253,7 @@ func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema
 		Properties:  []SchemaProperty{},
 	}
 
-	schema.Unknown = unknownKeys(deps, item)
+	schema.Unknown = unknownKeys(sandbox, item)
 
 	if additional, _ := item.GetObjectItem("additionalProperties"); additional != nil && additional.IsBool() {
 		schema.AdditionalProperties, _ = additional.GetBool()
@@ -261,7 +261,7 @@ func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema
 	}
 
 	if const_item, _ := item.GetObjectItem("const"); const_item != nil && !const_item.IsNull() {
-		schema.Const = anyToString(deps, const_item)
+		schema.Const = anyToString(sandbox, const_item)
 		schema.HasConst = true
 	}
 
@@ -273,7 +273,7 @@ func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema
 				if entry == nil {
 					continue
 				}
-				schema.Enum = append(schema.Enum, anyToString(deps, entry))
+				schema.Enum = append(schema.Enum, anyToString(sandbox, entry))
 			}
 		}
 	}
@@ -289,13 +289,13 @@ func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema
 	schema.MaxItems, schema.HasMaxItems = readSchemaInt(item, "maxItems")
 
 	if items_item, _ := item.GetObjectItem("items"); items_item != nil && items_item.IsObject() {
-		schema.Items = readSchema(deps, items_item)
+		schema.Items = readSchema(sandbox, items_item)
 	}
 
 	if properties, _ := item.GetObjectItem("properties"); properties != nil && properties.IsObject() {
 		keys, err := properties.GetKeys()
 		if err == nil {
-			deps.Sortdeps.Strings(keys)
+			sandbox.Deps.Sortdeps.Strings(keys)
 			for _, key := range keys {
 				property, _ := properties.GetObjectItem(key)
 				if property == nil || !property.IsObject() {
@@ -303,7 +303,7 @@ func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema
 				}
 				schema.Properties = append(schema.Properties, SchemaProperty{
 					Name:   key,
-					Schema: readSchema(deps, property),
+					Schema: readSchema(sandbox, property),
 				})
 			}
 		}
@@ -314,12 +314,12 @@ func readSchema(deps *deps.Deps, item *serializibles.SerializibleObject) *Schema
 
 // unknownKeys lists the keys of one schema node that fall outside the subset,
 // sorted so the message a build fails with is the same every time.
-func unknownKeys(deps *deps.Deps, item *serializibles.SerializibleObject) []string {
+func unknownKeys(sandbox *api.Sandbox, item *serializibles.SerializibleObject) []string {
 	keys, err := item.GetKeys()
 	if err != nil {
 		return nil
 	}
-	deps.Sortdeps.Strings(keys)
+	sandbox.Deps.Sortdeps.Strings(keys)
 
 	var unknown []string
 	for _, key := range keys {
@@ -352,8 +352,8 @@ func readSchemaInt(item *serializibles.SerializibleObject, key string) (int, boo
 
 // normalizeMethod maps the method spellings accepted in route.yaml onto the
 // upper-case set the dispatch compares against; "" is the default GET.
-func normalizeMethod(deps *deps.Deps, raw string) string {
-	method := deps.Stringsdeps.ToUpper(deps.Stringsdeps.TrimSpace(raw))
+func normalizeMethod(sandbox *api.Sandbox, raw string) string {
+	method := sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
 	if method == "" {
 		return DefaultMethod
 	}
@@ -460,7 +460,7 @@ func readStringArray(obj *serializibles.SerializibleObject, key string) []string
 
 // anyToString renders a scalar yaml value as the string that will be baked
 // into the generated Go literal source.
-func anyToString(deps *deps.Deps, item *serializibles.SerializibleObject) string {
+func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) string {
 	if item.IsString() {
 		value, _ := item.GetString()
 		return value
@@ -473,11 +473,11 @@ func anyToString(deps *deps.Deps, item *serializibles.SerializibleObject) string
 	}
 	if item.IsInt() {
 		value, _ := item.GetInt()
-		return deps.Stringsdeps.FormatInt(value, 10)
+		return sandbox.Deps.Stringsdeps.FormatInt(value, 10)
 	}
 	if item.IsFloat() {
 		value, _ := item.GetFloat()
-		return deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+		return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
 	}
 	return ""
 }

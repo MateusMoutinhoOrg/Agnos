@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -24,13 +24,13 @@ const DefaultStaticMount = "/static"
 // A missing, unparsable or capture-first static route falls back to
 // DefaultStaticMount: this runs on every build, so it reports nothing and
 // leaves the complaining to CollectRoutes, which parses the same file.
-func CollectFrontMount(deps *deps.Deps, io *smartio.SmartIO) string {
-	content, err := io.ReadFile(utils.RouteConfPath(deps, utils.StaticRouteName))
+func CollectFrontMount(sandbox *api.Sandbox, io *smartio.SmartIO) string {
+	content, err := io.ReadFile(utils.RouteConfPath(sandbox, utils.StaticRouteName))
 	if err != nil {
 		return DefaultStaticMount
 	}
 
-	conf, err := routeconf.New(deps, string(content))
+	conf, err := routeconf.New(sandbox, string(content))
 	if err != nil {
 		return DefaultStaticMount
 	}

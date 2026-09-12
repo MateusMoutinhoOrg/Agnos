@@ -11,7 +11,8 @@ go get github.com/MateusMoutinhoOrg/Agnos@latest
 
 `sandbox/` performs no OS effects of its own — filesystem, clock, stdout, processes all
 arrive through a `deps.Deps` struct. `adapters/availables/standard` builds the ready-made
-assembly, and `sandbox.New` turns it into the API object.
+assembly, and `sandbox.New` turns it into the API object, which carries the deps on
+`Sandbox.Deps` — so everything inside reaches them through the api it was handed.
 
 ```go
 package main
@@ -38,6 +39,7 @@ Everything callable from Go is behind one of them.
 | --- | --- |
 | `lib.Actions` | `api.Actions` |
 | `lib.Cli` | `api.Cli` |
+| `lib.Commands` | `api.Commands` |
 
 [PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs and
 dependency contracts — generated from `sandbox/api/` itself on every build.

@@ -1,20 +1,20 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func Persist(deps *deps.Deps, io *SmartIO) error {
+func Persist(sandbox *api.Sandbox, io *SmartIO) error {
 	for _, p := range io.PendingRemoveDirs {
-		deps.Iodeps.RemoveDir(rootedPath(deps, io, p))
+		sandbox.Deps.Iodeps.RemoveDir(rootedPath(sandbox, io, p))
 	}
 	io.PendingRemoveDirs = nil
 
 	for _, p := range io.PendingCreateDirs {
-		deps.Iodeps.CreateDir(rootedPath(deps, io, p))
+		sandbox.Deps.Iodeps.CreateDir(rootedPath(sandbox, io, p))
 	}
 	io.PendingCreateDirs = nil
 
 	for p, content := range io.Transactions {
-		err := deps.Iodeps.WriteFile(rootedPath(deps, io, p), content)
+		err := sandbox.Deps.Iodeps.WriteFile(rootedPath(sandbox, io, p), content)
 		if err != nil {
 			return err
 		}

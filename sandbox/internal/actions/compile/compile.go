@@ -2,7 +2,6 @@ package compile
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 )
 
@@ -11,17 +10,17 @@ import (
 // target names are resolved before the build runs, so an unknown target fails
 // fast; the build runs before any binary is produced, so every release comes
 // from a freshly rendered, compilable tree.
-func Compile(deps *deps.Deps, props api.CompileProps) error {
-	names, err := resolveTargets(deps, props.Targets)
+func Compile(sandbox *api.Sandbox, props api.CompileProps) error {
+	names, err := resolveTargets(sandbox, props.Targets)
 	if err != nil {
 		return err
 	}
 
-	deps.Std.Log("compile started with path %s \n", props.Path)
+	sandbox.Deps.Std.Log("compile started with path %s \n", props.Path)
 
-	if err := buildAction.Build(deps, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo}); err != nil {
+	if err := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo}); err != nil {
 		return err
 	}
 
-	return CompileInternal(deps, props.Path, names)
+	return CompileInternal(sandbox, props.Path, names)
 }

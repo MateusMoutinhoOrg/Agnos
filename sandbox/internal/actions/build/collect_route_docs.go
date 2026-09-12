@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -47,12 +47,12 @@ const routeDocOther = "Other"
 // The declaration is the only source: a route, a field or an example reaches
 // the page by being declared with `add-route`, `add-field` or `set-route`,
 // never by the page being edited.
-func CollectRouteDocs(deps *deps.Deps, io *smartio.SmartIO) ([]RouteDocGroup, error) {
+func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGroup, error) {
 	var groups []RouteDocGroup
 	index := map[string]int{}
 
 	for _, dir := range io.ListDirs(routesDir) {
-		name := lastSegmentOf(deps, dir)
+		name := lastSegmentOf(sandbox, dir)
 		if name == "" {
 			continue
 		}
@@ -62,9 +62,9 @@ func CollectRouteDocs(deps *deps.Deps, io *smartio.SmartIO) ([]RouteDocGroup, er
 			continue
 		}
 
-		conf, err := routeconf.New(deps, string(content))
+		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, deps.Std.Errorf("routes/%s/route.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("routes/%s/route.yaml: %w", name, err)
 		}
 
 		if conf.Hidden {
@@ -83,21 +83,21 @@ func CollectRouteDocs(deps *deps.Deps, io *smartio.SmartIO) ([]RouteDocGroup, er
 			groups = append(groups, RouteDocGroup{Category: category})
 		}
 
-		groups[position].Routes = append(groups[position].Routes, routeDoc(deps, name, conf))
+		groups[position].Routes = append(groups[position].Routes, routeDoc(sandbox, name, conf))
 	}
 
 	return groups, nil
 }
 
 // routeDoc turns one parsed declaration into its page section.
-func routeDoc(deps *deps.Deps, name string, conf *routeconf.RouteConf) RouteDoc {
+func routeDoc(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) RouteDoc {
 	doc := RouteDoc{
 		Name:            name,
 		Method:          conf.Method,
 		Pattern:         conf.Pattern(),
-		Help:            docCell(deps, conf.Help),
-		LongDescription: docText(deps, conf.LongDescription),
-		Body:            routeDocBody(deps, conf.Body),
+		Help:            docCell(sandbox, conf.Help),
+		LongDescription: docText(sandbox, conf.LongDescription),
+		Body:            routeDocBody(sandbox, conf.Body),
 		Examples:        conf.Examples,
 	}
 
@@ -105,20 +105,20 @@ func routeDoc(deps *deps.Deps, name string, conf *routeconf.RouteConf) RouteDoc 
 		if segment.Field == nil {
 			continue
 		}
-		doc.Fields = append(doc.Fields, routeDocField(deps, *segment.Field, "path"))
+		doc.Fields = append(doc.Fields, routeDocField(sandbox, *segment.Field, "path"))
 	}
 	for _, field := range conf.Headers {
-		doc.Fields = append(doc.Fields, routeDocField(deps, field, "header"))
+		doc.Fields = append(doc.Fields, routeDocField(sandbox, field, "header"))
 	}
 	for _, field := range conf.Params {
-		doc.Fields = append(doc.Fields, routeDocField(deps, field, "query"))
+		doc.Fields = append(doc.Fields, routeDocField(sandbox, field, "query"))
 	}
 
 	return doc
 }
 
 // routeDocField renders one field as its table row.
-func routeDocField(deps *deps.Deps, field routeconf.Field, in string) RouteDocField {
+func routeDocField(sandbox *api.Sandbox, field routeconf.Field, in string) RouteDocField {
 	value := ""
 	if field.HasDefault {
 		value = "`" + field.Default + "`"
@@ -127,9 +127,9 @@ func routeDocField(deps *deps.Deps, field routeconf.Field, in string) RouteDocFi
 	return RouteDocField{
 		Key:         field.Key,
 		In:          in,
-		Type:        routeFieldTypeLabel(deps, field, in),
+		Type:        routeFieldTypeLabel(sandbox, field, in),
 		Default:     value,
-		Description: docCell(deps, field.Description),
+		Description: docCell(sandbox, field.Description),
 	}
 }
 
@@ -137,7 +137,7 @@ func routeDocField(deps *deps.Deps, field routeconf.Field, in string) RouteDocFi
 // implies: its kind, whether it holds more than one value, whether it must be
 // given, and the bounds a numeric field declares. An array reads by its
 // origin: a query key repeats, a path segment takes what is left of the URL.
-func routeFieldTypeLabel(deps *deps.Deps, field routeconf.Field, in string) string {
+func routeFieldTypeLabel(sandbox *api.Sandbox, field routeconf.Field, in string) string {
 	label := field.Type
 	if label == "" {
 		label = "string"
@@ -152,7 +152,7 @@ func routeFieldTypeLabel(deps *deps.Deps, field routeconf.Field, in string) stri
 	if field.Required {
 		label += ", required"
 	}
-	if bounds := routeFieldBounds(deps, field); bounds != "" {
+	if bounds := routeFieldBounds(sandbox, field); bounds != "" {
 		label += ", " + bounds
 	}
 	return label
@@ -160,21 +160,21 @@ func routeFieldTypeLabel(deps *deps.Deps, field routeconf.Field, in string) stri
 
 // routeFieldBounds spells the min/max a numeric field declares, "" when it
 // declares neither.
-func routeFieldBounds(deps *deps.Deps, field routeconf.Field) string {
+func routeFieldBounds(sandbox *api.Sandbox, field routeconf.Field) string {
 	switch {
 	case field.HasMin && field.HasMax:
-		return routeNumberLabel(deps, field.Type, field.Min, true) + ".." + routeNumberLabel(deps, field.Type, field.Max, true)
+		return routeNumberLabel(sandbox, field.Type, field.Min, true) + ".." + routeNumberLabel(sandbox, field.Type, field.Max, true)
 	case field.HasMin:
-		return ">= " + routeNumberLabel(deps, field.Type, field.Min, true)
+		return ">= " + routeNumberLabel(sandbox, field.Type, field.Min, true)
 	case field.HasMax:
-		return "<= " + routeNumberLabel(deps, field.Type, field.Max, true)
+		return "<= " + routeNumberLabel(sandbox, field.Type, field.Max, true)
 	}
 	return ""
 }
 
 // routeDocBody is the one line describing a route's body: its kind, whether it
 // is required, the content type it accepts and the size it stops at.
-func routeDocBody(deps *deps.Deps, body routeconf.Body) string {
+func routeDocBody(sandbox *api.Sandbox, body routeconf.Body) string {
 	if body.Type == routeconf.BodyNone {
 		return ""
 	}
@@ -189,5 +189,5 @@ func routeDocBody(deps *deps.Deps, body routeconf.Body) string {
 	if body.HasSchema {
 		label += ", json-schema"
 	}
-	return label + ", up to " + deps.Stringsdeps.FormatInt(int64(body.MaxBytes), 10) + " bytes"
+	return label + ", up to " + sandbox.Deps.Stringsdeps.FormatInt(int64(body.MaxBytes), 10) + " bytes"
 }

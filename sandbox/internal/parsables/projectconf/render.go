@@ -1,16 +1,16 @@
 package projectconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func Render(deps *deps.Deps, project_conf *ProjectConf) string {
-	obj := deps.Serializables.CreateObject()
+func Render(sandbox *api.Sandbox, project_conf *ProjectConf) string {
+	obj := sandbox.Deps.Serializables.CreateObject()
 	obj.AddItemToObject("name", project_conf.Name)
 	if project_conf.Version == "" {
 		obj.AddItemToObject("version", nil)
 	} else {
 		obj.AddItemToObject("version", project_conf.Version)
 	}
-	return deps.Serializables.SerializeToYaml(obj)
+	return sandbox.Deps.Serializables.SerializeToYaml(obj)
 }

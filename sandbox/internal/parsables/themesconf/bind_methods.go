@@ -1,10 +1,10 @@
 package themesconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, themes_conf *ThemesConf) {
+func BindMethods(sandbox *api.Sandbox, themes_conf *ThemesConf) {
 
 	themes_conf.GetTheme = func(name string) (*Theme, error) {
 		for i, theme := range themes_conf.Themes {
@@ -12,13 +12,13 @@ func BindMethods(deps *deps.Deps, themes_conf *ThemesConf) {
 				return &themes_conf.Themes[i], nil
 			}
 		}
-		return nil, deps.Std.Errorf("theme not found")
+		return nil, sandbox.Deps.Std.Errorf("theme not found")
 	}
 
 	themes_conf.AddTheme = func(name string, id string, description string) error {
 		_, err := themes_conf.GetTheme(name)
 		if err == nil {
-			return deps.Std.Errorf("theme already exists")
+			return sandbox.Deps.Std.Errorf("theme already exists")
 		}
 
 		themes_conf.Themes = append(themes_conf.Themes, Theme{
@@ -31,6 +31,6 @@ func BindMethods(deps *deps.Deps, themes_conf *ThemesConf) {
 	}
 
 	themes_conf.Render = func() string {
-		return Render(deps, themes_conf)
+		return Render(sandbox, themes_conf)
 	}
 }

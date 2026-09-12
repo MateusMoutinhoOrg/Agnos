@@ -126,13 +126,13 @@ func isQualified(tokens []token, index int) bool {
 // References reports whether expr names any type this package declares. An
 // expression that does not is identical in both copies of the package, so the
 // generated shim assigns it across with no conversion at all.
-func References(api *Api, expr string) bool {
+func References(shape *Api, expr string) bool {
 	tokens := tokenize(expr)
 	for index, item := range tokens {
 		if !item.Ident || isQualified(tokens, index) {
 			continue
 		}
-		if Declares(api, item.Text) {
+		if Declares(shape, item.Text) {
 			return true
 		}
 	}
@@ -143,12 +143,12 @@ func References(api *Api, expr string) bool {
 // qualifier.Identifier, turning one type expression into the same expression
 // as read from another package. It is what makes `[]Item` become
 // `[]remoteapi.Item` on one side and `[]mathlib.Item` on the other.
-func Qualify(api *Api, expr string, qualifier string) string {
+func Qualify(shape *Api, expr string, qualifier string) string {
 	tokens := tokenize(expr)
 
 	out := ""
 	for index, item := range tokens {
-		if item.Ident && !isQualified(tokens, index) && Declares(api, item.Text) {
+		if item.Ident && !isQualified(tokens, index) && Declares(shape, item.Text) {
 			out += qualifier + "." + item.Text
 			continue
 		}

@@ -2,7 +2,6 @@ package add_dep
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -21,14 +20,14 @@ import (
 //
 // The adapter is enrolled in every available: nothing else fills that field
 // yet, and an available that leaves one empty is a nil func waiting to panic.
-func AddDepInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddDepProps) error {
-	if deps.Stringsdeps.Contains(props.Dep, "/") {
-		return AddRemoteDepInternal(deps, io, props)
+func AddDepInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddDepProps) error {
+	if sandbox.Deps.Stringsdeps.Contains(props.Dep, "/") {
+		return AddRemoteDepInternal(sandbox, io, props)
 	}
 
-	deps.Std.Log("add-dep started with path %s dep %s \n", props.Path, props.Dep)
+	sandbox.Deps.Std.Log("add-dep started with path %s dep %s \n", props.Path, props.Dep)
 
-	dep_conf, err := utils.LoadCatalogDepConf(deps, props.Dep)
+	dep_conf, err := utils.LoadCatalogDepConf(sandbox, props.Dep)
 	if err != nil {
 		return err
 	}
@@ -38,15 +37,15 @@ func AddDepInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddDepProps)
 		adapter = dep_conf.DefaultAdapter
 	}
 
-	adapter_conf, err := utils.LoadCatalogAdapterConf(deps, adapter)
+	adapter_conf, err := utils.LoadCatalogAdapterConf(sandbox, adapter)
 	if err != nil {
 		return err
 	}
 	if adapter_conf.Dep != dep_conf.Name {
-		return deps.Std.Errorf("adapter %q fills dep %q, not %q", adapter, adapter_conf.Dep, dep_conf.Name)
+		return sandbox.Deps.Std.Errorf("adapter %q fills dep %q, not %q", adapter, adapter_conf.Dep, dep_conf.Name)
 	}
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -56,13 +55,13 @@ func AddDepInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddDepProps)
 	}
 
 	group := utils.DeplistGroup + "/" + dep_conf.Name
-	if err := utils.RenderGroupExcept(deps, io, group, vars, []string{utils.DepConfFile}); err != nil {
+	if err := utils.RenderGroupExcept(sandbox, io, group, vars, []string{utils.DepConfFile}); err != nil {
 		return err
 	}
 
-	if err := addAdapterAction.InstallAdapter(deps, io, adapter_conf, module_conf, vars); err != nil {
+	if err := addAdapterAction.InstallAdapter(sandbox, io, adapter_conf, module_conf, vars); err != nil {
 		return err
 	}
 
-	return utils.EnrollAdapter(deps, io, adapter_conf.Name)
+	return utils.EnrollAdapter(sandbox, io, adapter_conf.Name)
 }

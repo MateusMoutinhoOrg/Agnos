@@ -10,10 +10,10 @@ tree:
     - file: sandbox/internal/commands/help/entries.yaml
       sha: de26675d3bf0579b8c2566dda1f1106f007139a5e03452e129262cfe667e64a7
     - file: sandbox/internal/commands/help/handler.go
-      sha: 0e463b84502bf24e3a1dbf0b9175ae782a8619b2c98693acd2ed92636b4c4f9c
+      sha: 976e7dca7f1571a4c5379ea0d0f47383ade8981974c020c728e05f6b0579a1c4
     - file: sandbox/internal/commands/version/entries.go
       sha: 90337e6ed450c8f839f9c7d507a570de4d3599ca6b61f74c50f92507a65680ef
     - file: sandbox/internal/commands/version/entries.yaml
       sha: 79d993e7132a86d8a54c44d726973e1bf21c005ba1bf82f8d81482e2e24be3b5
     - file: sandbox/internal/commands/version/handler.go
-      sha: 3e867688e1a2be4d91deea19d8c312cb9301b9b15c0be6af0e6b5ba1d7ca57bb
+      sha: d526c00d714d7779e76397e94fa0c714d9b5942cbd320879f780e503cbe12491

@@ -1,21 +1,21 @@
 package structureconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, structure_conf *StructureConf) {
+func BindMethods(sandbox *api.Sandbox, structure_conf *StructureConf) {
 
 	structure_conf.GetItem = func(path string) (*Item, error) {
 		item := findItem(structure_conf.Items, "", path)
 		if item == nil {
-			return nil, deps.Std.Errorf("item not found")
+			return nil, sandbox.Deps.Std.Errorf("item not found")
 		}
 		return item, nil
 	}
 
 	structure_conf.Render = func() string {
-		return Render(deps, structure_conf)
+		return Render(sandbox, structure_conf)
 	}
 }
 

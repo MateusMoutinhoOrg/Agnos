@@ -1,7 +1,7 @@
 package add_route
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -10,42 +10,42 @@ import (
 // It refuses to overwrite an existing route (via io.WriteFile). The trigger is
 // normalized to start with "/", so "users" and "/users" produce the same
 // route.yaml.
-func AddRouteInternal(deps *deps.Deps, io *smartio.SmartIO, name string, method string, trigger string, help string, category string) error {
-	if deps.Stringsdeps.TrimSpace(help) == "" {
-		return deps.Std.Errorf("add-route requires --help")
+func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, method string, trigger string, help string, category string) error {
+	if sandbox.Deps.Stringsdeps.TrimSpace(help) == "" {
+		return sandbox.Deps.Std.Errorf("add-route requires --help")
 	}
-	if deps.Stringsdeps.TrimSpace(category) == "" {
-		return deps.Std.Errorf("add-route requires --category")
+	if sandbox.Deps.Stringsdeps.TrimSpace(category) == "" {
+		return sandbox.Deps.Std.Errorf("add-route requires --category")
 	}
 
-	if err := utils.ValidateRouteName(deps, name); err != nil {
+	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
 	}
-	utils.NoteNormalizedCommandName(deps, name)
+	utils.NoteNormalizedCommandName(sandbox, name)
 
-	identifier := utils.RouteIdentifier(deps, name)
-	pkg := utils.RoutePackage(deps, name)
+	identifier := utils.RouteIdentifier(sandbox, name)
+	pkg := utils.RoutePackage(sandbox, name)
 
 	if pkg == "health" {
-		return deps.Std.Errorf("the health route is generated and cannot be declared")
+		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be declared")
 	}
 
-	if deps.Stringsdeps.TrimSpace(trigger) == "" {
+	if sandbox.Deps.Stringsdeps.TrimSpace(trigger) == "" {
 		trigger = "/" + identifier
 	}
-	segment, err := utils.RouteIdentifierSegment(deps, trigger)
+	segment, err := utils.RouteIdentifierSegment(sandbox, trigger)
 	if err != nil {
 		return err
 	}
 
-	verb, err := utils.RouteMethod(deps, method)
+	verb, err := utils.RouteMethod(sandbox, method)
 	if err != nil {
 		return err
 	}
 
-	deps.Std.Log("add-route creating %s \n", utils.RouteDir(deps, name))
+	sandbox.Deps.Std.Log("add-route creating %s \n", utils.RouteDir(sandbox, name))
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -56,13 +56,13 @@ func AddRouteInternal(deps *deps.Deps, io *smartio.SmartIO, name string, method 
 		"Module":     module_conf.Module,
 		"Method":     verb,
 		"Trigger":    segment,
-		"Help":       deps.Stringsdeps.TrimSpace(help),
-		"Category":   deps.Stringsdeps.TrimSpace(category),
+		"Help":       sandbox.Deps.Stringsdeps.TrimSpace(help),
+		"Category":   sandbox.Deps.Stringsdeps.TrimSpace(category),
 	}
 
-	dir := utils.RouteDir(deps, name)
+	dir := utils.RouteDir(sandbox, name)
 
-	route, err := deps.Embeddeps.RenderTemplate("templates/route_route.yaml", vars)
+	route, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/route_route.yaml", vars)
 	if err != nil {
 		return err
 	}
@@ -70,7 +70,7 @@ func AddRouteInternal(deps *deps.Deps, io *smartio.SmartIO, name string, method 
 		return err
 	}
 
-	handler, err := deps.Embeddeps.RenderTemplate("templates/route_handler.go", vars)
+	handler, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/route_handler.go", vars)
 	if err != nil {
 		return err
 	}

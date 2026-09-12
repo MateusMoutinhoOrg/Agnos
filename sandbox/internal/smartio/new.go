@@ -1,13 +1,13 @@
 package smartio
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/pathreplacerconf"
 )
 
-func joinPath(deps *deps.Deps, base string, name string) string {
-	if deps.Stringsdeps.HasSuffix(base, "/") || deps.Stringsdeps.HasSuffix(base, "\\") {
+func joinPath(sandbox *api.Sandbox, base string, name string) string {
+	if sandbox.Deps.Stringsdeps.HasSuffix(base, "/") || sandbox.Deps.Stringsdeps.HasSuffix(base, "\\") {
 		return base + name
 	}
 	return base + "/" + name
@@ -16,59 +16,59 @@ func joinPath(deps *deps.Deps, base string, name string) string {
 // normalizeRoot collapses the spellings of "the current directory" ("", ".",
 // "./") to "" so rootedPath adds no prefix, and strips a trailing slash from
 // every other value so joins are uniform.
-func normalizeRoot(deps *deps.Deps, path string) string {
+func normalizeRoot(sandbox *api.Sandbox, path string) string {
 	if path == "" || path == "." || path == "./" {
 		return ""
 	}
-	for deps.Stringsdeps.HasSuffix(path, "/") {
+	for sandbox.Deps.Stringsdeps.HasSuffix(path, "/") {
 		path = path[:len(path)-1]
 	}
 	return path
 }
 
-func New(deps *deps.Deps, path string, projectName string) *SmartIO {
+func New(sandbox *api.Sandbox, path string, projectName string) *SmartIO {
 	io := &SmartIO{
-		Root:         normalizeRoot(deps, path),
-		deps:         deps,
+		Root:         normalizeRoot(sandbox, path),
+		sandbox:      sandbox,
 		Transactions: make(map[string][]byte),
 	}
 
-	configDir := joinPath(deps, path, projectName+"Config")
+	configDir := joinPath(sandbox, path, projectName+"Config")
 
-	ignorePath := joinPath(deps, configDir, "ignore.yaml")
-	if deps.Iodeps.Exist(ignorePath) && deps.Iodeps.IsFile(ignorePath) {
-		content, err := deps.Iodeps.ReadFile(ignorePath)
+	ignorePath := joinPath(sandbox, configDir, "ignore.yaml")
+	if sandbox.Deps.Iodeps.Exist(ignorePath) && sandbox.Deps.Iodeps.IsFile(ignorePath) {
+		content, err := sandbox.Deps.Iodeps.ReadFile(ignorePath)
 		if err == nil {
-			conf, err := ignorableconf.New(deps, string(content))
+			conf, err := ignorableconf.New(sandbox, string(content))
 			if err == nil {
 				io.Ignore = conf
 			} else {
-				io.Ignore = ignorableconf.NewEmpty(deps)
+				io.Ignore = ignorableconf.NewEmpty(sandbox)
 			}
 		} else {
-			io.Ignore = ignorableconf.NewEmpty(deps)
+			io.Ignore = ignorableconf.NewEmpty(sandbox)
 		}
 	} else {
-		io.Ignore = ignorableconf.NewEmpty(deps)
+		io.Ignore = ignorableconf.NewEmpty(sandbox)
 	}
 
-	replacersPath := joinPath(deps, configDir, "paths.yaml")
-	if deps.Iodeps.Exist(replacersPath) && deps.Iodeps.IsFile(replacersPath) {
-		content, err := deps.Iodeps.ReadFile(replacersPath)
+	replacersPath := joinPath(sandbox, configDir, "paths.yaml")
+	if sandbox.Deps.Iodeps.Exist(replacersPath) && sandbox.Deps.Iodeps.IsFile(replacersPath) {
+		content, err := sandbox.Deps.Iodeps.ReadFile(replacersPath)
 		if err == nil {
-			conf, err := pathreplacerconf.New(deps, string(content))
+			conf, err := pathreplacerconf.New(sandbox, string(content))
 			if err == nil {
 				io.Replacers = conf
 			} else {
-				io.Replacers = pathreplacerconf.NewEmpty(deps)
+				io.Replacers = pathreplacerconf.NewEmpty(sandbox)
 			}
 		} else {
-			io.Replacers = pathreplacerconf.NewEmpty(deps)
+			io.Replacers = pathreplacerconf.NewEmpty(sandbox)
 		}
 	} else {
-		io.Replacers = pathreplacerconf.NewEmpty(deps)
+		io.Replacers = pathreplacerconf.NewEmpty(sandbox)
 	}
 
-	BindMethods(deps, io)
+	BindMethods(sandbox, io)
 	return io
 }

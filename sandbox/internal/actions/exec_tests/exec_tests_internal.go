@@ -1,7 +1,7 @@
 package exec_tests
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
@@ -37,18 +37,18 @@ type exampleRun struct {
 // first and then through the lib, and the two runs are cross-checked: the cli
 // is a wrapper over the lib, so they must leave the same tree and exit the
 // same way.
-func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) error {
-	root, err := projectRoot(deps, path)
+func ExecTestInternal(sandbox *api.Sandbox, path string, only string, update bool) error {
+	root, err := projectRoot(sandbox, path)
 	if err != nil {
 		return err
 	}
 
-	prefix, err := writeCliAlias(deps, path, root)
+	prefix, err := writeCliAlias(sandbox, path, root)
 	if err != nil {
 		return err
 	}
 
-	runs, err := planRuns(deps, path, only)
+	runs, err := planRuns(sandbox, path, only)
 	if err != nil {
 		return err
 	}
@@ -57,41 +57,41 @@ func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) er
 	produced := map[string]*resultconf.ResultConf{}
 
 	for _, run := range runs {
-		result, err := execExample(deps, path, root, prefix, run)
+		result, err := execExample(sandbox, path, root, prefix, run)
 		if err != nil {
 			return err
 		}
 		if len(result.Tree) == 0 {
 			failed = append(failed, run.Side+"/"+run.Name)
-			report(deps, run.Side+"/"+run.Name, []string{emptyAssertDir(run)})
+			report(sandbox, run.Side+"/"+run.Name, []string{emptyAssertDir(run)})
 			continue
 		}
 		produced[run.Side+"/"+run.Name] = result
 
-		divergences, err := checkGolden(deps, path, run, result, update)
+		divergences, err := checkGolden(sandbox, path, run, result, update)
 		if err != nil {
 			return err
 		}
 		if len(divergences) > 0 {
 			failed = append(failed, run.Side+"/"+run.Name)
-			report(deps, run.Side+"/"+run.Name, divergences)
+			report(sandbox, run.Side+"/"+run.Name, divergences)
 		}
 	}
 
 	crossed := crossCheckedNames(runs)
 	for _, name := range crossed {
-		divergences := crossCheck(deps, produced[utils.ExampleCliSide+"/"+name], produced[utils.ExampleLibSide+"/"+name])
+		divergences := crossCheck(sandbox, produced[utils.ExampleCliSide+"/"+name], produced[utils.ExampleLibSide+"/"+name])
 		if len(divergences) > 0 {
 			failed = append(failed, name)
-			report(deps, name+" (cli vs lib)", divergences)
+			report(sandbox, name+" (cli vs lib)", divergences)
 		}
 	}
 
-	deps.Std.Log("exec-test done: %d examples, %d cross-checks, %d failed \n", len(runs), len(crossed), len(failed))
+	sandbox.Deps.Std.Log("exec-test done: %d examples, %d cross-checks, %d failed \n", len(runs), len(crossed), len(failed))
 
 	if len(failed) > 0 {
-		return deps.Std.Errorf("exec-test: %d of %d checks failed: %s",
-			len(failed), len(runs)+len(crossed), deps.Stringsdeps.Join(failed, ", "))
+		return sandbox.Deps.Std.Errorf("exec-test: %d of %d checks failed: %s",
+			len(failed), len(runs)+len(crossed), sandbox.Deps.Stringsdeps.Join(failed, ", "))
 	}
 	return nil
 }
@@ -99,15 +99,15 @@ func ExecTestInternal(deps *deps.Deps, path string, only string, update bool) er
 // planRuns lists the examples to run, in the order they are run: alphabetical
 // by name, cli before lib. `only` narrows the plan to one name — both sides of
 // it — and is a usage error when no side declares that name.
-func planRuns(deps *deps.Deps, path string, only string) ([]exampleRun, error) {
-	only = deps.Stringsdeps.TrimSpace(only)
+func planRuns(sandbox *api.Sandbox, path string, only string) ([]exampleRun, error) {
+	only = sandbox.Deps.Stringsdeps.TrimSpace(only)
 
 	names := []string{}
 	seen := map[string]bool{}
 	has := map[string]bool{}
 
 	for _, side := range utils.ExampleSides {
-		for _, name := range listExamples(deps, path, side) {
+		for _, name := range listExamples(sandbox, path, side) {
 			has[side+"/"+name] = true
 			if !seen[name] {
 				seen[name] = true
@@ -115,12 +115,12 @@ func planRuns(deps *deps.Deps, path string, only string) ([]exampleRun, error) {
 			}
 		}
 	}
-	deps.Sortdeps.Strings(names)
+	sandbox.Deps.Sortdeps.Strings(names)
 
 	if only != "" {
 		if !seen[only] {
-			return nil, deps.Std.Errorf("exec-test: no example named %q (declared: %s)",
-				only, deps.Stringsdeps.Join(names, ", "))
+			return nil, sandbox.Deps.Std.Errorf("exec-test: no example named %q (declared: %s)",
+				only, sandbox.Deps.Stringsdeps.Join(names, ", "))
 		}
 		names = []string{only}
 	}
@@ -138,17 +138,17 @@ func planRuns(deps *deps.Deps, path string, only string) ([]exampleRun, error) {
 
 // listExamples lists one side's example names, sorted. It reads disk directly:
 // exec-test opens no SmartIO, so nothing here is filtered or buffered.
-func listExamples(deps *deps.Deps, path string, side string) []string {
-	dir := join(deps, path, utils.ExampleSideDir(side))
-	if !deps.Iodeps.IsDir(dir) {
+func listExamples(sandbox *api.Sandbox, path string, side string) []string {
+	dir := join(sandbox, path, utils.ExampleSideDir(side))
+	if !sandbox.Deps.Iodeps.IsDir(dir) {
 		return nil
 	}
 
 	var names []string
-	for _, entry := range deps.Iodeps.ListDirs(dir) {
-		names = append(names, utils.LastSegment(deps, entry))
+	for _, entry := range sandbox.Deps.Iodeps.ListDirs(dir) {
+		names = append(names, utils.LastSegment(sandbox, entry))
 	}
-	deps.Sortdeps.Strings(names)
+	sandbox.Deps.Sortdeps.Strings(names)
 	return names
 }
 
@@ -179,32 +179,32 @@ func crossCheckedNames(runs []exampleRun) []string {
 // with its own directory as the working directory, and what it produced is
 // gathered into a result — the exit status and merged output of the run, plus
 // every file it copied out of TestDir into AssertDir.
-func execExample(deps *deps.Deps, path string, root string, prefix []string, run exampleRun) (*resultconf.ResultConf, error) {
-	dir := join(deps, path, run.Dir)
+func execExample(sandbox *api.Sandbox, path string, root string, prefix []string, run exampleRun) (*resultconf.ResultConf, error) {
+	dir := join(sandbox, path, run.Dir)
 
-	deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleTestDir)
-	deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleAssertDir)
+	sandbox.Deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleTestDir)
+	sandbox.Deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleAssertDir)
 
 	program, args := invocation(run.Side)
-	result, err := deps.Rundeps.Run(rundeps.RunProps{
+	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 		Dir:        dir,
 		Program:    program,
 		Args:       args,
 		PathPrefix: prefix,
 	})
 	if err != nil {
-		return nil, deps.Std.Errorf("exec-test %s/%s: could not run %s: %w", run.Side, run.Name, program, err)
+		return nil, sandbox.Deps.Std.Errorf("exec-test %s/%s: could not run %s: %w", run.Side, run.Name, program, err)
 	}
 
-	conf := resultconf.NewEmpty(deps)
-	conf.CliOutput = normalize(deps, result.Output, root+"/"+run.Dir)
+	conf := resultconf.NewEmpty(sandbox)
+	conf.CliOutput = normalize(sandbox, result.Output, root+"/"+run.Dir)
 	conf.ExitCode = result.ExitCode
 
-	for _, entry := range treeOf(deps, dir+"/"+utils.ExampleAssertDir) {
+	for _, entry := range treeOf(sandbox, dir+"/"+utils.ExampleAssertDir) {
 		conf.AddTreeEntry(entry.File, entry.Sha)
 	}
 
-	deps.Std.Log("exec-test %s/%s: exit %d, %d files \n", run.Side, run.Name, conf.ExitCode, len(conf.Tree))
+	sandbox.Deps.Std.Log("exec-test %s/%s: exit %d, %d files \n", run.Side, run.Name, conf.ExitCode, len(conf.Tree))
 	return conf, nil
 }
 
@@ -221,25 +221,25 @@ func invocation(side string) (string, []string) {
 // relative to that directory and carrying the sha256 of its content. A file
 // that cannot be read is recorded with an empty sha rather than aborting the
 // suite: the comparison then reports it like any other divergence.
-func treeOf(deps *deps.Deps, assert_dir string) []resultconf.TreeEntry {
+func treeOf(sandbox *api.Sandbox, assert_dir string) []resultconf.TreeEntry {
 	var entries []resultconf.TreeEntry
 
-	for _, file := range deps.Iodeps.ListFilesRecursively(assert_dir) {
-		name := deps.Stringsdeps.TrimPrefix(deps.Stringsdeps.TrimPrefix(file, assert_dir), "/")
-		if name == "" || isVolatile(deps, name) {
+	for _, file := range sandbox.Deps.Iodeps.ListFilesRecursively(assert_dir) {
+		name := sandbox.Deps.Stringsdeps.TrimPrefix(sandbox.Deps.Stringsdeps.TrimPrefix(file, assert_dir), "/")
+		if name == "" || isVolatile(sandbox, name) {
 			continue
 		}
 
-		content, err := deps.Iodeps.ReadFile(file)
+		content, err := sandbox.Deps.Iodeps.ReadFile(file)
 		if err != nil {
 			entries = append(entries, resultconf.TreeEntry{File: name})
 			continue
 		}
 
-		entries = append(entries, resultconf.TreeEntry{File: name, Sha: deps.Hashdeps.Sha256Hex(content)})
+		entries = append(entries, resultconf.TreeEntry{File: name, Sha: sandbox.Deps.Hashdeps.Sha256Hex(content)})
 	}
 
-	deps.Sortdeps.SliceStable(entries, func(i, j int) bool {
+	sandbox.Deps.Sortdeps.SliceStable(entries, func(i, j int) bool {
 		return entries[i].File < entries[j].File
 	})
 	return entries
@@ -247,14 +247,14 @@ func treeOf(deps *deps.Deps, assert_dir string) []resultconf.TreeEntry {
 
 // isVolatile reports whether an AssertDir-relative path is one the tree leaves
 // out (see volatileFiles / volatileDirs).
-func isVolatile(deps *deps.Deps, name string) bool {
+func isVolatile(sandbox *api.Sandbox, name string) bool {
 	for _, file := range volatileFiles {
 		if name == file {
 			return true
 		}
 	}
 	for _, dir := range volatileDirs {
-		if deps.Stringsdeps.HasPrefix(name, dir) {
+		if sandbox.Deps.Stringsdeps.HasPrefix(name, dir) {
 			return true
 		}
 	}
@@ -265,9 +265,9 @@ func isVolatile(deps *deps.Deps, name string) bool {
 // example ran in becomes <dir>, and carriage returns are dropped. Any other
 // absolute path, timestamp or resolved version left in the output belongs to
 // the machine that ran it, and the example carrying it is not a valid one.
-func normalize(deps *deps.Deps, output string, dir string) string {
-	output = deps.Stringsdeps.ReplaceAll(output, "\r\n", "\n")
-	return deps.Stringsdeps.ReplaceAll(output, dir, "<dir>")
+func normalize(sandbox *api.Sandbox, output string, dir string) string {
+	output = sandbox.Deps.Stringsdeps.ReplaceAll(output, "\r\n", "\n")
+	return sandbox.Deps.Stringsdeps.ReplaceAll(output, dir, "<dir>")
 }
 
 // emptyAssertDir is what one example is told when it copied nothing out of its
@@ -282,43 +282,43 @@ func emptyAssertDir(run exampleRun) string {
 // It returns one line per divergence, empty when the example passed. Writing
 // over a golden that already exists prints what changed first: a golden
 // rewritten in silence is a golden nobody read.
-func checkGolden(deps *deps.Deps, path string, run exampleRun, produced *resultconf.ResultConf, update bool) ([]string, error) {
+func checkGolden(sandbox *api.Sandbox, path string, run exampleRun, produced *resultconf.ResultConf, update bool) ([]string, error) {
 	rel := run.Dir + "/" + utils.ExampleResultFile
-	golden_path := join(deps, path, rel)
+	golden_path := join(sandbox, path, rel)
 
-	if !deps.Iodeps.IsFile(golden_path) {
-		deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
-		return nil, deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
+	if !sandbox.Deps.Iodeps.IsFile(golden_path) {
+		sandbox.Deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
+		return nil, sandbox.Deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
 	}
 
-	golden, err := loadGolden(deps, run, golden_path)
+	golden, err := loadGolden(sandbox, run, golden_path)
 	if err != nil {
 		return nil, err
 	}
 
 	divergences := diffExitCode(golden.ExitCode, produced.ExitCode)
-	divergences = append(divergences, diffOutput(deps, golden.CliOutput, produced.CliOutput)...)
-	divergences = append(divergences, diffTree(deps, golden.Tree, produced.Tree)...)
+	divergences = append(divergences, diffOutput(sandbox, golden.CliOutput, produced.CliOutput)...)
+	divergences = append(divergences, diffTree(sandbox, golden.Tree, produced.Tree)...)
 
 	if !update {
 		return divergences, nil
 	}
 
-	deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
-	reportUpdate(deps, divergences)
-	return nil, deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
+	sandbox.Deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
+	reportUpdate(sandbox, divergences)
+	return nil, sandbox.Deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
 }
 
 // loadGolden reads and parses one example's result.yaml.
-func loadGolden(deps *deps.Deps, run exampleRun, golden_path string) (*resultconf.ResultConf, error) {
-	content, err := deps.Iodeps.ReadFile(golden_path)
+func loadGolden(sandbox *api.Sandbox, run exampleRun, golden_path string) (*resultconf.ResultConf, error) {
+	content, err := sandbox.Deps.Iodeps.ReadFile(golden_path)
 	if err != nil {
-		return nil, deps.Std.Errorf("exec-test %s/%s: could not read %s: %w", run.Side, run.Name, golden_path, err)
+		return nil, sandbox.Deps.Std.Errorf("exec-test %s/%s: could not read %s: %w", run.Side, run.Name, golden_path, err)
 	}
 
-	golden, err := resultconf.New(deps, string(content))
+	golden, err := resultconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, deps.Std.Errorf("exec-test %s/%s: %s: %w", run.Side, run.Name, golden_path, err)
+		return nil, sandbox.Deps.Std.Errorf("exec-test %s/%s: %s: %w", run.Side, run.Name, golden_path, err)
 	}
 	return golden, nil
 }
@@ -326,13 +326,13 @@ func loadGolden(deps *deps.Deps, run exampleRun, golden_path string) (*resultcon
 // reportUpdate prints what a golden is about to be written over with, in the
 // shape a failure reports it. It goes to the log channel and not the error
 // one: an update is progress, and --quiet silences progress.
-func reportUpdate(deps *deps.Deps, divergences []string) {
+func reportUpdate(sandbox *api.Sandbox, divergences []string) {
 	if len(divergences) == 0 {
-		deps.Std.Log("  unchanged \n")
+		sandbox.Deps.Std.Log("  unchanged \n")
 		return
 	}
 	for _, line := range divergences {
-		deps.Std.Log("  %s \n", line)
+		sandbox.Deps.Std.Log("  %s \n", line)
 	}
 }
 
@@ -341,12 +341,12 @@ func reportUpdate(deps *deps.Deps, divergences []string) {
 // wrapper over the lib. cli-output is deliberately left out — each side has
 // its own text (a cli error on one, a panic on the other) and is checked
 // against its own golden.
-func crossCheck(deps *deps.Deps, cli *resultconf.ResultConf, lib *resultconf.ResultConf) []string {
+func crossCheck(sandbox *api.Sandbox, cli *resultconf.ResultConf, lib *resultconf.ResultConf) []string {
 	if cli == nil || lib == nil {
 		return nil
 	}
 	divergences := diffExitCode(cli.ExitCode, lib.ExitCode)
-	return append(divergences, diffTree(deps, cli.Tree, lib.Tree)...)
+	return append(divergences, diffTree(sandbox, cli.Tree, lib.Tree)...)
 }
 
 // diffExitCode reports a differing exit status.
@@ -359,13 +359,13 @@ func diffExitCode(expected int, got int) []string {
 
 // diffOutput reports the differing lines of the two outputs, `-` for the
 // expected line and `+` for the one produced.
-func diffOutput(deps *deps.Deps, expected string, got string) []string {
+func diffOutput(sandbox *api.Sandbox, expected string, got string) []string {
 	if expected == got {
 		return nil
 	}
 
-	expected_lines := deps.Stringsdeps.Split(expected, "\n")
-	got_lines := deps.Stringsdeps.Split(got, "\n")
+	expected_lines := sandbox.Deps.Stringsdeps.Split(expected, "\n")
+	got_lines := sandbox.Deps.Stringsdeps.Split(got, "\n")
 
 	lines := []string{"cli-output:"}
 	for index := 0; index < len(expected_lines) || index < len(got_lines); index++ {
@@ -396,7 +396,7 @@ func lineAt(lines []string, index int) *string {
 // only the produced tree has, `-` for one only the expected tree has, and `~`
 // for one both have with a different sha. Saying only "failed" about two trees
 // of hundreds of files is no help at all.
-func diffTree(deps *deps.Deps, expected []resultconf.TreeEntry, got []resultconf.TreeEntry) []string {
+func diffTree(sandbox *api.Sandbox, expected []resultconf.TreeEntry, got []resultconf.TreeEntry) []string {
 	expected_shas := shasOf(expected)
 	got_shas := shasOf(got)
 
@@ -420,7 +420,7 @@ func diffTree(deps *deps.Deps, expected []resultconf.TreeEntry, got []resultconf
 	if len(lines) == 0 {
 		return nil
 	}
-	deps.Sortdeps.Strings(lines)
+	sandbox.Deps.Sortdeps.Strings(lines)
 	return append([]string{"tree:"}, lines...)
 }
 
@@ -436,10 +436,10 @@ func shasOf(entries []resultconf.TreeEntry) map[string]string {
 // report prints one failed check and everything that diverged. It goes to the
 // error channel, not the log one: --quiet silences progress, never the reason
 // a run failed.
-func report(deps *deps.Deps, label string, divergences []string) {
-	deps.Std.Error("exec-test %s: FAILED\n", label)
+func report(sandbox *api.Sandbox, label string, divergences []string) {
+	sandbox.Deps.Std.Error("exec-test %s: FAILED\n", label)
 	for _, line := range divergences {
-		deps.Std.Error("  %s\n", line)
+		sandbox.Deps.Std.Error("  %s\n", line)
 	}
 }
 
@@ -447,15 +447,15 @@ func report(deps *deps.Deps, label string, divergences []string) {
 // cannot resolve a path itself, and every example runs with its own directory
 // as the working directory, so the alias and the output normalization both
 // need the answer a child `pwd` gives.
-func projectRoot(deps *deps.Deps, path string) (string, error) {
-	result, err := deps.Rundeps.Run(rundeps.RunProps{Dir: path, Program: "pwd"})
+func projectRoot(sandbox *api.Sandbox, path string) (string, error) {
+	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{Dir: path, Program: "pwd"})
 	if err != nil {
-		return "", deps.Std.Errorf("exec-test: could not resolve %s: %w", path, err)
+		return "", sandbox.Deps.Std.Errorf("exec-test: could not resolve %s: %w", path, err)
 	}
 	if result.ExitCode != 0 {
-		return "", deps.Std.Errorf("exec-test: could not resolve %s:\n%s", path, result.Output)
+		return "", sandbox.Deps.Std.Errorf("exec-test: could not resolve %s:\n%s", path, result.Output)
 	}
-	return deps.Stringsdeps.TrimRight(result.Output, "\r\n"), nil
+	return sandbox.Deps.Stringsdeps.TrimRight(result.Output, "\r\n"), nil
 }
 
 // writeCliAlias writes the executable an example types — named after the
@@ -465,12 +465,12 @@ func projectRoot(deps *deps.Deps, path string) (string, error) {
 // what makes that name resolve to the code in the repo rather than to an
 // installed release. A project with no cli has nothing to alias and gets no
 // prefix.
-func writeCliAlias(deps *deps.Deps, path string, root string) ([]string, error) {
-	if !deps.Iodeps.IsDir(join(deps, path, "cmd/main")) {
+func writeCliAlias(sandbox *api.Sandbox, path string, root string) ([]string, error) {
+	if !sandbox.Deps.Iodeps.IsDir(join(sandbox, path, "cmd/main")) {
 		return nil, nil
 	}
 
-	conf, err := loadProjectConf(deps, path)
+	conf, err := loadProjectConf(sandbox, path)
 	if err != nil {
 		return nil, err
 	}
@@ -478,18 +478,18 @@ func writeCliAlias(deps *deps.Deps, path string, root string) ([]string, error) 
 	alias := aliasDir + "/" + conf.Name
 	script := "#!/bin/sh\nexec go run " + root + "/cmd/main \"$@\"\n"
 
-	if err := deps.Iodeps.WriteFile(join(deps, path, alias), []byte(script)); err != nil {
+	if err := sandbox.Deps.Iodeps.WriteFile(join(sandbox, path, alias), []byte(script)); err != nil {
 		return nil, err
 	}
 
 	// The filesystem contract writes content, not a mode, and a PATH entry
 	// only answers to an executable file.
-	result, err := deps.Rundeps.Run(rundeps.RunProps{Dir: path, Program: "chmod", Args: []string{"755", alias}})
+	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{Dir: path, Program: "chmod", Args: []string{"755", alias}})
 	if err != nil {
-		return nil, deps.Std.Errorf("exec-test: could not make %s executable: %w", alias, err)
+		return nil, sandbox.Deps.Std.Errorf("exec-test: could not make %s executable: %w", alias, err)
 	}
 	if result.ExitCode != 0 {
-		return nil, deps.Std.Errorf("exec-test: could not make %s executable:\n%s", alias, result.Output)
+		return nil, sandbox.Deps.Std.Errorf("exec-test: could not make %s executable:\n%s", alias, result.Output)
 	}
 
 	return []string{root + "/" + aliasDir}, nil
@@ -497,21 +497,21 @@ func writeCliAlias(deps *deps.Deps, path string, root string) ([]string, error) 
 
 // loadProjectConf reads the project.yaml the alias is named after. exec-test
 // opens no SmartIO, so it reads the file straight off disk.
-func loadProjectConf(deps *deps.Deps, path string) (*projectconf.ProjectConf, error) {
+func loadProjectConf(sandbox *api.Sandbox, path string) (*projectconf.ProjectConf, error) {
 	rel := config.ProjectName + "Config/project.yaml"
 
-	content, err := deps.Iodeps.ReadFile(join(deps, path, rel))
+	content, err := sandbox.Deps.Iodeps.ReadFile(join(sandbox, path, rel))
 	if err != nil {
-		return nil, deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
+		return nil, sandbox.Deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
-	return projectconf.New(deps, string(content))
+	return projectconf.New(sandbox, string(content))
 }
 
 // join is the project-relative path helper this action needs in place of the
 // SmartIO boundary it does without: "" and "." mean the current directory, so
 // they add no prefix.
-func join(deps *deps.Deps, path string, rel string) string {
-	path = deps.Stringsdeps.TrimSuffix(deps.Stringsdeps.TrimSpace(path), "/")
+func join(sandbox *api.Sandbox, path string, rel string) string {
+	path = sandbox.Deps.Stringsdeps.TrimSuffix(sandbox.Deps.Stringsdeps.TrimSpace(path), "/")
 	if path == "" || path == "." {
 		return rel
 	}

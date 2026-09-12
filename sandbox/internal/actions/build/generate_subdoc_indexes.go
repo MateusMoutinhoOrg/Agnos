@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -16,19 +16,19 @@ import (
 // stops carrying pages nothing links to any more.
 //
 // A project with no docs/ directory generates nothing.
-func GenerateSubdocIndexes(deps *deps.Deps, io *smartio.SmartIO, docs []utils.Doc) error {
+func GenerateSubdocIndexes(sandbox *api.Sandbox, io *smartio.SmartIO, docs []utils.Doc) error {
 	if !io.IsDir(utils.DocsDir) {
 		return nil
 	}
 
 	io.RemoveDir(utils.DocsDir + "/" + utils.DocsIndexName)
 
-	return generateSubdocIndexes(deps, io, docs)
+	return generateSubdocIndexes(sandbox, io, docs)
 }
 
 // generateSubdocIndexes walks the tree and writes <doc>/Index.md for every doc
 // that has sub-docs, at any depth.
-func generateSubdocIndexes(deps *deps.Deps, io *smartio.SmartIO, docs []utils.Doc) error {
+func generateSubdocIndexes(sandbox *api.Sandbox, io *smartio.SmartIO, docs []utils.Doc) error {
 	for _, doc := range docs {
 		if len(doc.Subdocs) == 0 {
 			continue
@@ -37,15 +37,15 @@ func generateSubdocIndexes(deps *deps.Deps, io *smartio.SmartIO, docs []utils.Do
 		vars := map[string]any{
 			"Name":        doc.Name,
 			"Description": doc.Description,
-			"Docs":        docRows(deps, doc.Path, doc.Subdocs),
+			"Docs":        docRows(sandbox, doc.Path, doc.Subdocs),
 		}
 
 		dest := doc.Path + "/" + utils.DocIndexFile
-		if err := utils.RenderTemplateToDest(deps, io, "templates/doc_index.md", vars, dest); err != nil {
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/doc_index.md", vars, dest); err != nil {
 			return err
 		}
 
-		if err := generateSubdocIndexes(deps, io, doc.Subdocs); err != nil {
+		if err := generateSubdocIndexes(sandbox, io, doc.Subdocs); err != nil {
 			return err
 		}
 	}
@@ -70,13 +70,13 @@ func docsOfTheme(docs []utils.Doc, id string) []utils.Doc {
 // docRows turns docs into the rows an index template ranges over: the name,
 // the description, and the link to the doc's own doc.md, written relative to
 // the directory the index file itself lives in.
-func docRows(deps *deps.Deps, from_dir string, docs []utils.Doc) []map[string]any {
+func docRows(sandbox *api.Sandbox, from_dir string, docs []utils.Doc) []map[string]any {
 	rows := make([]map[string]any, 0, len(docs))
 	for _, doc := range docs {
 		rows = append(rows, map[string]any{
 			"Name":        doc.Name,
 			"Description": doc.Description,
-			"Link":        relativeLink(deps, from_dir, doc.Path+"/"+utils.DocFile),
+			"Link":        relativeLink(sandbox, from_dir, doc.Path+"/"+utils.DocFile),
 		})
 	}
 	return rows
@@ -87,9 +87,9 @@ func docRows(deps *deps.Deps, from_dir string, docs []utils.Doc) []map[string]an
 // what a Markdown link must hold: GitHub resolves a "/"-prefixed link against
 // the site root rather than the repository, so no generated link starts with
 // one.
-func relativeLink(deps *deps.Deps, from_dir string, target string) string {
-	from := splitPath(deps, from_dir)
-	to := splitPath(deps, target)
+func relativeLink(sandbox *api.Sandbox, from_dir string, target string) string {
+	from := splitPath(sandbox, from_dir)
+	to := splitPath(sandbox, target)
 
 	common := 0
 	for common < len(from) && common < len(to)-1 && from[common] == to[common] {
@@ -102,14 +102,14 @@ func relativeLink(deps *deps.Deps, from_dir string, target string) string {
 	}
 	parts = append(parts, to[common:]...)
 
-	return deps.Stringsdeps.Join(parts, "/")
+	return sandbox.Deps.Stringsdeps.Join(parts, "/")
 }
 
 // splitPath breaks a project-relative path into its segments, dropping the
 // empty ones a leading, trailing or doubled "/" would produce.
-func splitPath(deps *deps.Deps, path string) []string {
-	parts := make([]string, 0, deps.Stringsdeps.Count(path, "/")+1)
-	for _, part := range deps.Stringsdeps.Split(path, "/") {
+func splitPath(sandbox *api.Sandbox, path string) []string {
+	parts := make([]string, 0, sandbox.Deps.Stringsdeps.Count(path, "/")+1)
+	for _, part := range sandbox.Deps.Stringsdeps.Split(path, "/") {
 		if part != "" && part != "." {
 			parts = append(parts, part)
 		}

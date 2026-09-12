@@ -1,15 +1,15 @@
 package ignorableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func Render(deps *deps.Deps, items *IgnorableConf) string {
-	arr := deps.Serializables.CreateArray()
+func Render(sandbox *api.Sandbox, items *IgnorableConf) string {
+	arr := sandbox.Deps.Serializables.CreateArray()
 
 	for _, p := range items.Paths {
-		arr.AddItemToArray(deps.Serializables.CreateString(p))
+		arr.AddItemToArray(sandbox.Deps.Serializables.CreateString(p))
 	}
 
-	return deps.Serializables.SerializeToYaml(arr)
+	return sandbox.Deps.Serializables.SerializeToYaml(arr)
 }

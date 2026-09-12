@@ -1,7 +1,7 @@
 package cli_init
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -9,10 +9,10 @@ import (
 // CliInitInternal renders every embedded asset under assets/cli into the
 // target project at the path it holds inside that group, using the same
 // Module variable the build step derives from go.mod.
-func CliInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Log("cli-init started with path %s \n", path)
+func CliInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
+	sandbox.Deps.Std.Log("cli-init started with path %s \n", path)
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -21,5 +21,5 @@ func CliInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 		"Module": module_conf.Module,
 	}
 
-	return utils.RenderGroup(deps, io, "cli", vars)
+	return utils.RenderGroup(sandbox, io, "cli", vars)
 }

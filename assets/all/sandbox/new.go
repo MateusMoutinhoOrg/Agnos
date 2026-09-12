@@ -8,9 +8,10 @@ import (
 )
 
 {{if .HasDeps}}func New(deps *deps.Deps) *api.Sandbox {
+	self := api.Sandbox{Deps: deps}
 {{else}}func New() *api.Sandbox {
-{{end}}	self := api.Sandbox{}
-{{range .Binds}}	binds.{{.}}({{if $.HasDeps}}deps, {{end}}&self)
+	self := api.Sandbox{}
+{{end}}{{range .Binds}}	binds.{{.}}(&self)
 {{end}}
 	return &self
 }

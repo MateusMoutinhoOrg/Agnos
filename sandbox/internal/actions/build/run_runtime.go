@@ -2,7 +2,6 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -28,26 +27,26 @@ var compilableDirs = []string{"cmd", "sandbox", "adapters"}
 //
 // It runs after the transaction is persisted — the toolchain reads the disk,
 // not the pending writes.
-func RunRuntime(deps *deps.Deps, path string, runtime string) error {
-	steps, err := runtimeSteps(deps, path, runtime)
+func RunRuntime(sandbox *api.Sandbox, path string, runtime string) error {
+	steps, err := runtimeSteps(sandbox, path, runtime)
 	if err != nil {
 		return err
 	}
 
 	for _, step := range steps {
-		command := step.Program + " " + deps.Stringsdeps.Join(step.Args, " ")
-		deps.Std.Log("runtime %s: %s \n", runtime, command)
+		command := step.Program + " " + sandbox.Deps.Stringsdeps.Join(step.Args, " ")
+		sandbox.Deps.Std.Log("runtime %s: %s \n", runtime, command)
 
-		result, err := deps.Rundeps.Run(rundeps.RunProps{
+		result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 			Dir:     path,
 			Program: step.Program,
 			Args:    step.Args,
 		})
 		if err != nil {
-			return deps.Std.Errorf("runtime %s: could not run `%s`: %w", runtime, command, err)
+			return sandbox.Deps.Std.Errorf("runtime %s: could not run `%s`: %w", runtime, command, err)
 		}
 		if result.ExitCode != 0 {
-			return deps.Std.Errorf("runtime %s: `%s` failed:\n%s", runtime, command, result.Output)
+			return sandbox.Deps.Std.Errorf("runtime %s: `%s` failed:\n%s", runtime, command, result.Output)
 		}
 	}
 
@@ -56,14 +55,14 @@ func RunRuntime(deps *deps.Deps, path string, runtime string) error {
 
 // runtimeSteps maps a runtime name onto the steps it runs. An unknown name is
 // a usage error rather than a silent skip.
-func runtimeSteps(deps *deps.Deps, path string, runtime string) ([]runtimeStep, error) {
+func runtimeSteps(sandbox *api.Sandbox, path string, runtime string) ([]runtimeStep, error) {
 	switch runtime {
 	case api.RuntimeNone, "":
 		return nil, nil
 	case api.RuntimeGo:
-		return goRuntimeSteps(deps, path), nil
+		return goRuntimeSteps(sandbox, path), nil
 	default:
-		return nil, deps.Std.Errorf("unknown runtime %q (use %q or %q)", runtime, api.RuntimeGo, api.RuntimeNone)
+		return nil, sandbox.Deps.Std.Errorf("unknown runtime %q (use %q or %q)", runtime, api.RuntimeGo, api.RuntimeNone)
 	}
 }
 
@@ -71,12 +70,12 @@ func runtimeSteps(deps *deps.Deps, path string, runtime string) ([]runtimeStep, 
 // schema that the project actually has. `go mod tidy` is the step that writes
 // go.sum, so a freshly scaffolded project is left in a state `go build`
 // accepts; the compile step is skipped when nothing is there to compile yet.
-func goRuntimeSteps(deps *deps.Deps, path string) []runtimeStep {
+func goRuntimeSteps(sandbox *api.Sandbox, path string) []runtimeStep {
 	steps := []runtimeStep{
 		{Program: "go", Args: []string{"mod", "tidy"}},
 	}
 
-	io := smartio.New(deps, path, config.ProjectName)
+	io := smartio.New(sandbox, path, config.ProjectName)
 	packages := []string{"build"}
 	for _, dir := range compilableDirs {
 		if io.IsDir(dir) {

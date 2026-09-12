@@ -1,11 +1,11 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func ListAllRecursively(deps *deps.Deps, io *SmartIO, path string) []string {
-	p, err := processInputPath(deps, io, path)
+func ListAllRecursively(sandbox *api.Sandbox, io *SmartIO, path string) []string {
+	p, err := processInputPath(sandbox, io, path)
 	if err != nil {
 		return nil
 	}
-	return filterPendingRemoved(deps, io, filterIgnored(io, unrootedPaths(deps, io, deps.Iodeps.ListAllRecursively(rootedPath(deps, io, p)))))
+	return filterPendingRemoved(sandbox, io, filterIgnored(io, unrootedPaths(sandbox, io, sandbox.Deps.Iodeps.ListAllRecursively(rootedPath(sandbox, io, p)))))
 }

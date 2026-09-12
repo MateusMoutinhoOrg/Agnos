@@ -1,11 +1,11 @@
 package resultconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *ResultConf {
+func NewEmpty(sandbox *api.Sandbox) *ResultConf {
 	conf := &ResultConf{}
-	BindMethods(deps, conf)
+	BindMethods(sandbox, conf)
 	return conf
 }

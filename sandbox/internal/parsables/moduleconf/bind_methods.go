@@ -1,17 +1,17 @@
 package moduleconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, conf *ModuleConf) {
+func BindMethods(sandbox *api.Sandbox, conf *ModuleConf) {
 	conf.AddRequire = func(require string) {
-		addRequire(deps, conf, require)
+		addRequire(sandbox, conf, require)
 	}
 	conf.RemoveRequire = func(module string) {
-		removeRequire(deps, conf, module)
+		removeRequire(sandbox, conf, module)
 	}
 	conf.Render = func() string {
-		return Render(deps, conf)
+		return Render(sandbox, conf)
 	}
 }

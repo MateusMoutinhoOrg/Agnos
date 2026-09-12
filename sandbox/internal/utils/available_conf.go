@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/availableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -35,21 +35,21 @@ func AvailableConfPath(available string) string {
 // LoadAvailableConf reads one available's declaration back through the
 // transaction-aware io, so a selection written earlier in the same command is
 // visible before Persist.
-func LoadAvailableConf(deps *deps.Deps, io *smartio.SmartIO, available string) (*availableconf.AvailableConf, error) {
+func LoadAvailableConf(sandbox *api.Sandbox, io *smartio.SmartIO, available string) (*availableconf.AvailableConf, error) {
 	rel := AvailableConfPath(available)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, deps.Std.Errorf("could not read %s: no available named %q", rel, available)
+		return nil, sandbox.Deps.Std.Errorf("could not read %s: no available named %q", rel, available)
 	}
 
-	return availableconf.New(deps, string(content))
+	return availableconf.New(sandbox, string(content))
 }
 
 // DeclaredAvailables returns the name of every available that declares its
 // selection, in listing order. An available with no declaration is not
 // reported: it is hand-written, and nothing generated may touch it.
-func DeclaredAvailables(deps *deps.Deps, io *smartio.SmartIO) []string {
+func DeclaredAvailables(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var availables []string
 
 	if !io.IsDir(AvailablesDir) {
@@ -57,7 +57,7 @@ func DeclaredAvailables(deps *deps.Deps, io *smartio.SmartIO) []string {
 	}
 
 	for _, dir := range io.ListDirs(AvailablesDir) {
-		parts := deps.Stringsdeps.Split(dir, "/")
+		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
 		name := parts[len(parts)-1]
 		if name == "" {
 			continue
@@ -76,18 +76,18 @@ func DeclaredAvailables(deps *deps.Deps, io *smartio.SmartIO) []string {
 // a contract installed into a project and bound by no available is a nil func
 // waiting to panic. A project with no declared available gets the standard
 // one, which is what cmd/main/main.go imports.
-func EnrollAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter string) error {
-	availables := DeclaredAvailables(deps, io)
+func EnrollAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) error {
+	availables := DeclaredAvailables(sandbox, io)
 	if len(availables) == 0 {
-		return writeAvailable(deps, io, StandardAvailable, availableconf.NewEmpty(deps), adapter, true)
+		return writeAvailable(sandbox, io, StandardAvailable, availableconf.NewEmpty(sandbox), adapter, true)
 	}
 
 	for _, name := range availables {
-		conf, err := LoadAvailableConf(deps, io, name)
+		conf, err := LoadAvailableConf(sandbox, io, name)
 		if err != nil {
 			return err
 		}
-		if err := writeAvailable(deps, io, name, conf, adapter, true); err != nil {
+		if err := writeAvailable(sandbox, io, name, conf, adapter, true); err != nil {
 			return err
 		}
 	}
@@ -98,13 +98,13 @@ func EnrollAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter string) error {
 // UnenrollAdapter is EnrollAdapter's inverse: it drops adapter from every
 // available that binds it, which is what makes removing an adapter leave a
 // tree that still compiles.
-func UnenrollAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter string) error {
-	for _, name := range DeclaredAvailables(deps, io) {
-		conf, err := LoadAvailableConf(deps, io, name)
+func UnenrollAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) error {
+	for _, name := range DeclaredAvailables(sandbox, io) {
+		conf, err := LoadAvailableConf(sandbox, io, name)
 		if err != nil {
 			return err
 		}
-		if err := writeAvailable(deps, io, name, conf, adapter, false); err != nil {
+		if err := writeAvailable(sandbox, io, name, conf, adapter, false); err != nil {
 			return err
 		}
 	}
@@ -114,7 +114,7 @@ func UnenrollAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter string) error
 
 // writeAvailable applies one enrollment change to a selection and writes it
 // back only when something actually changed, so a re-install rewrites nothing.
-func writeAvailable(deps *deps.Deps, io *smartio.SmartIO, name string, conf *availableconf.AvailableConf, adapter string, enroll bool) error {
+func writeAvailable(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *availableconf.AvailableConf, adapter string, enroll bool) error {
 	changed := conf.Remove(adapter)
 	if enroll {
 		changed = conf.Add(adapter)
@@ -132,14 +132,14 @@ func writeAvailable(deps *deps.Deps, io *smartio.SmartIO, name string, conf *ava
 // single place the "exactly one adapter per field per available" invariant is
 // maintained, so a contract with two implementations can never end up with
 // both bound.
-func SelectAdapter(deps *deps.Deps, io *smartio.SmartIO, available string, adapter string) error {
+func SelectAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, available string, adapter string) error {
 
-	conf, err := LoadAvailableConf(deps, io, available)
+	conf, err := LoadAvailableConf(sandbox, io, available)
 	if err != nil {
 		return err
 	}
 
-	target, err := LoadAdapterConf(deps, io, adapter)
+	target, err := LoadAdapterConf(sandbox, io, adapter)
 	if err != nil {
 		return err
 	}
@@ -151,7 +151,7 @@ func SelectAdapter(deps *deps.Deps, io *smartio.SmartIO, available string, adapt
 		if other == adapter {
 			continue
 		}
-		other_conf, err := LoadAdapterConf(deps, io, other)
+		other_conf, err := LoadAdapterConf(sandbox, io, other)
 		if err != nil || other_conf.Dep != target.Dep {
 			continue
 		}
@@ -170,11 +170,11 @@ func SelectAdapter(deps *deps.Deps, io *smartio.SmartIO, available string, adapt
 // AvailablesBinding returns the name of every available that binds adapter, in
 // listing order. It is what `remove-adapter` refuses on and what
 // `list-adapters` shows.
-func AvailablesBinding(deps *deps.Deps, io *smartio.SmartIO, adapter string) []string {
+func AvailablesBinding(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) []string {
 	var binding []string
 
-	for _, name := range DeclaredAvailables(deps, io) {
-		conf, err := LoadAvailableConf(deps, io, name)
+	for _, name := range DeclaredAvailables(sandbox, io) {
+		conf, err := LoadAvailableConf(sandbox, io, name)
 		if err != nil {
 			continue
 		}
@@ -190,18 +190,18 @@ func AvailablesBinding(deps *deps.Deps, io *smartio.SmartIO, adapter string) []s
 // adapters/availables/ and a Go package clause at the same time — the same
 // check ValidateCommandName makes, for the same reason: the name is
 // propagated straight into `package <name>` of the generated new.go.
-func ValidateAvailableName(deps *deps.Deps, available string) error {
+func ValidateAvailableName(sandbox *api.Sandbox, available string) error {
 	if available == "" {
-		return deps.Std.Errorf("an available needs a name")
+		return sandbox.Deps.Std.Errorf("an available needs a name")
 	}
 	if available[0] < 'a' || available[0] > 'z' {
-		return deps.Std.Errorf("invalid available name %q: an available name must start with a lowercase letter", available)
+		return sandbox.Deps.Std.Errorf("invalid available name %q: an available name must start with a lowercase letter", available)
 	}
 	for _, letter := range available {
 		if (letter >= 'a' && letter <= 'z') || (letter >= '0' && letter <= '9') {
 			continue
 		}
-		return deps.Std.Errorf("invalid available name %q: only lowercase letters and digits are allowed (it becomes the directory %s and a Go package name)",
+		return sandbox.Deps.Std.Errorf("invalid available name %q: only lowercase letters and digits are allowed (it becomes the directory %s and a Go package name)",
 			available, AvailableDir(available))
 	}
 	return nil

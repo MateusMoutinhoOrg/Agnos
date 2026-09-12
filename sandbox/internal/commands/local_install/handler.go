@@ -2,64 +2,63 @@ package local_install
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	deps.Std.Printf("Building project...\n")
-	if err := buildAction.Build(deps, api.BuildProps{Path: entries.Path, Runtime: "go"}); err != nil {
-		deps.Std.Error("build failed: %s\n", err.Error())
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	sandbox.Deps.Std.Printf("Building project...\n")
+	if err := buildAction.Build(sandbox, api.BuildProps{Path: entries.Path, Runtime: "go"}); err != nil {
+		sandbox.Deps.Std.Error("build failed: %s\n", err.Error())
 		return api.ExitFailure
 	}
 
-	deps.Std.Printf("Installing locally...\n")
+	sandbox.Deps.Std.Printf("Installing locally...\n")
 
 	// Get GOEXE
-	result, err := deps.Rundeps.Run(rundeps.RunProps{
+	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     entries.Path,
 		Program: "go",
 		Args:    []string{"env", "GOEXE"},
 	})
 	if err != nil {
-		deps.Std.Error("failed to run go env GOEXE: %s\n", err.Error())
+		sandbox.Deps.Std.Error("failed to run go env GOEXE: %s\n", err.Error())
 		return api.ExitFailure
 	}
-	goexe := deps.Stringsdeps.TrimSpace(result.Output)
+	goexe := sandbox.Deps.Stringsdeps.TrimSpace(result.Output)
 
-	binName := deps.Stringsdeps.ToLower(config.ProjectName) + goexe
+	binName := sandbox.Deps.Stringsdeps.ToLower(config.ProjectName) + goexe
 
 	var outPath string
-	if deps.Std.Goos() == "windows" {
-		home, err := deps.Iodeps.UserHomeDir()
+	if sandbox.Deps.Std.Goos() == "windows" {
+		home, err := sandbox.Deps.Iodeps.UserHomeDir()
 		if err != nil {
-			deps.Std.Error("failed to get user home dir: %s\n", err.Error())
+			sandbox.Deps.Std.Error("failed to get user home dir: %s\n", err.Error())
 			return api.ExitFailure
 		}
-		outPath = deps.Iodeps.Join(home, ".local", "bin", binName)
+		outPath = sandbox.Deps.Iodeps.Join(home, ".local", "bin", binName)
 	} else {
-		outPath = deps.Iodeps.Join("/usr/local/bin", binName)
+		outPath = sandbox.Deps.Iodeps.Join("/usr/local/bin", binName)
 	}
 
-	deps.Iodeps.CreateDir(deps.Iodeps.Dir(outPath))
+	sandbox.Deps.Iodeps.CreateDir(sandbox.Deps.Iodeps.Dir(outPath))
 
-	deps.Std.Log("building to %s\n", outPath)
-	result, err = deps.Rundeps.Run(rundeps.RunProps{
+	sandbox.Deps.Std.Log("building to %s\n", outPath)
+	result, err = sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     entries.Path,
 		Program: "go",
 		Args:    []string{"build", "-o", outPath, "./cmd/main"},
 	})
 	if err != nil {
-		deps.Std.Error("failed to run go build: %s\n", err.Error())
+		sandbox.Deps.Std.Error("failed to run go build: %s\n", err.Error())
 		return api.ExitFailure
 	}
 	if result.ExitCode != 0 {
-		deps.Std.Error("go build failed: %s\n", result.Output)
+		sandbox.Deps.Std.Error("go build failed: %s\n", result.Output)
 		return api.ExitFailure
 	}
 
-	deps.Std.Printf("Installed successfully at %s\n", outPath)
+	sandbox.Deps.Std.Printf("Installed successfully at %s\n", outPath)
 	return api.ExitOk
 }

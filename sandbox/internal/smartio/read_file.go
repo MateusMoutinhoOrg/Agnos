@@ -1,20 +1,20 @@
 package smartio
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func ReadFile(deps *deps.Deps, io *SmartIO, path string) ([]byte, error) {
-	p, err := processInputPath(deps, io, path)
+func ReadFile(sandbox *api.Sandbox, io *SmartIO, path string) ([]byte, error) {
+	p, err := processInputPath(sandbox, io, path)
 	if err != nil {
 		return nil, err
 	}
 
-	if isPendingRemoval(deps, io, p) {
-		return nil, deps.Std.Errorf("file %q does not exist", p)
+	if isPendingRemoval(sandbox, io, p) {
+		return nil, sandbox.Deps.Std.Errorf("file %q does not exist", p)
 	}
 
 	if content, ok := io.Transactions[p]; ok {
 		return content, nil
 	}
 
-	return deps.Iodeps.ReadFile(rootedPath(deps, io, p))
+	return sandbox.Deps.Iodeps.ReadFile(rootedPath(sandbox, io, p))
 }

@@ -2,7 +2,6 @@ package add_doc
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -13,37 +12,37 @@ import (
 // after enforcing what `verify` would later reject: an unknown theme, a
 // first-level doc with no theme, a sub-doc with one, and a sub-doc whose
 // parent is not a doc. It refuses to overwrite an existing doc.
-func AddDocInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DocProps) error {
-	if err := utils.ValidateDocName(deps, props.Name); err != nil {
+func AddDocInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.DocProps) error {
+	if err := utils.ValidateDocName(sandbox, props.Name); err != nil {
 		return err
 	}
 
-	description := deps.Stringsdeps.TrimSpace(props.Description)
+	description := sandbox.Deps.Stringsdeps.TrimSpace(props.Description)
 	if description == "" {
-		return deps.Std.Errorf("add-doc requires --description")
+		return sandbox.Deps.Std.Errorf("add-doc requires --description")
 	}
 
-	segments := utils.DocSegments(deps, props.Name)
-	dir := utils.DocDir(deps, props.Name)
-	parent := utils.DocParentDir(deps, props.Name)
+	segments := utils.DocSegments(sandbox, props.Name)
+	dir := utils.DocDir(sandbox, props.Name)
+	parent := utils.DocParentDir(sandbox, props.Name)
 
 	if io.IsDir(dir) {
-		return deps.Std.Errorf("doc %s already exists", dir)
+		return sandbox.Deps.Std.Errorf("doc %s already exists", dir)
 	}
 
-	themes, err := checkThemes(deps, io, props.Themes, len(segments) == 1)
+	themes, err := checkThemes(sandbox, io, props.Themes, len(segments) == 1)
 	if err != nil {
 		return err
 	}
 
 	if len(segments) > 1 && !io.IsFile(parent+"/"+utils.DocPropsFile) {
-		return deps.Std.Errorf("%s is not a doc: create it first, a sub-doc lives inside one", parent)
+		return sandbox.Deps.Std.Errorf("%s is not a doc: create it first, a sub-doc lives inside one", parent)
 	}
 
-	deps.Std.Log("add-doc creating %s \n", dir)
+	sandbox.Deps.Std.Log("add-doc creating %s \n", dir)
 
-	conf := docpropsconf.NewEmpty(deps)
-	conf.Name = utils.DocTitle(deps, props.Name)
+	conf := docpropsconf.NewEmpty(sandbox)
+	conf.Name = utils.DocTitle(sandbox, props.Name)
 	conf.Description = description
 	for _, theme := range themes {
 		conf.AddTheme(theme)
@@ -57,7 +56,7 @@ func AddDocInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DocProps) er
 		"Name":        conf.Name,
 		"Description": conf.Description,
 	}
-	doc, err := deps.Embeddeps.RenderTemplate("templates/doc_doc.md", vars)
+	doc, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/doc_doc.md", vars)
 	if err != nil {
 		return err
 	}
@@ -67,10 +66,10 @@ func AddDocInternal(deps *deps.Deps, io *smartio.SmartIO, props api.DocProps) er
 // checkThemes normalizes the requested theme ids and enforces where they may
 // appear: a first-level doc names at least one theme declared in themes.yaml,
 // a sub-doc names none — it is listed by its parent's Index.md.
-func checkThemes(deps *deps.Deps, io *smartio.SmartIO, requested []string, first_level bool) ([]string, error) {
+func checkThemes(sandbox *api.Sandbox, io *smartio.SmartIO, requested []string, first_level bool) ([]string, error) {
 	var themes []string
 	for _, theme := range requested {
-		theme = deps.Stringsdeps.TrimSpace(theme)
+		theme = sandbox.Deps.Stringsdeps.TrimSpace(theme)
 		if theme != "" {
 			themes = append(themes, theme)
 		}
@@ -78,25 +77,25 @@ func checkThemes(deps *deps.Deps, io *smartio.SmartIO, requested []string, first
 
 	if !first_level {
 		if len(themes) > 0 {
-			return nil, deps.Std.Errorf("--theme belongs to a first-level doc only: a sub-doc is listed by its parent's %s", utils.DocIndexFile)
+			return nil, sandbox.Deps.Std.Errorf("--theme belongs to a first-level doc only: a sub-doc is listed by its parent's %s", utils.DocIndexFile)
 		}
 		return themes, nil
 	}
 
-	themes_conf, err := utils.LoadThemesConf(deps, io)
+	themes_conf, err := utils.LoadThemesConf(sandbox, io)
 	if err != nil {
 		return nil, err
 	}
 
 	if len(themes) == 0 {
-		return nil, deps.Std.Errorf("add-doc requires at least one --theme for a first-level doc (declared in themes.yaml: %s)",
-			deps.Stringsdeps.Join(themeIds(themes_conf.Themes), ", "))
+		return nil, sandbox.Deps.Std.Errorf("add-doc requires at least one --theme for a first-level doc (declared in themes.yaml: %s)",
+			sandbox.Deps.Stringsdeps.Join(themeIds(themes_conf.Themes), ", "))
 	}
 
 	for _, theme := range themes {
 		if !hasTheme(themes_conf.Themes, theme) {
-			return nil, deps.Std.Errorf("unknown theme %q: themes.yaml declares %s",
-				theme, deps.Stringsdeps.Join(themeIds(themes_conf.Themes), ", "))
+			return nil, sandbox.Deps.Std.Errorf("unknown theme %q: themes.yaml declares %s",
+				theme, sandbox.Deps.Stringsdeps.Join(themeIds(themes_conf.Themes), ", "))
 		}
 	}
 

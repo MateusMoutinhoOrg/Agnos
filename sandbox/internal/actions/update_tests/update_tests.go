@@ -1,7 +1,7 @@
 package update_tests
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The package is update_tests, not update_test, for the same reason exec_tests
@@ -17,12 +17,12 @@ import (
 //
 // The name is required. Without it the command is `exec-test --update` under
 // another spelling, and one golden at a time is the whole of it.
-func UpdateTest(deps *deps.Deps, path string, name string) error {
-	if deps.Stringsdeps.TrimSpace(name) == "" {
-		return deps.Std.Errorf("update-test: an example name is required (rewrite every golden with `exec-test --update`)")
+func UpdateTest(sandbox *api.Sandbox, path string, name string) error {
+	if sandbox.Deps.Stringsdeps.TrimSpace(name) == "" {
+		return sandbox.Deps.Std.Errorf("update-test: an example name is required (rewrite every golden with `exec-test --update`)")
 	}
 
-	deps.Std.Log("update-test started with path %s \n", path)
+	sandbox.Deps.Std.Log("update-test started with path %s \n", path)
 
-	return UpdateTestInternal(deps, path, name)
+	return UpdateTestInternal(sandbox, path, name)
 }

@@ -2,7 +2,6 @@ package front_init
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
@@ -22,25 +21,25 @@ var frontDeps = []string{"embeddeps", "templatedeps", "hashdeps"}
 // page is answered over http, so a project with no server layer is given one
 // first — along with the deps that layer needs, which its internal half does
 // not install.
-func FrontInit(deps *deps.Deps, path string) error {
-	if !smartio.New(deps, path, config.ProjectName).IsDir(serverDir) {
-		if err := serverInitAction.InstallDeps(deps, path); err != nil {
+func FrontInit(sandbox *api.Sandbox, path string) error {
+	if !smartio.New(sandbox, path, config.ProjectName).IsDir(serverDir) {
+		if err := serverInitAction.InstallDeps(sandbox, path); err != nil {
 			return err
 		}
 	}
 
 	for _, dep := range frontDeps {
-		if err := addDepAction.AddDep(deps, api.AddDepProps{Path: path, Dep: dep}); err != nil {
+		if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: dep}); err != nil {
 			return err
 		}
 	}
 
-	io := smartio.New(deps, path, config.ProjectName)
-	if err := FrontInitInternal(deps, io, path); err != nil {
+	io := smartio.New(sandbox, path, config.ProjectName)
+	if err := FrontInitInternal(sandbox, io, path); err != nil {
 		return err
 	}
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(deps, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

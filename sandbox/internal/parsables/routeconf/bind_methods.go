@@ -1,12 +1,12 @@
 package routeconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, conf *RouteConf) {
+func BindMethods(sandbox *api.Sandbox, conf *RouteConf) {
 	conf.Render = func() string {
-		return Render(deps, conf)
+		return Render(sandbox, conf)
 	}
 	conf.Pattern = func() string {
 		return Pattern(conf)
@@ -18,7 +18,7 @@ func BindMethods(deps *deps.Deps, conf *RouteConf) {
 		return IdentifierLen(conf)
 	}
 	conf.SchemaJson = func() string {
-		return SchemaJson(deps, conf)
+		return SchemaJson(sandbox, conf)
 	}
 }
 

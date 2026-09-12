@@ -1,10 +1,10 @@
 package routeconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *RouteConf {
+func NewEmpty(sandbox *api.Sandbox) *RouteConf {
 	conf := &RouteConf{
 		Method:   DefaultMethod,
 		Paths:    []Segment{},
@@ -13,6 +13,6 @@ func NewEmpty(deps *deps.Deps) *RouteConf {
 		Params:   []Field{},
 		Body:     Body{Type: BodyNone, MaxBytes: DefaultMaxBytes},
 	}
-	BindMethods(deps, conf)
+	BindMethods(sandbox, conf)
 	return conf
 }

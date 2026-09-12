@@ -2,7 +2,6 @@ package add_adapter
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/adapterconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -16,25 +15,25 @@ import (
 // Installing does not by itself change what any available binds — an available
 // fills each field exactly once, so a second implementation only wins where it
 // is asked to. props.Available names the one that switches to it.
-func AddAdapterInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddAdapterProps) error {
-	deps.Std.Log("add-adapter started with path %s adapter %s \n", props.Path, props.Adapter)
+func AddAdapterInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddAdapterProps) error {
+	sandbox.Deps.Std.Log("add-adapter started with path %s adapter %s \n", props.Path, props.Adapter)
 
-	adapter_conf, err := utils.LoadCatalogAdapterConf(deps, props.Adapter)
+	adapter_conf, err := utils.LoadCatalogAdapterConf(sandbox, props.Adapter)
 	if err != nil {
 		return err
 	}
 
 	if !io.IsDir(utils.ContractsDir + "/" + adapter_conf.Dep) {
-		return deps.Std.Errorf("adapter %q fills dep %q, which is not installed (run `agnos add-dep %s --adapter %s`)",
+		return sandbox.Deps.Std.Errorf("adapter %q fills dep %q, which is not installed (run `agnos add-dep %s --adapter %s`)",
 			adapter_conf.Name, adapter_conf.Dep, adapter_conf.Dep, adapter_conf.Name)
 	}
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
 
-	if err := InstallAdapter(deps, io, adapter_conf, module_conf, map[string]interface{}{
+	if err := InstallAdapter(sandbox, io, adapter_conf, module_conf, map[string]interface{}{
 		"Module": module_conf.Module,
 	}); err != nil {
 		return err
@@ -44,7 +43,7 @@ func AddAdapterInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddAdapt
 		return nil
 	}
 
-	return utils.SelectAdapter(deps, io, props.Available, adapter_conf.Name)
+	return utils.SelectAdapter(sandbox, io, props.Available, adapter_conf.Name)
 }
 
 // InstallAdapter renders one adapter of the embedded catalog into the target
@@ -57,10 +56,10 @@ func AddAdapterInternal(deps *deps.Deps, io *smartio.SmartIO, props api.AddAdapt
 // It enrolls the adapter nowhere: who binds it is the caller's decision, and
 // the two callers make it differently — `add-dep` enrolls in every available
 // because nothing else fills that field yet, `add-adapter` in the one named.
-func InstallAdapter(deps *deps.Deps, io *smartio.SmartIO, adapter_conf *adapterconf.AdapterConf, module_conf *moduleconf.ModuleConf, vars map[string]interface{}) error {
+func InstallAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter_conf *adapterconf.AdapterConf, module_conf *moduleconf.ModuleConf, vars map[string]interface{}) error {
 
 	group := utils.AdapterlistGroup + "/" + adapter_conf.Name
-	if err := utils.RenderGroupExcept(deps, io, group, vars, []string{utils.AdapterConfFile}); err != nil {
+	if err := utils.RenderGroupExcept(sandbox, io, group, vars, []string{utils.AdapterConfFile}); err != nil {
 		return err
 	}
 

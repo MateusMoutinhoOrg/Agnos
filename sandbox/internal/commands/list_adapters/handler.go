@@ -2,21 +2,20 @@ package list_adapters
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	adapters, list_error := listAdaptersAction.ListAdapters(deps, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	adapters, list_error := listAdaptersAction.ListAdapters(sandbox, entries.Path)
 
 	if list_error != nil {
-		deps.Std.Error("%s\n", list_error.Error())
+		sandbox.Deps.Std.Error("%s\n", list_error.Error())
 		return api.ExitFailure
 	}
 
 	for _, adapter := range adapters {
-		deps.Std.Printf("%-16s %-16s %-10s %-16s %s\n",
-			adapter.Name, adapter.Dep, installedMark(adapter), boundBy(deps, adapter), adapter.Help)
+		sandbox.Deps.Std.Printf("%-16s %-16s %-10s %-16s %s\n",
+			adapter.Name, adapter.Dep, installedMark(adapter), boundBy(sandbox, adapter), adapter.Help)
 	}
 	return api.ExitOk
 }
@@ -31,9 +30,9 @@ func installedMark(adapter api.AdapterInfo) string {
 
 // boundBy is the fourth column: the availables that bind this adapter, which
 // is what tells an installed adapter from a bound one.
-func boundBy(deps *deps.Deps, adapter api.AdapterInfo) string {
+func boundBy(sandbox *api.Sandbox, adapter api.AdapterInfo) string {
 	if len(adapter.Availables) == 0 {
 		return "-"
 	}
-	return deps.Stringsdeps.Join(adapter.Availables, ",")
+	return sandbox.Deps.Stringsdeps.Join(adapter.Availables, ",")
 }

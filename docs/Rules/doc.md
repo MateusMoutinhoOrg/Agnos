@@ -29,9 +29,15 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 - `sandbox/` is closed: a file there imports only `sandbox/` packages — the stdlib included. A
   capability from outside (io, text, sorting, hashing, templating) is restated as a contract
-  under `sandbox/deps/` and reached as `deps.<Contract>`. **(verify)**
+  under `sandbox/deps/` and reached as `sandbox.Deps.<Contract>`. **(verify)**
 - `sandbox/` holds only `api`, `binds`, `deps`, `internal` and `new.go`. **(verify)**
-- `sandbox/api/*` imports nothing at all. **(verify)**
+- `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, and imports that
+  only for `Sandbox.Deps`. **(verify)**
+- Every function of `sandbox/binds/` and `sandbox/internal/` takes `sandbox *api.Sandbox` as
+  its first parameter and nothing else standing for the outside world: deps is reached as
+  `sandbox.Deps.<Contract>`, and the rest of the api as `sandbox.<Field>`. Holding the api is
+  what lets one part of it call another, and what makes a field a caller replaced take effect
+  everywhere.
 - `sandbox/deps/<x>/` imports nothing at all: a contract is written in Go's builtin types only,
   and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
   `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
@@ -53,8 +59,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   in a copy of the package made elsewhere, or it is a struct the generator can
   write a converter for. No generics, no `chan`, no anonymous struct or
   interface, no embedded field, and no identifier that is neither predeclared
-  nor declared in the package. This is what makes every agnos repo installable
-  as a dep. **(verify)**
+  nor declared in the package. `Sandbox.Deps` is the one field exempt, because
+  it is the one field that does not cross: a consumer installs the api of a
+  repo, never its wiring, so the copy drops it. This is what makes every agnos
+  repo installable as a dep. **(verify)**
 - `cmd/main/` wires an adapter into the sandbox and holds no logic.
 - Every `assets/deplist/<dep>/<path>` and `assets/adapterlist/<adapter>/<path>`, rendered with
   this module, equals `<path>` whenever that file exists here — re-mirror whenever either side
@@ -65,7 +73,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always
   use that spelling; an added contract never renames an existing one.
 - An adapter's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<adapter>/<adapter>.go`.
-- A command handler is always `CommandHandler(deps *deps.Deps, entries *Entries) int`.
+- A command handler is always `CommandHandler(sandbox *api.Sandbox, entries *Entries) int`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
 - A dep is named after the contract it installs; an adapter after what backs it (`argvdeps`,
@@ -74,11 +82,11 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 ## Handlers
 
-- Only `CommandHandler(deps *deps.Deps, entries *Entries) int` is exported. `Entries` is
+- Only `CommandHandler(sandbox *api.Sandbox, entries *Entries) int` is exported. `Entries` is
   generated from `entries.yaml` (flags first, then args, in declaration order), already typed,
   defaulted and range-checked.
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
-  through `deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
+  through `sandbox.Deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
 - Return `api.ExitOk` or `api.ExitFailure`, never `api.ExitUsage`: the dispatch rejects bad
   input before the handler runs.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.

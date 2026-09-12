@@ -1,7 +1,7 @@
 package server_init
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -22,10 +22,10 @@ const startServerDir = "sandbox/internal/commands/start_server"
 // A project with no cli layer is given one first, on this same open SmartIO:
 // actions compose by sharing one transaction, so there is no intermediate
 // Persist and no intermediate build between the two halves.
-func ServerInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Log("server-init started with path %s \n", path)
+func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
+	sandbox.Deps.Std.Log("server-init started with path %s \n", path)
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -35,28 +35,28 @@ func ServerInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error
 	}
 
 	if !io.IsDir(cliDir) {
-		if err := cliInitAction.CliInitInternal(deps, io, path); err != nil {
+		if err := cliInitAction.CliInitInternal(sandbox, io, path); err != nil {
 			return err
 		}
 	}
 
-	if err := utils.RenderGroup(deps, io, "server", vars); err != nil {
+	if err := utils.RenderGroup(sandbox, io, "server", vars); err != nil {
 		return err
 	}
 
-	return writeStartServer(deps, io, vars)
+	return writeStartServer(sandbox, io, vars)
 }
 
 // writeStartServer scaffolds the start-server command, leaving an existing one
 // alone: like a route's handler.go, it is written once and then the project's.
-func writeStartServer(deps *deps.Deps, io *smartio.SmartIO, vars map[string]interface{}) error {
+func writeStartServer(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
 	if io.IsDir(startServerDir) {
-		deps.Std.Log("server-init: %s already exists, keeping it \n", startServerDir)
+		sandbox.Deps.Std.Log("server-init: %s already exists, keeping it \n", startServerDir)
 		return nil
 	}
 
-	if err := utils.RenderTemplateToDest(deps, io, "templates/start_server_entries.yaml", vars, startServerDir+"/entries.yaml"); err != nil {
+	if err := utils.RenderTemplateToDest(sandbox, io, "templates/start_server_entries.yaml", vars, startServerDir+"/entries.yaml"); err != nil {
 		return err
 	}
-	return utils.RenderTemplateToDest(deps, io, "templates/start_server_handler.go", vars, startServerDir+"/handler.go")
+	return utils.RenderTemplateToDest(sandbox, io, "templates/start_server_handler.go", vars, startServerDir+"/handler.go")
 }

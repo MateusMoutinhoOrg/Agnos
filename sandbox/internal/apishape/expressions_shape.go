@@ -1,7 +1,7 @@
 package apishape
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // sliceElement returns the element type of a slice expression.
@@ -38,14 +38,14 @@ func mapElement(expr string) (string, string, bool) {
 // filed under: the expression spelled as an identifier, so `[]Item` becomes
 // SliceItem and `map[string]Item` MapStringItem. It is derived rather than
 // counted, so the same expression always gets the same function.
-func expressionName(deps *deps.Deps, expr string) string {
+func expressionName(sandbox *api.Sandbox, expr string) string {
 	tokens := tokenize(expr)
 
 	name := ""
 	for index, item := range tokens {
 		switch {
 		case item.Ident:
-			name += title(deps, item.Text)
+			name += title(sandbox, item.Text)
 		case item.Text == "*":
 			name += "Ptr"
 		case item.Text == "[" && index+1 < len(tokens) && tokens[index+1].Text == "]":
@@ -58,9 +58,9 @@ func expressionName(deps *deps.Deps, expr string) string {
 
 // title upper-cases the first letter of a name, the one spelling change a
 // generated identifier ever makes.
-func title(deps *deps.Deps, name string) string {
+func title(sandbox *api.Sandbox, name string) string {
 	if name == "" {
 		return name
 	}
-	return deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
+	return sandbox.Deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
 }

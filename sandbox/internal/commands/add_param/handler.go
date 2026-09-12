@@ -2,12 +2,11 @@ package add_param
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	addParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_param"
 )
 
-func CommandHandler(deps *deps.Deps, entries *Entries) int {
-	add_error := addParamAction.AddParam(deps, api.RouteFieldProps{
+func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+	add_error := addParamAction.AddParam(sandbox, api.RouteFieldProps{
 		Path:        entries.Path,
 		Route:       entries.Route,
 		Name:        entries.Name,
@@ -22,7 +21,7 @@ func CommandHandler(deps *deps.Deps, entries *Entries) int {
 		Position:    entries.Position,
 	})
 	if add_error != nil {
-		deps.Std.Error("%s\n", add_error.Error())
+		sandbox.Deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure
 	}
 	return api.ExitOk

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -10,10 +9,10 @@ import (
 // CommandIdentifier normalizes a user-typed command name into the CLI verb:
 // lowercased, spaces and underscores turned into dashes
 // ("My Feature" -> "my-feature").
-func CommandIdentifier(deps *deps.Deps, name string) string {
-	out := deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(name))
-	out = deps.Stringsdeps.ReplaceAll(out, " ", "-")
-	out = deps.Stringsdeps.ReplaceAll(out, "_", "-")
+func CommandIdentifier(sandbox *api.Sandbox, name string) string {
+	out := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(name))
+	out = sandbox.Deps.Stringsdeps.ReplaceAll(out, " ", "-")
+	out = sandbox.Deps.Stringsdeps.ReplaceAll(out, "_", "-")
 	return out
 }
 
@@ -22,22 +21,22 @@ func CommandIdentifier(deps *deps.Deps, name string) string {
 // clause, so anything outside [a-z][a-z0-9-]* would be propagated straight
 // into `package bad_name!` and break the whole project's build. The check runs
 // before any file is written.
-func ValidateCommandName(deps *deps.Deps, name string) error {
-	identifier := CommandIdentifier(deps, name)
+func ValidateCommandName(sandbox *api.Sandbox, name string) error {
+	identifier := CommandIdentifier(sandbox, name)
 	if identifier == "" {
-		return deps.Std.Errorf("a command needs a name")
+		return sandbox.Deps.Std.Errorf("a command needs a name")
 	}
 	if identifier[0] < 'a' || identifier[0] > 'z' {
-		return deps.Std.Errorf("invalid command name %q: a command name must start with a lowercase letter", name)
+		return sandbox.Deps.Std.Errorf("invalid command name %q: a command name must start with a lowercase letter", name)
 	}
 	for _, letter := range identifier {
 		valid := (letter >= 'a' && letter <= 'z') ||
 			(letter >= '0' && letter <= '9') ||
 			letter == '-'
 		if !valid {
-			return deps.Std.Errorf(
+			return sandbox.Deps.Std.Errorf(
 				"invalid command name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/commands/%s and a Go package name)",
-				name, CommandPackage(deps, name))
+				name, CommandPackage(sandbox, name))
 		}
 	}
 	return nil
@@ -46,88 +45,88 @@ func ValidateCommandName(deps *deps.Deps, name string) error {
 // NoteNormalizedCommandName logs the rewriting a command name went through,
 // so a name that is silently lowercased or re-punctuated ("MyCmd" -> "mycmd")
 // is never a surprise later.
-func NoteNormalizedCommandName(deps *deps.Deps, name string) {
-	identifier := CommandIdentifier(deps, name)
+func NoteNormalizedCommandName(sandbox *api.Sandbox, name string) {
+	identifier := CommandIdentifier(sandbox, name)
 	if identifier != name {
-		deps.Std.Log("note: command name %q normalized to %q \n", name, identifier)
+		sandbox.Deps.Std.Log("note: command name %q normalized to %q \n", name, identifier)
 	}
 }
 
 // CommandPackage is the Go package / directory name for a command: the
 // identifier with dashes turned into underscores ("my-feature" -> "my_feature").
-func CommandPackage(deps *deps.Deps, name string) string {
-	return deps.Stringsdeps.ReplaceAll(CommandIdentifier(deps, name), "-", "_")
+func CommandPackage(sandbox *api.Sandbox, name string) string {
+	return sandbox.Deps.Stringsdeps.ReplaceAll(CommandIdentifier(sandbox, name), "-", "_")
 }
 
 // CommandDir is the project-relative directory holding a command package.
-func CommandDir(deps *deps.Deps, name string) string {
-	return "sandbox/internal/commands/" + CommandPackage(deps, name)
+func CommandDir(sandbox *api.Sandbox, name string) string {
+	return "sandbox/internal/commands/" + CommandPackage(sandbox, name)
 }
 
 // CommandEntriesPath is the project-relative path of a command's entries.yaml.
-func CommandEntriesPath(deps *deps.Deps, name string) string {
-	return CommandDir(deps, name) + "/entries.yaml"
+func CommandEntriesPath(sandbox *api.Sandbox, name string) string {
+	return CommandDir(sandbox, name) + "/entries.yaml"
 }
 
 // LoadCommandConf reads and parses sandbox/internal/commands/<name>/entries.yaml.
-func LoadCommandConf(deps *deps.Deps, io *smartio.SmartIO, name string) (*commandconf.CommandConf, error) {
-	if err := ValidateCommandName(deps, name); err != nil {
+func LoadCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*commandconf.CommandConf, error) {
+	if err := ValidateCommandName(sandbox, name); err != nil {
 		return nil, err
 	}
-	content, err := io.ReadFile(CommandEntriesPath(deps, name))
+	content, err := io.ReadFile(CommandEntriesPath(sandbox, name))
 	if err != nil {
-		return nil, deps.Std.Errorf("command %q not found in %s", CommandIdentifier(deps, name), CommandDir(deps, name))
+		return nil, sandbox.Deps.Std.Errorf("command %q not found in %s", CommandIdentifier(sandbox, name), CommandDir(sandbox, name))
 	}
-	conf, err := commandconf.New(deps, string(content))
+	conf, err := commandconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, deps.Std.Errorf("commands/%s/entries.yaml: %w", CommandPackage(deps, name), err)
+		return nil, sandbox.Deps.Std.Errorf("commands/%s/entries.yaml: %w", CommandPackage(sandbox, name), err)
 	}
 	return conf, nil
 }
 
 // SaveCommandConf renders conf back over sandbox/internal/commands/<name>/entries.yaml.
-func SaveCommandConf(deps *deps.Deps, io *smartio.SmartIO, name string, conf *commandconf.CommandConf) error {
-	return io.WriteFileOverwrite(CommandEntriesPath(deps, name), []byte(conf.Render()))
+func SaveCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *commandconf.CommandConf) error {
+	return io.WriteFileOverwrite(CommandEntriesPath(sandbox, name), []byte(conf.Render()))
 }
 
 // FieldName normalizes a flag/arg name the same way command names are
 // ("Out File" -> "out-file"); the generated Go field is derived from it.
-func FieldName(deps *deps.Deps, name string) string {
-	return CommandIdentifier(deps, name)
+func FieldName(sandbox *api.Sandbox, name string) string {
+	return CommandIdentifier(sandbox, name)
 }
 
 // NewField builds a commandconf.Field from the raw values typed on the
 // command line, validating the type and parsing the default/min/max
 // literals. Identifiers are left exactly as given (the caller decides
 // whether the field is a flag or a positional arg).
-func NewField(deps *deps.Deps, props api.FieldProps) (commandconf.Field, error) {
+func NewField(sandbox *api.Sandbox, props api.FieldProps) (commandconf.Field, error) {
 	field := commandconf.Field{
-		Key:         FieldName(deps, props.Name),
+		Key:         FieldName(sandbox, props.Name),
 		Identifiers: props.Identifiers,
-		Description: deps.Stringsdeps.TrimSpace(props.Description),
+		Description: sandbox.Deps.Stringsdeps.TrimSpace(props.Description),
 		Examples:    props.Examples,
 		Required:    props.Required,
 		Array:       props.Array,
 	}
 	if field.Key == "" {
-		return field, deps.Std.Errorf("a flag/arg needs a name")
+		return field, sandbox.Deps.Std.Errorf("a flag/arg needs a name")
 	}
 
-	kind, ok := FieldType(deps, props.Type)
+	kind, ok := FieldType(sandbox, props.Type)
 	if !ok {
-		return field, deps.Std.Errorf("unknown type %q (use string, boolean, int or float)", props.Type)
+		return field, sandbox.Deps.Std.Errorf("unknown type %q (use string, boolean, int or float)", props.Type)
 	}
 	field.Type = kind
 
 	if field.Required && kind == "boolean" {
-		return field, deps.Std.Errorf("a boolean field cannot be required (its absence already means false)")
+		return field, sandbox.Deps.Std.Errorf("a boolean field cannot be required (its absence already means false)")
 	}
 
 	if props.Default != "" {
 		if field.Required {
-			return field, deps.Std.Errorf("a field cannot be both required and carry a default (the default already covers its absence)")
+			return field, sandbox.Deps.Std.Errorf("a field cannot be both required and carry a default (the default already covers its absence)")
 		}
-		if err := checkLiteral(deps, kind, "default", props.Default); err != nil {
+		if err := checkLiteral(sandbox, kind, "default", props.Default); err != nil {
 			return field, err
 		}
 		field.HasDefault = true
@@ -135,21 +134,21 @@ func NewField(deps *deps.Deps, props api.FieldProps) (commandconf.Field, error) 
 	}
 
 	if props.Min != "" {
-		value, err := parseBound(deps, kind, "min", props.Min)
+		value, err := parseBound(sandbox, kind, "min", props.Min)
 		if err != nil {
 			return field, err
 		}
 		field.Min, field.HasMin = value, true
 	}
 	if props.Max != "" {
-		value, err := parseBound(deps, kind, "max", props.Max)
+		value, err := parseBound(sandbox, kind, "max", props.Max)
 		if err != nil {
 			return field, err
 		}
 		field.Max, field.HasMax = value, true
 	}
 	if field.HasMin && field.HasMax && field.Min > field.Max {
-		return field, deps.Std.Errorf("min (%s) is greater than max (%s)", props.Min, props.Max)
+		return field, sandbox.Deps.Std.Errorf("min (%s) is greater than max (%s)", props.Min, props.Max)
 	}
 
 	return field, nil
@@ -157,8 +156,8 @@ func NewField(deps *deps.Deps, props api.FieldProps) (commandconf.Field, error) 
 
 // FieldType maps the type spellings accepted on the command line onto the
 // canonical entries.yaml set; "" defaults to string.
-func FieldType(deps *deps.Deps, raw string) (string, bool) {
-	switch deps.Stringsdeps.ToLower(deps.Stringsdeps.TrimSpace(raw)) {
+func FieldType(sandbox *api.Sandbox, raw string) (string, bool) {
+	switch sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) {
 	case "", "string", "str":
 		return "string", true
 	case "bool", "boolean":
@@ -173,8 +172,8 @@ func FieldType(deps *deps.Deps, raw string) (string, bool) {
 }
 
 // FindField returns the index of the field named name in fields, or -1.
-func FindField(deps *deps.Deps, fields []commandconf.Field, name string) int {
-	key := FieldName(deps, name)
+func FindField(sandbox *api.Sandbox, fields []commandconf.Field, name string) int {
+	key := FieldName(sandbox, name)
 	for i, field := range fields {
 		if field.Key == key {
 			return i
@@ -191,15 +190,15 @@ const AppendPosition = -1
 // into: AppendPosition means the end, and anything else must land inside
 // 0..len(fields). An out-of-range index is reported as such instead of
 // silently becoming an append (which then trips a later, unrelated rule).
-func CheckPosition(deps *deps.Deps, kind string, position int, fields []commandconf.Field) (int, error) {
+func CheckPosition(sandbox *api.Sandbox, kind string, position int, fields []commandconf.Field) (int, error) {
 	if position == AppendPosition {
 		return len(fields), nil
 	}
 	if position < 0 {
-		return 0, deps.Std.Errorf("--position %d is negative: use an index from 0 to %d, or leave it out to append", position, len(fields))
+		return 0, sandbox.Deps.Std.Errorf("--position %d is negative: use an index from 0 to %d, or leave it out to append", position, len(fields))
 	}
 	if position > len(fields) {
-		return 0, deps.Std.Errorf("--position %d is out of range: this command has %d %s(s), so the accepted range is 0 to %d", position, len(fields), kind, len(fields))
+		return 0, sandbox.Deps.Std.Errorf("--position %d is out of range: this command has %d %s(s), so the accepted range is 0 to %d", position, len(fields), kind, len(fields))
 	}
 	return position, nil
 }
@@ -242,31 +241,31 @@ func AppendUnique(values []string, extra []string) []string {
 	return values
 }
 
-func checkLiteral(deps *deps.Deps, kind string, label string, raw string) error {
+func checkLiteral(sandbox *api.Sandbox, kind string, label string, raw string) error {
 	switch kind {
 	case "boolean":
 		if raw != "true" && raw != "false" {
-			return deps.Std.Errorf("%s for a boolean must be true or false, got %q", label, raw)
+			return sandbox.Deps.Std.Errorf("%s for a boolean must be true or false, got %q", label, raw)
 		}
 	case "int":
-		if _, err := deps.Stringsdeps.ParseInt(raw, 10, 64); err != nil {
-			return deps.Std.Errorf("%s must be an int, got %q", label, raw)
+		if _, err := sandbox.Deps.Stringsdeps.ParseInt(raw, 10, 64); err != nil {
+			return sandbox.Deps.Std.Errorf("%s must be an int, got %q", label, raw)
 		}
 	case "float":
-		if _, err := deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
-			return deps.Std.Errorf("%s must be a float, got %q", label, raw)
+		if _, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
+			return sandbox.Deps.Std.Errorf("%s must be a float, got %q", label, raw)
 		}
 	}
 	return nil
 }
 
-func parseBound(deps *deps.Deps, kind string, label string, raw string) (float64, error) {
+func parseBound(sandbox *api.Sandbox, kind string, label string, raw string) (float64, error) {
 	if kind != "int" && kind != "float" {
-		return 0, deps.Std.Errorf("%s only applies to int/float fields", label)
+		return 0, sandbox.Deps.Std.Errorf("%s only applies to int/float fields", label)
 	}
-	if err := checkLiteral(deps, kind, label, raw); err != nil {
+	if err := checkLiteral(sandbox, kind, label, raw); err != nil {
 		return 0, err
 	}
-	value, _ := deps.Stringsdeps.ParseFloat(raw, 64)
+	value, _ := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64)
 	return value, nil
 }

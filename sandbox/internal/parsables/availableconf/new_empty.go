@@ -1,11 +1,11 @@
 package availableconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *AvailableConf {
+func NewEmpty(sandbox *api.Sandbox) *AvailableConf {
 	available_conf := &AvailableConf{Adapters: []string{}}
-	BindMethods(deps, available_conf)
+	BindMethods(sandbox, available_conf)
 	return available_conf
 }

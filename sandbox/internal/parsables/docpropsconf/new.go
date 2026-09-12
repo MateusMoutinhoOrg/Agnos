@@ -1,23 +1,23 @@
 package docpropsconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func New(deps *deps.Deps, content string) (*DocPropsConf, error) {
+func New(sandbox *api.Sandbox, content string) (*DocPropsConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 	props_specs := specs
 
 	if !props_specs.IsObject() {
-		return nil, deps.Std.Errorf("props_specs is not an object")
+		return nil, sandbox.Deps.Std.Errorf("props_specs is not an object")
 	}
 
 	doc_props_conf := &DocPropsConf{
@@ -33,25 +33,25 @@ func New(deps *deps.Deps, content string) (*DocPropsConf, error) {
 	if name_item != nil && !name_item.IsNull() {
 		doc_props_conf.Name, err = name_item.GetString()
 		if err != nil {
-			return nil, deps.Std.Errorf("name is not a string")
+			return nil, sandbox.Deps.Std.Errorf("name is not a string")
 		}
 	}
 
 	if description_item != nil && !description_item.IsNull() {
 		doc_props_conf.Description, err = description_item.GetString()
 		if err != nil {
-			return nil, deps.Std.Errorf("description is not a string")
+			return nil, sandbox.Deps.Std.Errorf("description is not a string")
 		}
 	}
 
 	if themes_item != nil && !themes_item.IsNull() {
 		if !themes_item.IsArray() {
-			return nil, deps.Std.Errorf("themes is not an array")
+			return nil, sandbox.Deps.Std.Errorf("themes is not an array")
 		}
 
 		size, err := themes_item.GetArraySize()
 		if err != nil {
-			return nil, deps.Std.Errorf("could not get themes array size")
+			return nil, sandbox.Deps.Std.Errorf("could not get themes array size")
 		}
 
 		for i := 0; i < size; i++ {
@@ -62,7 +62,7 @@ func New(deps *deps.Deps, content string) (*DocPropsConf, error) {
 
 			theme, err := item.GetString()
 			if err != nil {
-				return nil, deps.Std.Errorf("theme is not a string")
+				return nil, sandbox.Deps.Std.Errorf("theme is not a string")
 			}
 			doc_props_conf.Themes = append(doc_props_conf.Themes, theme)
 		}
@@ -72,12 +72,12 @@ func New(deps *deps.Deps, content string) (*DocPropsConf, error) {
 	if order_item != nil && !order_item.IsNull() {
 		order, err := order_item.GetInt()
 		if err != nil {
-			return nil, deps.Std.Errorf("order is not an int")
+			return nil, sandbox.Deps.Std.Errorf("order is not an int")
 		}
 		doc_props_conf.Order = int(order)
 		doc_props_conf.HasOrder = true
 	}
 
-	BindMethods(deps, doc_props_conf)
+	BindMethods(sandbox, doc_props_conf)
 	return doc_props_conf, nil
 }

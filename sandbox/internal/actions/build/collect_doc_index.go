@@ -1,7 +1,7 @@
 package build
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -13,7 +13,7 @@ import (
 // unused theme costs nothing and is not an error.
 //
 // Links are written relative to the repository root, where README.md lives.
-func CollectDocIndex(deps *deps.Deps, docs []utils.Doc, themes []themesconf.Theme) []map[string]any {
+func CollectDocIndex(sandbox *api.Sandbox, docs []utils.Doc, themes []themesconf.Theme) []map[string]any {
 	var index []map[string]any
 
 	for _, theme := range themes {
@@ -25,7 +25,7 @@ func CollectDocIndex(deps *deps.Deps, docs []utils.Doc, themes []themesconf.Them
 		index = append(index, map[string]any{
 			"Name":        theme.Name,
 			"Description": theme.Description,
-			"Docs":        docRows(deps, "", grouped),
+			"Docs":        docRows(sandbox, "", grouped),
 		})
 	}
 
@@ -38,7 +38,7 @@ func CollectDocIndex(deps *deps.Deps, docs []utils.Doc, themes []themesconf.Them
 // rendered from the same template that wrote the file — so either copy will
 // do; taking the disk one keeps the tree the source of truth whenever it has
 // something to say.
-func MergeDocs(deps *deps.Deps, on_disk []utils.Doc, generated []utils.Doc) []utils.Doc {
+func MergeDocs(sandbox *api.Sandbox, on_disk []utils.Doc, generated []utils.Doc) []utils.Doc {
 	merged := make([]utils.Doc, 0, len(on_disk)+len(generated))
 	merged = append(merged, on_disk...)
 
@@ -49,7 +49,7 @@ func MergeDocs(deps *deps.Deps, on_disk []utils.Doc, generated []utils.Doc) []ut
 		merged = append(merged, doc)
 	}
 
-	utils.SortDocs(deps, merged)
+	utils.SortDocs(sandbox, merged)
 	return merged
 }
 

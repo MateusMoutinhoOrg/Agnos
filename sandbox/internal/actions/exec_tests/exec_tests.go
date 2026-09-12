@@ -2,7 +2,6 @@ package exec_tests
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -19,13 +18,13 @@ import (
 // ignore.yaml / paths.yaml.
 // The project path is therefore joined here rather than at the SmartIO
 // boundary.
-func ExecTest(deps *deps.Deps, props api.ExecTestProps) error {
-	if !deps.Iodeps.IsDir(join(deps, props.Path, utils.ExamplesDir)) {
-		return deps.Std.Errorf("exec-test: %s has no %s/ directory (create one with add-cli-example / add-lib-example)",
+func ExecTest(sandbox *api.Sandbox, props api.ExecTestProps) error {
+	if !sandbox.Deps.Iodeps.IsDir(join(sandbox, props.Path, utils.ExamplesDir)) {
+		return sandbox.Deps.Std.Errorf("exec-test: %s has no %s/ directory (create one with add-cli-example / add-lib-example)",
 			props.Path, utils.ExamplesDir)
 	}
 
-	deps.Std.Log("exec-test started with path %s \n", props.Path)
+	sandbox.Deps.Std.Log("exec-test started with path %s \n", props.Path)
 
-	return ExecTestInternal(deps, props.Path, props.Only, props.Update)
+	return ExecTestInternal(sandbox, props.Path, props.Only, props.Update)
 }

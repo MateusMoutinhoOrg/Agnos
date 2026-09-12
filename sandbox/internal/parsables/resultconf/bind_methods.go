@@ -1,15 +1,15 @@
 package resultconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, conf *ResultConf) {
+func BindMethods(sandbox *api.Sandbox, conf *ResultConf) {
 	conf.AddTreeEntry = func(file string, sha string) {
 		conf.Tree = append(conf.Tree, TreeEntry{File: file, Sha: sha})
 	}
 
 	conf.Render = func() string {
-		return Render(deps, conf)
+		return Render(sandbox, conf)
 	}
 }

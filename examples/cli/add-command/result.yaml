@@ -10,4 +10,4 @@ tree:
     - file: sandbox/internal/commands/greet/entries.yaml
       sha: 79aaf6eee2c70d28ff7c72c8e3633c6f8062f3152955183529efe41243ed1817
     - file: sandbox/internal/commands/greet/handler.go
-      sha: fd23b08e5f4f99d6f7a31295792cc1532e0c357674ee7197e68ed133a76f34f1
+      sha: 8ddb75ab481dd1c8ce95b6bd8d7b13e97c5f7dbd978b47edfd78988debd5b628

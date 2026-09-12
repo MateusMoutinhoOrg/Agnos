@@ -4,7 +4,7 @@ Three units, and the relation between them is declared, never inferred.
 
 | Unit | Is | Lives in | How many |
 |---|---|---|---|
-| **dep** | the contract: one field of `deps.Deps` | `sandbox/deps/<dep>/` (closed) | one per field |
+| **dep** | the contract: one field of `deps.Deps`, reached as `sandbox.Deps.<Dep>` | `sandbox/deps/<dep>/` (closed) | one per field |
 | **adapter** | one implementation of it, exporting `Bind` | `adapters/libs/<adapter>/` | any number per dep |
 | **available** | a selection: exactly one adapter per dep | `adapters/availables/<name>/` | any number per project |
 
@@ -53,7 +53,7 @@ agnos list-adapters                             # who is installed, and who bind
 ```
 
 `standard` still binds `sortdeps`; `lambda` binds `reflectsort`. Nothing in `sandbox/` can tell
-the two apart — it calls `deps.Sortdeps` either way — so the choice lives entirely in the
+the two apart — it calls `sandbox.Deps.Sortdeps` either way — so the choice lives entirely in the
 entry point that picks an available.
 
 ## From another agnos repo
@@ -64,7 +64,8 @@ is copied.
 
 | Half | Is | Becomes, in the consumer |
 |---|---|---|
-| contract | `sandbox/api/`, which imports nothing, by the rule every agnos repo lives under | `sandbox/deps/<name>/`, the same files with the package clause rewritten |
+| contract | `sandbox/api/`, which imports nothing but `sandbox/deps`, by the rule every agnos repo lives under | `sandbox/deps/<name>/`, the same files with the package clause rewritten and `Sandbox.Deps` dropped |
+| wiring | `Sandbox.Deps`, how the repo reaches the outside world | nothing — a consumer installs an api, never the wiring behind it |
 | adapter | `sandbox.New` over one of its own availables | nothing — it runs compiled, out of the remote module |
 
 ```bash
@@ -95,7 +96,7 @@ identical in both copies — and every case follows from it:
 | a struct with a field of a named type of the same package | a generated converter, field by field — the only case that generates code |
 | a `func` field whose parameters or results fall in the case above | a closure, parameters in the reverse direction |
 | a slice, map or pointer of a convertible named type | a generated loop |
-| a type of another package (`time.Time`, `io.Reader`) | impossible, and already barred by "the api imports nothing" |
+| a type of another package (`time.Time`, `io.Reader`) | impossible: the api imports nothing but `sandbox/deps`, and `Sandbox.Deps` — the one field naming it — never crosses |
 | generics, `chan`, an anonymous struct or interface, an embedded field | rejected — outside the generator, not outside Go |
 
 This is not a new rule: it is the discipline `sandbox/deps/` contracts already

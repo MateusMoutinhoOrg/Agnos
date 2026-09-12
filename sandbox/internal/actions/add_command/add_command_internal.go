@@ -1,7 +1,7 @@
 package add_command
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -10,29 +10,29 @@ import (
 
 // AddCommandInternal writes the two hand-written files of a new command
 // package. It refuses to overwrite an existing command (via io.WriteFile).
-func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help string, category string) error {
-	if deps.Stringsdeps.TrimSpace(help) == "" {
-		return deps.Std.Errorf("add-command requires --help")
+func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, help string, category string) error {
+	if sandbox.Deps.Stringsdeps.TrimSpace(help) == "" {
+		return sandbox.Deps.Std.Errorf("add-command requires --help")
 	}
-	if deps.Stringsdeps.TrimSpace(category) == "" {
-		return deps.Std.Errorf("add-command requires --category")
+	if sandbox.Deps.Stringsdeps.TrimSpace(category) == "" {
+		return sandbox.Deps.Std.Errorf("add-command requires --category")
 	}
 
-	if err := utils.ValidateCommandName(deps, name); err != nil {
+	if err := utils.ValidateCommandName(sandbox, name); err != nil {
 		return err
 	}
-	utils.NoteNormalizedCommandName(deps, name)
+	utils.NoteNormalizedCommandName(sandbox, name)
 
-	identifier := utils.CommandIdentifier(deps, name)
-	pkg := utils.CommandPackage(deps, name)
+	identifier := utils.CommandIdentifier(sandbox, name)
+	pkg := utils.CommandPackage(sandbox, name)
 
 	if pkg == "help" {
-		return deps.Std.Errorf("the help command is generated and cannot be declared")
+		return sandbox.Deps.Std.Errorf("the help command is generated and cannot be declared")
 	}
 
-	deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
+	sandbox.Deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
 
-	module_conf, err := utils.LoadModuleConf(deps, io)
+	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -41,14 +41,14 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 		"Identifier":  identifier,
 		"Package":     pkg,
 		"Module":      module_conf.Module,
-		"ProjectName": projectName(deps, io),
-		"Help":        deps.Stringsdeps.TrimSpace(help),
-		"Category":    deps.Stringsdeps.TrimSpace(category),
+		"ProjectName": projectName(sandbox, io),
+		"Help":        sandbox.Deps.Stringsdeps.TrimSpace(help),
+		"Category":    sandbox.Deps.Stringsdeps.TrimSpace(category),
 	}
 
-	dir := utils.CommandDir(deps, name)
+	dir := utils.CommandDir(sandbox, name)
 
-	entries, err := deps.Embeddeps.RenderTemplate("templates/command_entries.yaml", vars)
+	entries, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/command_entries.yaml", vars)
 	if err != nil {
 		return err
 	}
@@ -56,7 +56,7 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 		return err
 	}
 
-	handler, err := deps.Embeddeps.RenderTemplate("templates/command_handler.go", vars)
+	handler, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/command_handler.go", vars)
 	if err != nil {
 		return err
 	}
@@ -69,14 +69,14 @@ func AddCommandInternal(deps *deps.Deps, io *smartio.SmartIO, name string, help 
 
 // projectName title-cases the target project's configured name for use in the
 // scaffold's help text, falling back to the CLI's own ProjectName constant.
-func projectName(deps *deps.Deps, io *smartio.SmartIO) string {
+func projectName(sandbox *api.Sandbox, io *smartio.SmartIO) string {
 	content, err := io.ReadFile(config.ProjectName + "Config/project.yaml")
 	if err != nil {
 		return config.ProjectName
 	}
-	conf, err := projectconf.New(deps, string(content))
+	conf, err := projectconf.New(sandbox, string(content))
 	if err != nil || conf.Name == "" {
 		return config.ProjectName
 	}
-	return deps.Stringsdeps.ToUpper(conf.Name[:1]) + conf.Name[1:]
+	return sandbox.Deps.Stringsdeps.ToUpper(conf.Name[:1]) + conf.Name[1:]
 }

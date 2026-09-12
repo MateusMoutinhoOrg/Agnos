@@ -1,7 +1,7 @@
 package verify
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
@@ -17,8 +17,9 @@ const routesDir = "sandbox/internal/routes"
 const routeHandlerName = "RouteHandler"
 
 // routeHandlerParams is the canonical RouteHandler signature the generated
-// dispatch calls: the deps, the bound entries and the response being written.
-var routeHandlerParams = []string{"*deps.Deps", "*Entries", "serverdeps.Response"}
+// dispatch calls: the sandbox, the bound entries and the response being
+// written.
+var routeHandlerParams = []string{"*api.Sandbox", "*Entries", "serverdeps.Response"}
 
 // routeMethods is every http method a route may declare.
 var routeMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
@@ -38,7 +39,7 @@ var schemaKeys = []string{
 //
 // A project with no sandbox/internal/routes has no server layer and nothing to
 // check.
-func CheckRoutes(deps *deps.Deps, io *smartio.SmartIO) []string {
+func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
 	if !io.IsDir(routesDir) {
@@ -48,27 +49,27 @@ func CheckRoutes(deps *deps.Deps, io *smartio.SmartIO) []string {
 	patterns := map[string]string{}
 
 	for _, dir := range io.ListDirs(routesDir) {
-		name := routeNameOf(deps, dir)
+		name := routeNameOf(sandbox, dir)
 		if name == "" {
 			continue
 		}
 
-		violations = append(violations, checkRouteFiles(deps, io, name)...)
+		violations = append(violations, checkRouteFiles(sandbox, io, name)...)
 
 		content, err := io.ReadFile(routesDir + "/" + name + "/route.yaml")
 		if err != nil {
 			continue
 		}
 
-		conf, err := routeconf.New(deps, string(content))
+		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
 			violations = append(violations, routeViolation(name, "route.yaml does not parse: "+err.Error()))
 			continue
 		}
 
-		violations = append(violations, checkRouteDeclaration(deps, name, conf)...)
-		violations = append(violations, checkRouteRawFields(deps, name, string(content))...)
-		violations = append(violations, checkRouteSchemaKeys(deps, name, conf)...)
+		violations = append(violations, checkRouteDeclaration(sandbox, name, conf)...)
+		violations = append(violations, checkRouteRawFields(sandbox, name, string(content))...)
+		violations = append(violations, checkRouteSchemaKeys(sandbox, name, conf)...)
 
 		key := conf.Method + " " + conf.Pattern()
 		if other, taken := patterns[key]; taken {
@@ -85,7 +86,7 @@ func CheckRoutes(deps *deps.Deps, io *smartio.SmartIO) []string {
 // checkRouteFiles reports a route package missing any of the three files every
 // route has: the declaration, the generated struct and the hand-written
 // handler.
-func checkRouteFiles(deps *deps.Deps, io *smartio.SmartIO, name string) []string {
+func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, name string) []string {
 	var violations []string
 
 	for _, file := range []string{"route.yaml", "entries.go", "handler.go"} {
@@ -99,7 +100,7 @@ func checkRouteFiles(deps *deps.Deps, io *smartio.SmartIO, name string) []string
 		return violations
 	}
 
-	parsed, err := deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
 	if err != nil {
 		return append(violations, routeViolation(name, "handler.go is not parsable Go: "+err.Error()))
 	}
@@ -113,7 +114,7 @@ func checkRouteFiles(deps *deps.Deps, io *smartio.SmartIO, name string) []string
 		}
 		return append(violations, routeViolation(name,
 			"handler.go declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(deps *deps.Deps, entries *Entries, response serverdeps.Response) int"))
+				routeHandlerName+"(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int"))
 	}
 
 	return append(violations, routeViolation(name, "handler.go exports no "+routeHandlerName))
@@ -135,7 +136,7 @@ func isRouteHandler(function goimportsdeps.Function) bool {
 
 // checkRouteDeclaration enforces the rules that survive parsing: the method,
 // the segments and the names a route binds.
-func checkRouteDeclaration(deps *deps.Deps, name string, conf *routeconf.RouteConf) []string {
+func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	var violations []string
 
 	known := false
@@ -157,7 +158,7 @@ func checkRouteDeclaration(deps *deps.Deps, name string, conf *routeconf.RouteCo
 	for i, segment := range conf.Paths {
 		if segment.Field == nil {
 			triggers++
-			violations = append(violations, checkRouteIdentifier(deps, name, segment.Identifier)...)
+			violations = append(violations, checkRouteIdentifier(sandbox, name, segment.Identifier)...)
 			continue
 		}
 		violations = append(violations, checkRouteCapture(name, *segment.Field, i == len(conf.Paths)-1)...)
@@ -167,8 +168,8 @@ func checkRouteDeclaration(deps *deps.Deps, name string, conf *routeconf.RouteCo
 			"declares no `identifier` segment; a route is named by the first literal segment of its path"))
 	}
 
-	violations = append(violations, checkRouteNames(deps, name, conf)...)
-	violations = append(violations, checkRouteRestName(deps, name, conf)...)
+	violations = append(violations, checkRouteNames(sandbox, name, conf)...)
+	violations = append(violations, checkRouteRestName(sandbox, name, conf)...)
 
 	return violations
 }
@@ -176,7 +177,7 @@ func checkRouteDeclaration(deps *deps.Deps, name string, conf *routeconf.RouteCo
 // checkRouteRestName keeps the segment taking the rest of the path out of the
 // name merging every other origin takes part in: its Entries field is a []T,
 // which a header or a query parameter of the same name could not fill.
-func checkRouteRestName(deps *deps.Deps, name string, conf *routeconf.RouteConf) []string {
+func checkRouteRestName(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	at := utils.RouteRestIndex(conf.Paths)
 	if at < 0 {
 		return nil
@@ -193,7 +194,7 @@ func checkRouteRestName(deps *deps.Deps, name string, conf *routeconf.RouteConf)
 	}
 
 	for _, origin := range origins {
-		if utils.FindRouteField(deps, origin.fields, key) >= 0 {
+		if utils.FindRouteField(sandbox, origin.fields, key) >= 0 {
 			violations = append(violations, routeViolation(name,
 				"declares "+key+" as both the segment taking the rest of the path and a "+origin.label+" field; the two cannot fill one Entries field"))
 		}
@@ -204,18 +205,18 @@ func checkRouteRestName(deps *deps.Deps, name string, conf *routeconf.RouteConf)
 
 // checkRouteIdentifier enforces the leading slash a trigger segment always
 // carries, and that it spells exactly one segment.
-func checkRouteIdentifier(deps *deps.Deps, name string, identifier string) []string {
+func checkRouteIdentifier(sandbox *api.Sandbox, name string, identifier string) []string {
 	if identifier == "" {
 		return []string{routeViolation(name, "declares an empty path identifier")}
 	}
-	if !deps.Stringsdeps.HasPrefix(identifier, "/") {
+	if !sandbox.Deps.Stringsdeps.HasPrefix(identifier, "/") {
 		return []string{routeViolation(name, "declares the path identifier "+identifier+
 			", which does not start with '/'")}
 	}
 	if identifier == "/" {
 		return nil
 	}
-	if deps.Stringsdeps.Contains(deps.Stringsdeps.TrimPrefix(identifier, "/"), "/") {
+	if sandbox.Deps.Stringsdeps.Contains(sandbox.Deps.Stringsdeps.TrimPrefix(identifier, "/"), "/") {
 		return []string{routeViolation(name, "declares the path identifier "+identifier+
 			", which holds an inner or trailing slash; an identifier is one segment")}
 	}
@@ -248,7 +249,7 @@ func checkRouteCapture(name string, field routeconf.Field, is_last bool) []strin
 // checkRouteNames enforces that a name is declared once per origin, and that
 // the origins declaring the same name agree on its type — the Entries field is
 // written once, so two origins cannot disagree about what it holds.
-func checkRouteNames(deps *deps.Deps, name string, conf *routeconf.RouteConf) []string {
+func checkRouteNames(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	var violations []string
 	types := map[string]string{}
 
@@ -297,7 +298,7 @@ func captureFields(conf *routeconf.RouteConf) []routeconf.Field {
 // checkRouteSchemaKeys reports a json-schema declared on a body that carries
 // none, and every keyword outside the supported subset, whatever depth it sits
 // at.
-func checkRouteSchemaKeys(deps *deps.Deps, name string, conf *routeconf.RouteConf) []string {
+func checkRouteSchemaKeys(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	var violations []string
 
 	if conf.Body.HasSchema && conf.Body.Type != "json" {
@@ -308,7 +309,7 @@ func checkRouteSchemaKeys(deps *deps.Deps, name string, conf *routeconf.RouteCon
 	for _, key := range schemaUnknown(conf.Body.Schema) {
 		violations = append(violations, routeViolation(name,
 			"declares the json-schema key "+key+", which is outside the supported subset ("+
-				deps.Stringsdeps.Join(schemaKeys, ", ")+")"))
+				sandbox.Deps.Stringsdeps.Join(schemaKeys, ", ")+")"))
 	}
 
 	return violations
@@ -331,8 +332,8 @@ func schemaUnknown(schema *routeconf.Schema) []string {
 // two rules the parser resolves away: it drops `required` from a boolean and
 // from a field that carries a default, so by the time a RouteConf exists the
 // contradiction is gone. The file is what has to be right.
-func checkRouteRawFields(deps *deps.Deps, name string, content string) []string {
-	specs, err := deps.Serializables.ParseYaml(content)
+func checkRouteRawFields(sandbox *api.Sandbox, name string, content string) []string {
+	specs, err := sandbox.Deps.Serializables.ParseYaml(content)
 	if err != nil || !specs.IsObject() {
 		return nil
 	}
@@ -352,7 +353,7 @@ func checkRouteRawFields(deps *deps.Deps, name string, content string) []string 
 			if entry == nil || !entry.IsObject() {
 				continue
 			}
-			violations = append(violations, checkRawField(deps, name, key, entry)...)
+			violations = append(violations, checkRawField(sandbox, name, key, entry)...)
 		}
 	}
 
@@ -361,7 +362,7 @@ func checkRouteRawFields(deps *deps.Deps, name string, content string) []string 
 
 // checkRawField reports the two contradictions one unparsed field entry may
 // carry.
-func checkRawField(deps *deps.Deps, name string, origin string, entry *serializables.SerializibleObject) []string {
+func checkRawField(sandbox *api.Sandbox, name string, origin string, entry *serializables.SerializibleObject) []string {
 	if !rawBool(entry, "required") {
 		return nil
 	}
@@ -408,8 +409,8 @@ func rawBool(entry *serializables.SerializibleObject, key string) bool {
 }
 
 // routeNameOf is the last segment of a listed route directory.
-func routeNameOf(deps *deps.Deps, path string) string {
-	parts := deps.Stringsdeps.Split(path, "/")
+func routeNameOf(sandbox *api.Sandbox, path string) string {
+	parts := sandbox.Deps.Stringsdeps.Split(path, "/")
 	return parts[len(parts)-1]
 }
 

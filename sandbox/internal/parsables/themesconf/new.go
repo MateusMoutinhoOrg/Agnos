@@ -1,23 +1,23 @@
 package themesconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func New(deps *deps.Deps, content string) (*ThemesConf, error) {
+func New(sandbox *api.Sandbox, content string) (*ThemesConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 	themes_specs := specs
 
 	if !themes_specs.IsArray() {
-		return nil, deps.Std.Errorf("themes_specs is not an array")
+		return nil, sandbox.Deps.Std.Errorf("themes_specs is not an array")
 	}
 
 	themes_conf := &ThemesConf{
@@ -26,7 +26,7 @@ func New(deps *deps.Deps, content string) (*ThemesConf, error) {
 
 	size, err := themes_specs.GetArraySize()
 	if err != nil {
-		return nil, deps.Std.Errorf("could not get themes array size")
+		return nil, sandbox.Deps.Std.Errorf("could not get themes array size")
 	}
 
 	for i := 0; i < size; i++ {
@@ -43,27 +43,27 @@ func New(deps *deps.Deps, content string) (*ThemesConf, error) {
 		if name_item != nil && !name_item.IsNull() {
 			theme.Name, err = name_item.GetString()
 			if err != nil {
-				return nil, deps.Std.Errorf("name is not a string")
+				return nil, sandbox.Deps.Std.Errorf("name is not a string")
 			}
 		}
 
 		if description_item != nil && !description_item.IsNull() {
 			theme.Description, err = description_item.GetString()
 			if err != nil {
-				return nil, deps.Std.Errorf("description is not a string")
+				return nil, sandbox.Deps.Std.Errorf("description is not a string")
 			}
 		}
 
 		if id_item != nil && !id_item.IsNull() {
 			theme.Id, err = id_item.GetString()
 			if err != nil {
-				return nil, deps.Std.Errorf("id is not a string")
+				return nil, sandbox.Deps.Std.Errorf("id is not a string")
 			}
 		}
 
 		themes_conf.Themes = append(themes_conf.Themes, theme)
 	}
 
-	BindMethods(deps, themes_conf)
+	BindMethods(sandbox, themes_conf)
 	return themes_conf, nil
 }

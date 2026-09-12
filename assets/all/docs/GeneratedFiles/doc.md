@@ -12,7 +12,7 @@
 | `LICENSE` | `start` | once. A placeholder; its text is pasted into `README.md`'s License section |
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
 | `sandbox/new.go` | `build` | always. One `binds.<X>Bind` per file of `sandbox/binds/` |
-| `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/` |
+| `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
 | `sandbox/internal/config/config.go` | `build` | always. `ProjectName`, `Version` from `project.yaml` |
 | `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |

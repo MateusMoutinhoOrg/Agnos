@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/structureconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -30,8 +30,8 @@ type StructureNode struct {
 // paths rather than one ("libs/<lib>/<lib>.go", "collect_*.go"). Such an item
 // has nothing to exist on disk under its own name, so `verify` checks the
 // literal part of the path instead (see StructureParentPath).
-func IsStructurePattern(deps *deps.Deps, path string) bool {
-	return deps.Stringsdeps.ContainsAny(path, "<>*?")
+func IsStructurePattern(sandbox *api.Sandbox, path string) bool {
+	return sandbox.Deps.Stringsdeps.ContainsAny(path, "<>*?")
 }
 
 // StructureConfPath is the project-relative path of the structure declaration.
@@ -44,17 +44,17 @@ func StructureConfPath() string {
 // a project scaffolded by an older agnos has none — and then describes nothing
 // rather than failing the build. A file that is there but does not parse is a
 // hard error.
-func LoadStructureConf(deps *deps.Deps, io *smartio.SmartIO) (*structureconf.StructureConf, error) {
+func LoadStructureConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*structureconf.StructureConf, error) {
 	rel := StructureConfPath()
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return structureconf.NewEmpty(deps), nil
+		return structureconf.NewEmpty(sandbox), nil
 	}
 
-	conf, err := structureconf.New(deps, string(content))
+	conf, err := structureconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, deps.Std.Errorf("%s: %w", rel, err)
+		return nil, sandbox.Deps.Std.Errorf("%s: %w", rel, err)
 	}
 	return conf, nil
 }
@@ -101,15 +101,15 @@ func flattenStructureIn(items []structureconf.Item, parent string, depth int) []
 // StructureParentPath is the path a pattern node is checked against: the
 // longest leading run of segments that holds no pattern character. It is empty
 // when the very first segment is already a pattern.
-func StructureParentPath(deps *deps.Deps, path string) string {
+func StructureParentPath(sandbox *api.Sandbox, path string) string {
 	var literal []string
 
-	for _, segment := range deps.Stringsdeps.Split(path, "/") {
-		if deps.Stringsdeps.ContainsAny(segment, "<>*?") {
+	for _, segment := range sandbox.Deps.Stringsdeps.Split(path, "/") {
+		if sandbox.Deps.Stringsdeps.ContainsAny(segment, "<>*?") {
 			break
 		}
 		literal = append(literal, segment)
 	}
 
-	return deps.Stringsdeps.Join(literal, "/")
+	return sandbox.Deps.Stringsdeps.Join(literal, "/")
 }

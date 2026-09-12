@@ -1,14 +1,14 @@
 package moduleconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewFromPath(deps *deps.Deps, path string) (*ModuleConf, error) {
-	bytes, err := deps.Iodeps.ReadFile(path)
+func NewFromPath(sandbox *api.Sandbox, path string) (*ModuleConf, error) {
+	bytes, err := sandbox.Deps.Iodeps.ReadFile(path)
 	if err != nil {
-		return nil, deps.Std.Errorf("failed to read module file at %s: %v", path, err)
+		return nil, sandbox.Deps.Std.Errorf("failed to read module file at %s: %v", path, err)
 	}
 
-	return New(deps, string(bytes))
+	return New(sandbox, string(bytes))
 }

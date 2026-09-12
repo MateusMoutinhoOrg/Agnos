@@ -6,18 +6,18 @@ tree:
     - file: sandbox/internal/routes/health/entries.go
       sha: 8b1b5f50403c9f2adba70764447c3f9ba4b531620a9096d115e88d5c25ec9131
     - file: sandbox/internal/routes/health/handler.go
-      sha: 08504db57f8d3caecb146f5c7cfc9336a34f25f7789ef59f0c3bde1b63f1c356
+      sha: b08e9a93f4719a9a5c8db8fb75f45defde994a8442199e5e020eb9922d911e75
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da
     - file: sandbox/internal/routes/home/entries.go
       sha: 830ab1467b941c3fbbcb989a99504835d40ce9d0f5bb1e0e0f0a836f4451b121
     - file: sandbox/internal/routes/home/handler.go
-      sha: 583e9aba160d94bda8750a70973c79f500b27f60c4228b66c1d883ea21dfdb55
+      sha: 5675217604fe411ce49d27f7eb4a920ec997ea8d339f31cbb9671dea748ab786
     - file: sandbox/internal/routes/home/route.yaml
       sha: 6276316befcd6a44feb11c0a19fcbd17ce1f0c003ca8c48e74d3ce3531f809a9
     - file: sandbox/internal/routes/static/entries.go
       sha: 862d196f94ff8d8b4510f4fe6b2163926781c1cd9f18e0aa11d64beb3c3754d3
     - file: sandbox/internal/routes/static/handler.go
-      sha: 9be7acf907cd6ace6abfe19d3dfb25b5afede37c8bf6ab0a0cb46a019d5af143
+      sha: 266ed447440a2ceb8f524d106847a9f8eb8693e156f49306b8c648cfc57f1cf6
     - file: sandbox/internal/routes/static/route.yaml
       sha: bea2ec05598aeb48c03a16a370f6d3a5bba2a85c1b78fdf5c3546433cf0ef817

@@ -1,33 +1,38 @@
-identifiers: ["verify"]
 category: Core Commands
-help: Checks the project keeps the sandbox/adapter schema
-long-description: |
-  Verifies the structural rules the harness depends on: sandbox/ imports
-  stay inside sandbox/, sandbox/ holds only api, binds, deps, internal and
-  new.go, sandbox/api and sandbox/deps import nothing external, every
-  sandbox/binds file mirrors a sandbox/api file and declares only functions,
-  and adapters/ holds only availables and libs. `agnos build` runs this as a
-  gate unless --unsafe is passed.
 examples:
-  - "verify"
+    - verify
 flags:
-  - name: path
-    identifiers: ["--path"]
-    description: the dir holding the project (defaults to the current directory)
-    examples:
-      - "verify --path ./my-project"
-    type: string
-    default: "."
-  - name: runtime
-    identifiers: ["--runtime"]
-    description: "the toolchain the project is handed to after the schema check: go (tidy + compile) or none"
-    examples:
-      - "verify --runtime none"
-    type: string
-    default: "go"
-  - name: quiet
-    identifiers: ["--quiet", "-q"]
-    description: Quiets the cli output
-    examples:
-      - "verify -q"
-    type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - verify --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - default: go
+      description: 'the toolchain the project is handed to after the schema check: go (tidy + compile) or none'
+      examples:
+        - verify --runtime none
+      identifiers:
+        - --runtime
+      name: runtime
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - verify -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Checks the project keeps the sandbox/adapter schema
+identifiers:
+    - verify
+long-description: |-
+    Verifies the structural rules the harness depends on: sandbox/ imports
+    stay inside sandbox/, sandbox/ holds only api, binds, deps, internal and
+    new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps
+    imports nothing external, every sandbox/binds file mirrors a sandbox/api
+    file and declares only functions, and adapters/ holds only availables and
+    libs. `agnos build` runs this as a gate unless --unsafe is passed.

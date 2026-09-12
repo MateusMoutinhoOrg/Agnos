@@ -1,10 +1,10 @@
 package docpropsconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, doc_props_conf *DocPropsConf) {
+func BindMethods(sandbox *api.Sandbox, doc_props_conf *DocPropsConf) {
 
 	doc_props_conf.AddTheme = func(id string) {
 		for _, theme := range doc_props_conf.Themes {
@@ -16,6 +16,6 @@ func BindMethods(deps *deps.Deps, doc_props_conf *DocPropsConf) {
 	}
 
 	doc_props_conf.Render = func() string {
-		return Render(deps, doc_props_conf)
+		return Render(sandbox, doc_props_conf)
 	}
 }

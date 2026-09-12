@@ -1,87 +1,87 @@
 package routeconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
 
 // Render serializes a RouteConf back to the route.yaml shape. Keys come out in
 // one fixed order and comments are dropped, which is what makes a re-render
 // idempotent — and why route.yaml is never edited by hand.
-func Render(deps *deps.Deps, conf *RouteConf) string {
-	obj := deps.Serializables.CreateObject()
+func Render(sandbox *api.Sandbox, conf *RouteConf) string {
+	obj := sandbox.Deps.Serializables.CreateObject()
 
 	obj.AddItemToObject("method", conf.Method)
-	obj.AddItemToObject("paths", segmentsArray(deps, conf.Paths))
+	obj.AddItemToObject("paths", segmentsArray(sandbox, conf.Paths))
 	obj.AddItemToObject("category", conf.Category)
 	obj.AddItemToObject("help", conf.Help)
 	if conf.LongDescription != "" {
 		obj.AddItemToObject("long-description", conf.LongDescription)
 	}
 	if len(conf.Examples) > 0 {
-		obj.AddItemToObject("examples", stringArray(deps, conf.Examples))
+		obj.AddItemToObject("examples", stringArray(sandbox, conf.Examples))
 	}
 	if conf.Hidden {
 		obj.AddItemToObject("hidden", true)
 	}
 	if len(conf.Headers) > 0 {
-		obj.AddItemToObject("headers", fieldsArray(deps, conf.Headers))
+		obj.AddItemToObject("headers", fieldsArray(sandbox, conf.Headers))
 	}
 	if len(conf.Params) > 0 {
-		obj.AddItemToObject("params", fieldsArray(deps, conf.Params))
+		obj.AddItemToObject("params", fieldsArray(sandbox, conf.Params))
 	}
 	if conf.Body.Type != BodyNone {
-		obj.AddItemToObject("body", bodyObject(deps, conf.Body))
+		obj.AddItemToObject("body", bodyObject(sandbox, conf.Body))
 	}
 
-	return deps.Serializables.SerializeToYaml(obj)
+	return sandbox.Deps.Serializables.SerializeToYaml(obj)
 }
 
 // SchemaJson renders the declared json-schema as canonical JSON: the same
 // tree Render writes into route.yaml, serialized for the generated
 // EntriesSchema constant routeio.ValidateSchema is run against.
-func SchemaJson(deps *deps.Deps, conf *RouteConf) string {
+func SchemaJson(sandbox *api.Sandbox, conf *RouteConf) string {
 	if !conf.Body.HasSchema || conf.Body.Schema == nil {
 		return ""
 	}
-	return deps.Serializables.SerializeToJson(schemaObject(deps, conf.Body.Schema))
+	return sandbox.Deps.Serializables.SerializeToJson(schemaObject(sandbox, conf.Body.Schema))
 }
 
 // segmentsArray renders `paths` as the ordered sequence it is: one entry per
 // segment, a trigger carrying its `identifier` and a capture its field.
-func segmentsArray(deps *deps.Deps, segments []Segment) *serializibles.SerializibleObject {
-	arr := deps.Serializables.CreateArray()
+func segmentsArray(sandbox *api.Sandbox, segments []Segment) *serializibles.SerializibleObject {
+	arr := sandbox.Deps.Serializables.CreateArray()
 	for _, segment := range segments {
 		if segment.Field == nil {
-			entry := deps.Serializables.CreateObject()
+			entry := sandbox.Deps.Serializables.CreateObject()
 			entry.AddItemToObject("identifier", segment.Identifier)
 			arr.AddItemToArray(entry)
 			continue
 		}
-		arr.AddItemToArray(fieldObject(deps, *segment.Field))
+		arr.AddItemToArray(fieldObject(sandbox, *segment.Field))
 	}
 	return arr
 }
 
 // fieldsArray renders headers/params in the canonical ordered sequence shape.
-func fieldsArray(deps *deps.Deps, fields []Field) *serializibles.SerializibleObject {
-	arr := deps.Serializables.CreateArray()
+func fieldsArray(sandbox *api.Sandbox, fields []Field) *serializibles.SerializibleObject {
+	arr := sandbox.Deps.Serializables.CreateArray()
 	for _, field := range fields {
-		arr.AddItemToArray(fieldObject(deps, field))
+		arr.AddItemToArray(fieldObject(sandbox, field))
 	}
 	return arr
 }
 
 // fieldObject renders one field — a captured segment, a header or a query
 // parameter — as its declaration entry.
-func fieldObject(deps *deps.Deps, field Field) *serializibles.SerializibleObject {
-	entry := deps.Serializables.CreateObject()
+func fieldObject(sandbox *api.Sandbox, field Field) *serializibles.SerializibleObject {
+	entry := sandbox.Deps.Serializables.CreateObject()
 	entry.AddItemToObject("name", field.Key)
 	if field.Description != "" {
 		entry.AddItemToObject("description", field.Description)
 	}
 	if len(field.Examples) > 0 {
-		entry.AddItemToObject("examples", stringArray(deps, field.Examples))
+		entry.AddItemToObject("examples", stringArray(sandbox, field.Examples))
 	}
 	entry.AddItemToObject("type", field.Type)
 	if field.HasDefault {
@@ -103,8 +103,8 @@ func fieldObject(deps *deps.Deps, field Field) *serializibles.SerializibleObject
 }
 
 // bodyObject renders the `body` declaration, the json-schema tree included.
-func bodyObject(deps *deps.Deps, body Body) *serializibles.SerializibleObject {
-	entry := deps.Serializables.CreateObject()
+func bodyObject(sandbox *api.Sandbox, body Body) *serializibles.SerializibleObject {
+	entry := sandbox.Deps.Serializables.CreateObject()
 	entry.AddItemToObject("type", body.Type)
 	if body.Required {
 		entry.AddItemToObject("required", true)
@@ -114,7 +114,7 @@ func bodyObject(deps *deps.Deps, body Body) *serializibles.SerializibleObject {
 		entry.AddItemToObject("content-type", body.ContentType)
 	}
 	if body.HasSchema && body.Schema != nil {
-		entry.AddItemToObject("json-schema", schemaObject(deps, body.Schema))
+		entry.AddItemToObject("json-schema", schemaObject(sandbox, body.Schema))
 	}
 	return entry
 }
@@ -122,8 +122,8 @@ func bodyObject(deps *deps.Deps, body Body) *serializibles.SerializibleObject {
 // schemaObject renders one node of the declared json-schema, recursing through
 // `properties` and `items`. Keys outside the subset were never parsed, so they
 // are never written back.
-func schemaObject(deps *deps.Deps, schema *Schema) *serializibles.SerializibleObject {
-	entry := deps.Serializables.CreateObject()
+func schemaObject(sandbox *api.Sandbox, schema *Schema) *serializibles.SerializibleObject {
+	entry := sandbox.Deps.Serializables.CreateObject()
 
 	if schema.Type != "" {
 		entry.AddItemToObject("type", schema.Type)
@@ -138,13 +138,13 @@ func schemaObject(deps *deps.Deps, schema *Schema) *serializibles.SerializibleOb
 		entry.AddItemToObject("pattern", schema.Pattern)
 	}
 	if len(schema.Required) > 0 {
-		entry.AddItemToObject("required", stringArray(deps, schema.Required))
+		entry.AddItemToObject("required", stringArray(sandbox, schema.Required))
 	}
 	if schema.HasAdditionalProperties {
 		entry.AddItemToObject("additionalProperties", schema.AdditionalProperties)
 	}
 	if len(schema.Enum) > 0 {
-		entry.AddItemToObject("enum", stringArray(deps, schema.Enum))
+		entry.AddItemToObject("enum", stringArray(sandbox, schema.Enum))
 	}
 	if schema.HasConst {
 		entry.AddItemToObject("const", schema.Const)
@@ -177,12 +177,12 @@ func schemaObject(deps *deps.Deps, schema *Schema) *serializibles.SerializibleOb
 		entry.AddItemToObject("uniqueItems", true)
 	}
 	if schema.Items != nil {
-		entry.AddItemToObject("items", schemaObject(deps, schema.Items))
+		entry.AddItemToObject("items", schemaObject(sandbox, schema.Items))
 	}
 	if len(schema.Properties) > 0 {
-		properties := deps.Serializables.CreateObject()
+		properties := sandbox.Deps.Serializables.CreateObject()
 		for _, property := range schema.Properties {
-			properties.AddItemToObject(property.Name, schemaObject(deps, property.Schema))
+			properties.AddItemToObject(property.Name, schemaObject(sandbox, property.Schema))
 		}
 		entry.AddItemToObject("properties", properties)
 	}
@@ -200,8 +200,8 @@ func numberValue(value float64) any {
 	return value
 }
 
-func stringArray(deps *deps.Deps, values []string) *serializibles.SerializibleObject {
-	arr := deps.Serializables.CreateArray()
+func stringArray(sandbox *api.Sandbox, values []string) *serializibles.SerializibleObject {
+	arr := sandbox.Deps.Serializables.CreateArray()
 	for _, value := range values {
 		arr.AddItemToArray(value)
 	}

@@ -1,13 +1,13 @@
 package moduleconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *ModuleConf {
+func NewEmpty(sandbox *api.Sandbox) *ModuleConf {
 	conf := &ModuleConf{
 		Requires: []string{},
 	}
-	BindMethods(deps, conf)
+	BindMethods(sandbox, conf)
 	return conf
 }

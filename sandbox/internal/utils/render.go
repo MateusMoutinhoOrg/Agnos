@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/templatedeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -24,14 +24,14 @@ import (
 // returns its contents verbatim, without any template rendering. Use it to
 // embed a file that is not itself a template (a LICENSE, a fixed snippet). A
 // missing file is a hard error.
-func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) map[string]any {
+func templateFuncs(sandbox *api.Sandbox, io *smartio.SmartIO, vars interface{}) map[string]any {
 	return map[string]any{
 		"render": func(project_path string) (string, error) {
 			content, err := io.ReadFile(project_path)
 			if err != nil {
 				return "", err
 			}
-			rendered, err := renderTemplate(deps, io, baseName(deps, project_path), content, vars)
+			rendered, err := renderTemplate(sandbox, io, baseName(sandbox, project_path), content, vars)
 			if err != nil {
 				return "", err
 			}
@@ -51,20 +51,20 @@ func templateFuncs(deps *deps.Deps, io *smartio.SmartIO, vars interface{}) map[s
 // without writing anything. It is what a caller needs when it has to read a
 // value out of an asset the build is about to write — the doc props of a
 // generated doc, say — rather than render that asset to its destination.
-func RenderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
-	return renderTemplate(deps, io, name, src, vars)
+func RenderTemplate(sandbox *api.Sandbox, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
+	return renderTemplate(sandbox, io, name, src, vars)
 }
 
 // renderTemplate parses src as a Go text/template named name and executes it
 // over vars, with templateFuncs available. It is the single rendering path for
 // this package: RenderTemplateToDest and RenderGroup both go through it, so the
 // `render` native function is available in every asset template.
-func renderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
-	rendered, err := deps.Templatedeps.Render(templatedeps.RenderProps{
+func renderTemplate(sandbox *api.Sandbox, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
+	rendered, err := sandbox.Deps.Templatedeps.Render(templatedeps.RenderProps{
 		Name:   name,
 		Source: string(src),
 		Vars:   vars,
-		Funcs:  templateFuncs(deps, io, vars),
+		Funcs:  templateFuncs(sandbox, io, vars),
 	})
 	if err != nil {
 		return nil, err
@@ -74,8 +74,8 @@ func renderTemplate(deps *deps.Deps, io *smartio.SmartIO, name string, src []byt
 
 // baseName is the last slash-separated segment of an asset path, the name a
 // template is reported under when it fails to parse or execute.
-func baseName(deps *deps.Deps, path string) string {
-	segments := deps.Stringsdeps.Split(path, "/")
+func baseName(sandbox *api.Sandbox, path string) string {
+	segments := sandbox.Deps.Stringsdeps.Split(path, "/")
 	return segments[len(segments)-1]
 }
 
@@ -85,14 +85,14 @@ func baseName(deps *deps.Deps, path string) string {
 // formatting editor has saved. A render that is not parsable Go is written as
 // it came out: the compile step reports it with a real message, which a
 // rendering error here would only hide.
-func formatIfGo(deps *deps.Deps, dest string, content []byte) []byte {
-	if !deps.Stringsdeps.HasSuffix(dest, ".go") {
+func formatIfGo(sandbox *api.Sandbox, dest string, content []byte) []byte {
+	if !sandbox.Deps.Stringsdeps.HasSuffix(dest, ".go") {
 		return content
 	}
 
-	formatted, err := deps.Goimportsdeps.Format(string(content))
+	formatted, err := sandbox.Deps.Goimportsdeps.Format(string(content))
 	if err != nil {
-		deps.Std.Log("could not format %s: %s\n", dest, err.Error())
+		sandbox.Deps.Std.Log("could not format %s: %s\n", dest, err.Error())
 		return content
 	}
 
@@ -102,19 +102,19 @@ func formatIfGo(deps *deps.Deps, dest string, content []byte) []byte {
 // RenderTemplateToDest renders one asset as a Go text/template over vars and
 // writes the result to dest_path. A Go destination is formatted first (see
 // formatIfGo).
-func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path string, vars interface{}, dest_path string) error {
+func RenderTemplateToDest(sandbox *api.Sandbox, io *smartio.SmartIO, template_path string, vars interface{}, dest_path string) error {
 
-	src, err := deps.Embeddeps.ReadFile(template_path)
+	src, err := sandbox.Deps.Embeddeps.ReadFile(template_path)
 	if err != nil {
 		return err
 	}
 
-	content, err := renderTemplate(deps, io, baseName(deps, template_path), src, vars)
+	content, err := renderTemplate(sandbox, io, baseName(sandbox, template_path), src, vars)
 	if err != nil {
 		return err
 	}
 
-	err = io.WriteFileOverwrite(dest_path, formatIfGo(deps, dest_path, content))
+	err = io.WriteFileOverwrite(dest_path, formatIfGo(sandbox, dest_path, content))
 	if err != nil {
 		return err
 	}
@@ -128,8 +128,8 @@ func RenderTemplateToDest(deps *deps.Deps, io *smartio.SmartIO, template_path st
 // is written to sandbox/new.go. Every file in the group is rendered with the
 // same vars, and every file may call the `render` native function (see
 // templateFuncs) to embed another template of the target project.
-func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interface{}) error {
-	return RenderGroupExcept(deps, io, group, vars, nil)
+func RenderGroup(sandbox *api.Sandbox, io *smartio.SmartIO, group string, vars interface{}) error {
+	return RenderGroupExcept(sandbox, io, group, vars, nil)
 }
 
 // RenderGroupExcept renders a group the way RenderGroup does, skipping every
@@ -137,9 +137,9 @@ func RenderGroup(deps *deps.Deps, io *smartio.SmartIO, group string, vars interf
 // catalogs carry their declaration at the root of the group — a file that
 // describes the package rather than one the package installs — so it is
 // rendered nowhere.
-func RenderGroupExcept(deps *deps.Deps, io *smartio.SmartIO, group string, vars interface{}, except []string) error {
+func RenderGroupExcept(sandbox *api.Sandbox, io *smartio.SmartIO, group string, vars interface{}, except []string) error {
 
-	files, err := deps.Embeddeps.ListFilesRecursively(group)
+	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively(group)
 	if err != nil {
 		return err
 	}
@@ -148,17 +148,17 @@ func RenderGroupExcept(deps *deps.Deps, io *smartio.SmartIO, group string, vars 
 		if containsPath(except, file) {
 			continue
 		}
-		src, err := deps.Embeddeps.ReadFile(group + "/" + file)
+		src, err := sandbox.Deps.Embeddeps.ReadFile(group + "/" + file)
 		if err != nil {
 			return err
 		}
 
-		content, err := renderTemplate(deps, io, baseName(deps, file), src, vars)
+		content, err := renderTemplate(sandbox, io, baseName(sandbox, file), src, vars)
 		if err != nil {
 			return err
 		}
 
-		err = io.WriteFileOverwrite(file, formatIfGo(deps, file, content))
+		err = io.WriteFileOverwrite(file, formatIfGo(sandbox, file, content))
 		if err != nil {
 			return err
 		}

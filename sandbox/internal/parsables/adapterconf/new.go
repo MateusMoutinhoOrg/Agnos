@@ -1,22 +1,22 @@
 package adapterconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func New(deps *deps.Deps, content string) (*AdapterConf, error) {
+func New(sandbox *api.Sandbox, content string) (*AdapterConf, error) {
 
 	if content == "" {
-		return nil, deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	adapter_specs, parse_error := deps.Serializables.ParseYaml(content)
+	adapter_specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !adapter_specs.IsObject() {
-		return nil, deps.Std.Errorf("adapter_specs is not an object")
+		return nil, sandbox.Deps.Std.Errorf("adapter_specs is not an object")
 	}
 
 	adapter_conf := &AdapterConf{Origin: OriginCatalog}
@@ -37,11 +37,11 @@ func New(deps *deps.Deps, content string) (*AdapterConf, error) {
 		}
 		value, err := item.GetString()
 		if err != nil {
-			return nil, deps.Std.Errorf("%s is not a string", field.key)
+			return nil, sandbox.Deps.Std.Errorf("%s is not a string", field.key)
 		}
 		*field.target = value
 	}
 
-	BindMethods(deps, adapter_conf)
+	BindMethods(sandbox, adapter_conf)
 	return adapter_conf, nil
 }

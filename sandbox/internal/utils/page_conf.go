@@ -1,7 +1,7 @@
 package utils
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -32,12 +32,12 @@ const StaticRouteName = "static"
 // PageAsset is the project-relative path of a page's html template. The name
 // is normalized the way a route name is, so both the identifier ("about-us")
 // and the package directory it becomes ("about_us") name the same file.
-func PageAsset(deps *deps.Deps, name string) string {
-	return PagesDir + "/" + RouteIdentifier(deps, name) + ".html"
+func PageAsset(sandbox *api.Sandbox, name string) string {
+	return PagesDir + "/" + RouteIdentifier(sandbox, name) + ".html"
 }
 
 // IsPage reports whether a route name has an html template beside it — the
 // single test that tells a page from any other route.
-func IsPage(deps *deps.Deps, io *smartio.SmartIO, name string) bool {
-	return io.IsFile(PageAsset(deps, name))
+func IsPage(sandbox *api.Sandbox, io *smartio.SmartIO, name string) bool {
+	return io.IsFile(PageAsset(sandbox, name))
 }

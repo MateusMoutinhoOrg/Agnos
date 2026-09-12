@@ -2,14 +2,13 @@ package static
 
 import (
 	"{{.Module}}/sandbox/api"
-	"{{.Module}}/sandbox/deps"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/internal/pageio"
 	"{{.Module}}/sandbox/internal/routeio"
 )
 
 // RouteHandler answers GET /static/<item...> with one file of pageio.StaticRoot,
-// served straight out of the binary through deps.Embeddeps.
+// served straight out of the binary through sandbox.Deps.Embeddeps.
 //
 // The captured segments are attacker-controlled and the path they build is
 // cleaned by the embed adapter before the read, so "/static/../asset.go" would
@@ -21,21 +20,21 @@ import (
 // `?sha=` is what the pageio helpers stamp on every link they build. It is a
 // cache key and never an input: the file that is served is the one the path
 // names, whatever the sha says. All it decides is cacheHeader below.
-func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Response) int {
-	relative, ok := safeSegments(deps, entries.Item)
+func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
+	relative, ok := safeSegments(sandbox, entries.Item)
 	if !ok {
-		return routeio.WriteError(deps, response, api.StatusBadRequest, "item",
+		return routeio.WriteError(sandbox, response, api.StatusBadRequest, "item",
 			"invalid static asset path")
 	}
 
-	content, err := deps.Embeddeps.ReadFile(pageio.StaticRoot + "/" + relative)
+	content, err := sandbox.Deps.Embeddeps.ReadFile(pageio.StaticRoot + "/" + relative)
 	if err != nil {
-		return routeio.WriteError(deps, response, api.StatusNotFound, "item",
+		return routeio.WriteError(sandbox, response, api.StatusNotFound, "item",
 			"static asset not found")
 	}
 
-	response.SetHeader("Content-Type", contentTypeOf(deps, relative))
-	response.SetHeader("Cache-Control", cacheHeader(deps, entries.Sha, content))
+	response.SetHeader("Content-Type", contentTypeOf(sandbox, relative))
+	response.SetHeader("Cache-Control", cacheHeader(sandbox, entries.Sha, content))
 	response.SetStatus(api.StatusOk)
 	response.Write(content)
 
@@ -48,8 +47,8 @@ func RouteHandler(deps *deps.Deps, entries *Entries, response serverdeps.Respons
 // with no sha, or with one from an older build, gets an answer the browser has
 // to revalidate — it is still served the current file, so a stale link is slow
 // rather than broken.
-func cacheHeader(deps *deps.Deps, sha string, content []byte) string {
-	if sha != "" && sha == pageio.ShortSha(deps, content) {
+func cacheHeader(sandbox *api.Sandbox, sha string, content []byte) string {
+	if sha != "" && sha == pageio.ShortSha(sandbox, content) {
 		return pageio.ImmutableCache
 	}
 	return pageio.RevalidateCache
@@ -62,7 +61,7 @@ func cacheHeader(deps *deps.Deps, sha string, content []byte) string {
 // means the request path was percent-encoded to hide one of them from the
 // dispatch's split. An empty segment cannot reach here — the dispatch drops
 // those — and is refused anyway rather than trusted.
-func safeSegments(deps *deps.Deps, segments []string) (string, bool) {
+func safeSegments(sandbox *api.Sandbox, segments []string) (string, bool) {
 	if len(segments) == 0 {
 		return "", false
 	}
@@ -70,24 +69,24 @@ func safeSegments(deps *deps.Deps, segments []string) (string, bool) {
 		if segment == "" || segment == "." || segment == ".." {
 			return "", false
 		}
-		if deps.Stringsdeps.ContainsAny(segment, "/\\\x00") {
+		if sandbox.Deps.Stringsdeps.ContainsAny(segment, "/\\\x00") {
 			return "", false
 		}
 	}
-	return deps.Stringsdeps.Join(segments, "/"), true
+	return sandbox.Deps.Stringsdeps.Join(segments, "/"), true
 }
 
 // contentTypeOf reads the media type off the asset's extension, matched in
 // lower case. An extension nothing below claims is served as opaque bytes
 // rather than guessed at, which is also what keeps an unknown asset from being
 // rendered as html by the browser.
-func contentTypeOf(deps *deps.Deps, relative string) string {
-	cut := deps.Stringsdeps.LastIndex(relative, ".")
+func contentTypeOf(sandbox *api.Sandbox, relative string) string {
+	cut := sandbox.Deps.Stringsdeps.LastIndex(relative, ".")
 	if cut < 0 {
 		return "application/octet-stream"
 	}
 
-	switch deps.Stringsdeps.ToLower(relative[cut:]) {
+	switch sandbox.Deps.Stringsdeps.ToLower(relative[cut:]) {
 	case ".html", ".htm":
 		return "text/html; charset=utf-8"
 	case ".css":

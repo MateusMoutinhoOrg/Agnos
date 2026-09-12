@@ -1,11 +1,11 @@
 package depconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(deps *deps.Deps, dep_conf *DepConf) {
+func BindMethods(sandbox *api.Sandbox, dep_conf *DepConf) {
 	dep_conf.Render = func() string {
-		return Render(deps, dep_conf)
+		return Render(sandbox, dep_conf)
 	}
 }

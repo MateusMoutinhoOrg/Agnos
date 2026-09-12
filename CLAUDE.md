@@ -108,10 +108,15 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 ```
 
 - **`sandbox/`** — the closed core. It imports only `sandbox/` packages — the stdlib included,
-  so text, sorting, hashing and templating come from `deps.<Contract>` too.
+  so text, sorting, hashing and templating come from `sandbox.Deps.<Contract>` too.
   `api/` holds contracts only, `deps/` holds dependency contracts (each `deps/<x>/` imports
   nothing at all; only the loose `deps/deps.go` names them),
   `binds/` holds one function file per `api/` file, `internal/` holds the logic.
+  **Every function of `binds/` and `internal/` takes `sandbox *api.Sandbox` first**, and
+  nothing else standing for the outside world: `api.Sandbox` carries `Deps`, so holding the
+  api is holding everything — one part of the api can call another, and a field a caller
+  replaced takes effect everywhere. `sandbox/api/` is the one place allowed to import
+  `sandbox/deps`, and only for that field.
 - **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<adapter>/`
   exports `Bind(deps *deps.Deps)` beside an `adapter.yaml` naming the dep it fills;
   `availables/<name>/new.go` is generated from `availables/<name>/available.yaml`, never from a
@@ -168,10 +173,12 @@ first use, two overwrite in silence. `add-dep`/`remove-dep` own the contract, `a
 `remove-adapter` one implementation, `set-adapter` the choice, `add-available`/`remove-available`
 the selection itself. `cmd/main/main.go` imports one available, and that import is how a program
 picks its implementations. Another agnos repo installs as a dep too: `add-dep
-<module>@<version> --as <name>` copies its `sandbox/api/` (which imports nothing,
-so the copy is self-contained) into `sandbox/deps/<name>/` with only the package
-clause changed, and **generates** `adapters/libs/<name>/` — the shim that builds
-the remote sandbox from the remote repo's own adapters and converts it, because
+<module>@<version> --as <name>` copies its `sandbox/api/` into `sandbox/deps/<name>/`
+with the package clause changed and `Sandbox.Deps` dropped — a consumer installs
+the api of a repo, never the wiring behind it, and that is what keeps the copy
+self-contained (`apishape.DepsField`) — and **generates** `adapters/libs/<name>/`
+— the shim that builds the remote sandbox from the remote repo's own adapters
+and converts it, because
 a top-level cast cannot work (Go's type identity is not recursive through named
 types) and the conversion names a type whose import path lives in the consumer.
 `sandbox/internal/apishape/` holds the convertibility rule and the converter
@@ -192,8 +199,9 @@ change a rule there and nowhere else. The ones most easily broken:
 - **Every file is an instance of a pattern.** New code copies an existing sibling exactly:
   same filenames, same function names, same ordering. Never add a one-off — `verify` and the
   collectors read shape by convention.
-- Naming is load-bearing: `deps.Iodeps` from `sandbox/deps/iodeps`, `Bind(deps *deps.Deps)`,
-  `CommandHandler(deps *deps.Deps, entries *Entries) int`.
+- Naming is load-bearing: `sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`,
+  `Bind(deps *deps.Deps)` (an adapter still fills `deps.Deps` directly),
+  `CommandHandler(sandbox *api.Sandbox, entries *Entries) int`.
 - Generated files are never edited — change the template under `assets/` and bootstrap.
   `docs/GeneratedFiles/doc.md` lists which files are rewritten by every build.
 - Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The

@@ -1,14 +1,14 @@
 package deps_init
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/availableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-func DepsInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
-	deps.Std.Log("deps-init started with path %s \n", path)
+func DepsInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
+	sandbox.Deps.Std.Log("deps-init started with path %s \n", path)
 
 	io.CreateDir("sandbox/deps")
 	io.CreateDir("adapters")
@@ -21,5 +21,5 @@ func DepsInitInternal(deps *deps.Deps, io *smartio.SmartIO, path string) error {
 	}
 
 	return io.WriteFileOverwrite(utils.AvailableConfPath(utils.StandardAvailable),
-		[]byte(availableconf.NewEmpty(deps).Render()))
+		[]byte(availableconf.NewEmpty(sandbox).Render()))
 }

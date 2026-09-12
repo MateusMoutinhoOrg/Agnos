@@ -1,11 +1,11 @@
 package adapterconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *AdapterConf {
+func NewEmpty(sandbox *api.Sandbox) *AdapterConf {
 	adapter_conf := &AdapterConf{Origin: OriginCatalog}
-	BindMethods(deps, adapter_conf)
+	BindMethods(sandbox, adapter_conf)
 	return adapter_conf
 }

@@ -1,16 +1,16 @@
 package commandconf
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func NewEmpty(deps *deps.Deps) *CommandConf {
+func NewEmpty(sandbox *api.Sandbox) *CommandConf {
 	conf := &CommandConf{
 		Identifiers: []string{},
 		Examples:    []string{},
 		Flags:       []Field{},
 		Args:        []Field{},
 	}
-	BindMethods(deps, conf)
+	BindMethods(sandbox, conf)
 	return conf
 }
