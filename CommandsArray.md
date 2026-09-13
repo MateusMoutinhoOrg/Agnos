@@ -5,7 +5,7 @@
 - [sandbox/api/command.go](#sandboxapicommandgo)
 - [sandbox/api/sandbox.go](#sandboxapisandboxgo) 
 - [sandbox/binds/cli.go](#sandboxbindscligo)
-- [sandbox/internal/commands/<item>/new.go](#sandboxinternalcommandsnew.go)
+- [sandbox/internal/commands/<item>/new.go](#sandboxinternalcommandsnewgo)
 - [sandbox/internal/commands/<item>/entries.yaml](#sandboxinternalcommandsitementriesyaml)
 - [sandbox/internal/commands/<item>/handler.go](#sandboxinternalcommandsitemhandlergo)
 
@@ -85,40 +85,36 @@ type Command struct {
     a function that returns a instance of commands constructing only the props, based on entries.yaml.
 #### sample:
 ```go
-func NewCommand() api.Command {
-    command := NewBasicCommand()
+func NewCommand(sandbox *api.Sandbox) api.Command {
+    command := api.NewCommand() // vanila constructions containing the basic methods.
     command.name = "<item>"
     
-
-    return api.Command{
-        Name: "<item>",
-        Category: "<item>",
-        Help: "<item>",
-        LongDescription: "<item>",
-        Args: []api.CommandArg{
-            {
-                Id: "<item>",
-                Required: true,
-                Description: "<item>",
-                Examples: []string{"<item>"},
-                Default: "<item>",
-            },
-        },
-        Flags: []api.CommandFlag{
-            {
-                Id: "<item>",
-                Required: true,
-                Description: "<item>",
-                Examples: []string{"<item>"},
-                Default: "<item>",
-                Identifiers: []string{"<item>"},
-            },
-        },
-      
-        Handler: func() int {
-            return 0
+    command.Args = []api.CommandArg{
+        {
+            Id: "<item>",
+            Required: true,
+            Description: "<item>",
+            Examples: []string{"<item>"},
+            Default: "<item>",
         },
     }
+
+    command.Flags = []api.CommandFlag{
+        {
+            Id: "<item>",
+            Required: true,
+            Description: "<item>",
+            Examples: []string{"<item>"},
+            Default: "<item>",
+            Identifiers: []string{"<item>"},
+        },
+    }
+    command.Handler = func() int {
+        // the handler recives sandbox and self, to be able to retrive itens using the GetItemMethod.
+        return CommandHandler(sandbox,&command)
+    }
+    return &command
+
 }
 ```
 
@@ -129,7 +125,11 @@ func NewCommand() api.Command {
 
 ---
 ### sandbox/internal/commands/<item>/entries.yaml
-
-
+#### action:
+    nothing, entries.yaml can keep as it is, but can be modified if nescessary
 ---
 ### sandbox/internal/commands/<item>/handler.go
+#### action:
+    modify
+#### modificatioN:
+    modify the assignature of the functions.to be equal as it colled on. new.go
