@@ -46,6 +46,10 @@ sandbox:
           order: 3
           gen: true
           description: Cli struct + exit consts
+        command.go:
+          order: 4
+          gen: true
+          description: Command/CommandFlag/CommandArg + NewCommand
     binds:
       order: 3
       dir: true
@@ -57,7 +61,7 @@ sandbox:
         cli.go:
           order: 2
           gen: true
-          description: CliBind
+          description: "CliBind: Sandbox.Commands + Cli.CliMain"
     deps:
       order: 4
       dir: true
@@ -82,11 +86,11 @@ sandbox:
         cli/climain.go:
           order: 2
           gen: true
-          description: CliMain + dispatch<Name> per command
+          description: CliMain, the one dispatch, read off Sandbox.Commands
         commands/<name>:
           order: 3
           dir: true
-          description: entries.yaml (decl), entries.go (gen), handler.go (hand)
+          description: entries.yaml (decl), new.go (gen), handler.go (hand)
         actions/<name>:
           order: 4
           dir: true
@@ -96,7 +100,7 @@ sandbox:
           description: "collectors: list one dir, title-case names"
         actions/build/generate_*.go:
           order: 6
-          description: entries.go per command, help entries.yaml, doc indexes
+          description: new.go per command, help entries.yaml, doc indexes
         actions/verify/check_*.go:
           order: 7
           description: one rule set per file, each returns []string
@@ -174,7 +178,7 @@ assets:
     templates:
       order: 9
       dir: true
-      description: single-file scaffolds (entries.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+      description: single-file scaffolds (new.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
 cmd/main/main.go:
   order: 5
   gen: true

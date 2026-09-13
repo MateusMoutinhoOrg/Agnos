@@ -355,7 +355,7 @@ type Actions struct {
 	CliPurge func(path string) error
 
 	// AddCommand declares a new command: its entries.yaml, its generated
-	// entries.go and a handler.go to fill in.
+	// new.go and a handler.go to fill in.
 	AddCommand func(path string, name string, help string, category string) error
 
 	// RemoveCommand deletes one command and unwires it from the dispatcher.

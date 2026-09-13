@@ -5,28 +5,28 @@ import (
 	addBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_body_field"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	add_error := addBodyFieldAction.AddBodyField(sandbox, api.RouteBodyFieldProps{
-		Path:                   entries.Path,
-		Route:                  entries.Route,
-		Name:                   entries.Name,
-		Type:                   entries.Type,
-		Required:               entries.Required,
-		Array:                  entries.Array,
-		Min:                    entries.Min,
-		Max:                    entries.Max,
-		ExclusiveMin:           entries.ExclusiveMin,
-		ExclusiveMax:           entries.ExclusiveMax,
-		Format:                 entries.Format,
-		Pattern:                entries.Pattern,
-		Enum:                   entries.Enum,
-		Const:                  entries.Const,
-		Nullable:               entries.Nullable,
-		MinItems:               entries.MinItems,
-		MaxItems:               entries.MaxItems,
-		UniqueItems:            entries.UniqueItems,
-		AdditionalProperties:   entries.AdditionalProperties,
-		NoAdditionalProperties: entries.NoAdditionalProperties,
+		Path:                   command.GetString("path"),
+		Route:                  command.GetString("route"),
+		Name:                   command.GetString("name"),
+		Type:                   command.GetString("type"),
+		Required:               command.GetBool("required"),
+		Array:                  command.GetBool("array"),
+		Min:                    command.GetString("min"),
+		Max:                    command.GetString("max"),
+		ExclusiveMin:           command.GetString("exclusive-min"),
+		ExclusiveMax:           command.GetString("exclusive-max"),
+		Format:                 command.GetString("format"),
+		Pattern:                command.GetString("pattern"),
+		Enum:                   command.GetStrings("enum"),
+		Const:                  command.GetString("const"),
+		Nullable:               command.GetBool("nullable"),
+		MinItems:               command.GetString("min-items"),
+		MaxItems:               command.GetString("max-items"),
+		UniqueItems:            command.GetBool("unique-items"),
+		AdditionalProperties:   command.GetBool("additional-properties"),
+		NoAdditionalProperties: command.GetBool("no-additional-properties"),
 	})
 	if add_error != nil {
 		sandbox.Deps.Std.Error("%s\n", add_error.Error())

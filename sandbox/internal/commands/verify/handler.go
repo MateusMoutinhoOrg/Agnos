@@ -6,13 +6,13 @@ import (
 	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	verify_error := verifyAction.Verify(sandbox, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	verify_error := verifyAction.Verify(sandbox, command.GetString("path"))
 
 	// The schema check says the tree has the right shape; the runtime says
 	// the Go toolchain accepts what is in it. `verify passed` means both.
 	if verify_error == nil {
-		verify_error = buildAction.RunRuntime(sandbox, entries.Path, entries.Runtime)
+		verify_error = buildAction.RunRuntime(sandbox, command.GetString("path"), command.GetString("runtime"))
 	}
 
 	if verify_error != nil {

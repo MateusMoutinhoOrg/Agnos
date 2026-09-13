@@ -5,8 +5,8 @@ import (
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	adapters, list_error := listAdaptersAction.ListAdapters(sandbox, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	adapters, list_error := listAdaptersAction.ListAdapters(sandbox, command.GetString("path"))
 
 	if list_error != nil {
 		sandbox.Deps.Std.Error("%s\n", list_error.Error())

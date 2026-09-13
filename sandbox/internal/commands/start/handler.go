@@ -5,14 +5,14 @@ import (
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	var module *string
-	if entries.Module != "" {
-		modVal := entries.Module
+	if command.GetString("module") != "" {
+		modVal := command.GetString("module")
 		module = &modVal
 	}
 
-	if !sandbox.Deps.Iodeps.Exist(entries.Path+"/go.mod") && module == nil {
+	if !sandbox.Deps.Iodeps.Exist(command.GetString("path")+"/go.mod") && module == nil {
 		{
 			sandbox.Deps.Std.Error("the module flag (--module) is required when there is no go.mod in the path\n")
 		}
@@ -20,10 +20,10 @@ func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
 	}
 
 	start_error := startAction.Start(sandbox, api.StartProps{
-		Path:        entries.Path,
-		ProjectName: entries.ProjectName,
+		Path:        command.GetString("path"),
+		ProjectName: command.GetString("project-name"),
 		Module:      module,
-		Force:       entries.Force,
+		Force:       command.GetBool("force"),
 	})
 
 	if start_error != nil {

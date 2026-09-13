@@ -5,11 +5,11 @@ import (
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	exec_error := execTestsAction.ExecTest(sandbox, api.ExecTestProps{
-		Path:   entries.Path,
-		Only:   entries.Only,
-		Update: entries.Update,
+		Path:   command.GetString("path"),
+		Only:   command.GetString("only"),
+		Update: command.GetBool("update"),
 	})
 
 	if exec_error != nil {

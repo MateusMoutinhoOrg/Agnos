@@ -5,11 +5,11 @@ import (
 	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	install_error := addAdapterAction.AddAdapter(sandbox, api.AddAdapterProps{
-		Path:      entries.Path,
-		Adapter:   entries.Adapter,
-		Available: entries.Available,
+		Path:      command.GetString("path"),
+		Adapter:   command.GetString("adapter"),
+		Available: command.GetString("available"),
 	})
 
 	if install_error != nil {

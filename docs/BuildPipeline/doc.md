@@ -6,7 +6,7 @@
 
 1. Read `AgnosConfig/project.yaml` (hard error if missing) and `go.mod`. Set `HasDeps` (`sandbox/deps/` exists), `HasCli` (`sandbox/internal/cli/` exists), `HasServer` (`sandbox/internal/server/` exists) and `HasAssets` (`assets/all/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
 2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the asset groups themselves write — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions). Skipped when `docs/` is absent.
-3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `entries.go` per command.
+3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `new.go` per command.
 4. Collectors, then render groups in order: `all` (always), `deps` (`HasDeps`), `cli` (`HasCli`), `server` (`HasServer`, preceded by one `entries.go` per route).
 
 | Collector | Lists | Var | Feeds |
@@ -16,7 +16,7 @@
 | `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
 | `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `docs/LibUsage/doc.md` |
 | `CollectAvailables` | `adapters/availables/<x>/available.yaml` | `Availables` (`Name`, `Adapters`) | `GenerateAvailableNews` -> `adapters/availables/<x>/new.go` |
-| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (rich map: identifiers, category, help, `Flags`/`Args` with Go names, types, getters, defaults, `RangeCheck`) | `climain.go`, `help/handler.go`, `entries.go` |
+| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (the declaration itself: identifiers, category, help, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `binds/cli.go` |
 | `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
 | `CollectGeneratedDocs` | `assets/{all,cli,server}/docs/*/props.yaml` (`cli` only when `HasCli`, `server` only when `HasServer`), rendered | merged into the doc tree | same |
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
@@ -58,8 +58,8 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Dispatch (`climain.go`)
 
-`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against every command's identifiers; unknown -> exit 2. `dispatch<Name>`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `sandbox.Deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `CommandHandler(sandbox, &entries)`.
+`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against the identifiers of every `*api.Command` of `sandbox.Commands`; unknown -> exit 2. Then one generic `runCommand`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `sandbox.Deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order, binding every value into `command.Items` under its declared id. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `command.Handler()`, which is that package's `CommandHandler(sandbox, command)`. Nothing in this file is generated per command — `binds/cli.go` is where the set is spelled, out of each package's `NewCommand`.
 
 ## Self-hosting
 
-Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `binds/cli.go`, `climain.go`, every `entries.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `binds/cli.go`, `climain.go`, every command's `new.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).

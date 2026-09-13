@@ -29,11 +29,11 @@
 {{- if .HasCli }}
 | `cmd/main/main.go` | `build` | always |
 | `docs/{CliInstall,CliExamples}/` | `build` | always. Both `doc.md` and `props.yaml` |
-| `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `build` | always |
-| `sandbox/internal/cli/climain.go` | `build` | always. `CliMain` + one `dispatch<Name>` per command |
+| `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/binds/cli.go` | `build` | always |
+| `sandbox/internal/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
 | `sandbox/internal/commands/help/{entries.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/commands/version/{entries.yaml,handler.go}` | `build` | always |
-| `sandbox/internal/commands/<name>/entries.go` | `build` | always. The `Entries` struct of that command |
+| `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command` |
 | `sandbox/internal/commands/<name>/entries.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command` — never by hand |
 | `sandbox/internal/commands/<name>/handler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 {{- end }}

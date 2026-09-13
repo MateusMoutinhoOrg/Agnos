@@ -198,7 +198,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	if hasCli {
-		if err := GenerateCommandEntries(sandbox, io, commands); err != nil {
+		if err := GenerateCommandNew(sandbox, io, commands, module_conf.Module); err != nil {
 			return err
 		}
 		if err := utils.RenderGroup(sandbox, io, "cli", vars); err != nil {

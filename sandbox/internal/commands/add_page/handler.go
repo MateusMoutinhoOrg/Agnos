@@ -5,13 +5,13 @@ import (
 	addPageAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_page"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	add_error := addPageAction.AddPage(sandbox, api.PageProps{
-		Path:    entries.Path,
-		Name:    entries.Name,
-		Trigger: entries.Trigger,
-		Title:   entries.Title,
-		Help:    entries.Help,
+		Path:    command.GetString("path"),
+		Name:    command.GetString("name"),
+		Trigger: command.GetString("trigger"),
+		Title:   command.GetString("title"),
+		Help:    command.GetString("help"),
 	})
 
 	if add_error != nil {

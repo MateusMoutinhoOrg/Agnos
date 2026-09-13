@@ -5,10 +5,10 @@ import (
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	compile_error := compileAction.Compile(sandbox, api.CompileProps{
-		Path:    entries.Path,
-		Targets: entries.Target,
+		Path:    command.GetString("path"),
+		Targets: command.GetStrings("target"),
 	})
 
 	if compile_error != nil {

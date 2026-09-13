@@ -5,9 +5,9 @@ tree:
       sha: 24922a1348952950c35dbf396239d622a2bbab8aa8910a5b462dc7d9524856e7
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
-    - file: sandbox/internal/commands/greet/entries.go
-      sha: f845affd41560b658b5134ef3b9dbb0612bfe1152015abc41238c1b2fdc6bc82
     - file: sandbox/internal/commands/greet/entries.yaml
       sha: 79aaf6eee2c70d28ff7c72c8e3633c6f8062f3152955183529efe41243ed1817
     - file: sandbox/internal/commands/greet/handler.go
-      sha: 8ddb75ab481dd1c8ce95b6bd8d7b13e97c5f7dbd978b47edfd78988debd5b628
+      sha: b65d5636e16aceb058b357657c83779be3fc7a7011fa779a60328f3929d0c27a
+    - file: sandbox/internal/commands/greet/new.go
+      sha: 443fd6abfd45733ba0180dfd9cc88b376259af2c296bd493e1b353d42020f8fe

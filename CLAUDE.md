@@ -136,10 +136,18 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 Two layers per feature: an **action** (`sandbox/internal/actions/<name>/`) with `<name>.go`
 (opens SmartIO, persists, runs the follow-up `build`) plus `<name>_internal.go` (pure logic on
 an already-open SmartIO), and a **command**
-(`sandbox/internal/commands/<name>/`) with `entries.yaml` (declaration), `entries.go`
-(generated) and `handler.go` (hand-written). Both directories are snake_case for a kebab-case
+(`sandbox/internal/commands/<name>/`) with `entries.yaml` (declaration), `new.go`
+(generated — the `api.Command` that package contributes to `sandbox.Commands`) and
+`handler.go` (hand-written). Both directories are snake_case for a kebab-case
 command (`add-command` -> `add_command/`). Only `handler.go` and contract/adapter pairs are
 written by hand; everything else is generated.
+
+`sandbox.Commands` (`[]*api.Command`, built by `binds/cli.go` from every package's generated
+`NewCommand`) **is** the command surface: `climain.go` is one generic dispatch that binds a
+command line against those declarations into `command.Items`, and both help screens are printed
+from the same slice. A handler reads its values off the command by the id its `entries.yaml`
+declares — `command.GetString("path")`, `command.GetBool("quiet")`, `command.GetStrings("example")`
+— so nothing about a command is spelled in Go anywhere but its own `new.go`.
 
 The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
 layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` mirrors `api/cli.go`,
@@ -201,7 +209,7 @@ change a rule there and nowhere else. The ones most easily broken:
   collectors read shape by convention.
 - Naming is load-bearing: `sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`,
   `Bind(deps *deps.Deps)` (an adapter still fills `deps.Deps` directly),
-  `CommandHandler(sandbox *api.Sandbox, entries *Entries) int`.
+  `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`.
 - Generated files are never edited — change the template under `assets/` and bootstrap.
   `docs/GeneratedFiles/doc.md` lists which files are rewritten by every build.
 - Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The

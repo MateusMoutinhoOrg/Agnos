@@ -43,13 +43,13 @@ A layer is an asset group plus an `<x>-init`/`<x>-purge` pair, and the server la
 | Concept | CLI | Server | Front |
 |---|---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) |
-| Surface + bind | `sandbox/api/cli.go`, `sandbox/binds/cli.go` | `sandbox/api/server.go`, `sandbox/binds/server.go` | — (served through the server's) |
+| Surface + bind | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/binds/cli.go` | `sandbox/api/server.go`, `sandbox/binds/server.go` | — (served through the server's) |
 | Generated dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
 | Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` |
-| Declared unit | `commands/<name>/entries.yaml` | `routes/<name>/route.yaml` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
+| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `collect_front_mount.go` |
-| Per-unit generator | `generate_command_entries.go` | `generate_route_entries.go` | — (`generate_route_entries.go`) |
+| Per-unit generator | `generate_command_new.go` | `generate_route_entries.go` | — (`generate_route_entries.go`) |
 | Asset group | `assets/cli/` | `assets/server/` | `assets/front/` |
 | Build trigger | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` | `hasFront := io.IsDir("sandbox/internal/pageio")` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` |

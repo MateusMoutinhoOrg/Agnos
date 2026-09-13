@@ -5,11 +5,11 @@ import (
 	"{{.Module}}/sandbox/internal/config"
 )
 
-// help is a command like any other — entries.yaml, generated entries.go, and
-// this handler.go — except that `agnos build` writes all three instead of the
-// user writing two of them. This file is regenerated from every
-// sandbox/internal/commands/<name>/entries.yaml: the command metadata is baked
-// into helpCommands below, the rendering code is fixed.
+// help is a command like any other — entries.yaml, generated new.go, and this
+// handler.go — except that `{{.GeneratorName}} build` writes all three instead
+// of the user writing two of them. Nothing about the command set is baked in
+// here: the screens below are printed from sandbox.Commands, the same
+// declarations the dispatch binds a command line against.
 
 const (
 	exitOk    = 0
@@ -50,67 +50,21 @@ const (
 	red     = "\033[31m"
 )
 
-// ─── Baked command metadata ─────────────────────────────────────────────────
-
-type helpField struct {
-	Identifiers []string // empty for a positional argument
-	Name        string   // set for a positional argument
-	Description string
-	Examples    []string
-	Type        string
-	Default     string
-	Required    bool
-}
-
-type helpCommand struct {
-	Identifiers     []string
-	Category        string
-	Description     string
-	LongDescription string
-	Examples        []string
-	Hidden          bool
-	Flags           []helpField
-	Args            []helpField
-}
-
-var helpCommands = []helpCommand{
-{{- range .Commands}}
-	{
-		Identifiers:     []string{ {{.IdentifiersGo}} },
-		Category:        {{printf "%q" .Category}},
-		Description:     {{printf "%q" .Help}},
-		LongDescription: {{printf "%q" .LongDescription}},
-		Examples:        []string{ {{range .Examples}}{{printf "%q" .}}, {{end}} },
-		Hidden:          {{.Hidden}},
-		Flags: []helpField{
-{{- range .Flags}}
-			{Identifiers: []string{ {{.IdentifiersGo}} }, Description: {{printf "%q" .Description}}, Examples: []string{ {{range .Examples}}{{printf "%q" .}}, {{end}} }, Type: {{printf "%q" .Type}}, Default: {{printf "%q" .Default}}, Required: {{.Required}}},
-{{- end}}
-		},
-		Args: []helpField{
-{{- range .Args}}
-			{Name: {{printf "%q" .Key}}, Description: {{printf "%q" .Description}}, Examples: []string{ {{range .Examples}}{{printf "%q" .}}, {{end}} }, Type: {{printf "%q" .Type}}, Default: {{printf "%q" .Default}}, Required: {{.Required}}},
-{{- end}}
-		},
-	},
-{{- end}}
-}
-
 // ─── Entry points ───────────────────────────────────────────────────────────
 
 // CommandHandler backs the `help` / `--help` verb: with no argument it prints
 // the general help screen, with a command name it prints that command's
 // detailed help.
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	name := entries.Command
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	name := command.GetString("command")
 	if name == "" {
 		PrintGeneralHelp(sandbox)
 		return exitOk
 	}
 
-	for i := range helpCommands {
-		if identifiedBy(helpCommands[i].Identifiers, name) {
-			printCommandHelp(sandbox, &helpCommands[i])
+	for _, declared := range sandbox.Commands {
+		if identifiedBy(declared.Identifiers, name) {
+			printCommandHelp(sandbox, declared)
 			return exitOk
 		}
 	}
@@ -142,8 +96,8 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 	p("\n")
 
 	categoryOrder := []string{}
-	categorized := map[string][]helpCommand{}
-	for _, cmd := range helpCommands {
+	categorized := map[string][]*api.Command{}
+	for _, cmd := range sandbox.Commands {
 		if cmd.Hidden {
 			continue
 		}
@@ -158,7 +112,7 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 	}
 
 	maxNameLen := 0
-	for _, cmd := range helpCommands {
+	for _, cmd := range sandbox.Commands {
 		if cmd.Hidden || len(cmd.Identifiers) == 0 {
 			continue
 		}
@@ -188,7 +142,7 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 			dots := " " + sandbox.Deps.Stringsdeps.Repeat("·", dotsNeeded-2) + " "
 
 			p("  %s│%s  %s%s%s%s%s%s%s%s\n",
-				gray, reset, green+bold, name, reset, gray, dots, reset, cmd.Description, aliasTag,
+				gray, reset, green+bold, name, reset, gray, dots, reset, cmd.Help, aliasTag,
 			)
 		}
 		p("  %s│%s\n", gray, reset)
@@ -206,14 +160,14 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 
 // ─── Per-command help ──────────────────────────────────────────────────────
 
-func printCommandHelp(sandbox *api.Sandbox, cmd *helpCommand) {
+func printCommandHelp(sandbox *api.Sandbox, cmd *api.Command) {
 	p := sandbox.Deps.Std.Printf
 
 	name := cmd.Identifiers[0]
 
 	titleLine := sandbox.Deps.Std.Sprintf("%s %s", binaryName(sandbox), name)
 	innerW := len(titleLine) + 4
-	if w := len(cmd.Description) + 4; w > innerW {
+	if w := len(cmd.Help) + 4; w > innerW {
 		innerW = w
 	}
 	if innerW < 42 {
@@ -227,8 +181,8 @@ func printCommandHelp(sandbox *api.Sandbox, cmd *helpCommand) {
 		sandbox.Deps.Stringsdeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
 	)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
-		cyan, reset, dim, cmd.Description, reset,
-		sandbox.Deps.Stringsdeps.Repeat(" ", innerW-2-len(cmd.Description)), cyan, reset,
+		cyan, reset, dim, cmd.Help, reset,
+		sandbox.Deps.Stringsdeps.Repeat(" ", innerW-2-len(cmd.Help)), cyan, reset,
 	)
 	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", innerW), reset)
 	p("\n")
@@ -249,9 +203,9 @@ func printCommandHelp(sandbox *api.Sandbox, cmd *helpCommand) {
 	argPart := ""
 	for _, arg := range cmd.Args {
 		if arg.Required {
-			argPart += sandbox.Deps.Std.Sprintf(" %s%s<%s>%s", bold, green, arg.Name, reset)
+			argPart += sandbox.Deps.Std.Sprintf(" %s%s<%s>%s", bold, green, arg.Id, reset)
 		} else {
-			argPart += sandbox.Deps.Std.Sprintf(" %s[%s]%s", dim, arg.Name, reset)
+			argPart += sandbox.Deps.Std.Sprintf(" %s[%s]%s", dim, arg.Id, reset)
 		}
 	}
 	p("  %s│%s%s%s%s\n", gray, reset, usage, flagPart, argPart)
@@ -274,7 +228,7 @@ func printCommandHelp(sandbox *api.Sandbox, cmd *helpCommand) {
 	if len(cmd.Args) > 0 {
 		printSection(p, "ARGUMENTS")
 		for i, arg := range cmd.Args {
-			printField(p, arg.Name, arg.Description, arg.Type, arg.Default, arg.Required, arg.Examples)
+			printField(p, arg.Id, arg.Description, arg.Type, arg.Default, arg.Required, arg.Examples)
 			if i < len(cmd.Args)-1 {
 				p("  %s│%s\n", gray, reset)
 			}

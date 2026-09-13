@@ -37,14 +37,15 @@ No recipe below asks for a Go file to be created by hand except the cases listed
 ```
 
 `add-command` writes `sandbox/internal/commands/<name>/entries.yaml` (the declaration) and a
-stub `handler.go` (yours), then generates `entries.go` and the dispatch arm. Every key these
-editors write is in [EntriesYaml](../EntriesYaml/doc.md); never edit `entries.yaml` by hand.
+stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
+`sandbox.Commands`. Every key these editors write is in
+[EntriesYaml](../EntriesYaml/doc.md); never edit `entries.yaml` by hand.
 
 Then write `handler.go` — the whole hand-written half of a command:
 
 ```go
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	if err := something(sandbox, entries.Path); err != nil {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	if err := something(sandbox, command.GetString("path")); err != nil {
 		sandbox.Deps.Std.Error("%s\n", err.Error())
 		return api.ExitFailure
 	}
@@ -53,7 +54,7 @@ func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
 }
 ```
 
-`Entries` arrives typed, defaulted and range-checked: bad input already exited 2 before the
+Every value arrives typed, defaulted and range-checked: bad input already exited 2 before the
 handler ran. [Commands](../Commands/doc.md) documents the command on the next build.
 {{- else }}
 ## Add the CLI layer

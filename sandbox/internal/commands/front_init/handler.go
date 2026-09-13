@@ -5,8 +5,8 @@ import (
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	init_error := frontInitAction.FrontInit(sandbox, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	init_error := frontInitAction.FrontInit(sandbox, command.GetString("path"))
 
 	if init_error != nil {
 		sandbox.Deps.Std.Error("%s\n", init_error.Error())

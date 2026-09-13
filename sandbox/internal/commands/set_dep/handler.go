@@ -5,12 +5,12 @@ import (
 	setDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_dep"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	set_error := setDepAction.SetDep(sandbox, api.SetDepProps{
-		Path:            entries.Path,
-		Dep:             entries.Dep,
-		Version:         entries.Version,
-		RemoteAvailable: entries.RemoteAvailable,
+		Path:            command.GetString("path"),
+		Dep:             command.GetString("dep"),
+		Version:         command.GetString("version"),
+		RemoteAvailable: command.GetString("remote-available"),
 	})
 
 	if set_error != nil {

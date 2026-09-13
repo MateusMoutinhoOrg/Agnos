@@ -5,8 +5,8 @@ import (
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	init_error := cliInitAction.CliInit(sandbox, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	init_error := cliInitAction.CliInit(sandbox, command.GetString("path"))
 
 	if init_error != nil {
 		sandbox.Deps.Std.Error("%s\n", init_error.Error())

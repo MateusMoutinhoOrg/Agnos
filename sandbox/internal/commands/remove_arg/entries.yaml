@@ -1,35 +1,41 @@
-identifiers: ["remove-arg"]
-category: Cli System
-help: Remove a positional arg from a command's entries.yaml
-long-description: |
-  Drops one positional arg declaration from
-  sandbox/internal/commands/<command>/entries.yaml and runs build so
-  entries.go and the dispatch layer forget it. Later args shift up.
-examples:
-  - "remove-arg file --command exec"
 args:
-  - name: name
-    description: the arg name
-    examples:
-      - "remove-arg file --command exec"
-    type: string
-    required: true
+    - description: the arg name
+      examples:
+        - remove-arg file --command exec
+      name: name
+      required: true
+      type: string
+category: Cli System
+examples:
+    - remove-arg file --command exec
 flags:
-  - name: command
-    identifiers: ["--command", "-c"]
-    description: the command (identifier or package name) that owns the arg
-    examples:
-      - "--command exec"
-    type: string
-    required: true
-  - name: path
-    identifiers: ["--path"]
-    description: the dir holding the project (defaults to the current directory)
-    examples:
-      - "remove-arg file --command exec --path ./my-project"
-    type: string
-    default: "."
-  - name: quiet
-    identifiers: ["--quiet", "-q"]
-    description: Quiets the cli output
-    type: boolean
+    - description: the command (identifier or package name) that owns the arg
+      examples:
+        - --command exec
+      identifiers:
+        - --command
+        - -c
+      name: command
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-arg file --command exec --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Remove a positional arg from a command's entries.yaml
+identifiers:
+    - remove-arg
+long-description: |-
+    Drops one positional arg declaration from
+    sandbox/internal/commands/<command>/entries.yaml and runs build so the
+    command's new.go forgets it. Later args shift up.

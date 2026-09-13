@@ -15,8 +15,12 @@ type Sandbox struct {
 	// effect everywhere. It is also the one field that does not cross into
 	// a consumer: an installed copy of this contract carries the api, never
 	// the wiring behind it.
-	Deps     *deps.Deps
-	Actions  Actions
-	Cli      Cli
-	Commands Commands
+	Deps    *deps.Deps
+	Actions Actions
+	Cli     Cli
+	// Commands is every command the project declares, in listing order,
+	// each built by the generated NewCommand of its own package. The cli
+	// dispatch reads the command line against these declarations; a caller
+	// holding the sandbox reads the same surface without one.
+	Commands []*Command
 }

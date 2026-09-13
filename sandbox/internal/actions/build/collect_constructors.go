@@ -7,7 +7,9 @@ import (
 
 // CollectConstructors lists sandbox/api and returns one title-cased entry per
 // .go file other than sandbox.go, for the {{range .Constructors}} loop in
-// sandbox/api/sandbox.go.
+// sandbox/api/sandbox.go. command.go is skipped along with it: what it
+// declares is the shape of one command, not a field of the sandbox — the
+// Commands slice built from it is written by the template itself.
 func CollectConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 	files := io.ListFiles("sandbox/api")
@@ -17,7 +19,7 @@ func CollectConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		parts := sandbox.Deps.Stringsdeps.Split(file, "/")
 		name := parts[len(parts)-1]
 
-		if name == "sandbox.go" || !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
+		if name == "sandbox.go" || name == "command.go" || !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
 			continue
 		}
 

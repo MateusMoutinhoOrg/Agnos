@@ -39,7 +39,11 @@ Everything callable from Go is behind one of them.
 | --- | --- |
 | `lib.Actions` | `api.Actions` |
 | `lib.Cli` | `api.Cli` |
-| `lib.Commands` | `api.Commands` |
+| `lib.Commands` | `[]*api.Command` |
+
+`lib.Commands` is the command surface itself: every command the project declares,
+each carrying its flags, its args and the `Handler` that runs it, so a caller drives a command
+without a command line — bind the values into `command.Items` and call `command.Handler()`.
 
 [PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs and
 dependency contracts — generated from `sandbox/api/` itself on every build.

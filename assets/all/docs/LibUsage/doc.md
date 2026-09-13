@@ -56,8 +56,15 @@ Everything callable from Go is behind one of them.
 {{- range .Constructors }}
 | `lib.{{ . }}` | `api.{{ . }}` |
 {{- end }}
+{{- if .HasCli }}
+| `lib.Commands` | `[]*api.Command` |
+{{- end }}
 
-[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
+{{if .HasCli}}`lib.Commands` is the command surface itself: every command the project declares,
+each carrying its flags, its args and the `Handler` that runs it, so a caller drives a command
+without a command line — bind the values into `command.Items` and call `command.Handler()`.
+
+{{end}}[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
 dependency contracts{{end}} — generated from `sandbox/api/` itself on every build.
 {{if .HasDeps}}
 ## Custom deps

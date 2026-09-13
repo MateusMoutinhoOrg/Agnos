@@ -21,4 +21,11 @@ type Sandbox struct {
 {{- range .Constructors }}
 	{{ . }} {{ . }}
 {{- end }}
+{{- if .HasCli}}
+	// Commands is every command the project declares, in listing order,
+	// each built by the generated NewCommand of its own package. The cli
+	// dispatch reads the command line against these declarations; a caller
+	// holding the sandbox reads the same surface without one.
+	Commands []*Command
+{{- end}}
 }

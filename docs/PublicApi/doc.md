@@ -29,7 +29,7 @@ Sandbox is the whole library: one field per contract declared in sandbox/api/, e
 | `Deps` | `*deps.Deps` | Deps is every capability the sandbox reaches the outside world through. It rides on the api so that a function handed the Sandbox holds the whole of what it needs, and can call another field of the api besides — which is what makes a field a caller replaced take effect everywhere. It is also the one field that does not cross into a consumer: an installed copy of this contract carries the api, never the wiring behind it. |
 | `Actions` | `Actions` |  |
 | `Cli` | `Cli` |  |
-| `Commands` | `Commands` |  |
+| `Commands` | `[]*Command` | Commands is every command the project declares, in listing order, each built by the generated NewCommand of its own package. The cli dispatch reads the command line against these declarations; a caller holding the sandbox reads the same surface without one. |
 
 ## `sandbox/api/actions.go`
 
@@ -319,7 +319,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `RemoveAvailable` | `func(path string, available string) error` | RemoveAvailable deletes one available. The standard one is refused: it is what cmd/main/main.go imports. |
 | `CliInit` | `func(path string) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
 | `CliPurge` | `func(path string) error` | CliPurge removes the CLI layer and every command declared in it. |
-| `AddCommand` | `func(path string, name string, help string, category string) error` | AddCommand declares a new command: its entries.yaml, its generated entries.go and a handler.go to fill in. |
+| `AddCommand` | `func(path string, name string, help string, category string) error` | AddCommand declares a new command: its entries.yaml, its generated new.go and a handler.go to fill in. |
 | `RemoveCommand` | `func(path string, name string) error` | RemoveCommand deletes one command and unwires it from the dispatcher. |
 | `SetCommand` | `func(props CommandProps) error` | SetCommand rewrites the command-level keys of one command's entries.yaml. |
 | `AddFlag` | `func(props FieldProps) error` | AddFlag declares one flag on a command. |
@@ -369,19 +369,76 @@ Cli is the CLI surface of the sandbox. CliMain is the generated dispatch-and-par
 | --- | --- |
 | `CliMain` | `func(args []string) int` |
 
-## `sandbox/api/commands.go`
+## `sandbox/api/command.go`
+
+### `CommandArg`
+
+CommandArg is one positional argument a command declares — the parsed form of one entry under `args:` in that command's entries.yaml. It is matched by position, so Id names it for GetItem and for the help screen, never on the command line.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Type` | `string` | Type is the declared type: "string", "boolean", "int" or "float". |
+| `Id` | `string` | Id is the name the argument is declared and read back under. |
+| `Required` | `bool` | Required reports that the command line is rejected without it. |
+| `Array` | `bool` | Array reports that it takes every argument left on the line. |
+| `Description` | `string` | Description is the one-line help text. |
+| `Examples` | `[]string` | Examples are whole command lines the help screen prints. |
+| `Default` | `string` | Default is the value bound when the argument is absent, spelled as it is written in entries.yaml. |
+| `HasDefault` | `bool` | HasDefault tells a declared empty default from no default at all. |
+| `Min` | `float64` | Min and Max bound a numeric value; HasMin and HasMax tell a bound of zero from no bound. |
+| `HasMin` | `bool` |  |
+| `Max` | `float64` |  |
+| `HasMax` | `bool` |  |
+
+### `CommandFlag`
+
+CommandFlag is one flag a command declares — the parsed form of one entry under `flags:` in that command's entries.yaml. It is matched by Identifiers and read back under Id.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `Type` | `string` | Type is the declared type: "string", "boolean", "int" or "float". |
+| `Id` | `string` | Id is the name the flag is declared and read back under. |
+| `Required` | `bool` | Required reports that the command line is rejected without it. |
+| `Array` | `bool` | Array reports that every occurrence is kept, not just the first. |
+| `Description` | `string` | Description is the one-line help text. |
+| `Examples` | `[]string` | Examples are whole command lines the help screen prints. |
+| `Default` | `string` | Default is the value bound when the flag is absent, spelled as it is written in entries.yaml. |
+| `HasDefault` | `bool` | HasDefault tells a declared empty default from no default at all. |
+| `Identifiers` | `[]string` | Identifiers are the spellings the flag answers to ("--path", "-p"). |
+| `Min` | `float64` | Min and Max bound a numeric value; HasMin and HasMax tell a bound of zero from no bound. |
+| `HasMin` | `bool` |  |
+| `Max` | `float64` |  |
+| `HasMax` | `bool` |  |
 
 ### `Command`
 
-Command is one command the project declares, as the sandbox sees it.
+Command is one command of the project, as the sandbox offers it: the whole of what its entries.yaml declares, plus the handler behind it. Sandbox.Commands holds one per sandbox/internal/commands/<name>/, each built by that package's generated NewCommand. The cli dispatch fills Items from the command line and then calls Handler; a caller holding the sandbox can do the same.
 
-### `Commands`
+| Field | Type | Description |
+| --- | --- | --- |
+| `Name` | `string` | Name is the package directory of the command, snake_case. |
+| `Identifiers` | `[]string` | Identifiers are the verbs it answers to ("add-flag"), the first of which is the one the help screen prints. |
+| `Category` | `string` | Category groups it on the general help screen. |
+| `Help` | `string` | Help is the one-line description. |
+| `LongDescription` | `string` | LongDescription is the paragraph the per-command help screen prints. |
+| `Examples` | `[]string` | Examples are whole command lines the help screen prints. |
+| `Hidden` | `bool` | Hidden keeps it off the general help screen without disabling it. |
+| `Args` | `[]CommandArg` | Args are the positional arguments, in declaration order. |
+| `Flags` | `[]CommandFlag` | Flags are the flags, in declaration order. |
+| `Items` | `map[string][]any` | Items holds the values bound to the declaration: one entry per flag or arg Id, in declaration order for an array, one element long for a scalar, absent when nothing was bound. The Get* fields read it. |
+| `GetItem` | `func(id string) []any` | GetItem returns every value bound under one Id, nil when none was. |
+| `GetString` | `func(id string) string` | GetString returns the first string bound under one Id, "" when none was. |
+| `GetBool` | `func(id string) bool` | GetBool returns the first boolean bound under one Id, false when none was. |
+| `GetInt` | `func(id string) int` | GetInt returns the first int bound under one Id, 0 when none was. |
+| `GetFloat` | `func(id string) float64` | GetFloat returns the first float bound under one Id, 0 when none was. |
+| `GetStrings` | `func(id string) []string` | GetStrings returns every string bound under one Id, in order. |
+| `GetInts` | `func(id string) []int` | GetInts returns every int bound under one Id, in order. |
+| `GetFloats` | `func(id string) []float64` | GetFloats returns every float bound under one Id, in order. |
+| `Handler` | `func() int` | Handler runs the command against the values in Items. It is the command package's own CommandHandler, closed over the sandbox. |
 
-Commands is the command surface of the sandbox: every command declared in sandbox/internal/commands/, in declaration order.
-
-| Field | Type |
+| Function | Description |
 | --- | --- |
-| `List` | `[]Command` |
+| `NewCommand() *Command` | NewCommand returns an empty Command with Items open and every Get* reader bound to it. A generated NewCommand fills the declaration and the handler on top of what this returns, so every command reads its values the same way. |
 
 # Dependency contracts
 

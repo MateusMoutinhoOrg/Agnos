@@ -5,12 +5,12 @@ import (
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	set_error := setAdapterAction.SetAdapter(sandbox, api.SetAdapterProps{
-		Path:      entries.Path,
-		Dep:       entries.Dep,
-		Adapter:   entries.Adapter,
-		Available: entries.Available,
+		Path:      command.GetString("path"),
+		Dep:       command.GetString("dep"),
+		Adapter:   command.GetString("adapter"),
+		Available: command.GetString("available"),
 	})
 
 	if set_error != nil {

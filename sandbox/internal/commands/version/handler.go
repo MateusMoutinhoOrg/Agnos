@@ -5,9 +5,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
-// CommandHandler backs the `version` / `--version` verb. Entries has no fields:
-// this command declares no flags or args.
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+// CommandHandler backs the `version` / `--version` verb. Nothing is read off
+// the command: it declares no flags or args.
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	if config.Version == "" {
 		sandbox.Deps.Std.Printf("no version set yet\n")
 		return api.ExitOk

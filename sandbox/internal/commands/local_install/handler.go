@@ -7,9 +7,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	sandbox.Deps.Std.Printf("Building project...\n")
-	if err := buildAction.Build(sandbox, api.BuildProps{Path: entries.Path, Runtime: "go"}); err != nil {
+	if err := buildAction.Build(sandbox, api.BuildProps{Path: command.GetString("path"), Runtime: "go"}); err != nil {
 		sandbox.Deps.Std.Error("build failed: %s\n", err.Error())
 		return api.ExitFailure
 	}
@@ -18,7 +18,7 @@ func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
 
 	// Get GOEXE
 	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
-		Dir:     entries.Path,
+		Dir:     command.GetString("path"),
 		Program: "go",
 		Args:    []string{"env", "GOEXE"},
 	})
@@ -46,7 +46,7 @@ func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
 
 	sandbox.Deps.Std.Log("building to %s\n", outPath)
 	result, err = sandbox.Deps.Rundeps.Run(rundeps.RunProps{
-		Dir:     entries.Path,
+		Dir:     command.GetString("path"),
 		Program: "go",
 		Args:    []string{"build", "-o", outPath, "./cmd/main"},
 	})

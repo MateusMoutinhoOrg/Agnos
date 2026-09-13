@@ -75,7 +75,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always
   use that spelling; an added contract never renames an existing one.
 - An adapter's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<adapter>/<adapter>.go`.
-- A command handler is always `CommandHandler(sandbox *api.Sandbox, entries *Entries) int`.
+- A command handler is always `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
 - A dep is named after the contract it installs; an adapter after what backs it (`argvdeps`,
@@ -84,9 +84,11 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 {{ if .HasCli }}
 ## Handlers
 
-- Only `CommandHandler(sandbox *api.Sandbox, entries *Entries) int` is exported. `Entries` is
-  generated from `entries.yaml` (flags first, then args, in declaration order), already typed,
-  defaulted and range-checked.
+- A command is `sandbox/internal/commands/<name>/`, holding `entries.yaml` (the declaration),
+  `new.go` (generated) and `handler.go` (hand-written), snake_case for a kebab-case name.
+- Only `CommandHandler(sandbox *api.Sandbox, command *api.Command) int` is exported. Every flag
+  and arg of `entries.yaml` is read off `command` by id (`command.GetString("path")`), already
+  typed, defaulted and range-checked.
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
   through `sandbox.Deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
 - Return `api.ExitOk` or `api.ExitFailure`, never `api.ExitUsage`: the dispatch rejects bad
@@ -94,6 +96,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.
 - A command's `entries.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
   hand: they re-render it with keys in alphabetical order and drop comments.
+- `sandbox.Commands` is the whole command surface, one `*api.Command` per declared command,
+  built by `sandbox/binds/cli.go` from each package's generated `NewCommand`. The dispatch and
+  both help screens read it; nothing about the command set is generated per command anywhere
+  else.
 {{ end }}{{ if .HasServer }}
 ## Routes
 

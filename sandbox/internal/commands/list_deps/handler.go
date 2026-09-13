@@ -5,8 +5,8 @@ import (
 	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	deplist, list_error := listDepsAction.ListDeps(sandbox, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	deplist, list_error := listDepsAction.ListDeps(sandbox, command.GetString("path"))
 
 	if list_error != nil {
 		sandbox.Deps.Std.Error("%s\n", list_error.Error())

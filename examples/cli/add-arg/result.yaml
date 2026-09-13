@@ -1,9 +1,9 @@
 cli-output: "add-arg adding who to sandbox/internal/commands/greet/entries.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/commands/greet/entries.go
-      sha: cd89ea5ab867096ee87c4e876cf7aaf79134f4872dc34dbf06a291de6e8016b1
     - file: sandbox/internal/commands/greet/entries.yaml
       sha: 7655212d33d980ab804a1b742cb6794daccde09feb9d6831a3e5d234d74799e0
     - file: sandbox/internal/commands/greet/handler.go
-      sha: 8ddb75ab481dd1c8ce95b6bd8d7b13e97c5f7dbd978b47edfd78988debd5b628
+      sha: b65d5636e16aceb058b357657c83779be3fc7a7011fa779a60328f3929d0c27a
+    - file: sandbox/internal/commands/greet/new.go
+      sha: 725fca90aa7ebb7a4d96968917bb64ed0527337909b56ebbaa2fbc69bed005be

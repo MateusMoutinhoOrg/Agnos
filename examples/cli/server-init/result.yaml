@@ -3,12 +3,12 @@ exit-code: 0
 tree:
     - file: sandbox/api/server.go
       sha: 8fa80b543a894dc4a06875003a648f253058ebd3e641ea91ea495c6d846df1de
-    - file: sandbox/internal/commands/start_server/entries.go
-      sha: 57f167e529dfad00abfd3e33319ba2958b3dbb0e3430251ecd6f297530700034
     - file: sandbox/internal/commands/start_server/entries.yaml
       sha: d463ba2aad26659c3f79bf8b2b54c901220f1c24be7b131fc58bd19d0e8d191d
     - file: sandbox/internal/commands/start_server/handler.go
-      sha: 33f98f84134086835d7258aaa12a81b58b7c00ceea0b886bc8185cff4a97db7b
+      sha: 70abdead26610f396244eeec1cf1078dbee7c090918464057c4ed76fee2e165b
+    - file: sandbox/internal/commands/start_server/new.go
+      sha: b19a21a003bb8ce6b1197b1270079e3cf775b648108cf6d40478514cb777b4df
     - file: sandbox/internal/routes/health/entries.go
       sha: 8b1b5f50403c9f2adba70764447c3f9ba4b531620a9096d115e88d5c25ec9131
     - file: sandbox/internal/routes/health/handler.go

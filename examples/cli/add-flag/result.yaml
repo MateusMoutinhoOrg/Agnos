@@ -1,9 +1,9 @@
 cli-output: "add-flag adding name to sandbox/internal/commands/greet/entries.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/commands/greet/entries.go
-      sha: fb02da5e0205b24086ea469d679ff07f308edfe8a7a7a1e23ceaf94c145fcb02
     - file: sandbox/internal/commands/greet/entries.yaml
       sha: b9aab781efdddc79eb695cfa5e804669f69618a0d80d28f09e2e7d3729aece06
     - file: sandbox/internal/commands/greet/handler.go
-      sha: 8ddb75ab481dd1c8ce95b6bd8d7b13e97c5f7dbd978b47edfd78988debd5b628
+      sha: b65d5636e16aceb058b357657c83779be3fc7a7011fa779a60328f3929d0c27a
+    - file: sandbox/internal/commands/greet/new.go
+      sha: 9418264be8e65e549f5e8e587ab4e5a18be6640510a19264e4d08b3584e3cc11

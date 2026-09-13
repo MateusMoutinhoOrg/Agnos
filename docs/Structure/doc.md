@@ -27,19 +27,20 @@ sandbox/                            closed: imports nothing outside sandbox/, no
     sandbox.go                      (gen) Sandbox struct, one field per api/ file
     actions.go                      Actions struct + props structs + Runtime consts
     cli.go                          (gen) Cli struct + exit consts
+    command.go                      (gen) Command/CommandFlag/CommandArg + NewCommand
   binds/                            one file per api/ file, functions only
     actions.go                      ActionsBind(sandbox): one assignment per action
-    cli.go                          (gen) CliBind
+    cli.go                          (gen) CliBind: Sandbox.Commands + Cli.CliMain
   deps/                             contracts; each <x>/ imports nothing at all
     deps.go                         (gen) Deps struct, one <Title> <dir>.Sandbox per dir
     <x>/<x>.go                      type Sandbox struct of func fields
   internal/                         the logic; unreachable from outside the sandbox
     config/config.go                (gen) ProjectName, Version
-    cli/climain.go                  (gen) CliMain + dispatch<Name> per command
-    commands/<name>/                entries.yaml (decl), entries.go (gen), handler.go (hand)
+    cli/climain.go                  (gen) CliMain, the one dispatch, read off Sandbox.Commands
+    commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
     actions/build/collect_*.go      collectors: list one dir, title-case names
-    actions/build/generate_*.go     entries.go per command, help entries.yaml, doc indexes
+    actions/build/generate_*.go     new.go per command, help entries.yaml, doc indexes
     actions/verify/check_*.go       one rule set per file, each returns []string
     parsables/<name>conf/           api.go, new.go, new_empty.go, bind_methods.go, render.go
     apishape/                       the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from
@@ -59,7 +60,7 @@ assets/                             Go text/templates embedded by asset.go; neve
   front/                            rendered when sandbox/internal/pageio/ exists
   deplist/<dep>/                    one installable contract, dep.yaml beside the target layout it mirrors
   adapterlist/<adapter>/            one installable adapter, adapter.yaml beside the target layout it mirrors
-  templates/                        single-file scaffolds (entries.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+  templates/                        single-file scaffolds (new.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
 cmd/main/main.go                    (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
 docs/                               one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
   **/Index.md                       (gen) written for every doc that has sub-docs

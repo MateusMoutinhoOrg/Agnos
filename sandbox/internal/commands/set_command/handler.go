@@ -5,17 +5,17 @@ import (
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	set_error := setCommandAction.SetCommand(sandbox, api.CommandProps{
-		Path:            entries.Path,
-		Command:         entries.Name,
-		Help:            entries.Help,
-		Category:        entries.Category,
-		LongDescription: entries.LongDescription,
-		Hidden:          entries.Hidden,
-		Visible:         entries.Visible,
-		Identifiers:     entries.Identifier,
-		Examples:        entries.Example,
+		Path:            command.GetString("path"),
+		Command:         command.GetString("name"),
+		Help:            command.GetString("help"),
+		Category:        command.GetString("category"),
+		LongDescription: command.GetString("long-description"),
+		Hidden:          command.GetBool("hidden"),
+		Visible:         command.GetBool("visible"),
+		Identifiers:     command.GetStrings("identifier"),
+		Examples:        command.GetStrings("example"),
 	})
 	if set_error != nil {
 		sandbox.Deps.Std.Error("%s\n", set_error.Error())

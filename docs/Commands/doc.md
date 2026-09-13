@@ -295,7 +295,7 @@ Add a positional arg to a command's entries.yaml
 agnos add-arg --command <command> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
 ```
 
-Inserts one positional arg declaration into sandbox/internal/commands/<command>/entries.yaml (at --position, else at the end) and runs build so entries.go and the dispatch layer are regenerated. Positional args bind by order; an array arg must stay last.
+Inserts one positional arg declaration into sandbox/internal/commands/<command>/entries.yaml (at --position, else at the end) and runs build so the command's new.go declares it. Positional args bind by order; an array arg must stay last.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -314,7 +314,7 @@ Inserts one positional arg declaration into sandbox/internal/commands/<command>/
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | string, required |  | the arg name (becomes the generated struct field) |
+| `name` | string, required |  | the arg name (the id the handler reads it back by) |
 
 ```bash
 agnos add-arg file --type string --required --description "the file to process" --command exec
@@ -329,7 +329,7 @@ Scaffold a new command package in the project
 agnos add-command --help <help> --category <category> [--path <path>] [--quiet] <name>
 ```
 
-Creates sandbox/internal/commands/<name>/ with a hand-written entries.yaml and a stub handler.go, then runs build so entries.go and the dispatch layer are generated for it. Refuses to overwrite an existing command.
+Creates sandbox/internal/commands/<name>/ with a hand-written entries.yaml and a stub handler.go, then runs build so new.go and the dispatch pick it up. Refuses to overwrite an existing command.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -355,7 +355,7 @@ Add a flag to a command's entries.yaml
 agnos add-flag [--identifier <identifier>...] --command <command> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
 ```
 
-Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml and runs build so entries.go and the dispatch layer are regenerated. Without --identifier the flag answers to --<name>. Refuses a name or identifier the command already uses.
+Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml and runs build so the command's new.go declares it. Without --identifier the flag answers to --<name>. Refuses a name or identifier the command already uses.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -375,7 +375,7 @@ Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | string, required |  | the flag name (becomes the generated struct field, e.g. out-file -> OutFile) |
+| `name` | string, required |  | the flag name (the id the handler reads it back by, e.g. command.GetString("out-file")) |
 
 ```bash
 agnos add-flag output --identifier --out --identifier -o --type string --required --command exec
@@ -431,7 +431,7 @@ Remove a positional arg from a command's entries.yaml
 agnos remove-arg --command <command> [--path <path>] [--quiet] <name>
 ```
 
-Drops one positional arg declaration from sandbox/internal/commands/<command>/entries.yaml and runs build so entries.go and the dispatch layer forget it. Later args shift up.
+Drops one positional arg declaration from sandbox/internal/commands/<command>/entries.yaml and runs build so the command's new.go forgets it. Later args shift up.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -455,7 +455,7 @@ Delete a command package from the project
 agnos remove-command [--path <path>] [--quiet] <name>
 ```
 
-Deletes sandbox/internal/commands/<name>/ (entries.yaml, entries.go, handler.go and anything else inside) and runs build so climain.go and help stop dispatching to it. The generated help command cannot be removed.
+Deletes sandbox/internal/commands/<name>/ (entries.yaml, new.go, handler.go and anything else inside) and runs build so the dispatch and help stop answering to it. The generated help command cannot be removed.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -479,7 +479,7 @@ Remove a flag from a command's entries.yaml
 agnos remove-flag --command <command> [--path <path>] [--quiet] <name>
 ```
 
-Drops one flag declaration (matched by its name or by one of its identifiers) from sandbox/internal/commands/<command>/entries.yaml and runs build so entries.go and the dispatch layer forget it.
+Drops one flag declaration (matched by its name or by one of its identifiers) from sandbox/internal/commands/<command>/entries.yaml and runs build so the command's new.go forgets it.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

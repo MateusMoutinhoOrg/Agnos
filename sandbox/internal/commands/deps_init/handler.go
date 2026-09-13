@@ -5,8 +5,8 @@ import (
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	init_error := depsInitAction.DepsInit(sandbox, entries.Path)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	init_error := depsInitAction.DepsInit(sandbox, command.GetString("path"))
 
 	if init_error != nil {
 		sandbox.Deps.Std.Error("%s\n", init_error.Error())

@@ -1,7 +1,7 @@
 # EntriesYaml
 
 `sandbox/internal/commands/<name>/entries.yaml` declares one command. `{{.GeneratorName}} build` generates
-`entries.go` (the `Entries` struct) and a dispatch arm from it. Grow it with
+`new.go` (the `api.Command` the handler is given) from it. Grow it with
 `add-flag` / `add-arg` / `set-command` ([Workflow](../Workflow/doc.md#change-the-command-surface)),
 not by hand: the editors re-render it with keys in alphabetical order and drop comments.
 
@@ -42,7 +42,7 @@ args:
 
 | Key | Effect |
 |---|---|
-| `name` | Go field name (`out-file` -> `OutFile`). For a flag, defaults to the first identifier |
+| `name` | The id the handler reads the value back by. For a flag, defaults to the first identifier |
 | `identifiers` | Flag spellings (`--name`, `-n`). Flags only. Default `--<name>` |
 | `type` | `string` (default), `boolean` (presence only, never required), `int`, `float` |
 | `description`, `examples` | Help text |
@@ -51,16 +51,19 @@ args:
 | `array` | Every occurrence collected into `[]T`. An array arg must be last |
 | `min`, `max` | Bounds for `int`/`float`, checked before the handler runs |
 
-Go types: `string`/`[]string`, `bool`, `int`/`[]int`, `float64`/`[]float64`.
+Read a value back off the `*api.Command` the handler is given, by id:
+`GetString` / `GetBool` / `GetInt` / `GetFloat`, `GetStrings` / `GetInts` / `GetFloats` for an
+`array`, `GetItem` for the raw `[]any`.
 
 A boolean flag named `quiet` is special: the dispatch replaces `deps.Std.Log` with a no-op
 before the handler runs.
 
 ## Dispatch
 
-`CliMain(args)` matches `args[0]` against every command's identifiers — no match, and an empty
-command line, exit `2` with the general help. The arm then reads each declared flag anywhere on
-the line, assigns defaults, converts and range-checks numbers, and drains the positionals in
-order. An unread `-`-prefixed argument, a leftover positional, a missing required field or a
-value out of range all exit `2` before `CommandHandler` runs — which is why a handler never
+`CliMain(args)` matches `args[0]` against the identifiers of every command of `sandbox.Commands`
+— no match, and an empty command line, exit `2` with the general help. It then reads each
+declared flag anywhere on the line, assigns defaults, converts and range-checks numbers, and
+drains the positionals in order, binding each value into `command.Items` under its id. An
+unread `-`-prefixed argument, a leftover positional, a missing required field or a value out of
+range all exit `2` before `CommandHandler` runs — which is why a handler never
 returns `api.ExitUsage` ([Rules](../Rules/doc.md#exit-codes)).

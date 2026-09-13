@@ -5,8 +5,8 @@ import (
 	addCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_cli_example"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	add_error := addCliExampleAction.AddCliExample(sandbox, entries.Path, entries.Name)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	add_error := addCliExampleAction.AddCliExample(sandbox, command.GetString("path"), command.GetString("name"))
 	if add_error != nil {
 		sandbox.Deps.Std.Error("%s\n", add_error.Error())
 		return api.ExitFailure

@@ -9,15 +9,15 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	if entries.Publisher != "gh" {
-		sandbox.Deps.Std.Error("Unsupported publisher %q. The only available publisher is \"gh\".\n", entries.Publisher)
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	if command.GetString("publisher") != "gh" {
+		sandbox.Deps.Std.Error("Unsupported publisher %q. The only available publisher is \"gh\".\n", command.GetString("publisher"))
 		return api.ExitFailure
 	}
 
-	io := smartio.New(sandbox, entries.Path, config.ProjectName)
+	io := smartio.New(sandbox, command.GetString("path"), config.ProjectName)
 
-	releaseName := entries.ReleaseName
+	releaseName := command.GetString("release_name")
 	if releaseName == "" {
 		rel := config.ProjectName + "Config/project.yaml"
 		content, err := io.ReadFile(rel)
@@ -34,31 +34,31 @@ func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
 	}
 
 	sandbox.Deps.Std.Printf("Building project...\n")
-	if err := buildAction.Build(sandbox, api.BuildProps{Path: entries.Path, Runtime: "go"}); err != nil {
+	if err := buildAction.Build(sandbox, api.BuildProps{Path: command.GetString("path"), Runtime: "go"}); err != nil {
 		sandbox.Deps.Std.Error("build failed: %s\n", err.Error())
 		return api.ExitFailure
 	}
 
 	sandbox.Deps.Std.Printf("Compiling targets...\n")
 	// If targets is empty or "all", we pass "all".
-	targets := entries.Target
+	targets := command.GetString("target")
 	if targets == "" {
 		targets = "all"
 	}
-	if err := compileAction.Compile(sandbox, api.CompileProps{Path: entries.Path, Targets: []string{targets}}); err != nil {
+	if err := compileAction.Compile(sandbox, api.CompileProps{Path: command.GetString("path"), Targets: []string{targets}}); err != nil {
 		sandbox.Deps.Std.Error("compile failed: %s\n", err.Error())
 		return api.ExitFailure
 	}
 
 	sandbox.Deps.Std.Printf("Gathering compiled binaries...\n")
-	releaseDir := sandbox.Deps.Iodeps.Join(entries.Path, "release")
+	releaseDir := sandbox.Deps.Iodeps.Join(command.GetString("path"), "release")
 	if !sandbox.Deps.Iodeps.IsDir(releaseDir) {
 		sandbox.Deps.Std.Error("could not read release directory: %s\n", releaseDir)
 		return api.ExitFailure
 	}
 
 	args := []string{"release", "create", releaseName}
-	if entries.Draft {
+	if command.GetBool("draft") {
 		args = append(args, "--draft")
 	}
 
@@ -70,7 +70,7 @@ func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
 
 	sandbox.Deps.Std.Printf("Creating release %s with gh...\n", releaseName)
 	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
-		Dir:     entries.Path,
+		Dir:     command.GetString("path"),
 		Program: "gh",
 		Args:    args,
 	})
