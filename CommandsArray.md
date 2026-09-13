@@ -2,15 +2,15 @@
 
 ### New Tree:
 
-- [sandbox/api/commands.go](#sandboxapicommandsgo)
+- [sandbox/api/command.go](#sandboxapicommandgo)
 - [sandbox/api/sandbox.go](#sandboxapisandboxgo) 
-- [sandbox/binds/cli.go](#sandboxbindscli)
+- [sandbox/binds/cli.go](#sandboxbindscligo)
 - [sandbox/internal/commands/<item>/new.go](#sandboxinternalcommandsnew.go)
 - [sandbox/internal/commands/<item>/entries.yaml](#sandboxinternalcommandsitementriesyaml)
 - [sandbox/internal/commands/<item>/handler.go](#sandboxinternalcommandsitemhandlergo)
 
 ---
-### sandbox/api/commands.go
+### sandbox/api/command.go
 
 #### action: 
 create
@@ -57,32 +57,32 @@ type Command struct {
 ---
 ### sandbox/api/sandbox.go 
 #### action: 
-modify
+    modify
 #### modification:
-create the prop commands (a array of Command)
+    create the prop commands (a array of Command)
 
 
 ---
 ### sandbox/binds/cli.go
 #### action: 
-modify
+    modify
 #### modification:
-add the constructions of api.commands, by importing and calling each NewCommand() of sandbox/internal/commands/<command>/command.gos
+    add the constructions of api.commands, by importing and calling each NewCommand() of sandbox/internal/commands/<command>/command.gos
 
 ---
 ### sandbox/internal/commands/<item>/entries.go
 #### action: 
-remove 
+    remove 
 #### reason:
-its will not be nescessary anymore.
+    its will not be nescessary anymore.
 
 
 ---
-### sandbox/internal/commands/<item>/new-command.go
+### sandbox/internal/commands/<item>/new.go
 #### action:
-create
+    create
 #### description:
-a function that returns a instance of commands constructing only the props, based on entries.yaml.
+    a function that returns a instance of commands constructing only the props, based on entries.yaml.
 #### sample:
 ```go
 func NewCommand() api.Command {
@@ -120,7 +120,7 @@ func NewCommand() api.Command {
         },
     }
 }
-
+```
 
 
 
@@ -133,5 +133,3 @@ func NewCommand() api.Command {
 
 ---
 ### sandbox/internal/commands/<item>/handler.go
-
-# 
