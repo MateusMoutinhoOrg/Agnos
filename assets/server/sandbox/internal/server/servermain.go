@@ -121,10 +121,11 @@ func matchRoute(sandbox *api.Sandbox, route *api.Route, segments []string) bool 
 // segments, then the headers, then the query parameters, then what none of them
 // brought, then the body's own declaration.
 //
-// The route it binds is a fresh instance, minted by the declaration's own New:
-// two requests in flight hold their own Items and their own request.
+// What it binds is a copy of the declaration, never the declaration on
+// sandbox.Routes: two requests in flight hold their own Items and their own
+// request.
 func runRoute(sandbox *api.Sandbox, declared *api.Route, request serverdeps.Request, response serverdeps.Response, segments []string) {
-	route := declared.New()
+	route := api.BindRoute(declared)
 	route.Request = request
 	route.Response = response
 
@@ -148,7 +149,7 @@ func runRoute(sandbox *api.Sandbox, declared *api.Route, request serverdeps.Requ
 		return
 	}
 
-	if status := route.Handler(); status == 0 {
+	if status := route.Handler(route); status == 0 {
 		routeio.WriteError(sandbox, response, api.StatusFailure, "", "the route handler returned no status")
 	}
 }

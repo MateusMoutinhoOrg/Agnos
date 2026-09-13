@@ -164,8 +164,8 @@ rendered when `sandbox/internal/server/` exists, exactly as the cli group is ren
 command one: `servermain.go` is one generic dispatch that binds a request against those
 declarations into `route.Items`, and a handler reads its values by the name `route.yaml`
 declares — `route.GetString("tenant")`, `route.GetStrings("item")`. Each request runs on its own
-instance, minted by `route.New()`, so two in flight never share bound values. The dispatch
-settles everything but the body (404/405/415/413/400) before a handler runs; the body is read on
+copy of the declaration (`api.BindRoute`), so two in flight never share bound values. The
+dispatch settles everything but the body (404/405/415/413/400) before a handler runs; the body is read on
 demand by the `ReadBody` generated into the route's own `new.go`.
 `sandbox/internal/routeio/` holds what both `servermain.go` and the routes need — `WriteError`,
 the schema validator, and `RequestOf`/`ResponseOf`, which put the dep names back on the request

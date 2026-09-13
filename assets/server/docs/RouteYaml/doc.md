@@ -115,8 +115,8 @@ A handler reads a bound value by the name its declaration gives it, never off a 
 | `route.GetStrings(name)`, `GetInts`, `GetFloats` | every value bound under it, in order — for an `array` capture or param |
 | `route.GetItem(name)` | the raw `[]any` behind them |
 
-`route` is one instance per request, minted by `Route.New`, so two requests in flight never
-share a value.
+`route` is a copy of the declaration, made per request by `api.BindRoute`, so two requests in
+flight never share a value.
 
 ## Body keys
 

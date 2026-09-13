@@ -130,7 +130,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `sandbox.Routes` is the whole http surface, one `*api.Route` per declared route, built by
   `sandbox/binds/server.go` from each package's generated `NewRoute`. The dispatch reads it and
   nothing about the route set is generated per route anywhere else; each request runs on its
-  own instance, minted by `Route.New`.
+  copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
 - Match order is the collector's, not the directory's: most `identifier`s first, then the
   longest ones, then the routes of fixed length before the ones taking the rest of the path,
   then the pattern alphabetically. Without it a route on `/` would swallow one on `/home`.

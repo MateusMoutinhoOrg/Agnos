@@ -69,8 +69,9 @@ without a command line — bind the values into `command.Items` and call `comman
 
 {{end}}{{if .HasServer}}`lib.Routes` is the http surface the same way: every route the project
 declares, in match order, each carrying its `paths`, its headers, its params, its body and the
-`Handler` that answers it. `route.New()` mints the instance one request runs on, so a caller
-drives a route without a socket — bind the values into its `Items` and call `Handler()`.
+`Handler` that answers it. `api.BindRoute(route)` copies one into the route a single request
+runs on, so a caller drives a route without a socket — bind the values into the copy's `Items`
+and call `Handler(copy)`.
 
 {{end}}[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
 dependency contracts{{end}} — generated from `sandbox/api/` itself on every build.

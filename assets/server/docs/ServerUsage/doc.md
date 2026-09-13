@@ -88,4 +88,4 @@ answered with, and propagates the one `ReadBody` gives it. [Routes](../Routes/do
 the route on the next build.
 
 A Go caller reads the same surface without a socket: `sandbox.Routes` is every declared route,
-in match order, and `Route.New` mints the instance one request runs on.
+in match order, and `api.BindRoute` copies one into the route a single request runs on.

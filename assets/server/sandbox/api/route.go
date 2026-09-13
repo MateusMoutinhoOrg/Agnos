@@ -69,10 +69,12 @@ type RouteBody struct {
 // Route is one http route of the project, as the sandbox offers it: the whole
 // of what its route.yaml declares, plus the handler behind it. Sandbox.Routes
 // holds one per sandbox/internal/routes/<name>/, each built by that package's
-// generated NewRoute, in match order. The server dispatch mints one instance
-// per request through New, fills Items from the path, the headers and the
-// query string, and then calls Handler; a caller holding the sandbox can do
-// the same.
+// generated NewRoute, in match order.
+//
+// What Sandbox.Routes holds is the declaration alone: nothing is ever bound
+// onto it. The server dispatch copies it with BindRoute, fills that copy's
+// Items from the path, the headers and the query string, and hands it to
+// Handler; a caller holding the sandbox can do the same.
 type Route struct {
 	// Name is the package directory of the route, snake_case.
 	Name string
@@ -131,21 +133,18 @@ type Route struct {
 	// GetFloats returns every float bound under one Id, in order.
 	GetFloats func(id string) []float64
 
-	// New mints a fresh instance of this route: the same declaration, with
-	// Items empty and Handler closed over the new instance. The dispatch
-	// calls it once per request, so two requests in flight never share
-	// bound values.
-	New func() *Route
-
-	// Handler runs the route against the values in Items and returns the
-	// status it answered with. It is the route package's own RouteHandler,
-	// closed over the sandbox and over this instance.
-	Handler func() int
+	// Handler runs the route against one bound copy — the values in its
+	// Items and the response it carries — and returns the status it
+	// answered with. It takes that copy rather than closing over one, so
+	// the declaration on Sandbox.Routes is shared by every request while
+	// nothing bound ever is. It is the route package's own RouteHandler,
+	// closed over the sandbox.
+	Handler func(route *Route) int
 }
 
 // NewRoute returns an empty Route with Items open and every Get* reader bound
-// to it. A generated NewRoute fills the declaration, New and the handler on top
-// of what this returns, so every route reads its values the same way.
+// to it. A generated NewRoute fills the declaration and the handler on top of
+// what this returns, so every route reads its values the same way.
 func NewRoute() *Route {
 	route := &Route{
 		Examples: []string{},
@@ -155,6 +154,29 @@ func NewRoute() *Route {
 		Items:    map[string][]any{},
 	}
 
+	bindRouteReaders(route)
+	return route
+}
+
+// BindRoute copies one declaration into the route a single request runs on:
+// the same declared fields — the slices are read-only and shared — with Items
+// empty, the readers pointed at the copy and the handler carried over. The
+// dispatch calls it once per request, so two requests in flight never share a
+// bound value.
+func BindRoute(route *Route) *Route {
+	bound := *route
+	bound.Items = map[string][]any{}
+	bound.Request = nil
+	bound.Response = nil
+
+	bindRouteReaders(&bound)
+	return &bound
+}
+
+// bindRouteReaders points every Get* field of a route at that route's own
+// Items. A copy has to be read back through it: the readers are closures, so
+// the ones copied off the declaration would still read the declaration's.
+func bindRouteReaders(route *Route) {
 	route.GetItem = func(id string) []any {
 		return route.Items[id]
 	}
@@ -201,8 +223,6 @@ func NewRoute() *Route {
 		}
 		return values
 	}
-
-	return route
 }
 
 // firstRouteItem is the one value of an Id a scalar reader wants, nil when
