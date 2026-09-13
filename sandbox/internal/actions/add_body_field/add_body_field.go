@@ -9,7 +9,7 @@ import (
 
 // AddBodyField declares one property of the body json-schema of
 // sandbox/internal/routes/<route>/route.yaml, then runs build as a follow-up
-// step so the Body struct, EntriesSchema and ReadBody pick it up.
+// step so the Body struct, BodySchema and ReadBody pick it up.
 func AddBodyField(sandbox *api.Sandbox, props api.RouteBodyFieldProps) error {
 	io := smartio.New(sandbox, props.Path, config.ProjectName)
 	if err := AddBodyFieldInternal(sandbox, io, props); err != nil {

@@ -386,8 +386,8 @@ type Actions struct {
 	// ServerPurge removes the server layer and every route declared in it.
 	ServerPurge func(path string) error
 
-	// AddRoute declares a new route: its route.yaml, its generated
-	// entries.go and a handler.go to fill in.
+	// AddRoute declares a new route: its route.yaml, its generated new.go
+	// and a handler.go to fill in.
 	AddRoute func(path string, name string, method string, trigger string, help string, category string) error
 
 	// RemoveRoute deletes one route and unwires it from the dispatch.

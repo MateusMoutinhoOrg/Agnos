@@ -8,7 +8,7 @@ import (
 // RouteHandler answers the built-in health route with a fixed JSON object. It
 // is the server layer's `version` command: a route agnos writes itself, so a
 // freshly initialized server already answers something.
-func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
 	body := sandbox.Deps.Serializables.CreateObject()
 	body.AddItemToObject("status", "ok")
 

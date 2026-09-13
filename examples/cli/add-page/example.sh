@@ -9,7 +9,7 @@ agnos front-init --path TestDir -q
 agnos add-page home --trigger / --title "Home" --path TestDir
 
 # What result.yaml records: the two halves of a page — the route that answers it
-# and the html it renders — plus the entries.go the follow-up build generated
+# and the html it renders — plus the new.go the follow-up build generated
 # from the declaration.
 mkdir -p AssertDir/sandbox/internal/routes/home
 cp -R TestDir/sandbox/internal/routes/home/. AssertDir/sandbox/internal/routes/home/

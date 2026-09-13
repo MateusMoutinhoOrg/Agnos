@@ -38,11 +38,11 @@
 | `sandbox/internal/commands/<name>/handler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 {{- end }}
 {{- if .HasServer }}
-| `sandbox/api/server.go`, `sandbox/binds/server.go` | `build` | always |
-| `sandbox/internal/server/servermain.go` | `build` | always. `ServerMain` + one `match<Name>`/`handle<Name>` per route |
+| `sandbox/api/{server.go,route.go}`, `sandbox/binds/server.go` | `build` | always. `binds` builds `sandbox.Routes` from every route's `NewRoute` |
+| `sandbox/internal/server/servermain.go` | `build` | always. `ServerMain` + the one dispatch that binds a request against `sandbox.Routes` |
 | `sandbox/internal/routeio/*.go` | `build` | always |
 | `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
-| `sandbox/internal/routes/<name>/entries.go` | `build` | always. The `Entries` struct and `ReadBody` of that route |
+| `sandbox/internal/routes/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, and its `ReadBody` |
 | `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-segment` / `add-header` / `add-param` / `set-body` / `add-body-field` and their inverses — never by hand |
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |

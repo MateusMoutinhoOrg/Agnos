@@ -59,10 +59,18 @@ Everything callable from Go is behind one of them.
 {{- if .HasCli }}
 | `lib.Commands` | `[]*api.Command` |
 {{- end }}
+{{- if .HasServer }}
+| `lib.Routes` | `[]*api.Route` |
+{{- end }}
 
 {{if .HasCli}}`lib.Commands` is the command surface itself: every command the project declares,
 each carrying its flags, its args and the `Handler` that runs it, so a caller drives a command
 without a command line — bind the values into `command.Items` and call `command.Handler()`.
+
+{{end}}{{if .HasServer}}`lib.Routes` is the http surface the same way: every route the project
+declares, in match order, each carrying its `paths`, its headers, its params, its body and the
+`Handler` that answers it. `route.New()` mints the instance one request runs on, so a caller
+drives a route without a socket — bind the values into its `Items` and call `Handler()`.
 
 {{end}}[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
 dependency contracts{{end}} — generated from `sandbox/api/` itself on every build.

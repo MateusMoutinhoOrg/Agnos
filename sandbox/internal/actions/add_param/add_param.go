@@ -9,7 +9,7 @@ import (
 
 // AddParam inserts one query-parameter declaration into the `params` of
 // sandbox/internal/routes/<route>/route.yaml, then runs build as a follow-up
-// step so entries.go and the dispatch arm pick it up.
+// step so the route's new.go picks it up.
 func AddParam(sandbox *api.Sandbox, props api.RouteFieldProps) error {
 	io := smartio.New(sandbox, props.Path, config.ProjectName)
 	if err := AddParamInternal(sandbox, io, props); err != nil {

@@ -538,7 +538,7 @@ Declare a property of a route's body json-schema
 agnos add-body-field --route <route> [--type <type>] [--required] [--array] [--min <min>] [--max <max>] [--exclusive-min <exclusive-min>] [--exclusive-max <exclusive-max>] [--format <format>] [--pattern <pattern>] [--enum <enum>...] [--const <const>] [--nullable] [--min-items <min-items>] [--max-items <max-items>] [--unique-items] [--additional-properties] [--no-additional-properties] [--path <path>] [--quiet] <name>
 ```
 
-Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and EntriesSchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.
+Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -582,7 +582,7 @@ Declare a request header on a route
 agnos add-header --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
 ```
 
-Declares one request header on a route and runs build so entries.go and the dispatch arm pick it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs.
+Declares one request header on a route and runs build so the route's new.go picks it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -615,7 +615,7 @@ Declare a query parameter on a route
 agnos add-param --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
 ```
 
-Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array collects every occurrence of the key into a []T field; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path.
+Declares one query-string parameter on a route and runs build so the route's new.go picks it up. --array collects every occurrence of the key, read back with GetStrings; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -649,7 +649,7 @@ Declare a new http route
 agnos add-route [--trigger <trigger>] [--method <method>] --help <help> --category <category> [--path <path>] [--quiet] <name>
 ```
 
-Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so entries.go and the dispatch arm are generated. The trigger is normalized to start with /, and defaults to /<name>.
+Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in sandbox.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -676,7 +676,7 @@ Add a segment to a route's path
 agnos add-segment --route <route> [--identifier <identifier>] [--type <type>] [--description <description>] [--example <example>...] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [<name>]
 ```
 
-Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted. --array makes that capture take every segment left in the path into a []T field, which only the last segment of a route may do.
+Appends one segment to the route's paths and runs build so the route's new.go picks it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and is bound under that name already converted. --array makes that capture take every segment left in the path, which only the last segment of a route may do.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

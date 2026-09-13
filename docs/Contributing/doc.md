@@ -43,13 +43,13 @@ A layer is an asset group plus an `<x>-init`/`<x>-purge` pair, and the server la
 | Concept | CLI | Server | Front |
 |---|---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) |
-| Surface + bind | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/binds/cli.go` | `sandbox/api/server.go`, `sandbox/binds/server.go` | — (served through the server's) |
-| Generated dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
+| Surface + bind | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/binds/cli.go` -> `sandbox.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/binds/server.go` -> `sandbox.Routes` | — (served through the server's) |
+| Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
 | Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` |
-| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
+| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `collect_front_mount.go` |
-| Per-unit generator | `generate_command_new.go` | `generate_route_entries.go` | — (`generate_route_entries.go`) |
+| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` | — (`generate_route_new.go`) |
 | Asset group | `assets/cli/` | `assets/server/` | `assets/front/` |
 | Build trigger | `hasCli := io.IsDir("sandbox/internal/cli")` | `hasServer := io.IsDir("sandbox/internal/server")` | `hasFront := io.IsDir("sandbox/internal/pageio")` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` |
@@ -59,7 +59,7 @@ Both halves of the pair go in `GeneratedDocsGroups`, in the vars map of `build_i
 
 The build trigger is never the content tree: `assets/frontend/` is the project's own and may legitimately be empty, so `hasFront` reads `pageio/`. `hasAssets` stays `assets/all`, so a front project does not read as a generator.
 
-`sandbox/internal/routeio/` exists because `servermain.go` imports every route, so a route cannot import `internal/server` back: shared route code goes in a third package both may import. `sandbox/internal/pageio/` is the same shape one layer up.
+`sandbox/internal/routeio/` exists because a route may not import `internal/server`: shared route code goes in a third package both may import. It is also where the two readers that put the dep names back on a bound route live — `RequestOf` and `ResponseOf`, because `api.Route` carries the request and the response as `any`: `sandbox/api/` may name no type of `sandbox/deps`. `sandbox/internal/pageio/` is the same shape one layer up.
 
 ## Add a contract + adapter lib
 

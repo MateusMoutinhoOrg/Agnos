@@ -100,7 +100,7 @@ sandbox:
           description: "collectors: list one dir, title-case names"
         actions/build/generate_*.go:
           order: 6
-          description: new.go per command, help entries.yaml, doc indexes
+          description: new.go per command and per route, help entries.yaml, doc indexes
         actions/verify/check_*.go:
           order: 7
           description: one rule set per file, each returns []string

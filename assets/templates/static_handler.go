@@ -20,8 +20,8 @@ import (
 // `?sha=` is what the pageio helpers stamp on every link they build. It is a
 // cache key and never an input: the file that is served is the one the path
 // names, whatever the sha says. All it decides is cacheHeader below.
-func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
-	relative, ok := safeSegments(sandbox, entries.Item)
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
+	relative, ok := safeSegments(sandbox, route.GetStrings("item"))
 	if !ok {
 		return routeio.WriteError(sandbox, response, api.StatusBadRequest, "item",
 			"invalid static asset path")
@@ -34,7 +34,7 @@ func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Re
 	}
 
 	response.SetHeader("Content-Type", contentTypeOf(sandbox, relative))
-	response.SetHeader("Cache-Control", cacheHeader(sandbox, entries.Sha, content))
+	response.SetHeader("Cache-Control", cacheHeader(sandbox, route.GetString("sha"), content))
 	response.SetStatus(api.StatusOk)
 	response.Write(content)
 

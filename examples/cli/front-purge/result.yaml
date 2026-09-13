@@ -7,9 +7,9 @@ tree:
       sha: 092a48d1f45f5024d3307ee1d75af78a0d140b5f81600c2c51c12c0dd7c66a85
     - file: assets/frontend/static/styles/main.css
       sha: 735ddf9858cbe7853198c30e4b283a3d6ba2398dc3428765c45676b787d6eeef
-    - file: sandbox/internal/routes/health/entries.go
-      sha: 8b1b5f50403c9f2adba70764447c3f9ba4b531620a9096d115e88d5c25ec9131
     - file: sandbox/internal/routes/health/handler.go
-      sha: b08e9a93f4719a9a5c8db8fb75f45defde994a8442199e5e020eb9922d911e75
+      sha: 95f40a74f0a10d8c2395b2d69924d0b38dadd2dd4471d8d5e16cc37e3b482cd7
+    - file: sandbox/internal/routes/health/new.go
+      sha: 9f0b4d37d337a56ad3b29d9b509fafc6deb5c6837707396f4ee544adbd0559b3
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da

@@ -11,10 +11,9 @@ agnos server-init --path TestDir -q
 agnos add-route static --trigger /static --help "Serve a file under /static" --category Files --path TestDir -q
 agnos add-segment rest --route static --array --path TestDir
 
-# What result.yaml records: the declaration this example wrote, the []string
-# field build generated from it, and the dispatch, which is where the route
-# stops asking for an exact segment count. The lib side copies the same set.
-mkdir -p AssertDir/sandbox/internal/routes/static AssertDir/sandbox/internal/server
+# What result.yaml records: the declaration this example wrote and the
+# api.Route build generated from it, whose last segment is the array that takes
+# the rest of the path. The lib side copies the same set.
+mkdir -p AssertDir/sandbox/internal/routes/static
 cp TestDir/sandbox/internal/routes/static/route.yaml AssertDir/sandbox/internal/routes/static/route.yaml
-cp TestDir/sandbox/internal/routes/static/entries.go AssertDir/sandbox/internal/routes/static/entries.go
-cp TestDir/sandbox/internal/server/servermain.go AssertDir/sandbox/internal/server/servermain.go
+cp TestDir/sandbox/internal/routes/static/new.go AssertDir/sandbox/internal/routes/static/new.go

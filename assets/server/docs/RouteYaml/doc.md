@@ -1,10 +1,13 @@
 # RouteYaml
 
 `sandbox/internal/routes/<name>/route.yaml` declares one http route. `{{.GeneratorName}} build` generates
-`entries.go` (the `Entries` struct and its `ReadBody`) and a match/handle pair in
-`sandbox/internal/server/servermain.go` from it. Grow it with the editors of
-[Workflow](../Workflow/doc.md#change-the-route-surface) — one per place this file holds
-something — not by hand: they re-render it with keys in alphabetical order and drop comments.
+`new.go` from it — the `api.Route` that lands in `sandbox.Routes`, plus the `ReadBody` its body
+calls for. The dispatch in `sandbox/internal/server/servermain.go` is generic: it reads every
+request against those declarations, and nothing about a route is spelled in Go anywhere else.
+
+Grow the file with the editors of [Workflow](../Workflow/doc.md#change-the-route-surface) — one
+per place it holds something — not by hand: they re-render it with keys in alphabetical order
+and drop comments.
 
 | Section | Editors |
 |---|---|
@@ -60,11 +63,11 @@ kinds.
 | Key | Effect |
 |---|---|
 | `identifier` | A literal segment, **always starting with `/`** (`/users`, never `users`). `/` alone is the root; no other holds an inner or trailing slash. Excludes `name` and every field key |
-| `name` | A captured segment: it matches anything and becomes an `Entries` field, already converted |
+| `name` | A captured segment: it matches anything and is bound under this name, already converted |
 | `type` | `string` (default), `boolean`, `int`, `float` |
 | `description`, `examples`, `min`, `max` | As in [EntriesYaml](../EntriesYaml/doc.md#field-keys) |
 | `required` | Always `true` on a capture — `false` is a `verify` violation, and `default` is refused |
-| `array` | The capture takes **every segment left** in the path, as a `[]T` field. Only on the last entry of `paths`, and its name is declared nowhere else |
+| `array` | The capture takes **every segment left** in the path, read back with `GetStrings`/`GetInts`/`GetFloats`. Only on the last entry of `paths`, and its name is declared nowhere else |
 
 The first `identifier` is the trigger that names the route. Match order is by specificity, not
 by directory: most `identifier`s first, then the longest `identifier`s, then the routes of
@@ -86,8 +89,8 @@ paths:
 
 ```
 GET /static          404
-GET /static/a        Rest = ["a"]
-GET /static/a/b.png  Rest = ["a", "b.png"]
+GET /static/a        GetStrings("rest") = ["a"]
+GET /static/a/b.png  GetStrings("rest") = ["a", "b.png"]
 ```
 
 ## Field keys
@@ -98,9 +101,22 @@ two differences: `name` **is** the external spelling — the header name, matche
 to case, or the query key — and `array: true` is refused in `headers` (in `params` it collects
 every occurrence of the key; in `paths` it takes the rest of the path).
 
-One `name` may be declared in more than one place. The `Entries` field is written once and
-filled by the first origin, in `paths` → `headers` → `params` order, that brings a value; any
-one of them satisfies `required`, and all of them must agree on `type`.
+One `name` may be declared in more than one place. The value is bound once and filled by the
+first origin, in `paths` → `headers` → `params` order, that brings a value; any one of them
+satisfies `required`, and all of them must agree on `type`.
+
+## Reading the values
+
+A handler reads a bound value by the name its declaration gives it, never off a field:
+
+| Reader | Returns |
+|---|---|
+| `route.GetString(name)`, `GetInt`, `GetFloat`, `GetBool` | the first value bound under that name, the zero value when none was |
+| `route.GetStrings(name)`, `GetInts`, `GetFloats` | every value bound under it, in order — for an `array` capture or param |
+| `route.GetItem(name)` | the raw `[]any` behind them |
+
+`route` is one instance per request, minted by `Route.New`, so two requests in flight never
+share a value.
 
 ## Body keys
 
@@ -121,7 +137,10 @@ build rather than being ignored.
 
 ## Generated `ReadBody`
 
-| `body.type` | Signature |
+`ReadBody(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response)` is generated
+into the route's own `new.go`, returning what its `body.type` declares:
+
+| `body.type` | Returns |
 |---|---|
 | `none` | none is generated |
 | `raw` | `([]byte, int)` |
@@ -130,14 +149,14 @@ build rather than being ignored.
 | `json` without one | `(*serializables.SerializibleObject, int)` |
 
 Every variant does, in order: `Request.ReadBody(MaxBodyBytes)` (`413`), the `required` check
-(`400`) and — for `json` — `routeio.ValidateSchema` against `EntriesSchema` (`400` on the first
-violation, its field path in the response's `field`). A second call returns the cached value.
-A nested object becomes `Body<Path>`; an object inside an array becomes `Body<Path>Item`.
+(`400`) and — for `json` — `routeio.ValidateSchema` against `BodySchema` (`400` on the first
+violation, its field path in the response's `field`). A nested object becomes `Body<Path>`; an
+object inside an array becomes `Body<Path>Item`.
 
 ## Dispatch
 
-`ServerMain` hands every request to one dispatch, which slices the path and tests each route in
-match order. Everything but the body is settled before the handler runs.
+`ServerMain` hands every request to one dispatch, which slices the path and tests each route of
+`sandbox.Routes` in match order. Everything but the body is settled before the handler runs.
 
 | Situation | Status | Answered by |
 |---|---|---|

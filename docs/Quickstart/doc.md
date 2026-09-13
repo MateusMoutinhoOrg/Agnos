@@ -21,10 +21,11 @@ import (
 	"github.com/you/my-tool/sandbox/api"
 )
 
-func CommandHandler(sandbox *api.Sandbox, entries *Entries) int {
-	sandbox.Deps.Std.Log("greeting %s\n", entries.Name)        // stderr, silenced by --quiet
-	for i := 0; i < entries.Times; i++ {
-		sandbox.Deps.Std.Printf("hello, %s\n", entries.Name)   // stdout, the result
+func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
+	name := command.GetString("name")
+	sandbox.Deps.Std.Log("greeting %s\n", name)        // stderr, silenced by --quiet
+	for i := 0; i < command.GetInt("times"); i++ {
+		sandbox.Deps.Std.Printf("hello, %s\n", name)   // stdout, the result
 	}
 	return api.ExitOk
 }

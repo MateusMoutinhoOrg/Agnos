@@ -10,8 +10,10 @@ agnos server-init --path TestDir
 # What result.yaml records: the paths this example asserts, copied out of
 # TestDir. sandbox/internal/commands/start_server proves the implicit cli-init
 # ran: a server needs a command that starts it.
-mkdir -p AssertDir/sandbox/api
+mkdir -p AssertDir/sandbox/api AssertDir/sandbox/binds
 cp TestDir/sandbox/api/server.go AssertDir/sandbox/api/server.go
+cp TestDir/sandbox/api/route.go AssertDir/sandbox/api/route.go
+cp TestDir/sandbox/binds/server.go AssertDir/sandbox/binds/server.go
 mkdir -p AssertDir/sandbox/internal/server
 cp -R TestDir/sandbox/internal/server/. AssertDir/sandbox/internal/server/
 mkdir -p AssertDir/sandbox/internal/routes

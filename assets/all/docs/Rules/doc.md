@@ -104,9 +104,9 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 ## Routes
 
 - A route is `sandbox/internal/routes/<name>/`, holding `route.yaml` (the declaration),
-  `entries.go` (generated) and `handler.go` (hand-written) — the server layer's mirror of a
+  `new.go` (generated) and `handler.go` (hand-written) — the server layer's mirror of a
   command package, snake_case for a kebab-case name. **(verify)**
-- Only `RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int` is
+- Only `RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int` is
   exported from a route. It returns the status it answered with, and reaches `400`/`413`/`415`
   only by propagating one from `ReadBody`: the dispatch settles everything but the body before
   the handler runs. **(verify)**
@@ -120,13 +120,17 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   `identifier` or a `name`, never both. **(verify)**
 - A captured segment is always `required: true` and never defaulted: it is present whenever
   the route matched. `array: true` on it takes every segment left in the path into a `[]T`
-  field, which only the last entry of `paths` may do, and which needs at least one segment to
+  list, which only the last entry of `paths` may do, and which needs at least one segment to
   match — so its name is declared nowhere else. **(verify)**
 - A name is declared once per origin, and the origins declaring the same name agree on its
-  type — the `Entries` field is written once. **(verify)**
+  type — one name binds one entry of `Route.Items`. **(verify)**
 - No two routes declare the same method and path pattern. **(verify)**
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
   subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
+- `sandbox.Routes` is the whole http surface, one `*api.Route` per declared route, built by
+  `sandbox/binds/server.go` from each package's generated `NewRoute`. The dispatch reads it and
+  nothing about the route set is generated per route anywhere else; each request runs on its
+  own instance, minted by `Route.New`.
 - Match order is the collector's, not the directory's: most `identifier`s first, then the
   longest ones, then the routes of fixed length before the ones taking the rest of the path,
   then the pattern alphabetically. Without it a route on `/` would swallow one on `/home`.

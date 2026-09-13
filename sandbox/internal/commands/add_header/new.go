@@ -17,7 +17,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	command.Identifiers = []string{"add-header"}
 	command.Category = "Server System"
 	command.Help = "Declare a request header on a route"
-	command.LongDescription = "Declares one request header on a route and runs build so entries.go and the dispatch arm pick it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs."
+	command.LongDescription = "Declares one request header on a route and runs build so the route's new.go picks it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs."
 	command.Examples = []string{"add-header authorization --route create-user --required", "add-header x-retries --route create-user --type int --default 1 --max 5"}
 	command.Hidden = false
 

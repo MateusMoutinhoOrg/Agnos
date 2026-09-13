@@ -328,7 +328,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared positional argument from a command. |
 | `ServerInit` | `func(path string) error` | ServerInit adds the http server layer (sandbox/internal/server, the routeio package, the health route and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
 | `ServerPurge` | `func(path string) error` | ServerPurge removes the server layer and every route declared in it. |
-| `AddRoute` | `func(path string, name string, method string, trigger string, help string, category string) error` | AddRoute declares a new route: its route.yaml, its generated entries.go and a handler.go to fill in. |
+| `AddRoute` | `func(path string, name string, method string, trigger string, help string, category string) error` | AddRoute declares a new route: its route.yaml, its generated new.go and a handler.go to fill in. |
 | `RemoveRoute` | `func(path string, name string) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
 | `SetRoute` | `func(props RouteProps) error` | SetRoute rewrites the route-level keys of one route's route.yaml. |
 | `AddSegment` | `func(props RouteFieldProps) error` | AddSegment appends one segment to a route's path: a literal one when props.Identifier is set, a captured one otherwise — and, with props.Array, one taking every segment left in the path. |

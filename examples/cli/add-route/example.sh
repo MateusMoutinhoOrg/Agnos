@@ -14,8 +14,8 @@ agnos add-param page --route create-user --type int --default 1 --min 1 --path T
 agnos set-body create-user --type json --required --path TestDir -q
 agnos add-body-field email --route create-user --required --format email --path TestDir
 
-# What result.yaml records: the declaration this example wrote and the struct
-# build generated from it. The lib side copies the same set.
+# What result.yaml records: the declaration this example wrote and the
+# api.Route build generated from it. The lib side copies the same set.
 mkdir -p AssertDir/sandbox/internal/routes/create_user
 cp TestDir/sandbox/internal/routes/create_user/route.yaml AssertDir/sandbox/internal/routes/create_user/route.yaml
-cp TestDir/sandbox/internal/routes/create_user/entries.go AssertDir/sandbox/internal/routes/create_user/entries.go
+cp TestDir/sandbox/internal/routes/create_user/new.go AssertDir/sandbox/internal/routes/create_user/new.go

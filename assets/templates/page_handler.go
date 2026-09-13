@@ -29,7 +29,7 @@ type pageVars struct {
 // A template that fails to read or to render is a packaging or authoring
 // mistake, never the caller's — a helper pointed at an asset that is not there
 // is one of them — so it answers 500 and says nothing about the asset tree.
-func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
 	content, err := pageio.Render(sandbox, pageAsset, pageVars{
 		Title:   {{printf "%q" .Title}},
 		Message: "this page is rendered from assets/frontend/pages/{{.Identifier}}.html",

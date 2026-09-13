@@ -42,13 +42,11 @@ func main() {
 		panic(err)
 	}
 
-	// What result.yaml records: the declaration this example wrote, the
-	// []string field build generated from it, and the dispatch, which is where
-	// the route stops asking for an exact segment count — the same set the cli
-	// side copies.
+	// What result.yaml records: the declaration this example wrote and the
+	// api.Route build generated from it, whose last segment is the array that
+	// takes the rest of the path — the same set the cli side copies.
 	copy_out := map[string][]string{
-		"sandbox/internal/routes/static": {"route.yaml", "entries.go"},
-		"sandbox/internal/server":        {"servermain.go"},
+		"sandbox/internal/routes/static": {"route.yaml", "new.go"},
 	}
 	for dir, files := range copy_out {
 		if err := os.MkdirAll("AssertDir/"+dir, 0o755); err != nil {

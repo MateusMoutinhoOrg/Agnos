@@ -7,7 +7,7 @@
 1. Read `AgnosConfig/project.yaml` (hard error if missing) and `go.mod`. Set `HasDeps` (`sandbox/deps/` exists), `HasCli` (`sandbox/internal/cli/` exists), `HasServer` (`sandbox/internal/server/` exists) and `HasAssets` (`assets/all/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
 2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the asset groups themselves write — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions). Skipped when `docs/` is absent.
 3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `new.go` per command.
-4. Collectors, then render groups in order: `all` (always), `deps` (`HasDeps`), `cli` (`HasCli`), `server` (`HasServer`, preceded by one `entries.go` per route).
+4. Collectors, then render groups in order: `all` (always), `deps` (`HasDeps`), `cli` (`HasCli`), `server` (`HasServer`, preceded by one `new.go` per route).
 
 | Collector | Lists | Var | Feeds |
 |---|---|---|---|
@@ -22,7 +22,7 @@
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
 | `CollectPublicApi` | `sandbox/api/*.go` parsed by `deps.Goimportsdeps` | `PublicApi` (per file: `Path`, `Doc`, `Types`, `Constants`, `Variables`, `Functions`; exported only, doc comments flattened to one table line) | `docs/PublicApi/doc.md` |
 | `CollectDepsApi` | `sandbox/deps/<x>/*.go`, same parse | `DepsApi` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |
-| `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (rich map: method, pattern, `MatchParts`, `Bindings` with Go names, parse funcs, defaults and `RangeCheck`, `Body`, `SchemaJson`, `BodyStructs`), **ordered for matching**: most `identifier`s, then longest, then pattern | `servermain.go`, `route_entries.go` |
+| `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (the declaration itself: `Paths`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`), **ordered for matching**: most `identifier`s, then longest, then pattern | `route_new.go`, `binds/server.go` |
 | `CollectRouteDocs` | `routes/<x>/route.yaml` (visible ones), grouped by category in first-seen order | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Help`, `LongDescription`, `Fields` as table rows, `Body`, `Examples`) | `docs/Routes/doc.md` |
 | `CollectCommandDocs` | `commands/<x>/entries.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Help`, `LongDescription`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
 | `CollectStructure` | `AgnosConfig/structure.yaml` (structureconf) | `Structure` (one `Line` per item, depth-indented and padded to a common description column) | `docs/Structure/doc.md` |

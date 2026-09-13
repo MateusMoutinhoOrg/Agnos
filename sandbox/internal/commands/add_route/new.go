@@ -17,7 +17,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	command.Identifiers = []string{"add-route"}
 	command.Category = "Server System"
 	command.Help = "Declare a new http route"
-	command.LongDescription = "Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so entries.go and the dispatch arm are generated. The trigger is normalized to start with /, and defaults to /<name>."
+	command.LongDescription = "Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in sandbox.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>."
 	command.Examples = []string{"add-route create-user --trigger /users --method POST --help \"Create a user\" --category Users"}
 	command.Hidden = false
 

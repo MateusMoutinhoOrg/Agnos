@@ -150,16 +150,27 @@ declares — `command.GetString("path")`, `command.GetBool("quiet")`, `command.G
 — so nothing about a command is spelled in Go anywhere but its own `new.go`.
 
 The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
-layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` mirrors `api/cli.go`,
+layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go` mirror
+`api/cli.go` + `api/command.go`, `binds/server.go` mirrors `binds/cli.go`,
 `internal/server/servermain.go` mirrors `internal/cli/climain.go`, `internal/routes/<name>/`
-(`route.yaml` + generated `entries.go` + hand-written `handler.go` -> `RouteHandler`) mirrors
+(`route.yaml` + generated `new.go` + hand-written `handler.go` -> `RouteHandler`) mirrors
 `internal/commands/<name>/`, `parsables/routeconf/` mirrors `commandconf/`, `assets/server/`
 mirrors `assets/cli/`, and `server-init`/`server-purge` mirror `cli-init`/`cli-purge`. It is
 rendered when `sandbox/internal/server/` exists, exactly as the cli group is rendered when
-`sandbox/internal/cli/` does. The dispatch settles everything but the body (404/405/415/413/400)
-before a handler runs; the body is read on demand by the generated `Entries.ReadBody`.
-`sandbox/internal/routeio/` holds what both `servermain.go` and the routes need, because
-`servermain.go` imports every route and a route may not import it back.
+`sandbox/internal/cli/` does.
+
+`sandbox.Routes` (`[]*api.Route`, built by `binds/server.go` from every package's generated
+`NewRoute`, in match order) **is** the http surface, exactly as `sandbox.Commands` is the
+command one: `servermain.go` is one generic dispatch that binds a request against those
+declarations into `route.Items`, and a handler reads its values by the name `route.yaml`
+declares — `route.GetString("tenant")`, `route.GetStrings("item")`. Each request runs on its own
+instance, minted by `route.New()`, so two in flight never share bound values. The dispatch
+settles everything but the body (404/405/415/413/400) before a handler runs; the body is read on
+demand by the `ReadBody` generated into the route's own `new.go`.
+`sandbox/internal/routeio/` holds what both `servermain.go` and the routes need — `WriteError`,
+the schema validator, and `RequestOf`/`ResponseOf`, which put the dep names back on the request
+and the response `api.Route` carries as `any` (`sandbox/api/` may name no type of
+`sandbox/deps`).
 
 The **front layer** is the third column, and declares no unit of its own: a page **is** a
 route. `sandbox/internal/pageio/` (generated; `Render` plus the `staticref`/`cssref`/`jsref`/

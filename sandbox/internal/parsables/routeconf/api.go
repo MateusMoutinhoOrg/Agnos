@@ -2,8 +2,8 @@ package routeconf
 
 // Field is one header, one query parameter or one captured path segment
 // declared in a route's route.yaml. Key is the external spelling — the header
-// name (matched without regard to case) or the query key — and the generated
-// Entries field is derived from it.
+// name (matched without regard to case) or the query key — and it is also the
+// id the bound value is read back under.
 type Field struct {
 	Key         string
 	Description string
@@ -75,9 +75,9 @@ type Schema struct {
 }
 
 // Body describes a route's request body. It is the one part of a request the
-// dispatch does not read: the generated Entries.ReadBody applies Required,
-// MaxBytes and Schema on demand, so a handler can refuse a request before a
-// byte of the body is read.
+// dispatch does not read: the generated ReadBody applies Required, MaxBytes and
+// Schema on demand, so a handler can refuse a request before a byte of the body
+// is read.
 type Body struct {
 	Type        string // "none" | "raw" | "text" | "json"
 	Required    bool
@@ -89,9 +89,10 @@ type Body struct {
 
 // RouteConf is the parsed form of sandbox/internal/routes/<name>/route.yaml —
 // the declarative description of one http route, which `agnos build` turns
-// into an entries.go struct plus a match/handle pair in
-// sandbox/internal/server/servermain.go. It is written by `add-route` and
-// rewritten by `add-field` / `remove-field` / `set-route`, never by hand.
+// into the api.Route of that route's generated new.go, and which the dispatch
+// in sandbox/internal/server/servermain.go reads every request against. It is
+// written by `add-route` and rewritten by `add-field` / `remove-field` /
+// `set-route`, never by hand.
 type RouteConf struct {
 	Method          string
 	Paths           []Segment
@@ -118,7 +119,7 @@ type RouteConf struct {
 	// spell, the tie-break between two routes fixing as many segments.
 	IdentifierLen func() int
 	// SchemaJson is the declared json-schema as canonical JSON — the text
-	// baked into the generated EntriesSchema constant — or "" when the body
+	// baked into the generated BodySchema constant — or "" when the body
 	// declares none.
 	SchemaJson func() string
 }

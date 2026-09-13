@@ -17,9 +17,9 @@ const routesDir = "sandbox/internal/routes"
 const routeHandlerName = "RouteHandler"
 
 // routeHandlerParams is the canonical RouteHandler signature the generated
-// dispatch calls: the sandbox, the bound entries and the response being
+// new.go closes over: the sandbox, the bound route and the response being
 // written.
-var routeHandlerParams = []string{"*api.Sandbox", "*Entries", "serverdeps.Response"}
+var routeHandlerParams = []string{"*api.Sandbox", "*api.Route", "serverdeps.Response"}
 
 // routeMethods is every http method a route may declare.
 var routeMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
@@ -84,12 +84,12 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 }
 
 // checkRouteFiles reports a route package missing any of the three files every
-// route has: the declaration, the generated struct and the hand-written
+// route has: the declaration, the generated constructor and the hand-written
 // handler.
 func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, name string) []string {
 	var violations []string
 
-	for _, file := range []string{"route.yaml", "entries.go", "handler.go"} {
+	for _, file := range []string{"route.yaml", "new.go", "handler.go"} {
 		if !io.IsFile(routesDir + "/" + name + "/" + file) {
 			violations = append(violations, routeViolation(name, "has no "+file))
 		}
@@ -114,7 +114,7 @@ func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, name string) []s
 		}
 		return append(violations, routeViolation(name,
 			"handler.go declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int"))
+				routeHandlerName+"(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int"))
 	}
 
 	return append(violations, routeViolation(name, "handler.go exports no "+routeHandlerName))
@@ -175,8 +175,9 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 }
 
 // checkRouteRestName keeps the segment taking the rest of the path out of the
-// name merging every other origin takes part in: its Entries field is a []T,
-// which a header or a query parameter of the same name could not fill.
+// name merging every other origin takes part in: what it binds is a list of
+// values, which a header or a query parameter of the same name could not go on
+// filling.
 func checkRouteRestName(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	at := utils.RouteRestIndex(conf.Paths)
 	if at < 0 {
@@ -196,7 +197,7 @@ func checkRouteRestName(sandbox *api.Sandbox, name string, conf *routeconf.Route
 	for _, origin := range origins {
 		if utils.FindRouteField(sandbox, origin.fields, key) >= 0 {
 			violations = append(violations, routeViolation(name,
-				"declares "+key+" as both the segment taking the rest of the path and a "+origin.label+" field; the two cannot fill one Entries field"))
+				"declares "+key+" as both the segment taking the rest of the path and a "+origin.label+" field; the two cannot fill one field"))
 		}
 	}
 
@@ -247,8 +248,8 @@ func checkRouteCapture(name string, field routeconf.Field, is_last bool) []strin
 }
 
 // checkRouteNames enforces that a name is declared once per origin, and that
-// the origins declaring the same name agree on its type — the Entries field is
-// written once, so two origins cannot disagree about what it holds.
+// the origins declaring the same name agree on its type — one name binds one
+// field of Route.Items, so two origins cannot disagree about what it holds.
 func checkRouteNames(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	var violations []string
 	types := map[string]string{}

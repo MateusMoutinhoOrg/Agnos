@@ -9,7 +9,7 @@ import (
 
 // AddArg appends (or inserts at --position) one positional arg declaration
 // into sandbox/internal/commands/<command>/entries.yaml, then runs build as a
-// follow-up step so entries.go and the dispatch layer pick it up.
+// follow-up step so the command's new.go picks it up.
 func AddArg(sandbox *api.Sandbox, props api.FieldProps) error {
 	io := smartio.New(sandbox, props.Path, config.ProjectName)
 	if err := AddArgInternal(sandbox, io, props); err != nil {

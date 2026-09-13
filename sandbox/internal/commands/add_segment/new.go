@@ -17,7 +17,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	command.Identifiers = []string{"add-segment"}
 	command.Category = "Server System"
 	command.Help = "Add a segment to a route's path"
-	command.LongDescription = "Appends one segment to the route's paths and runs build so entries.go and the dispatch arm pick it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and becomes an Entries field already converted. --array makes that capture take every segment left in the path into a []T field, which only the last segment of a route may do."
+	command.LongDescription = "Appends one segment to the route's paths and runs build so the route's new.go picks it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and is bound under that name already converted. --array makes that capture take every segment left in the path, which only the last segment of a route may do."
 	command.Examples = []string{"add-segment --route create-user --identifier /users", "add-segment tenant --route create-user --description \"the tenant the user belongs to\"", "add-segment page --route list-users --type int --min 1", "add-segment rest --route static --array"}
 	command.Hidden = false
 

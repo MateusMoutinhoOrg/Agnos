@@ -94,4 +94,4 @@ flags:
 help: Declare a request header on a route
 identifiers:
     - add-header
-long-description: Declares one request header on a route and runs build so entries.go and the dispatch arm pick it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs.
+long-description: Declares one request header on a route and runs build so the route's new.go picks it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs.

@@ -7,7 +7,7 @@ import (
 
 // cliDirs are the directories the cli layer owns whole. The asset group only
 // names the files it installs, so removing those one by one would leave the
-// generated neighbours behind — a command's entries.go with no entries.yaml
+// generated neighbours behind — a command's new.go with no entries.yaml
 // and no handler.go next to it. The cli layer is generated from end to end,
 // so purging it means dropping these directories entirely.
 var cliDirs = []string{

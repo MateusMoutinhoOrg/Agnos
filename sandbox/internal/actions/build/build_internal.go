@@ -76,7 +76,8 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	// The server layer's mirror of CollectCommands: one entry per declared
-	// route, already ordered for matching so servermain.go only has to range.
+	// route, already ordered for matching so the dispatch only has to range
+	// over sandbox.Routes.
 	routes, err := CollectRoutes(sandbox, io)
 	if err != nil {
 		return err
@@ -207,7 +208,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	if hasServer {
-		if err := GenerateRouteEntries(sandbox, io, routes, module_conf.Module); err != nil {
+		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {
 			return err
 		}
 		if err := utils.RenderGroup(sandbox, io, "server", vars); err != nil {

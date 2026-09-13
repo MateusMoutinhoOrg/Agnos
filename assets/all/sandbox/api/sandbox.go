@@ -28,4 +28,11 @@ type Sandbox struct {
 	// holding the sandbox reads the same surface without one.
 	Commands []*Command
 {{- end}}
+{{- if .HasServer}}
+	// Routes is every http route the project declares, in match order,
+	// each built by the generated NewRoute of its own package. The server
+	// dispatch reads a request against these declarations; a caller holding
+	// the sandbox reads the same surface without one.
+	Routes []*Route
+{{- end}}
 }

@@ -13,7 +13,7 @@ const routesDir = "sandbox/internal/routes"
 // frontDirs are the directories the front layer owns whole: the render layer
 // itself and the route serving the static tree. The asset group only names the
 // files it installs, so removing those one by one would leave the generated
-// neighbours behind — the static route's entries.go with no route.yaml and no
+// neighbours behind — the static route's new.go with no route.yaml and no
 // handler.go next to it.
 var frontDirs = []string{
 	"sandbox/internal/pageio",

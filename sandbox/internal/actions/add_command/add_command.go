@@ -9,8 +9,8 @@ import (
 
 // AddCommand scaffolds a new command package under
 // sandbox/internal/commands/<name>/ — a hand-written entries.yaml and a stub
-// handler.go — then runs build as a follow-up step so entries.go and the
-// dispatch layer are generated for it.
+// handler.go — then runs build as a follow-up step so its new.go — the
+// api.Command that lands in sandbox.Commands — is generated for it.
 func AddCommand(sandbox *api.Sandbox, path string, name string, help string, category string) error {
 	io := smartio.New(sandbox, path, config.ProjectName)
 	if err := AddCommandInternal(sandbox, io, name, help, category); err != nil {

@@ -40,7 +40,7 @@ sandbox/                            closed: imports nothing outside sandbox/, no
     commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
     actions/build/collect_*.go      collectors: list one dir, title-case names
-    actions/build/generate_*.go     new.go per command, help entries.yaml, doc indexes
+    actions/build/generate_*.go     new.go per command and per route, help entries.yaml, doc indexes
     actions/verify/check_*.go       one rule set per file, each returns []string
     parsables/<name>conf/           api.go, new.go, new_empty.go, bind_methods.go, render.go
     apishape/                       the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from

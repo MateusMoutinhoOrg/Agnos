@@ -31,7 +31,7 @@ route, so `docs/Routes` lists it and every route editor (`set-route`, `add-param
 | `assets/frontend/static/styles/main.css`, `.../scripts/main.js` | `front-init` | once |
 | `sandbox/internal/routes/<page>/{route.yaml,handler.go}` | `add-page` | once |
 | `assets/frontend/pages/<page>.html` | `add-page` | once |
-| `sandbox/internal/routes/<page>/entries.go` | `build` | always |
+| `sandbox/internal/routes/<page>/new.go` | `build` | always |
 
 `once` files are a starting point and yours from the moment they exist. To go back to the
 scaffolded one: `{{.GeneratorName}} remove-route static && {{.GeneratorName}} front-init` for

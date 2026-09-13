@@ -158,4 +158,4 @@ flags:
 help: Declare a property of a route's body json-schema
 identifiers:
     - add-body-field
-long-description: Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and EntriesSchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.
+long-description: Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.

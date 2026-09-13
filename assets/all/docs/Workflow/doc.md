@@ -85,7 +85,8 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 ```
 
 `add-route` writes `sandbox/internal/routes/<name>/route.yaml` (the declaration) and a stub
-`handler.go` (yours), then generates `entries.go` and the match/handle pair of the dispatch.
+`handler.go` (yours), then generates `new.go` — the `api.Route` that lands in
+`sandbox.Routes`, which the dispatch reads every request against.
 One editor per place the declaration holds something, so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
@@ -95,17 +96,18 @@ whether it is required, its size limit and its content-type.
 Then write `handler.go` — the whole hand-written half of a route:
 
 ```go
-func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
-	body, status := entries.ReadBody(sandbox, response)
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
+	body, status := ReadBody(sandbox, route, response)
 	if status != api.StatusOk {
 		return status
 	}
-	return writeJson(sandbox, response, api.StatusCreated, create(sandbox, entries.Tenant, body))
+	return writeJson(sandbox, response, api.StatusCreated, create(sandbox, route.GetString("tenant"), body))
 }
 ```
 
-`Entries` arrives bound, converted and range-checked: a bad request was already answered `400`
-before the handler ran. The body is the exception — it is read only when `ReadBody` asks for
+`route` arrives bound, converted and range-checked — every value read back by the name its
+declaration gives it (`GetString`, `GetInt`, `GetBool`, `GetStrings`) — so a bad request was
+already answered `400` before the handler ran. The body is the exception — it is read only when `ReadBody` asks for
 it. [Routes](../Routes/doc.md) documents the route on the next build, and
 [ServerUsage](../ServerUsage/doc.md) is the whole recipe.
 {{- else }}
@@ -131,8 +133,8 @@ project with no CLI gets one first: a server needs a command that starts it.
 ```
 
 `add-page` writes the route that answers the page (`route.yaml` + a `handler.go` rendering
-through `pageio`) and `assets/frontend/pages/<name>.html`, then generates `entries.go` and the
-match/handle pair of the dispatch. A page **is** a route, so every editor of
+through `pageio`) and `assets/frontend/pages/<name>.html`, then generates its `new.go` like
+any other route's. A page **is** a route, so every editor of
 [RouteYaml](../RouteYaml/doc.md) works on its declaration and [Routes](../Routes/doc.md)
 documents it.
 

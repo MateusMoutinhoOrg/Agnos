@@ -118,22 +118,6 @@ func exportedName(sandbox *api.Sandbox, raw string) string {
 	return b
 }
 
-func goType(kind string, array bool) string {
-	base := "string"
-	switch kind {
-	case "boolean":
-		base = "bool"
-	case "int":
-		base = "int"
-	case "float":
-		base = "float64"
-	}
-	if array {
-		return "[]" + base
-	}
-	return base
-}
-
 func goStringList(sandbox *api.Sandbox, values []string) string {
 	quoted := make([]string, 0, len(values))
 	for _, value := range values {

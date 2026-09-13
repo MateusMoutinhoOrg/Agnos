@@ -7,8 +7,11 @@ route what `sandbox/internal/commands/<name>/` is to a command, and `route.yaml`
 | Concept | CLI | Server |
 |---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
-| Generated dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` |
+| Dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` |
 | Declared unit | `commands/<name>/entries.yaml` | `routes/<name>/route.yaml` |
+| Generated declaration | `new.go` -> `NewCommand` | `new.go` -> `NewRoute` |
+| Surface on the sandbox | `sandbox.Commands` | `sandbox.Routes` |
+| Built by | `sandbox/binds/cli.go` | `sandbox/binds/server.go` |
 | Hand-written half | `handler.go` -> `CommandHandler` | `handler.go` -> `RouteHandler` |
 | Install / remove | `cli-init` / `cli-purge` | `server-init` / `server-purge` |
 
@@ -47,35 +50,42 @@ err := sandbox.Server.Serve(api.ServeProps{Addr: ":8080", ReadTimeoutMs: 10000, 
 ```
 
 `add-route` writes `route.yaml` (the declaration) and a stub `handler.go` (yours); `build`
-generates `entries.go` and the dispatch arm. One editor per place the declaration holds
-something — `add-segment`, `add-header`, `add-param`, `set-body`, `add-body-field`, `set-route`,
-each with its `remove-` inverse — so every key of [RouteYaml](../RouteYaml/doc.md) is reachable
-from the command line and `route.yaml` is never edited by hand.
+generates `new.go`, the `api.Route` that lands in `sandbox.Routes`. One editor per place the
+declaration holds something — `add-segment`, `add-header`, `add-param`, `set-body`,
+`add-body-field`, `set-route`, each with its `remove-` inverse — so every key of
+[RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
+edited by hand.
 
 `add-segment` takes `--identifier /users` for a literal segment, or a name for a capture; an
 identifier is normalized to start with `/`, and an inner or trailing slash is refused. With
-`--array` the capture takes every segment left in the path into a `[]T` field
-(`{{.GeneratorName}} add-segment rest --route static --array` matches `/static/a/b.png`), which only the
-last segment of a route may do.
+`--array` the capture takes every segment left in the path
+(`{{.GeneratorName}} add-segment rest --route static --array` matches `/static/a/b.png`), which
+only the last segment of a route may do.
 `add-body-field` takes a dotted path (`address.city`), creating the intervening objects in the
 `json-schema`.
 
 ## Write the handler
 
 ```go
-func RouteHandler(sandbox *api.Sandbox, entries *Entries, response serverdeps.Response) int {
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
 	// the body has not been read yet — refuse early if you can
-	if !isAuthorized(sandbox, entries.Authorization) {
+	if !isAuthorized(sandbox, route.GetString("authorization")) {
 		return routeio.WriteError(sandbox, response, api.StatusFailure, "", "not authorized")
 	}
-	body, status := entries.ReadBody(sandbox, response)
+	body, status := ReadBody(sandbox, route, response)
 	if status != api.StatusOk {
 		return status
 	}
-	return writeJson(sandbox, response, api.StatusCreated, createUser(sandbox, entries.Tenant, body))
+	return writeJson(sandbox, response, api.StatusCreated, createUser(sandbox, route.GetString("tenant"), body))
 }
 ```
 
-`Entries` arrives bound, converted and range-checked; a bad request was already answered `400`
-before the handler ran. The handler returns the status it answered with, and propagates the one
-`ReadBody` gives it. [Routes](../Routes/doc.md) documents the route on the next build.
+`route` arrives bound, converted and range-checked; a bad request was already answered `400`
+before the handler ran. Every value is read back by the name its declaration gives it —
+`GetString`, `GetInt`, `GetFloat`, `GetBool`, and `GetStrings`/`GetInts`/`GetFloats` for an
+array ([RouteYaml](../RouteYaml/doc.md#reading-the-values)). The handler returns the status it
+answered with, and propagates the one `ReadBody` gives it. [Routes](../Routes/doc.md) documents
+the route on the next build.
+
+A Go caller reads the same surface without a socket: `sandbox.Routes` is every declared route,
+in match order, and `Route.New` mints the instance one request runs on.

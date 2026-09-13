@@ -7,9 +7,9 @@ tree:
       sha: 735ddf9858cbe7853198c30e4b283a3d6ba2398dc3428765c45676b787d6eeef
     - file: sandbox/internal/pageio/templates.go
       sha: c6f4b54bc3c1ca1946e91049171c796b92a6a7ef20391e21a8d9353325387cca
-    - file: sandbox/internal/routes/static/entries.go
-      sha: 862d196f94ff8d8b4510f4fe6b2163926781c1cd9f18e0aa11d64beb3c3754d3
     - file: sandbox/internal/routes/static/handler.go
-      sha: 266ed447440a2ceb8f524d106847a9f8eb8693e156f49306b8c648cfc57f1cf6
+      sha: 61335e88115834d9f2a3a00e1bebc4a2672358bff9e252ff41487c1bb33e2731
+    - file: sandbox/internal/routes/static/new.go
+      sha: fe889c3e5a2969e34b2a4a3294be33212ea4bb9b3dce88702843547df27b8d02
     - file: sandbox/internal/routes/static/route.yaml
       sha: bea2ec05598aeb48c03a16a370f6d3a5bba2a85c1b78fdf5c3546433cf0ef817

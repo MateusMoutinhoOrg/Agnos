@@ -9,7 +9,7 @@ import (
 
 // RemoveFlag drops one flag declaration from
 // sandbox/internal/commands/<command>/entries.yaml, then runs build so the
-// generated entries.go and dispatch layer forget it.
+// generated new.go forgets it.
 func RemoveFlag(sandbox *api.Sandbox, path string, command string, name string) error {
 	io := smartio.New(sandbox, path, config.ProjectName)
 	if err := RemoveFlagInternal(sandbox, io, command, name); err != nil {

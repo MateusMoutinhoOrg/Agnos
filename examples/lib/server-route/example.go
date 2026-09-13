@@ -67,12 +67,12 @@ func main() {
 	}
 
 	// What result.yaml records: the declaration this example wrote and the
-	// struct build generated from it — the same set the cli side copies.
+	// api.Route build generated from it — the same set the cli side copies.
 	assert_dir := "AssertDir/sandbox/internal/routes/create_user"
 	if err := os.MkdirAll(assert_dir, 0o755); err != nil {
 		panic(err)
 	}
-	for _, file := range []string{"route.yaml", "entries.go"} {
+	for _, file := range []string{"route.yaml", "new.go"} {
 		content, err := os.ReadFile("TestDir/sandbox/internal/routes/create_user/" + file)
 		if err != nil {
 			panic(err)

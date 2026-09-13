@@ -7,7 +7,7 @@ import (
 
 // serverDirs are the directories the server layer owns whole. The asset group
 // only names the files it installs, so removing those one by one would leave
-// the generated neighbours behind — a route's entries.go with no route.yaml
+// the generated neighbours behind — a route's new.go with no route.yaml
 // and no handler.go next to it. The server layer is generated from end to end,
 // so purging it means dropping these directories entirely.
 //

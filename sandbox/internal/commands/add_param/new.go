@@ -17,7 +17,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	command.Identifiers = []string{"add-param"}
 	command.Category = "Server System"
 	command.Help = "Declare a query parameter on a route"
-	command.LongDescription = "Declares one query-string parameter on a route and runs build so entries.go and the dispatch arm pick it up. --array collects every occurrence of the key into a []T field; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path."
+	command.LongDescription = "Declares one query-string parameter on a route and runs build so the route's new.go picks it up. --array collects every occurrence of the key, read back with GetStrings; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path."
 	command.Examples = []string{"add-param page --route list-users --type int --default 1 --min 1", "add-param tag --route list-users --array"}
 	command.Hidden = false
 
