@@ -10,6 +10,6 @@ tree:
     - file: AgnosConfig/project.yaml
       sha: d855450b74c63de8d82ae1523bc76e3dc25175a99bd17fce161e2451e02bb783
     - file: AgnosConfig/structure.yaml
-      sha: 633274f15eddc40266be1f64a4766f7b74e8fea94b0a68188ef7ed6d630ba70f
+      sha: 033edde90caa82fd248205ef2fa56ba56fde1d60983e34ee766dc014fc5bab09
     - file: AgnosConfig/themes.yaml
       sha: bfca54d2e915fa19bd69f60491160116d280bea07e6ff3c1896fb959c1c3e388

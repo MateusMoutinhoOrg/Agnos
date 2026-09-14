@@ -11,18 +11,17 @@
 
 | Collector | Lists | Var | Feeds |
 |---|---|---|---|
-| `CollectBinds` | `sandbox/binds/*.go` | `Binds` | `sandbox/new.go` |
-| `CollectConstructors` | `sandbox/api/*` | `Constructors` | `sandbox/api/sandbox.go` |
+| `CollectConstructors` | `sandbox/api/*` minus `sandbox.go`, `command.go`, `route.go` | `Constructors` (`Name`, `Package`, `HasNew`) | `sandbox/api/sandbox.go`, `sandbox/new.go` |
 | `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
 | `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `docs/LibUsage/doc.md` |
 | `CollectAvailables` | `adapters/availables/<x>/available.yaml` | `Availables` (`Name`, `Adapters`) | `GenerateAvailableNews` -> `adapters/availables/<x>/new.go` |
-| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (the declaration itself: identifiers, category, help, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `binds/cli.go` |
+| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (the declaration itself: identifiers, category, help, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `internal/cli/new.go` |
 | `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
 | `CollectGeneratedDocs` | `assets/{all,cli,server}/docs/*/props.yaml` (`cli` only when `HasCli`, `server` only when `HasServer`), rendered | merged into the doc tree | same |
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
 | `CollectPublicApi` | `sandbox/api/*.go` parsed by `deps.Goimportsdeps` | `PublicApi` (per file: `Path`, `Doc`, `Types`, `Constants`, `Variables`, `Functions`; exported only, doc comments flattened to one table line) | `docs/PublicApi/doc.md` |
 | `CollectDepsApi` | `sandbox/deps/<x>/*.go`, same parse | `DepsApi` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |
-| `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (the declaration itself: `Paths`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`), **ordered for matching**: most `identifier`s, then longest, then pattern | `route_new.go`, `binds/server.go` |
+| `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (the declaration itself: `Paths`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`), **ordered for matching**: most `identifier`s, then longest, then pattern | `route_new.go`, `internal/server/new.go` |
 | `CollectRouteDocs` | `routes/<x>/route.yaml` (visible ones), grouped by category in first-seen order | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Help`, `LongDescription`, `Fields` as table rows, `Body`, `Examples`) | `docs/Routes/doc.md` |
 | `CollectCommandDocs` | `commands/<x>/entries.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Help`, `LongDescription`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
 | `CollectStructure` | `AgnosConfig/structure.yaml` (structureconf) | `Structure` (one `Line` per item, depth-indented and padded to a common description column) | `docs/Structure/doc.md` |
@@ -58,8 +57,8 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Dispatch (`climain.go`)
 
-`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against the identifiers of every `*api.Command` of `sandbox.Commands`; unknown -> exit 2. Then one generic `runCommand`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `sandbox.Deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order, binding every value into `command.Items` under its declared id. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `command.Handler()`, which is that package's `CommandHandler(sandbox, command)`. Nothing in this file is generated per command — `binds/cli.go` is where the set is spelled, out of each package's `NewCommand`.
+`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against the identifiers of every `api.Command` of `sandbox.Cli.Commands`, then copy the match with `api.BindCommand`; unknown -> exit 2. Then one generic `runCommand`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `sandbox.Deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order, binding every value into `command.Items` under its declared id. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `command.Handler(command)`, which is that package's `CommandHandler(sandbox, command)`. Nothing in this file is generated per command — `internal/cli/new.go` is where the set is spelled, out of each package's `NewCommand`.
 
 ## Self-hosting
 
-Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `binds/cli.go`, `climain.go`, every command's `new.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/cli/new.go`, `climain.go`, every command's `new.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).

@@ -60,7 +60,7 @@ before the handler runs.
 
 ## Dispatch
 
-`CliMain(args)` matches `args[0]` against the identifiers of every command of `sandbox.Commands`
+`CliMain(args)` matches `args[0]` against the identifiers of every command of `Cli.Commands`
 — no match, and an empty command line, exit `2` with the general help. It then reads each
 declared flag anywhere on the line, assigns defaults, converts and range-checks numbers, and
 drains the positionals in order, binding each value into `command.Items` under its id. An

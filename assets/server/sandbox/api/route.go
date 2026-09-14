@@ -67,11 +67,11 @@ type RouteBody struct {
 }
 
 // Route is one http route of the project, as the sandbox offers it: the whole
-// of what its route.yaml declares, plus the handler behind it. Sandbox.Routes
+// of what its route.yaml declares, plus the handler behind it. Server.Routes
 // holds one per sandbox/internal/routes/<name>/, each built by that package's
 // generated NewRoute, in match order.
 //
-// What Sandbox.Routes holds is the declaration alone: nothing is ever bound
+// What Server.Routes holds is the declaration alone: nothing is ever bound
 // onto it. The server dispatch copies it with BindRoute, fills that copy's
 // Items from the path, the headers and the query string, and hands it to
 // Handler; a caller holding the sandbox can do the same.
@@ -136,7 +136,7 @@ type Route struct {
 	// Handler runs the route against one bound copy — the values in its
 	// Items and the response it carries — and returns the status it
 	// answered with. It takes that copy rather than closing over one, so
-	// the declaration on Sandbox.Routes is shared by every request while
+	// the declaration on Server.Routes is shared by every request while
 	// nothing bound ever is. It is the route package's own RouteHandler,
 	// closed over the sandbox.
 	Handler func(route *Route) int

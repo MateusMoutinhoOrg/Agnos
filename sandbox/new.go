@@ -3,14 +3,15 @@ package sandbox
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
-
-	binds "github.com/MateusMoutinhoOrg/Agnos/sandbox/binds"
+	actions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions"
+	cli "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/cli"
 )
 
 func New(deps *deps.Deps) *api.Sandbox {
 	self := api.Sandbox{Deps: deps}
-	binds.ActionsBind(&self)
-	binds.CliBind(&self)
+
+	self.Actions = actions.NewActions(&self)
+	self.Cli = cli.NewCli(&self)
 
 	return &self
 }

@@ -14,9 +14,9 @@ const routesDir = "sandbox/internal/routes"
 // CollectRoutes reads every sandbox/internal/routes/<name>/route.yaml and
 // returns one data map per route, for the generated
 // sandbox/internal/routes/<name>/new.go and the {{range .Routes}} loop of
-// sandbox/binds/server.go. It is the server layer's CollectCommands: what the
+// sandbox/internal/server/new.go. It is the server layer's CollectCommands: what the
 // map holds is the declaration itself, which the dispatch reads back off
-// sandbox.Routes at runtime, so nothing here is a Go spelling of the routing.
+// Server.Routes at runtime, so nothing here is a Go spelling of the routing.
 //
 // The list comes back ordered for matching, not in listing order: the most
 // specific route first, so a route fixing "/" can never swallow "/home".
@@ -58,7 +58,7 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 // fixing the most literal segments first, then the one whose literals spell
 // the most characters, then the one of fixed length before the one taking the
 // rest of the path, then by pattern for a stable tie-break. The ordering is
-// the collector's, so sandbox.Routes is already in match order and the
+// the collector's, so Server.Routes is already in match order and the
 // dispatch only has to range.
 func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {

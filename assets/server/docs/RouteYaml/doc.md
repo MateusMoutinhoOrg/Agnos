@@ -1,7 +1,7 @@
 # RouteYaml
 
 `sandbox/internal/routes/<name>/route.yaml` declares one http route. `{{.GeneratorName}} build` generates
-`new.go` from it — the `api.Route` that lands in `sandbox.Routes`, plus the `ReadBody` its body
+`new.go` from it — the `api.Route` that lands in `Server.Routes`, plus the `ReadBody` its body
 calls for. The dispatch in `sandbox/internal/server/servermain.go` is generic: it reads every
 request against those declarations, and nothing about a route is spelled in Go anywhere else.
 
@@ -156,7 +156,7 @@ object inside an array becomes `Body<Path>Item`.
 ## Dispatch
 
 `ServerMain` hands every request to one dispatch, which slices the path and tests each route of
-`sandbox.Routes` in match order. Everything but the body is settled before the handler runs.
+`Server.Routes` in match order. Everything but the body is settled before the handler runs.
 
 | Situation | Status | Answered by |
 |---|---|---|

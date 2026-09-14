@@ -54,24 +54,20 @@ Everything callable from Go is behind one of them.
 | Field | Type |
 | --- | --- |
 {{- range .Constructors }}
-| `lib.{{ . }}` | `api.{{ . }}` |
-{{- end }}
-{{- if .HasCli }}
-| `lib.Commands` | `[]*api.Command` |
-{{- end }}
-{{- if .HasServer }}
-| `lib.Routes` | `[]*api.Route` |
+| `lib.{{ .Name }}` | `api.{{ .Name }}` |
 {{- end }}
 
-{{if .HasCli}}`lib.Commands` is the command surface itself: every command the project declares,
-each carrying its flags, its args and the `Handler` that runs it, so a caller drives a command
-without a command line — bind the values into `command.Items` and call `command.Handler()`.
+{{if .HasCli}}`lib.Cli.Commands` (`[]api.Command`) is the command surface itself: every command
+the project declares, each carrying its flags, its args and the `Handler` that runs it.
+`api.BindCommand(&command)` copies one into the command a single run binds to, so a caller
+drives a command without a command line — bind the values into the copy's `Items` and call
+`copy.Handler(copy)`.
 
-{{end}}{{if .HasServer}}`lib.Routes` is the http surface the same way: every route the project
-declares, in match order, each carrying its `paths`, its headers, its params, its body and the
-`Handler` that answers it. `api.BindRoute(route)` copies one into the route a single request
-runs on, so a caller drives a route without a socket — bind the values into the copy's `Items`
-and call `Handler(copy)`.
+{{end}}{{if .HasServer}}`lib.Server.Routes` (`[]api.Route`) is the http surface the same way:
+every route the project declares, in match order, each carrying its `paths`, its headers, its
+params, its body and the `Handler` that answers it. `api.BindRoute(&route)` copies one into the
+route a single request runs on, so a caller drives a route without a socket — bind the values
+into the copy's `Items` and call `copy.Handler(copy)`.
 
 {{end}}[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
 dependency contracts{{end}} — generated from `sandbox/api/` itself on every build.
@@ -80,7 +76,7 @@ dependency contracts{{end}} — generated from `sandbox/api/` itself on every bu
 
 Every sub-contract is a struct of function fields, so any of them can be swapped for a
 test double, an in-memory implementation or an instrumented wrapper. Patch fields **before**
-`sandbox.New(&deps)`: the binders capture the pointer.
+`sandbox.New(&deps)`: the constructors capture the pointer.
 
 ```go
 deps := standard.New()

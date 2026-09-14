@@ -6,6 +6,6 @@ tree:
     - file: sandbox/internal/routes/home/handler.go
       sha: 3506aee2520ae509358938c1955cd2b9bdfb637ec539fc66b55a58d2cfa69cb6
     - file: sandbox/internal/routes/home/new.go
-      sha: 83919c020a956df2b6d8f9eedc216828d85baa44a216cd40eeb0ea8fab01db91
+      sha: 695deb20a9a874351c6cc4d1d010ed3cbf1c6f777ef218ac9426624ec43ef457
     - file: sandbox/internal/routes/home/route.yaml
       sha: 6276316befcd6a44feb11c0a19fcbd17ce1f0c003ca8c48e74d3ce3531f809a9

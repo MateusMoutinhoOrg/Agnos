@@ -5,8 +5,9 @@ import (
 )
 {{end}}
 // Sandbox is the whole library: one field per contract declared in
-// sandbox/api/, each filled by its binder. sandbox.New returns it, and nothing
-// callable lives outside of it.
+// sandbox/api/, each built by the New<Contract> of its own package under
+// sandbox/internal/. sandbox.New returns it, and nothing callable lives outside
+// of it.
 type Sandbox struct {
 {{- if .HasDeps}}
 	// Deps is every capability the sandbox reaches the outside world
@@ -19,20 +20,6 @@ type Sandbox struct {
 	Deps *deps.Deps
 {{- end}}
 {{- range .Constructors }}
-	{{ . }} {{ . }}
+	{{ .Name }} {{ .Name }}
 {{- end }}
-{{- if .HasCli}}
-	// Commands is every command the project declares, in listing order,
-	// each built by the generated NewCommand of its own package. The cli
-	// dispatch reads the command line against these declarations; a caller
-	// holding the sandbox reads the same surface without one.
-	Commands []*Command
-{{- end}}
-{{- if .HasServer}}
-	// Routes is every http route the project declares, in match order,
-	// each built by the generated NewRoute of its own package. The server
-	// dispatch reads a request against these declarations; a caller holding
-	// the sandbox reads the same surface without one.
-	Routes []*Route
-{{- end}}
 }

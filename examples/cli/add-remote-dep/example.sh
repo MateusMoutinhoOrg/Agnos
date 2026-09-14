@@ -11,7 +11,7 @@
 
 agnos start --path TestDir/remote --project-name Remote --module example/remote -q
 
-mkdir -p TestDir/remote/sandbox/binds TestDir/remote/sandbox/internal/greeter
+mkdir -p TestDir/remote/sandbox/internal/greeter
 
 cat > TestDir/remote/sandbox/api/greeter.go <<'GO'
 package api
@@ -35,18 +35,21 @@ type Greeting struct {
 }
 GO
 
-cat > TestDir/remote/sandbox/binds/greeter.go <<'GO'
-package binds
+cat > TestDir/remote/sandbox/internal/greeter/new.go <<'GO'
+package greeter
 
 import (
 	api "example/remote/sandbox/api"
-	greeter "example/remote/sandbox/internal/greeter"
 )
 
-func GreeterBind(sandbox *api.Sandbox) {
-	sandbox.Greeter.Greet = func(props api.GreetProps) api.Greeting {
-		return greeter.Greet(props)
+func NewGreeter(sandbox *api.Sandbox) api.Greeter {
+	greeter := api.Greeter{}
+
+	greeter.Greet = func(props api.GreetProps) api.Greeting {
+		return Greet(props)
 	}
+
+	return greeter
 }
 GO
 

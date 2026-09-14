@@ -19,7 +19,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish` (or 
 
 1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(sandbox, io *smartio.SmartIO, ...) error`. Project-relative paths only. Log via `sandbox.Deps.Std.Log`, fail via `sandbox.Deps.Std.Errorf`, never `Printf`.
 2. `<name>.go`: `func <Name>(sandbox, ...) error` = `smartio.New(sandbox, path, config.ProjectName)` -> internal -> `io.Persist()` -> `buildAction.Build(sandbox, api.BuildProps{Path, Runtime})` (`RuntimeGo` if it adds, `RuntimeNone` if it removes). Props with more than three values go in a struct in `sandbox/api/actions.go`.
-3. Add the field to `api.Actions` and the assignment to `sandbox/binds/actions.go`.
+3. Add the field to `api.Actions` and the assignment to `NewActions` in `sandbox/internal/actions/new.go`.
 4. Comment the new field: its row in [PublicApi](../PublicApi/doc.md) is generated from that comment.
 
 ## Add a command to agnos
@@ -43,7 +43,7 @@ A layer is an asset group plus an `<x>-init`/`<x>-purge` pair, and the server la
 | Concept | CLI | Server | Front |
 |---|---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) |
-| Surface + bind | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/binds/cli.go` -> `sandbox.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/binds/server.go` -> `sandbox.Routes` | — (served through the server's) |
+| Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/server/new.go` -> `Server.Routes` | — (served through the server's) |
 | Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
 | Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` |
 | Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |

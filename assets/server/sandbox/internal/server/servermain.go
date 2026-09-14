@@ -27,7 +27,7 @@ const (
 // ServerMain opens the port through sandbox.Deps.Serverdeps — which routes
 // nothing — and hands every request to dispatch, whatever its method or path.
 // Nothing here is generated per route: every route is one declaration built by
-// its own NewRoute and collected by sandbox/binds/server.go, so this file is
+// its own NewRoute and collected by sandbox/internal/server/new.go, so this file is
 // the same in every project.
 func ServerMain(sandbox *api.Sandbox, props api.ServeProps) error {
 	server := sandbox.Deps.Serverdeps.NewServer(serverdeps.ServerProps{
@@ -44,7 +44,7 @@ func ServerMain(sandbox *api.Sandbox, props api.ServeProps) error {
 }
 
 // dispatch is the whole routing layer: it slices the path into segments and
-// tests every route of sandbox.Routes against them, in the order the collector
+// tests every route of Server.Routes against them, in the order the collector
 // put them — the route fixing the most literal segments first, so a route on
 // "/" can never swallow one on "/home".
 //
@@ -58,7 +58,8 @@ func dispatch(sandbox *api.Sandbox, request serverdeps.Request, response serverd
 	method := request.GetMethod()
 	path_matched := false
 
-	for _, declared := range sandbox.Routes {
+	for index := range sandbox.Server.Routes {
+		declared := &sandbox.Server.Routes[index]
 		if !matchRoute(sandbox, declared, segments) {
 			continue
 		}
@@ -122,7 +123,7 @@ func matchRoute(sandbox *api.Sandbox, route *api.Route, segments []string) bool 
 // brought, then the body's own declaration.
 //
 // What it binds is a copy of the declaration, never the declaration on
-// sandbox.Routes: two requests in flight hold their own Items and their own
+// Server.Routes: two requests in flight hold their own Items and their own
 // request.
 func runRoute(sandbox *api.Sandbox, declared *api.Route, request serverdeps.Request, response serverdeps.Response, segments []string) {
 	route := api.BindRoute(declared)

@@ -111,8 +111,9 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   so text, sorting, hashing and templating come from `sandbox.Deps.<Contract>` too.
   `api/` holds contracts only, `deps/` holds dependency contracts (each `deps/<x>/` imports
   nothing at all; only the loose `deps/deps.go` names them),
-  `binds/` holds one function file per `api/` file, `internal/` holds the logic.
-  **Every function of `binds/` and `internal/` takes `sandbox *api.Sandbox` first**, and
+  `internal/` holds the logic — one `internal/<x>/new.go` per `api/<x>.go`, declaring the
+  `New<X>(sandbox) api.<X>` that `sandbox/new.go` calls to fill the field.
+  **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and
   nothing else standing for the outside world: `api.Sandbox` carries `Deps`, so holding the
   api is holding everything — one part of the api can call another, and a field a caller
   replaced takes effect everywhere. `sandbox/api/` is the one place allowed to import
@@ -137,21 +138,21 @@ Two layers per feature: an **action** (`sandbox/internal/actions/<name>/`) with 
 (opens SmartIO, persists, runs the follow-up `build`) plus `<name>_internal.go` (pure logic on
 an already-open SmartIO), and a **command**
 (`sandbox/internal/commands/<name>/`) with `entries.yaml` (declaration), `new.go`
-(generated — the `api.Command` that package contributes to `sandbox.Commands`) and
+(generated — the `api.Command` that package contributes to `Cli.Commands`) and
 `handler.go` (hand-written). Both directories are snake_case for a kebab-case
 command (`add-command` -> `add_command/`). Only `handler.go` and contract/adapter pairs are
 written by hand; everything else is generated.
 
-`sandbox.Commands` (`[]*api.Command`, built by `binds/cli.go` from every package's generated
-`NewCommand`) **is** the command surface: `climain.go` is one generic dispatch that binds a
-command line against those declarations into `command.Items`, and both help screens are printed
-from the same slice. A handler reads its values off the command by the id its `entries.yaml`
-declares — `command.GetString("path")`, `command.GetBool("quiet")`, `command.GetStrings("example")`
+`sandbox.Cli.Commands` (`[]api.Command`, built by `internal/cli/new.go` from every package's
+generated `NewCommand`) **is** the command surface: `climain.go` is one generic dispatch that
+copies the matched declaration with `api.BindCommand` and binds a command line onto that copy's
+`command.Items`, and both help screens are printed from the same slice. A handler reads its
+values off the command by the id its `entries.yaml` declares — `command.GetString("path")`, `command.GetBool("quiet")`, `command.GetStrings("example")`
 — so nothing about a command is spelled in Go anywhere but its own `new.go`.
 
 The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
 layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go` mirror
-`api/cli.go` + `api/command.go`, `binds/server.go` mirrors `binds/cli.go`,
+`api/cli.go` + `api/command.go`, `internal/server/new.go` mirrors `internal/cli/new.go`,
 `internal/server/servermain.go` mirrors `internal/cli/climain.go`, `internal/routes/<name>/`
 (`route.yaml` + generated `new.go` + hand-written `handler.go` -> `RouteHandler`) mirrors
 `internal/commands/<name>/`, `parsables/routeconf/` mirrors `commandconf/`, `assets/server/`
@@ -159,9 +160,9 @@ mirrors `assets/cli/`, and `server-init`/`server-purge` mirror `cli-init`/`cli-p
 rendered when `sandbox/internal/server/` exists, exactly as the cli group is rendered when
 `sandbox/internal/cli/` does.
 
-`sandbox.Routes` (`[]*api.Route`, built by `binds/server.go` from every package's generated
-`NewRoute`, in match order) **is** the http surface, exactly as `sandbox.Commands` is the
-command one: `servermain.go` is one generic dispatch that binds a request against those
+`sandbox.Server.Routes` (`[]api.Route`, built by `internal/server/new.go` from every package's
+generated `NewRoute`, in match order) **is** the http surface, exactly as `sandbox.Cli.Commands`
+is the command one: `servermain.go` is one generic dispatch that binds a request against those
 declarations into `route.Items`, and a handler reads its values by the name `route.yaml`
 declares — `route.GetString("tenant")`, `route.GetStrings("item")`. Each request runs on its own
 copy of the declaration (`api.BindRoute`), so two in flight never share bound values. The

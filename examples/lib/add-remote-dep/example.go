@@ -32,7 +32,7 @@ func main() {
 	}
 
 	write("TestDir/remote/sandbox/api/greeter.go", greeterApi)
-	write("TestDir/remote/sandbox/binds/greeter.go", greeterBinds)
+	write("TestDir/remote/sandbox/internal/greeter/new.go", greeterNew)
 	write("TestDir/remote/sandbox/internal/greeter/greeter.go", greeterInternal)
 
 	if err := lib.Actions.Build(api.BuildProps{Path: "TestDir/remote", Runtime: api.RuntimeGo}); err != nil {
@@ -125,17 +125,20 @@ type Greeting struct {
 }
 `
 
-const greeterBinds = `package binds
+const greeterNew = `package greeter
 
 import (
 	api "example/remote/sandbox/api"
-	greeter "example/remote/sandbox/internal/greeter"
 )
 
-func GreeterBind(sandbox *api.Sandbox) {
-	sandbox.Greeter.Greet = func(props api.GreetProps) api.Greeting {
-		return greeter.Greet(props)
+func NewGreeter(sandbox *api.Sandbox) api.Greeter {
+	greeter := api.Greeter{}
+
+	greeter.Greet = func(props api.GreetProps) api.Greeting {
+		return Greet(props)
 	}
+
+	return greeter
 }
 `
 

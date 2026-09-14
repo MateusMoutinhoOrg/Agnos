@@ -2,22 +2,22 @@ cli-output: "add-dep started with path TestDir dep std \nbuild started with path
 exit-code: 0
 tree:
     - file: sandbox/api/route.go
-      sha: 3ef174e750e45af024b1c39431240747cc0d3e6baaefe7a042baa053b5401440
+      sha: f213538f06a304efd6ebd079c86d05a618311265f3685ea548a211ef1a6b0dfb
     - file: sandbox/api/server.go
-      sha: 8fa80b543a894dc4a06875003a648f253058ebd3e641ea91ea495c6d846df1de
-    - file: sandbox/binds/server.go
-      sha: 4f6e9ccbd6d99065f496238b28c60dce1462165a5693b971f3471dd3ff243ed8
+      sha: 15675c204dc00e0fbd8428b635c4093cf73eb75df01dbf46ee0deefea3b2e705
     - file: sandbox/internal/commands/start_server/entries.yaml
       sha: d463ba2aad26659c3f79bf8b2b54c901220f1c24be7b131fc58bd19d0e8d191d
     - file: sandbox/internal/commands/start_server/handler.go
       sha: 70abdead26610f396244eeec1cf1078dbee7c090918464057c4ed76fee2e165b
     - file: sandbox/internal/commands/start_server/new.go
-      sha: b19a21a003bb8ce6b1197b1270079e3cf775b648108cf6d40478514cb777b4df
+      sha: 00651eca5746e0d0b310a467d86ae36ba3af55977b08c6fc22b01e1a187bcdda
     - file: sandbox/internal/routes/health/handler.go
       sha: 95f40a74f0a10d8c2395b2d69924d0b38dadd2dd4471d8d5e16cc37e3b482cd7
     - file: sandbox/internal/routes/health/new.go
-      sha: 68050125f9119e9e8a273168cb464b184721d12e2f8189394d248a4eaaafe9f0
+      sha: 3a0ad7f63838ff65fc82701b1e3317562f5bf451cbdca1f205f1767260531b0b
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da
+    - file: sandbox/internal/server/new.go
+      sha: b739c39000771059135a852f79ad70e2074283e6c6e1eac4238a6d18afc030ce
     - file: sandbox/internal/server/servermain.go
-      sha: 3257933ecc3ca6dd65462e9007ed4d2afde3ae46a83a927fd587248ea3f7d1b6
+      sha: ed49c49b65fcbca50bec7f6ce8c6d25ac7ef4d9f1f9ed6e566b6692a33c35530

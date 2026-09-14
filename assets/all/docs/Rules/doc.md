@@ -30,10 +30,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `sandbox/` is closed: a file there imports only `sandbox/` packages — the stdlib included. A
   capability from outside (io, text, sorting, hashing, templating) is restated as a contract
   under `sandbox/deps/` and reached as `sandbox.Deps.<Contract>`. **(verify)**
-- `sandbox/` holds only `api`, `binds`, `deps`, `internal` and `new.go`. **(verify)**
+- `sandbox/` holds only `api`, `deps`, `internal` and `new.go`. **(verify)**
 - `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, and imports that
   only for `Sandbox.Deps`. **(verify)**
-- Every function of `sandbox/binds/` and `sandbox/internal/` takes `sandbox *api.Sandbox` as
+- Every function of `sandbox/internal/` takes `sandbox *api.Sandbox` as
   its first parameter and nothing else standing for the outside world: deps is reached as
   `sandbox.Deps.<Contract>`, and the rest of the api as `sandbox.<Field>`. Holding the api is
   what lets one part of it call another, and what makes a field a caller replaced take effect
@@ -41,7 +41,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `sandbox/deps/<x>/` imports nothing at all: a contract is written in Go's builtin types only,
   and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
   `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
-- Every `sandbox/binds/` file mirrors one `api/` file and declares only functions. **(verify)**
+- Every `sandbox/api/<x>.go` other than `sandbox.go`, `command.go` and `route.go` is a field of
+  the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go`
+  declares — the one name `sandbox/new.go` calls. A contract with no such file is a field
+  nothing fills, and `sandbox/new.go` leaves it alone. **(verify)**
 - Every file of `sandbox/api/` and `sandbox/deps/` parses, and every exported type, func, const
   and var in them carries a doc comment — [PublicApi](../PublicApi/doc.md) is generated from
   those comments. **(verify)**
@@ -96,10 +99,11 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.
 - A command's `entries.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
   hand: they re-render it with keys in alphabetical order and drop comments.
-- `sandbox.Commands` is the whole command surface, one `*api.Command` per declared command,
-  built by `sandbox/binds/cli.go` from each package's generated `NewCommand`. The dispatch and
+- `Cli.Commands` is the whole command surface, one `api.Command` per declared command, built by
+  `sandbox/internal/cli/new.go` from each package's generated `NewCommand`. The dispatch and
   both help screens read it; nothing about the command set is generated per command anywhere
-  else.
+  else. Each run binds to its own copy of the declaration, made by `api.BindCommand`, so what
+  the slice holds is never written to.
 {{ end }}{{ if .HasServer }}
 ## Routes
 
@@ -127,8 +131,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - No two routes declare the same method and path pattern. **(verify)**
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
   subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
-- `sandbox.Routes` is the whole http surface, one `*api.Route` per declared route, built by
-  `sandbox/binds/server.go` from each package's generated `NewRoute`. The dispatch reads it and
+- `Server.Routes` is the whole http surface, one `api.Route` per declared route, built by
+  `sandbox/internal/server/new.go` from each package's generated `NewRoute`. The dispatch reads it and
   nothing about the route set is generated per route anywhere else; each request runs on its
   copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
 - Match order is the collector's, not the directory's: most `identifier`s first, then the

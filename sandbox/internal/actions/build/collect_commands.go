@@ -9,8 +9,8 @@ import (
 // CollectCommands reads every sandbox/internal/commands/<name>/entries.yaml and
 // returns one data map per command, in listing order, for the generated
 // sandbox/internal/commands/<name>/new.go and the {{range .Commands}} loop of
-// sandbox/binds/cli.go. What the map holds is the declaration itself: the
-// dispatch and the help screens read it back off sandbox.Commands at runtime,
+// sandbox/internal/cli/new.go. What the map holds is the declaration itself: the
+// dispatch and the help screens read it back off Cli.Commands at runtime,
 // so nothing here is a Go spelling of anything. `help` is collected like every
 // other command: its entries.yaml is written by GenerateHelpEntriesYaml just
 // before this runs.

@@ -22,22 +22,21 @@ AgnosConfig/                        written once by `start`, read by every `buil
   paths.yaml                        SmartIO listing rewrites  (pathreplacerconf)
   docs/ReadmeHeader.md              README body, a template
 sandbox/                            closed: imports nothing outside sandbox/, no OS packages
-  new.go                            (gen) New(deps) *api.Sandbox, one binds.<X>Bind per binds/ file
+  new.go                            (gen) New(deps) *api.Sandbox, one <x>.New<X> per api/ file
   api/                              contracts only; imports nothing but sandbox/deps, for Sandbox.Deps
     sandbox.go                      (gen) Sandbox struct, one field per api/ file
     actions.go                      Actions struct + props structs + Runtime consts
     cli.go                          (gen) Cli struct + exit consts
     command.go                      (gen) Command/CommandFlag/CommandArg + NewCommand
-  binds/                            one file per api/ file, functions only
-    actions.go                      ActionsBind(sandbox): one assignment per action
-    cli.go                          (gen) CliBind: Sandbox.Commands + Cli.CliMain
   deps/                             contracts; each <x>/ imports nothing at all
     deps.go                         (gen) Deps struct, one <Title> <dir>.Sandbox per dir
     <x>/<x>.go                      type Sandbox struct of func fields
   internal/                         the logic; unreachable from outside the sandbox
     config/config.go                (gen) ProjectName, Version
-    cli/climain.go                  (gen) CliMain, the one dispatch, read off Sandbox.Commands
+    cli/new.go                      (gen) NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain
+    cli/climain.go                  (gen) CliMain, the one dispatch, read off Cli.Commands
     commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)
+    actions/new.go                  NewActions(sandbox) api.Actions: one assignment per action
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
     actions/build/collect_*.go      collectors: list one dir, title-case names
     actions/build/generate_*.go     new.go per command and per route, help entries.yaml, doc indexes

@@ -58,4 +58,4 @@ flags:
 help: Declare a new http route
 identifiers:
     - add-route
-long-description: Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in sandbox.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>.
+long-description: Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in Server.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>.

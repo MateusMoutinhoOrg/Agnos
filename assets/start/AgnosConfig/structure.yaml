@@ -10,7 +10,7 @@ sandbox:
     new.go:
       order: 1
       gen: true
-      description: New(deps) *api.Sandbox, one binds.<X>Bind per binds/ file
+      description: New(deps) *api.Sandbox, one <x>.New<X> per api/ file
     api:
       order: 2
       dir: true

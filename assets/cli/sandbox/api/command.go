@@ -62,10 +62,14 @@ type CommandFlag struct {
 }
 
 // Command is one command of the project, as the sandbox offers it: the whole
-// of what its entries.yaml declares, plus the handler behind it. Sandbox.Commands
+// of what its entries.yaml declares, plus the handler behind it. Cli.Commands
 // holds one per sandbox/internal/commands/<name>/, each built by that package's
-// generated NewCommand. The cli dispatch fills Items from the command line and
-// then calls Handler; a caller holding the sandbox can do the same.
+// generated NewCommand.
+//
+// What Cli.Commands holds is the declaration alone: nothing is ever bound onto
+// it. The cli dispatch copies it with BindCommand, fills that copy's Items from
+// the command line, and hands it to Handler; a caller holding the sandbox can
+// do the same.
 type Command struct {
 	// Name is the package directory of the command, snake_case.
 	Name string
@@ -111,9 +115,12 @@ type Command struct {
 	// GetFloats returns every float bound under one Id, in order.
 	GetFloats func(id string) []float64
 
-	// Handler runs the command against the values in Items. It is the
+	// Handler runs the command against one bound copy — the values in its
+	// Items — and returns the exit code it answered with. It takes that
+	// copy rather than closing over one, so the declaration on Cli.Commands
+	// is shared by every caller while nothing bound ever is. It is the
 	// command package's own CommandHandler, closed over the sandbox.
-	Handler func() int
+	Handler func(command *Command) int
 }
 
 // NewCommand returns an empty Command with Items open and every Get* reader
@@ -128,6 +135,27 @@ func NewCommand() *Command {
 		Items:       map[string][]any{},
 	}
 
+	bindCommandReaders(command)
+	return command
+}
+
+// BindCommand copies one declaration into the command a single run binds to:
+// the same declared fields — the slices are read-only and shared — with Items
+// empty, the readers pointed at the copy and the handler carried over. The
+// dispatch calls it once per command line, so what Cli.Commands holds is never
+// written to.
+func BindCommand(command *Command) *Command {
+	bound := *command
+	bound.Items = map[string][]any{}
+
+	bindCommandReaders(&bound)
+	return &bound
+}
+
+// bindCommandReaders points every Get* field of a command at that command's own
+// Items. A copy has to be read back through it: the readers are closures, so
+// the ones copied off the declaration would still read the declaration's.
+func bindCommandReaders(command *Command) {
 	command.GetItem = func(id string) []any {
 		return command.Items[id]
 	}
@@ -174,8 +202,6 @@ func NewCommand() *Command {
 		}
 		return values
 	}
-
-	return command
 }
 
 // first is the one value of an Id a scalar reader wants, nil when nothing was

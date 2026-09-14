@@ -2,7 +2,7 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: sandbox/api/sandbox.go
-      sha: 8d1b2318d2c8733f7e037c4824a71f1df8ffb8a00fc7296c6c51748cd699069f
+      sha: fbb648b54d8f2597bfce86ce213e534a4d455bb7ffae2525081741ad7e4664a6
     - file: sandbox/internal/config/config.go
       sha: aab6f7a4c149a73b0125511d51c75e6cc765c168db181090726b3d9c8c64c88e
     - file: sandbox/new.go

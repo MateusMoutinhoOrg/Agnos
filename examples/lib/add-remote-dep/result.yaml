@@ -14,4 +14,4 @@ tree:
     - file: sandbox/deps/remote/greeter.go
       sha: 5fe9fe69498c87176ea5bc32e9ec47f22d0a90a064f4251fad77128e080aacae
     - file: sandbox/deps/remote/sandbox.go
-      sha: 3d313ba6fc5a88e824e392f09aa13e2aa0937f2edafec6342e67b056835b1123
+      sha: d58d004dbbd50a98d8fec7be1558533007261c3fccbb606f6d0c599decba1ae4

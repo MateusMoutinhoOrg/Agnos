@@ -11,7 +11,7 @@
 | `go.sum` | `go mod tidy` | - |
 | `LICENSE` | `start` | once. A placeholder; its text is pasted into `README.md`'s License section |
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
-| `sandbox/new.go` | `build` | always. One `binds.<X>Bind` per file of `sandbox/binds/` |
+| `sandbox/new.go` | `build` | always. One `<x>.New<X>(&self)` per other file of `sandbox/api/` |
 | `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
 | `sandbox/internal/config/config.go` | `build` | always. `ProjectName`, `Version` from `project.yaml` |
 | `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
@@ -26,7 +26,8 @@
 | `assets/asset.go` | `add-dep embeddeps` | once |
 | `cmd/main/main.go` | `build` | always |
 | `docs/{CliInstall,CliExamples}/` | `build` | always. Both `doc.md` and `props.yaml` |
-| `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/binds/cli.go` | `build` | always |
+| `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
+| `sandbox/internal/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
 | `sandbox/internal/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
 | `sandbox/internal/commands/help/{entries.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/commands/version/{entries.yaml,handler.go}` | `build` | always |
@@ -39,5 +40,6 @@
 | `examples/<side>/<name>/result.yaml` | `exec-test` | on `update-test <name>`, on `--update` or when absent — never by hand |
 
 Everything not listed is yours: `sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
-and `sandbox/deps/` that you write, their `sandbox/binds/` and `adapters/libs/` halves, and any
+and `sandbox/deps/` that you write, their `sandbox/internal/<x>/new.go` and `adapters/libs/`
+halves, and any
 directory of `adapters/availables/` other than `standard`.

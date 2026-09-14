@@ -10,8 +10,8 @@ route what `sandbox/internal/commands/<name>/` is to a command, and `route.yaml`
 | Dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` |
 | Declared unit | `commands/<name>/entries.yaml` | `routes/<name>/route.yaml` |
 | Generated declaration | `new.go` -> `NewCommand` | `new.go` -> `NewRoute` |
-| Surface on the sandbox | `sandbox.Commands` | `sandbox.Routes` |
-| Built by | `sandbox/binds/cli.go` | `sandbox/binds/server.go` |
+| Surface on the sandbox | `Cli.Commands` | `Server.Routes` |
+| Built by | `sandbox/internal/cli/new.go` | `sandbox/internal/server/new.go` |
 | Hand-written half | `handler.go` -> `CommandHandler` | `handler.go` -> `RouteHandler` |
 | Install / remove | `cli-init` / `cli-purge` | `server-init` / `server-purge` |
 
@@ -50,7 +50,7 @@ err := sandbox.Server.Serve(api.ServeProps{Addr: ":8080", ReadTimeoutMs: 10000, 
 ```
 
 `add-route` writes `route.yaml` (the declaration) and a stub `handler.go` (yours); `build`
-generates `new.go`, the `api.Route` that lands in `sandbox.Routes`. One editor per place the
+generates `new.go`, the `api.Route` that lands in `Server.Routes`. One editor per place the
 declaration holds something — `add-segment`, `add-header`, `add-param`, `set-body`,
 `add-body-field`, `set-route`, each with its `remove-` inverse — so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
@@ -87,5 +87,5 @@ array ([RouteYaml](../RouteYaml/doc.md#reading-the-values)). The handler returns
 answered with, and propagates the one `ReadBody` gives it. [Routes](../Routes/doc.md) documents
 the route on the next build.
 
-A Go caller reads the same surface without a socket: `sandbox.Routes` is every declared route,
+A Go caller reads the same surface without a socket: `Server.Routes` is every declared route,
 in match order, and `api.BindRoute` copies one into the route a single request runs on.

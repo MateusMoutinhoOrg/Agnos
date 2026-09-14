@@ -16,7 +16,7 @@ import (
 //
 // It must run before CollectCommands, so the declaration is already in the
 // transaction when the collector reads it and help flows through the same
-// new.go / sandbox.Commands generation as any other command.
+// new.go / Cli.Commands generation as any other command.
 func GenerateHelpEntriesYaml(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
 	if io.Exist("sandbox/internal/commands/help/entries.yaml") {
 		return nil

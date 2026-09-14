@@ -649,7 +649,7 @@ Declare a new http route
 agnos add-route [--trigger <trigger>] [--method <method>] --help <help> --category <category> [--path <path>] [--quiet] <name>
 ```
 
-Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in sandbox.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>.
+Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in Server.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -1319,7 +1319,7 @@ Checks the project keeps the sandbox/adapter schema
 agnos verify [--path <path>] [--runtime <runtime>] [--quiet]
 ```
 
-Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, binds, deps, internal and new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps imports nothing external, every sandbox/binds file mirrors a sandbox/api file and declares only functions, and adapters/ holds only availables and libs. `agnos build` runs this as a gate unless --unsafe is passed.
+Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, deps, internal and new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps imports nothing external, every sandbox/api file has the sandbox/internal/<x>/new.go that builds it, and adapters/ holds only availables and libs. `agnos build` runs this as a gate unless --unsafe is passed.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

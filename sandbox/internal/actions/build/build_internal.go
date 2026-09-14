@@ -77,7 +77,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 
 	// The server layer's mirror of CollectCommands: one entry per declared
 	// route, already ordered for matching so the dispatch only has to range
-	// over sandbox.Routes.
+	// over Server.Routes.
 	routes, err := CollectRoutes(sandbox, io)
 	if err != nil {
 		return err
@@ -167,7 +167,6 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"HasFront":          hasFront,
 		"StaticMount":       CollectFrontMount(sandbox, io),
 		"HasAssets":         hasAssets,
-		"Binds":             CollectBinds(sandbox, io),
 		"Constructors":      CollectConstructors(sandbox, io),
 		"DepsLibs":          CollectDepsLibs(sandbox, io),
 		"AdapterLibs":       CollectAdapterLibs(sandbox, io),

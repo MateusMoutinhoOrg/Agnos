@@ -11,7 +11,7 @@ import (
 // generated NewRoute and every generated ReadBody reads them through these, and
 // a hand-written handler is handed the response already read back.
 //
-// A route nothing bound — one taken straight off sandbox.Routes rather than
+// A route nothing bound — one taken straight off Server.Routes rather than
 // minted per request by the dispatch — reads back as the zero value, whose
 // function fields are nil.
 

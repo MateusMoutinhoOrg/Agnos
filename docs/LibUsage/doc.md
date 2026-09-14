@@ -39,11 +39,12 @@ Everything callable from Go is behind one of them.
 | --- | --- |
 | `lib.Actions` | `api.Actions` |
 | `lib.Cli` | `api.Cli` |
-| `lib.Commands` | `[]*api.Command` |
 
-`lib.Commands` is the command surface itself: every command the project declares,
-each carrying its flags, its args and the `Handler` that runs it, so a caller drives a command
-without a command line — bind the values into `command.Items` and call `command.Handler()`.
+`lib.Cli.Commands` (`[]api.Command`) is the command surface itself: every command
+the project declares, each carrying its flags, its args and the `Handler` that runs it.
+`api.BindCommand(&command)` copies one into the command a single run binds to, so a caller
+drives a command without a command line — bind the values into the copy's `Items` and call
+`copy.Handler(copy)`.
 
 [PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs and
 dependency contracts — generated from `sandbox/api/` itself on every build.
@@ -52,7 +53,7 @@ dependency contracts — generated from `sandbox/api/` itself on every build.
 
 Every sub-contract is a struct of function fields, so any of them can be swapped for a
 test double, an in-memory implementation or an instrumented wrapper. Patch fields **before**
-`sandbox.New(&deps)`: the binders capture the pointer.
+`sandbox.New(&deps)`: the constructors capture the pointer.
 
 ```go
 deps := standard.New()

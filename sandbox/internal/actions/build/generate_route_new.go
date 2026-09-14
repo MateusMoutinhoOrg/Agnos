@@ -8,8 +8,8 @@ import (
 
 // GenerateRouteNew renders assets/templates/route_new.go once per route into
 // sandbox/internal/routes/<name>/new.go — the api.Route that package declares,
-// derived from its route.yaml, which sandbox/binds/server.go collects into
-// sandbox.Routes, plus the ReadBody its body declaration calls for. It is the
+// derived from its route.yaml, which sandbox/internal/server/new.go collects into
+// Server.Routes, plus the ReadBody its body declaration calls for. It is the
 // server layer's GenerateCommandNew; the module path is merged in because a
 // route's new.go imports the project's own packages.
 func GenerateRouteNew(sandbox *api.Sandbox, io *smartio.SmartIO, routes []map[string]any, module string) error {

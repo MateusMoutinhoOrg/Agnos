@@ -8,7 +8,7 @@ import (
 
 // sandboxAllowedDirs is the fixed set of sub-directories the sandbox/ tree may
 // contain; sandboxAllowedFiles is the fixed set of loose files.
-var sandboxAllowedDirs = []string{"api", "binds", "deps", "internal"}
+var sandboxAllowedDirs = []string{"api", "deps", "internal"}
 var sandboxAllowedFiles = []string{"new.go"}
 
 // CheckSandbox runs every sandbox-layer rule and returns one string per
@@ -24,13 +24,13 @@ func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []st
 	violations = append(violations, checkSandboxImports(sandbox, io, module)...)
 	violations = append(violations, checkSandboxApi(sandbox, io, module)...)
 	violations = append(violations, checkSandboxDeps(sandbox, io, module)...)
-	violations = append(violations, checkSandboxBinds(sandbox, io)...)
+	violations = append(violations, checkSandboxConstructors(sandbox, io)...)
 
 	return violations
 }
 
-// checkSandboxContents enforces that sandbox/ holds only the api, binds, deps
-// and internal directories plus a loose new.go.
+// checkSandboxContents enforces that sandbox/ holds only the api, deps and
+// internal directories plus a loose new.go.
 func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
@@ -38,7 +38,7 @@ func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		name := lastSegment(sandbox, dir)
 		if !contains(sandboxAllowedDirs, name) {
 			violations = append(violations, "sandbox/ contains unexpected directory "+name+
-				" (allowed: api, binds, deps, internal)")
+				" (allowed: api, deps, internal)")
 		}
 	}
 
@@ -138,53 +138,59 @@ func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) 
 	return violations
 }
 
-// checkSandboxBinds enforces that every file in sandbox/binds mirrors a file
-// of the same name in sandbox/api and declares only functions.
-func checkSandboxBinds(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+// constructorExempt are the sandbox/api/ files that declare no field of the
+// sandbox: sandbox.go is the struct itself, and command.go and route.go are the
+// shape of one command and of one route, each owned by the contract whose
+// New<Name> builds the slice of them.
+var constructorExempt = []string{"sandbox.go", "command.go", "route.go"}
+
+// checkSandboxConstructors enforces that the package building a contract builds
+// it under the one name sandbox/new.go calls: sandbox/api/<x>.go is a field of
+// the Sandbox, so sandbox/internal/<x>/new.go declares New<X>.
+//
+// A contract with no sandbox/internal/<x>/new.go passes. Such a field is one
+// this repo does not fill — an api published for a consumer to install, say —
+// and sandbox/new.go leaves it alone rather than naming a package that is not
+// written yet.
+func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
-	apiFiles := map[string]bool{}
 	for _, file := range io.ListFiles("sandbox/api") {
-		apiFiles[lastSegment(sandbox, file)] = true
-	}
-
-	for _, file := range io.ListFiles("sandbox/binds") {
 		name := lastSegment(sandbox, file)
-		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
+		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || contains(constructorExempt, name) {
 			continue
 		}
-		if !apiFiles[name] {
-			violations = append(violations,
-				"sandbox/binds/"+name+" has no matching file in sandbox/api/")
+
+		base := sandbox.Deps.Stringsdeps.TrimSuffix(name, ".go")
+		constructor := "New" + sandbox.Deps.Stringsdeps.ToUpper(base[:1]) + base[1:]
+		newFile := "sandbox/internal/" + base + "/new.go"
+
+		if !io.IsFile(newFile) {
+			continue
 		}
-		for _, decl := range topLevelNonFuncDecls(sandbox, io, file) {
+		if !declaresFunc(sandbox, io, newFile, constructor) {
 			violations = append(violations,
-				"sandbox/binds/"+name+" declares "+decl+"; sandbox/binds/ may contain only functions")
+				newFile+" does not declare "+constructor+"; it is what sandbox/new.go calls to fill Sandbox."+
+					sandbox.Deps.Stringsdeps.ToUpper(base[:1])+base[1:])
 		}
 	}
 
 	return violations
 }
 
-// topLevelNonFuncDecls returns a label for every top-level declaration in the
-// file that is not a function, types first, then constants, then variables.
-func topLevelNonFuncDecls(sandbox *api.Sandbox, io *smartio.SmartIO, file string) []string {
+// declaresFunc reports whether a file declares a plain top-level function of
+// that name.
+func declaresFunc(sandbox *api.Sandbox, io *smartio.SmartIO, file string, name string) bool {
 	parsed := parseFile(sandbox, io, file)
 	if parsed == nil {
-		return nil
+		return false
 	}
-
-	var found []string
-	for range parsed.Types {
-		found = append(found, "a type")
+	for _, function := range parsed.Functions {
+		if function.Name == name && function.Receiver == "" {
+			return true
+		}
 	}
-	for range parsed.Constants {
-		found = append(found, "a const")
-	}
-	for range parsed.Variables {
-		found = append(found, "a var")
-	}
-	return found
+	return false
 }
 
 // fileImports returns the import paths of one Go file, sorted.

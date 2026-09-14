@@ -8,7 +8,7 @@ import (
 // help is a command like any other — entries.yaml, generated new.go, and this
 // handler.go — except that `agnos build` writes all three instead
 // of the user writing two of them. Nothing about the command set is baked in
-// here: the screens below are printed from sandbox.Commands, the same
+// here: the screens below are printed from Cli.Commands, the same
 // declarations the dispatch binds a command line against.
 
 const (
@@ -62,7 +62,7 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		return exitOk
 	}
 
-	for _, declared := range sandbox.Commands {
+	for _, declared := range sandbox.Cli.Commands {
 		if identifiedBy(declared.Identifiers, name) {
 			printCommandHelp(sandbox, declared)
 			return exitOk
@@ -96,8 +96,8 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 	p("\n")
 
 	categoryOrder := []string{}
-	categorized := map[string][]*api.Command{}
-	for _, cmd := range sandbox.Commands {
+	categorized := map[string][]api.Command{}
+	for _, cmd := range sandbox.Cli.Commands {
 		if cmd.Hidden {
 			continue
 		}
@@ -112,7 +112,7 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 	}
 
 	maxNameLen := 0
-	for _, cmd := range sandbox.Commands {
+	for _, cmd := range sandbox.Cli.Commands {
 		if cmd.Hidden || len(cmd.Identifiers) == 0 {
 			continue
 		}
@@ -160,7 +160,7 @@ func PrintGeneralHelp(sandbox *api.Sandbox) {
 
 // ─── Per-command help ──────────────────────────────────────────────────────
 
-func printCommandHelp(sandbox *api.Sandbox, cmd *api.Command) {
+func printCommandHelp(sandbox *api.Sandbox, cmd api.Command) {
 	p := sandbox.Deps.Std.Printf
 
 	name := cmd.Identifiers[0]

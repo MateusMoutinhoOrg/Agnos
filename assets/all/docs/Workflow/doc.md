@@ -38,7 +38,7 @@ No recipe below asks for a Go file to be created by hand except the cases listed
 
 `add-command` writes `sandbox/internal/commands/<name>/entries.yaml` (the declaration) and a
 stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`sandbox.Commands`. Every key these editors write is in
+`Cli.Commands`. Every key these editors write is in
 [EntriesYaml](../EntriesYaml/doc.md); never edit `entries.yaml` by hand.
 
 Then write `handler.go` — the whole hand-written half of a command:
@@ -86,7 +86,7 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 
 `add-route` writes `sandbox/internal/routes/<name>/route.yaml` (the declaration) and a stub
 `handler.go` (yours), then generates `new.go` — the `api.Route` that lands in
-`sandbox.Routes`, which the dispatch reads every request against.
+`Server.Routes`, which the dispatch reads every request against.
 One editor per place the declaration holds something, so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
@@ -169,15 +169,15 @@ declaration, no generated counterpart — write the package and run `build`.
 ## Add a surface to the sandbox api
 
 The api is what a Go caller gets back from `sandbox.New` (see [LibUsage](../LibUsage/doc.md)).
-Three hand-written files, then `build` regenerates `sandbox/api/sandbox.go` and `sandbox/new.go`
-around them:
+Two hand-written places, then `build` regenerates `sandbox/api/sandbox.go` and
+`sandbox/new.go` around them:
 
 1. `sandbox/api/<x>.go` — the contract: `type <X> struct { ... }` of function fields, named
    after the file, every declaration doc-commented (those comments render
    [PublicApi](../PublicApi/doc.md)). It becomes the `api.Sandbox` field `<X>`.
-2. `sandbox/internal/<x>/` — the implementation.
-3. `sandbox/binds/<x>.go` — `func <X>Bind(sandbox *api.Sandbox)`, assigning
-   each field of `sandbox.<X>`. One binds file per api file, functions only.
+2. `sandbox/internal/<x>/new.go` — `func New<X>(sandbox *api.Sandbox) api.<X>`, assigning each
+   field of the contract, with the implementation beside it. `sandbox/new.go` calls it as
+   `self.<X> = <x>.New<X>(&self)`.
 
 ## Add a dependency
 
@@ -252,7 +252,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | `assets/frontend/pages/<page>.html`, `assets/frontend/static/**` | a page looks like something |
 {{- end }}
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
-| `sandbox/api/<x>.go` + `sandbox/binds/<x>.go` | a new api surface |
+| `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `{{.ConfigDir}}/docs/ReadmeHeader.md`

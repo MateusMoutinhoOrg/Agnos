@@ -36,7 +36,7 @@ agnos remove-command <cmd>
 
 `add-command` writes `sandbox/internal/commands/<name>/entries.yaml` (the declaration) and a
 stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`sandbox.Commands`. Every key these editors write is in
+`Cli.Commands`. Every key these editors write is in
 [EntriesYaml](../EntriesYaml/doc.md); never edit `entries.yaml` by hand.
 
 Then write `handler.go` — the whole hand-written half of a command:
@@ -88,15 +88,15 @@ declaration, no generated counterpart — write the package and run `build`.
 ## Add a surface to the sandbox api
 
 The api is what a Go caller gets back from `sandbox.New` (see [LibUsage](../LibUsage/doc.md)).
-Three hand-written files, then `build` regenerates `sandbox/api/sandbox.go` and `sandbox/new.go`
-around them:
+Two hand-written places, then `build` regenerates `sandbox/api/sandbox.go` and
+`sandbox/new.go` around them:
 
 1. `sandbox/api/<x>.go` — the contract: `type <X> struct { ... }` of function fields, named
    after the file, every declaration doc-commented (those comments render
    [PublicApi](../PublicApi/doc.md)). It becomes the `api.Sandbox` field `<X>`.
-2. `sandbox/internal/<x>/` — the implementation.
-3. `sandbox/binds/<x>.go` — `func <X>Bind(sandbox *api.Sandbox)`, assigning
-   each field of `sandbox.<X>`. One binds file per api file, functions only.
+2. `sandbox/internal/<x>/new.go` — `func New<X>(sandbox *api.Sandbox) api.<X>`, assigning each
+   field of the contract, with the implementation beside it. `sandbox/new.go` calls it as
+   `self.<X> = <x>.New<X>(&self)`.
 
 ## Add a dependency
 
@@ -159,7 +159,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | --- | --- |
 | `sandbox/internal/commands/<name>/handler.go` | a command does something |
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
-| `sandbox/api/<x>.go` + `sandbox/binds/<x>.go` | a new api surface |
+| `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `AgnosConfig/docs/ReadmeHeader.md`

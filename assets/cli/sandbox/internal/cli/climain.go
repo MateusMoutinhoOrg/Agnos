@@ -35,11 +35,12 @@ const quietId = "quiet"
 // helpId is the command the empty command line falls back to.
 const helpId = "help"
 
-// CliMain reads the verb, finds the command of sandbox.Commands that answers to
-// it, binds the rest of the command line to that command's declared flags and
-// args, and calls its handler. Nothing here is generated per command: every
-// command is one declaration built by its own NewCommand and collected by
-// sandbox/binds/cli.go, so this dispatch is the same file in every project.
+// CliMain reads the verb, finds the command of Cli.Commands that answers to
+// it, binds the rest of the command line to a copy of that command's declared
+// flags and args, and calls its handler. Nothing here is generated per command:
+// every command is one declaration built by its own NewCommand and collected by
+// sandbox/internal/cli/new.go, so this dispatch is the same file in every
+// project.
 // `help` is reached through that same path — it is a declared command whose
 // files `{{.GeneratorName}} build` happens to write itself — and directly only
 // for the empty command line below.
@@ -56,9 +57,10 @@ func CliMain(sandbox *api.Sandbox, args []string) int {
 		return runHelp(sandbox)
 	}
 
-	for _, command := range sandbox.Commands {
-		if answersTo(command, action) {
-			return runCommand(sandbox, command, verb)
+	for index := range sandbox.Cli.Commands {
+		declared := &sandbox.Cli.Commands[index]
+		if answersTo(declared, action) {
+			return runCommand(sandbox, api.BindCommand(declared), verb)
 		}
 	}
 
@@ -80,19 +82,21 @@ func answersTo(command *api.Command, action string) bool {
 // runHelp prints the general help screen by running the help command with
 // nothing bound to it, and reports the empty command line as a usage error.
 func runHelp(sandbox *api.Sandbox) int {
-	for _, command := range sandbox.Commands {
-		if answersTo(command, helpId) && command.Handler != nil {
-			command.Handler()
+	for index := range sandbox.Cli.Commands {
+		declared := &sandbox.Cli.Commands[index]
+		if answersTo(declared, helpId) && declared.Handler != nil {
+			command := api.BindCommand(declared)
+			command.Handler(command)
 			break
 		}
 	}
 	return ExitUsage
 }
 
-// runCommand binds one command line to one command's declaration and hands the
-// result to its handler. The order is the order a user reads a command line in:
-// the flags, then the leftovers that look like flags, then the positional args,
-// then whatever is still unread.
+// runCommand binds one command line onto one bound copy of a command's
+// declaration and hands the result to its handler. The order is the order a
+// user reads a command line in: the flags, then the leftovers that look like
+// flags, then the positional args, then whatever is still unread.
 func runCommand(sandbox *api.Sandbox, command *api.Command, verb argvdeps.Parser) int {
 	for _, flag := range command.Flags {
 		if !bindFlag(sandbox, command, flag, verb) {
@@ -118,7 +122,7 @@ func runCommand(sandbox *api.Sandbox, command *api.Command, verb argvdeps.Parser
 		return ExitUsage
 	}
 
-	return command.Handler()
+	return command.Handler(command)
 }
 
 // bindFlag reads one declared flag off the command line into command.Items.
