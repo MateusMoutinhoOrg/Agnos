@@ -39,6 +39,7 @@ Everything callable from Go is behind one of them.
 | --- | --- |
 | `lib.Actions` | `api.Actions` |
 | `lib.Cli` | `api.Cli` |
+| `lib.Extension` | `api.Extension` |
 
 `lib.Cli.Commands` (`[]api.Command`) is the command surface itself: every command
 the project declares, each carrying its flags, its args and the `Handler` that runs it.
