@@ -50,9 +50,9 @@ func CliMain(sandbox *api.Sandbox, args []string) int {
 		return runHelp(sandbox)
 	}
 
-	verb := sandbox.Deps.Argvdeps.New(args)
+	parser := sandbox.Deps.Argvdeps.New(args)
 
-	action, err := verb.GetNextStringArg()
+	action, err := parser.GetNextStringArg()
 	if err != nil {
 		return runHelp(sandbox)
 	}
@@ -60,7 +60,7 @@ func CliMain(sandbox *api.Sandbox, args []string) int {
 	for index := range sandbox.Cli.Commands {
 		declared := &sandbox.Cli.Commands[index]
 		if answersTo(declared, action) {
-			return runCommand(sandbox, api.BindCommand(declared), verb)
+			return runCommand(sandbox, api.BindCommand(declared), parser)
 		}
 	}
 
@@ -97,9 +97,9 @@ func runHelp(sandbox *api.Sandbox) int {
 // declaration and hands the result to its handler. The order is the order a
 // user reads a command line in: the flags, then the leftovers that look like
 // flags, then the positional args, then whatever is still unread.
-func runCommand(sandbox *api.Sandbox, command *api.Command, verb argvdeps.Parser) int {
+func runCommand(sandbox *api.Sandbox, command *api.Command, parser argvdeps.Parser) int {
 	for _, flag := range command.Flags {
-		if !bindFlag(sandbox, command, flag, verb) {
+		if !bindFlag(sandbox, command, flag, parser) {
 			return ExitUsage
 		}
 	}
@@ -108,17 +108,17 @@ func runCommand(sandbox *api.Sandbox, command *api.Command, verb argvdeps.Parser
 		silenceLogs(sandbox)
 	}
 
-	if !checkUnknownFlags(sandbox, verb) {
+	if !checkUnknownFlags(sandbox, parser) {
 		return ExitUsage
 	}
 
 	for _, arg := range command.Args {
-		if !bindArg(sandbox, command, arg, verb) {
+		if !bindArg(sandbox, command, arg, parser) {
 			return ExitUsage
 		}
 	}
 
-	if !checkUnusedArgs(sandbox, verb) {
+	if !checkUnusedArgs(sandbox, parser) {
 		return ExitUsage
 	}
 
@@ -126,17 +126,17 @@ func runCommand(sandbox *api.Sandbox, command *api.Command, verb argvdeps.Parser
 }
 
 // bindFlag reads one declared flag off the command line into command.Items.
-func bindFlag(sandbox *api.Sandbox, command *api.Command, flag api.CommandFlag, verb argvdeps.Parser) bool {
+func bindFlag(sandbox *api.Sandbox, command *api.Command, flag api.CommandFlag, parser argvdeps.Parser) bool {
 	if flag.Type == typeBoolean {
-		command.Items[flag.Id] = []any{verb.IsPresent(flag.Identifiers)}
+		command.Items[flag.Id] = []any{parser.IsPresent(flag.Identifiers)}
 		return true
 	}
 
-	occurrences := verb.GetOptionsSize(flag.Identifiers)
+	occurrences := parser.GetOptionsSize(flag.Identifiers)
 
 	if flag.Array {
 		for occurrence := 0; occurrence < occurrences; occurrence++ {
-			raw, rawOk := optionValue(sandbox, verb, flag.Id, flag.Identifiers, occurrence)
+			raw, rawOk := optionValue(sandbox, parser, flag.Id, flag.Identifiers, occurrence)
 			if !rawOk {
 				return false
 			}
@@ -150,7 +150,7 @@ func bindFlag(sandbox *api.Sandbox, command *api.Command, flag api.CommandFlag, 
 	}
 
 	if occurrences > 0 {
-		raw, rawOk := optionValue(sandbox, verb, flag.Id, flag.Identifiers, 0)
+		raw, rawOk := optionValue(sandbox, parser, flag.Id, flag.Identifiers, 0)
 		if !rawOk {
 			return false
 		}
@@ -177,10 +177,10 @@ func bindFlag(sandbox *api.Sandbox, command *api.Command, flag api.CommandFlag, 
 
 // bindArg reads one declared positional argument off the command line into
 // command.Items. An array arg drains every argument that is left.
-func bindArg(sandbox *api.Sandbox, command *api.Command, arg api.CommandArg, verb argvdeps.Parser) bool {
+func bindArg(sandbox *api.Sandbox, command *api.Command, arg api.CommandArg, parser argvdeps.Parser) bool {
 	if arg.Array {
 		for {
-			raw, rawOk := nextArgValue(verb)
+			raw, rawOk := nextArgValue(parser)
 			if !rawOk {
 				break
 			}
@@ -193,7 +193,7 @@ func bindArg(sandbox *api.Sandbox, command *api.Command, arg api.CommandArg, ver
 		return bound(sandbox, command, arg.Id, subjectArg, arg.Required)
 	}
 
-	if raw, rawOk := nextArgValue(verb); rawOk {
+	if raw, rawOk := nextArgValue(parser); rawOk {
 		value, valueOk := parseValue(sandbox, subjectArg, arg.Id, arg.Type, raw)
 		if !valueOk {
 			return false
@@ -246,8 +246,8 @@ func silenceLogs(sandbox *api.Sandbox) {
 
 // optionValue reads the occurrence-th value of a value flag, reporting a
 // clean usage error when the flag was given with nothing after it.
-func optionValue(sandbox *api.Sandbox, verb argvdeps.Parser, name string, flags []string, occurrence int) (string, bool) {
-	raw, err := verb.GetStringOption(flags, occurrence)
+func optionValue(sandbox *api.Sandbox, parser argvdeps.Parser, name string, flags []string, occurrence int) (string, bool) {
+	raw, err := parser.GetStringOption(flags, occurrence)
 	if err != nil {
 		sandbox.Deps.Std.Error("flag '%s': expected a value after %s\n", name, flags[0])
 		return "", false
@@ -258,8 +258,8 @@ func optionValue(sandbox *api.Sandbox, verb argvdeps.Parser, name string, flags 
 // nextArgValue drains the next positional argument, reporting whether one was
 // left. It never fails on the value itself: parsing is parseValue's job, so an
 // unparsable argument is told apart from an exhausted command line.
-func nextArgValue(verb argvdeps.Parser) (string, bool) {
-	raw, err := verb.GetNextStringArg()
+func nextArgValue(parser argvdeps.Parser) (string, bool) {
+	raw, err := parser.GetNextStringArg()
 	if err != nil {
 		return "", false
 	}
@@ -357,12 +357,12 @@ func numberLabel(sandbox *api.Sandbox, kind string, value float64) string {
 // checkUnknownFlags reports the first argument that still looks like a flag
 // after every declared flag has been read — a typo such as --pathh, which
 // would otherwise be ignored and leave the command running on a default.
-func checkUnknownFlags(sandbox *api.Sandbox, verb argvdeps.Parser) bool {
-	for i, used := range verb.Used {
-		if used || !sandbox.Deps.Stringsdeps.HasPrefix(verb.Args[i], "-") {
+func checkUnknownFlags(sandbox *api.Sandbox, parser argvdeps.Parser) bool {
+	for i, used := range parser.Used {
+		if used || !sandbox.Deps.Stringsdeps.HasPrefix(parser.Args[i], "-") {
 			continue
 		}
-		sandbox.Deps.Std.Error("unknown flag %q — run '%s help' for the accepted flags\n", verb.Args[i], binaryName(sandbox))
+		sandbox.Deps.Std.Error("unknown flag %q — run '%s help' for the accepted flags\n", parser.Args[i], binaryName(sandbox))
 		return false
 	}
 	return true
@@ -370,12 +370,12 @@ func checkUnknownFlags(sandbox *api.Sandbox, verb argvdeps.Parser) bool {
 
 // checkUnusedArgs reports the first argument left over once every declared
 // flag and positional arg has been read.
-func checkUnusedArgs(sandbox *api.Sandbox, verb argvdeps.Parser) bool {
-	for i, used := range verb.Used {
+func checkUnusedArgs(sandbox *api.Sandbox, parser argvdeps.Parser) bool {
+	for i, used := range parser.Used {
 		if used {
 			continue
 		}
-		sandbox.Deps.Std.Error("unexpected argument %q\n", verb.Args[i])
+		sandbox.Deps.Std.Error("unexpected argument %q\n", parser.Args[i])
 		return false
 	}
 	return true

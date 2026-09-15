@@ -1,6 +1,7 @@
 package standard
 
 import (
+	argvdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/argvdeps"
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/embeddeps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/goimportsdeps"
 	hashdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/hashdeps"
@@ -12,12 +13,12 @@ import (
 	std "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/std"
 	stringsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/stringsdeps"
 	templatedeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/templatedeps"
-	verb "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/verb"
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func New() deps.Deps {
 	deps := deps.Deps{}
+	argvdeps.Bind(&deps)
 	embeddeps.Bind(&deps)
 	goimportsdeps.Bind(&deps)
 	hashdeps.Bind(&deps)
@@ -29,6 +30,5 @@ func New() deps.Deps {
 	std.Bind(&deps)
 	stringsdeps.Bind(&deps)
 	templatedeps.Bind(&deps)
-	verb.Bind(&deps)
 	return deps
 }

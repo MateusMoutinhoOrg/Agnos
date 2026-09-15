@@ -81,8 +81,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A command handler is always `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
-- A dep is named after the contract it installs; an adapter after what backs it (`argvdeps`,
-  adapter `verb`). The two are separate names because one dep may have several adapters.
+- A dep is named after the contract it installs; an adapter after what backs it (`sortdeps`,
+  adapter `reflectsort`). The two are separate names because one dep may have several adapters.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, one directory per concern.
 {{ if .HasCli }}
 ## Handlers

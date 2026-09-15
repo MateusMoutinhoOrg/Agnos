@@ -1,4 +1,4 @@
-default-adapter: verb
+default-adapter: argvdeps
 field: Argvdeps
 help: Per-call argv parser
 name: argvdeps

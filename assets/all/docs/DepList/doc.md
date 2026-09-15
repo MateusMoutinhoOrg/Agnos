@@ -9,8 +9,7 @@ in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 
 | Dep | `Deps` field | Adapters | Backed by | Provides |
 |---|---|---|---|---|
-| `argvdeps` | `Argvdeps` | `verb` | `github.com/MateusMoutinhoOrg/Verb` (pinned in `go.mod`) | Per-call argv parser. Installed by `cli-init` |
-| `dbdeps` | `Dbdeps` | `keep` | `github.com/MateusMoutinhoOrg/Keep` (pinned) | Schema database |
+| `argvdeps` | `Argvdeps` | `argvdeps` | `strings`, `strconv`, `time` | Per-call argv parser. Installed by `cli-init` |
 | `embeddeps` | `Embeddeps` | `embeddeps` + `assets/asset.go` | `embed`, `text/template` | Read and render files compiled into the binary |
 | `goimportsdeps` | `Goimportsdeps` | `goimportsdeps` | `go/parser` | Go source reader (package, imports, declarations) |
 | `hashdeps` | `Hashdeps` | `hashdeps` | `crypto/sha256`, `encoding/hex` | SHA-256 of a byte slice, lower-case hex |

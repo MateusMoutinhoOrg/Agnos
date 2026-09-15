@@ -4,7 +4,7 @@ tree:
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: sandbox/internal/cli/climain.go
-      sha: 994ba31611a7c90aa2a15918fc9579e37a022077b5274e3c4bacc079c80a56c1
+      sha: 0d0db6ea9a21277c18c7a7fae939ac9f6c2e3e3f1cf511964cc7040f51062f67
     - file: sandbox/internal/cli/new.go
       sha: 70c4b960ff513933bc881bad643f18abeedfe5c3626fa3306183cbaf665b8ef7
     - file: sandbox/internal/commands/help/entries.yaml

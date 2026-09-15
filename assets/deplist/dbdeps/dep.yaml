@@ -1,4 +1,0 @@
-default-adapter: keep
-field: Dbdeps
-help: Schema database
-name: dbdeps

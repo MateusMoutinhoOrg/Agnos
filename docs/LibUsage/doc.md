@@ -88,6 +88,7 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 
 | Adapter lib | Binder |
 | --- | --- |
+| `adapters/libs/argvdeps` | `argvdeps.Bind(&deps)` |
 | `adapters/libs/embeddeps` | `embeddeps.Bind(&deps)` |
 | `adapters/libs/goimportsdeps` | `goimportsdeps.Bind(&deps)` |
 | `adapters/libs/hashdeps` | `hashdeps.Bind(&deps)` |
@@ -99,7 +100,6 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 | `adapters/libs/std` | `std.Bind(&deps)` |
 | `adapters/libs/stringsdeps` | `stringsdeps.Bind(&deps)` |
 | `adapters/libs/templatedeps` | `templatedeps.Bind(&deps)` |
-| `adapters/libs/verb` | `verb.Bind(&deps)` |
 
 Starting from `standard.New()` is the safe default: an unfilled field is a nil func that
 panics on first call. For a permanent mix, write your own
