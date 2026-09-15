@@ -6,8 +6,8 @@ type ExtensionAction struct {
 }
 
 type Extension struct {
-	Name string
-
-	Build   func(sandbox *Sandbox) error
-	Actions []ExtensionAction
+	Name     string
+	RunBuild bool
+	Build    func(sandbox *Sandbox) error
+	Actions  []ExtensionAction
 }
