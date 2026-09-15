@@ -1,0 +1,37 @@
+args:
+    - description: the header to drop
+      examples:
+        - remove-header authorization --route create-user
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - remove-header authorization --route create-user
+flags:
+    - description: the route (identifier or package name) the header is declared on
+      examples:
+        - remove-header authorization --route create-user
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-header authorization --route create-user --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one declared header from a route
+identifiers:
+    - remove-header
+long-description: 'Drops one declared header from a route, the exact inverse of add-header. The build renders only: dropping a header may leave hand-written code referring to what is gone.'

@@ -1,0 +1,24 @@
+category: Deps System
+examples:
+    - list-adapters
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - list-adapters --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - list-adapters -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Lists the adapters of the catalog and of the project
+identifiers:
+    - list-adapters
+long-description: 'One row per adapter: the name, the dep it fills, whether it is installed, the availables binding it, and what backs it.'

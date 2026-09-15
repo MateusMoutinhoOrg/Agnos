@@ -1,0 +1,42 @@
+args:
+    - description: the flag name (or one of its identifiers, e.g. --out)
+      examples:
+        - remove-flag output --command exec
+      name: name
+      required: true
+      type: string
+category: Cli System
+examples:
+    - remove-flag output --command exec
+    - remove-flag --out --command exec
+flags:
+    - description: the command (identifier or package name) that owns the flag
+      examples:
+        - --command exec
+      identifiers:
+        - --command
+        - -c
+      name: command
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-flag output --command exec --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Remove a flag from a command's entries.yaml
+identifiers:
+    - remove-flag
+long-description: |-
+    Drops one flag declaration (matched by its name or by one of its identifiers)
+    from sandbox/internal/commands/<command>/entries.yaml and runs build so the
+    command's new.go forgets it.

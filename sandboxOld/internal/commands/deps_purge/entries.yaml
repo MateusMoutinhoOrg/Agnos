@@ -1,0 +1,26 @@
+category: Deps System
+examples:
+    - deps-purge
+    - deps-purge --path ./my-project
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - deps-purge --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - deps-purge -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Removes the dependency-injection subsystem from the project
+identifiers:
+    - deps-purge
+long-description: |
+    Removes the sandbox/deps and adapters directories and calls build.

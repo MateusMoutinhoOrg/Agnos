@@ -1,0 +1,50 @@
+package set_command
+
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
+)
+
+// SetCommandInternal parses the target command's entries.yaml, overwrites
+// every command-level key the caller supplied (empty strings are "leave as
+// is"; --identifier and --example append) and writes the file back.
+func SetCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.CommandProps) error {
+	conf, err := utils.LoadCommandConf(sandbox, io, props.Command)
+	if err != nil {
+		return err
+	}
+	if props.Hidden && props.Visible {
+		return sandbox.Deps.Std.Errorf("--hidden and --visible are mutually exclusive")
+	}
+
+	changed := false
+	if help := sandbox.Deps.Stringsdeps.TrimSpace(props.Help); help != "" {
+		conf.Help, changed = help, true
+	}
+	if category := sandbox.Deps.Stringsdeps.TrimSpace(props.Category); category != "" {
+		conf.Category, changed = category, true
+	}
+	if long := sandbox.Deps.Stringsdeps.TrimSpace(props.LongDescription); long != "" {
+		conf.LongDescription, changed = long, true
+	}
+	if props.Hidden {
+		conf.Hidden, changed = true, true
+	}
+	if props.Visible {
+		conf.Hidden, changed = false, true
+	}
+	if len(props.Identifiers) > 0 {
+		conf.Identifiers, changed = utils.AppendUnique(conf.Identifiers, props.Identifiers), true
+	}
+	if len(props.Examples) > 0 {
+		conf.Examples, changed = utils.AppendUnique(conf.Examples, props.Examples), true
+	}
+	if !changed {
+		return sandbox.Deps.Std.Errorf("set-command: nothing to change (pass --help, --category, --long-description, --hidden, --visible, --identifier or --example)")
+	}
+
+	sandbox.Deps.Std.Log("set-command updating %s \n", utils.CommandEntriesPath(sandbox, props.Command))
+
+	return utils.SaveCommandConf(sandbox, io, props.Command, conf)
+}

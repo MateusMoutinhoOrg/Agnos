@@ -1,0 +1,71 @@
+identifiers: ["set-command"]
+category: Cli System
+help: Update the command-level keys of a command's entries.yaml
+long-description: |
+  Rewrites help, category, long-description and hidden in
+  sandbox/internal/commands/<name>/entries.yaml, and appends extra
+  identifiers / examples, then runs build so help output is regenerated.
+  Keys not passed are left untouched.
+examples:
+  - "set-command exec --help \"run the thing\" --category Core"
+  - "set-command exec --identifier run --example \"exec file.txt\""
+  - "set-command exec --hidden"
+args:
+  - name: name
+    description: the command to update (identifier or package name)
+    examples:
+      - "set-command exec --help \"run the thing\""
+    type: string
+    required: true
+flags:
+  - name: help
+    identifiers: ["--help"]
+    description: new one-line help text
+    examples:
+      - "--help \"run the thing\""
+    type: string
+  - name: category
+    identifiers: ["--category"]
+    description: new category the command is grouped under in help output
+    examples:
+      - "--category Core"
+    type: string
+  - name: long-description
+    identifiers: ["--long-description"]
+    description: new long description shown by help <command>
+    examples:
+      - "--long-description \"Runs the thing end to end.\""
+    type: string
+  - name: identifier
+    identifiers: ["--identifier", "-i"]
+    description: an extra verb the command answers to (repeatable)
+    examples:
+      - "--identifier run"
+    type: string
+    array: true
+  - name: example
+    identifiers: ["--example", "-e"]
+    description: an extra usage example (repeatable)
+    examples:
+      - "--example \"exec file.txt\""
+    type: string
+    array: true
+  - name: hidden
+    identifiers: ["--hidden"]
+    description: hide the command from help listings
+    type: boolean
+  - name: visible
+    identifiers: ["--visible"]
+    description: show the command in help listings again
+    type: boolean
+  - name: path
+    identifiers: ["--path"]
+    description: the dir holding the project (defaults to the current directory)
+    examples:
+      - "set-command exec --hidden --path ./my-project"
+    type: string
+    default: "."
+  - name: quiet
+    identifiers: ["--quiet", "-q"]
+    description: Quiets the cli output
+    type: boolean

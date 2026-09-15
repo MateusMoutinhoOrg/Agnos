@@ -1,0 +1,31 @@
+args:
+    - description: the available to remove
+      examples:
+        - remove-available lambda
+      name: available
+      required: true
+      type: string
+category: Deps System
+examples:
+    - remove-available lambda
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-available --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - remove-available lambda -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Deletes one available
+identifiers:
+    - remove-available
+long-description: 'Removes adapters/availables/<name>/ whole. The standard available is refused: cmd/main/main.go imports it.'

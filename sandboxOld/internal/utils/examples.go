@@ -1,0 +1,145 @@
+package utils
+
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+)
+
+// ExamplesDir is the example tree of a project: one directory per side, each
+// holding one directory per example. Every example is both documentation and
+// a test — `exec-test` runs it and compares what it produced with its golden.
+const ExamplesDir = "examples"
+
+// ExampleCliSide and ExampleLibSide are the two sides of ExamplesDir: the one
+// exercised through the project's cli and the one exercised through its lib.
+const (
+	ExampleCliSide = "cli"
+	ExampleLibSide = "lib"
+)
+
+// ExampleCliFile and ExampleLibFile are the one file each side's example
+// directory holds — the example itself, run with the directory as its cwd.
+const (
+	ExampleCliFile = "example.sh"
+	ExampleLibFile = "example.go"
+)
+
+// ExampleResultFile is the golden one example run is compared against,
+// ExampleTestDir the only directory an example may write into, and
+// ExampleAssertDir the subset of it the example copies out at the end — the
+// one the golden's tree is taken from, so that an example asserts what it is
+// about and not the whole project. Both are removed before every run.
+const (
+	ExampleResultFile = "result.yaml"
+	ExampleTestDir    = "TestDir"
+	ExampleAssertDir  = "AssertDir"
+)
+
+// ExampleSides is the fixed order the two sides are walked in: an example
+// present on both sides is run through the cli first.
+var ExampleSides = []string{ExampleCliSide, ExampleLibSide}
+
+// ExampleSideDir is the project-relative directory holding one side's
+// examples ("cli" -> "examples/cli").
+func ExampleSideDir(side string) string {
+	return ExamplesDir + "/" + side
+}
+
+// ExampleDir is the project-relative directory of one example
+// ("cli", "start" -> "examples/cli/start").
+func ExampleDir(side string, name string) string {
+	return ExampleSideDir(side) + "/" + name
+}
+
+// ExampleFile is the name of the one file an example of that side holds.
+func ExampleFile(side string) string {
+	if side == ExampleCliSide {
+		return ExampleCliFile
+	}
+	return ExampleLibFile
+}
+
+// Example metadata
+type Example struct {
+	Name        string
+	Description string
+}
+
+// CollectExamples returns the examples declared on one side of
+// examples/, sorted. A project with no examples/ directory — every project
+// before its first add-cli-example / add-lib-example — yields none, which is
+// what the generated listing then documents.
+func CollectExamples(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []Example {
+	dir := ExampleSideDir(side)
+	if !io.IsDir(dir) {
+		return nil
+	}
+
+	var examples []Example
+	for _, entry := range io.ListDirs(dir) {
+		name := LastSegment(sandbox, entry)
+		desc := ""
+		propsPath := entry + "/props.yaml"
+		if content, err := io.ReadFile(propsPath); err == nil {
+			if tree, err := sandbox.Deps.Serializables.ParseYaml(string(content)); err == nil {
+				if props, err := tree.GetObjectItem("description"); err == nil {
+					if description, err := props.GetString(); err == nil {
+						desc = description
+					}
+				}
+			}
+		}
+		examples = append(examples, Example{Name: name, Description: desc})
+	}
+	sandbox.Deps.Sortdeps.Slice(examples, func(i, j int) bool {
+		return examples[i].Name < examples[j].Name
+	})
+	return examples
+}
+
+// ValidateExampleName reports whether a user-typed example name is usable as
+// a directory name under examples/<side>/. It becomes a directory and is
+// linked from a generated listing, so only letters, digits, dots, dashes and
+// underscores are allowed, and it is one segment — an example is never nested.
+func ValidateExampleName(sandbox *api.Sandbox, name string) error {
+	name = sandbox.Deps.Stringsdeps.TrimSpace(name)
+	if name == "" {
+		return sandbox.Deps.Std.Errorf("an example needs a name")
+	}
+
+	for _, letter := range name {
+		valid := (letter >= 'a' && letter <= 'z') ||
+			(letter >= 'A' && letter <= 'Z') ||
+			(letter >= '0' && letter <= '9') ||
+			letter == '.' || letter == '-' || letter == '_'
+		if !valid {
+			return sandbox.Deps.Std.Errorf(
+				"invalid example name %q: only letters, digits, dots, dashes and underscores are allowed (it becomes one directory under %s)",
+				name, ExamplesDir)
+		}
+	}
+	return nil
+}
+
+// RemoveExample deletes one example directory and everything in it — the
+// example file, its golden result.yaml and any TestDir / AssertDir the last
+// run left behind. It is the whole of both remove-*-example actions: the two differ
+// only in the side they name.
+func RemoveExample(sandbox *api.Sandbox, io *smartio.SmartIO, side string, name string) error {
+	if err := ValidateExampleName(sandbox, name); err != nil {
+		return err
+	}
+
+	dir := ExampleDir(side, name)
+	if !io.IsDir(dir) {
+		return sandbox.Deps.Std.Errorf("example %s not found", dir)
+	}
+
+	sandbox.Deps.Std.Log("remove-%s-example removing %s \n", side, dir)
+
+	for _, entry := range io.ListAllRecursively(dir) {
+		io.RemoveDir(entry)
+	}
+	io.RemoveDir(dir)
+	return nil
+}

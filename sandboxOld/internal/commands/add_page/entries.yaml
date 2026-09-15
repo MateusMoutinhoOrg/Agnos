@@ -1,0 +1,41 @@
+args:
+    - description: the page name (becomes the route, its Go package and the html file)
+      name: name
+      required: true
+      type: string
+category: Front System
+examples:
+    - add-page home --trigger / --title Home
+    - add-page about --title About
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+    - description: the literal segment the page answers on, / included (defaults to /<name>)
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
+    - description: the <title> the scaffolded page carries (defaults to the page name)
+      identifiers:
+        - --title
+      name: title
+      type: string
+    - description: one-line description of the page, for docs/Routes (defaults to one derived from the name)
+      identifiers:
+        - --help
+      name: help
+      type: string
+help: Declare a new html page
+identifiers:
+    - add-page
+long-description: Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge.

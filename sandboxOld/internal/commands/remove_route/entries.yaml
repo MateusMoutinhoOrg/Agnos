@@ -1,0 +1,29 @@
+args:
+    - description: the route to delete (identifier or package name)
+      examples:
+        - remove-route create-user
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - remove-route create-user
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-route --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one declared route
+identifiers:
+    - remove-route
+long-description: 'Removes sandbox/internal/routes/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone.'

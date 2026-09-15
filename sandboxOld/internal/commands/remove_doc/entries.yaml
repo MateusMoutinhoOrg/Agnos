@@ -1,0 +1,36 @@
+args:
+    - description: the doc directory under docs/, nested with / for a sub-doc (e.g. PublicApi/api.AddDoc)
+      examples:
+        - remove-doc HandleReports
+      name: name
+      required: true
+      type: string
+category: Documentation
+examples:
+    - remove-doc HandleReports
+    - remove-doc PublicApi/api.AddDoc --path ./my-project
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - remove-doc HandleReports --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - remove-doc HandleReports -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete a doc directory from docs/
+identifiers:
+    - remove-doc
+long-description: |-
+    Deletes docs/<name>/ (doc.md, props.yaml, its assets and every sub-doc
+    nested under it) and runs build so the indexes that listed it are rewritten
+    without it. A theme left with no docs simply stops rendering a section in
+    README.md; it is not an error, so themes.yaml can keep it.

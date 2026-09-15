@@ -1,0 +1,74 @@
+args:
+    - description: the route to edit (identifier or package name)
+      examples:
+        - set-body create-user --type json
+      name: route
+      required: true
+      type: string
+category: Server System
+examples:
+    - set-body create-user --type json --required --max-bytes 2097152
+    - set-body upload-avatar --type raw --content-type application/octet-stream
+    - set-body ping --type none
+flags:
+    - description: 'how the body is read: none, raw, text or json'
+      examples:
+        - set-body create-user --type json
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: answer 400 when the body is absent or empty
+      examples:
+        - set-body create-user --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: accept an absent body again
+      examples:
+        - set-body create-user --optional
+      identifiers:
+        - --optional
+      name: optional
+      type: boolean
+    - default: "-1"
+      description: the longest body accepted, in bytes; a longer one is answered 413
+      examples:
+        - set-body create-user --max-bytes 2097152
+      identifiers:
+        - --max-bytes
+      name: max-bytes
+      type: int
+    - description: the only content-type accepted; a divergent one is answered 415
+      examples:
+        - set-body create-user --content-type text/plain
+      identifiers:
+        - --content-type
+      name: content-type
+      type: string
+    - description: delete the declared json-schema, leaving the body unvalidated
+      examples:
+        - set-body create-user --drop-schema
+      identifiers:
+        - --drop-schema
+      name: drop-schema
+      type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - set-body create-user --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rewrite the body keys of a route.yaml
+identifiers:
+    - set-body
+long-description: 'Overwrites the body keys of one route.yaml: how the body is read, whether it is required, the longest one accepted and the content-type the dispatch demands. Empty options leave the current value alone. Declaring a json-schema is add-body-field''s job; --drop-schema deletes the one already declared.'

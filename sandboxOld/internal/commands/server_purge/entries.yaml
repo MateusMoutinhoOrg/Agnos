@@ -1,0 +1,22 @@
+category: Server System
+examples:
+    - server-purge
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - server-purge --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Remove the http server layer and every route in it
+identifiers:
+    - server-purge
+long-description: Drops sandbox/internal/{server,routes,routeio} and the start-server command, then re-renders. The cli layer and the installed deps are left in place.

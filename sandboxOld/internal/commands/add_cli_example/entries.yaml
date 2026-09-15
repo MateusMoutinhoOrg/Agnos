@@ -1,0 +1,31 @@
+args:
+    - description: the name of the new example (it becomes one directory under examples/cli/)
+      examples:
+        - add-cli-example start
+      name: name
+      required: true
+      type: string
+category: Examples
+examples:
+    - add-cli-example start
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-cli-example start --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      examples:
+        - add-cli-example start -q
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Scaffold a new example under examples/cli/
+identifiers:
+    - add-cli-example
+long-description: Creates examples/cli/<name>/ with an example.sh stub that already runs and exits 0, then runs build so the example listing of the docs names it. The golden result.yaml is written by the first exec-test, never by hand. Refuses an existing name, and refuses outright in a project with no cli.
