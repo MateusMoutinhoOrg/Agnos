@@ -6,11 +6,13 @@ import (
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"gopkg.in/yaml.v3"
 )
 
 // Bind fills deps.Deps.Serializables, providing the capability to
-// create, parse, and serialize generic JSON/YAML structures.
+// create, parse, and serialize generic JSON/YAML structures. JSON goes
+// through encoding/json; YAML through the codec of yaml_decode.go and
+// yaml_encode.go, which reads and writes what gopkg.in/yaml.v3 read and
+// wrote before it, byte for byte.
 func Bind(deps *deps.Deps) {
 	deps.Serializables = serializibles.Sandbox{
 		CreateString: func(value string) *serializibles.SerializibleObject {
@@ -50,12 +52,12 @@ func Bind(deps *deps.Deps) {
 			return wrapValue(&v), nil
 		},
 		ParseYaml: func(data string) (*serializibles.SerializibleObject, error) {
-			var v any
-			if err := yaml.Unmarshal([]byte(data), &v); err != nil {
+			v, err := decodeYaml(data)
+			if err != nil {
 				return nil, err
 			}
-			// YAML unmarshals into map[string]any but sometimes into map[any]any.
-			// gopkg.in/yaml.v3 unmarshals into map[string]any.
+			// The codec of yaml_decode.go parses into map[string]any, []any
+			// and the scalar kinds, which is the shape wrapValue navigates.
 			return wrapValue(&v), nil
 		},
 
@@ -69,12 +71,11 @@ func Bind(deps *deps.Deps) {
 		},
 		SerializeToYaml: func(data *serializibles.SerializibleObject) string {
 			raw := reconstruct(data)
-			bytes, err := yaml.Marshal(raw)
+			result, err := encodeYaml(raw)
 			if err != nil {
 				return ""
 			}
 
-			result := string(bytes)
 			if result == "{}\n" || result == "[]\n" {
 				return ""
 			}
