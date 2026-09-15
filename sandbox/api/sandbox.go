@@ -19,4 +19,6 @@ type Sandbox struct {
 	Deps    *deps.Deps
 	Actions Actions
 	Cli     Cli
+
+	Extensions []Extension
 }
