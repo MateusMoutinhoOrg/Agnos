@@ -134,7 +134,8 @@ Never `fmt.Printf`.
   family, and only its literal head has to exist. Drop the entry when the path goes. **(verify)**
 - A generated page is changed at its source, never on the page:
   [PublicApi](../PublicApi/doc.md) from the doc comments of `sandbox/api/` and `sandbox/deps/`,
-  [Commands](../Commands/doc.md) from each `entries.yaml`, [Structure](../Structure/doc.md) from
+  [Commands](../Commands/doc.md) from each `entries.yaml`,
+  [Structure](../Structure/doc.md) from
   `AgnosConfig/structure.yaml`, `README.md` from
   `AgnosConfig/docs/ReadmeHeader.md` and every `props.yaml`.
 - Docs are short, objective and dense: tables, commands, file paths and rules — no prose, no

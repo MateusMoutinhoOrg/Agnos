@@ -21,9 +21,9 @@ README and a doc). Start with
 `docs/Workflow/doc.md` (the recipe for every change any agnos project takes) and
 `docs/Contributing/doc.md` (what is specific to changing agnos itself).
 
-`docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,Commands,LibUsage,LibExamples,PublicApi}/`
+`docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi}/`
 are rendered from `assets/all/docs/` into **every** agnos project, this one included,
-`docs/{CliInstall,CliExamples}/` from `assets/cli/docs/`,
+`docs/{CliInstall,CliExamples,Commands}/` from `assets/cli/docs/`,
 `docs/{RouteYaml,Routes,ServerUsage}/` from `assets/server/docs/` and `docs/FrontUsage/` from
 `assets/front/docs/`: editing one means editing that
 template, and it has to read correctly in a scaffolded project, not only here. Guard a line

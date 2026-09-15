@@ -51,9 +51,8 @@ build.
 {{- end }}
 {{- end }}
 {{- else }}
-No command is declared yet — this project has no CLI surface. Run `{{.GeneratorName}} cli-init`, then
-`{{.GeneratorName}} add-command <name> --help "..." --category "..."`, and every command lands on this page
-on the next build.
+No command is declared yet. Run `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
+and every command lands on this page on the next build.
 {{- end }}
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

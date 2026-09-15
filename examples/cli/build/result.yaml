@@ -17,10 +17,6 @@ tree:
       sha: 17220206e45e83d775311c94bd55f75eaea35b2e711469d11927f01d39eade19
     - file: docs/Adapters/props.yaml
       sha: 358d3f1dfa734fbad170a428773afc67c618522e8e295438475bdaec7d76ffb9
-    - file: docs/Commands/doc.md
-      sha: e56fd3987f43615bf06da7eb48501c7fe05e1219ac030625e89f8b227ee58c2f
-    - file: docs/Commands/props.yaml
-      sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
     - file: docs/DepList/doc.md
       sha: e8b1315f42d1eaaea8d5d84d4218e96fade49d7691fa51fa7861094ca39e4600
     - file: docs/DepList/props.yaml
@@ -30,7 +26,7 @@ tree:
     - file: docs/EntriesYaml/props.yaml
       sha: b2b3fb7a3d0d54857cbce60bc3e04cdf9961230598afed4eb5d474407d5bafed
     - file: docs/GeneratedFiles/doc.md
-      sha: 9411d878a6fcf0fef4673ee6676c8f4a3ec2a69fea21e290ff5104c319bce91e
+      sha: 3c5fa8e299cd44278a2fe0b5e85179a3ba83a0ee39e603f95fd3bcd19817ad22
     - file: docs/GeneratedFiles/props.yaml
       sha: a0eef341ebd88c5ba305c3948e7486fd5b001ff50af0232d73fb0c9a32982ab3
     - file: docs/LibExamples/doc.md
@@ -50,7 +46,7 @@ tree:
     - file: docs/Requirements/props.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: 886c1e6c0437433b2f9bc003e37257c03470441940f031cfd1945ed2111d0448
+      sha: a86153a40eed765ec2266a28a9223ff60c760f0ba5ace8c0d824da125983e33d
     - file: docs/Rules/props.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md
