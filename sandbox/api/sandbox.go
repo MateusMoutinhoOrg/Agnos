@@ -16,8 +16,7 @@ type Sandbox struct {
 	// effect everywhere. It is also the one field that does not cross into
 	// a consumer: an installed copy of this contract carries the api, never
 	// the wiring behind it.
-	Deps      *deps.Deps
-	Actions   Actions
-	Cli       Cli
-	Extension Extension
+	Deps    *deps.Deps
+	Actions Actions
+	Cli     Cli
 }
