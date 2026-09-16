@@ -60,6 +60,15 @@ first-class constraint. Humans are a secondary audience.
 - **Deterministic and idempotent.** Same input, same bytes out. An LLM must be able to
   regenerate the tree and diff it to zero.
 
+**`interview` is the exception, and the only one.** An LLM drives agnos through the plain cli;
+the interactive session is what a *person* uses, and it is written for a beginner who has never
+read a page of this repo — plain words instead of agnos vocabulary, the next step suggested
+first, and no row on a menu that the project in front of them cannot run. Density, token cost
+and "read the declaration" do not apply there: `sandbox/internal/actions/interview/` is the one
+place where hand-holding is the correct answer, and `docs/Interview/doc.md` is its page. Every
+rule above still binds the *code* of that feature — same patterns, same gofmt, same declarations;
+the exception covers only who its screens are written for.
+
 ## Bootstrap workflow
 
 **Never run an installed `agnos build` on this repo after touching templates, collectors,
@@ -161,13 +170,18 @@ values off the command by the id its `entries.yaml` declares — `command.GetStr
 — so nothing about a command is spelled in Go anywhere but its own `new.go`.
 
 `interview` is the second reader of that surface, and the reason it stays worth keeping generic:
-`sandbox/internal/actions/interview/` builds its top menu from every `Category`, a question from
-every `CommandArg` and `CommandFlag` — typed, bounded and defaulted exactly as declared — and
-binds the answers with `api.BindCommand` before calling the command's own handler. It declares
-nothing per command, so a command added later is covered without it changing. The one thing it
-knows by name is `suggest.go`: the table saying which field names something that already exists
-and where to read the list of them, always off the project at `--path` and never off the running
-binary's own `Cli.Commands`.
+`sandbox/internal/actions/interview/` builds a question from every `CommandArg` and `CommandFlag`
+— typed, bounded and defaulted exactly as declared — and binds the answers with `api.BindCommand`
+before calling the command's own handler. It declares nothing per command, so a command added
+later is covered without it changing. Two files hold the whole of the agnos vocabulary it spells,
+and both read the project at `--path`, never the running binary's own `Cli.Commands`:
+`suggest.go`, the table saying which field names something that already exists and where to read
+the list of them, and `state.go`, the beginner gate — the project is re-read before every menu
+(started or not, which extensions are on, how many units of its own each layer declares), an area
+whose mechanic is off is not offered at all, and the `<x>-init` that would turn it on is offered
+as a step instead, the first key one marked as the suggested next thing to do. That gate is why
+an empty folder offers `start` and nothing else, and a project with no cli offers `cli-init`
+before it offers anything about commands.
 
 The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
 layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go` mirror

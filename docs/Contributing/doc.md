@@ -34,10 +34,12 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 `handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
 
-`interview` needs nothing for the new command: it generates its questions from the declaration.
-Teach `sandbox/internal/actions/interview/suggest.go` only when one of the command's fields names
-something that already exists — a table entry saying where to read that list, off the project at
-`--path`.
+`interview` needs nothing for the new command: it generates its questions from the declaration. It is the one feature of agnos written for a beginner rather than for an llm ([Interview](../Interview/doc.md), and the exception in [Rules](../Rules/doc.md#authoring)), and two of its files take an entry — only for a command that is one of these:
+
+| Teach | When |
+|---|---|
+| `interview/suggest.go` | one of the command's fields names something that already exists: the entry says where to read that list, off the project at `--path` |
+| `interview/state.go` | the command opens or fills a layer: a row in `areas` for a new category, one in `extensionInit` for a new `<x>-init`, a rung in `nextSteps` for the step that offers it, and a name in `scaffoldedUnits` for a unit its init writes |
 
 `add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
 
@@ -59,6 +61,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/sandbox-front/`, `assets/doc-front/` |
 | Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` |
+| Interview gate (`interview/state.go`) | `Cli System` -> `sandbox-cli`, step `cli-init` | `Server System` -> `sandbox-server`, step `server-init` | `Front System` -> `sandbox-front`, step `front-init` |
 | Verify | `check_sandbox.go` et al | `check_routes.go` | — (`check_routes.go`) |
 
 A layer is an extension, so adding one is [Add an extension](#add-an-extension) plus the rows above. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.

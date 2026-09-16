@@ -1,6 +1,7 @@
 # Quickstart
 
 Every command takes the project dir via `--path` (default `.`). Every step ends by running `build`, so the tree always compiles.
+Typing none of it: `agnos interview` asks these same steps as questions, one suggested at a time — [Interview](../Interview/doc.md).
 
 ```bash
 agnos start --project-name my-tool --module github.com/you/my-tool   # AgnosConfig/, go.mod, sandbox skeleton

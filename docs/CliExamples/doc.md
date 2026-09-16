@@ -37,6 +37,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `enable-extension` |  | [example.sh](../../examples/cli/enable-extension/example.sh) |
 | `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
 | `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
+| `interview` | drive the guided session from a pipe | [example.sh](../../examples/cli/interview/example.sh) |
 | `list-adapters` |  | [example.sh](../../examples/cli/list-adapters/example.sh) |
 | `list-deps` |  | [example.sh](../../examples/cli/list-deps/example.sh) |
 | `list-extensions` |  | [example.sh](../../examples/cli/list-extensions/example.sh) |

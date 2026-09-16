@@ -58,7 +58,7 @@ Driving agnos from a terminal - install, scaffold, declare commands, reference
 | [Quickstart](docs/Quickstart/doc.md) | Empty directory to a compiling CLI with one command, using only agnos commands |
 | [Commands](docs/Commands/doc.md) | Every command of agnos, generated from the command declarations |
 | [CliExamples](docs/CliExamples/doc.md) | Index of every runnable example of the agnos cli |
-| [Interview](docs/Interview/doc.md) | The interactive session: how it walks the command surface |
+| [Interview](docs/Interview/doc.md) | The interactive session: the one screen written for a person, and what it offers when |
 
 ### LibUsage
 

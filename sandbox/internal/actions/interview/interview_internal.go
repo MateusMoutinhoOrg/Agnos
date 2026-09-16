@@ -16,24 +16,27 @@ const (
 	exitOptionId = "\x00exit"
 	backOptionId = "\x00back"
 	runOptionId  = "\x00run"
+	stepPrefix   = "\x00step:"
 )
 
-// InterviewInternal is the session: a menu of the categories the command
-// surface declares, a menu of the commands in one of them, one question per
-// field that command declares, a confirm screen showing the command line the
-// answers add up to, and then the command itself — over and over until the
-// person asks to stop.
+// InterviewInternal is the session: the steps this project has not taken and
+// the areas it already has, a menu of the commands in one of them, one
+// question per field that command declares, a confirm screen showing the
+// command line the answers add up to, and then the command itself — over and
+// over until the person asks to stop.
 //
 // Nothing about any command is spelled here. Cli.Commands already holds every
 // declaration — its category, its help, and each flag and arg with its type,
 // its bounds, whether it repeats and what it falls back to — so the questions
 // are generated from the declarations and a command declared tomorrow is
-// covered without this file changing.
+// covered without this file changing. What state.go adds on top is not a
+// command list but a filter: which of those declarations the project in front
+// of the person can actually run.
 func InterviewInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
-	printWelcome(sandbox, path)
+	printWelcome(sandbox, io, path)
 
 	for {
-		command, chosen, err := chooseCommand(sandbox)
+		command, chosen, err := chooseCommand(sandbox, io)
 		if err != nil {
 			return endSession(sandbox, err)
 		}
@@ -73,35 +76,93 @@ func endSession(sandbox *api.Sandbox, reason error) error {
 
 // ─── Choosing a command ─────────────────────────────────────────────────────
 
-// chooseCommand walks the two menus that lead to one command, and reports
-// false when the person chose to stop instead.
-func chooseCommand(sandbox *api.Sandbox) (api.Command, bool, error) {
+// chooseCommand walks the menus that lead to one command, and reports false
+// when the person chose to stop instead. The state is read again on every
+// pass: a command that turned a mechanic on opens its area, and the step that
+// turned it on is gone from the next menu.
+func chooseCommand(sandbox *api.Sandbox, io *smartio.SmartIO) (api.Command, bool, error) {
 	for {
-		category, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(
+		state := readState(sandbox, io)
+
+		chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(
 			"What do you want to do?",
-			categoryRows(sandbox),
+			topRows(sandbox, state),
 		)
 		if err != nil {
 			return api.Command{}, false, err
 		}
-		if category == exitOptionId {
+		if chosen == exitOptionId {
 			return api.Command{}, false, nil
 		}
 
-		command, chosen, err := chooseInCategory(sandbox, category)
+		if verb, isStep := stepVerb(sandbox, chosen); isStep {
+			if command, found := commandByVerb(sandbox, verb); found {
+				return command, true, nil
+			}
+			continue
+		}
+
+		command, picked, err := chooseInCategory(sandbox, state, chosen)
 		if err != nil {
 			return api.Command{}, false, err
 		}
-		if chosen {
+		if picked {
 			return command, true, nil
 		}
 	}
 }
 
-// chooseInCategory offers the commands of one category, and reports false when
-// the person asked to go back to the categories.
-func chooseInCategory(sandbox *api.Sandbox, category string) (api.Command, bool, error) {
-	commands := commandsIn(sandbox, category)
+// topRows is the first menu: the steps this project has not taken, the areas
+// it has, and the row that ends the session. A step is a command too — it is
+// listed first, in plain words, because it is what the project needs next.
+func topRows(sandbox *api.Sandbox, state projectState) []interviewer.AlternativeOption {
+	rows := []interviewer.AlternativeOption{}
+
+	for _, one := range nextSteps(state) {
+		if _, found := commandByVerb(sandbox, one.Verb); !found {
+			continue
+		}
+
+		mark := "  "
+		if len(rows) == 0 && one.Key {
+			mark = "★ "
+		}
+
+		rows = append(rows, interviewer.AlternativeOption{
+			Id:  stepPrefix + one.Verb,
+			Msg: sandbox.Deps.Std.Sprintf("%s%s  %s(%s)%s", mark, one.Msg, dim, one.Verb, reset),
+		})
+	}
+
+	rows = append(rows, categoryRows(sandbox, state)...)
+
+	return append(rows, interviewer.AlternativeOption{Id: exitOptionId, Msg: "· exit"})
+}
+
+// stepVerb reads a chosen row back as the command a step runs, reporting false
+// for every row that is not one.
+func stepVerb(sandbox *api.Sandbox, chosen string) (string, bool) {
+	if !sandbox.Deps.Stringsdeps.HasPrefix(chosen, stepPrefix) {
+		return "", false
+	}
+	return sandbox.Deps.Stringsdeps.TrimPrefix(chosen, stepPrefix), true
+}
+
+// commandByVerb reads one declaration of the surface back by the name it is
+// typed as.
+func commandByVerb(sandbox *api.Sandbox, verb string) (api.Command, bool) {
+	for _, command := range sandbox.Cli.Commands {
+		if verbOf(command) == verb {
+			return command, true
+		}
+	}
+	return api.Command{}, false
+}
+
+// chooseInCategory offers the commands of one area, and reports false when the
+// person asked to go back to the first menu.
+func chooseInCategory(sandbox *api.Sandbox, state projectState, category string) (api.Command, bool, error) {
+	commands := commandsIn(sandbox, state, category)
 
 	rows := []interviewer.AlternativeOption{}
 	for _, command := range commands {
@@ -129,29 +190,56 @@ func chooseInCategory(sandbox *api.Sandbox, category string) (api.Command, bool,
 	return api.Command{}, false, nil
 }
 
-// categoryRows is one row per category the command surface declares, in the
-// order the help screen groups them, plus the row that ends the session.
-func categoryRows(sandbox *api.Sandbox) []interviewer.AlternativeOption {
-	rows := []interviewer.AlternativeOption{}
-	seen := map[string]bool{}
+// categoryRows is one row per area this project has, each saying what it is
+// for. The order is the areas table's — what someone new needs first — and an
+// area whose mechanic is off has no command that applies, so no row is built
+// for it at all.
+func categoryRows(sandbox *api.Sandbox, state projectState) []interviewer.AlternativeOption {
+	offered := map[string]bool{}
+	declared := []string{}
 
 	for _, command := range sandbox.Cli.Commands {
 		category := categoryOf(command)
-		if !offerable(command) || seen[category] {
+		if !offerable(state, command) || offered[category] {
 			continue
 		}
-		seen[category] = true
-		rows = append(rows, interviewer.AlternativeOption{Id: category, Msg: category})
+		offered[category] = true
+		declared = append(declared, category)
 	}
 
-	return append(rows, interviewer.AlternativeOption{Id: exitOptionId, Msg: "· exit"})
+	rows := []interviewer.AlternativeOption{}
+	emitted := map[string]bool{}
+
+	for _, one := range areas {
+		if offered[one.Name] {
+			rows = append(rows, categoryRow(sandbox, one.Name))
+			emitted[one.Name] = true
+		}
+	}
+	for _, category := range declared {
+		if !emitted[category] {
+			rows = append(rows, categoryRow(sandbox, category))
+			emitted[category] = true
+		}
+	}
+
+	return rows
 }
 
-// commandsIn is every offerable command of one category, in declaration order.
-func commandsIn(sandbox *api.Sandbox, category string) []api.Command {
+// categoryRow is one area as a menu row, indented to line up under the steps.
+func categoryRow(sandbox *api.Sandbox, category string) interviewer.AlternativeOption {
+	return interviewer.AlternativeOption{
+		Id:  category,
+		Msg: "  " + labelled(sandbox, category, areaHelp(category)),
+	}
+}
+
+// commandsIn is every command of one area this project can run, in declaration
+// order.
+func commandsIn(sandbox *api.Sandbox, state projectState, category string) []api.Command {
 	commands := []api.Command{}
 	for _, command := range sandbox.Cli.Commands {
-		if offerable(command) && categoryOf(command) == category {
+		if offerable(state, command) && categoryOf(command) == category {
 			commands = append(commands, command)
 		}
 	}
@@ -159,10 +247,14 @@ func commandsIn(sandbox *api.Sandbox, category string) []api.Command {
 }
 
 // offerable reports whether a command belongs on a menu: a hidden one is kept
-// off every listing, one with no identifier cannot be named, and the interview
-// does not offer itself.
-func offerable(command api.Command) bool {
-	return !command.Hidden && len(command.Identifiers) > 0 && verbOf(command) != selfVerb
+// off every listing, one with no identifier cannot be named, the interview
+// does not offer itself, and the rest is what the project at --path can
+// actually run — the gate in state.go.
+func offerable(state projectState, command api.Command) bool {
+	if command.Hidden || len(command.Identifiers) == 0 || verbOf(command) == selfVerb {
+		return false
+	}
+	return applies(state, verbOf(command), categoryOf(command))
 }
 
 // categoryOf is the heading a command is listed under, with the same fallback
@@ -216,7 +308,7 @@ func confirmPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command,
 // changed, and a way back. The two fields the interview answers by itself are
 // not offered — the path is the session's and the progress stays visible.
 func planRows(sandbox *api.Sandbox, command api.Command, values map[string][]any) []interviewer.AlternativeOption {
-	rows := []interviewer.AlternativeOption{{Id: runOptionId, Msg: "run it"}}
+	rows := []interviewer.AlternativeOption{{Id: runOptionId, Msg: "yes, run it"}}
 
 	for _, field := range FieldsOf(command) {
 		if AnsweredForYou(command, field) {
@@ -228,7 +320,7 @@ func planRows(sandbox *api.Sandbox, command api.Command, values map[string][]any
 		})
 	}
 
-	return append(rows, interviewer.AlternativeOption{Id: backOptionId, Msg: "· back, run nothing"})
+	return append(rows, interviewer.AlternativeOption{Id: backOptionId, Msg: "· no, back to the menu"})
 }
 
 // currentText is what one answer holds now, for the row that offers to change

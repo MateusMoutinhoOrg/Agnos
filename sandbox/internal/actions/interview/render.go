@@ -2,6 +2,8 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
@@ -34,9 +36,11 @@ func notice(sandbox *api.Sandbox, format string, a ...any) {
 	sandbox.Deps.Std.Printf("  %s%s%s\n", yellow, sandbox.Deps.Std.Sprintf(format, a...), reset)
 }
 
-// printWelcome opens the session: who is asking, and which project the answers
-// will be applied to.
-func printWelcome(sandbox *api.Sandbox, path string) {
+// printWelcome opens the session: who is asking, which project the answers
+// will be applied to, and what state that project is in — the same reading the
+// menus are filtered by, said once in plain words so the first menu is not a
+// surprise.
+func printWelcome(sandbox *api.Sandbox, io *smartio.SmartIO, path string) {
 	p := sandbox.Deps.Std.Printf
 
 	title := sandbox.Deps.Std.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
@@ -53,12 +57,54 @@ func printWelcome(sandbox *api.Sandbox, path string) {
 	)
 	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", width), reset)
 	p("\n")
-	p("  %sWelcome to %s. I am your development assistant.%s\n", bold+white, sandbox.Config.ProjectName, reset)
-	p("  %sAnswer the questions and I will run the command for you —%s\n", dim, reset)
-	p("  %severy answer is a flag or an argument you could have typed.%s\n", dim, reset)
+	p("  %sYou do not need to know any command to use this.%s\n", bold+white, reset)
+	p("  %sPick what you want from the menu, answer the questions, and I run it.%s\n", dim, reset)
+	p("  %sNothing happens before you see the command and say yes.%s\n", dim, reset)
 	p("\n")
-	p("  %sproject%s  %s%s%s\n", dim, reset, green, path, reset)
+	p("  %s↑↓%s move   %senter%s choose   %sq%s go back\n", cyan, reset, cyan, reset, cyan, reset)
 	p("\n")
+
+	state := readState(sandbox, io)
+
+	p("  %sfolder %s  %s%s%s\n", dim, reset, green, path, reset)
+	p("  %sproject%s  %s\n", dim, reset, projectText(sandbox, state))
+	p("\n")
+}
+
+// projectText is the one line saying what is in the folder: nothing yet, or
+// the project's name followed by the layers it has turned on. It is what makes
+// the first menu legible — an area is missing because the layer behind it is
+// off, and this line is where that is said.
+func projectText(sandbox *api.Sandbox, state projectState) string {
+	if !state.Started {
+		return sandbox.Deps.Std.Sprintf("%snone here yet — creating one is the first step%s", yellow, reset)
+	}
+
+	name := state.Name
+	if name == "" {
+		name = "unnamed"
+	}
+
+	text := sandbox.Deps.Std.Sprintf("%s%s%s  ", bold+white, name, reset)
+	for _, spec := range utils.ExtensionCatalog() {
+		if extensionInit[spec.Name] == "" {
+			continue
+		}
+
+		mark := sandbox.Deps.Std.Sprintf("%soff%s", red, reset)
+		if enabled(state, spec.Name) {
+			mark = sandbox.Deps.Std.Sprintf("%son%s", green, reset)
+		}
+		text += sandbox.Deps.Std.Sprintf("  %s%s%s %s", dim, layerName(sandbox, spec.Name), reset, mark)
+	}
+
+	return text
+}
+
+// layerName is a mechanic without its sandbox- prefix, which is the generator's
+// word for it and not the person's.
+func layerName(sandbox *api.Sandbox, extension string) string {
+	return sandbox.Deps.Stringsdeps.TrimPrefix(extension, "sandbox-")
 }
 
 // printPlan is the confirm screen: the command line the answers add up to,
@@ -68,10 +114,11 @@ func printPlan(sandbox *api.Sandbox, command api.Command, values map[string][]an
 	p := sandbox.Deps.Std.Printf
 
 	p("\n")
-	p("  %sABOUT TO RUN%s\n", bold+cyan, reset)
+	p("  %sNOTHING HAS RUN YET%s %s— this is the command your answers add up to:%s\n", bold+cyan, reset, dim, reset)
 	p("  %s│%s\n", gray, reset)
 	p("  %s│%s  %s$%s %s%s%s\n", gray, reset, dim, reset, bold+white, CommandLine(sandbox, command, values), reset)
 	p("  %s│%s\n", gray, reset)
+	p("  %s│%s  %syou could have typed it yourself — that is all I am doing%s\n", gray, reset, dim, reset)
 	p("\n")
 }
 

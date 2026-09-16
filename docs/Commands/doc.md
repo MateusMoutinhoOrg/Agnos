@@ -1403,13 +1403,13 @@ agnos help start
 
 ### `interview`
 
-Start an interactive session that drives any agnos command
+Guided mode: answer questions instead of typing commands
 
 ```bash
 agnos interview [--path <path>] [--quiet]
 ```
 
-Asks what you want to do, then generates the questions from the declaration of the command that answers it: one question per flag and arg, typed, bounded and defaulted exactly as that command declares them. It shows the command line your answers add up to before running anything, and returns to the menu afterwards. Every command of the surface is reachable, and a command declared later is covered without the interview changing.
+The one screen of agnos made for a person rather than for a script: it reads the project you point it at and offers what that project can actually do next — create it, give it a command line, declare a command — one suggested step at a time. Areas you have not turned on stay off the menu until you turn them on. Every answer is a flag or an argument you could have typed, and the command line your answers add up to is shown before anything runs.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

@@ -1,26 +1,71 @@
 # Interview
 
-`agnos interview` drives the whole command surface by asking questions. It declares nothing of
-its own: every menu and every question is generated from `Cli.Commands`, so a command added
-tomorrow is covered without this feature changing.
+`agnos interview` is the one surface of agnos written for a person instead of for an llm — an
+llm drives agnos through the plain cli ([Commands](../Commands/doc.md)). It asks in plain words,
+offers only what the project in front of it can run, and leads with the step that project needs
+next. The rule behind that, and its limits, is in [Rules](../Rules/doc.md#authoring).
 
 ```bash
 agnos interview                       # the current directory
 agnos interview --path ./my-project   # another project
 ```
 
+It declares nothing of its own: every menu and every question is generated from `Cli.Commands`,
+so a command added tomorrow is covered without this feature changing.
+
 ## The session
 
 | Step | Comes from |
 | --- | --- |
-| What do you want to do? | the `category` of every declared command |
-| Which command? | the commands of that category, with their `help` |
+| What do you want to do? | the steps this project has not taken, then the areas it has |
+| Which command? | the commands of that area, with their `help` |
 | One question per field | each `CommandArg` and `CommandFlag` of that command |
-| About to run | the command line the answers add up to |
+| Nothing has run yet | the command line the answers add up to |
 | Run it / change one answer / back | — |
 
-Running a command returns to the first menu. `· exit` ends the session; so does ctrl-c, `q`, or
-the input running out — none of them is a failure, and all exit `0`.
+Running a command returns to the first menu, rebuilt from the project on disk — a command that
+turned a layer on opens that layer's area on the next pass, and the step that turned it on is
+gone. `· exit` ends the session; so does ctrl-c, `q`, or the input running out — none of them is
+a failure, and all exit `0`.
+
+## The first menu
+
+The project at `--path` is read before every menu: whether `AgnosConfig/project.yaml` is there,
+which extensions are on, and how many units of its own each layer declares.
+
+**Steps** — what this project has not done yet, in the order a project grows. The first key one
+is marked `★`; the rest are offers.
+
+| Step | Offered when | Key |
+| --- | --- | --- |
+| `start` | there is no project in the folder | ★ |
+| `cli-init` | `sandbox-cli` is off | ★ |
+| `add-command` | the cli is on and declares no command of its own | ★ |
+| `add-route` | the server is on and declares no route of its own | ★ |
+| `add-page` | the front is on and has no page | ★ |
+| `server-init` | `sandbox-server` is off | |
+| `front-init` | the server is on and `sandbox-front` is off | |
+| `deps-init` | `sandbox-deps` is off | |
+
+`help`, `version`, `health` and `static` are what an init scaffolds, so they never count as
+units the project declared itself.
+
+**Areas** — one row per category of the command surface, offered only while the mechanic that
+owns it is on.
+
+| Area | Needs |
+| --- | --- |
+| `Cli System` | `sandbox-cli` |
+| `Server System` | `sandbox-server` |
+| `Front System` | `sandbox-front` |
+| `Deps System` | `sandbox-deps` |
+| `Examples` | `sandbox-example` |
+| `Documentation` | `doc` |
+| `Core Commands`, `Extensions`, `Info` | — |
+
+With no project in the folder only `start` and `Info` are offered: every other command answers
+*run `agnos start` first*. An `<x>-init` is only ever a step — while its mechanic is off the area
+is hidden and the step is the way in, and once it is on the init is offered nowhere.
 
 ## Questions
 
@@ -32,6 +77,7 @@ same rules the dispatch applies to a command line, applied before a handler runs
 | Field | Answered by |
 | --- | --- |
 | `--path` | the session's own `--path`, never asked |
+| `--path` of `start` | asked: it is the folder being created, with the session's path as its default |
 | `--quiet` | always off, so the build a command runs stays visible |
 | everything else | asked, defaulting to what `entries.yaml` declares |
 

@@ -113,6 +113,14 @@ func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command
 		return []any{false}, nil
 	}
 
+	// The scaffold's --path is the one field whose declared default is not the
+	// right offer: the session was opened on a folder, and a project created
+	// from that session belongs in it.
+	if field.Id == pathFieldId && verbOf(command) == scaffoldVerb {
+		field.Default = session
+		field.HasDefault = true
+	}
+
 	values, err := askField(sandbox, io, command, field)
 	if err != nil {
 		return nil, err
@@ -127,12 +135,16 @@ func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command
 
 // AnsweredForYou reports the fields the session settles without asking: the
 // project it was opened on, and the progress channel it keeps open. A scaffold
-// answers for neither — its path is the project it is about to create.
+// is asked for its path — that one is the project it is about to create, not
+// the one already open — and never for its quiet, which no interview wants.
 func AnsweredForYou(command api.Command, field Field) bool {
-	if !field.IsFlag || verbOf(command) == scaffoldVerb {
+	if !field.IsFlag {
 		return false
 	}
-	return field.Id == pathFieldId || (field.Id == quietFieldId && field.Type == typeBoolean)
+	if field.Id == quietFieldId && field.Type == typeBoolean {
+		return true
+	}
+	return field.Id == pathFieldId && verbOf(command) != scaffoldVerb
 }
 
 // askField picks the question one field is asked as: yes or no for a boolean,
@@ -162,7 +174,7 @@ func askScalar(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, er
 	if len(offered.Options) > 0 {
 		chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(
 			questionFor(sandbox, field),
-			menuRows(offered, field.Required),
+			menuRows(sandbox, offered, field),
 		)
 		if err != nil {
 			return nil, err
@@ -197,13 +209,13 @@ func askScalarText(sandbox *api.Sandbox, field Field) ([]any, error) {
 			if !field.Required {
 				return []any{}, nil
 			}
-			notice(sandbox, "%s is required", label(field))
+			notice(sandbox, "%s has to be answered", label(field))
 			continue
 		}
 
 		value, ok := convert(sandbox, field, answer)
 		if !ok {
-			notice(sandbox, "%q is not a valid %s", answer, field.Type)
+			notice(sandbox, "%q is not a %s", answer, typeWord(field.Type))
 			continue
 		}
 		if !withinBounds(sandbox, field, value) {
@@ -235,7 +247,7 @@ func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, err
 		}
 
 		if len(values) == 0 && field.Required {
-			notice(sandbox, "%s needs at least one value", label(field))
+			notice(sandbox, "%s needs at least one answer", label(field))
 			return askArray(sandbox, field, offered)
 		}
 
@@ -251,7 +263,7 @@ func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, err
 
 		if sandbox.Deps.Stringsdeps.TrimSpace(answer) == "" {
 			if field.Required && len(values) == 0 {
-				notice(sandbox, "%s needs at least one value", label(field))
+				notice(sandbox, "%s needs at least one answer", label(field))
 				continue
 			}
 			return values, nil
@@ -259,7 +271,7 @@ func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, err
 
 		value, ok := convert(sandbox, field, answer)
 		if !ok {
-			notice(sandbox, "%q is not a valid %s", answer, field.Type)
+			notice(sandbox, "%q is not a %s", answer, typeWord(field.Type))
 			continue
 		}
 		if !withinBounds(sandbox, field, value) {
@@ -273,20 +285,30 @@ func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, err
 // ─── Building the question ──────────────────────────────────────────────────
 
 // menuRows is a candidate list with the rows the interview adds to it: one for
-// leaving an optional field alone, and one for typing a value an open list
-// does not hold.
-func menuRows(offered suggestion, required bool) []interviewer.AlternativeOption {
+// leaving a field alone, and one for typing a value an open list does not
+// hold. Both say what they do rather than what they are called — the menu is
+// read by someone who has not seen the command before.
+func menuRows(sandbox *api.Sandbox, offered suggestion, field Field) []interviewer.AlternativeOption {
 	rows := []interviewer.AlternativeOption{}
 	rows = append(rows, offered.Options...)
 
 	if offered.Open {
-		rows = append(rows, interviewer.AlternativeOption{Id: otherOptionId, Msg: "· type another value"})
+		rows = append(rows, interviewer.AlternativeOption{Id: otherOptionId, Msg: "· none of these — let me type it"})
 	}
-	if !required {
-		rows = append(rows, interviewer.AlternativeOption{Id: skipOptionId, Msg: "· leave it unset"})
+	if !field.Required {
+		rows = append(rows, interviewer.AlternativeOption{Id: skipOptionId, Msg: skipText(sandbox, field)})
 	}
 
 	return rows
+}
+
+// skipText is what the row leaving a field alone says will happen: the
+// declared default is taken, or nothing is passed at all.
+func skipText(sandbox *api.Sandbox, field Field) string {
+	if field.HasDefault {
+		return sandbox.Deps.Std.Sprintf("· skip it — %q is used", field.Default)
+	}
+	return "· skip it — leave it unset"
 }
 
 // questionFor words one field as a question: what it is called, what it is
@@ -303,36 +325,47 @@ func questionFor(sandbox *api.Sandbox, field Field) string {
 // so far so it is clear the answer is one of several.
 func arrayQuestionFor(sandbox *api.Sandbox, field Field, given int) string {
 	if given == 0 {
-		return sandbox.Deps.Std.Sprintf("%s  (repeatable, empty to stop)", questionFor(sandbox, field))
+		return sandbox.Deps.Std.Sprintf("%s  (more than one allowed — answer nothing to stop)", questionFor(sandbox, field))
 	}
-	return sandbox.Deps.Std.Sprintf("%s — value %d, empty to stop", label(field), given+1)
+	return sandbox.Deps.Std.Sprintf("%s — one more, or nothing to stop (%d so far)", label(field), given)
 }
 
-// conditionOf is the parenthesis after a question: the declared type, whether
-// an answer is demanded, the default that stands in for one, and the bounds a
-// number has to fall inside.
+// conditionOf is the parenthesis after a question, in the words of someone who
+// has not read a help screen: what kind of answer is expected, whether one is
+// demanded, what stands in for it when it is skipped, and the bounds a number
+// has to fall inside.
 func conditionOf(sandbox *api.Sandbox, field Field) string {
-	condition := field.Type
-	if condition == "" {
-		condition = "string"
-	}
+	condition := typeWord(field.Type)
 
 	if field.Required {
 		condition += ", required"
 	} else if field.HasDefault {
-		condition = sandbox.Deps.Std.Sprintf("%s, default %q", condition, field.Default)
+		condition = sandbox.Deps.Std.Sprintf("%s, %q if you skip it", condition, field.Default)
 	} else {
 		condition += ", optional"
 	}
 
 	if field.HasMin {
-		condition = sandbox.Deps.Std.Sprintf("%s, min %s", condition, numberLabel(sandbox, field.Type, field.Min))
+		condition = sandbox.Deps.Std.Sprintf("%s, %s or more", condition, numberLabel(sandbox, field.Type, field.Min))
 	}
 	if field.HasMax {
-		condition = sandbox.Deps.Std.Sprintf("%s, max %s", condition, numberLabel(sandbox, field.Type, field.Max))
+		condition = sandbox.Deps.Std.Sprintf("%s, %s or less", condition, numberLabel(sandbox, field.Type, field.Max))
 	}
 
 	return condition
+}
+
+// typeWord is a declared type said as the answer it asks for.
+func typeWord(kind string) string {
+	switch kind {
+	case typeInt:
+		return "whole number"
+	case typeFloat:
+		return "number"
+	case typeBoolean:
+		return "yes or no"
+	}
+	return "text"
 }
 
 // label is how a field is named back to the person: a flag by the spelling it
@@ -396,11 +429,11 @@ func withinBounds(sandbox *api.Sandbox, field Field, value any) bool {
 	}
 
 	if field.HasMin && number < field.Min {
-		notice(sandbox, "%s must be >= %s", label(field), numberLabel(sandbox, field.Type, field.Min))
+		notice(sandbox, "%s has to be %s or more", label(field), numberLabel(sandbox, field.Type, field.Min))
 		return false
 	}
 	if field.HasMax && number > field.Max {
-		notice(sandbox, "%s must be <= %s", label(field), numberLabel(sandbox, field.Type, field.Max))
+		notice(sandbox, "%s has to be %s or less", label(field), numberLabel(sandbox, field.Type, field.Max))
 		return false
 	}
 
