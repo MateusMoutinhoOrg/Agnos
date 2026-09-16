@@ -49,4 +49,11 @@ type Sandbox struct {
 	// Ids of every one chosen, in the order the options were declared.
 	// Choosing none is a valid answer and returns an empty slice.
 	MultipleAlternativeQuestion func(question string, alternatives []AlternativeOption) ([]string, error)
+
+	// Back reports whether an error a question returned means the person
+	// asked to step back to the question before it, rather than that no
+	// answer can be had at all. It is the one way a caller tells the two
+	// apart, so that going back can be undone by asking again while every
+	// other error ends the session.
+	Back func(err error) bool
 }

@@ -11,9 +11,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
-// prompt writes one question in line mode and leaves the cursor after it.
-func prompt(question string) {
-	fmt.Fprintf(os.Stdout, "\n  %s%s%s\n  %s>%s ", bold+cyan, question, reset, gray, reset)
+// prompt writes one question and leaves the cursor after it. The line break is
+// the caller's because a question read key by key is printed in raw mode, where
+// nothing returns the carriage on its own.
+func prompt(question string, newline string) {
+	fmt.Fprintf(os.Stdout, "%s  %s%s%s%s  %s>%s ", newline, bold+cyan, question, reset, newline, gray, reset)
 }
 
 // retry reports one unusable answer and is followed by another attempt. A
@@ -27,17 +29,14 @@ func retry(reason string) {
 // empty line is returned as an empty string, which is how a caller offering a
 // default learns the default was taken.
 func strQuestion(question string) (string, error) {
-	prompt(question)
-	return readLine()
+	return askText(question)
 }
 
 // intQuestion fills interviewer.Sandbox.IntQuestion, asking again until the
 // answer converts.
 func intQuestion(question string) (int, error) {
 	for {
-		prompt(question)
-
-		answer, err := readLine()
+		answer, err := askText(question)
 		if err != nil {
 			return 0, err
 		}
@@ -56,9 +55,7 @@ func intQuestion(question string) (int, error) {
 // the answer converts.
 func floatQuestion(question string) (float64, error) {
 	for {
-		prompt(question)
-
-		answer, err := readLine()
+		answer, err := askText(question)
 		if err != nil {
 			return 0, err
 		}
@@ -142,6 +139,9 @@ func Bind(deps *deps.Deps) {
 		},
 		MultipleAlternativeQuestion: func(question string, alternatives []interviewer.AlternativeOption) ([]string, error) {
 			return multipleAlternativeQuestion(question, alternatives)
+		},
+		Back: func(err error) bool {
+			return isBack(err)
 		},
 	}
 }

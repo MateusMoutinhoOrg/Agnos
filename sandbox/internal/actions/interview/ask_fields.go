@@ -91,30 +91,79 @@ func FieldsOf(command api.Command) []Field {
 // A field an earlier answer has ruled out is not asked at all and binds
 // nothing, which is the same state the command line leaves it in when it is
 // not typed.
-func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, session string) (map[string][]any, error) {
+//
+// The walk goes backwards as well as forwards: a question answered with "back"
+// returns to the last one that was actually put to the person — over the fields
+// the session answers by itself and the ones an answer ruled out — and every
+// answer from there on is dropped, so what is asked again is asked against the
+// same state it was the first time. Going back past the first question reports
+// false: there is nothing left to correct, so the command is left unrun and the
+// menu comes back.
+func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, session string) (map[string][]any, bool, error) {
+	fields := FieldsOf(command)
 	values := map[string][]any{}
+	asked := []int{}
 
-	for _, field := range FieldsOf(command) {
+	for index := 0; index < len(fields); index++ {
+		field := fields[index]
 		if RuledOut(sandbox, command, field, values) {
 			continue
 		}
 
-		bound, err := ResolveField(sandbox, io, command, field, session)
+		bound, err := ResolveField(sandbox, io, command, field, values, session)
 		if err != nil {
-			return nil, err
+			if !sandbox.Deps.Interviewer.Back(err) {
+				return nil, false, err
+			}
+
+			trail, previous, found := stepBack(asked)
+			if !found {
+				return nil, false, nil
+			}
+
+			asked = trail
+			forgetFrom(values, fields, previous)
+			index = previous - 1
+			continue
 		}
+
 		if len(bound) > 0 {
 			values[field.Id] = bound
+		} else {
+			delete(values, field.Id)
+		}
+
+		if !AnsweredForYou(command, field) {
+			asked = append(asked, index)
 		}
 	}
 
-	return values, nil
+	return values, true, nil
+}
+
+// stepBack takes the last question off the trail of the ones put to the person
+// and reports which field it was, or false when the trail is empty.
+func stepBack(asked []int) ([]int, int, bool) {
+	if len(asked) == 0 {
+		return asked, 0, false
+	}
+	last := len(asked) - 1
+	return asked[:last], asked[last], true
+}
+
+// forgetFrom drops every answer from one field onwards. Going back re-walks the
+// fields after it, and a rule reading a stale answer of a question that has not
+// been asked again would rule out a field the person can still see.
+func forgetFrom(values map[string][]any, fields []Field, from int) {
+	for _, field := range fields[from:] {
+		delete(values, field.Id)
+	}
 }
 
 // ResolveField settles one field: the two the interview answers by itself, and
 // everything else by asking. It is also what the confirm screen calls to
 // change a single answer without walking the whole command again.
-func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, field Field, session string) ([]any, error) {
+func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, field Field, answered map[string][]any, session string) ([]any, error) {
 	if AnsweredForYou(command, field) {
 		if field.Id == pathFieldId {
 			return []any{session}, nil
@@ -128,6 +177,13 @@ func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command
 	if field.Id == pathFieldId && verbOf(command) == scaffoldVerb {
 		field.Default = session
 		field.HasDefault = true
+	}
+
+	// A declaration cannot say that a field is needed only in some folders, so
+	// the project being worked on says it instead — and the question is worded,
+	// and enforced, as the required one it is here.
+	if RequiredHere(sandbox, command, field, answered, session) {
+		field.Required = true
 	}
 
 	values, err := askField(sandbox, io, command, field)

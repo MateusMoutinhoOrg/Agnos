@@ -61,7 +61,8 @@ func printWelcome(sandbox *api.Sandbox, io *smartio.SmartIO, path string) {
 	p("  %sPick what you want from the menu, answer the questions, and I run it.%s\n", dim, reset)
 	p("  %sNothing happens before you see the command and say yes.%s\n", dim, reset)
 	p("\n")
-	p("  %s↑↓%s move   %senter%s choose   %sq%s go back\n", cyan, reset, cyan, reset, cyan, reset)
+	p("  %s↑↓%s move   %senter%s choose   %sesc%s go back   %sctrl-c%s quit\n", cyan, reset, cyan, reset, cyan, reset, cyan, reset)
+	p("  %sgoing back re-asks the question before this one; nothing is lost by it%s\n", dim, reset)
 	p("\n")
 
 	state := readState(sandbox, io)
@@ -110,16 +111,59 @@ func layerName(sandbox *api.Sandbox, extension string) string {
 // printPlan is the confirm screen: the command line the answers add up to,
 // spelled exactly as it would be typed. It is what turns an interview into a
 // way of learning the cli rather than a way of avoiding it.
-func printPlan(sandbox *api.Sandbox, command api.Command, values map[string][]any) {
+//
+// Three things are said around that line, and each of them is there because the
+// line alone would mislead: that the attempt before this one failed and the
+// answers were kept, that a name is written down differently from the way it
+// was typed, and that running this takes a layer away.
+func printPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, failed int) {
 	p := sandbox.Deps.Std.Printf
 
 	p("\n")
+
+	if failed != api.ExitOk {
+		p("  %sTHAT DID NOT WORK%s %s— every answer is still here; change the one at fault and run it again%s\n", bold+yellow, reset, dim, reset)
+		p("\n")
+	}
+
+	if Destructive(sandbox, command, values) {
+		p("  %sTHIS TAKES SOMETHING AWAY%s %s— %s%s\n", bold+red, reset, dim, lossText(sandbox, io, command), reset)
+		p("\n")
+	}
+
 	p("  %sNOTHING HAS RUN YET%s %s— this is the command your answers add up to:%s\n", bold+cyan, reset, dim, reset)
 	p("  %s│%s\n", gray, reset)
 	p("  %s│%s  %s$%s %s%s%s\n", gray, reset, dim, reset, bold+white, CommandLine(sandbox, command, values), reset)
+
+	for _, note := range NormalizedNotes(sandbox, command, values) {
+		p("  %s│%s  %s%s%s\n", gray, reset, yellow, note, reset)
+	}
+
 	p("  %s│%s\n", gray, reset)
 	p("  %s│%s  %syou could have typed it yourself — that is all I am doing%s\n", gray, reset, dim, reset)
 	p("\n")
+}
+
+// lossText names what a destructive command is about to remove. A purge knows
+// the units it takes with it, and naming them is the difference between a
+// person agreeing to a command line and agreeing to losing four routes they
+// wrote.
+func lossText(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command) string {
+	unit, names := Losses(sandbox, io, command)
+	if len(names) == 0 {
+		return "there is no undoing this one"
+	}
+
+	return sandbox.Deps.Std.Sprintf("this removes %d %s: %s",
+		len(names), plural(unit, len(names)), sandbox.Deps.Stringsdeps.Join(names, ", "))
+}
+
+// plural is a unit said of however many there are of it.
+func plural(unit string, count int) string {
+	if count == 1 {
+		return unit
+	}
+	return unit + "s"
 }
 
 // printOutcome reports what the command answered with, in the words the exit

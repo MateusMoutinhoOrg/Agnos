@@ -14,6 +14,10 @@ import (
 // menu finishes on enter with the row under the cursor, a multiple-choice one
 // toggles rows with space and finishes on enter with whatever is ticked.
 //
+// Escape and q answer neither: they report ErrBack, which the caller undoes by
+// asking the question before this one again. Only ctrl-c and ctrl-d end a
+// session.
+//
 // A terminal that cannot be put in raw mode answers the same question as a
 // numbered list read line by line, so every question has an answer whatever it
 // is being run under.
@@ -53,6 +57,9 @@ func runMenu(question string, options []interviewer.AlternativeOption, multiple 
 			if multiple {
 				ticked[cursor] = !ticked[cursor]
 			}
+		case keyBack:
+			fmt.Fprint(os.Stdout, "\r\n")
+			return nil, ErrBack
 		case keyCancel:
 			fmt.Fprint(os.Stdout, "\r\n")
 			return nil, ErrCancelled
@@ -71,10 +78,10 @@ func runMenu(question string, options []interviewer.AlternativeOption, multiple 
 func printQuestion(question string, multiple bool) {
 	fmt.Fprintf(os.Stdout, "\r\n  %s%s%s\r\n", bold+cyan, question, reset)
 	if multiple {
-		fmt.Fprintf(os.Stdout, "  %sspace toggles, enter confirms, q cancels%s\r\n", dim, reset)
+		fmt.Fprintf(os.Stdout, "  %sspace toggles, enter confirms, esc goes back%s\r\n", dim, reset)
 		return
 	}
-	fmt.Fprintf(os.Stdout, "  %s↑↓ to move, enter confirms, q cancels%s\r\n", dim, reset)
+	fmt.Fprintf(os.Stdout, "  %s↑↓ to move, enter confirms, esc goes back%s\r\n", dim, reset)
 }
 
 // paintMenu repaints the rows in place: it walks the cursor back over the rows

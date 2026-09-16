@@ -28,16 +28,33 @@ const (
 	lineUp     = "\033[A"
 )
 
-// ErrCancelled reports that the person answering asked to stop — ctrl-c, q or
-// a lone escape. It is an error because no answer can be had, which is the one
-// thing the contract says an error means.
+// ErrCancelled reports that the person answering asked to stop the whole
+// session — ctrl-c or ctrl-d. It is an error because no answer can be had,
+// which is the one thing the contract says an error means.
 var ErrCancelled = errors.New("interview cancelled")
+
+// ErrBack reports that the person asked to step back to the question before
+// this one. It is an error for the same reason ErrCancelled is — this question
+// has no answer — and the caller tells the two apart through the contract's
+// Back, which is what makes going back undoable instead of fatal.
+var ErrBack = errors.New("going back")
 
 // ErrNoInput reports that the input ended before the question was answered.
 var ErrNoInput = errors.New("no input left to answer with")
 
+// backToken is how a session with no terminal asks to go back. A piped stdin
+// has no escape key to press — every byte of it is the answer — so the one
+// line that means "back" is spelled out instead.
+const backToken = ":back"
+
+// isBack fills interviewer.Sandbox.Back: of the errors a question returns,
+// only this one is undone by asking again.
+func isBack(err error) bool {
+	return errors.Is(err, ErrBack)
+}
+
 // key is one decoded keypress. Raw mode hands over bytes, and a menu only
-// cares about the six meanings below.
+// cares about the seven meanings below.
 type key int
 
 const (
@@ -46,6 +63,7 @@ const (
 	keyDown
 	keyEnter
 	keySpace
+	keyBack
 	keyCancel
 )
 
@@ -91,6 +109,10 @@ func stty(args ...string) bool {
 // readKey reads one keypress in raw mode. Arrow keys arrive as an escape
 // sequence (0x1b 0x5b 0x41 is up), and j/k are accepted beside them so the
 // menu answers to the hands that expect either.
+//
+// The two ways out are kept apart on purpose: ctrl-c and ctrl-d end the
+// session, while escape and q step back one question. They used to be the same
+// key, which made "go back" delete every answer already given.
 func readKey() (key, error) {
 	buffer := make([]byte, 1)
 	if _, err := os.Stdin.Read(buffer); err != nil {
@@ -98,8 +120,10 @@ func readKey() (key, error) {
 	}
 
 	switch buffer[0] {
-	case 0x03, 0x04, 'q':
+	case 0x03, 0x04:
 		return keyCancel, nil
+	case 'q':
+		return keyBack, nil
 	case '\r', '\n':
 		return keyEnter, nil
 	case ' ':
@@ -109,41 +133,63 @@ func readKey() (key, error) {
 	case 'j':
 		return keyDown, nil
 	case 0x1b:
-		return readEscape()
+		return readEscape(), nil
 	}
 
 	return keyUnknown, nil
 }
 
-// readEscape decodes the two bytes that follow an escape. Anything that is not
-// a recognised arrow is ignored rather than guessed at, and an input that ends
-// mid-sequence is a cancel.
-func readEscape() (key, error) {
-	buffer := make([]byte, 2)
-	if _, err := os.Stdin.Read(buffer); err != nil {
-		return keyCancel, nil
-	}
-	if buffer[0] != '[' {
-		return keyUnknown, nil
+// readEscape decodes what follows an escape byte. An escape on its own is the
+// escape key, and an escape followed by a bracket is an arrow — the two are
+// told apart by how long the rest takes to arrive, because nothing follows a
+// key the person pressed themselves.
+func readEscape() key {
+	rest, timedOut := readPending(2)
+	if timedOut || len(rest) < 2 || rest[0] != '[' {
+		return keyBack
 	}
 
-	switch buffer[1] {
+	switch rest[1] {
 	case 'A':
-		return keyUp, nil
+		return keyUp
 	case 'B':
-		return keyDown, nil
+		return keyDown
 	}
 
-	return keyUnknown, nil
+	return keyUnknown
+}
+
+// readPending reads up to size bytes that are already on their way, reporting
+// true when none arrived. VMIN 0 with VTIME 1 is a tenth of a second of
+// patience — long enough for a terminal to finish an escape sequence it is
+// already sending, short enough that a pressed escape key does not hang.
+func readPending(size int) ([]byte, bool) {
+	if !stty("min", "0", "time", "1") {
+		return nil, true
+	}
+	defer stty("min", "1", "time", "0")
+
+	buffer := make([]byte, size)
+	read, err := os.Stdin.Read(buffer)
+	if err != nil || read == 0 {
+		return nil, true
+	}
+	return buffer[:read], false
 }
 
 // readLine reads one answer in line mode. An empty line is a valid answer — it
 // is how a caller offering a default learns the default was taken — so only an
-// input that ended with nothing on it is an error.
+// input that ended with nothing on it is an error. The one line that is not an
+// answer at all is the back token.
 func readLine() (string, error) {
 	line, err := lineReader.ReadString('\n')
 	if err != nil && line == "" {
 		return "", ErrNoInput
 	}
-	return strings.TrimRight(line, "\r\n"), nil
+
+	answer := strings.TrimRight(line, "\r\n")
+	if strings.TrimSpace(answer) == backToken {
+		return "", ErrBack
+	}
+	return answer, nil
 }

@@ -34,7 +34,11 @@ agnos interview --path TestDir < /dev/null
 agnos cli-init --path TestDir -q
 agnos add-command greet --help "Greet someone" --category Core --path TestDir -q
 
-printf '3\n3\nname\n\n1\n1\nwho to greet\n\nworld\n1\n\n1\n' | agnos interview --path TestDir
+# The area is row 4 rather than row 3 because this project's first menu is led
+# by `· exit`: every step left on it is an offer to install a whole layer, and
+# no menu of this session puts one of those under an enter pressed blind.
+
+printf '4\n3\nname\n\n1\n1\nwho to greet\n\nworld\n1\n\n1\n' | agnos interview --path TestDir
 
 # What result.yaml records: the paths this example asserts, copied out of
 # TestDir. The declaration `start` wrote and the one the third session added a

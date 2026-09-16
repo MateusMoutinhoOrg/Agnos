@@ -173,7 +173,7 @@ values off the command by the id its `entries.yaml` declares — `command.GetStr
 `sandbox/internal/actions/interview/` builds a question from every `CommandArg` and `CommandFlag`
 — typed, bounded and defaulted exactly as declared — and binds the answers with `api.BindCommand`
 before calling the command's own handler. It declares nothing per command, so a command added
-later is covered without it changing. Three files hold the whole of the agnos vocabulary it
+later is covered without it changing. Six tables hold the whole of the agnos vocabulary it
 spells: `suggest.go`, the table saying which field names something that already exists and where
 to read the list of them — off the project at `--path`, never the running binary's own
 `Cli.Commands` — `ruled_out.go`, the table saying which field a previous answer removes
@@ -183,7 +183,19 @@ the command refuses, and `state.go`, the beginner gate — the project is re-rea
 whose mechanic is off is not offered at all, and the `<x>-init` that would turn it on is offered
 as a step instead, the first key one marked as the suggested next thing to do. That gate is why
 an empty folder offers `start` and nothing else, and a project with no cli offers `cli-init`
-before it offers anything about commands.
+before it offers anything about commands. Three more say what a declaration cannot: `required.go`,
+which field a declaration calls optional that the folder makes mandatory — `start --module` where
+there is no `go.mod` — so the error moves from after the confirm screen to the question;
+`danger.go`, which command takes something away, so no menu puts one under the enter of someone
+who has not read it and the confirm screen names what goes and defaults to no; and `normalize.go`,
+which answers are written down under a name other than the one typed, so the line the confirm
+screen promises "you could have typed yourself" is never one that would do something else.
+
+Going back is the session's, not the adapter's: a question answered with escape — `:back` on a
+line where the answers come from a pipe — re-asks the one before it and drops every answer after
+it, and going back past the first question leaves the command unrun. Only ctrl-c and ctrl-d end a
+session. A command that *fails* costs nothing either: the confirm screen returns with every
+answer on it and the row that changes the one at fault already there.
 
 The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
 layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go` mirror

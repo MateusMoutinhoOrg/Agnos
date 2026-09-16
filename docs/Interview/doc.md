@@ -21,13 +21,33 @@ so a command added tomorrow is covered without this feature changing.
 | What do you want to do? | the steps this project has not taken, then the areas it has |
 | Which command? | the commands of that area, with their `help` |
 | One question per field | each `CommandArg` and `CommandFlag` of that command |
-| Nothing has run yet | the command line the answers add up to |
+| Nothing has run yet | the command line the answers add up to, plus what it rewrites and what it removes |
 | Run it / change one answer / back | — |
 
 Running a command returns to the first menu, rebuilt from the project on disk — a command that
 turned a layer on opens that layer's area on the next pass, and the step that turned it on is
-gone. `· exit` ends the session; so does ctrl-c, `q`, or the input running out — none of them is
-a failure, and all exit `0`.
+gone. A command that **fails** does not: the confirm screen comes back with every answer still on
+it, so one rejected character costs one `change`, not the whole questionnaire.
+
+`· exit` ends the session; so does ctrl-c, ctrl-d, or the input running out — none of them is a
+failure, and all exit `0`.
+
+## Going back
+
+| Where | Key | Line mode |
+| --- | --- | --- |
+| any question | `esc` (and `q` on a menu) | a line that reads `:back` |
+| ends the session | `ctrl-c`, `ctrl-d` | the input running out |
+
+Going back re-asks the question before this one and drops every answer after it, so what is asked
+again is asked against the state it was asked against the first time. Going back past the first
+question of a command leaves that command unrun and brings the menu back; going back at the menu
+is the way out.
+
+Nothing is answered by going back — a text question reads the keys itself rather than a whole
+line, which is what keeps every printable character an answer and leaves escape meaning escape.
+`deps.Interviewer.Back` is how a session tells that error from one that means no answer can be
+had at all.
 
 ## The first menu
 
@@ -80,7 +100,13 @@ same rules the dispatch applies to a command line, applied before a handler runs
 | `--path` | the session's own `--path`, never asked |
 | `--path` of `start` | asked: it is the folder being created, with the session's path as its default |
 | `--quiet` | always off, so the build a command runs stays visible |
+| `--module` of `start` | asked as **required** when the target folder has no `go.mod`, optional when it has one |
 | everything else | asked, defaulting to what `entries.yaml` declares |
+
+A declaration is written once and read everywhere, so it can only call a field optional; the
+folder being worked on is what decides. `--module` is the one field this applies to today, and
+the rule is the one `start`'s handler rejects on — asking it as required only moves that error
+from after the confirm screen to the question itself.
 
 A field an answer already given decides is not asked at all, and does not appear on the confirm
 screen: `--required` after a `--default` (and on a boolean, whose absence already means false),
@@ -95,6 +121,29 @@ the commands declared, the deps installed, the adapters, the availables, the rou
 the docs, the examples, the themes of `themes.yaml`, the extensions of the catalog, and the
 closed vocabularies (`string`/`boolean`/`int`/`float`, the http methods, the compile targets).
 Those lists are read from the project at `--path`, not from the binary running the interview.
+
+## Nothing destructive under a blind enter
+
+A guided screen tells the person the pre-selected row is the safe one, so it has to be.
+
+| Menu | Leads with |
+| --- | --- |
+| an area whose first command removes or overwrites (`Extensions`, headed by `disable-extension`) | `· back` |
+| the first menu when every step left on it is an offer to install a whole layer | `· exit` |
+| the confirm screen of a command that takes something away | `· no, back to the menu` |
+
+A purge's confirm screen names what goes with it — `this removes 3 commands: greet, help,
+version` — read off the project, not off the command line.
+
+## The command line is the command that runs
+
+The confirm screen promises *you could have typed it yourself*. A name typed with capitals,
+spaces or underscores is written down normalized, so the screen says so as well:
+
+```
+│  $ agnos add-flag --command greet "My Flag Name!"
+│  "My Flag Name!" is written down as the flag --my-flag-name!
+```
 
 ## Running
 

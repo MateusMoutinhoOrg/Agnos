@@ -24,12 +24,6 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   a formatting editor has saved.
 - `build` compiles `./cmd/... ./sandbox/... ./adapters/...`, never `./...`:
   `assets/` holds Go templates, not compilable Go.
-- **Written for an llm, except where a person answers.** Every file of this tree is written to
-  be read and rewritten by a machine — that is what the rules above buy. An interactive screen
-  is the one exception: it is answered by someone who has never read this page, so it is
-  written for them — plain words instead of the generator's vocabulary, the next step offered
-  first, and no menu row the project in front of them cannot run. The rules above still bind
-  its code; the exception is only about who its screens are written for.
 
 ## Extensions
 

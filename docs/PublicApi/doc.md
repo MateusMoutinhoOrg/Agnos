@@ -663,6 +663,7 @@ Sandbox is the interview library injected whole as the Deps.Interviewer field. E
 | `BoolQuestion` | `func(question string) (bool, error)` | BoolQuestion asks a yes-or-no question and returns the answer. |
 | `SingleAlternativeQuestion` | `func(question string, alternatives []AlternativeOption) (string, error)` | SingleAlternativeQuestion offers a list of options and returns the Id of the one chosen — never its Msg, so the wording of an option may change without moving what the caller matches on. |
 | `MultipleAlternativeQuestion` | `func(question string, alternatives []AlternativeOption) ([]string, error)` | MultipleAlternativeQuestion offers a list of options and returns the Ids of every one chosen, in the order the options were declared. Choosing none is a valid answer and returns an empty slice. |
+| `Back` | `func(err error) bool` | Back reports whether an error a question returned means the person asked to step back to the question before it, rather than that no answer can be had at all. It is the one way a caller tells the two apart, so that going back can be undone by asking again while every other error ends the session. |
 
 ## `deps.Iodeps`
 

@@ -34,13 +34,16 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 `handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
 
-`interview` needs nothing for the new command: it generates its questions from the declaration. It is the one feature of agnos written for a beginner rather than for an llm ([Interview](../Interview/doc.md)), and three of its files take an entry — only for a command that is one of these:
+`interview` needs nothing for the new command: it generates its questions from the declaration. It is the one feature of agnos written for a beginner rather than for an llm ([Interview](../Interview/doc.md)), and six of its tables take an entry — only for a command that is one of these:
 
 | Teach | When |
 |---|---|
 | `interview/suggest.go` | one of the command's fields names something that already exists: the entry says where to read that list, off the project at `--path` |
 | `interview/state.go` | the command opens or fills a layer: a row in `areas` for a new category, one in `extensionInit` for a new `<x>-init`, a rung in `nextSteps` for the step that offers it, and a name in `scaffoldedUnits` for a unit its init writes |
 | `interview/ruled_out.go` | two of the command's fields exclude each other, or one only applies to some `--type`: the entry is the same rule the action refuses with, so the question is never asked |
+| `interview/required.go` | a field the declaration calls optional that some projects make mandatory: the entry is the condition the handler rejects on, so the question is asked as the required one it is |
+| `interview/danger.go` | the command removes or overwrites something: the entry keeps it off the row a blind enter lands on, and — for a purge — names the units it takes with it |
+| `interview/normalize.go` | the command rewrites a name before writing it down: the entry is the noun, and the confirm screen says what the typed name becomes |
 
 `add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
 
