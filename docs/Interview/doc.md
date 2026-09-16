@@ -3,7 +3,8 @@
 `agnos interview` is the one surface of agnos written for a person instead of for an llm — an
 llm drives agnos through the plain cli ([Commands](../Commands/doc.md)). It asks in plain words,
 offers only what the project in front of it can run, and leads with the step that project needs
-next. The rule behind that, and its limits, is in [Rules](../Rules/doc.md#authoring).
+next. Every other rule of this repo still binds its code; the exception is only about who its
+screens are written for.
 
 ```bash
 agnos interview                       # the current directory
