@@ -2,16 +2,16 @@ package sandbox
 
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	actionscostructor "github.com/MateusMoutinhoOrg/Agnos/sandbox/constructors/actions"
+	clicostructor "github.com/MateusMoutinhoOrg/Agnos/sandbox/constructors/cli"
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
-	actions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions"
-	cli "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/cli"
 )
 
 func New(deps *deps.Deps) *api.Sandbox {
 	self := api.Sandbox{Deps: deps}
 
-	self.Actions = actions.NewActions(&self)
-	self.Cli = cli.NewCli(&self)
+	clicostructor.Constructor(&self)
+	actionscostructor.Constructor(&self)
 
 	return &self
 }
