@@ -3,7 +3,6 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -75,7 +74,7 @@ func goRuntimeSteps(sandbox *api.Sandbox, path string) []runtimeStep {
 		{Program: "go", Args: []string{"mod", "tidy"}},
 	}
 
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	packages := []string{"build"}
 	for _, dir := range compilableDirs {
 		if io.IsDir(dir) {

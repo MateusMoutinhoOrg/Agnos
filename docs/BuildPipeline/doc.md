@@ -39,7 +39,7 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 
 | Group | Renders when | Holds |
 |---|---|---|
-| `sandbox` | `sandbox` | `sandbox/new.go`, `api/sandbox.go`, `internal/config/config.go` |
+| `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go`, `internal/config/new.go` |
 | `sandbox-deps` | `sandbox-deps` | `sandbox/deps/deps.go` |
 | `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command}.go`, `internal/cli/`, `help`, `version` |
 | `sandbox-server` | `sandbox-server` | `api/{server,route}.go`, `internal/{server,routes/health,routeio}` |

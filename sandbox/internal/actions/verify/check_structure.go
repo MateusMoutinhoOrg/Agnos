@@ -21,7 +21,7 @@ import (
 func CheckStructure(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
-	if !io.IsFile(utils.StructureConfPath()) {
+	if !io.IsFile(utils.StructureConfPath(sandbox)) {
 		return violations
 	}
 
@@ -34,7 +34,7 @@ func CheckStructure(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		if utils.IsStructurePattern(sandbox, node.Path) {
 			parent := utils.StructureParentPath(sandbox, node.Path)
 			if parent != "" && !io.IsDir(parent) {
-				violations = append(violations, ghostSpec(node.Path,
+				violations = append(violations, ghostSpec(sandbox, node.Path,
 					"the directory "+parent+" it would live in does not exist"))
 			}
 			continue
@@ -42,13 +42,13 @@ func CheckStructure(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 		if node.Dir {
 			if !io.IsDir(node.Path) {
-				violations = append(violations, ghostSpec(node.Path, "there is no such directory"))
+				violations = append(violations, ghostSpec(sandbox, node.Path, "there is no such directory"))
 			}
 			continue
 		}
 
 		if !io.IsFile(node.Path) {
-			violations = append(violations, ghostSpec(node.Path, "there is no such file"))
+			violations = append(violations, ghostSpec(sandbox, node.Path, "there is no such file"))
 		}
 	}
 
@@ -56,7 +56,7 @@ func CheckStructure(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 }
 
 // ghostSpec words one violation the same way for every kind of missing item.
-func ghostSpec(path string, reason string) string {
-	return utils.StructureConfPath() + " describes " + path + ", but " + reason +
+func ghostSpec(sandbox *api.Sandbox, path string, reason string) string {
+	return utils.StructureConfPath(sandbox) + " describes " + path + ", but " + reason +
 		" (a ghost spec: drop the item or restore the path)"
 }

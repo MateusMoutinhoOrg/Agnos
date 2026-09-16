@@ -3,12 +3,11 @@ package deps_purge
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 func DepsPurge(sandbox *api.Sandbox, path string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := DepsPurgeInternal(sandbox, io, path); err != nil {
 		return err
 	}

@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/extensionsconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -73,8 +72,8 @@ func IsExtensionName(name string) bool {
 
 // ExtensionsConfPath is the project-relative path of the extensions
 // declaration, held in the config directory beside project.yaml.
-func ExtensionsConfPath() string {
-	return config.ProjectName + "Config/" + ExtensionsConfFile
+func ExtensionsConfPath(sandbox *api.Sandbox) string {
+	return sandbox.Config.ProjectName + "Config/" + ExtensionsConfFile
 }
 
 // LoadExtensionsConf reads <ProjectName>Config/extensions.yaml back through the
@@ -82,7 +81,7 @@ func ExtensionsConfPath() string {
 // so a missing or unparsable file is a hard error: what a project generates is
 // declared, never guessed from the directories it happens to carry.
 func LoadExtensionsConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*extensionsconf.ExtensionsConf, error) {
-	rel := ExtensionsConfPath()
+	rel := ExtensionsConfPath(sandbox)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
@@ -98,7 +97,7 @@ func LoadExtensionsConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*extensionsc
 
 // SaveExtensionsConf renders conf back over the declaration.
 func SaveExtensionsConf(sandbox *api.Sandbox, io *smartio.SmartIO, conf *extensionsconf.ExtensionsConf) error {
-	return io.WriteFileOverwrite(ExtensionsConfPath(), []byte(conf.Render()))
+	return io.WriteFileOverwrite(ExtensionsConfPath(sandbox), []byte(conf.Render()))
 }
 
 // NewExtensionsConf is the declaration a fresh project starts with: every key

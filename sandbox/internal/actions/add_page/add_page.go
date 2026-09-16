@@ -3,7 +3,6 @@ package add_page
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -12,7 +11,7 @@ import (
 // assets/frontend/pages/, then runs build as a follow-up step so its new.go
 // and the dispatch arm are generated for it.
 func AddPage(sandbox *api.Sandbox, props api.PageProps) error {
-	io := smartio.New(sandbox, props.Path, config.ProjectName)
+	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddPageInternal(sandbox, io, props); err != nil {
 		return err
 	}

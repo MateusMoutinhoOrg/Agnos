@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -49,7 +48,7 @@ type Doc struct {
 // transaction-aware io. Like project.yaml it is written by `agnos start`, so a
 // missing or unparsable file is a hard error rather than an empty fallback.
 func LoadThemesConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*themesconf.ThemesConf, error) {
-	rel := config.ProjectName + "Config/themes.yaml"
+	rel := sandbox.Config.ProjectName + "Config/themes.yaml"
 
 	content, err := io.ReadFile(rel)
 	if err != nil {

@@ -8,12 +8,12 @@ tree:
     - file: sandbox/internal/commands/help/entries.yaml
       sha: 7ca5e07ad3cbeb8a97555ae83b15f36a1a5ad0177100a7187a1e1eeea530ae73
     - file: sandbox/internal/commands/help/handler.go
-      sha: b27dc0b683234c126d1efa516d983fd608e63039f837bbae2fa50cd29f0e7667
+      sha: 0615e6bf3f730c6bbd48da6017147bd6f28c75ea041c71ba6a7dabed320ac782
     - file: sandbox/internal/commands/help/new.go
       sha: bbe35f19850d0d6f3660840616d737ca1ce8a2298309e19ccc2216f975758d9b
     - file: sandbox/internal/commands/version/entries.yaml
       sha: 79d993e7132a86d8a54c44d726973e1bf21c005ba1bf82f8d81482e2e24be3b5
     - file: sandbox/internal/commands/version/handler.go
-      sha: 34fd63ed66bae759a689f225ecee8852abcb0bfb71de098c1b3243a5acc57239
+      sha: 1d4589df0100fc0c9487783ce7dc72fefe2fb8d5789986fca1bdd4484e7acf44
     - file: sandbox/internal/commands/version/new.go
       sha: 1511a3f8ee17608298c63cfa7edc88b6c2ebf946b23e13bfc512c000c697160e

@@ -2,16 +2,15 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // projectNameConst title-cases the configured project name for use as the
-// generated config.ProjectName constant (which names the <X>Config/ dir).
+// generated Config.ProjectName of the project (which names the <X>Config/ dir).
 func projectNameConst(sandbox *api.Sandbox, name string) string {
 	if len(name) == 0 {
-		return config.ProjectName
+		return sandbox.Config.ProjectName
 	}
 	return sandbox.Deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
 }
@@ -21,7 +20,7 @@ func projectNameConst(sandbox *api.Sandbox, name string) string {
 // the generator ("agnos add-route") render it from here, while a command of the
 // generated project ("<name> start-server") renders from the project's own Name.
 func generatorName(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Stringsdeps.ToLower(config.ProjectName)
+	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
 }
 
 func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
@@ -190,7 +189,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"Version":             project_conf.Version,
 		"ProjectName":         projectNameConst(sandbox, project_conf.Name),
 		"GeneratorName":       generatorName(sandbox),
-		"ConfigDir":           config.ProjectName + "Config",
+		"ConfigDir":           sandbox.Config.ProjectName + "Config",
 		"StructureConfFile":   utils.StructureConfFile,
 		"HasSandbox":          hasSandbox,
 		"HasDeps":             hasDeps,

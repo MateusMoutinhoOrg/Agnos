@@ -2,7 +2,6 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/structureconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
@@ -35,8 +34,8 @@ func IsStructurePattern(sandbox *api.Sandbox, path string) bool {
 }
 
 // StructureConfPath is the project-relative path of the structure declaration.
-func StructureConfPath() string {
-	return config.ProjectName + "Config/" + StructureConfFile
+func StructureConfPath(sandbox *api.Sandbox) string {
+	return sandbox.Config.ProjectName + "Config/" + StructureConfFile
 }
 
 // LoadStructureConf reads <ProjectName>Config/structure.yaml through the
@@ -45,7 +44,7 @@ func StructureConfPath() string {
 // rather than failing the build. A file that is there but does not parse is a
 // hard error.
 func LoadStructureConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*structureconf.StructureConf, error) {
-	rel := StructureConfPath()
+	rel := StructureConfPath(sandbox)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {

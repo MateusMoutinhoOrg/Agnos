@@ -4,7 +4,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
@@ -28,7 +27,7 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	}
 	goexe := sandbox.Deps.Stringsdeps.TrimSpace(result.Output)
 
-	binName := sandbox.Deps.Stringsdeps.ToLower(config.ProjectName) + goexe
+	binName := sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName) + goexe
 
 	var outPath string
 	if sandbox.Deps.Std.Goos() == "windows" {

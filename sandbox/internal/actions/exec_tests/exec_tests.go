@@ -2,7 +2,6 @@ package exec_tests
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -21,7 +20,7 @@ import (
 // The project path is therefore joined here rather than at the SmartIO
 // boundary.
 func ExecTest(sandbox *api.Sandbox, props api.ExecTestProps) error {
-	if err := utils.RequireExtension(sandbox, smartio.New(sandbox, props.Path, config.ProjectName), utils.ExtensionSandboxExample); err != nil {
+	if err := utils.RequireExtension(sandbox, smartio.New(sandbox, props.Path, sandbox.Config.ProjectName), utils.ExtensionSandboxExample); err != nil {
 		return err
 	}
 

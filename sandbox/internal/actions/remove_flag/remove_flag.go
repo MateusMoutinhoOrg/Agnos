@@ -3,7 +3,6 @@ package remove_flag
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -11,7 +10,7 @@ import (
 // sandbox/internal/commands/<command>/entries.yaml, then runs build so the
 // generated new.go forgets it.
 func RemoveFlag(sandbox *api.Sandbox, path string, command string, name string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := RemoveFlagInternal(sandbox, io, command, name); err != nil {
 		return err
 	}

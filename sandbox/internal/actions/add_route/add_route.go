@@ -3,7 +3,6 @@ package add_route
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -12,7 +11,7 @@ import (
 // handler.go — then runs build as a follow-up step so its new.go — the
 // api.Route that lands in Server.Routes — is generated for it.
 func AddRoute(sandbox *api.Sandbox, path string, name string, method string, trigger string, help string, category string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := AddRouteInternal(sandbox, io, name, method, trigger, help, category); err != nil {
 		return err
 	}

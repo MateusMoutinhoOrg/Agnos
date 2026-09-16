@@ -3,7 +3,6 @@ package add_lib_example
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -12,7 +11,7 @@ import (
 // listing of the docs names it. Nothing under examples/ is compiled, so the
 // build renders only.
 func AddLibExample(sandbox *api.Sandbox, path string, name string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := AddLibExampleInternal(sandbox, io, name); err != nil {
 		return err
 	}

@@ -8,10 +8,12 @@ tree:
     - file: adapters/libs/remote/adapter.yaml
       sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
     - file: adapters/libs/remote/remote.go
-      sha: bbf4e3e23c6b112aa1b02f247d135dfc0a7075be2856b3e91ba6befc9e5ba80a
+      sha: 0b4485de8575d79ea9000ec470b5ec0477d28e8ac500f64505ef239d0938d210
     - file: sandbox/deps/deps.go
       sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
+    - file: sandbox/deps/remote/config.go
+      sha: b6d141b78bc214c781edef54236479a5ca767c493908623351f5526a1f39647b
     - file: sandbox/deps/remote/greeter.go
       sha: 5fe9fe69498c87176ea5bc32e9ec47f22d0a90a064f4251fad77128e080aacae
     - file: sandbox/deps/remote/sandbox.go
-      sha: d58d004dbbd50a98d8fec7be1558533007261c3fccbb606f6d0c599decba1ae4
+      sha: fc82d66ab10a6698abeb10ff7d489f9c3c33b481c59c0b60ef4107e20977237f

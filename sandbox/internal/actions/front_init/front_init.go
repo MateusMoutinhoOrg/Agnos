@@ -5,7 +5,6 @@ import (
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -23,7 +22,7 @@ var frontDeps = []string{"embeddeps", "templatedeps", "hashdeps"}
 // first — along with the deps that layer needs, which its internal half does
 // not install.
 func FrontInit(sandbox *api.Sandbox, path string) error {
-	has_server, err := utils.ExtensionEnabled(sandbox, smartio.New(sandbox, path, config.ProjectName), utils.ExtensionSandboxServer)
+	has_server, err := utils.ExtensionEnabled(sandbox, smartio.New(sandbox, path, sandbox.Config.ProjectName), utils.ExtensionSandboxServer)
 	if err != nil {
 		return err
 	}
@@ -39,7 +38,7 @@ func FrontInit(sandbox *api.Sandbox, path string) error {
 		}
 	}
 
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := FrontInitInternal(sandbox, io, path); err != nil {
 		return err
 	}

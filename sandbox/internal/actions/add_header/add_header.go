@@ -3,7 +3,6 @@ package add_header
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -11,7 +10,7 @@ import (
 // sandbox/internal/routes/<route>/route.yaml, then runs build as a follow-up
 // step so the route's new.go picks it up.
 func AddHeader(sandbox *api.Sandbox, props api.RouteFieldProps) error {
-	io := smartio.New(sandbox, props.Path, config.ProjectName)
+	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddHeaderInternal(sandbox, io, props); err != nil {
 		return err
 	}

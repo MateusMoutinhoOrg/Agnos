@@ -3,7 +3,6 @@ package remove_param
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -12,7 +11,7 @@ import (
 // step. The build renders only: dropping a parameter may leave hand-written
 // code referring to what is gone.
 func RemoveParam(sandbox *api.Sandbox, path string, route string, name string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := RemoveParamInternal(sandbox, io, route, name); err != nil {
 		return err
 	}

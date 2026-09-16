@@ -3,7 +3,6 @@ package exec_tests
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/resultconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -498,7 +497,7 @@ func writeCliAlias(sandbox *api.Sandbox, path string, root string) ([]string, er
 // loadProjectConf reads the project.yaml the alias is named after. exec-test
 // opens no SmartIO, so it reads the file straight off disk.
 func loadProjectConf(sandbox *api.Sandbox, path string) (*projectconf.ProjectConf, error) {
-	rel := config.ProjectName + "Config/project.yaml"
+	rel := sandbox.Config.ProjectName + "Config/project.yaml"
 
 	content, err := sandbox.Deps.Iodeps.ReadFile(join(sandbox, path, rel))
 	if err != nil {

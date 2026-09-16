@@ -50,6 +50,10 @@ sandbox:
           order: 4
           gen: true
           description: Command/CommandFlag/CommandArg + NewCommand
+        config.go:
+          order: 5
+          gen: true
+          description: Config struct, the project's own name and version
     constructors:
       order: 3
       dir: true
@@ -75,10 +79,10 @@ sandbox:
       dir: true
       description: the logic; unreachable from outside the sandbox
       children:
-        config/config.go:
+        config/new.go:
           order: 1
           gen: true
-          description: ProjectName, Version
+          description: "NewConfig(sandbox) api.Config: ProjectName, Version"
         cli/new.go:
           order: 2
           gen: true

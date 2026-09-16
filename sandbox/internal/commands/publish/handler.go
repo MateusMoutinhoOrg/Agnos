@@ -5,7 +5,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -15,11 +14,11 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		return api.ExitFailure
 	}
 
-	io := smartio.New(sandbox, command.GetString("path"), config.ProjectName)
+	io := smartio.New(sandbox, command.GetString("path"), sandbox.Config.ProjectName)
 
 	releaseName := command.GetString("release_name")
 	if releaseName == "" {
-		rel := config.ProjectName + "Config/project.yaml"
+		rel := sandbox.Config.ProjectName + "Config/project.yaml"
 		content, err := io.ReadFile(rel)
 		if err != nil {
 			sandbox.Deps.Std.Error("could not read %s to determine release name: %s\n", rel, err.Error())

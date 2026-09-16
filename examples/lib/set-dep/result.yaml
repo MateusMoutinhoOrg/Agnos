@@ -1,4 +1,4 @@
-cli-output: "started with path TestDir/remote \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nstarted with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nset-dep started with path TestDir/app dep remote version v0.0.1 \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+cli-output: "started with path TestDir/remote \nbuild started with path TestDir/remote \nsuccessfully rendered template\nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nstarted with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nset-dep started with path TestDir/app dep remote version v0.0.1 \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: adapters/availables/standard/available.yaml
@@ -8,10 +8,12 @@ tree:
     - file: adapters/libs/remote/adapter.yaml
       sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
     - file: adapters/libs/remote/remote.go
-      sha: 89ceed064cd56624508370e0cd6efe76b87bfeebdf8ebc72534d4d5fc3e946c8
+      sha: fdf88cddc69bb523ac110f6bfd7e472bdc892b7fbf7d22520797a9df5099988d
     - file: sandbox/deps/deps.go
       sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
+    - file: sandbox/deps/remote/config.go
+      sha: b6d141b78bc214c781edef54236479a5ca767c493908623351f5526a1f39647b
     - file: sandbox/deps/remote/greeter.go
       sha: 7e9ff865e2bb0e38400b846c8c6cf1fe7f35dc52f38bbb6d6b7fd3214a65a2fb
     - file: sandbox/deps/remote/sandbox.go
-      sha: d58d004dbbd50a98d8fec7be1558533007261c3fccbb606f6d0c599decba1ae4
+      sha: fc82d66ab10a6698abeb10ff7d489f9c3c33b481c59c0b60ef4107e20977237f

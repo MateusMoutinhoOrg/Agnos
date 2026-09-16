@@ -29,6 +29,7 @@ Sandbox is the whole library: one field per contract declared in sandbox/api/, e
 | `Deps` | `*deps.Deps` | Deps is every capability the sandbox reaches the outside world through. It rides on the api so that a function handed the Sandbox holds the whole of what it needs, and can call another field of the api besides — which is what makes a field a caller replaced take effect everywhere. It is also the one field that does not cross into a consumer: an installed copy of this contract carries the api, never the wiring behind it. |
 | `Actions` | `Actions` |  |
 | `Cli` | `Cli` |  |
+| `Config` | `Config` |  |
 
 ## `sandbox/api/actions.go`
 
@@ -453,6 +454,17 @@ Command is one command of the project, as the sandbox offers it: the whole of wh
 | --- | --- |
 | `NewCommand() *Command` | NewCommand returns an empty Command with Items open and every Get* reader bound to it. A generated NewCommand fills the declaration and the handler on top of what this returns, so every command reads its values the same way. |
 | `BindCommand(command *Command) *Command` | BindCommand copies one declaration into the command a single run binds to: the same declared fields — the slices are read-only and shared — with Items empty, the readers pointed at the copy and the handler carried over. The dispatch calls it once per command line, so what Cli.Commands holds is never written to. |
+
+## `sandbox/api/config.go`
+
+### `Config`
+
+Config is what the project knows about itself: the values of <ProjectName>Config/project.yaml, rendered into the sandbox by the build that read them. It is a field of the Sandbox like any other contract, so a caller may replace it — a test that runs the cli under another name, say — and every reader of it follows.
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `ProjectName` | `string` | ProjectName is the project's name, title-cased. It prefixes the <ProjectName>Config/ directory that holds every declaration, and lower-cased it is the name the cli answers to. |
+| `Version` | `string` | Version is the release the project is at, the `version` key of <ProjectName>Config/project.yaml. |
 
 # Dependency contracts
 

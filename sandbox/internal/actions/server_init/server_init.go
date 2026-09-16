@@ -4,7 +4,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -25,7 +24,7 @@ const cliDep = "argvdeps"
 // transaction — front-init does — still has to install this set first: the
 // internal half renders assets and writes nothing to go.mod.
 func InstallDeps(sandbox *api.Sandbox, path string) error {
-	has_cli, err := utils.ExtensionEnabled(sandbox, smartio.New(sandbox, path, config.ProjectName), utils.ExtensionSandboxCli)
+	has_cli, err := utils.ExtensionEnabled(sandbox, smartio.New(sandbox, path, sandbox.Config.ProjectName), utils.ExtensionSandboxCli)
 	if err != nil {
 		return err
 	}
@@ -53,7 +52,7 @@ func ServerInit(sandbox *api.Sandbox, path string) error {
 		return err
 	}
 
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := ServerInitInternal(sandbox, io, path); err != nil {
 		return err
 	}

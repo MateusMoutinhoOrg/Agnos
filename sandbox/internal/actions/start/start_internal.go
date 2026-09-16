@@ -3,7 +3,6 @@ package start
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
@@ -43,7 +42,7 @@ func StartInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.StartPro
 	vars := map[string]interface{}{
 		"Name":      project_conf.Name,
 		"Version":   project_conf.Version,
-		"ConfigDir": config.ProjectName + "Config",
+		"ConfigDir": sandbox.Config.ProjectName + "Config",
 	}
 
 	if err := utils.RenderGroup(sandbox, io, "start", vars); err != nil {

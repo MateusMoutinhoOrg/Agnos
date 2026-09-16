@@ -18,7 +18,8 @@
 | `sandbox/new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
 | `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
-| `sandbox/internal/config/config.go` | `build` | always. `ProjectName`, `Version` from `project.yaml` |
+| `sandbox/api/config.go` | `build` | always. The `Config` contract: `ProjectName`, `Version` |
+| `sandbox/internal/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
 {{- end }}
 {{- if .HasDoc }}
 | `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |

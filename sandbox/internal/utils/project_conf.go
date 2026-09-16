@@ -2,15 +2,14 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 // ProjectConfPath is the project-relative path of the file `agnos start`
 // writes once and every later command reads.
-func ProjectConfPath() string {
-	return config.ProjectName + "Config/project.yaml"
+func ProjectConfPath(sandbox *api.Sandbox) string {
+	return sandbox.Config.ProjectName + "Config/project.yaml"
 }
 
 // LoadProjectConf reads <ProjectName>Config/project.yaml back through the
@@ -19,7 +18,7 @@ func ProjectConfPath() string {
 // prerequisite for every other command, so a missing or unparsable
 // project.yaml is a hard error.
 func LoadProjectConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*projectconf.ProjectConf, error) {
-	rel := ProjectConfPath()
+	rel := ProjectConfPath(sandbox)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {

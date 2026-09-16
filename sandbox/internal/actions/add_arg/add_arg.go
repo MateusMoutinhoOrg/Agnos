@@ -3,7 +3,6 @@ package add_arg
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -11,7 +10,7 @@ import (
 // into sandbox/internal/commands/<command>/entries.yaml, then runs build as a
 // follow-up step so the command's new.go picks it up.
 func AddArg(sandbox *api.Sandbox, props api.FieldProps) error {
-	io := smartio.New(sandbox, props.Path, config.ProjectName)
+	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddArgInternal(sandbox, io, props); err != nil {
 		return err
 	}

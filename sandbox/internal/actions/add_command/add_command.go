@@ -3,7 +3,6 @@ package add_command
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -12,7 +11,7 @@ import (
 // handler.go — then runs build as a follow-up step so its new.go — the
 // api.Command that lands in Cli.Commands — is generated for it.
 func AddCommand(sandbox *api.Sandbox, path string, name string, help string, category string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := AddCommandInternal(sandbox, io, name, help, category); err != nil {
 		return err
 	}

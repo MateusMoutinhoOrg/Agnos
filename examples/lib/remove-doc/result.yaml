@@ -1,4 +1,4 @@
-cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-doc creating docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nremove-doc removing docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-doc creating docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nremove-doc removing docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: docs/Adapters/doc.md
@@ -14,11 +14,11 @@ tree:
     - file: docs/EntriesYaml/props.yaml
       sha: b2b3fb7a3d0d54857cbce60bc3e04cdf9961230598afed4eb5d474407d5bafed
     - file: docs/Extensions/doc.md
-      sha: 9af90f494be7075e21e34c978930bdd99b27018ded0bde37ea222401db644713
+      sha: 5b2e62a249fcef6b9998def1a3ad99326635caf96f55c17bd6084cc1f5cb74c4
     - file: docs/Extensions/props.yaml
       sha: 7de2cd40d2152a82ee767844ab2f1c29b119374cef0f5ef40457c2a84997d0ca
     - file: docs/GeneratedFiles/doc.md
-      sha: 7de27111e62c9cb53d356dca41bc244069b86b8a959f248ac1b6c4fe088c2ad9
+      sha: 17a3cbc01467aee2effd9a12e05e1f703cf11abe2210cee917e59d350b7ee0a1
     - file: docs/GeneratedFiles/props.yaml
       sha: a0eef341ebd88c5ba305c3948e7486fd5b001ff50af0232d73fb0c9a32982ab3
     - file: docs/LibExamples/doc.md
@@ -26,11 +26,11 @@ tree:
     - file: docs/LibExamples/props.yaml
       sha: 12e3e2ce4605e04a1d13db3a014bb0416be1793c8bc39d85daa2cc6f29eb0767
     - file: docs/LibUsage/doc.md
-      sha: 4a6e9bc6b5ccfc26710c33310e3add488c4b74d17bf55a2ea6615a4f668bbf35
+      sha: 189bbcc9ee693cb2f1ecf2c33257a9e7732c081d7853a10f4d92066b1ec473e8
     - file: docs/LibUsage/props.yaml
       sha: b901bd3853e5a437cb1c734b15b3d3e97ccf99fa6837048c8f646a7ed948872d
     - file: docs/PublicApi/doc.md
-      sha: e805afe186982286ac3f26c88f687bbe6cb52d0282397b80083ae3249a02acbb
+      sha: 95e931b207e4aa1ca807dd3dd4eff51b24d1f5bd58180544707b574b29faf8ab
     - file: docs/PublicApi/props.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md

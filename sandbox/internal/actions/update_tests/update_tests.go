@@ -2,7 +2,6 @@ package update_tests
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -25,7 +24,7 @@ func UpdateTest(sandbox *api.Sandbox, path string, name string) error {
 		return sandbox.Deps.Std.Errorf("update-test: an example name is required (rewrite every golden with `exec-test --update`)")
 	}
 
-	if err := utils.RequireExtension(sandbox, smartio.New(sandbox, path, config.ProjectName), utils.ExtensionSandboxExample); err != nil {
+	if err := utils.RequireExtension(sandbox, smartio.New(sandbox, path, sandbox.Config.ProjectName), utils.ExtensionSandboxExample); err != nil {
 		return err
 	}
 

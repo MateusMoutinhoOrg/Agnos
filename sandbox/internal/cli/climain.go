@@ -3,7 +3,6 @@ package cli
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
 // Exit codes. Kept here (not in sandbox/api) so the cli layer has no
@@ -232,7 +231,7 @@ func bound(sandbox *api.Sandbox, command *api.Command, id string, subject string
 // binaryName is the executable's name as a user types it: the configured
 // project name, lowercased.
 func binaryName(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Stringsdeps.ToLower(config.ProjectName)
+	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
 }
 
 // silenceLogs turns off the progress channel for the rest of the process. It

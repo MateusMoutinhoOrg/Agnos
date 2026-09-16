@@ -2,7 +2,6 @@ package add_command
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -70,13 +69,13 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, 
 // projectName title-cases the target project's configured name for use in the
 // scaffold's help text, falling back to the CLI's own ProjectName constant.
 func projectName(sandbox *api.Sandbox, io *smartio.SmartIO) string {
-	content, err := io.ReadFile(config.ProjectName + "Config/project.yaml")
+	content, err := io.ReadFile(sandbox.Config.ProjectName + "Config/project.yaml")
 	if err != nil {
-		return config.ProjectName
+		return sandbox.Config.ProjectName
 	}
 	conf, err := projectconf.New(sandbox, string(content))
 	if err != nil || conf.Name == "" {
-		return config.ProjectName
+		return sandbox.Config.ProjectName
 	}
 	return sandbox.Deps.Stringsdeps.ToUpper(conf.Name[:1]) + conf.Name[1:]
 }

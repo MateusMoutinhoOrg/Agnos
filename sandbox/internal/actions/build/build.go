@@ -2,7 +2,6 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -10,7 +9,7 @@ import (
 // hands the result to props.Runtime, so a build only reports success when the
 // toolchain accepts what was rendered.
 func Build(sandbox *api.Sandbox, props api.BuildProps) error {
-	io := smartio.New(sandbox, props.Path, config.ProjectName)
+	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	err := BuildInternal(sandbox, io, props.Path)
 	if err != nil {
 		return err

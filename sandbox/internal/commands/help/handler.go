@@ -2,7 +2,6 @@ package help
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 )
 
 // help is a command like any other — entries.yaml, generated new.go, and this
@@ -31,7 +30,7 @@ func identifiedBy(identifiers []string, name string) bool {
 // project name, lowercased. Usage lines show what to type, not the display
 // name of the project.
 func binaryName(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Stringsdeps.ToLower(config.ProjectName)
+	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
 }
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
@@ -284,7 +283,7 @@ func printField(p func(string, ...any) (int, error), label, description, kind, d
 func printBanner(sandbox *api.Sandbox) {
 	p := sandbox.Deps.Std.Printf
 
-	titleLine := sandbox.Deps.Std.Sprintf("%s  %s", config.ProjectName, config.Version)
+	titleLine := sandbox.Deps.Std.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
 	innerW := len(titleLine) + 4
 	if innerW < 42 {
 		innerW = 42

@@ -24,7 +24,7 @@ func CheckExtensions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 	for _, extension := range extensions_conf.Extensions {
 		if !utils.IsExtensionName(extension.Name) {
-			violations = append(violations, utils.ExtensionsConfPath()+" declares "+extension.Name+
+			violations = append(violations, utils.ExtensionsConfPath(sandbox)+" declares "+extension.Name+
 				", which is not an extension (known: "+
 				sandbox.Deps.Stringsdeps.Join(utils.ExtensionNames(), ", ")+")")
 		}
@@ -42,7 +42,7 @@ func CheckExtensions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 			continue
 		}
 		if extensions_conf.IsEnabled(spec.Name) {
-			violations = append(violations, utils.ExtensionsConfPath()+" has "+spec.Name+
+			violations = append(violations, utils.ExtensionsConfPath(sandbox)+" has "+spec.Name+
 				" on with "+utils.ExtensionSandbox+" off (it renders into the sandbox and has nothing to render into)")
 		}
 	}

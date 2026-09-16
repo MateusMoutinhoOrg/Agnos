@@ -3,14 +3,13 @@ package remove_cli_example
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
 // RemoveCliExample deletes one example of examples/cli/ whole, then runs build
 // so the example listing of the docs is rewritten without it.
 func RemoveCliExample(sandbox *api.Sandbox, path string, name string) error {
-	io := smartio.New(sandbox, path, config.ProjectName)
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := RemoveCliExampleInternal(sandbox, io, name); err != nil {
 		return err
 	}

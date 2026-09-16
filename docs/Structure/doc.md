@@ -28,13 +28,14 @@ sandbox/                            closed: imports nothing outside sandbox/, no
     actions.go                      Actions struct + props structs + Runtime consts
     cli.go                          (gen) Cli struct + exit consts
     command.go                      (gen) Command/CommandFlag/CommandArg + NewCommand
+    config.go                       (gen) Config struct, the project's own name and version
   constructors/                     one <x>/constructor.go per field of the Sandbox; written once, then yours
     <x>/constructor.go              Constructor(sandbox): sandbox.<X> = <x>.New<X>(sandbox)
   deps/                             contracts; each <x>/ imports nothing at all
     deps.go                         (gen) Deps struct, one <Title> <dir>.Sandbox per dir
     <x>/<x>.go                      type Sandbox struct of func fields
   internal/                         the logic; unreachable from outside the sandbox
-    config/config.go                (gen) ProjectName, Version
+    config/new.go                   (gen) NewConfig(sandbox) api.Config: ProjectName, Version
     cli/new.go                      (gen) NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain
     cli/climain.go                  (gen) CliMain, the one dispatch, read off Cli.Commands
     commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)

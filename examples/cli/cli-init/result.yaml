@@ -7,21 +7,23 @@ tree:
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: sandbox/constructors/cli/constructor.go
       sha: 8f19032e1c267c72da99fbb995c89ccd8d1869f54b473b88eae0643f1022fa9a
+    - file: sandbox/constructors/config/constructor.go
+      sha: 20b790d9a9e67ed5df67aaa50ae92f02e3910c48ea178a7999bd7c8ff624beac
     - file: sandbox/internal/cli/climain.go
-      sha: 0d0db6ea9a21277c18c7a7fae939ac9f6c2e3e3f1cf511964cc7040f51062f67
+      sha: 18f46d76da32981cc3aa7dd53f27bf3bfbe9450a898ee21aee384ccd705d44b5
     - file: sandbox/internal/cli/new.go
       sha: 70c4b960ff513933bc881bad643f18abeedfe5c3626fa3306183cbaf665b8ef7
     - file: sandbox/internal/commands/help/entries.yaml
       sha: 7ca5e07ad3cbeb8a97555ae83b15f36a1a5ad0177100a7187a1e1eeea530ae73
     - file: sandbox/internal/commands/help/handler.go
-      sha: b27dc0b683234c126d1efa516d983fd608e63039f837bbae2fa50cd29f0e7667
+      sha: 0615e6bf3f730c6bbd48da6017147bd6f28c75ea041c71ba6a7dabed320ac782
     - file: sandbox/internal/commands/help/new.go
       sha: bbe35f19850d0d6f3660840616d737ca1ce8a2298309e19ccc2216f975758d9b
     - file: sandbox/internal/commands/version/entries.yaml
       sha: 79d993e7132a86d8a54c44d726973e1bf21c005ba1bf82f8d81482e2e24be3b5
     - file: sandbox/internal/commands/version/handler.go
-      sha: 34fd63ed66bae759a689f225ecee8852abcb0bfb71de098c1b3243a5acc57239
+      sha: 1d4589df0100fc0c9487783ce7dc72fefe2fb8d5789986fca1bdd4484e7acf44
     - file: sandbox/internal/commands/version/new.go
       sha: 1511a3f8ee17608298c63cfa7edc88b6c2ebf946b23e13bfc512c000c697160e
     - file: sandbox/new.go
-      sha: 7b7ffd1ef0de6eea969c2eda364993f97eff47b79641ff5d159df5b439a21ba3
+      sha: f6087a30367cb642f01f7dc51e823627ddb9f474c8b2002fca644ce37d51ce44

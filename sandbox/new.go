@@ -4,6 +4,7 @@ import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	actions "github.com/MateusMoutinhoOrg/Agnos/sandbox/constructors/actions"
 	cli "github.com/MateusMoutinhoOrg/Agnos/sandbox/constructors/cli"
+	config "github.com/MateusMoutinhoOrg/Agnos/sandbox/constructors/config"
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
@@ -17,6 +18,7 @@ func New(deps *deps.Deps) *api.Sandbox {
 
 	actions.Constructor(&self)
 	cli.Constructor(&self)
+	config.Constructor(&self)
 
 	return &self
 }
