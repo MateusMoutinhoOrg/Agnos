@@ -18,6 +18,7 @@ func VerifyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) erro
 	}
 
 	var violations []string
+	violations = append(violations, CheckExtensions(sandbox, io)...)
 	violations = append(violations, CheckSandbox(sandbox, io, module_conf.Module)...)
 	violations = append(violations, CheckContracts(sandbox, io)...)
 	violations = append(violations, CheckApiShape(sandbox, io)...)

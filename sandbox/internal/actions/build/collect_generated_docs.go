@@ -7,23 +7,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// GeneratedDocsGroups returns the asset groups whose docs this build writes:
-// `all` always, then `cli`, `server` and `front` for each layer the project
-// carries, exactly as the groups are rendered.
-func GeneratedDocsGroups(has_cli bool, has_server bool, has_front bool) []string {
-	groups := []string{"all"}
-	if has_cli {
-		groups = append(groups, "cli")
-	}
-	if has_server {
-		groups = append(groups, "server")
-	}
-	if has_front {
-		groups = append(groups, "front")
-	}
-	return groups
-}
-
 // CollectGeneratedDocs returns the first-level docs the given groups write on
 // this build, read from those groups' own props.yaml templates. They belong in
 // the doc index like any other doc, but SmartIO listings read disk, so on a

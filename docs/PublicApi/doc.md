@@ -130,6 +130,16 @@ SetAdapterProps describes one selection to change: which adapter fills a dep's f
 | `Adapter` | `string` |
 | `Available` | `string` |
 
+### `ExtensionInfo`
+
+ExtensionInfo is one row of ListExtensions: one generation mechanic of the catalog, what it looks after, and whether this project turned it on.
+
+| Field | Type |
+| --- | --- |
+| `Name` | `string` |
+| `Enabled` | `bool` |
+| `Help` | `string` |
+
 ### `DepInfo`
 
 DepInfo is one row of ListDeps: a dep of the embedded catalog, and what the project holds of it.
@@ -304,6 +314,9 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `Compile` | `func(props CompileProps) error` | Compile cross-compiles the project's cmd/ binaries into release/, one file per named target. |
 | `Verify` | `func(path string) error` | Verify checks the project against the schema every generator assumes and writes nothing; it reports every violation at once. |
 | `Start` | `func(props StartProps) error` | Start scaffolds a new project: the config directory, go.mod, the sandbox skeleton and a first build. |
+| `EnableExtension` | `func(path string, name string) error` | EnableExtension turns one generation mechanic on in the project's extensions.yaml and rebuilds, so what that mechanic owns is rendered from here on. |
+| `DisableExtension` | `func(path string, name string) error` | DisableExtension turns one generation mechanic off. Nothing is removed: agnos stops rendering what that mechanic owns and the files it wrote become the project's, to keep or to edit by hand. Deleting them is what the matching <x>-purge is for. |
+| `ListExtensions` | `func(path string) ([]ExtensionInfo, error)` | ListExtensions returns one row per generation mechanic of the catalog, saying which ones this project turned on. |
 | `DepsInit` | `func(path string) error` | DepsInit adds the dependency layer (sandbox/deps/ and adapters/availables/standard/) to a project that has none. |
 | `DepsPurge` | `func(path string) error` | DepsPurge removes the dependency layer and every installed dep with it. |
 | `AddDep` | `func(props AddDepProps) error` | AddDep installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |

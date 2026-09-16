@@ -40,4 +40,23 @@ func main() {
 	if err := os.CopyFS("AssertDir/sandbox/internal/commands", os.DirFS("TestDir/sandbox/internal/commands")); err != nil {
 		panic(err)
 	}
+
+	// The declaration the pair wrote: this is the whole of what tells the
+	// build the mechanic is on or off from here.
+	if err := copyExtensions(); err != nil {
+		panic(err)
+	}
+}
+
+// copyExtensions puts the project's extensions.yaml into AssertDir at the
+// place it holds in the tree.
+func copyExtensions() error {
+	content, err := os.ReadFile("TestDir/AgnosConfig/extensions.yaml")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll("AssertDir/AgnosConfig", 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile("AssertDir/AgnosConfig/extensions.yaml", content, 0o644)
 }

@@ -37,7 +37,7 @@ var frontDirs = []string{
 func FrontPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("front-purge started with path %s \n", path)
 
-	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively("front")
+	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionSandboxFront)
 	if err != nil {
 		return err
 	}
@@ -68,7 +68,7 @@ func FrontPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 		}
 	}
 
-	return nil
+	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxFront, false)
 }
 
 // pageDirs returns the route package of every declared page — every route with

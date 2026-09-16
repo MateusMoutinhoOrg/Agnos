@@ -18,3 +18,8 @@ mkdir -p AssertDir/sandbox/internal/routes
 cp -R TestDir/sandbox/internal/routes/. AssertDir/sandbox/internal/routes/
 mkdir -p AssertDir/assets/frontend
 cp -R TestDir/assets/frontend/. AssertDir/assets/frontend/
+
+# The declaration the pair wrote: this is the whole of what tells the build the
+# mechanic is on or off from here.
+mkdir -p AssertDir/AgnosConfig
+cp TestDir/AgnosConfig/extensions.yaml AssertDir/AgnosConfig/extensions.yaml

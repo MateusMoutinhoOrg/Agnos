@@ -2,6 +2,9 @@ package update_tests
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // The package is update_tests, not update_test, for the same reason exec_tests
@@ -20,6 +23,10 @@ import (
 func UpdateTest(sandbox *api.Sandbox, path string, name string) error {
 	if sandbox.Deps.Stringsdeps.TrimSpace(name) == "" {
 		return sandbox.Deps.Std.Errorf("update-test: an example name is required (rewrite every golden with `exec-test --update`)")
+	}
+
+	if err := utils.RequireExtension(sandbox, smartio.New(sandbox, path, config.ProjectName), utils.ExtensionSandboxExample); err != nil {
+		return err
 	}
 
 	sandbox.Deps.Std.Log("update-test started with path %s \n", path)

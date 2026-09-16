@@ -1,0 +1,13 @@
+cli-output: |
+    sandbox            on   the sandbox core: sandbox/new.go, api/sandbox.go, internal/config
+    sandbox-deps       off  the dependency layer: sandbox/deps/, adapters/, availables
+    sandbox-cli        off  the cli layer: cmd/main, the dispatch, help and version
+    sandbox-server     off  the http layer: server/, routes/, routeio/
+    sandbox-front      off  the html layer: pageio/ and the pages
+    sandbox-example    on   the examples/ suite and exec-test
+    doc                on   the docs/ tree and its Index.md files
+    readme             on   README.md, built from themes.yaml and the doc index
+exit-code: 0
+tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 2005721582975cbce188942cffaee11b9703a71615e6c4a1dc7edd073a9464a5

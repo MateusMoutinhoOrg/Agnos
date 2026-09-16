@@ -1,0 +1,26 @@
+args:
+    - description: the extension to turn off
+      examples:
+        - disable-extension doc
+      name: name
+      required: true
+      type: string
+category: Extensions
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - disable-extension --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Turn one generation mechanic off
+identifiers:
+    - disable-extension

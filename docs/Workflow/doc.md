@@ -22,6 +22,18 @@ to that older binary's shape. Build it with a binary compiled from this tree ins
 No recipe below asks for a Go file to be created by hand except the cases listed under
 [Hand-written code](#hand-written-code).
 
+## Choose what agnos generates
+
+```bash
+agnos list-extensions             # every generation mechanic and whether it is on
+agnos enable-extension readme     # start generating README.md again
+agnos disable-extension doc       # stop generating docs/, keep what is there
+```
+
+`AgnosConfig/extensions.yaml` is what `build` reads to decide what to render. Turning a
+mechanic off stops the generation and removes nothing: the files stay, and they are yours to
+edit. Every key is in [Extensions](../Extensions/doc.md).
+
 ## Change the command surface
 
 ```bash

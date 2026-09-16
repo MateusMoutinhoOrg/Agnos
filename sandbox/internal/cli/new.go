@@ -23,12 +23,15 @@ import (
 	compile "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/compile"
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps_purge"
+	disable_extension "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/disable_extension"
+	enable_extension "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/enable_extension"
 	exec_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/exec_test"
 	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_init"
 	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
 	list_adapters "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_adapters"
 	list_deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_deps"
+	list_extensions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_extensions"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	remove_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_adapter"
@@ -88,12 +91,15 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		compile.NewCommand(sandbox),
 		deps_init.NewCommand(sandbox),
 		deps_purge.NewCommand(sandbox),
+		disable_extension.NewCommand(sandbox),
+		enable_extension.NewCommand(sandbox),
 		exec_test.NewCommand(sandbox),
 		front_init.NewCommand(sandbox),
 		front_purge.NewCommand(sandbox),
 		help.NewCommand(sandbox),
 		list_adapters.NewCommand(sandbox),
 		list_deps.NewCommand(sandbox),
+		list_extensions.NewCommand(sandbox),
 		local_install.NewCommand(sandbox),
 		publish.NewCommand(sandbox),
 		remove_adapter.NewCommand(sandbox),

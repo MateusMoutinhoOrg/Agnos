@@ -23,11 +23,14 @@ import (
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
+	disableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/disable_extension"
+	enableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/enable_extension"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
 	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
+	listExtensionsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_extensions"
 	removeAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_adapter"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
 	removeAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_available"
@@ -73,6 +76,15 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.Start = func(props api.StartProps) error {
 		return startAction.Start(sandbox, props)
+	}
+	actions.EnableExtension = func(path string, name string) error {
+		return enableExtensionAction.EnableExtension(sandbox, path, name)
+	}
+	actions.DisableExtension = func(path string, name string) error {
+		return disableExtensionAction.DisableExtension(sandbox, path, name)
+	}
+	actions.ListExtensions = func(path string) ([]api.ExtensionInfo, error) {
+		return listExtensionsAction.ListExtensions(sandbox, path)
 	}
 	actions.DepsInit = func(path string) error {
 		return depsInitAction.DepsInit(sandbox, path)

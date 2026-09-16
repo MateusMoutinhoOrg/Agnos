@@ -124,8 +124,8 @@ func RenderTemplateToDest(sandbox *api.Sandbox, io *smartio.SmartIO, template_pa
 
 // RenderGroup renders every asset under assets/<group> as a Go text/template
 // and writes each result to the path it holds inside the group. An asset at
-// assets/all/sandbox/new.go rendered with RenderGroup(deps, io, "all", vars)
-// is written to sandbox/new.go. Every file in the group is rendered with the
+// assets/sandbox/sandbox/new.go rendered with RenderGroup(deps, io, "sandbox",
+// vars) is written to sandbox/new.go. Every file in the group is rendered with the
 // same vars, and every file may call the `render` native function (see
 // templateFuncs) to embed another template of the target project.
 func RenderGroup(sandbox *api.Sandbox, io *smartio.SmartIO, group string, vars interface{}) error {

@@ -98,6 +98,7 @@ Lookup tables - schemas, file formats, generated file listings
 | Doc | Description |
 | --- | --- |
 | [EntriesYaml](docs/EntriesYaml/doc.md) | Every key of a command's entries.yaml and what the generated code does with it |
+| [Extensions](docs/Extensions/doc.md) | The generation mechanics this project turns on, and what each one writes |
 | [DepList](docs/DepList/doc.md) | Every dep `agnos add-dep` can add, the adapters that fill it, and what backs each one |
 | [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into this project and whether build overwrites it |
 | [LibExamples](docs/LibExamples/doc.md) | Index of every runnable example of agnos as a Go module |

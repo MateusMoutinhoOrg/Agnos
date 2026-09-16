@@ -30,10 +30,13 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `compile` | cross-compile a project's cmd/main into release/ | [example.go](../../examples/lib/compile/example.go) |
 | `deps-init` | add the dependency layer to a project that has none | [example.go](../../examples/lib/deps-init/example.go) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.go](../../examples/lib/deps-purge/example.go) |
+| `disable-extension` |  | [example.go](../../examples/lib/disable-extension/example.go) |
+| `enable-extension` |  | [example.go](../../examples/lib/enable-extension/example.go) |
 | `front-init` |  | [example.go](../../examples/lib/front-init/example.go) |
 | `front-purge` |  | [example.go](../../examples/lib/front-purge/example.go) |
 | `list-adapters` |  | [example.go](../../examples/lib/list-adapters/example.go) |
 | `list-deps` |  | [example.go](../../examples/lib/list-deps/example.go) |
+| `list-extensions` |  | [example.go](../../examples/lib/list-extensions/example.go) |
 | `remove-adapter` |  | [example.go](../../examples/lib/remove-adapter/example.go) |
 | `remove-arg` | delete one declared positional argument | [example.go](../../examples/lib/remove-arg/example.go) |
 | `remove-available` |  | [example.go](../../examples/lib/remove-available/example.go) |

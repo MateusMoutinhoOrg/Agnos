@@ -2,6 +2,8 @@ package exec_tests
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -15,10 +17,14 @@ import (
 // no SmartIO: there is no transaction to persist — each example's TestDir and
 // AssertDir are written by a child process, outside any buffer, and the tree
 // recorded for it has to be the literal one on disk, unfiltered by
-// ignore.yaml / paths.yaml.
+// paths.yaml.
 // The project path is therefore joined here rather than at the SmartIO
 // boundary.
 func ExecTest(sandbox *api.Sandbox, props api.ExecTestProps) error {
+	if err := utils.RequireExtension(sandbox, smartio.New(sandbox, props.Path, config.ProjectName), utils.ExtensionSandboxExample); err != nil {
+		return err
+	}
+
 	if !sandbox.Deps.Iodeps.IsDir(join(sandbox, props.Path, utils.ExamplesDir)) {
 		return sandbox.Deps.Std.Errorf("exec-test: %s has no %s/ directory (create one with add-cli-example / add-lib-example)",
 			props.Path, utils.ExamplesDir)

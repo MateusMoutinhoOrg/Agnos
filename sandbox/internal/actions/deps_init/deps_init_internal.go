@@ -13,6 +13,10 @@ func DepsInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 	io.CreateDir("sandbox/deps")
 	io.CreateDir("adapters")
 
+	if err := utils.SetExtension(sandbox, io, utils.ExtensionSandboxDeps, true); err != nil {
+		return err
+	}
+
 	// The standard available starts empty and declared: from here on which
 	// adapter binds is read from the declaration, never from a listing of
 	// adapters/libs, so the same contract may later have two implementations.

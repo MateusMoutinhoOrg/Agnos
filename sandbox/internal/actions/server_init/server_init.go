@@ -6,6 +6,7 @@ import (
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // serverDeps are the contracts the server layer calls into: the socket itself,
@@ -24,8 +25,13 @@ const cliDep = "argvdeps"
 // transaction — front-init does — still has to install this set first: the
 // internal half renders assets and writes nothing to go.mod.
 func InstallDeps(sandbox *api.Sandbox, path string) error {
+	has_cli, err := utils.ExtensionEnabled(sandbox, smartio.New(sandbox, path, config.ProjectName), utils.ExtensionSandboxCli)
+	if err != nil {
+		return err
+	}
+
 	install := serverDeps
-	if !smartio.New(sandbox, path, config.ProjectName).IsDir(cliDir) {
+	if !has_cli {
 		install = append(install, cliDep)
 	}
 
@@ -38,8 +44,8 @@ func InstallDeps(sandbox *api.Sandbox, path string) error {
 	return nil
 }
 
-// ServerInit installs the deps the server layer depends on and renders the
-// "server" asset group into the project, then runs build as a follow-up step.
+// ServerInit installs the deps the server layer depends on and turns the server
+// mechanic on, then runs build as a follow-up step, which renders the group.
 // A server needs an entry point that starts it and that entry point is a
 // command, so a project with no cli layer gets one first.
 func ServerInit(sandbox *api.Sandbox, path string) error {

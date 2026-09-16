@@ -14,3 +14,8 @@ mkdir -p AssertDir/sandbox/internal
 cp -R TestDir/sandbox/internal/. AssertDir/sandbox/internal/
 mkdir -p AssertDir/docs
 cp -R TestDir/docs/. AssertDir/docs/
+
+# The declaration the pair wrote: this is the whole of what tells the build the
+# mechanic is on or off from here.
+mkdir -p AssertDir/AgnosConfig
+cp TestDir/AgnosConfig/extensions.yaml AssertDir/AgnosConfig/extensions.yaml

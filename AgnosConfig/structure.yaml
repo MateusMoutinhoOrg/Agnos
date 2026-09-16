@@ -12,9 +12,9 @@ AgnosConfig:
     structure.yaml:
       order: 3
       description: this tree  (structureconf)
-    ignore.yaml:
+    extensions.yaml:
       order: 4
-      description: SmartIO listing filters  (ignorableconf)
+      description: which mechanics agnos generates  (extensionsconf)
     paths.yaml:
       order: 5
       description: SmartIO listing rewrites  (pathreplacerconf)
@@ -142,36 +142,48 @@ assets:
       order: 1
       dir: true
       description: written once, on `start`
-    all:
+    sandbox:
       order: 2
       dir: true
-      description: rendered by every `build`
-    deps:
+      description: "rendered when the `sandbox` extension is on; one group per extension from here down"
+    sandbox-deps:
       order: 3
       dir: true
-      description: rendered when sandbox/deps/ exists
-    cli:
+      description: rendered when `sandbox-deps` is on
+    sandbox-cli:
       order: 4
       dir: true
-      description: rendered when sandbox/internal/cli/ exists
-    server:
+      description: rendered when `sandbox-cli` is on
+    sandbox-server:
       order: 5
       dir: true
-      description: rendered when sandbox/internal/server/ exists
-    front:
+      description: rendered when `sandbox-server` is on
+    sandbox-front:
       order: 6
       dir: true
-      description: rendered when sandbox/internal/pageio/ exists
-    deplist/<dep>:
+      description: rendered when `sandbox-front` is on
+    readme:
       order: 7
+      dir: true
+      description: rendered when `readme` is on
+    doc:
+      order: 8
+      dir: true
+      description: rendered when `doc` is on
+    doc-<x>:
+      order: 9
+      dir: true
+      description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-example, doc-example-cli)"
+    deplist/<dep>:
+      order: 10
       dir: true
       description: one installable contract, dep.yaml beside the target layout it mirrors
     adapterlist/<adapter>:
-      order: 8
+      order: 11
       dir: true
       description: one installable adapter, adapter.yaml beside the target layout it mirrors
     templates:
-      order: 9
+      order: 12
       dir: true
       description: single-file scaffolds (new.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
 cmd/main/main.go:

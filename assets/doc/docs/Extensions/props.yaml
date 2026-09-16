@@ -1,0 +1,5 @@
+description: "The generation mechanics this project turns on, and what each one writes"
+name: "Extensions"
+order: 1
+themes:
+  - reference

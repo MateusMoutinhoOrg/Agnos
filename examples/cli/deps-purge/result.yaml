@@ -1,6 +1,8 @@
 cli-output: "deps-purge started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 2005721582975cbce188942cffaee11b9703a71615e6c4a1dc7edd073a9464a5
     - file: sandbox/api/sandbox.go
       sha: fbb648b54d8f2597bfce86ce213e534a4d455bb7ffae2525081741ad7e4664a6
     - file: sandbox/internal/config/config.go

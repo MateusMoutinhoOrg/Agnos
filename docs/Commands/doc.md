@@ -1331,6 +1331,55 @@ Verifies the structural rules the harness depends on: sandbox/ imports stay insi
 agnos verify
 ```
 
+## Extensions
+
+### `disable-extension`
+
+Turn one generation mechanic off
+
+```bash
+agnos disable-extension [--path <path>] [--quiet] <name>
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the extension to turn off |
+
+### `enable-extension`
+
+Turn one generation mechanic on
+
+```bash
+agnos enable-extension [--path <path>] [--quiet] <name>
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the extension to turn on |
+
+### `list-extensions`
+
+Lists the generation mechanics and which are on
+
+```bash
+agnos list-extensions [--path <path>] [--quiet]
+```
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
 ## Info
 
 ### `help` — `--help`

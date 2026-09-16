@@ -12,3 +12,8 @@ agnos deps-purge --path TestDir
 # TestDir. The lib side copies the same set.
 mkdir -p AssertDir/sandbox
 cp -R TestDir/sandbox/. AssertDir/sandbox/
+
+# The declaration the pair wrote: this is the whole of what tells the build the
+# mechanic is on or off from here.
+mkdir -p AssertDir/AgnosConfig
+cp TestDir/AgnosConfig/extensions.yaml AssertDir/AgnosConfig/extensions.yaml

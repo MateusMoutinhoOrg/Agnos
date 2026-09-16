@@ -4,9 +4,10 @@ Every command takes the project dir via `--path` (default `.`). Every step ends 
 
 ```bash
 agnos start --project-name my-tool --module github.com/you/my-tool   # AgnosConfig/, go.mod, sandbox skeleton
-agnos deps-init                                                       # sandbox/deps/ + adapters/
+agnos list-extensions                                                 # what agnos generates for this project
+agnos deps-init                                                       # sandbox/deps/ + adapters/ (sandbox-deps: true)
 agnos add-dep iodeps                                              # any name from `agnos list-deps`
-agnos cli-init                                                        # cmd/main, dispatch, help, version (installs std + argvdeps)
+agnos cli-init                                                        # cmd/main, dispatch, help, version (sandbox-cli: true)
 agnos add-command greet --help "Say hello" --category Demo
 agnos add-flag name --command greet --identifier --name --identifier -n --required --description "who to greet"
 agnos add-arg times --command greet --type int --min 1 --default 1 --description "how many times"
@@ -41,3 +42,7 @@ go run ./cmd/main greet -n bob 2
 agnos compile --target all          # release/<target> per platform
 agnos publish --draft               # build, compile all, `gh release create <version>`
 ```
+
+What agnos generates is yours to choose — `agnos disable-extension readme` hands `README.md`
+back to you, and the next `build` leaves it alone. Every key is in
+[Extensions](../Extensions/doc.md).

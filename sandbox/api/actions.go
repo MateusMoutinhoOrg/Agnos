@@ -103,6 +103,14 @@ type SetAdapterProps struct {
 	Available string
 }
 
+// ExtensionInfo is one row of ListExtensions: one generation mechanic of the
+// catalog, what it looks after, and whether this project turned it on.
+type ExtensionInfo struct {
+	Name    string
+	Enabled bool
+	Help    string
+}
+
 // DepInfo is one row of ListDeps: a dep of the embedded catalog, and what the
 // project holds of it.
 type DepInfo struct {
@@ -295,6 +303,21 @@ type Actions struct {
 	// Start scaffolds a new project: the config directory, go.mod, the
 	// sandbox skeleton and a first build.
 	Start func(props StartProps) error
+
+	// EnableExtension turns one generation mechanic on in the project's
+	// extensions.yaml and rebuilds, so what that mechanic owns is rendered
+	// from here on.
+	EnableExtension func(path string, name string) error
+
+	// DisableExtension turns one generation mechanic off. Nothing is removed:
+	// agnos stops rendering what that mechanic owns and the files it wrote
+	// become the project's, to keep or to edit by hand. Deleting them is what
+	// the matching <x>-purge is for.
+	DisableExtension func(path string, name string) error
+
+	// ListExtensions returns one row per generation mechanic of the catalog,
+	// saying which ones this project turned on.
+	ListExtensions func(path string) ([]ExtensionInfo, error)
 
 	// DepsInit adds the dependency layer (sandbox/deps/ and
 	// adapters/availables/standard/) to a project that has none.

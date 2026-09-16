@@ -10,5 +10,9 @@ import (
 // it — the example.sh, the golden result.yaml and any TestDir or AssertDir left
 // behind by the last run.
 func RemoveCliExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	if err := utils.RequireExtension(sandbox, io, utils.ExtensionSandboxExample); err != nil {
+		return err
+	}
+
 	return utils.RemoveExample(sandbox, io, utils.ExampleCliSide, name)
 }

@@ -7,6 +7,7 @@ import (
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // frontDeps are the contracts the front layer calls into on top of the ones
@@ -16,13 +17,17 @@ import (
 // channels, text conversion and sorting — comes with the server.
 var frontDeps = []string{"embeddeps", "templatedeps", "hashdeps"}
 
-// FrontInit installs the deps the front layer depends on and renders the
-// "front" asset group into the project, then runs build as a follow-up step. A
+// FrontInit installs the deps the front layer depends on and turns the front
+// mechanic on, then runs build as a follow-up step, which renders the group. A
 // page is answered over http, so a project with no server layer is given one
 // first — along with the deps that layer needs, which its internal half does
 // not install.
 func FrontInit(sandbox *api.Sandbox, path string) error {
-	if !smartio.New(sandbox, path, config.ProjectName).IsDir(serverDir) {
+	has_server, err := utils.ExtensionEnabled(sandbox, smartio.New(sandbox, path, config.ProjectName), utils.ExtensionSandboxServer)
+	if err != nil {
+		return err
+	}
+	if !has_server {
 		if err := serverInitAction.InstallDeps(sandbox, path); err != nil {
 			return err
 		}

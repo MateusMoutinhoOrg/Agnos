@@ -1,6 +1,8 @@
 cli-output: "front-purge started with path TestDir \nfront-purge kept assets/frontend: pages, styles and scripts are yours \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 1d354355676e8ef9a21346c9933bc01d44139e3e6593d83bfc661c9b8421d2a4
     - file: assets/frontend/pages/home.html
       sha: a642c3b25062f971d6d28625d24303c6feedf96134f2c1c753a441943fbd4b4b
     - file: assets/frontend/static/scripts/main.js

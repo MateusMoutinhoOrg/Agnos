@@ -12,12 +12,20 @@ import (
 // existing example, and refuses outright in a project with no cli: there is no
 // binary for an example.sh to type.
 func AddCliExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	if err := utils.RequireExtension(sandbox, io, utils.ExtensionSandboxExample); err != nil {
+		return err
+	}
+
 	if err := utils.ValidateExampleName(sandbox, name); err != nil {
 		return err
 	}
 
-	if !io.IsDir("sandbox/internal/cli") {
-		return sandbox.Deps.Std.Errorf("add-cli-example: this project has no cli (sandbox/internal/cli is missing; add one with cli-init)")
+	has_cli, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxCli)
+	if err != nil {
+		return err
+	}
+	if !has_cli {
+		return sandbox.Deps.Std.Errorf("add-cli-example: this project has no cli (%s is off; add one with cli-init)", utils.ExtensionSandboxCli)
 	}
 
 	dir := utils.ExampleDir(utils.ExampleCliSide, name)

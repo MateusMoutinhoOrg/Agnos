@@ -16,16 +16,17 @@ Full documentation lives under `docs/` and is the source of truth, indexed in `R
 (one section per theme of `AgnosConfig/themes.yaml`; there is no index file between the
 README and a doc). Start with
 `docs/Rules/doc.md` (every rule, in one page — generated from
-`assets/all/docs/Rules/doc.md`, which is where a rule is added or changed),
+`assets/doc/docs/Rules/doc.md`, which is where a rule is added or changed),
 `docs/Structure/doc.md` (schema), `docs/BuildPipeline/doc.md` (what `build` does),
 `docs/Workflow/doc.md` (the recipe for every change any agnos project takes) and
 `docs/Contributing/doc.md` (what is specific to changing agnos itself).
 
-`docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi}/`
-are rendered from `assets/all/docs/` into **every** agnos project, this one included,
-`docs/{CliInstall,CliExamples,Commands}/` from `assets/cli/docs/`,
-`docs/{RouteYaml,Routes,ServerUsage}/` from `assets/server/docs/` and `docs/FrontUsage/` from
-`assets/front/docs/`: editing one means editing that
+`docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/`
+are rendered from `assets/doc/docs/` into **every** agnos project, this one included,
+`docs/{CliInstall,Commands}/` from `assets/doc-cli/docs/`,
+`docs/{RouteYaml,Routes,ServerUsage}/` from `assets/doc-server/docs/`, `docs/FrontUsage/` from
+`assets/doc-front/docs/`, `docs/LibExamples/` from `assets/doc-example/docs/` and
+`docs/CliExamples/` from `assets/doc-example-cli/docs/`: editing one means editing that
 template, and it has to read correctly in a scaffolded project, not only here. Guard a line
 that holds for this repo alone with `{{ if .HasAssets }}`.
 
@@ -122,15 +123,19 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   exports `Bind(deps *deps.Deps)` beside an `adapter.yaml` naming the dep it fills;
   `availables/<name>/new.go` is generated from `availables/<name>/available.yaml`, never from a
   dir listing.
-- **`assets/`** — every generated file's template. Groups `start`, `all`, `deps`, `cli`,
-  `server`, `front` render `assets/<group>/<path>` to `<path>`; `deplist/<dep>/**` is one
+- **`assets/`** — every generated file's template, **one group per extension**: the group's
+  name is the condition it renders under (`sandbox`, `sandbox-cli`, `doc`, `doc-cli`,
+  `readme`, …; `utils.AssetGroups()` is the list, `docs/BuildPipeline/doc.md#asset-groups` the
+  table). `assets/<group>/<path>` renders to `<path>`. `start` is outside it, written once by
+  `start`; `deplist/<dep>/**` is one
   installable contract and `adapterlist/<adapter>/**` one installable adapter, each with its
   own declaration at the root of the group and installed nowhere (`dep.yaml`) or into the
   package (`adapter.yaml`); `templates/*` are single-file scaffolds rendered with
   `utils.RenderTemplateToDest`. A scaffold rendering to a file that is *itself* a template
   (`page_html.html`) escapes its own braces: `{{ "{{ .Title }}" }}`.
 - **`cmd/main/`** — generated; wires an adapter into the sandbox, holds no logic.
-- **`AgnosConfig/`** — written once by `start`, read by every `build`.
+- **`AgnosConfig/`** — written once by `start`, read by every `build`. `extensions.yaml` is
+  the one that decides what gets generated.
 - **`examples/`** — one directory per example, on the `cli` and the `lib` side; `exec-test` runs
   each and diffs it against the `result.yaml` beside it.
 
@@ -155,10 +160,10 @@ layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go
 `api/cli.go` + `api/command.go`, `internal/server/new.go` mirrors `internal/cli/new.go`,
 `internal/server/servermain.go` mirrors `internal/cli/climain.go`, `internal/routes/<name>/`
 (`route.yaml` + generated `new.go` + hand-written `handler.go` -> `RouteHandler`) mirrors
-`internal/commands/<name>/`, `parsables/routeconf/` mirrors `commandconf/`, `assets/server/`
-mirrors `assets/cli/`, and `server-init`/`server-purge` mirror `cli-init`/`cli-purge`. It is
-rendered when `sandbox/internal/server/` exists, exactly as the cli group is rendered when
-`sandbox/internal/cli/` does.
+`internal/commands/<name>/`, `parsables/routeconf/` mirrors `commandconf/`, `assets/sandbox-server/`
+mirrors `assets/sandbox-cli/`, and `server-init`/`server-purge` mirror `cli-init`/`cli-purge`. It is
+rendered when `sandbox-server` is on, exactly as the cli group is rendered when
+`sandbox-cli` is.
 
 `sandbox.Server.Routes` (`[]api.Route`, built by `internal/server/new.go` from every package's
 generated `NewRoute`, in match order) **is** the http surface, exactly as `sandbox.Cli.Commands`
@@ -175,14 +180,28 @@ and the response `api.Route` carries as `any` (`sandbox/api/` may name no type o
 
 The **front layer** is the third column, and declares no unit of its own: a page **is** a
 route. `sandbox/internal/pageio/` (generated; `Render` plus the `staticref`/`cssref`/`jsref`/
-`dirref`/`inline`/`include` helpers) mirrors `routeio/` and is what `build` reads `hasFront`
-from — never `assets/frontend/`, which is the project's own content and may be empty.
-`assets/front/` is the group, `front-init`/`front-purge` the pair, and a page is
+`dirref`/`inline`/`include` helpers) mirrors `routeio/`, and `sandbox-front` is the key that
+renders it — never a probe of `assets/frontend/`, which is the project's own content and may
+be empty. `assets/sandbox-front/` is the group, `front-init`/`front-purge` the pair, and a page is
 `routes/<page>/route.yaml` plus `assets/frontend/pages/<page>.html`, written by
 `add-page`/`remove-page`. Both halves are written **once** and are then the project's; only
 `pageio` and `docs/FrontUsage` are rewritten by every build. `pageio.StaticMount` is rendered
 from the first segment of the `static` route's declaration (`collect_front_mount.go`), so
 renaming the mount moves every generated link instead of breaking it in silence.
+
+The **extensions** are what agnos generates for a project, declared in
+`AgnosConfig/extensions.yaml` and nowhere else — `build` never infers a mechanic from a
+directory being present. Eight keys: `sandbox` (the core), `sandbox-deps`, `sandbox-cli`,
+`sandbox-server`, `sandbox-front`, `sandbox-example` (the `examples/` suite), `doc` and
+`readme`. Everything that renders into the sandbox is spelled `sandbox-<mechanic>`; `doc` and
+`readme` stand on their own. `false` means **stop generating**, never **delete**: what the
+mechanic wrote stays and becomes the project's, and removing it is what `<x>-purge` does — the
+same command that writes the `false`. The catalog is `utils.ExtensionCatalog()`, the groups
+each key renders `utils.AssetGroups()`, and `enable-extension`/`disable-extension`/
+`list-extensions` plus every `<x>-init`/`<x>-purge` are the only writers of the file.
+`utils.SetExtension` renders a mechanic's *code* group into the same transaction when it turns
+one on, because the build that follows collects `sandbox/api/` off disk and would otherwise
+generate a `sandbox.go` missing the field the new group's `cmd/main/main.go` already uses.
 
 The **deps layer** is three units, not one: a **dep** is the contract (`sandbox/deps/<dep>/`,
 one field of `deps.Deps`), an **adapter** is one implementation of it
@@ -213,7 +232,7 @@ follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` t
 
 ## Rules that generated code depends on
 
-The full list is `docs/Rules/doc.md`, rendered from `assets/all/docs/Rules/doc.md`; add or
+The full list is `docs/Rules/doc.md`, rendered from `assets/doc/docs/Rules/doc.md`; add or
 change a rule there and nowhere else. The ones most easily broken:
 
 - **Every file is an instance of a pattern.** New code copies an existing sibling exactly:
@@ -224,6 +243,9 @@ change a rule there and nowhere else. The ones most easily broken:
   `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`.
 - Generated files are never edited — change the template under `assets/` and bootstrap.
   `docs/GeneratedFiles/doc.md` lists which files are rewritten by every build.
+- Never hand-edit `AgnosConfig/extensions.yaml`; use `enable-extension` / `disable-extension`
+  or the `<x>-init` / `<x>-purge` pair that owns the key. A missing file is a hard error, not a
+  default — `verify` also rejects an unknown key and any `sandbox-*` on with `sandbox` off.
 - Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The
   same holds for a route's `route.yaml`: `add-route`/`remove-route`, `set-route`,
   `add-segment`/`remove-segment`, `add-header`/`remove-header`, `add-param`/`remove-param`,

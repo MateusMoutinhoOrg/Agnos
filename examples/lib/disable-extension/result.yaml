@@ -1,0 +1,7 @@
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndisable-extension started with path TestDir extension readme \nbuild started with path TestDir \nsuccessfully rendered template\nREADME.md still here: yes\n"
+exit-code: 0
+tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 3408d771f108f1ef9a8c3d40940929e9e880941480fd8f1bafea487e1b1cad94
+    - file: README.md
+      sha: 0fb9fecc385f9e61a8845bb3bf3ab27e6ae146cec65bce31e79a0e4fd721de93

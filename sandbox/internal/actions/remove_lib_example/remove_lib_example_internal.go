@@ -10,5 +10,9 @@ import (
 // it — the example.go, the golden result.yaml and any TestDir or AssertDir left
 // behind by the last run.
 func RemoveLibExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	if err := utils.RequireExtension(sandbox, io, utils.ExtensionSandboxExample); err != nil {
+		return err
+	}
+
 	return utils.RemoveExample(sandbox, io, utils.ExampleLibSide, name)
 }

@@ -2,7 +2,6 @@ package smartio
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/pathreplacerconf"
 )
 
@@ -21,7 +20,6 @@ type SmartIO struct {
 	// bound then.
 	sandbox *api.Sandbox
 
-	Ignore       *ignorableconf.IgnorableConf
 	Replacers    *pathreplacerconf.PathReplacerConf
 	Transactions map[string][]byte
 

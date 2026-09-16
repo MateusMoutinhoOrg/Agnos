@@ -11,6 +11,10 @@ import (
 // records a golden instead of reporting a failure. It refuses to overwrite an
 // existing example.
 func AddLibExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	if err := utils.RequireExtension(sandbox, io, utils.ExtensionSandboxExample); err != nil {
+		return err
+	}
+
 	if err := utils.ValidateExampleName(sandbox, name); err != nil {
 		return err
 	}
@@ -27,10 +31,15 @@ func AddLibExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name strin
 
 	sandbox.Deps.Std.Log("add-lib-example creating %s \n", dir)
 
+	has_deps, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxDeps)
+	if err != nil {
+		return err
+	}
+
 	vars := map[string]interface{}{
 		"Name":    name,
 		"Module":  module_conf.Module,
-		"HasDeps": io.IsDir("sandbox/deps"),
+		"HasDeps": has_deps,
 	}
 	return utils.RenderTemplateToDest(sandbox, io, "templates/example_lib.go", vars, dir+"/"+utils.ExampleLibFile)
 }

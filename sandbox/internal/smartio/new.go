@@ -2,7 +2,6 @@ package smartio
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/ignorableconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/pathreplacerconf"
 )
 
@@ -34,23 +33,6 @@ func New(sandbox *api.Sandbox, path string, projectName string) *SmartIO {
 	}
 
 	configDir := joinPath(sandbox, path, projectName+"Config")
-
-	ignorePath := joinPath(sandbox, configDir, "ignore.yaml")
-	if sandbox.Deps.Iodeps.Exist(ignorePath) && sandbox.Deps.Iodeps.IsFile(ignorePath) {
-		content, err := sandbox.Deps.Iodeps.ReadFile(ignorePath)
-		if err == nil {
-			conf, err := ignorableconf.New(sandbox, string(content))
-			if err == nil {
-				io.Ignore = conf
-			} else {
-				io.Ignore = ignorableconf.NewEmpty(sandbox)
-			}
-		} else {
-			io.Ignore = ignorableconf.NewEmpty(sandbox)
-		}
-	} else {
-		io.Ignore = ignorableconf.NewEmpty(sandbox)
-	}
 
 	replacersPath := joinPath(sandbox, configDir, "paths.yaml")
 	if sandbox.Deps.Iodeps.Exist(replacersPath) && sandbox.Deps.Iodeps.IsFile(replacersPath) {

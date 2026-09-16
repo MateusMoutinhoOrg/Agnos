@@ -18,7 +18,7 @@ AgnosConfig/                        written once by `start`, read by every `buil
   project.yaml                      name, version, description  (projectconf)
   themes.yaml                       doc themes: name, id, description  (themesconf)
   structure.yaml                    this tree  (structureconf)
-  ignore.yaml                       SmartIO listing filters  (ignorableconf)
+  extensions.yaml                   which mechanics agnos generates  (extensionsconf)
   paths.yaml                        SmartIO listing rewrites  (pathreplacerconf)
   docs/ReadmeHeader.md              README body, a template
 sandbox/                            closed: imports nothing outside sandbox/, no OS packages
@@ -52,11 +52,14 @@ adapters/                           the only place OS-bound and third-party code
   availables/<name>/new.go          (gen) New() deps.Deps calling the Bind of every adapter declared; an available with no available.yaml is hand-written and left alone
 assets/                             Go text/templates embedded by asset.go; never `go build ./...`
   start/                            written once, on `start`
-  all/                              rendered by every `build`
-  deps/                             rendered when sandbox/deps/ exists
-  cli/                              rendered when sandbox/internal/cli/ exists
-  server/                           rendered when sandbox/internal/server/ exists
-  front/                            rendered when sandbox/internal/pageio/ exists
+  sandbox/                          rendered when the `sandbox` extension is on; one group per extension from here down
+  sandbox-deps/                     rendered when `sandbox-deps` is on
+  sandbox-cli/                      rendered when `sandbox-cli` is on
+  sandbox-server/                   rendered when `sandbox-server` is on
+  sandbox-front/                    rendered when `sandbox-front` is on
+  readme/                           rendered when `readme` is on
+  doc/                              rendered when `doc` is on
+  doc-<x>/                          rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-example, doc-example-cli)
   deplist/<dep>/                    one installable contract, dep.yaml beside the target layout it mirrors
   adapterlist/<adapter>/            one installable adapter, adapter.yaml beside the target layout it mirrors
   templates/                        single-file scaffolds (new.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)

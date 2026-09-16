@@ -27,30 +27,45 @@ func generatorName(sandbox *api.Sandbox) string {
 func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("build started with path %s \n", path)
 
-	//Creating the basic dir struct
-	io.CreateDir("sandbox/api")
-	io.CreateDir("sandbox/internal")
-
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
 
-	hasDeps := io.IsDir("sandbox/deps")
-	hasCli := io.IsDir("sandbox/internal/cli")
-	hasServer := io.IsDir("sandbox/internal/server")
+	// Which mechanics this project wants is declared, never inferred from the
+	// directories it happens to carry. A key the catalog gained since the
+	// project was scaffolded is filled with its default and written back, so a
+	// new extension never breaks an older tree.
+	extensions_conf, err := utils.LoadExtensionsConf(sandbox, io)
+	if err != nil {
+		return err
+	}
+	if utils.NormalizeExtensions(extensions_conf) {
+		if err := utils.SaveExtensionsConf(sandbox, io, extensions_conf); err != nil {
+			return err
+		}
+	}
 
-	// hasFront reports the html front layer, whose shared code is
-	// sandbox/internal/pageio — the same test one directory up that hasCli and
-	// hasServer make. The trigger is never assets/frontend/: that tree is the
-	// project's own content and may legitimately be empty.
-	hasFront := io.IsDir("sandbox/internal/pageio")
+	hasSandbox := extensions_conf.IsEnabled(utils.ExtensionSandbox)
+	hasDeps := extensions_conf.IsEnabled(utils.ExtensionSandboxDeps)
+	hasCli := extensions_conf.IsEnabled(utils.ExtensionSandboxCli)
+	hasServer := extensions_conf.IsEnabled(utils.ExtensionSandboxServer)
+	hasFront := extensions_conf.IsEnabled(utils.ExtensionSandboxFront)
+	hasExample := extensions_conf.IsEnabled(utils.ExtensionSandboxExample)
+	hasDoc := extensions_conf.IsEnabled(utils.ExtensionDoc)
+	hasReadme := extensions_conf.IsEnabled(utils.ExtensionReadme)
+
+	if hasSandbox {
+		io.CreateDir("sandbox/api")
+		io.CreateDir("sandbox/internal")
+	}
 
 	// hasAssets reports that the project carries its own agnos asset groups —
 	// it is itself a generator, like agnos. The docs of such a project have to
 	// name its templates and its own bootstrap; every other project has no
-	// assets/ tree to be told about.
-	hasAssets := io.IsDir("assets/all")
+	// assets/ tree to be told about. It is a property of the tree, not a
+	// mechanic the project turns on.
+	hasAssets := io.IsDir("assets/" + utils.ExtensionSandbox)
 
 	project_conf, err := utils.LoadProjectConf(sandbox, io)
 	if err != nil {
@@ -143,14 +158,16 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
-	generated_docs, err := CollectGeneratedDocs(sandbox, io, docsVars(module_conf.Module, project_conf.Name, generatorName(sandbox)), GeneratedDocsGroups(hasCli, hasServer, hasFront))
+	generated_docs, err := CollectGeneratedDocs(sandbox, io, docsVars(module_conf.Module, project_conf.Name, generatorName(sandbox)), utils.DocGroups(sandbox, extensions_conf))
 	if err != nil {
 		return err
 	}
 	docs = MergeDocs(sandbox, docs, generated_docs)
 
-	if err := GenerateSubdocIndexes(sandbox, io, docs); err != nil {
-		return err
+	if hasDoc {
+		if err := GenerateSubdocIndexes(sandbox, io, docs); err != nil {
+			return err
+		}
 	}
 
 	vars := map[string]interface{}{
@@ -161,10 +178,14 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"GeneratorName":     generatorName(sandbox),
 		"ConfigDir":         config.ProjectName + "Config",
 		"StructureConfFile": utils.StructureConfFile,
+		"HasSandbox":        hasSandbox,
 		"HasDeps":           hasDeps,
 		"HasCli":            hasCli,
 		"HasServer":         hasServer,
 		"HasFront":          hasFront,
+		"HasExample":        hasExample,
+		"HasDoc":            hasDoc,
+		"HasReadme":         hasReadme,
 		"StaticMount":       CollectFrontMount(sandbox, io),
 		"HasAssets":         hasAssets,
 		"Constructors":      CollectConstructors(sandbox, io),
@@ -184,15 +205,10 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"DepsApi":           deps_api,
 	}
 
-	if err := utils.RenderGroup(sandbox, io, "all", vars); err != nil {
-		return err
-	}
-
+	// The per-unit generators: one new.go per declared available, command and
+	// route, each owned by the mechanic that declares the unit.
 	if hasDeps {
 		if err := GenerateAvailableNews(sandbox, io, availables, module_conf.Module); err != nil {
-			return err
-		}
-		if err := utils.RenderGroup(sandbox, io, "deps", vars); err != nil {
 			return err
 		}
 	}
@@ -201,22 +217,19 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		if err := GenerateCommandNew(sandbox, io, commands, module_conf.Module); err != nil {
 			return err
 		}
-		if err := utils.RenderGroup(sandbox, io, "cli", vars); err != nil {
-			return err
-		}
 	}
 
 	if hasServer {
 		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {
 			return err
 		}
-		if err := utils.RenderGroup(sandbox, io, "server", vars); err != nil {
-			return err
-		}
 	}
 
-	if hasFront {
-		if err := utils.RenderGroup(sandbox, io, "front", vars); err != nil {
+	// Every asset group the declaration turns on, in render order. A mechanic
+	// that is off is not rendered at all: what it wrote before stays on disk,
+	// untouched, for the project to keep by hand.
+	for _, group := range utils.RenderableGroups(extensions_conf) {
+		if err := utils.RenderGroup(sandbox, io, group, vars); err != nil {
 			return err
 		}
 	}

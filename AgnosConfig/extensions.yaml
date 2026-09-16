@@ -1,3 +1,8 @@
-sandbox: true 
-sandbox-cli: true 
-sandbox-server: false 
+doc: true
+readme: true
+sandbox: true
+sandbox-cli: true
+sandbox-deps: true
+sandbox-example: true
+sandbox-front: false
+sandbox-server: false

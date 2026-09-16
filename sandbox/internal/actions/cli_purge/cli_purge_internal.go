@@ -3,6 +3,7 @@ package cli_purge
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // cliDirs are the directories the cli layer owns whole. The asset group only
@@ -23,7 +24,7 @@ var cliDirs = []string{
 func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("cli-purge started with path %s \n", path)
 
-	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively("cli")
+	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionSandboxCli)
 	if err != nil {
 		return err
 	}
@@ -48,7 +49,7 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 		}
 	}
 
-	return nil
+	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxCli, false)
 }
 
 // ancestorDirs returns every directory that contains one of the given files,

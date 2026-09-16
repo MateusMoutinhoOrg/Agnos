@@ -1,0 +1,26 @@
+args:
+    - description: the extension to turn on
+      examples:
+        - enable-extension readme
+      name: name
+      required: true
+      type: string
+category: Extensions
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - enable-extension --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Turn one generation mechanic on
+identifiers:
+    - enable-extension

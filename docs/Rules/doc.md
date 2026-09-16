@@ -25,6 +25,20 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `build` compiles `./cmd/... ./sandbox/... ./adapters/...`, never `./...`:
   `assets/` holds Go templates, not compilable Go.
 
+## Extensions
+
+- What this project generates is declared in `AgnosConfig/extensions.yaml`, one key per
+  mechanic, and nowhere else: `build` never infers a mechanic from a directory being present.
+  A missing declaration is a hard error, not a default. **(verify)**
+- Only the keys of the catalog may appear, and no `sandbox-<x>` mechanic is on while `sandbox`
+  is off. **(verify)**
+- `false` means *stop generating*, never *delete*: agnos leaves what the mechanic already
+  wrote exactly as it is, for the project to keep or edit by hand. Removing those files is
+  what an `<x>-purge` does — and it is the same command that writes the `false`.
+- The declaration is written by `agnos enable-extension` / `disable-extension` and
+  by every `<x>-init` / `<x>-purge` pair, never by hand.
+- Every key is in [Extensions](../Extensions/doc.md).
+
 ## Layers
 
 - `sandbox/` is closed: a file there imports only `sandbox/` packages — the stdlib included. A
@@ -144,6 +158,7 @@ Never `fmt.Printf`.
 - Say a rule once, in this page, and link to it. Links are relative to the file that carries
   them: `../X/doc.md` inside `docs/`, `docs/X/doc.md` in `README.md` and `ReadmeHeader.md`.
 
+
 ## Examples
 
 - An example is `examples/<side>/<name>/`, holding exactly one `example.go` under `lib/`
@@ -169,3 +184,4 @@ Never `fmt.Printf`.
 
 Details: [LibExamples](../LibExamples/doc.md) and
 [CliExamples](../CliExamples/doc.md).
+

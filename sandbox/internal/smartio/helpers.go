@@ -43,22 +43,10 @@ func unrootedPaths(sandbox *api.Sandbox, io *SmartIO, paths []string) []string {
 	return out
 }
 
-func processInputPath(sandbox *api.Sandbox, io *SmartIO, path string) (string, error) {
-	p := io.Replacers.Format(path)
-	if io.Ignore.IsIgnorable(p) {
-		return p, sandbox.Deps.Std.Errorf("path %q is ignorable", p)
-	}
-	return p, nil
-}
-
-func filterIgnored(io *SmartIO, paths []string) []string {
-	var result []string
-	for _, p := range paths {
-		if !io.Ignore.IsIgnorable(p) {
-			result = append(result, p)
-		}
-	}
-	return result
+// processInputPath applies the paths.yaml rewrites to a path on its way in,
+// so every caller below works with the spelling the project declared.
+func processInputPath(io *SmartIO, path string) string {
+	return io.Replacers.Format(path)
 }
 
 // isPendingRemoval checks if a path (or any of its parents) has been

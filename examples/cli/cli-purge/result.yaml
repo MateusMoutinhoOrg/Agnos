@@ -1,6 +1,8 @@
 cli-output: "cli-purge started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 5e049d58fe09aa2e00986685020d5e8c611929c97af4fea95f744dd68766eef8
     - file: docs/Adapters/doc.md
       sha: 17220206e45e83d775311c94bd55f75eaea35b2e711469d11927f01d39eade19
     - file: docs/Adapters/props.yaml
@@ -13,8 +15,12 @@ tree:
       sha: 610582dde1f07d92217052da0c286044eae83fa1e9575b0f7aac5d2eb2224b7e
     - file: docs/EntriesYaml/props.yaml
       sha: b2b3fb7a3d0d54857cbce60bc3e04cdf9961230598afed4eb5d474407d5bafed
+    - file: docs/Extensions/doc.md
+      sha: da7e0293ffb6a90aaacd33a8af4d140baef5acd4c0ccb7416f039fd16a7df703
+    - file: docs/Extensions/props.yaml
+      sha: 7de2cd40d2152a82ee767844ab2f1c29b119374cef0f5ef40457c2a84997d0ca
     - file: docs/GeneratedFiles/doc.md
-      sha: a6c11e5d9d5718d6010e887c14c7b615fb35ac64aaae0dd2155d128703a52331
+      sha: e62c71a66cb534f010c47496e9d3a2a4050d19c4d04a6069b5848fda58bd1132
     - file: docs/GeneratedFiles/props.yaml
       sha: a0eef341ebd88c5ba305c3948e7486fd5b001ff50af0232d73fb0c9a32982ab3
     - file: docs/LibExamples/doc.md
@@ -34,7 +40,7 @@ tree:
     - file: docs/Requirements/props.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: 168e7e853e4cd5458e4313da24dc6c2f79068039d2046288f0dc676f5568105d
+      sha: a9b431b5f9058f782ddb3e523534b108b3f03b6174e341b6021b88f0b731a03d
     - file: docs/Rules/props.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md
@@ -42,7 +48,7 @@ tree:
     - file: docs/Structure/props.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: d1a10e253e2f612a8733bff1239b3c57602c0b88f24b2800451aed58dcd8f2da
+      sha: 5784afc307a0e04f48793501184cc7613b25e3320d581b46c4554ae792ae57e0
     - file: docs/Workflow/props.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b
     - file: sandbox/internal/config/config.go

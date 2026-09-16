@@ -6,20 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// CliInitInternal renders every embedded asset under assets/cli into the
-// target project at the path it holds inside that group, using the same
-// Module variable the build step derives from go.mod.
+// CliInitInternal turns the cli mechanic on in the project's declaration. It
+// writes no asset itself: the follow-up build renders every group the
+// declaration turns on, and sandbox-cli is one of them from here.
 func CliInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("cli-init started with path %s \n", path)
 
-	module_conf, err := utils.LoadModuleConf(sandbox, io)
-	if err != nil {
-		return err
-	}
-
-	vars := map[string]interface{}{
-		"Module": module_conf.Module,
-	}
-
-	return utils.RenderGroup(sandbox, io, "cli", vars)
+	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxCli, true)
 }

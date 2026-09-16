@@ -33,10 +33,13 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `compile` | cross-compile a project's cmd/main into release/ | [example.sh](../../examples/cli/compile/example.sh) |
 | `deps-init` | add the dependency layer to a project that has none | [example.sh](../../examples/cli/deps-init/example.sh) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.sh](../../examples/cli/deps-purge/example.sh) |
+| `disable-extension` |  | [example.sh](../../examples/cli/disable-extension/example.sh) |
+| `enable-extension` |  | [example.sh](../../examples/cli/enable-extension/example.sh) |
 | `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
 | `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
 | `list-adapters` |  | [example.sh](../../examples/cli/list-adapters/example.sh) |
 | `list-deps` |  | [example.sh](../../examples/cli/list-deps/example.sh) |
+| `list-extensions` |  | [example.sh](../../examples/cli/list-extensions/example.sh) |
 | `remove-adapter` |  | [example.sh](../../examples/cli/remove-adapter/example.sh) |
 | `remove-arg` | delete one declared positional argument | [example.sh](../../examples/cli/remove-arg/example.sh) |
 | `remove-available` |  | [example.sh](../../examples/cli/remove-available/example.sh) |

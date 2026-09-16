@@ -2,16 +2,10 @@ package front_init
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
-
-// serverDir is what tells a project that already has a server layer from one
-// that has to be given one first — the same directory `build` reads hasServer
-// from.
-const serverDir = "sandbox/internal/server"
 
 // staticStyle and staticScript are the two files the skeleton carries. They
 // are not decoration: //go:embed keeps no empty directory, so a `dirref
@@ -22,10 +16,10 @@ const (
 	staticScript = utils.StaticAssetsDir + "/scripts/main.js"
 )
 
-// FrontInitInternal renders every embedded asset under assets/front into the
-// target project at the path it holds inside that group, then writes the two
-// halves that are the project's from the moment they exist: the static route
-// and the skeleton of assets/frontend/.
+// FrontInitInternal turns the front mechanic on in the project's declaration,
+// then writes the two halves that are the project's from the moment they
+// exist: the static route and the skeleton of assets/frontend/. The group
+// itself is rendered by the follow-up build, like every other mechanic.
 //
 // A project with no server layer is given one first, on this same open
 // SmartIO: actions compose by sharing one transaction, so there is no
@@ -33,7 +27,11 @@ const (
 func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("front-init started with path %s \n", path)
 
-	if !io.IsDir(serverDir) {
+	has_server, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxServer)
+	if err != nil {
+		return err
+	}
+	if !has_server {
 		if err := serverInitAction.ServerInitInternal(sandbox, io, path); err != nil {
 			return err
 		}
@@ -56,14 +54,10 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 		return err
 	}
 
-	// The static route is written before the group is rendered because
-	// pageio's StaticMount is read off that declaration. The build that
-	// follows renders it again from the same source, so the only thing this
-	// ordering buys is a first render that is already correct rather than one
-	// pointing at a mount the project may have renamed.
-	vars["StaticMount"] = buildAction.CollectFrontMount(sandbox, io)
-
-	return utils.RenderGroup(sandbox, io, "front", vars)
+	// The static route is written before the mechanic is turned on because
+	// pageio's StaticMount is read off that declaration: the build that follows
+	// has to find the route already there to render the group against it.
+	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxFront, true)
 }
 
 // writeStaticRoute scaffolds the route serving assets/frontend/static, leaving

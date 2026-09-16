@@ -7,17 +7,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// cliDir is what tells a project that already has a cli layer from one that
-// has to be given one first — the same directory `build` reads hasCli from.
-const cliDir = "sandbox/internal/cli"
-
 // startServerDir holds the one command the server layer writes: the entry
 // point that opens the port.
 const startServerDir = "sandbox/internal/commands/start_server"
 
-// ServerInitInternal renders every embedded asset under assets/server into the
-// target project at the path it holds inside that group, and writes the
-// start-server command beside it.
+// ServerInitInternal turns the server mechanic on in the project's declaration
+// and writes the start-server command beside it. The group itself is rendered
+// by the follow-up build, like every other mechanic.
 //
 // A project with no cli layer is given one first, on this same open SmartIO:
 // actions compose by sharing one transaction, so there is no intermediate
@@ -34,13 +30,17 @@ func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 		"Module": module_conf.Module,
 	}
 
-	if !io.IsDir(cliDir) {
+	has_cli, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxCli)
+	if err != nil {
+		return err
+	}
+	if !has_cli {
 		if err := cliInitAction.CliInitInternal(sandbox, io, path); err != nil {
 			return err
 		}
 	}
 
-	if err := utils.RenderGroup(sandbox, io, "server", vars); err != nil {
+	if err := utils.SetExtension(sandbox, io, utils.ExtensionSandboxServer, true); err != nil {
 		return err
 	}
 

@@ -5,7 +5,8 @@
 
 | File | Written by | Rewrite |
 |---|---|---|
-| `AgnosConfig/{project,themes,structure,ignore,paths}.yaml` | `start` | once |
+| `AgnosConfig/{project,themes,structure,paths}.yaml` | `start` | once |
+| `AgnosConfig/extensions.yaml` | `start` | once, then rewritten by `enable-extension` / `disable-extension` and every `<x>-init` / `<x>-purge` — never by hand |
 | `AgnosConfig/docs/ReadmeHeader.md` | `start` | once. The whole of `README.md` above the doc index, itself a template |
 | `go.mod` | `start` | once. `add-dep` / `remove-dep` edit `require` |
 | `go.sum` | `go mod tidy` | - |
@@ -14,8 +15,9 @@
 | `sandbox/new.go` | `build` | always. One `<x>.New<X>(&self)` per other file of `sandbox/api/` |
 | `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
 | `sandbox/internal/config/config.go` | `build` | always. `ProjectName`, `Version` from `project.yaml` |
-| `docs/{Requirements,Workflow,Rules,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,LibExamples,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
+| `docs/LibExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/deps/deps.go` | `build` | always. One `<Title> <dir>.Sandbox` per dir of `sandbox/deps/` |
 | `adapters/availables/<name>/new.go` | `build` | always. One `<adapter>.Bind(&deps)` per entry of that available's `available.yaml`; an available with no `available.yaml` is hand-written and left alone |
 | `adapters/availables/<name>/available.yaml` | `deps-init` | once, then rewritten by `add-dep` / `remove-dep` — never by hand |
@@ -25,7 +27,8 @@
 | `adapters/libs/<dep>/<dep>.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; the generated shim |
 | `assets/asset.go` | `add-dep embeddeps` | once |
 | `cmd/main/main.go` | `build` | always |
-| `docs/{CliInstall,CliExamples,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `docs/{CliInstall,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
 | `sandbox/internal/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
 | `sandbox/internal/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |

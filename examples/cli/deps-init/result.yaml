@@ -1,6 +1,8 @@
 cli-output: "deps-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 5e049d58fe09aa2e00986685020d5e8c611929c97af4fea95f744dd68766eef8
     - file: adapters/availables/standard/available.yaml
       sha: 3a150d843a1c249764e0a44169bca6e40c86178e9e910d7f5538acfdb606d9a8
     - file: adapters/availables/standard/new.go

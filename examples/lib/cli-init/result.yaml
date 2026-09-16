@@ -1,6 +1,8 @@
 cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: c3941fda22ece3a7bb1ddc0275b9a9bd2aaae064f01245cccdcf338311620c22
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: sandbox/internal/cli/climain.go

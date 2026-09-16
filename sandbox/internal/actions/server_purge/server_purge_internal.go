@@ -3,6 +3,7 @@ package server_purge
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // serverDirs are the directories the server layer owns whole. The asset group
@@ -31,7 +32,7 @@ var serverDirs = []string{
 func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("server-purge started with path %s \n", path)
 
-	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively("server")
+	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionSandboxServer)
 	if err != nil {
 		return err
 	}
@@ -56,7 +57,7 @@ func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string)
 		}
 	}
 
-	return nil
+	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxServer, false)
 }
 
 // ancestorDirs returns every directory that contains one of the given files,

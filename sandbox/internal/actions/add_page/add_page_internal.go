@@ -7,11 +7,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// pageioDir is the front layer's shared package, and the same directory
-// `build` reads hasFront from: without it there is nothing for the scaffolded
-// handler to render through.
-const pageioDir = "sandbox/internal/pageio"
-
 // pageMethod and pageCategory are fixed: a page is read by a browser
 // navigating to it, and it is listed in docs/Routes under a heading of its own
 // so the pages of a project read as a set rather than scattered among its api
@@ -42,7 +37,11 @@ func AddPageInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PagePr
 	if identifier == utils.StaticRouteName {
 		return sandbox.Deps.Std.Errorf("%q is the route serving the static assets and cannot be a page", utils.StaticRouteName)
 	}
-	if !io.IsDir(pageioDir) {
+	has_front, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxFront)
+	if err != nil {
+		return err
+	}
+	if !has_front {
 		return sandbox.Deps.Std.Errorf("the project has no front layer: run front-init before declaring a page")
 	}
 

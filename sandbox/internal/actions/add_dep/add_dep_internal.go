@@ -21,6 +21,13 @@ import (
 // The adapter is enrolled in every available: nothing else fills that field
 // yet, and an available that leaves one empty is a nil func waiting to panic.
 func AddDepInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddDepProps) error {
+	// Installing a dep is asking for the dependency layer, so the mechanic
+	// that renders sandbox/deps/deps.go is turned on here rather than being
+	// inferred later from the directory this install is about to create.
+	if err := utils.SetExtension(sandbox, io, utils.ExtensionSandboxDeps, true); err != nil {
+		return err
+	}
+
 	if sandbox.Deps.Stringsdeps.Contains(props.Dep, "/") {
 		return AddRemoteDepInternal(sandbox, io, props)
 	}

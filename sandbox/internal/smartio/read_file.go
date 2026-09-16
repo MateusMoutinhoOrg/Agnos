@@ -3,10 +3,7 @@ package smartio
 import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
 func ReadFile(sandbox *api.Sandbox, io *SmartIO, path string) ([]byte, error) {
-	p, err := processInputPath(sandbox, io, path)
-	if err != nil {
-		return nil, err
-	}
+	p := processInputPath(io, path)
 
 	if isPendingRemoval(sandbox, io, p) {
 		return nil, sandbox.Deps.Std.Errorf("file %q does not exist", p)
