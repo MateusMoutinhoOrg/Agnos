@@ -1401,6 +1401,26 @@ agnos help
 agnos help start
 ```
 
+### `interview`
+
+Start an interactive session that drives any agnos command
+
+```bash
+agnos interview [--path <path>] [--quiet]
+```
+
+Asks what you want to do, then generates the questions from the declaration of the command that answers it: one question per flag and arg, typed, bounded and defaulted exactly as that command declares them. It shows the command line your answers add up to before running anything, and returns to the menu afterwards. Every command of the surface is reachable, and a command declared later is covered without the interview changing.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+```bash
+agnos interview
+agnos interview --path ./my-project
+```
+
 ### `version` — `--version`
 
 Print the installed version
@@ -1413,16 +1433,6 @@ Prints the current version of the installed binary and exits.
 
 ```bash
 agnos version
-```
-
-## INFO
-
-### `interwiew`
-
-Start a interwiew with user
-
-```bash
-agnos interwiew
 ```
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

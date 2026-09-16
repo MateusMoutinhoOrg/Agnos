@@ -94,6 +94,7 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 | `adapters/libs/embeddeps` | `embeddeps.Bind(&deps)` |
 | `adapters/libs/goimportsdeps` | `goimportsdeps.Bind(&deps)` |
 | `adapters/libs/hashdeps` | `hashdeps.Bind(&deps)` |
+| `adapters/libs/interviewer` | `interviewer.Bind(&deps)` |
 | `adapters/libs/iodeps` | `iodeps.Bind(&deps)` |
 | `adapters/libs/rundeps` | `rundeps.Bind(&deps)` |
 | `adapters/libs/serializables` | `serializables.Bind(&deps)` |

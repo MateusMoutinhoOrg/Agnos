@@ -496,4 +496,11 @@ type Actions struct {
 	// UpdateTest runs one example by name, both sides, and rewrites its
 	// golden result.yaml with what the run produced, printing the changes.
 	UpdateTest func(path string, name string) error
+
+	// Interview runs the interactive session over a project: it asks what is
+	// to be done, generates the questions from the declaration of the command
+	// that answers it, and runs that command with the answers bound onto it.
+	// It writes nothing of its own — every command it dispatches runs the
+	// action behind it, which persists and builds for itself.
+	Interview func(path string) error
 }

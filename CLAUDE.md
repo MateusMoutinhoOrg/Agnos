@@ -160,6 +160,15 @@ copies the matched declaration with `api.BindCommand` and binds a command line o
 values off the command by the id its `entries.yaml` declares — `command.GetString("path")`, `command.GetBool("quiet")`, `command.GetStrings("example")`
 — so nothing about a command is spelled in Go anywhere but its own `new.go`.
 
+`interview` is the second reader of that surface, and the reason it stays worth keeping generic:
+`sandbox/internal/actions/interview/` builds its top menu from every `Category`, a question from
+every `CommandArg` and `CommandFlag` — typed, bounded and defaulted exactly as declared — and
+binds the answers with `api.BindCommand` before calling the command's own handler. It declares
+nothing per command, so a command added later is covered without it changing. The one thing it
+knows by name is `suggest.go`: the table saying which field names something that already exists
+and where to read the list of them, always off the project at `--path` and never off the running
+binary's own `Cli.Commands`.
+
 The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
 layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go` mirror
 `api/cli.go` + `api/command.go`, `internal/server/new.go` mirrors `internal/cli/new.go`,

@@ -34,6 +34,11 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 `handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
 
+`interview` needs nothing for the new command: it generates its questions from the declaration.
+Teach `sandbox/internal/actions/interview/suggest.go` only when one of the command's fields names
+something that already exists — a table entry saying where to read that list, off the project at
+`--path`.
+
 `add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
 
 ## Add a layer (cli, server, …)

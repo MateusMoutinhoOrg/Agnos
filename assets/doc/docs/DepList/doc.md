@@ -13,6 +13,7 @@ in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 | `embeddeps` | `Embeddeps` | `embeddeps` + `assets/asset.go` | `embed`, `text/template` | Read and render files compiled into the binary |
 | `goimportsdeps` | `Goimportsdeps` | `goimportsdeps` | `go/parser` | Go source reader (package, imports, declarations) |
 | `hashdeps` | `Hashdeps` | `hashdeps` | `crypto/sha256`, `encoding/hex` | SHA-256 of a byte slice, lower-case hex |
+| `interviewer` | `Interviewer` | `interviewer` | `os`, `os/exec`, `bufio` | Ask a person a question and get the answer back typed. Arrow-key menus over stdin in raw mode, numbered prompts where there is no terminal |
 | `iodeps` | `Iodeps` | `iodeps` | `os`, `path/filepath` | Filesystem. `WriteFile` creates parents; `RemoveDir` removes files too; `Join`/`Dir` build host paths |
 | `requestdeps` | `Requestdeps` | `requestdeps` | `net/http` (30s timeout) | Per-call HTTP request |
 | `rundeps` | `Rundeps` | `rundeps` | `os/exec` | Run a program to completion; stdout+stderr merged; non-zero exit is `Result.ExitCode`, not an error |

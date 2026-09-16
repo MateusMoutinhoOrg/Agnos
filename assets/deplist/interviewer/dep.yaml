@@ -1,0 +1,4 @@
+default-adapter: interviewer
+field: Interviewer
+help: Ask a person a question and get the answer back, typed
+name: interviewer

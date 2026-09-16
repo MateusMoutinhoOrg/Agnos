@@ -28,6 +28,7 @@ import (
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
+	interviewAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/interview"
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
 	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
 	listExtensionsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_extensions"
@@ -226,6 +227,9 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.UpdateTest = func(path string, name string) error {
 		return updateTestsAction.UpdateTest(sandbox, path, name)
+	}
+	actions.Interview = func(path string) error {
+		return interviewAction.Interview(sandbox, path)
 	}
 
 	return actions

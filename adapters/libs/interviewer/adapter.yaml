@@ -1,0 +1,5 @@
+dep: interviewer
+help: Terminal interview over os.Stdin, raw mode through stty, numbered fallback
+module: ""
+name: interviewer
+origin: catalog

@@ -1,0 +1,21 @@
+category: Info
+examples:
+    - interview
+    - interview --path ./my-project
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Start an interactive session that drives any agnos command
+identifiers:
+    - interview
+long-description: 'Asks what you want to do, then generates the questions from the declaration of the command that answers it: one question per flag and arg, typed, bounded and defaulted exactly as that command declares them. It shows the command line your answers add up to before running anything, and returns to the menu afterwards. Every command of the surface is reachable, and a command declared later is covered without the interview changing.'

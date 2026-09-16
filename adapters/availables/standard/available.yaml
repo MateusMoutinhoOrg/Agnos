@@ -3,6 +3,7 @@ adapters:
     - embeddeps
     - goimportsdeps
     - hashdeps
+    - interviewer
     - iodeps
     - rundeps
     - serializables
