@@ -29,6 +29,7 @@ import (
 	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_init"
 	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
+	interwiew "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/interwiew"
 	list_adapters "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_adapters"
 	list_deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_deps"
 	list_extensions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_extensions"
@@ -97,6 +98,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		front_init.NewCommand(sandbox),
 		front_purge.NewCommand(sandbox),
 		help.NewCommand(sandbox),
+		interwiew.NewCommand(sandbox),
 		list_adapters.NewCommand(sandbox),
 		list_deps.NewCommand(sandbox),
 		list_extensions.NewCommand(sandbox),

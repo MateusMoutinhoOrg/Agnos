@@ -1415,4 +1415,14 @@ Prints the current version of the installed binary and exits.
 agnos version
 ```
 
+## INFO
+
+### `interwiew`
+
+Start a interwiew with user
+
+```bash
+agnos interwiew
+```
+
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).
