@@ -23,6 +23,14 @@ func generatorName(sandbox *api.Sandbox) string {
 	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
 }
 
+// generatorVersion is the release of the binary running this build. A tree was
+// rendered by this version, so it is the version a doc names as the one that
+// maintains it — never the project's own Version, which is what the generated
+// project releases under.
+func generatorVersion(sandbox *api.Sandbox) string {
+	return sandbox.Config.Version
+}
+
 func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("build started with path %s \n", path)
 
@@ -189,6 +197,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"Version":             project_conf.Version,
 		"ProjectName":         projectNameConst(sandbox, project_conf.Name),
 		"GeneratorName":       generatorName(sandbox),
+		"GeneratorVersion":    generatorVersion(sandbox),
 		"ConfigDir":           sandbox.Config.ProjectName + "Config",
 		"StructureConfFile":   utils.StructureConfFile,
 		"HasSandbox":          hasSandbox,

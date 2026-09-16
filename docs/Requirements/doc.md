@@ -5,11 +5,14 @@ Two tools, nothing else. Every recipe of [Workflow](../Workflow/doc.md) assumes 
 | Tool | Version | Needed for |
 | --- | --- | --- |
 | Go | 1.25+ | compiling this project; `agnos build` ends in a `go mod tidy` and a compile |
-| agnos | latest | every generated file — the tree cannot be maintained by hand |
+| agnos | v0.8.0+ | every generated file — the tree cannot be maintained by hand |
+
+This tree was rendered by `agnos v0.8.0`, so that is the floor: an older
+binary rewrites it to its own older shape.
 
 ```bash
 go version      # go1.25.0 or newer
-agnos version
+agnos version  # v0.8.0 or newer
 ```
 
 ## Go 1.25+

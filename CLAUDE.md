@@ -36,7 +36,9 @@ prefixes every command agnos owns (`agnos build`, `agnos add-command`, `agnos ad
 only what that project answers itself (`<name> help`, `<name> version`, `<name> start-server`,
 and whatever its own `add-command` declared). Never hardcode `agnos` in a template, and never
 use `{{.Name}}` to spell an agnos command: in this repo both render `agnos`, so the mistake is
-invisible here and surfaces only in a scaffolded project.
+invisible here and surfaces only in a scaffolded project. The version is the same pair:
+`{{.GeneratorVersion}}` is the release of the binary that rendered the tree (the floor
+`docs/Requirements/` names), `{{.Version}}` is what the generated project releases under.
 
 ## Audience: LLMs, not humans
 
@@ -108,7 +110,9 @@ example always runs against this tree; each run that reaches the go runtime pays
 `go mod tidy` + `go build`, so prefer `--only`. A `<name>` on both sides must leave the same
 tree and exit the same way, so both sides copy the same set. Create and delete examples with
 `add-cli-example` / `add-lib-example` / `remove-cli-example` / `remove-lib-example` only.
-Release: bump `version` in `AgnosConfig/project.yaml`, then `agnos publish`.
+Release: bump `version` in `AgnosConfig/project.yaml`, then `build` + `exec-test --update` (the
+bumped version renders into `docs/Requirements/doc.md`, so every golden holding that page moves),
+then `agnos publish`.
 
 ## Architecture
 

@@ -5,11 +5,14 @@ Two tools, nothing else. Every recipe of [Workflow](../Workflow/doc.md) assumes 
 | Tool | Version | Needed for |
 | --- | --- | --- |
 | Go | 1.25+ | compiling this project; `{{.GeneratorName}} build` ends in a `go mod tidy` and a compile |
-| {{.GeneratorName}} | latest | every generated file — the tree cannot be maintained by hand |
+| {{.GeneratorName}} | {{if .GeneratorVersion}}{{.GeneratorVersion}}+{{else}}latest{{end}} | every generated file — the tree cannot be maintained by hand |
 
-```bash
+{{if .GeneratorVersion}}This tree was rendered by `{{.GeneratorName}} {{.GeneratorVersion}}`, so that is the floor: an older
+binary rewrites it to its own older shape.
+
+{{end}}```bash
 go version      # go1.25.0 or newer
-{{.GeneratorName}} version
+{{.GeneratorName}} version{{if .GeneratorVersion}}  # {{.GeneratorVersion}} or newer{{end}}
 ```
 
 ## Go 1.25+
