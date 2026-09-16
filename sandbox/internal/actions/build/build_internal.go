@@ -60,6 +60,20 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		io.CreateDir("sandbox/internal")
 	}
 
+	// The contracts of sandbox/api/ and the packages that build them. The
+	// first is one field of the Sandbox each; the second is the call list
+	// sandbox/new.go is rendered from, and it is wider than the first — a
+	// constructor the project wrote itself is in it too.
+	constructors := CollectConstructors(sandbox, io)
+
+	// One constructor package per contract, written the first time and never
+	// again: from there on how that field is built is the project's.
+	if hasSandbox {
+		if err := GenerateConstructors(sandbox, io, constructors, module_conf.Module); err != nil {
+			return err
+		}
+	}
+
 	// hasAssets reports that the project carries its own agnos asset groups —
 	// it is itself a generator, like agnos. The docs of such a project have to
 	// name its templates and its own bootstrap; every other project has no
@@ -171,38 +185,39 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	vars := map[string]interface{}{
-		"Module":            module_conf.Module,
-		"Name":              project_conf.Name,
-		"Version":           project_conf.Version,
-		"ProjectName":       projectNameConst(sandbox, project_conf.Name),
-		"GeneratorName":     generatorName(sandbox),
-		"ConfigDir":         config.ProjectName + "Config",
-		"StructureConfFile": utils.StructureConfFile,
-		"HasSandbox":        hasSandbox,
-		"HasDeps":           hasDeps,
-		"HasCli":            hasCli,
-		"HasServer":         hasServer,
-		"HasFront":          hasFront,
-		"HasExample":        hasExample,
-		"HasDoc":            hasDoc,
-		"HasReadme":         hasReadme,
-		"StaticMount":       CollectFrontMount(sandbox, io),
-		"HasAssets":         hasAssets,
-		"Constructors":      CollectConstructors(sandbox, io),
-		"DepsLibs":          CollectDepsLibs(sandbox, io),
-		"AdapterLibs":       CollectAdapterLibs(sandbox, io),
-		"Availables":        availables,
-		"CliExamples":       utils.CollectExamples(sandbox, io, utils.ExampleCliSide),
-		"LibExamples":       utils.CollectExamples(sandbox, io, utils.ExampleLibSide),
-		"Commands":          commands,
-		"CommandDocs":       command_docs,
-		"Routes":            routes,
-		"RouteDocs":         route_docs,
-		"Themes":            themes_conf.Themes,
-		"DocIndex":          CollectDocIndex(sandbox, docs, themes_conf.Themes),
-		"PublicApi":         public_api,
-		"Structure":         structure,
-		"DepsApi":           deps_api,
+		"Module":              module_conf.Module,
+		"Name":                project_conf.Name,
+		"Version":             project_conf.Version,
+		"ProjectName":         projectNameConst(sandbox, project_conf.Name),
+		"GeneratorName":       generatorName(sandbox),
+		"ConfigDir":           config.ProjectName + "Config",
+		"StructureConfFile":   utils.StructureConfFile,
+		"HasSandbox":          hasSandbox,
+		"HasDeps":             hasDeps,
+		"HasCli":              hasCli,
+		"HasServer":           hasServer,
+		"HasFront":            hasFront,
+		"HasExample":          hasExample,
+		"HasDoc":              hasDoc,
+		"HasReadme":           hasReadme,
+		"StaticMount":         CollectFrontMount(sandbox, io),
+		"HasAssets":           hasAssets,
+		"Constructors":        constructors,
+		"ConstructorPackages": CollectConstructorPackages(sandbox, io, constructors),
+		"DepsLibs":            CollectDepsLibs(sandbox, io),
+		"AdapterLibs":         CollectAdapterLibs(sandbox, io),
+		"Availables":          availables,
+		"CliExamples":         utils.CollectExamples(sandbox, io, utils.ExampleCliSide),
+		"LibExamples":         utils.CollectExamples(sandbox, io, utils.ExampleLibSide),
+		"Commands":            commands,
+		"CommandDocs":         command_docs,
+		"Routes":              routes,
+		"RouteDocs":           route_docs,
+		"Themes":              themes_conf.Themes,
+		"DocIndex":            CollectDocIndex(sandbox, docs, themes_conf.Themes),
+		"PublicApi":           public_api,
+		"Structure":           structure,
+		"DepsApi":             deps_api,
 	}
 
 	// The per-unit generators: one new.go per declared available, command and

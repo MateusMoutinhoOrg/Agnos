@@ -4,11 +4,12 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // sandboxAllowedDirs is the fixed set of sub-directories the sandbox/ tree may
 // contain; sandboxAllowedFiles is the fixed set of loose files.
-var sandboxAllowedDirs = []string{"api", "deps", "internal"}
+var sandboxAllowedDirs = []string{"api", "constructors", "deps", "internal"}
 var sandboxAllowedFiles = []string{"new.go"}
 
 // CheckSandbox runs every sandbox-layer rule and returns one string per
@@ -25,12 +26,13 @@ func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []st
 	violations = append(violations, checkSandboxApi(sandbox, io, module)...)
 	violations = append(violations, checkSandboxDeps(sandbox, io, module)...)
 	violations = append(violations, checkSandboxConstructors(sandbox, io)...)
+	violations = append(violations, checkSandboxConstructorPackages(sandbox, io)...)
 
 	return violations
 }
 
-// checkSandboxContents enforces that sandbox/ holds only the api, deps and
-// internal directories plus a loose new.go.
+// checkSandboxContents enforces that sandbox/ holds only the api, constructors,
+// deps and internal directories plus a loose new.go.
 func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
@@ -38,7 +40,7 @@ func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		name := lastSegment(sandbox, dir)
 		if !contains(sandboxAllowedDirs, name) {
 			violations = append(violations, "sandbox/ contains unexpected directory "+name+
-				" (allowed: api, deps, internal)")
+				" (allowed: api, constructors, deps, internal)")
 		}
 	}
 
@@ -145,13 +147,12 @@ func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) 
 var constructorExempt = []string{"sandbox.go", "command.go", "route.go"}
 
 // checkSandboxConstructors enforces that the package building a contract builds
-// it under the one name sandbox/new.go calls: sandbox/api/<x>.go is a field of
-// the Sandbox, so sandbox/internal/<x>/new.go declares New<X>.
+// it under the one name the generated constructor calls: sandbox/api/<x>.go is
+// a field of the Sandbox, so sandbox/internal/<x>/new.go declares New<X>.
 //
 // A contract with no sandbox/internal/<x>/new.go passes. Such a field is one
 // this repo does not fill — an api published for a consumer to install, say —
-// and sandbox/new.go leaves it alone rather than naming a package that is not
-// written yet.
+// and no constructor package is written for it.
 func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
@@ -170,8 +171,39 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []strin
 		}
 		if !declaresFunc(sandbox, io, newFile, constructor) {
 			violations = append(violations,
-				newFile+" does not declare "+constructor+"; it is what sandbox/new.go calls to fill Sandbox."+
+				newFile+" does not declare "+constructor+"; it is what "+utils.ConstructorPath(base)+" calls to fill Sandbox."+
 					sandbox.Deps.Stringsdeps.ToUpper(base[:1])+base[1:])
+		}
+	}
+
+	return violations
+}
+
+// checkSandboxConstructorPackages enforces the shape sandbox/new.go is
+// rendered against: every directory under sandbox/constructors/ carries a
+// constructor.go declaring Constructor, because new.go imports that directory
+// by its own name and calls exactly that function on it.
+//
+// The directories are the list, not sandbox/api/ — which is the whole point of
+// the layer. A project may add a constructor of its own and have it called,
+// and may rewrite a generated one, so long as it keeps this one shape.
+func checkSandboxConstructorPackages(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+	var violations []string
+
+	for _, dir := range io.ListDirs(utils.ConstructorsDir) {
+		name := lastSegment(sandbox, dir)
+		file := utils.ConstructorPath(name)
+
+		if !io.IsFile(file) {
+			violations = append(violations, utils.ConstructorDir(name)+" has no "+utils.ConstructorFile+
+				"; every package under "+utils.ConstructorsDir+
+				"/ declares the Constructor(sandbox) that sandbox/new.go calls")
+			continue
+		}
+		if !declaresFunc(sandbox, io, file, "Constructor") {
+			violations = append(violations,
+				file+" does not declare Constructor; it is what sandbox/new.go calls to fill the "+
+					"field this package owns")
 		}
 	}
 

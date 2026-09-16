@@ -5,6 +5,8 @@ tree:
       sha: c3941fda22ece3a7bb1ddc0275b9a9bd2aaae064f01245cccdcf338311620c22
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
+    - file: sandbox/constructors/cli/constructor.go
+      sha: 8f19032e1c267c72da99fbb995c89ccd8d1869f54b473b88eae0643f1022fa9a
     - file: sandbox/internal/cli/climain.go
       sha: 0d0db6ea9a21277c18c7a7fae939ac9f6c2e3e3f1cf511964cc7040f51062f67
     - file: sandbox/internal/cli/new.go
@@ -21,3 +23,5 @@ tree:
       sha: 34fd63ed66bae759a689f225ecee8852abcb0bfb71de098c1b3243a5acc57239
     - file: sandbox/internal/commands/version/new.go
       sha: 1511a3f8ee17608298c63cfa7edc88b6c2ebf946b23e13bfc512c000c697160e
+    - file: sandbox/new.go
+      sha: 7b7ffd1ef0de6eea969c2eda364993f97eff47b79641ff5d159df5b439a21ba3

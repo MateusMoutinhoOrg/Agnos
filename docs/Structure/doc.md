@@ -22,12 +22,14 @@ AgnosConfig/                        written once by `start`, read by every `buil
   paths.yaml                        SmartIO listing rewrites  (pathreplacerconf)
   docs/ReadmeHeader.md              README body, a template
 sandbox/                            closed: imports nothing outside sandbox/, no OS packages
-  new.go                            (gen) New(deps) *api.Sandbox, one <x>.New<X> per api/ file
+  new.go                            (gen) New(deps) *api.Sandbox, one <x>.Constructor(&self) per constructors/ dir
   api/                              contracts only; imports nothing but sandbox/deps, for Sandbox.Deps
     sandbox.go                      (gen) Sandbox struct, one field per api/ file
     actions.go                      Actions struct + props structs + Runtime consts
     cli.go                          (gen) Cli struct + exit consts
     command.go                      (gen) Command/CommandFlag/CommandArg + NewCommand
+  constructors/                     one <x>/constructor.go per field of the Sandbox; written once, then yours
+    <x>/constructor.go              Constructor(sandbox): sandbox.<X> = <x>.New<X>(sandbox)
   deps/                             contracts; each <x>/ imports nothing at all
     deps.go                         (gen) Deps struct, one <Title> <dir>.Sandbox per dir
     <x>/<x>.go                      type Sandbox struct of func fields

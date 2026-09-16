@@ -12,6 +12,10 @@ agnos cli-purge --path TestDir
 # TestDir. The lib side copies the same set.
 mkdir -p AssertDir/sandbox/internal
 cp -R TestDir/sandbox/internal/. AssertDir/sandbox/internal/
+
+# The purge takes sandbox/constructors/cli with the layer, so new.go comes out
+# of the following build calling nothing at all.
+cp TestDir/sandbox/new.go AssertDir/sandbox/new.go
 mkdir -p AssertDir/docs
 cp -R TestDir/docs/. AssertDir/docs/
 

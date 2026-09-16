@@ -113,7 +113,12 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   `api/` holds contracts only, `deps/` holds dependency contracts (each `deps/<x>/` imports
   nothing at all; only the loose `deps/deps.go` names them),
   `internal/` holds the logic — one `internal/<x>/new.go` per `api/<x>.go`, declaring the
-  `New<X>(sandbox) api.<X>` that `sandbox/new.go` calls to fill the field.
+  `New<X>(sandbox) api.<X>` that `constructors/<x>/constructor.go` calls to fill the field.
+  `constructors/` is the one open list in the sandbox: `sandbox/new.go` is generated as one
+  `<x>.Constructor(&self)` per directory under it, in name order, so a package written by hand
+  is called exactly like a generated one. Each `constructors/<x>/constructor.go` is written
+  **once**, by the first `build` that finds the contract, and no build rewrites it — how a
+  field of the `Sandbox` is built is the project's to change.
   **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and
   nothing else standing for the outside world: `api.Sandbox` carries `Deps`, so holding the
   api is holding everything — one part of the api can call another, and a field a caller

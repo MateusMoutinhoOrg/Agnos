@@ -8,4 +8,4 @@ tree:
     - file: sandbox/internal/config/config.go
       sha: aab6f7a4c149a73b0125511d51c75e6cc765c168db181090726b3d9c8c64c88e
     - file: sandbox/new.go
-      sha: 67a1dc5b9392e324ae8bbe3d0ef93b475ef7a4d9f48d1c06da63d6efbbc68957
+      sha: b8cd7db703c9e2d1b13f873b93fa8fa0d4229eeb0188cef1ccaee28cf3e62757

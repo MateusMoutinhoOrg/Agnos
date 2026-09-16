@@ -44,7 +44,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `sandbox/` is closed: a file there imports only `sandbox/` packages — the stdlib included. A
   capability from outside (io, text, sorting, hashing, templating) is restated as a contract
   under `sandbox/deps/` and reached as `sandbox.Deps.<Contract>`. **(verify)**
-- `sandbox/` holds only `api`, `deps`, `internal` and `new.go`. **(verify)**
+- `sandbox/` holds only `api`, `constructors`, `deps`, `internal` and `new.go`. **(verify)**
 - `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, and imports that
   only for `Sandbox.Deps`. **(verify)**
 - Every function of `sandbox/internal/` takes `sandbox *api.Sandbox` as
@@ -57,8 +57,17 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
 - Every `sandbox/api/<x>.go` other than `sandbox.go`, `command.go` and `route.go` is a field of
   the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go`
-  declares — the one name `sandbox/new.go` calls. A contract with no such file is a field
-  nothing fills, and `sandbox/new.go` leaves it alone. **(verify)**
+  declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
+  such file is a field nothing fills, and no constructor is written for it. **(verify)**
+- `sandbox/new.go` is one `<x>.Constructor(&self)` per directory of `sandbox/constructors/`,
+  in name order, and nothing else. The directories are the list, so a constructor written by
+  hand is called exactly like a generated one.
+- Every directory under `sandbox/constructors/` holds a `constructor.go` declaring
+  `Constructor(sandbox *api.Sandbox)`, and is named after the package it declares.
+  **(verify)**
+- `sandbox/constructors/<x>/constructor.go` is written **once**, by the first `build` that
+  finds the contract, and no build rewrites it: how a field of the `Sandbox` is built — wrapped,
+  decorated, swapped for another implementation — is the project's, not the generator's.
 - Every file of `sandbox/api/` and `sandbox/deps/` parses, and every exported type, func, const
   and var in them carries a doc comment — [PublicApi](../PublicApi/doc.md) is generated from
   those comments. **(verify)**

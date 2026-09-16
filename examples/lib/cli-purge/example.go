@@ -38,6 +38,12 @@ func main() {
 	if err := os.CopyFS("AssertDir/sandbox/internal", os.DirFS("TestDir/sandbox/internal")); err != nil {
 		panic(err)
 	}
+
+	// The purge takes sandbox/constructors/cli with the layer, so new.go
+	// comes out of the following build calling nothing at all.
+	if err := copyNewGo(); err != nil {
+		panic(err)
+	}
 	if err := os.CopyFS("AssertDir/docs", os.DirFS("TestDir/docs")); err != nil {
 		panic(err)
 	}
@@ -60,4 +66,17 @@ func copyExtensions() error {
 		return err
 	}
 	return os.WriteFile("AssertDir/AgnosConfig/extensions.yaml", content, 0o644)
+}
+
+// copyNewGo puts the project's sandbox/new.go into AssertDir at the place it
+// holds in the tree.
+func copyNewGo() error {
+	content, err := os.ReadFile("TestDir/sandbox/new.go")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll("AssertDir/sandbox", 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile("AssertDir/sandbox/new.go", content, 0o644)
 }

@@ -107,8 +107,19 @@ Two hand-written places, then `build` regenerates `sandbox/api/sandbox.go` and
    after the file, every declaration doc-commented (those comments render
    [PublicApi](../PublicApi/doc.md)). It becomes the `api.Sandbox` field `<X>`.
 2. `sandbox/internal/<x>/new.go` — `func New<X>(sandbox *api.Sandbox) api.<X>`, assigning each
-   field of the contract, with the implementation beside it. `sandbox/new.go` calls it as
-   `self.<X> = <x>.New<X>(&self)`.
+   field of the contract, with the implementation beside it.
+
+`build` then writes `sandbox/constructors/<x>/constructor.go` — `sandbox.<X> =
+<x>.New<X>(sandbox)` — **once**, and `sandbox/new.go` calls it. From there the constructor is
+yours: wrap the implementation, decorate the contract, or build a different one entirely.
+
+## Construct a field yourself
+
+`sandbox/new.go` is one `<x>.Constructor(&self)` per directory of `sandbox/constructors/`, so
+adding a directory is adding a call. Write `sandbox/constructors/<x>/constructor.go` with
+`func Constructor(sandbox *api.Sandbox)` in `package <x>`, run `build`, and it is wired — the
+same way a generated one is, and with no generated file to fight over. Editing a constructor
+`build` wrote earlier works for the same reason: nothing rewrites it.
 
 ## Add a dependency
 
@@ -172,6 +183,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | `sandbox/internal/commands/<name>/handler.go` | a command does something |
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
+| `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |
 | `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `AgnosConfig/docs/ReadmeHeader.md`

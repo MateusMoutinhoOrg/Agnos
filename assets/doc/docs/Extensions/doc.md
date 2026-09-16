@@ -18,7 +18,7 @@ sandbox-server: false
 
 | Key | What {{.GeneratorName}} generates and looks after |
 |---|---|
-| `sandbox` | the core: `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/internal/config/config.go` |
+| `sandbox` | the core: `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/constructors/<x>/constructor.go`, `sandbox/internal/config/config.go` |
 | `sandbox-deps` | `sandbox/deps/deps.go`, each available's `new.go`; `add-dep` and the rest of the dependency commands |
 | `sandbox-cli` | `cmd/main`, the dispatch, `help`, `version`, `sandbox/api/{cli,command}.go`; `add-command` and the rest |
 | `sandbox-server` | `sandbox/internal/{server,routes,routeio}`, `sandbox/api/{server,route}.go`; `add-route` and the rest |

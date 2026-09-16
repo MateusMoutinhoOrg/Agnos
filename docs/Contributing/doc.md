@@ -44,6 +44,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 |---|---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) |
 | Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/server/new.go` -> `Server.Routes` | — (served through the server's) |
+| Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — |
 | Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
 | Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` |
 | Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
@@ -57,7 +58,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 
 A layer is an extension, so adding one is [Add an extension](#add-an-extension) plus the rows above. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.
 
-`<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders the mechanic's code group into the same transaction, and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole, then writes the key back as `false`.
+`<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders the mechanic's code group into the same transaction, and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole — its `sandbox/constructors/<x>/` included, since that package names what is being removed — then writes the key back as `false`.
 
 `sandbox/internal/routeio/` exists because a route may not import `internal/server`: shared route code goes in a third package both may import. It is also where the two readers that put the dep names back on a bound route live — `RequestOf` and `ResponseOf`, because `api.Route` carries the request and the response as `any`: `sandbox/api/` may name no type of `sandbox/deps`. `sandbox/internal/pageio/` is the same shape one layer up.
 

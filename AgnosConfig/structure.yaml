@@ -29,7 +29,7 @@ sandbox:
     new.go:
       order: 1
       gen: true
-      description: New(deps) *api.Sandbox, one <x>.New<X> per api/ file
+      description: New(deps) *api.Sandbox, one <x>.Constructor(&self) per constructors/ dir
     api:
       order: 2
       dir: true
@@ -50,8 +50,16 @@ sandbox:
           order: 4
           gen: true
           description: Command/CommandFlag/CommandArg + NewCommand
-    deps:
+    constructors:
       order: 3
+      dir: true
+      description: one <x>/constructor.go per field of the Sandbox; written once, then yours
+      children:
+        <x>/constructor.go:
+          order: 1
+          description: "Constructor(sandbox): sandbox.<X> = <x>.New<X>(sandbox)"
+    deps:
+      order: 4
       dir: true
       description: contracts; each <x>/ imports nothing at all
       children:
@@ -63,7 +71,7 @@ sandbox:
           order: 2
           description: type Sandbox struct of func fields
     internal:
-      order: 4
+      order: 5
       dir: true
       description: the logic; unreachable from outside the sandbox
       children:

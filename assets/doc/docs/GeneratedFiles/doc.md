@@ -15,7 +15,8 @@
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
 {{- end }}
 {{- if .HasSandbox }}
-| `sandbox/new.go` | `build` | always. One `<x>.New<X>(&self)` per other file of `sandbox/api/` |
+| `sandbox/new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
+| `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
 | `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
 | `sandbox/internal/config/config.go` | `build` | always. `ProjectName`, `Version` from `project.yaml` |
 {{- end }}

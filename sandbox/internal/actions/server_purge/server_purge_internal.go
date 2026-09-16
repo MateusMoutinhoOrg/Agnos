@@ -14,11 +14,14 @@ import (
 //
 // sandbox/internal/commands/start_server goes with them: it is the entry point
 // server-init writes, and it would not compile without the layer it starts.
+// sandbox/constructors/server goes with them for the same reason: it fills
+// Sandbox.Server by naming the package being removed.
 var serverDirs = []string{
 	"sandbox/internal/server",
 	"sandbox/internal/routes",
 	"sandbox/internal/routeio",
 	"sandbox/internal/commands/start_server",
+	utils.ConstructorDir("server"),
 }
 
 // ServerPurgeInternal removes from the target project every file that the

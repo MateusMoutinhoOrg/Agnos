@@ -41,6 +41,16 @@ func main() {
 		panic(err)
 	}
 
+	// The constructor the layer brought with it, and the new.go that calls
+	// it: sandbox/new.go is one call per directory of sandbox/constructors/,
+	// so this is the whole of how Sandbox.Cli comes to be filled.
+	if err := os.CopyFS("AssertDir/sandbox/constructors", os.DirFS("TestDir/sandbox/constructors")); err != nil {
+		panic(err)
+	}
+	if err := copyNewGo(); err != nil {
+		panic(err)
+	}
+
 	// The declaration the pair wrote: this is the whole of what tells the
 	// build the mechanic is on or off from here.
 	if err := copyExtensions(); err != nil {
@@ -59,4 +69,17 @@ func copyExtensions() error {
 		return err
 	}
 	return os.WriteFile("AssertDir/AgnosConfig/extensions.yaml", content, 0o644)
+}
+
+// copyNewGo puts the project's sandbox/new.go into AssertDir at the place it
+// holds in the tree.
+func copyNewGo() error {
+	content, err := os.ReadFile("TestDir/sandbox/new.go")
+	if err != nil {
+		return err
+	}
+	if err := os.MkdirAll("AssertDir/sandbox", 0o755); err != nil {
+		return err
+	}
+	return os.WriteFile("AssertDir/sandbox/new.go", content, 0o644)
 }

@@ -16,6 +16,13 @@ cp -R TestDir/sandbox/internal/cli/. AssertDir/sandbox/internal/cli/
 mkdir -p AssertDir/sandbox/internal/commands
 cp -R TestDir/sandbox/internal/commands/. AssertDir/sandbox/internal/commands/
 
+# The constructor the layer brought with it, and the new.go that calls it:
+# sandbox/new.go is one call per directory of sandbox/constructors/, so this is
+# the whole of how Sandbox.Cli comes to be filled.
+mkdir -p AssertDir/sandbox/constructors
+cp -R TestDir/sandbox/constructors/. AssertDir/sandbox/constructors/
+cp TestDir/sandbox/new.go AssertDir/sandbox/new.go
+
 # The declaration the pair wrote: this is the whole of what tells the build the
 # mechanic is on or off from here.
 mkdir -p AssertDir/AgnosConfig

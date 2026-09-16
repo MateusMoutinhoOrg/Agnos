@@ -11,9 +11,15 @@ import (
 // generated neighbours behind — a command's new.go with no entries.yaml
 // and no handler.go next to it. The cli layer is generated from end to end,
 // so purging it means dropping these directories entirely.
+//
+// sandbox/constructors/cli goes with them: it is what fills Sandbox.Cli, and
+// it names the package being removed. It is written once and may since have
+// been edited, so it is dropped with the layer it belongs to rather than left
+// behind for sandbox/new.go to keep calling.
 var cliDirs = []string{
 	"sandbox/internal/cli",
 	"sandbox/internal/commands",
+	utils.ConstructorDir("cli"),
 }
 
 // CliPurgeInternal removes from the target project every file that the "cli"
