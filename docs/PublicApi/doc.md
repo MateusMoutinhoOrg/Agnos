@@ -637,6 +637,28 @@ Sandbox is the hashing library injected whole as the Deps.Hashdeps field.
 | --- | --- | --- |
 | `Sha256Hex` | `func(content []byte) string` | Sha256Hex returns the SHA-256 digest of content, lower-case hexadecimal. It is what every recorded example tree is compared by, so the encoding is part of the golden and may not change. |
 
+## `deps.Interviewer`
+
+`sandbox/deps/interviewer`
+
+### `AlterativeOption`
+
+| Field | Type |
+| --- | --- |
+| `Id` | `string` |
+| `Msg` | `bool` |
+
+### `Sandbox`
+
+| Field | Type | Description |
+| --- | --- | --- |
+| `IntQuestion` | `func(question string) (int, error)` |  |
+| `StrQuestion` | `func(question string) (string, error)` |  |
+| `FloatQuestion` | `func(question string) (float64, error)` |  |
+| `BoolQuestion` | `func(question string) (bool, error)` | add Yes or No for answer |
+| `SingleAlternativeQuestion` | `func(question string, alternatives []AlterativeOption) (string, error)` | returns the id of the answer |
+| `MultipleAlternativeQuestion` | `func(question string, alternatives []AlterativeOption) ([]string, error)` | returns the ids of the answers |
+
 ## `deps.Iodeps`
 
 `sandbox/deps/iodeps`

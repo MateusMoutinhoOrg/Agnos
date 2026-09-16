@@ -75,6 +75,7 @@ The contracts available to patch:
 | `deps.Embeddeps` | `sandbox/deps/embeddeps` |
 | `deps.Goimportsdeps` | `sandbox/deps/goimportsdeps` |
 | `deps.Hashdeps` | `sandbox/deps/hashdeps` |
+| `deps.Interviewer` | `sandbox/deps/interviewer` |
 | `deps.Iodeps` | `sandbox/deps/iodeps` |
 | `deps.Rundeps` | `sandbox/deps/rundeps` |
 | `deps.Serializables` | `sandbox/deps/serializables` |

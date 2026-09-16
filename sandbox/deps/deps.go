@@ -5,6 +5,7 @@ import (
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/embeddeps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	hashdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/hashdeps"
+	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
@@ -23,6 +24,7 @@ type Deps struct {
 	Embeddeps     embeddeps.Sandbox
 	Goimportsdeps goimportsdeps.Sandbox
 	Hashdeps      hashdeps.Sandbox
+	Interviewer   interviewer.Sandbox
 	Iodeps        iodeps.Sandbox
 	Rundeps       rundeps.Sandbox
 	Serializables serializables.Sandbox
