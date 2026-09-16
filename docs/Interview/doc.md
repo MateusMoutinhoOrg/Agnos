@@ -82,6 +82,14 @@ same rules the dispatch applies to a command line, applied before a handler runs
 | `--quiet` | always off, so the build a command runs stays visible |
 | everything else | asked, defaulting to what `entries.yaml` declares |
 
+A field an answer already given decides is not asked at all, and does not appear on the confirm
+screen: `--required` after a `--default` (and on a boolean, whose absence already means false),
+`--default` after a `--required`, `--min`/`--max` on a field that is not a number, `set-body`'s
+`--optional` after its `--required`, and each `add-body-field` keyword outside the `--type` it
+applies to. Every one of them is a combination the command itself refuses, so the question only
+led to an error after the confirm screen. Changing an answer there drops the answers it has just
+ruled out.
+
 A field that names something already in the project is offered as a list instead of a text box —
 the commands declared, the deps installed, the adapters, the availables, the routes, the pages,
 the docs, the examples, the themes of `themes.yaml`, the extensions of the catalog, and the

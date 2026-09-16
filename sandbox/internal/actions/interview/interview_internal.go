@@ -270,7 +270,9 @@ func categoryOf(command api.Command) string {
 
 // confirmPlan shows the command line the answers add up to and offers to run
 // it, to change one answer, or to go back to the menu without running
-// anything. Changing an answer re-asks that one field and nothing else.
+// anything. Changing an answer re-asks that one field and nothing else — and
+// then drops the answers that one has just ruled out, so the line on screen is
+// never one the command would refuse.
 func confirmPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, path string) (bool, error) {
 	for {
 		printPlan(sandbox, command, values)
@@ -298,20 +300,23 @@ func confirmPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command,
 		}
 		if len(bound) > 0 {
 			values[field.Id] = bound
-			continue
+		} else {
+			delete(values, field.Id)
 		}
-		delete(values, field.Id)
+
+		PruneRuledOut(sandbox, command, values)
 	}
 }
 
 // planRows is the confirm menu: run it, one row per answer that can be
 // changed, and a way back. The two fields the interview answers by itself are
-// not offered — the path is the session's and the progress stays visible.
+// not offered — the path is the session's and the progress stays visible — and
+// neither is one the answers have ruled out, which was never asked.
 func planRows(sandbox *api.Sandbox, command api.Command, values map[string][]any) []interviewer.AlternativeOption {
 	rows := []interviewer.AlternativeOption{{Id: runOptionId, Msg: "yes, run it"}}
 
 	for _, field := range FieldsOf(command) {
-		if AnsweredForYou(command, field) {
+		if AnsweredForYou(command, field) || RuledOut(sandbox, command, field, values) {
 			continue
 		}
 		rows = append(rows, interviewer.AlternativeOption{

@@ -9,6 +9,7 @@ import (
 // The declared types a flag or an arg may carry, spelled as entries.yaml
 // spells them — the same four the cli dispatch converts.
 const (
+	typeString  = "string"
 	typeBoolean = "boolean"
 	typeInt     = "int"
 	typeFloat   = "float"
@@ -86,10 +87,18 @@ func FieldsOf(command api.Command) []Field {
 // keyed by field id. A field left unanswered carries its declared default
 // instead — the dispatch does that when it reads a command line, and nothing
 // else would, because the interview hands the handler its values directly.
+//
+// A field an earlier answer has ruled out is not asked at all and binds
+// nothing, which is the same state the command line leaves it in when it is
+// not typed.
 func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, session string) (map[string][]any, error) {
 	values := map[string][]any{}
 
 	for _, field := range FieldsOf(command) {
+		if RuledOut(sandbox, command, field, values) {
+			continue
+		}
+
 		bound, err := ResolveField(sandbox, io, command, field, session)
 		if err != nil {
 			return nil, err

@@ -173,10 +173,12 @@ values off the command by the id its `entries.yaml` declares — `command.GetStr
 `sandbox/internal/actions/interview/` builds a question from every `CommandArg` and `CommandFlag`
 — typed, bounded and defaulted exactly as declared — and binds the answers with `api.BindCommand`
 before calling the command's own handler. It declares nothing per command, so a command added
-later is covered without it changing. Two files hold the whole of the agnos vocabulary it spells,
-and both read the project at `--path`, never the running binary's own `Cli.Commands`:
-`suggest.go`, the table saying which field names something that already exists and where to read
-the list of them, and `state.go`, the beginner gate — the project is re-read before every menu
+later is covered without it changing. Three files hold the whole of the agnos vocabulary it
+spells: `suggest.go`, the table saying which field names something that already exists and where
+to read the list of them — off the project at `--path`, never the running binary's own
+`Cli.Commands` — `ruled_out.go`, the table saying which field a previous answer removes
+— `--required` after a `--default`, a `--min` on a string — so no question leads to a combination
+the command refuses, and `state.go`, the beginner gate — the project is re-read before every menu
 (started or not, which extensions are on, how many units of its own each layer declares), an area
 whose mechanic is off is not offered at all, and the `<x>-init` that would turn it on is offered
 as a step instead, the first key one marked as the suggested next thing to do. That gate is why
