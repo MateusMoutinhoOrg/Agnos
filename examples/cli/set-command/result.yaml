@@ -2,9 +2,15 @@ cli-output: "set-command updating sandbox/internal/commands/greet/entries.yaml \
 exit-code: 0
 tree:
     - file: docs/Commands/doc.md
-      sha: c03377a048c94dba5cd7f48c773172771c0bceb21460a830b27fd7357a45d2ee
+      sha: 76fa529aa57e2c99fb34a5b963e19e7fdcecce8ea0b712cbfd33dd32e962b52b
+    - file: docs/Commands/greet.md
+      sha: c136550f9222be1126c42cd16aa1e673a3de7caab8c76b44c1c1dd0a89c079bc
+    - file: docs/Commands/help.md
+      sha: e18d835c2e1bf014718cb11f7ae962bce71764596e7841f8eed27a75244c59af
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
+    - file: docs/Commands/version.md
+      sha: 4e4bb1a3c9f878233b796e03c65503388abdcd38ca6613b6b51bed8ac26e6ce3
     - file: sandbox/internal/commands/greet/entries.yaml
       sha: 8cd924dad124c837a90c8861ef587dab67d16b0ed4f67d22f7136e3b2128c581
     - file: sandbox/internal/commands/greet/handler.go
