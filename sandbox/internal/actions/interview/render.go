@@ -112,10 +112,11 @@ func layerName(sandbox *api.Sandbox, extension string) string {
 // spelled exactly as it would be typed. It is what turns an interview into a
 // way of learning the cli rather than a way of avoiding it.
 //
-// Three things are said around that line, and each of them is there because the
+// Four things are said around that line, and each of them is there because the
 // line alone would mislead: that the attempt before this one failed and the
 // answers were kept, that a name is written down differently from the way it
-// was typed, and that running this takes a layer away.
+// was typed, that questions were left out and why, and that running this takes
+// a layer away.
 func printPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, failed int) {
 	p := sandbox.Deps.Std.Printf
 
@@ -137,6 +138,10 @@ func printPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, v
 
 	for _, note := range NormalizedNotes(sandbox, command, values) {
 		p("  %s│%s  %s%s%s\n", gray, reset, yellow, note, reset)
+	}
+
+	for _, note := range NotAskedNotes(sandbox, command, values) {
+		p("  %s│%s  %s%s%s\n", gray, reset, dim, note, reset)
 	}
 
 	p("  %s│%s\n", gray, reset)

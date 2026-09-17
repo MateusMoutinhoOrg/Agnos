@@ -1,0 +1,27 @@
+args:
+    - description: the route (identifier or package name) to print
+      examples:
+        - show-route create-user
+      name: route
+      required: true
+      type: string
+category: Server System
+examples:
+    - show-route create-user
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Print one route's whole declaration as a tree
+identifiers:
+    - show-route
+long-description: 'Reads sandbox/internal/routes/<route>/route.yaml and prints it as a tree: the request line the route answers, then every place the declaration holds something — the segments of its path, its headers, its query parameters and the json-schema of its body, property by property with the keywords declared on each. It is the one command of the route surface that writes nothing and runs no build.'

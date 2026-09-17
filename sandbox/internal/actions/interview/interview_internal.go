@@ -22,8 +22,8 @@ const (
 // InterviewInternal is the session: the steps this project has not taken and
 // the areas it already has, a menu of the commands in one of them, one
 // question per field that command declares, a confirm screen showing the
-// command line the answers add up to, and then the command itself — over and
-// over until the person asks to stop.
+// command line the answers add up to, the command itself, and then what comes
+// after it — over and over until the person asks to stop.
 //
 // Nothing about any command is spelled here. Cli.Commands already holds every
 // declaration — its category, its help, and each flag and arg with its type,
@@ -44,15 +44,7 @@ func InterviewInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 			break
 		}
 
-		values, asked, err := AskValues(sandbox, io, command, path)
-		if err != nil {
-			return endSession(sandbox, err)
-		}
-		if !asked {
-			continue
-		}
-
-		if err := runPlan(sandbox, io, command, values, path); err != nil {
+		if err := runChain(sandbox, io, command, map[string][]any{}, path); err != nil {
 			return endSession(sandbox, err)
 		}
 	}
@@ -288,29 +280,71 @@ func categoryOf(command api.Command) string {
 
 // ─── Confirming and running ─────────────────────────────────────────────────
 
+// runChain is one command and everything that follows from it: the questions,
+// the confirm screen, the command, and then the menu of what finishes what it
+// started — which runs the next command with the route or the command in hand
+// already answered, and offers its own follow-ups in turn.
+//
+// It is what makes a route declared in an interview a route that answers
+// something. A command that leaves a thing half-declared used to end the same
+// way as one that finished it — back at the top menu, with the person left to
+// know that add-body-field exists and to find it under an area they have not
+// read yet.
+func runChain(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, carried map[string][]any, path string) error {
+	for {
+		values, asked, err := AskValues(sandbox, io, command, path, carried)
+		if err != nil {
+			return err
+		}
+		if !asked {
+			return nil
+		}
+
+		ran, err := runPlan(sandbox, io, command, values, path)
+		if err != nil {
+			return err
+		}
+		if !ran {
+			return nil
+		}
+
+		next, inherited, chosen, err := chooseFollowUp(sandbox, io, command, values)
+		if err != nil {
+			return err
+		}
+		if !chosen {
+			return nil
+		}
+
+		command, carried = next, inherited
+	}
+}
+
 // runPlan shows the confirm screen and runs what it shows, over and over until
-// the command finishes ok or the person goes back to the menu.
+// the command finishes ok or the person goes back to the menu. It reports
+// whether the command ran at all, which is what settles whether there is
+// anything to offer after it.
 //
 // A command that fails does not cost the answers. The screen comes back with
 // every one of them still on it and the row that changes the one at fault
 // already on the menu — the same mechanism a change before the first run uses.
 // Losing a whole questionnaire to one rejected character was the interview's
 // worst moment, and this loop is the whole of the fix.
-func runPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, path string) error {
+func runPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, path string) (bool, error) {
 	failed := api.ExitOk
 
 	for {
 		confirmed, err := confirmPlan(sandbox, io, command, values, path, failed)
 		if err != nil {
-			return err
+			return false, err
 		}
 		if !confirmed {
-			return nil
+			return false, nil
 		}
 
 		failed = runCommand(sandbox, command, values)
 		if failed == api.ExitOk {
-			return nil
+			return true, nil
 		}
 	}
 }

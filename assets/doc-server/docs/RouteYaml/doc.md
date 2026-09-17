@@ -12,11 +12,14 @@ and drop comments.
 | Section | Editors |
 |---|---|
 | route-level keys | `set-route` |
-| `paths` | `add-segment` / `remove-segment` |
-| `headers` | `add-header` / `remove-header` |
-| `params` | `add-param` / `remove-param` |
+| `paths` | `add-segment` / `set-segment` / `remove-segment` |
+| `headers` | `add-header` / `set-header` / `remove-header` |
+| `params` | `add-param` / `set-param` / `remove-param` |
 | `body` | `set-body` |
-| `body.json-schema` | `add-body-field` / `remove-body-field` |
+| `body.json-schema` | `add-body-field` / `set-body-field` / `remove-body-field` / `import-body` |
+
+`{{.GeneratorName}} show-route <route>` prints the whole of it as a tree, which is what the
+file reads as once the schema is more than a few keys deep.
 
 ```yaml
 method: POST

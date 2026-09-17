@@ -21,16 +21,36 @@ so a command added tomorrow is covered without this feature changing.
 | What do you want to do? | the steps this project has not taken, then the areas it has |
 | Which command? | the commands of that area, with their `help` |
 | One question per field | each `CommandArg` and `CommandFlag` of that command |
-| Nothing has run yet | the command line the answers add up to, plus what it rewrites and what it removes |
+| Nothing has run yet | the command line the answers add up to, what it rewrites, what it never asked and what it removes |
 | Run it / change one answer / back | — |
+| What next for `<name>`? | the commands that finish what the one that just ran started |
 
-Running a command returns to the first menu, rebuilt from the project on disk — a command that
-turned a layer on opens that layer's area on the next pass, and the step that turned it on is
-gone. A command that **fails** does not: the confirm screen comes back with every answer still on
-it, so one rejected character costs one `change`, not the whole questionnaire.
+Running a command offers what comes after it, and then returns to the first menu, rebuilt from
+the project on disk — a command that turned a layer on opens that layer's area on the next pass,
+and the step that turned it on is gone. A command that **fails** does not: the confirm screen
+comes back with every answer still on it, so one rejected character costs one `change`, not the
+whole questionnaire.
 
 `· exit` ends the session; so does ctrl-c, ctrl-d, or the input running out — none of them is a
 failure, and all exit `0`.
+
+## What comes next
+
+A command declares one thing; the thing itself is the several commands that fill it in.
+`add-route` writes a route that answers nothing and carries no body, so the menu after it offers
+the commands that give it one — with the route already answered, so it is never typed twice.
+
+| After | Offered |
+| --- | --- |
+| `add-route`, `add-page` | `import-body`, `add-body-field`, `set-body`, `add-param`, `add-header`, `add-segment`, `show-route` |
+| `add-body-field`, `add-param`, `add-header`, `add-segment` | one more of the same, then `show-route` |
+| `import-body`, `set-body`, `set-body-field` | `show-route`, then the editors of what it wrote |
+| `add-command` | `add-flag`, `add-arg`, `set-command` |
+| `add-flag`, `add-arg` | one more of the same, or the other |
+
+`· nothing else — back to the menu` is the last row, and `esc` is the same answer: the command
+has already run, so there is nothing to undo. A carried answer is on the confirm screen of the
+command that inherits it, and `change` is how it is pointed at a different route.
 
 ## Going back
 
@@ -113,19 +133,47 @@ folder being worked on is what decides. `--module` is the one field this applies
 the rule is the one `start`'s handler rejects on — asking it as required only moves that error
 from after the confirm screen to the question itself.
 
-A field an answer already given decides is not asked at all, and does not appear on the confirm
-screen: `--required` after a `--default` (and on a boolean, whose absence already means false),
-`--default` after a `--required`, `--min`/`--max` on a field that is not a number, `set-body`'s
-`--optional` after its `--required`, and each `add-body-field` keyword outside the `--type` it
-applies to. Every one of them is a combination the command itself refuses, so the question only
-led to an error after the confirm screen. Changing an answer there drops the answers it has just
-ruled out.
+A field an answer already given decides is not asked at all, and is not a row on the confirm
+screen either: `--required` after a `--default` (and on a boolean, whose absence already means
+false), `--default` after a `--required`, `--min`/`--max` on a field that is not a number,
+`set-body`'s `--optional` after its `--required`, and each `add-body-field` keyword outside the
+`--type` it applies to. Every one of them is a combination the command itself refuses, so the
+question only led to an error after the confirm screen. Changing an answer there drops the
+answers it has just ruled out.
+
+The `set-` editors are the exception, and the rules read them as such: an unanswered `--type`
+there leaves the declared type alone rather than naming one, so nothing about the type is known
+and nothing that depends on it is ruled out.
+
+The confirm screen says which ones went and why, so a keyword that was looked for and never
+asked about is accounted for rather than missing:
+
+```
+│  $ agnos add-body-field active --route create-user --type boolean
+│  not asked: --min, --max — only a number or a piece of text carries a smallest and a largest
+│  not asked: --format, --pattern — only a piece of text carries a shape
+```
+
+A field carried in from the command before it is not asked either. It is a `change` row on the
+confirm screen like any other answer.
 
 A field that names something already in the project is offered as a list instead of a text box —
 the commands declared, the deps installed, the adapters, the availables, the routes, the pages,
 the docs, the examples, the themes of `themes.yaml`, the extensions of the catalog, and the
-closed vocabularies (`string`/`boolean`/`int`/`float`, the http methods, the compile targets).
-Those lists are read from the project at `--path`, not from the binary running the interview.
+closed vocabularies (`string`/`boolean`/`int`/`float`, the http methods, the compile targets,
+the schema formats, the keys `--clear` takes off). Those lists are read from the project at
+`--path`, not from the binary running the interview.
+
+Some of them are read off the thing the command is about rather than off the project: the
+parameters, headers, segments and body properties a route declares — the nested ones by the
+dotted path that names them — are the list `set-param`, `set-header`, `set-segment`,
+`set-body-field` and their `remove-` inverses offer, and a command's own flags and args are the
+list `remove-flag` and `remove-arg` offer.
+
+That is also the one place the question order is not the declaration's: a required `--route` or
+`--command` names the thing the other questions are about, so it is asked first even though the
+command line spells it after the positional it scopes. The command line the answers add up to
+is unchanged.
 
 ## Nothing destructive under a blind enter
 
@@ -135,7 +183,7 @@ A guided screen tells the person the pre-selected row is the safe one, so it has
 | --- | --- |
 | an area whose first command removes or overwrites (`Extensions`, headed by `disable-extension`) | `· back` |
 | the first menu when every step left on it is an offer to install a whole layer | `· exit` |
-| the confirm screen of a command that takes something away | `· no, back to the menu` |
+| the confirm screen of a command that takes something away, `start --force` and `import-body --replace` included | `· no, back to the menu` |
 
 A purge's confirm screen names what goes with it — `this removes 3 commands: greet, help,
 version` — read off the project, not off the command line.

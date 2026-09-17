@@ -3,6 +3,7 @@ package interview
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -47,7 +48,14 @@ type suggestion struct {
 //
 // A field with no entry here is answered as free text, which is the right
 // answer for every name a command is about to create.
-func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, id string) suggestion {
+//
+// answered is what the session has bound so far, and it is what lets a list be
+// read off the thing the command is about rather than off the project: the
+// query parameters of the route already answered, not of every route there is.
+// A field whose list depends on an answer that has not come yet — a name asked
+// before its --route, which is what the argument order spells — falls back to
+// free text, exactly as it did before there was a list at all.
+func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, id string, answered map[string][]any) suggestion {
 	verb := verbOf(command)
 
 	switch id {
@@ -70,6 +78,10 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		return closed(exampleOptions(sandbox, io, ""))
 	case "category":
 		return open(categoryOptions(sandbox, io))
+	case "format":
+		return closed(literalOptions(utils.RouteSchemaFormats))
+	case "clear":
+		return clearSuggestion(verb)
 	case "type":
 		return typeSuggestion(verb)
 	case "available":
@@ -79,10 +91,52 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 	case "dep":
 		return depSuggestion(sandbox, io, verb)
 	case "name":
-		return nameSuggestion(sandbox, io, verb)
+		return nameSuggestion(sandbox, io, verb, answered)
 	}
 
 	return suggestion{}
+}
+
+// scopeFields are the ids that name the thing the rest of a command's
+// questions are about: the route whose parameters are being listed, the
+// command whose flags are. They are declared as flags, so the argument order
+// puts them after the name they scope — and a list read off a route that has
+// not been answered yet is no list at all.
+//
+// The interview asks them first instead. It changes the order the questions
+// come in and nothing about the command line they add up to, and it is what
+// turns "which parameter?" from a text box into the parameters that route
+// declares.
+var scopeFields = []string{"route", "command"}
+
+// AskOrder is the order the interview puts one command's fields to the person:
+// the field that scopes the others first, and the declaration's own order
+// after it. Only a required flag is hoisted — an optional one may be skipped,
+// and an arg is already asked before the flags.
+func AskOrder(fields []Field) []Field {
+	for _, id := range scopeFields {
+		for index, field := range fields {
+			if field.Id != id || !field.IsFlag || !field.Required {
+				continue
+			}
+
+			ordered := []Field{field}
+			ordered = append(ordered, fields[:index]...)
+			return append(ordered, fields[index+1:]...)
+		}
+	}
+
+	return fields
+}
+
+// clearSuggestion is the keys --clear takes off, which are the command's own:
+// a body property carries the json-schema keywords, a header or a query
+// parameter the keys of a declared field.
+func clearSuggestion(verb string) suggestion {
+	if verb == "set-body-field" {
+		return closed(literalOptions(utils.RouteBodyFieldClearKeys))
+	}
+	return closed(literalOptions(utils.RouteFieldClearKeys))
 }
 
 // typeSuggestion picks the vocabulary the declared types come from. A route
@@ -92,7 +146,7 @@ func typeSuggestion(verb string) suggestion {
 	switch verb {
 	case "set-body":
 		return suggestion{}
-	case "add-body-field":
+	case "add-body-field", "set-body-field":
 		return closed(literalOptions(bodyTypes))
 	}
 	return closed(literalOptions(fieldTypes))
@@ -139,7 +193,7 @@ func depSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) sugge
 // nameSuggestion answers the one field id that means something different on
 // every command. A name a command is about to create has no list, so only the
 // commands that name something existing appear here.
-func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) suggestion {
+func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answered map[string][]any) suggestion {
 	switch verb {
 	case "enable-extension", "disable-extension":
 		return closed(extensionOptions())
@@ -157,9 +211,139 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) sugg
 		return closed(exampleOptions(sandbox, io, utils.ExampleLibSide))
 	case "update-test":
 		return closed(exampleOptions(sandbox, io, ""))
+	case "set-param", "remove-param":
+		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInQuery))
+	case "set-header", "remove-header":
+		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInHeader))
+	case "set-segment", "remove-segment":
+		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInPath))
+	case "set-body-field", "remove-body-field":
+		return closed(bodyFieldOptions(sandbox, io, answered))
+	case "remove-flag":
+		return closed(commandFieldOptions(sandbox, io, answered, true))
+	case "remove-arg":
+		return closed(commandFieldOptions(sandbox, io, answered, false))
 	}
 
 	return suggestion{}
+}
+
+// commandFieldOptions is the flags, or the args, one command of the project
+// declares — the same answer for a command that routeFieldOptions is for a
+// route, read off the --command already answered.
+func commandFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any, flags bool) []interviewer.AlternativeOption {
+	name := answeredText(sandbox, answered, "command")
+	if name == "" {
+		return []interviewer.AlternativeOption{}
+	}
+
+	conf, err := utils.LoadCommandConf(sandbox, io, name)
+	if err != nil {
+		return []interviewer.AlternativeOption{}
+	}
+
+	fields := conf.Args
+	if flags {
+		fields = conf.Flags
+	}
+
+	options := []interviewer.AlternativeOption{}
+	for _, field := range fields {
+		label := field.Key
+		if len(field.Identifiers) > 0 {
+			label = field.Identifiers[0]
+		}
+		options = append(options, interviewer.AlternativeOption{Id: field.Key, Msg: labelled(sandbox, label, field.Description)})
+	}
+	return options
+}
+
+// routeFieldOptions is what one route declares in one of the three places a
+// request line is read from, by the name the editors of that place spell. It
+// is the answer to the question a person editing a declaration actually has —
+// which parameters does this route have — and it is read off the route that
+// was answered, so a session that has not answered one yet gets no list.
+func routeFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any, in string) []interviewer.AlternativeOption {
+	conf, found := answeredRoute(sandbox, io, answered)
+	if !found {
+		return []interviewer.AlternativeOption{}
+	}
+
+	if in == utils.RouteFieldInPath {
+		options := []interviewer.AlternativeOption{}
+		for _, segment := range conf.Paths {
+			if segment.Field == nil {
+				options = append(options, interviewer.AlternativeOption{Id: segment.Identifier, Msg: segment.Identifier + "  —  a literal segment"})
+				continue
+			}
+			options = append(options, interviewer.AlternativeOption{
+				Id:  segment.Field.Key,
+				Msg: labelled(sandbox, "{"+segment.Field.Key+"}", segment.Field.Description),
+			})
+		}
+		return options
+	}
+
+	fields := conf.Headers
+	if in == utils.RouteFieldInQuery {
+		fields = conf.Params
+	}
+
+	options := []interviewer.AlternativeOption{}
+	for _, field := range fields {
+		options = append(options, interviewer.AlternativeOption{Id: field.Key, Msg: labelled(sandbox, field.Key, field.Description)})
+	}
+	return options
+}
+
+// bodyFieldOptions is every property of one route's body json-schema, by the
+// dotted path add-body-field declares it at — the nested ones included, which
+// is the one list a person cannot read off the route.yaml at a glance.
+func bodyFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+	conf, found := answeredRoute(sandbox, io, answered)
+	if !found || conf.Body.Schema == nil {
+		return []interviewer.AlternativeOption{}
+	}
+	return appendSchemaPaths(sandbox, []interviewer.AlternativeOption{}, conf.Body.Schema, "")
+}
+
+// appendSchemaPaths walks one object schema depth-first, so a nested property
+// is listed under the object it belongs to.
+func appendSchemaPaths(sandbox *api.Sandbox, options []interviewer.AlternativeOption, schema *routeconf.Schema, prefix string) []interviewer.AlternativeOption {
+	for _, property := range schema.Properties {
+		path := property.Name
+		if prefix != "" {
+			path = prefix + "." + property.Name
+		}
+
+		object := utils.SchemaObjectOf(property.Schema)
+		kind := property.Schema.Type
+		if object != nil && property.Schema.Type == "array" {
+			kind = "[]" + object.Type
+		}
+
+		options = append(options, interviewer.AlternativeOption{Id: path, Msg: labelled(sandbox, path, kind)})
+		if object != nil && object.Type == "object" {
+			options = appendSchemaPaths(sandbox, options, object, path)
+		}
+	}
+	return options
+}
+
+// answeredRoute is the route the session is working on, read off disk, or
+// false while the question naming it has not been answered — which is what the
+// argument order leaves true for a name asked before its --route.
+func answeredRoute(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) (*routeconf.RouteConf, bool) {
+	route := answeredText(sandbox, answered, "route")
+	if route == "" {
+		return nil, false
+	}
+
+	conf, err := utils.LoadRouteConf(sandbox, io, route)
+	if err != nil {
+		return nil, false
+	}
+	return conf, true
 }
 
 // ─── The lists ──────────────────────────────────────────────────────────────

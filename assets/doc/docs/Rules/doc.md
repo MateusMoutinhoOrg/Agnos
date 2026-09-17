@@ -138,10 +138,12 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   only by propagating one from `ReadBody`: the dispatch settles everything but the body before
   the handler runs. **(verify)**
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
-  `add-segment` / `remove-segment`, `add-header` / `remove-header`, `add-param` /
-  `remove-param`, `set-body` and `add-body-field` / `remove-body-field` — one editor per place
-  the file holds something, and never by hand: they re-render it with keys in alphabetical
-  order and drop comments.
+  `add-segment` / `set-segment` / `remove-segment`, `add-header` / `set-header` /
+  `remove-header`, `add-param` / `set-param` / `remove-param`, `set-body` and
+  `add-body-field` / `set-body-field` / `remove-body-field` / `import-body` — one editor per
+  place the file holds something and one `set-` per `add-`, so a bound that was forgotten is
+  never a remove-and-declare-again, and never by hand: they re-render it with keys in
+  alphabetical order and drop comments. `show-route` reads it and writes nothing.
 - Every `identifier` of `paths` starts with `/` and spells exactly one segment; `/` alone is
   the root. A route declares at least one of them, and every entry of `paths` carries an
   `identifier` or a `name`, never both. **(verify)**

@@ -1,0 +1,62 @@
+args:
+    - description: the route (identifier or package name) that receives the schema
+      examples:
+        - import-body create-user --json '{"email":"a@b.c"}'
+      name: route
+      required: true
+      type: string
+category: Server System
+examples:
+    - import-body create-user --file payload.json --required --infer-format
+flags:
+    - description: the example payload itself, as one json document
+      examples:
+        - import-body create-user --json '{"email":"a@b.c","age":30}'
+      identifiers:
+        - --json
+      name: json
+      type: string
+    - description: a file holding the example payload, read instead of --json
+      examples:
+        - import-body create-user --file payload.json
+      identifiers:
+        - --file
+      name: file
+      type: string
+    - description: list every key the example carries in its object's required set
+      examples:
+        - import-body create-user --file payload.json --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: start the schema over instead of adding to the one declared
+      examples:
+        - import-body create-user --file payload.json --replace
+      identifiers:
+        - --replace
+      name: replace
+      type: boolean
+    - description: read an email, a uuid, a date-time or a uri back as the format it spells
+      examples:
+        - import-body create-user --file payload.json --infer-format
+      identifiers:
+        - --infer-format
+      name: infer-format
+      type: boolean
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Infer a route's body json-schema from an example payload
+identifiers:
+    - import-body
+long-description: 'Reads one example payload and declares a body property for every key it carries, which is add-body-field run once per key. A route that declared no body becomes a json one here. The inference is a starting point: a type per key, the objects and lists around them, and — with --infer-format — the four formats a string may spell. A property already declared is never written over; --replace starts the schema over instead. Every bound after that is set-body-field''s.'

@@ -37,6 +37,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `enable-extension` |  | [example.sh](../../examples/cli/enable-extension/example.sh) |
 | `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
 | `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
+| `import-body` | read a whole body json-schema off one example payload | [example.sh](../../examples/cli/import-body/example.sh) |
 | `interview` | drive the guided session from a pipe | [example.sh](../../examples/cli/interview/example.sh) |
 | `list-adapters` |  | [example.sh](../../examples/cli/list-adapters/example.sh) |
 | `list-deps` |  | [example.sh](../../examples/cli/list-deps/example.sh) |
@@ -55,6 +56,8 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `set-adapter` |  | [example.sh](../../examples/cli/set-adapter/example.sh) |
 | `set-command` | rewrite the command-level keys of a command | [example.sh](../../examples/cli/set-command/example.sh) |
 | `set-dep` |  | [example.sh](../../examples/cli/set-dep/example.sh) |
+| `set-route-field` | edit fields a route already declares, instead of re-declaring them | [example.sh](../../examples/cli/set-route-field/example.sh) |
+| `show-route` | print a route declaration as a tree | [example.sh](../../examples/cli/show-route/example.sh) |
 | `start` | scaffold a new project | [example.sh](../../examples/cli/start/example.sh) |
 | `verify` | check a project against the schema, writing nothing | [example.sh](../../examples/cli/verify/example.sh) |
 

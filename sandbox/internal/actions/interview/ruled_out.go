@@ -31,11 +31,27 @@ const (
 // value the cli converts, so add-body-field is the only command that sees it.
 const typeObject = "object"
 
-// schemaVerb is the command declaring a json-schema property instead of an
+// schemaVerbs are the commands declaring a json-schema property instead of an
 // agnos field. Two rules read differently there: a required boolean property
 // is legal — required means the key has to be present, not that a false is
-// demanded — and min/max also bound the length of a string.
-const schemaVerb = "add-body-field"
+// demanded — and min/max also bound the length of a string. Declaring one and
+// editing one are the same declaration, so both are here.
+var schemaVerbs = map[string]bool{
+	"add-body-field": true,
+	"set-body-field": true,
+}
+
+// editVerbs are the commands that rewrite a declaration instead of writing
+// one. They are the one place an unanswered field is not a fact: everywhere
+// else a skipped --type means the declared default and a no to --array means
+// not a list, while here both mean "leave it as it is" — and the type left as
+// it is may well be the one the keyword applies to.
+var editVerbs = map[string]bool{
+	"set-segment":    true,
+	"set-header":     true,
+	"set-param":      true,
+	"set-body-field": true,
+}
 
 // RuledOut reports a field there is nothing left to ask about, because an
 // answer already given decides it. Asking anyway offers a combination the
@@ -46,39 +62,108 @@ const schemaVerb = "add-body-field"
 // vocabulary, beside SuggestFor: that table says where a field's answers come
 // from, this one which fields a previous answer removes. Both are keyed by
 // field id, and a field with no entry here is always asked.
-//
-// Every rule is one the action behind the command enforces with an error:
-// utils.NewField and utils.NewRouteField for the fields, add-body-field's
-// propertySchema for the schema keywords, set-body for its own pair.
 func RuledOut(sandbox *api.Sandbox, command api.Command, field Field, values map[string][]any) bool {
+	return RuledOutReason(sandbox, command, field, values) != ""
+}
+
+// RuledOutReason is why a field was not asked, and "" for one that was. The
+// rule and the sentence are one thing: a question that disappears without a
+// word is the interview's own version of a hidden flag, so every rule below
+// answers with what it took away and the confirm screen says so.
+//
+// Every one of them is a rule the action behind the command enforces with an
+// error: utils.NewField and utils.NewRouteField for the fields,
+// utils.RouteBodyPropertySchema for the schema keywords, set-body for its own
+// pair.
+func RuledOutReason(sandbox *api.Sandbox, command api.Command, field Field, values map[string][]any) string {
 	kind := answeredText(sandbox, values, typeFieldId)
-	schema := verbOf(command) == schemaVerb
+	schema := schemaVerbs[verbOf(command)]
+
+	// An editor was told the type only if it was answered, and on every other
+	// command a skipped --type binds the declared default — so an empty kind
+	// means the type is whatever is already on disk, and a rule that reads one
+	// has nothing to read. Rules that read no type are unaffected.
+	typed := kind != ""
+	listed := answeredYes(values, arrayFieldId) || editVerbs[verbOf(command)]
 
 	switch field.Id {
 	case requiredFieldId:
-		return answeredText(sandbox, values, defaultFieldId) != "" || (!schema && kind == typeBoolean)
-	case defaultFieldId:
-		return answeredYes(values, requiredFieldId)
-	case optionalFieldId:
-		return answeredYes(values, requiredFieldId)
-	case minFieldId, maxFieldId:
-		if schema {
-			return kind == typeBoolean || kind == typeObject
+		if answeredText(sandbox, values, defaultFieldId) != "" {
+			return "what it falls back to already covers its absence"
 		}
-		return !numeric(kind)
+		if typed && !schema && kind == typeBoolean {
+			return "a yes-or-no value is never demanded — not giving it already means no"
+		}
+	case defaultFieldId:
+		if answeredYes(values, requiredFieldId) {
+			return "it has to be given, so there is nothing to fall back to"
+		}
+	case optionalFieldId:
+		if answeredYes(values, requiredFieldId) {
+			return "it has to be given, so there is nothing to fall back to"
+		}
+	case minFieldId, maxFieldId:
+		if typed && schema && (kind == typeBoolean || kind == typeObject) {
+			return "only a number or a piece of text carries a smallest and a largest"
+		}
+		if typed && !schema && !numeric(kind) {
+			return "only a number carries a smallest and a largest"
+		}
 	case exclusiveMinFieldId, exclusiveMaxFieldId:
-		return !numeric(kind)
+		if typed && !numeric(kind) {
+			return "only a number carries a bound it may not touch"
+		}
 	case formatFieldId, patternFieldId:
-		return kind != typeString
+		if typed && kind != typeString {
+			return "only a piece of text carries a shape"
+		}
 	case minItemsFieldId, maxItemsFieldId, uniqueItemsFieldId:
-		return !answeredYes(values, arrayFieldId)
+		if !listed {
+			return "only a list carries a length"
+		}
 	case additionalPropsFieldId:
-		return kind != typeObject
+		if typed && kind != typeObject {
+			return "only an object holds keys of its own"
+		}
 	case noAdditionalPropsFieldId:
-		return kind != typeObject || answeredYes(values, additionalPropsFieldId)
+		if typed && kind != typeObject {
+			return "only an object holds keys of its own"
+		}
+		if answeredYes(values, additionalPropsFieldId) {
+			return "the question before this one already answered it"
+		}
 	}
 
-	return false
+	return ""
+}
+
+// NotAskedNotes is what the confirm screen says about the questions that never
+// appeared: one line per reason, naming every field it took away. The screen
+// promises the line is what the person could have typed themselves, and a flag
+// they looked for and never saw asked about is the one thing that makes that
+// line read as a shorter command than it is.
+func NotAskedNotes(sandbox *api.Sandbox, command api.Command, values map[string][]any) []string {
+	reasons := []string{}
+	taken := map[string][]string{}
+
+	for _, field := range FieldsOf(command) {
+		reason := RuledOutReason(sandbox, command, field, values)
+		if reason == "" {
+			continue
+		}
+		if _, seen := taken[reason]; !seen {
+			reasons = append(reasons, reason)
+		}
+		taken[reason] = append(taken[reason], label(field))
+	}
+
+	notes := []string{}
+	for _, reason := range reasons {
+		notes = append(notes, sandbox.Deps.Std.Sprintf("not asked: %s — %s",
+			sandbox.Deps.Stringsdeps.Join(taken[reason], ", "), reason))
+	}
+
+	return notes
 }
 
 // PruneRuledOut drops every answer a change on the confirm screen has just
@@ -86,7 +171,7 @@ func RuledOut(sandbox *api.Sandbox, command api.Command, field Field, values map
 // became string. It walks the fields in the order they are asked, so a rule
 // reads the same answers it read during the session.
 func PruneRuledOut(sandbox *api.Sandbox, command api.Command, values map[string][]any) {
-	for _, field := range FieldsOf(command) {
+	for _, field := range AskOrder(FieldsOf(command)) {
 		if RuledOut(sandbox, command, field, values) {
 			delete(values, field.Id)
 		}

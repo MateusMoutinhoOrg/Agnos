@@ -29,6 +29,7 @@ import (
 	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_init"
 	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
+	import_body "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/import_body"
 	interview "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/interview"
 	list_adapters "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_adapters"
 	list_deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_deps"
@@ -54,9 +55,14 @@ import (
 	server_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server_purge"
 	set_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_adapter"
 	set_body "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_body"
+	set_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_body_field"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
 	set_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_dep"
+	set_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_header"
+	set_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_param"
 	set_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_route"
+	set_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_segment"
+	show_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/show_route"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/start"
 	update_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/update_test"
 	verify "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/verify"
@@ -98,6 +104,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		front_init.NewCommand(sandbox),
 		front_purge.NewCommand(sandbox),
 		help.NewCommand(sandbox),
+		import_body.NewCommand(sandbox),
 		interview.NewCommand(sandbox),
 		list_adapters.NewCommand(sandbox),
 		list_deps.NewCommand(sandbox),
@@ -123,9 +130,14 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		server_purge.NewCommand(sandbox),
 		set_adapter.NewCommand(sandbox),
 		set_body.NewCommand(sandbox),
+		set_body_field.NewCommand(sandbox),
 		set_command.NewCommand(sandbox),
 		set_dep.NewCommand(sandbox),
+		set_header.NewCommand(sandbox),
+		set_param.NewCommand(sandbox),
 		set_route.NewCommand(sandbox),
+		set_segment.NewCommand(sandbox),
+		show_route.NewCommand(sandbox),
 		start.NewCommand(sandbox),
 		update_test.NewCommand(sandbox),
 		verify.NewCommand(sandbox),

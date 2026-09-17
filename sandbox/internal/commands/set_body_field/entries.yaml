@@ -1,0 +1,170 @@
+args:
+    - description: the dotted path of the property to edit (address.city)
+      examples:
+        - set-body-field age --route create-user --max 130
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - set-body-field age --route create-user --type int --min 0 --max 130
+flags:
+    - description: the route (identifier or package name) the property is declared on
+      examples:
+        - set-body-field age --route create-user
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - description: the key the property answers to from now on (it stays in the object it is declared in)
+      examples:
+        - set-body-field age --route create-user --rename years
+      identifiers:
+        - --rename
+      name: rename
+      type: string
+    - description: 'the value type: string, boolean, int, float or object'
+      examples:
+        - set-body-field age --route create-user --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: list the property in its parent object's required set
+      examples:
+        - set-body-field email --route create-user --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: declare an array of the type instead of a single value
+      examples:
+        - set-body-field tags --route create-user --array
+      identifiers:
+        - --array
+      name: array
+      type: boolean
+    - description: minimum for a number, minLength for a string
+      examples:
+        - set-body-field age --route create-user --min 0
+      identifiers:
+        - --min
+      name: min
+      type: string
+    - description: maximum for a number, maxLength for a string
+      examples:
+        - set-body-field age --route create-user --max 130
+      identifiers:
+        - --max
+      name: max
+      type: string
+    - description: exclusiveMinimum for a number property
+      examples:
+        - set-body-field score --route create-user --exclusive-min 0
+      identifiers:
+        - --exclusive-min
+      name: exclusive-min
+      type: string
+    - description: exclusiveMaximum for a number property
+      examples:
+        - set-body-field score --route create-user --exclusive-max 1
+      identifiers:
+        - --exclusive-max
+      name: exclusive-max
+      type: string
+    - description: 'json-schema format for a string property: email, uuid, date-time or uri'
+      examples:
+        - set-body-field email --route create-user --format email
+      identifiers:
+        - --format
+      name: format
+      type: string
+    - description: regular expression a string property must match
+      examples:
+        - set-body-field zip --route create-user --pattern '^[0-9]{5}$'
+      identifiers:
+        - --pattern
+      name: pattern
+      type: string
+    - array: true
+      description: an accepted value of the property (repeatable; replaces the enum set)
+      examples:
+        - set-body-field role --route create-user --enum admin --enum member
+      identifiers:
+        - --enum
+      name: enum
+      type: string
+    - description: the single value the property must carry
+      examples:
+        - set-body-field kind --route create-user --const user
+      identifiers:
+        - --const
+      name: const
+      type: string
+    - description: accept null as well as the declared type
+      examples:
+        - set-body-field nickname --route create-user --nullable
+      identifiers:
+        - --nullable
+      name: nullable
+      type: boolean
+    - description: shortest accepted array (an array property only)
+      examples:
+        - set-body-field tags --route create-user --min-items 1
+      identifiers:
+        - --min-items
+      name: min-items
+      type: string
+    - description: longest accepted array (an array property only)
+      examples:
+        - set-body-field tags --route create-user --max-items 10
+      identifiers:
+        - --max-items
+      name: max-items
+      type: string
+    - description: refuse an array holding the same value twice (an array property only)
+      examples:
+        - set-body-field tags --route create-user --unique-items
+      identifiers:
+        - --unique-items
+      name: unique-items
+      type: boolean
+    - description: accept undeclared keys inside an object property
+      examples:
+        - set-body-field meta --route create-user --additional-properties
+      identifiers:
+        - --additional-properties
+      name: additional-properties
+      type: boolean
+    - description: refuse undeclared keys inside an object property
+      examples:
+        - set-body-field meta --route create-user --no-additional-properties
+      identifiers:
+        - --no-additional-properties
+      name: no-additional-properties
+      type: boolean
+    - array: true
+      description: 'a keyword to take off again: required, array, min, max, format, pattern, enum, const, nullable and the rest (repeatable)'
+      examples:
+        - set-body-field age --route create-user --clear max
+      identifiers:
+        - --clear
+      name: clear
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rewrite one property of a route's body json-schema
+identifiers:
+    - set-body-field
+long-description: Rewrites one property of the route's body json-schema in place and runs build. The keywords already declared are read back, the ones given are written over them, and the whole is built again by the constructor add-body-field uses — so the property a forgotten --max is added to is the property that was there. --clear takes a keyword off again, and a --type the old keywords cannot survive drops them, naming each one it dropped. A property that is not declared yet is add-body-field's.

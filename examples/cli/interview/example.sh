@@ -24,12 +24,15 @@ agnos interview --path TestDir < /dev/null
 # its own — declared here with the plain cli, which is the cheap way to reach
 # the state the session is about.
 #
-# The answers: the Cli System area, add-flag, a flag named `name` with no
-# --identifier of its own, on `greet`, of type string, described, with no
-# --example, defaulting to "world", not an array, at no particular position,
-# and yes to running it. `--required` is never asked — a flag carrying a
-# default cannot also be required, so the session does not offer the
-# combination add-flag would refuse.
+# The answers: the Cli System area, add-flag, the command `greet` — asked
+# first, although the command line spells it after the name, because it is what
+# the other questions are about — then a flag named `name` with no --identifier
+# of its own, of type string, described, with no --example, defaulting to
+# "world", not an array, at no particular position, and yes to running it —
+# then nothing else for `greet`, and out.
+# `--required` is never asked — a flag carrying a default cannot also be
+# required, so the session does not offer the combination add-flag would
+# refuse, and the confirm screen says which questions went and why.
 
 agnos cli-init --path TestDir -q
 agnos add-command greet --help "Greet someone" --category Core --path TestDir -q
@@ -38,7 +41,7 @@ agnos add-command greet --help "Greet someone" --category Core --path TestDir -q
 # by `· exit`: every step left on it is an offer to install a whole layer, and
 # no menu of this session puts one of those under an enter pressed blind.
 
-printf '4\n3\nname\n\n1\n1\nwho to greet\n\nworld\n1\n\n1\n' | agnos interview --path TestDir
+printf '4\n3\n1\nname\n\n1\nwho to greet\n\nworld\n1\n\n1\n3\n1\n' | agnos interview --path TestDir
 
 # What result.yaml records: the paths this example asserts, copied out of
 # TestDir. The declaration `start` wrote and the one the third session added a

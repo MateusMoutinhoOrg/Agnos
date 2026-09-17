@@ -28,6 +28,7 @@ import (
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
+	importBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/import_body"
 	interviewAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/interview"
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
 	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
@@ -51,9 +52,14 @@ import (
 	serverPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_purge"
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
 	setBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body"
+	setBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body_field"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	setDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_dep"
+	setHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_header"
+	setParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_param"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
+	setSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_segment"
+	showRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_route"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
 	updateTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_tests"
 	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
@@ -191,6 +197,24 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.RemoveBodyField = func(path string, route string, name string) error {
 		return removeBodyFieldAction.RemoveBodyField(sandbox, path, route, name)
+	}
+	actions.SetSegment = func(props api.RouteFieldEditProps) error {
+		return setSegmentAction.SetSegment(sandbox, props)
+	}
+	actions.SetHeader = func(props api.RouteFieldEditProps) error {
+		return setHeaderAction.SetHeader(sandbox, props)
+	}
+	actions.SetParam = func(props api.RouteFieldEditProps) error {
+		return setParamAction.SetParam(sandbox, props)
+	}
+	actions.SetBodyField = func(props api.RouteBodyFieldEditProps) error {
+		return setBodyFieldAction.SetBodyField(sandbox, props)
+	}
+	actions.ImportBody = func(props api.RouteBodyImportProps) error {
+		return importBodyAction.ImportBody(sandbox, props)
+	}
+	actions.ShowRoute = func(path string, route string) ([]string, error) {
+		return showRouteAction.ShowRoute(sandbox, path, route)
 	}
 	actions.FrontInit = func(path string) error {
 		return frontInitAction.FrontInit(sandbox, path)

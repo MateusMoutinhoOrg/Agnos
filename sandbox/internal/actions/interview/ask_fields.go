@@ -90,7 +90,12 @@ func FieldsOf(command api.Command) []Field {
 //
 // A field an earlier answer has ruled out is not asked at all and binds
 // nothing, which is the same state the command line leaves it in when it is
-// not typed.
+// not typed. The order is the declaration's, with the one exception AskOrder
+// makes: the field naming the thing the other questions are about is asked
+// first, so their lists can be read off it. A field carried already holds the answer the command before this
+// one gave it — the route just declared, the command just scaffolded — and is
+// not asked either: the confirm screen still offers to change it, which is
+// where a carried answer is corrected.
 //
 // The walk goes backwards as well as forwards: a question answered with "back"
 // returns to the last one that was actually put to the person — over the fields
@@ -99,14 +104,21 @@ func FieldsOf(command api.Command) []Field {
 // same state it was the first time. Going back past the first question reports
 // false: there is nothing left to correct, so the command is left unrun and the
 // menu comes back.
-func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, session string) (map[string][]any, bool, error) {
-	fields := FieldsOf(command)
+func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, session string, carried map[string][]any) (map[string][]any, bool, error) {
+	fields := AskOrder(FieldsOf(command))
 	values := map[string][]any{}
 	asked := []int{}
+
+	for id, bound := range carried {
+		values[id] = bound
+	}
 
 	for index := 0; index < len(fields); index++ {
 		field := fields[index]
 		if RuledOut(sandbox, command, field, values) {
+			continue
+		}
+		if len(carried[field.Id]) > 0 {
 			continue
 		}
 
@@ -123,6 +135,9 @@ func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, s
 
 			asked = trail
 			forgetFrom(values, fields, previous)
+			for id, bound := range carried {
+				values[id] = bound
+			}
 			index = previous - 1
 			continue
 		}
@@ -153,7 +168,9 @@ func stepBack(asked []int) ([]int, int, bool) {
 
 // forgetFrom drops every answer from one field onwards. Going back re-walks the
 // fields after it, and a rule reading a stale answer of a question that has not
-// been asked again would rule out a field the person can still see.
+// been asked again would rule out a field the person can still see. A carried
+// answer is put back afterwards: it was never asked, so there is nothing about
+// it to re-walk.
 func forgetFrom(values map[string][]any, fields []Field, from int) {
 	for _, field := range fields[from:] {
 		delete(values, field.Id)
@@ -186,7 +203,7 @@ func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command
 		field.Required = true
 	}
 
-	values, err := askField(sandbox, io, command, field)
+	values, err := askField(sandbox, io, command, field, answered)
 	if err != nil {
 		return nil, err
 	}
@@ -215,7 +232,7 @@ func AnsweredForYou(command api.Command, field Field) bool {
 // askField picks the question one field is asked as: yes or no for a boolean,
 // a repeated question for an array, one question otherwise — each of them over
 // a menu when the field names something that already exists.
-func askField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, field Field) ([]any, error) {
+func askField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, field Field, answered map[string][]any) ([]any, error) {
 	if field.Type == typeBoolean {
 		answer, err := sandbox.Deps.Interviewer.BoolQuestion(questionFor(sandbox, field))
 		if err != nil {
@@ -224,7 +241,7 @@ func askField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, fi
 		return []any{answer}, nil
 	}
 
-	offered := SuggestFor(sandbox, io, command, field.Id)
+	offered := SuggestFor(sandbox, io, command, field.Id, answered)
 
 	if field.Array {
 		return askArray(sandbox, field, offered)

@@ -1,0 +1,100 @@
+args:
+    - description: 'the segment to edit: a capture by its name, a literal by the identifier it spells'
+      examples:
+        - set-segment tenant --route create-user --type int
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - set-segment tenant --route create-user --type int --description 'the tenant id'
+flags:
+    - description: the route (identifier or package name) the segment is declared on
+      examples:
+        - set-segment tenant --route create-user
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - description: the name the captured segment answers to from now on
+      examples:
+        - set-segment tenant --route create-user --rename account
+      identifiers:
+        - --rename
+      name: rename
+      type: string
+    - description: make the segment a literal spelling this, whatever it was before
+      examples:
+        - set-segment tenant --route create-user --identifier /accounts
+      identifiers:
+        - --identifier
+      name: identifier
+      type: string
+    - description: 'the value type of the capture: string, boolean, int or float'
+      examples:
+        - set-segment tenant --route create-user --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: help text shown for the capture
+      examples:
+        - set-segment tenant --route create-user --description 'the tenant the user belongs to'
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - description: make the capture take every segment left in the path (last segment only)
+      examples:
+        - set-segment rest --route serve-file --array
+      identifiers:
+        - --array
+      name: array
+      type: boolean
+    - description: smallest accepted value (int/float only)
+      examples:
+        - set-segment page --route list-users --type int --min 1
+      identifiers:
+        - --min
+      name: min
+      type: string
+    - description: largest accepted value (int/float only)
+      examples:
+        - set-segment page --route list-users --type int --max 50
+      identifiers:
+        - --max
+      name: max
+      type: string
+    - array: true
+      description: a value the capture takes, for the docs (repeatable; appended)
+      examples:
+        - set-segment tenant --route create-user --example acme
+      identifiers:
+        - --example
+      name: example
+      type: string
+    - array: true
+      description: 'a key to take off again: description, examples, required, array, min or max (repeatable)'
+      examples:
+        - set-segment page --route list-users --clear max
+      identifiers:
+        - --clear
+      name: clear
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rewrite one declared segment of a route's path
+identifiers:
+    - set-segment
+long-description: 'Rewrites one segment of the route''s path in place and runs build. It is add-segment applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so editing a segment and declaring one leave the same bytes. --identifier makes the segment a literal, whatever it was before; every other key edits a capture.'

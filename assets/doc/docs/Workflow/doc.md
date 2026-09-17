@@ -91,6 +91,10 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 {{.GeneratorName}} add-param <name> --route <route> --type int --default 1 --min 1
 {{.GeneratorName}} set-body <route> --type json --required --max-bytes 2097152
 {{.GeneratorName}} add-body-field <dotted.name> --route <route> --format email --required
+{{.GeneratorName}} import-body <route> --file payload.json --required --infer-format
+{{.GeneratorName}} set-segment <name> --route <route> --type int  # and set-header / set-param
+{{.GeneratorName}} set-body-field <dotted.name> --route <route> --max 130 --clear format
+{{.GeneratorName}} show-route <route>                            # the whole declaration as a tree
 {{.GeneratorName}} remove-segment <name> --route <route>         # and remove-header / remove-param /
 {{.GeneratorName}} remove-body-field <dotted.name> --route <route>
 {{.GeneratorName}} remove-route <route>
@@ -104,6 +108,17 @@ One editor per place the declaration holds something, so every key of
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
 it passes through; `set-body` covers the envelope around the schema — how the body is read,
 whether it is required, its size limit and its content-type.
+
+Each `add-` has a `set-` beside it, so a bound that was forgotten is added to the declaration
+that is there instead of removing it and declaring it again: the keys given are written over
+the ones already declared, `--clear <key>` takes one off, and the result goes through the same
+constructor the `add-` side calls. `import-body` is `add-body-field` run once per key of an
+example payload — a document pasted with `--json` or read with `--file`, inferring a type per
+key, the objects and lists around them and, with `--infer-format`, the four formats a string
+may spell; it never writes over a property already declared, and `--replace` starts the schema
+over. `show-route` prints the whole declaration as a tree — the path, the headers, the
+parameters and the body schema property by property — and is the one of them that writes
+nothing.
 
 Then write `handler.go` — the whole hand-written half of a route:
 

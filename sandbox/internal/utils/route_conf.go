@@ -211,6 +211,27 @@ func FindRouteSegment(sandbox *api.Sandbox, segments []routeconf.Segment, name s
 	return -1
 }
 
+// FindRoutePathSegment returns the index of the segment key names, looking it
+// up as a capture first and as a literal identifier second, or -1. It is how
+// every editor of `paths` names one segment: a capture answers to its name, a
+// trigger to the identifier it spells.
+func FindRoutePathSegment(sandbox *api.Sandbox, segments []routeconf.Segment, key string) int {
+	if index := FindRouteSegment(sandbox, segments, key); index >= 0 {
+		return index
+	}
+
+	identifier, err := RouteIdentifierSegment(sandbox, key)
+	if err != nil {
+		return -1
+	}
+	for i, segment := range segments {
+		if segment.Field == nil && segment.Identifier == identifier {
+			return i
+		}
+	}
+	return -1
+}
+
 // RouteRestIndex returns the index of the segment that takes the rest of the
 // path — the one capture declared `array: true` — or -1 when the route fixes
 // its length. It is the one reading of that rule, shared by the editor, the

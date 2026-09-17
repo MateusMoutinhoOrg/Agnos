@@ -703,6 +703,34 @@ agnos add-segment page --route list-users --type int --min 1
 agnos add-segment rest --route static --array
 ```
 
+### `import-body`
+
+Infer a route's body json-schema from an example payload
+
+```bash
+agnos import-body [--json <json>] [--file <file>] [--required] [--replace] [--infer-format] [--path <path>] [--quiet] <route>
+```
+
+Reads one example payload and declares a body property for every key it carries, which is add-body-field run once per key. A route that declared no body becomes a json one here. The inference is a starting point: a type per key, the objects and lists around them, and — with --infer-format — the four formats a string may spell. A property already declared is never written over; --replace starts the schema over instead. Every bound after that is set-body-field's.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--json` | string |  | the example payload itself, as one json document |
+| `--file` | string |  | a file holding the example payload, read instead of --json |
+| `--required` | boolean |  | list every key the example carries in its object's required set |
+| `--replace` | boolean |  | start the schema over instead of adding to the one declared |
+| `--infer-format` | boolean |  | read an email, a uuid, a date-time or a uri back as the format it spells |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `route` | string, required |  | the route (identifier or package name) that receives the schema |
+
+```bash
+agnos import-body create-user --file payload.json --required --infer-format
+```
+
 ### `remove-body-field`
 
 Delete one property from a route's body json-schema
@@ -893,6 +921,116 @@ agnos set-body upload-avatar --type raw --content-type application/octet-stream
 agnos set-body ping --type none
 ```
 
+### `set-body-field`
+
+Rewrite one property of a route's body json-schema
+
+```bash
+agnos set-body-field --route <route> [--rename <rename>] [--type <type>] [--required] [--array] [--min <min>] [--max <max>] [--exclusive-min <exclusive-min>] [--exclusive-max <exclusive-max>] [--format <format>] [--pattern <pattern>] [--enum <enum>...] [--const <const>] [--nullable] [--min-items <min-items>] [--max-items <max-items>] [--unique-items] [--additional-properties] [--no-additional-properties] [--clear <clear>...] [--path <path>] [--quiet] <name>
+```
+
+Rewrites one property of the route's body json-schema in place and runs build. The keywords already declared are read back, the ones given are written over them, and the whole is built again by the constructor add-body-field uses — so the property a forgotten --max is added to is the property that was there. --clear takes a keyword off again, and a --type the old keywords cannot survive drops them, naming each one it dropped. A property that is not declared yet is add-body-field's.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--route` | string, required |  | the route (identifier or package name) the property is declared on |
+| `--rename` | string |  | the key the property answers to from now on (it stays in the object it is declared in) |
+| `--type` | string |  | the value type: string, boolean, int, float or object |
+| `--required` | boolean |  | list the property in its parent object's required set |
+| `--array` | boolean |  | declare an array of the type instead of a single value |
+| `--min` | string |  | minimum for a number, minLength for a string |
+| `--max` | string |  | maximum for a number, maxLength for a string |
+| `--exclusive-min` | string |  | exclusiveMinimum for a number property |
+| `--exclusive-max` | string |  | exclusiveMaximum for a number property |
+| `--format` | string |  | json-schema format for a string property: email, uuid, date-time or uri |
+| `--pattern` | string |  | regular expression a string property must match |
+| `--enum` | string, repeatable |  | an accepted value of the property (repeatable; replaces the enum set) |
+| `--const` | string |  | the single value the property must carry |
+| `--nullable` | boolean |  | accept null as well as the declared type |
+| `--min-items` | string |  | shortest accepted array (an array property only) |
+| `--max-items` | string |  | longest accepted array (an array property only) |
+| `--unique-items` | boolean |  | refuse an array holding the same value twice (an array property only) |
+| `--additional-properties` | boolean |  | accept undeclared keys inside an object property |
+| `--no-additional-properties` | boolean |  | refuse undeclared keys inside an object property |
+| `--clear` | string, repeatable |  | a keyword to take off again: required, array, min, max, format, pattern, enum, const, nullable and the rest (repeatable) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the dotted path of the property to edit (address.city) |
+
+```bash
+agnos set-body-field age --route create-user --type int --min 0 --max 130
+```
+
+### `set-header`
+
+Rewrite one declared request header of a route
+
+```bash
+agnos set-header --route <route> [--rename <rename>] [--type <type>] [--description <description>] [--default <default>] [--required] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] <name>
+```
+
+Rewrites one declared header in place and runs build. It is add-header applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so adding a bound that was forgotten never means removing the header and declaring it again.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--route` | string, required |  | the route (identifier or package name) the header is declared on |
+| `--rename` | string |  | the header name it answers to from now on |
+| `--type` | string |  | the value type: string, boolean, int or float |
+| `--description` | string |  | help text shown for the header |
+| `--default` | string |  | the literal bound when the header is absent |
+| `--required` | boolean |  | refuse a request that does not carry the header |
+| `--min` | string |  | smallest accepted value (int/float only) |
+| `--max` | string |  | largest accepted value (int/float only) |
+| `--example` | string, repeatable |  | a value the header takes, for the docs (repeatable; appended) |
+| `--clear` | string, repeatable |  | a key to take off again: description, examples, default, required, min or max (repeatable) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the header to edit, by the name it is declared under |
+
+```bash
+agnos set-header authorization --route create-user --required --description 'the bearer token'
+```
+
+### `set-param`
+
+Rewrite one declared query parameter of a route
+
+```bash
+agnos set-param --route <route> [--rename <rename>] [--type <type>] [--description <description>] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] <name>
+```
+
+Rewrites one declared query parameter in place and runs build. It is add-param applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so adding a bound that was forgotten never means removing the parameter and declaring it again.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--route` | string, required |  | the route (identifier or package name) the parameter is declared on |
+| `--rename` | string |  | the query key it answers to from now on |
+| `--type` | string |  | the value type: string, boolean, int or float |
+| `--description` | string |  | help text shown for the parameter |
+| `--default` | string |  | the literal bound when the parameter is absent |
+| `--required` | boolean |  | refuse a request that does not carry the parameter |
+| `--array` | boolean |  | collect every occurrence of the key into a []T field |
+| `--min` | string |  | smallest accepted value (int/float only) |
+| `--max` | string |  | largest accepted value (int/float only) |
+| `--example` | string, repeatable |  | a value the parameter takes, for the docs (repeatable; appended) |
+| `--clear` | string, repeatable |  | a key to take off again: description, examples, default, required, array, min or max (repeatable) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the query parameter to edit, by the key it is declared under |
+
+```bash
+agnos set-param page --route list-users --type int --min 1 --max 50
+```
+
 ### `set-route`
 
 Rewrite the route-level keys of a route.yaml
@@ -921,6 +1059,62 @@ Overwrites method, help, category, long-description, hidden and examples on one 
 
 ```bash
 agnos set-route create-user --method POST --example "curl -X POST localhost:8080/users"
+```
+
+### `set-segment`
+
+Rewrite one declared segment of a route's path
+
+```bash
+agnos set-segment --route <route> [--rename <rename>] [--identifier <identifier>] [--type <type>] [--description <description>] [--array] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] <name>
+```
+
+Rewrites one segment of the route's path in place and runs build. It is add-segment applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so editing a segment and declaring one leave the same bytes. --identifier makes the segment a literal, whatever it was before; every other key edits a capture.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--route` | string, required |  | the route (identifier or package name) the segment is declared on |
+| `--rename` | string |  | the name the captured segment answers to from now on |
+| `--identifier` | string |  | make the segment a literal spelling this, whatever it was before |
+| `--type` | string |  | the value type of the capture: string, boolean, int or float |
+| `--description` | string |  | help text shown for the capture |
+| `--array` | boolean |  | make the capture take every segment left in the path (last segment only) |
+| `--min` | string |  | smallest accepted value (int/float only) |
+| `--max` | string |  | largest accepted value (int/float only) |
+| `--example` | string, repeatable |  | a value the capture takes, for the docs (repeatable; appended) |
+| `--clear` | string, repeatable |  | a key to take off again: description, examples, required, array, min or max (repeatable) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `name` | string, required |  | the segment to edit: a capture by its name, a literal by the identifier it spells |
+
+```bash
+agnos set-segment tenant --route create-user --type int --description 'the tenant id'
+```
+
+### `show-route`
+
+Print one route's whole declaration as a tree
+
+```bash
+agnos show-route [--path <path>] [--quiet] <route>
+```
+
+Reads sandbox/internal/routes/<route>/route.yaml and prints it as a tree: the request line the route answers, then every place the declaration holds something — the segments of its path, its headers, its query parameters and the json-schema of its body, property by property with the keywords declared on each. It is the one command of the route surface that writes nothing and runs no build.
+
+| Flag | Type | Default | Description |
+| --- | --- | --- | --- |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+
+| Argument | Type | Default | Description |
+| --- | --- | --- | --- |
+| `route` | string, required |  | the route (identifier or package name) to print |
+
+```bash
+agnos show-route create-user
 ```
 
 ## Examples

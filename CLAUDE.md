@@ -177,17 +177,24 @@ values off the command by the id its `entries.yaml` declares — `command.GetStr
 `sandbox/internal/actions/interview/` builds a question from every `CommandArg` and `CommandFlag`
 — typed, bounded and defaulted exactly as declared — and binds the answers with `api.BindCommand`
 before calling the command's own handler. It declares nothing per command, so a command added
-later is covered without it changing. Six tables hold the whole of the agnos vocabulary it
+later is covered without it changing. Seven tables hold the whole of the agnos vocabulary it
 spells: `suggest.go`, the table saying which field names something that already exists and where
 to read the list of them — off the project at `--path`, never the running binary's own
-`Cli.Commands` — `ruled_out.go`, the table saying which field a previous answer removes
-— `--required` after a `--default`, a `--min` on a string — so no question leads to a combination
-the command refuses, and `state.go`, the beginner gate — the project is re-read before every menu
-(started or not, which extensions are on, how many units of its own each layer declares), an area
-whose mechanic is off is not offered at all, and the `<x>-init` that would turn it on is offered
-as a step instead, the first key one marked as the suggested next thing to do. That gate is why
-an empty folder offers `start` and nothing else, and a project with no cli offers `cli-init`
-before it offers anything about commands. Three more say what a declaration cannot: `required.go`,
+`Cli.Commands`, and off the route or command already answered when the list is that unit's own
+fields, which is why its `scopeFields` hoists a required `--route` / `--command` ahead of the
+positional it scopes; `ruled_out.go`, the table saying which field a previous answer removes —
+`--required` after a `--default`, a `--min` on a string — so no question leads to a combination
+the command refuses, and which says *why* in one sentence, so the confirm screen accounts for
+every question that never appeared; and `state.go`, the beginner gate — the project is re-read
+before every menu (started or not, which extensions are on, how many units of its own each layer
+declares), an area whose mechanic is off is not offered at all, and the `<x>-init` that would
+turn it on is offered as a step instead, the first key one marked as the suggested next thing to
+do. That gate is why an empty folder offers `start` and nothing else, and a project with no cli
+offers `cli-init` before it offers anything about commands. `followup.go` is the fourth: what a
+command leaves half-declared and which commands finish it, so `add-route` is followed by a menu
+offering `import-body`, `add-body-field`, `add-param` and the rest with the route it just
+declared already answered — a command that declares one thing is never the end of the thing
+itself. Three more say what a declaration cannot: `required.go`,
 which field a declaration calls optional that the folder makes mandatory — `start --module` where
 there is no `go.mod` — so the error moves from after the confirm screen to the question;
 `danger.go`, which command takes something away, so no menu puts one under the enter of someone
@@ -294,9 +301,15 @@ change a rule there and nowhere else. The ones most easily broken:
   default — `verify` also rejects an unknown key and any `sandbox-*` on with `sandbox` off.
 - Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The
   same holds for a route's `route.yaml`: `add-route`/`remove-route`, `set-route`,
-  `add-segment`/`remove-segment`, `add-header`/`remove-header`, `add-param`/`remove-param`,
-  `set-body`, `add-body-field`/`remove-body-field` — one editor per place the file holds
-  something, so no key of the declaration needs a hand edit.
+  `add-segment`/`set-segment`/`remove-segment`, `add-header`/`set-header`/`remove-header`,
+  `add-param`/`set-param`/`remove-param`, `set-body`,
+  `add-body-field`/`set-body-field`/`remove-body-field`, `import-body` — one editor per place
+  the file holds something and one `set-` per `add-`, so no key of the declaration needs a hand
+  edit and no forgotten bound is a remove-and-declare-again. A `set-` reads the declaration back
+  as the props that wrote it (`utils.RouteFieldEdited`, `utils.RouteBodyFieldEdited`), writes the
+  given keys over them, drops what `--clear` names, and rebuilds through the constructor the
+  `add-` side calls — so an edited declaration and a declared one are the same bytes.
+  `show-route` reads the whole of it back as a tree and writes nothing.
   When declaring one of agnos's own flags, never pass a value that is exactly one of
   `add-flag`'s own spellings (`--identifier --example`) — the argv parser counts it as an
   occurrence and pollutes the declaration.

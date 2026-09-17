@@ -240,6 +240,27 @@ RouteFieldProps describes one field to add to a route's route.yaml. It covers th
 | `Max` | `string` |
 | `Position` | `int` |
 
+### `RouteFieldEditProps`
+
+RouteFieldEditProps describes the change set-segment, set-header or set-param applies to one field a route already declares. Name is the field as it is declared now and Rename the spelling it takes on ("" leaves it alone); every other key overwrites what is there when it is given, and an empty one leaves it as it is. Clear is how a key is taken off again — "description", "examples", "default", "required", "array", "min" or "max" — because an empty string cannot say "unset this" and "leave it alone" at once.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+| `Rename` | `string` |
+| `Identifier` | `string` |
+| `Description` | `string` |
+| `Examples` | `[]string` |
+| `Type` | `string` |
+| `Default` | `string` |
+| `Required` | `bool` |
+| `Array` | `bool` |
+| `Min` | `string` |
+| `Max` | `string` |
+| `Clear` | `[]string` |
+
 ### `RouteBodyProps`
 
 RouteBodyProps describes the body envelope of one route — everything about the request body but the json-schema, which is grown property by property with AddBodyField. Type is "none", "raw", "text" or "json"; Required and Optional are the two sides of one switch, as are the empty strings and MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared json-schema.
@@ -281,6 +302,49 @@ RouteBodyFieldProps describes one property of a route's body json-schema. Name i
 | `UniqueItems` | `bool` |
 | `AdditionalProperties` | `bool` |
 | `NoAdditionalProperties` | `bool` |
+
+### `RouteBodyFieldEditProps`
+
+RouteBodyFieldEditProps describes the change set-body-field applies to one property a route's body json-schema already declares. Name is the dotted path it sits at and Rename the leaf spelling it takes on (it stays in the object it is declared in); every other key is one keyword of the supported subset, overwriting what is there when it is given. Clear names the keywords to take off instead — "required", "array", "min", "max", "exclusive-min", "exclusive-max", "format", "pattern", "enum", "const", "nullable", "min-items", "max-items", "unique-items" or "additional-properties" — which is the one thing an empty value cannot say.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+| `Rename` | `string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Array` | `bool` |
+| `Min` | `string` |
+| `Max` | `string` |
+| `ExclusiveMin` | `string` |
+| `ExclusiveMax` | `string` |
+| `Format` | `string` |
+| `Pattern` | `string` |
+| `Enum` | `[]string` |
+| `Const` | `string` |
+| `Nullable` | `bool` |
+| `MinItems` | `string` |
+| `MaxItems` | `string` |
+| `UniqueItems` | `bool` |
+| `AdditionalProperties` | `bool` |
+| `NoAdditionalProperties` | `bool` |
+| `Clear` | `[]string` |
+
+### `RouteBodyImportProps`
+
+RouteBodyImportProps describes one example payload to read a route's body json-schema off. Json is the document itself and File a path to read it from — exactly one of the two — and the inference walks it: an object becomes an object property, a list an array of whatever its first item is, and a scalar the type it is written as. Required lists every key the example carries in its object's required set, InferFormat reads an email, a uuid, a date-time or a uri back as the format it spells, and Replace drops the schema that is there instead of adding to it.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Json` | `string` |
+| `File` | `string` |
+| `Required` | `bool` |
+| `Replace` | `bool` |
+| `InferFormat` | `bool` |
 
 ### `PageProps`
 
@@ -353,6 +417,12 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetBody` | `func(props RouteBodyProps) error` | SetBody rewrites the body keys of one route's route.yaml. |
 | `AddBodyField` | `func(props RouteBodyFieldProps) error` | AddBodyField declares one property of a route's body json-schema, at the dotted path props.Name. |
 | `RemoveBodyField` | `func(path string, route string, name string) error` | RemoveBodyField deletes one property from a route's body json-schema. |
+| `SetSegment` | `func(props RouteFieldEditProps) error` | SetSegment rewrites one declared segment of a route's path, named either by its capture name or by the identifier it spells. |
+| `SetHeader` | `func(props RouteFieldEditProps) error` | SetHeader rewrites one declared request header of a route. |
+| `SetParam` | `func(props RouteFieldEditProps) error` | SetParam rewrites one declared query parameter of a route. |
+| `SetBodyField` | `func(props RouteBodyFieldEditProps) error` | SetBodyField rewrites one property of a route's body json-schema, at the dotted path props.Name. |
+| `ImportBody` | `func(props RouteBodyImportProps) error` | ImportBody declares a route's body json-schema from an example payload, inferring one property per key the example carries. |
+| `ShowRoute` | `func(path string, route string) ([]string, error)` | ShowRoute renders one route's whole declaration — its path, its headers, its query parameters and its body schema — as the lines of a tree, ready to print. |
 | `FrontInit` | `func(path string) error` | FrontInit adds the html front layer (sandbox/internal/pageio, the route serving assets/frontend/static and that tree's skeleton) to a project that has none, installing the server layer first when it is missing. |
 | `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer, the static route and the route of every declared page, leaving assets/frontend/ untouched. |
 | `AddPage` | `func(props PageProps) error` | AddPage declares a new html page: the route that answers it and the html template under assets/frontend/pages/ that it renders. |

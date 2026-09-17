@@ -7,9 +7,14 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// forceFieldId is the answer that turns a scaffold from something that creates
-// a project into something that writes over one.
-const forceFieldId = "force"
+// overwritingAnswers is the commands that take something away only when one of
+// their own answers says so, and the field that says it: a scaffold creates a
+// project unless --force writes over one, and an import adds to a schema
+// unless --replace starts it over. Every other command is decided by its name.
+var overwritingAnswers = map[string]string{
+	scaffoldVerb:  "force",
+	"import-body": "replace",
+}
 
 // removePrefix is how every command that drops one unit of a layer is spelled,
 // which is why they are matched by their shape rather than listed one by one.
@@ -47,11 +52,11 @@ func DestructiveVerb(sandbox *api.Sandbox, verb string) bool {
 	return destructiveVerbs[verb]
 }
 
-// Destructive is DestructiveVerb plus the one command whose answers decide it:
-// a scaffold creates a project, and only --force makes it write over one.
+// Destructive is DestructiveVerb plus the commands whose answers decide it: a
+// scaffold creates a project, and only --force makes it write over one.
 func Destructive(sandbox *api.Sandbox, command api.Command, values map[string][]any) bool {
-	if verbOf(command) == scaffoldVerb {
-		return answeredYes(values, forceFieldId)
+	if field, decided := overwritingAnswers[verbOf(command)]; decided {
+		return answeredYes(values, field)
 	}
 	return DestructiveVerb(sandbox, verbOf(command))
 }
