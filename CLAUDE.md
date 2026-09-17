@@ -1,118 +1,130 @@
 # CLAUDE.md
 
-This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
-
 ## What this is
 
 Agnos (`agnos`) is a Go CLI that **scaffolds and regenerates other Go CLIs**. `agnos start`
 writes a project skeleton; `agnos build` re-renders every generated file from `text/template`
-assets embedded in the binary; commands like `add-command`, `add-flag`, `add-dep` declare
-the project's command surface without a file being hand-edited.
+assets embedded in the binary; commands like `add-command`, `add-flag`, `add-dep` declare the
+project's command surface without a file being hand-edited.
 
 Agnos is built with itself: `agnos build` regenerates this repo in place, and the result must
 compile and be idempotent. That self-hosting constraint drives every rule below.
 
-Full documentation lives under `docs/` and is the source of truth, indexed in `README.md`
-(one section per theme of `AgnosConfig/themes.yaml`; there is no index file between the
-README and a doc). Start with
-`docs/Rules/doc.md` (every rule, in one page — generated from
-`assets/doc/docs/Rules/doc.md`, which is where a rule is added or changed),
-`docs/Structure/doc.md` (schema), `docs/BuildPipeline/doc.md` (what `build` does),
-`docs/Workflow/doc.md` (the recipe for every change any agnos project takes) and
-`docs/Contributing/doc.md` (what is specific to changing agnos itself).
+## Which doc to read
 
+`docs/` is the source of truth, indexed in `README.md`. Read the one the change needs — not all
+of them. In doubt, `docs/Workflow/doc.md`.
+
+| Changing | Read |
+|---|---|
+| a template under `assets/`, a collector, the build order | `docs/BuildPipeline/doc.md` |
+| adding a command, action, route, layer, extension, dep, example or doc **to agnos itself** | `docs/Contributing/doc.md` |
+| the recipe every agnos project follows for a change | `docs/Workflow/doc.md` |
+| a declaration's schema | `docs/Structure/doc.md`, `docs/EntriesYaml/doc.md`, `assets/doc-server/docs/RouteYaml/doc.md` |
+| the interactive session | `docs/Interview/doc.md` |
+| the example suite | `docs/CliExamples/doc.md` |
+| which files a build rewrites | `docs/GeneratedFiles/doc.md` |
+| unsure whether something is a rule | `docs/Rules/doc.md` — every rule, one page |
+| what a command declares | `docs/Commands/<command>.md` — the path is the command's own name |
+| what a contract declares | `docs/PublicApi/doc.md` — its index names the page per symbol |
+
+A rule is added or changed in `assets/doc/docs/Rules/doc.md`, never in the rendered copy.
 `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/`
-are rendered from `assets/doc/docs/` into **every** agnos project, this one included,
-`docs/{CliInstall,Commands}/` from `assets/doc-cli/docs/`,
-`docs/{RouteYaml,Routes,ServerUsage}/` from `assets/doc-server/docs/`, `docs/FrontUsage/` from
-`assets/doc-front/docs/`, `docs/LibExamples/` from `assets/doc-example/docs/` and
-`docs/CliExamples/` from `assets/doc-example-cli/docs/`: editing one means editing that
-template, and it has to read correctly in a scaffolded project, not only here. Guard a line
-that holds for this repo alone with `{{ if .HasAssets }}`.
+render from `assets/doc/docs/` into **every** agnos project, this one included; the cli, server,
+front and example docs render from `assets/doc-cli/`, `assets/doc-server/`, `assets/doc-front/`,
+`assets/doc-example{,-cli}/`. Editing one means editing that template, and it has to read
+correctly in a scaffolded project, not only here.
 
-**Two names, never swapped.** `{{.GeneratorName}}` is the cli running the build — agnos — and
-prefixes every command agnos owns (`agnos build`, `agnos add-command`, `agnos add-route`,
-`agnos add-dep`, `agnos exec-test`). `{{.Name}}` is the project being generated and prefixes
-only what that project answers itself (`<name> help`, `<name> version`, `<name> start-server`,
-and whatever its own `add-command` declared). Never hardcode `agnos` in a template, and never
-use `{{.Name}}` to spell an agnos command: in this repo both render `agnos`, so the mistake is
-invisible here and surfaces only in a scaffolded project. The version is the same pair:
-`{{.GeneratorVersion}}` is the release of the binary that rendered the tree (the floor
-`docs/Requirements/` names), `{{.Version}}` is what the generated project releases under.
+## Traps
 
-## Audience: LLMs, not humans
+None of these is caught by a `verify` check: each one is invisible in this repo and surfaces
+only later, or in a generated project.
 
-The primary reader and writer of this repo is an LLM. Every choice — code shape, docs,
-naming, file layout — optimizes for machine reading and machine writing, and token cost is a
-first-class constraint. Humans are a secondary audience.
+### Never run an installed `agnos build` on this repo
 
-- **Generate over hand-write.** If a file can be rendered from a template, a collector or a
-  declaration, it must be — hand-written code is only contracts, adapters, `sandbox/internal/`
-  and `handler.go`. A new hand-written file needs a reason why generation cannot cover it.
-- **Generate over document.** The same applies to docs: `README.md` (its documentation index
-  included), every `Index.md`, `docs/Commands/`, `docs/PublicApi/` and `docs/Structure/` are
-  rendered, never typed. Document by commenting the contract, not by writing a page.
-- **Docs are short, objective and dense.** Tables, commands, file paths and rules — no prose,
-  no narrative, no tutorials, no motivation sections, no repetition across pages. Shorter is
-  strictly better: a page an LLM re-reads on every task costs tokens each time. Say the rule
-  once, in the one place it belongs, and link with a relative path from elsewhere.
-- **Convention over configuration.** Shape is read by convention (`verify` and the collectors
-  parse it), so uniformity is what makes generation possible. Every file is an instance of a
-  pattern; one-offs break the machine reader.
-- **Deterministic and idempotent.** Same input, same bytes out. An LLM must be able to
-  regenerate the tree and diff it to zero.
-
-**`interview` is the exception, and the only one.** An LLM drives agnos through the plain cli;
-the interactive session is what a *person* uses, and it is written for a beginner who has never
-read a page of this repo — plain words instead of agnos vocabulary, the next step suggested
-first, and no row on a menu that the project in front of them cannot run. Density, token cost
-and "read the declaration" do not apply there: `sandbox/internal/actions/interview/` is the one
-place where hand-holding is the correct answer, and `docs/Interview/doc.md` is its page. Every
-rule above still binds the *code* of that feature — same patterns, same gofmt, same declarations;
-the exception covers only who its screens are written for.
-
-## Bootstrap workflow
-
-**Never run an installed `agnos build` on this repo after touching templates, collectors,
-deps or adapters** — it rewrites the tree to the older binary's shape. Always bootstrap:
+It rewrites the tree to the older binary's shape. Always bootstrap:
 
 ```bash
 go build -o release/bootstrap.bin ./cmd/main
-./release/bootstrap.bin build                                    # verify + regenerate + go mod tidy + compile
-./release/bootstrap.bin verify                                   # the schema check alone, writes nothing
+./release/bootstrap.bin build                 # verify + regenerate + go mod tidy + compile
+./release/bootstrap.bin verify                # the schema check alone, writes nothing
 ./release/bootstrap.bin build -q && git diff --quiet && echo idempotent
-./release/bootstrap.bin local-install                            # install the result
+./release/bootstrap.bin local-install          # install the result
 ```
 
 Compile scope is always `./cmd/... ./sandbox/... ./adapters/...` — **never `go build ./...`**,
 because `assets/` holds Go templates, not compilable Go. Every command takes `--path <dir>`
 (default `.`) and `-q`, and runs `build` for you.
 
-There are no Go tests. The checks are `verify` (layers, contracts, adapters, deplist mirror,
-docs, structure — one `check_*.go` per rule set in `sandbox/internal/actions/verify/`), a
-compiling and idempotent `build`, and the example suite:
+### Two names, never swapped
 
-```bash
-./release/bootstrap.bin exec-test               # every example, checked against its golden
-./release/bootstrap.bin exec-test --only start  # one example, both sides
-./release/bootstrap.bin update-test start       # rewrite one golden, printing what it changes
-./release/bootstrap.bin exec-test --update      # rewrite every golden; for a shape change alone
-```
+`{{.GeneratorName}}` is the cli running the build — agnos — and prefixes every command agnos
+owns (`agnos build`, `agnos add-command`, `agnos add-route`, `agnos add-dep`, `agnos exec-test`).
+`{{.Name}}` is the project being generated and prefixes only what that project answers itself
+(`<name> help`, `<name> version`, `<name> start-server`, and whatever its own `add-command`
+declared). Never hardcode `agnos` in a template, and never use `{{.Name}}` to spell an agnos
+command: in this repo both render `agnos`, so the mistake is invisible here and surfaces only in
+a scaffolded project. The version is the same pair: `{{.GeneratorVersion}}` is the release of the
+binary that rendered the tree, `{{.Version}}` what the generated project releases under.
 
-`examples/{cli,lib}/<name>/` holds one `example.sh` / `example.go` that runs with its own
-directory as the cwd and writes only into `TestDir`, then copies out of it into `AssertDir` the
-paths it asserts; `result.yaml` (output, exit code, sha256 of every `AssertDir` file) is the
-golden, written by `exec-test`, never by hand. An example that copies nothing out fails, and
-only `start` copies the whole tree — every other one asserts what its own command touched, so a
-`start` template change moves one golden and not all of them. `exec-test` writes an `agnos`
-alias (`go run ./cmd/main`) into `release/exec-test/` and puts it in front of the PATH, so an
-example always runs against this tree; each run that reaches the go runtime pays a
-`go mod tidy` + `go build`, so prefer `--only`. A `<name>` on both sides must leave the same
-tree and exit the same way, so both sides copy the same set. Create and delete examples with
-`add-cli-example` / `add-lib-example` / `remove-cli-example` / `remove-lib-example` only.
-Release: bump `version` in `AgnosConfig/project.yaml`, then `build` + `exec-test --update` (the
-bumped version renders into `docs/Requirements/doc.md`, so every golden holding that page moves),
-then `agnos publish`.
+Guard a doc line that holds for this repo alone with `{{ if .HasAssets }}`.
+
+### Never hand-edit a generated file or a declaration
+
+Change the template under `assets/` and bootstrap; `docs/GeneratedFiles/doc.md` is the list of
+what every build rewrites. One editor per place a declaration holds something:
+
+| File | Its editors |
+|---|---|
+| `AgnosConfig/extensions.yaml` | `enable-extension` / `disable-extension`, or the `<x>-init` / `<x>-purge` pair that owns the key |
+| a command's `entries.yaml` | `add-flag` / `add-arg` / `set-command` and their inverses |
+| a route's `route.yaml` | `add-route`, `set-route`, `add-segment`, `add-header`, `add-param`, `set-body`, `add-body-field`, `import-body`, each with its `set-` and `remove-` pair; `show-route` reads it back and writes nothing |
+| `examples/<side>/<name>/result.yaml` | `update-test <name>`, or `exec-test --update` |
+| an example | `add-cli-example` / `add-lib-example` and their `remove-` pair |
+| a doc | `agnos add-doc` / `agnos remove-doc` |
+
+A missing `extensions.yaml` is a hard error, not a default; `verify` also rejects an unknown key
+and any `sandbox-*` on with `sandbox` off.
+
+When declaring one of agnos's own flags, never pass a value that is exactly one of `add-flag`'s
+own spellings (`--identifier --example`) — the argv parser counts it as an occurrence and
+pollutes the declaration.
+
+### Output channels
+
+`deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`), `deps.Std.Error`
+-> stderr. Never `fmt.Printf`. A handler returns `api.ExitOk` or `api.ExitFailure`, never
+`api.ExitUsage` — the dispatch rejects bad input before it runs.
+
+### Naming is load-bearing
+
+`sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`, `Bind(deps *deps.Deps)` (an adapter fills
+`deps.Deps` directly), `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`,
+`RouteHandler` for a route. **Every file is an instance of a pattern**: new code copies an
+existing sibling exactly — same filenames, same function names, same ordering. `verify` and the
+collectors read shape by convention, so a one-off breaks the machine reader.
+
+### Searching this repo
+
+`git grep` hits the `assets/` mirror of nearly every file, so a symbol search fans out to
+hundreds of hits. Narrow with `':!assets' ':!examples'` to **locate** a file — never to judge
+impact. Once you have it, the twin under `assets/` is what the next build renders from, and
+editing only the rendered copy is undone in silence.
+
+### The rest
+
+- Every exported declaration of `sandbox/api/` and `sandbox/deps/` carries a doc comment —
+  `docs/PublicApi/` is generated from those comments and `verify` fails without them.
+- `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.
+- Any new path worth naming gets an entry in `AgnosConfig/structure.yaml`; `verify` fails on an
+  entry whose path does not exist.
+- Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
+  segment is always `required: true`. `array: true` on the last capture takes every segment left,
+  and only there.
+- A page is a route with `assets/frontend/pages/<page>.html` beside it — that file is the whole
+  of what tells one from any other route. `remove-route` refuses a route that has one.
+- A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
+  reverse.
 
 ## Architecture
 
@@ -121,219 +133,88 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 (reaches OS)    (closed)       (wires them)
 ```
 
-- **`sandbox/`** — the closed core. It imports only `sandbox/` packages — the stdlib included,
-  so text, sorting, hashing and templating come from `sandbox.Deps.<Contract>` too.
-  `api/` holds contracts only, `deps/` holds dependency contracts (each `deps/<x>/` imports
-  nothing at all; only the loose `deps/deps.go` names them),
-  `internal/` holds the logic — one `internal/<x>/new.go` per `api/<x>.go`, declaring the
-  `New<X>(sandbox) api.<X>` that `constructors/<x>/constructor.go` calls to fill the field.
-  `constructors/` is the one open list in the sandbox: `sandbox/new.go` is generated as one
-  `<x>.Constructor(&self)` per directory under it, in name order, so a package written by hand
-  is called exactly like a generated one. Each `constructors/<x>/constructor.go` is written
-  **once**, by the first `build` that finds the contract, and no build rewrites it — how a
-  field of the `Sandbox` is built is the project's to change.
-  **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and
-  nothing else standing for the outside world: `api.Sandbox` carries `Deps`, so holding the
-  api is holding everything — one part of the api can call another, and a field a caller
-  replaced takes effect everywhere. `sandbox/api/` is the one place allowed to import
-  `sandbox/deps`, and only for that field.
-- **`adapters/`** — the only place OS-bound and third-party code lives. `libs/<adapter>/`
-  exports `Bind(deps *deps.Deps)` beside an `adapter.yaml` naming the dep it fills;
-  `availables/<name>/new.go` is generated from `availables/<name>/available.yaml`, never from a
-  dir listing.
-- **`assets/`** — every generated file's template, **one group per extension**: the group's
-  name is the condition it renders under (`sandbox`, `sandbox-cli`, `doc`, `doc-cli`,
-  `readme`, …; `utils.AssetGroups()` is the list, `docs/BuildPipeline/doc.md#asset-groups` the
-  table). `assets/<group>/<path>` renders to `<path>`. `start` is outside it, written once by
-  `start`; `deplist/<dep>/**` is one
-  installable contract and `adapterlist/<adapter>/**` one installable adapter, each with its
-  own declaration at the root of the group and installed nowhere (`dep.yaml`) or into the
-  package (`adapter.yaml`); `templates/*` are single-file scaffolds rendered with
-  `utils.RenderTemplateToDest`. A scaffold rendering to a file that is *itself* a template
-  (`page_html.html`) escapes its own braces: `{{ "{{ .Title }}" }}`.
+- **`sandbox/`** — the closed core. It imports only `sandbox/` packages, the stdlib included, so
+  text, sorting, hashing and templating come from `sandbox.Deps.<Contract>` too. `api/` holds
+  contracts, `deps/` dependency contracts, `internal/` the logic, and `constructors/` is the one
+  open list. **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and nothing
+  else standing for the outside world: holding the api is holding everything.
+- **`adapters/`** — the only place OS-bound and third-party code lives.
+- **`assets/`** — every generated file's template, one group per extension; `assets/<group>/<path>`
+  renders to `<path>`. `utils.AssetGroups()` is the list.
 - **`cmd/main/`** — generated; wires an adapter into the sandbox, holds no logic.
-- **`AgnosConfig/`** — written once by `start`, read by every `build`. `extensions.yaml` is
-  the one that decides what gets generated.
-- **`examples/`** — one directory per example, on the `cli` and the `lib` side; `exec-test` runs
-  each and diffs it against the `result.yaml` beside it.
+- **`AgnosConfig/`** — written once by `start`, read by every `build`.
+- **`examples/`** — one directory per example, on the `cli` and the `lib` side.
 
-Two layers per feature: an **action** (`sandbox/internal/actions/<name>/`) with `<name>.go`
-(opens SmartIO, persists, runs the follow-up `build`) plus `<name>_internal.go` (pure logic on
-an already-open SmartIO), and a **command**
-(`sandbox/internal/commands/<name>/`) with `entries.yaml` (declaration), `new.go`
-(generated — the `api.Command` that package contributes to `Cli.Commands`) and
-`handler.go` (hand-written). Both directories are snake_case for a kebab-case
-command (`add-command` -> `add_command/`). Only `handler.go` and contract/adapter pairs are
-written by hand; everything else is generated.
+**Two layers per feature**: an **action** (`sandbox/internal/actions/<name>/`) with `<name>.go`
+(opens SmartIO, persists, runs the follow-up `build`) plus `<name>_internal.go` (pure logic on an
+already-open SmartIO), and a **command** (`sandbox/internal/commands/<name>/`) with
+`entries.yaml`, a generated `new.go` and a hand-written `handler.go`. Both directories are
+snake_case for a kebab-case command (`add-command` -> `add_command/`). Only `handler.go` and
+contract/adapter pairs are hand-written; everything else is generated.
 
-`sandbox.Cli.Commands` (`[]api.Command`, built by `internal/cli/new.go` from every package's
-generated `NewCommand`) **is** the command surface: `climain.go` is one generic dispatch that
-copies the matched declaration with `api.BindCommand` and binds a command line onto that copy's
-`command.Items`, and both help screens are printed from the same slice. A handler reads its
-values off the command by the id its `entries.yaml` declares — `command.GetString("path")`, `command.GetBool("quiet")`, `command.GetStrings("example")`
-— so nothing about a command is spelled in Go anywhere but its own `new.go`.
+**`sandbox.Cli.Commands` is the command surface.** `climain.go` is one generic dispatch that
+binds a command line onto a copy of the matched declaration, and a handler reads its values by
+the id its `entries.yaml` declares — `command.GetString("path")`, `command.GetBool("quiet")`.
+`sandbox.Server.Routes` is the http surface the same way, and the server layer mirrors the cli
+layer file for file. The front layer declares no unit of its own: a page **is** a route.
 
-`interview` is the second reader of that surface, and the reason it stays worth keeping generic:
-`sandbox/internal/actions/interview/` builds a question from every `CommandArg` and `CommandFlag`
-— typed, bounded and defaulted exactly as declared — and binds the answers with `api.BindCommand`
-before calling the command's own handler. It declares nothing per command, so a command added
-later is covered without it changing. Seven tables hold the whole of the agnos vocabulary it
-spells: `suggest.go`, the table saying which field names something that already exists and where
-to read the list of them — off the project at `--path`, never the running binary's own
-`Cli.Commands`, and off the route or command already answered when the list is that unit's own
-fields, which is why its `scopeFields` hoists a required `--route` / `--command` ahead of the
-positional it scopes; `ruled_out.go`, the table saying which field a previous answer removes —
-`--required` after a `--default`, a `--min` on a string — so no question leads to a combination
-the command refuses, and which says *why* in one sentence, so the confirm screen accounts for
-every question that never appeared; and `state.go`, the beginner gate — the project is re-read
-before every menu (started or not, which extensions are on, how many units of its own each layer
-declares), an area whose mechanic is off is not offered at all, and the `<x>-init` that would
-turn it on is offered as a step instead, the first key one marked as the suggested next thing to
-do. That gate is why an empty folder offers `start` and nothing else, and a project with no cli
-offers `cli-init` before it offers anything about commands. `followup.go` is the fourth: what a
-command leaves half-declared and which commands finish it, so `add-route` is followed by a menu
-offering `import-body`, `add-body-field`, `add-param` and the rest with the route it just
-declared already answered — a command that declares one thing is never the end of the thing
-itself. Three more say what a declaration cannot: `required.go`,
-which field a declaration calls optional that the folder makes mandatory — `start --module` where
-there is no `go.mod` — so the error moves from after the confirm screen to the question;
-`danger.go`, which command takes something away, so no menu puts one under the enter of someone
-who has not read it and the confirm screen names what goes and defaults to no; and `normalize.go`,
-which answers are written down under a name other than the one typed, so the line the confirm
-screen promises "you could have typed yourself" is never one that would do something else.
+**Extensions** are declared in `AgnosConfig/extensions.yaml` and nowhere else — `build` never
+infers a mechanic from a directory being present. Eight keys: `sandbox`, `sandbox-deps`,
+`sandbox-cli`, `sandbox-server`, `sandbox-front`, `sandbox-example`, `doc`, `readme`. `false`
+means **stop generating**, never **delete**: what the mechanic wrote stays and becomes the
+project's, and removing it is what `<x>-purge` does.
 
-Going back is the session's, not the adapter's: a question answered with escape — `:back` on a
-line where the answers come from a pipe — re-asks the one before it and drops every answer after
-it, and going back past the first question leaves the command unrun. Only ctrl-c and ctrl-d end a
-session. A command that *fails* costs nothing either: the confirm screen returns with every
-answer on it and the row that changes the one at fault already there.
-
-The **server layer** mirrors the cli layer file for file, and is the pattern to copy when a
-layer is added: `serverdeps` mirrors `argvdeps`, `api/server.go` + `api/route.go` mirror
-`api/cli.go` + `api/command.go`, `internal/server/new.go` mirrors `internal/cli/new.go`,
-`internal/server/servermain.go` mirrors `internal/cli/climain.go`, `internal/routes/<name>/`
-(`route.yaml` + generated `new.go` + hand-written `handler.go` -> `RouteHandler`) mirrors
-`internal/commands/<name>/`, `parsables/routeconf/` mirrors `commandconf/`, `assets/sandbox-server/`
-mirrors `assets/sandbox-cli/`, and `server-init`/`server-purge` mirror `cli-init`/`cli-purge`. It is
-rendered when `sandbox-server` is on, exactly as the cli group is rendered when
-`sandbox-cli` is.
-
-`sandbox.Server.Routes` (`[]api.Route`, built by `internal/server/new.go` from every package's
-generated `NewRoute`, in match order) **is** the http surface, exactly as `sandbox.Cli.Commands`
-is the command one: `servermain.go` is one generic dispatch that binds a request against those
-declarations into `route.Items`, and a handler reads its values by the name `route.yaml`
-declares — `route.GetString("tenant")`, `route.GetStrings("item")`. Each request runs on its own
-copy of the declaration (`api.BindRoute`), so two in flight never share bound values. The
-dispatch settles everything but the body (404/405/415/413/400) before a handler runs; the body is read on
-demand by the `ReadBody` generated into the route's own `new.go`.
-`sandbox/internal/routeio/` holds what both `servermain.go` and the routes need — `WriteError`,
-the schema validator, and `RequestOf`/`ResponseOf`, which put the dep names back on the request
-and the response `api.Route` carries as `any` (`sandbox/api/` may name no type of
-`sandbox/deps`).
-
-The **front layer** is the third column, and declares no unit of its own: a page **is** a
-route. `sandbox/internal/pageio/` (generated; `Render` plus the `staticref`/`cssref`/`jsref`/
-`dirref`/`inline`/`include` helpers) mirrors `routeio/`, and `sandbox-front` is the key that
-renders it — never a probe of `assets/frontend/`, which is the project's own content and may
-be empty. `assets/sandbox-front/` is the group, `front-init`/`front-purge` the pair, and a page is
-`routes/<page>/route.yaml` plus `assets/frontend/pages/<page>.html`, written by
-`add-page`/`remove-page`. Both halves are written **once** and are then the project's; only
-`pageio` and `docs/FrontUsage` are rewritten by every build. `pageio.StaticMount` is rendered
-from the first segment of the `static` route's declaration (`collect_front_mount.go`), so
-renaming the mount moves every generated link instead of breaking it in silence.
-
-The **extensions** are what agnos generates for a project, declared in
-`AgnosConfig/extensions.yaml` and nowhere else — `build` never infers a mechanic from a
-directory being present. Eight keys: `sandbox` (the core), `sandbox-deps`, `sandbox-cli`,
-`sandbox-server`, `sandbox-front`, `sandbox-example` (the `examples/` suite), `doc` and
-`readme`. Everything that renders into the sandbox is spelled `sandbox-<mechanic>`; `doc` and
-`readme` stand on their own. `false` means **stop generating**, never **delete**: what the
-mechanic wrote stays and becomes the project's, and removing it is what `<x>-purge` does — the
-same command that writes the `false`. The catalog is `utils.ExtensionCatalog()`, the groups
-each key renders `utils.AssetGroups()`, and `enable-extension`/`disable-extension`/
-`list-extensions` plus every `<x>-init`/`<x>-purge` are the only writers of the file.
-`utils.SetExtension` renders a mechanic's *code* group into the same transaction when it turns
-one on, because the build that follows collects `sandbox/api/` off disk and would otherwise
-generate a `sandbox.go` missing the field the new group's `cmd/main/main.go` already uses.
-
-The **deps layer** is three units, not one: a **dep** is the contract (`sandbox/deps/<dep>/`,
-one field of `deps.Deps`), an **adapter** is one implementation of it
-(`adapters/libs/<adapter>/`, `adapter.yaml` says which dep), and an **available** is a selection
-(`adapters/availables/<name>/available.yaml`, exactly one adapter per field). One dep may have
-many adapters; `verify` demands every available fill every field exactly once — zero panics on
-first use, two overwrite in silence. `add-dep`/`remove-dep` own the contract, `add-adapter`/
-`remove-adapter` one implementation, `set-adapter` the choice, `add-available`/`remove-available`
-the selection itself. `cmd/main/main.go` imports one available, and that import is how a program
-picks its implementations. Another agnos repo installs as a dep too: `add-dep
-<module>@<version> --as <name>` copies its `sandbox/api/` into `sandbox/deps/<name>/`
-with the package clause changed and `Sandbox.Deps` dropped — a consumer installs
-the api of a repo, never the wiring behind it, and that is what keeps the copy
-self-contained (`apishape.DepsField`) — and **generates** `adapters/libs/<name>/`
-— the shim that builds the remote sandbox from the remote repo's own adapters
-and converts it, because
-a top-level cast cannot work (Go's type identity is not recursive through named
-types) and the conversion names a type whose import path lives in the consumer.
-`sandbox/internal/apishape/` holds the convertibility rule and the converter
-plan; `verify` applies that rule to every repo's `sandbox/api/` unconditionally,
-which is what makes every agnos repo installable by construction.
+**The deps layer is three units**: a **dep** is the contract (`sandbox/deps/<dep>/`), an
+**adapter** one implementation of it (`adapters/libs/<adapter>/`), and an **available** a
+selection (`adapters/availables/<name>/`). `verify` demands every available fill every field
+exactly once — zero panics on first use, two overwrite in silence.
 
 **SmartIO** (`sandbox/internal/smartio/`) is a transactional filesystem rooted at `--path`.
-Actions pass project-relative paths only; `Root` is joined at the `deps.Iodeps` boundary.
-Writes buffer until `Persist`, but `List*` reads disk — so an action that runs `build` as a
-follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` through their
-`*Internal` function.
+Actions pass project-relative paths only. Writes buffer until `Persist`, but `List*` reads disk —
+so an action that runs `build` as a follow-up must `Persist` first.
 
-## Rules that generated code depends on
+`docs/Contributing/doc.md` holds the recipe for adding any of these.
 
-The full list is `docs/Rules/doc.md`, rendered from `assets/doc/docs/Rules/doc.md`; add or
-change a rule there and nowhere else. The ones most easily broken:
+## Audience: LLMs, not humans
 
-- **Every file is an instance of a pattern.** New code copies an existing sibling exactly:
-  same filenames, same function names, same ordering. Never add a one-off — `verify` and the
-  collectors read shape by convention.
-- Naming is load-bearing: `sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`,
-  `Bind(deps *deps.Deps)` (an adapter still fills `deps.Deps` directly),
-  `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`.
-- Generated files are never edited — change the template under `assets/` and bootstrap.
-  `docs/GeneratedFiles/doc.md` lists which files are rewritten by every build.
-- Never hand-edit `AgnosConfig/extensions.yaml`; use `enable-extension` / `disable-extension`
-  or the `<x>-init` / `<x>-purge` pair that owns the key. A missing file is a hard error, not a
-  default — `verify` also rejects an unknown key and any `sandbox-*` on with `sandbox` off.
-- Never hand-edit a command's `entries.yaml`; use `add-flag` / `add-arg` / `set-command`. The
-  same holds for a route's `route.yaml`: `add-route`/`remove-route`, `set-route`,
-  `add-segment`/`set-segment`/`remove-segment`, `add-header`/`set-header`/`remove-header`,
-  `add-param`/`set-param`/`remove-param`, `set-body`,
-  `add-body-field`/`set-body-field`/`remove-body-field`, `import-body` — one editor per place
-  the file holds something and one `set-` per `add-`, so no key of the declaration needs a hand
-  edit and no forgotten bound is a remove-and-declare-again. A `set-` reads the declaration back
-  as the props that wrote it (`utils.RouteFieldEdited`, `utils.RouteBodyFieldEdited`), writes the
-  given keys over them, drops what `--clear` names, and rebuilds through the constructor the
-  `add-` side calls — so an edited declaration and a declared one are the same bytes.
-  `show-route` reads the whole of it back as a tree and writes nothing.
-  When declaring one of agnos's own flags, never pass a value that is exactly one of
-  `add-flag`'s own spellings (`--identifier --example`) — the argv parser counts it as an
-  occurrence and pollutes the declaration.
-- A page is a route with `assets/frontend/pages/<page>.html` beside it — that file is the whole
-  of what tells one from any other route. `add-page`/`remove-page` are its editors, and
-  `remove-route` refuses a route that has one. `front-purge` drops the routes (their handlers
-  import `pageio`) and never `assets/frontend/`.
-- Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
-  segment is always `required: true`. `array: true` on the last capture makes it take every
-  segment left in the path (`[]T`, one or more), and only there. Match order is by specificity
-  (most identifiers, then longest, then fixed length before catch-all), settled by the
-  collector, not the template.
-- Every exported declaration of `sandbox/api/` and `sandbox/deps/` carries a doc comment —
-  `docs/PublicApi/doc.md` is generated from those comments, and `verify` fails without them.
-- `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.
-- Output: `deps.Std.Printf` -> stdout, `deps.Std.Log` -> stderr (silenced by `--quiet`),
-  `deps.Std.Error` -> stderr. Never `fmt.Printf`. A handler returns `api.ExitOk` or
-  `api.ExitFailure`, never `api.ExitUsage` — the dispatch rejects bad input before it runs.
-- An example is never created or deleted by hand, and `result.yaml` is never edited — refresh one
-  golden with `update-test <name>`, the whole suite with `exec-test --update`, or delete it.
-- Docs: create/delete with `agnos add-doc` / `agnos remove-doc`. `README.md`, every `Index.md`,
-  and the docs of `assets/{all,cli}/docs/` are generated — `docs/Commands` from every command's
-  `entries.yaml`, `docs/Structure/doc.md`'s tree from `AgnosConfig/structure.yaml`. Any new
-  path worth naming gets an entry in `structure.yaml`, and `verify` fails on an entry whose
-  path does not exist.
-- A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
-  reverse.
+The primary reader and writer of this repo is an LLM. Every choice optimizes for machine reading
+and machine writing, and token cost is a first-class constraint.
+
+- **Generate over hand-write.** If a file can be rendered from a template, a collector or a
+  declaration, it must be. A new hand-written file needs a reason why generation cannot cover it.
+- **Generate over document.** `README.md`, every `Index.md`, `docs/Commands/`, `docs/PublicApi/`
+  and `docs/Structure/` are rendered, never typed. Document by commenting the contract.
+- **Docs are short, objective and dense.** Tables, commands, file paths and rules — no prose, no
+  tutorials, no repetition across pages. Say the rule once, in the one place it belongs, and link
+  with a relative path. A page an LLM re-reads on every task costs tokens each time.
+- **One page per unit.** A doc that grows with the project is split so a lookup costs the unit
+  asked about: one page per command, one per contract, indexed by a `doc.md` that routes.
+- **Convention over configuration.** Uniformity is what makes generation possible.
+- **Deterministic and idempotent.** Same input, same bytes out.
+
+**`interview` is the exception, and the only one.** An LLM drives agnos through the plain cli;
+the interactive session is what a *person* uses, and it is written for a beginner who has never
+read a page of this repo — plain words instead of agnos vocabulary, the next step suggested
+first, and no row on a menu that the project in front of them cannot run. Density, token cost and
+"read the declaration" do not apply there. Every rule above still binds its *code*; the exception
+covers only who its screens are written for. `docs/Interview/doc.md` is its page.
+
+## Testing
+
+There are no Go tests. The checks are `verify` (one `check_*.go` per rule set in
+`sandbox/internal/actions/verify/`), a compiling and idempotent `build`, and the example suite:
+
+```bash
+./release/bootstrap.bin exec-test               # every example, checked against its golden
+./release/bootstrap.bin exec-test --only start  # one example, both sides
+./release/bootstrap.bin update-test start       # rewrite one golden, printing what it changes
+./release/bootstrap.bin exec-test --update      # rewrite every golden; for a shape change alone
+```
+
+Each run that reaches the go runtime pays a `go mod tidy` + `go build`, so prefer `--only`. A
+`<name>` on both sides must leave the same tree and exit the same way. `docs/CliExamples/doc.md`
+has the rest.
+
+Release: bump `version` in `AgnosConfig/project.yaml`, then `build` + `exec-test --update` (the
+bumped version renders into `docs/Requirements/doc.md`, so every golden holding that page moves),
+then `agnos publish`.

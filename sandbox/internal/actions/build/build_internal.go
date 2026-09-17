@@ -242,6 +242,29 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 	}
 
+	// One page per command beside docs/Commands' own index: a lookup costs the
+	// page of the command asked about, never every command of the project.
+	if hasDoc && hasCli {
+		if err := GenerateCommandPages(sandbox, io, command_docs, project_conf.Name); err != nil {
+			return err
+		}
+	}
+
+	// The server layer's mirror of it, one page per declared route.
+	if hasDoc && hasServer {
+		if err := GenerateRoutePages(sandbox, io, route_docs); err != nil {
+			return err
+		}
+	}
+
+	// The same for the contracts: one page per file of sandbox/api and per
+	// contract of sandbox/deps, indexed by the symbols each one declares.
+	if hasDoc && hasSandbox {
+		if err := GeneratePublicApiPages(sandbox, io, public_api, deps_api); err != nil {
+			return err
+		}
+	}
+
 	if hasServer {
 		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {
 			return err

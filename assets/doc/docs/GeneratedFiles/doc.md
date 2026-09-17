@@ -24,6 +24,7 @@
 {{- if .HasDoc }}
 | `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
+| `docs/PublicApi/<contract>.md` | `build` | always. One page per file of `sandbox/api/` and per contract of `sandbox/deps/`; `docs/PublicApi/doc.md` indexes them by the symbols each declares |
 {{- end }}
 {{- if and .HasDoc .HasExample }}
 | `docs/LibExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
@@ -42,6 +43,7 @@
 | `cmd/main/main.go` | `build` | always |
 {{- if .HasDoc }}
 | `docs/{CliInstall,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `docs/Commands/<command>.md` | `build` | always. One page per visible command; `docs/Commands/doc.md` indexes them |
 {{- end }}
 {{- if and .HasDoc .HasExample }}
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
@@ -63,6 +65,7 @@
 | `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/routes/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, and its `ReadBody` |
 | `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `docs/Routes/<route>.md` | `build` | always. One page per visible route; `docs/Routes/doc.md` indexes them |
 | `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-segment` / `add-header` / `add-param` / `set-body` / `add-body-field` / `import-body`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |

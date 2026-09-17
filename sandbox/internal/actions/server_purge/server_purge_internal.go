@@ -16,11 +16,17 @@ import (
 // server-init writes, and it would not compile without the layer it starts.
 // sandbox/constructors/server goes with them for the same reason: it fills
 // Sandbox.Server by naming the package being removed.
+//
+// docs/Routes is one of them: the asset group installs its doc.md and
+// props.yaml, but the build writes one page per route beside them. Removing
+// only the installed two would leave a directory of pages with no props.yaml,
+// which every later build reads as a doc that fails to load.
 var serverDirs = []string{
 	"sandbox/internal/server",
 	"sandbox/internal/routes",
 	"sandbox/internal/routeio",
 	"sandbox/internal/commands/start_server",
+	"docs/Routes",
 	utils.ConstructorDir("server"),
 }
 

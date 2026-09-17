@@ -16,18 +16,23 @@ func CollectDepsApi(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any
 	for _, dir := range collectLibDirs(sandbox, io, "sandbox/deps") {
 
 		var files []map[string]any
+		var symbols []string
 		for _, file := range goFilesOf(sandbox, io, "sandbox/deps/"+dir["Name"]) {
 			parsed, err := parseGoFile(sandbox, io, file)
 			if err != nil {
 				return nil, err
 			}
-			files = append(files, fileData(sandbox, file, parsed))
+			data := fileData(sandbox, file, parsed)
+			files = append(files, data)
+			symbols = append(symbols, declaredSymbols(data)...)
 		}
 
 		contracts = append(contracts, map[string]any{
-			"Name":  dir["Name"],
-			"Title": dir["Title"],
-			"Files": files,
+			"Name":    dir["Name"],
+			"Title":   dir["Title"],
+			"Files":   files,
+			"Page":    DepsApiPageOf(dir["Name"]),
+			"Symbols": identifierList(sandbox, symbols),
 		})
 	}
 

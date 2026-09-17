@@ -29,10 +29,43 @@ func CollectPublicApi(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]a
 
 		group := fileData(sandbox, file, parsed)
 		group["Name"] = titleOf(sandbox, sandbox.Deps.Stringsdeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go"))
+		group["Page"] = PublicApiPageOf(sandbox, file)
+		group["Symbols"] = identifierList(sandbox, declaredSymbols(group))
 		groups = append(groups, group)
 	}
 
 	return groups, nil
+}
+
+// PublicApiPageOf is the file one contract of sandbox/api is documented in,
+// named after the source itself ("sandbox/api/actions.go" -> "api.actions.md")
+// and relative to the docs/PublicApi directory that indexes it. The index link
+// and the generated page are spelled here and nowhere else.
+func PublicApiPageOf(sandbox *api.Sandbox, file string) string {
+	base := sandbox.Deps.Stringsdeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go")
+	return "api." + base + ".md"
+}
+
+// DepsApiPageOf is PublicApiPageOf for a dependency contract, named after its
+// directory ("stringsdeps" -> "deps.stringsdeps.md").
+func DepsApiPageOf(name string) string {
+	return "deps." + name + ".md"
+}
+
+// declaredSymbols is every exported name one parsed file declares, in the order
+// its page prints them. docs/PublicApi's index lists them per page, so which
+// page declares a symbol is answered by the index alone.
+func declaredSymbols(data map[string]any) []string {
+	var names []string
+	for _, key := range []string{"Constants", "Variables", "Types", "Functions"} {
+		entries, _ := data[key].([]map[string]any)
+		for _, entry := range entries {
+			if name, _ := entry["Name"].(string); name != "" {
+				names = append(names, name)
+			}
+		}
+	}
+	return names
 }
 
 // parseGoFile reads a project file through the transaction-aware io and parses

@@ -69,6 +69,8 @@ assets/                             Go text/templates embedded by asset.go; neve
 cmd/main/main.go                    (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
 docs/                               one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
   **/Index.md                       (gen) written for every doc that has sub-docs
+  Commands/<command>.md             (gen) one page per visible command, indexed by docs/Commands/doc.md
+  PublicApi/<contract>.md           (gen) one page per file of sandbox/api and per contract of sandbox/deps, indexed by docs/PublicApi/doc.md
 examples/                           one dir per example; `exec-test` runs each and diffs it against its golden
   cli/<name>/example.sh             the example, run with `sh` and its own dir as cwd
   lib/<name>/example.go             the example, run with `go run` and its own dir as cwd

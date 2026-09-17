@@ -16,9 +16,15 @@ import (
 // it names the package being removed. It is written once and may since have
 // been edited, so it is dropped with the layer it belongs to rather than left
 // behind for sandbox/new.go to keep calling.
+//
+// docs/Commands is one of them for the same reason: the asset group installs
+// its doc.md and props.yaml, but the build writes one page per command beside
+// them. Removing only the installed two would leave a directory of pages with
+// no props.yaml, which every later build reads as a doc that fails to load.
 var cliDirs = []string{
 	"sandbox/internal/cli",
 	"sandbox/internal/commands",
+	"docs/Commands",
 	utils.ConstructorDir("cli"),
 }
 

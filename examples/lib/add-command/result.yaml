@@ -2,9 +2,15 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: docs/Commands/doc.md
-      sha: 24922a1348952950c35dbf396239d622a2bbab8aa8910a5b462dc7d9524856e7
+      sha: 76fa529aa57e2c99fb34a5b963e19e7fdcecce8ea0b712cbfd33dd32e962b52b
+    - file: docs/Commands/greet.md
+      sha: ba7169279e2ec040b3d8c5d78ddd70a1f7e31e3fc9518b7f9b81802cc60b2349
+    - file: docs/Commands/help.md
+      sha: e18d835c2e1bf014718cb11f7ae962bce71764596e7841f8eed27a75244c59af
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
+    - file: docs/Commands/version.md
+      sha: 4e4bb1a3c9f878233b796e03c65503388abdcd38ca6613b6b51bed8ac26e6ce3
     - file: sandbox/internal/commands/greet/entries.yaml
       sha: 79aaf6eee2c70d28ff7c72c8e3633c6f8062f3152955183529efe41243ed1817
     - file: sandbox/internal/commands/greet/handler.go

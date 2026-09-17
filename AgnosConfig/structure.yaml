@@ -210,6 +210,12 @@ docs:
     "**/Index.md":
       gen: true
       description: written for every doc that has sub-docs
+    "Commands/<command>.md":
+      gen: true
+      description: one page per visible command, indexed by docs/Commands/doc.md
+    "PublicApi/<contract>.md":
+      gen: true
+      description: one page per file of sandbox/api and per contract of sandbox/deps, indexed by docs/PublicApi/doc.md
 examples:
   order: 7
   dir: true

@@ -1,44 +1,20 @@
 # Routes
 {{ if .RouteDocs }}
-Every route this server answers, generated from
-`sandbox/internal/routes/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)) on each build.
-Hidden routes are not listed.
+Every route this server answers, one page each, generated from
+`sandbox/internal/routes/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)) on each build —
+open the one you need rather than this whole page. Hidden routes are not listed.
 
 A path is matched segment by segment, most specific route first. A path nothing matches is
-`404`; one matched under another method is `405`. Every field below is bound, converted and
+`404`; one matched under another method is `405`. Every field of a route is bound, converted and
 range-checked before the handler runs — a failure there is `400`, never the handler's call.
 {{- range .RouteDocs }}
 
 ## {{ .Category }}
+
+| Route | Answers | Package |
+| --- | --- | --- |
 {{- range .Routes }}
-
-### `{{ .Method }} {{ .Pattern }}`
-
-{{ .Help }}
-{{- with .LongDescription }}
-
-{{ . }}
-{{- end }}
-{{- if .Fields }}
-
-| Field | In | Type | Default | Description |
-| --- | --- | --- | --- | --- |
-{{- range .Fields }}
-| `{{ .Key }}` | {{ .In }} | {{ .Type }} | {{ .Default }} | {{ .Description }} |
-{{- end }}
-{{- end }}
-{{- with .Body }}
-
-Body: {{ . }}
-{{- end }}
-{{- if .Examples }}
-
-```bash
-{{- range .Examples }}
-{{ . }}
-{{- end }}
-```
-{{- end }}
+| [`{{ .Method }} {{ .Pattern }}`]({{ .Name }}.md) | {{ .Help }} | `{{ .Name }}` |
 {{- end }}
 {{- end }}
 {{- else }}
