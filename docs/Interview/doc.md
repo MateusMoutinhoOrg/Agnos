@@ -49,6 +49,11 @@ line, which is what keeps every printable character an answer and leaves escape 
 `deps.Interviewer.Back` is how a session tells that error from one that means no answer can be
 had at all.
 
+Reading the keys is also what makes a text answer editable: `←`/`→` move the cursor one rune at a
+time, `home`/`end` (`ctrl-a`/`ctrl-e`) jump to either end, and `backspace`/`delete` take the rune
+off either side of it. Any other sequence a terminal sends is dropped rather than typed into the
+answer.
+
 ## The first menu
 
 The project at `--path` is read before every menu: whether `AgnosConfig/project.yaml` is there,

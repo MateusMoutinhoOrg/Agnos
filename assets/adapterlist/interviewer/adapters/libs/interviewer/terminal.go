@@ -25,6 +25,8 @@ const (
 	cursorHide = "\033[?25l"
 	cursorShow = "\033[?25h"
 	clearBelow = "\033[J"
+	clearLine  = "\033[K"
+	cursorBack = "\033[%dD"
 	lineUp     = "\033[A"
 )
 
