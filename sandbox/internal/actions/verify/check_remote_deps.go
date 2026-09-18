@@ -76,8 +76,11 @@ func cachedModuleDir(sandbox *api.Sandbox, path string, module string) (string, 
 }
 
 // checkRemoteCopy compares one copied contract with the module it came from,
-// rendering the module's own api the way the copy was written: the package
-// clause rewritten, then formatted.
+// rendering the module's own api through the very function the install writes
+// with — package clause rewritten, dependency wiring stripped, then formatted.
+// Rendering it any other way here would call a correct copy drifted: the
+// stripped Sandbox.Deps field and its import are in the module and never in
+// the copy, so the difference is the install doing its job.
 func checkRemoteCopy(sandbox *api.Sandbox, io *smartio.SmartIO, dep string, dir string) []string {
 	remote, err := add_dep.ReadRemoteApi(sandbox, dir)
 	if err != nil {
@@ -96,10 +99,7 @@ func checkRemoteCopy(sandbox *api.Sandbox, io *smartio.SmartIO, dep string, dir 
 			continue
 		}
 
-		expected := sandbox.Deps.Stringsdeps.ReplaceAll(file.Content,
-			"package "+file.Parsed.Package+"\n", "package "+dep+"\n")
-
-		formatted, err := sandbox.Deps.Goimportsdeps.Format(expected)
+		formatted, err := add_dep.RenderRemoteFile(sandbox, file, dep)
 		if err != nil {
 			violations = append(violations, target+" could not be compared: "+err.Error())
 			continue

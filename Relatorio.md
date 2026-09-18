@@ -1,34 +1,53 @@
-# Relatório de Avaliação do Agnos CLI (Modo Entrevista)
+# Relatório de Bug: Falso Positivo de "Drift" no Agnos CLI (`verify`)
 
-## 1. Dificuldades com o Body JSON e Chaves (Schema)
-O problema que você relatou sobre "não encontrar como determinar o body json e suas chaves" ocorre devido ao fluxo linear e fragmentado de como os comandos foram agrupados na interface interativa.
+## 1. Informações do Ambiente
+- **Ferramenta:** Agnos CLI
+- **Versão:** `v0.8.1`
+- **Comandos afetados:** `agnos verify`, `agnos add-dep`, `agnos set-dep`
 
-* **Descoberta do Comando (Discoverability):** O Agnos tem comandos dedicados a isso: `add-body-field` (para adicionar propriedades ao JSON) e `set-body` (para configurar Content-Type, obrigatoriedade, tamanho limite). No entanto, eles ficam isolados no menu **"Server System"**. Quando você cria uma rota (`add-route`), o CLI não engata perguntas sobre o body automaticamente; ele termina o comando e te joga de volta ao menu principal. Você precisa "adivinhar" que deve buscar por `add-body-field` depois.
-* **Criação de Estruturas Complexas é Cansativa:** O `add-body-field` permite adicionar campos aninhados usando notação de ponto (ex: `address.city`), mas configurar um payload com 10 propriedades pelo modo entrevista exigiria rodar a opção "add-body-field" 10 vezes.
-* **Falta de Suporte a Mock/Import:** **[Feature Faltante]** Seria muito útil ter a possibilidade de colar um JSON de exemplo e deixar o CLI inferir os campos (tipos, required, etc.), como um "import json".
+## 2. Descrição do Problema
+O comando `agnos verify` reporta um erro de "drift" (desvio) em dependências remotas mesmo quando elas acabaram de ser baixadas com sucesso pela própria CLI, gerando um falso positivo. Isso afeta o fluxo de verificação do projeto e cria um cenário insolúvel ("Catch-22").
 
-## 2. Restrições Ocultas no Menu e Confusão (Ruled Out)
-No código fonte (especificamente em `ruled_out.go`), o Agnos usa uma mecânica inteligente que esconde certas perguntas dependendo das respostas anteriores. 
+O bug ocorre especificamente com dependências remotas importadas com uso de renomeação de pacote (flag `--as`), onde o gerador interno de código da CLI altera legitimamente o `sandbox.go` para remover o field `Deps` e sua importação (para manter o sandbox isolado). 
 
-* **Exemplo:** Se em `add-body-field` você responder que o tipo é `boolean`, perguntas sobre `min`, `max`, `pattern` ou `format` não serão exibidas.
-* **O Problema:** Isso limpa o questionário, mas pode deixar a sensação de "cadê a feature de limites?" caso o usuário selecione acidentalmente um tipo incorreto. Ele só descobrirá na tela de confirmação (Confirm Screen). **[Sugestão de UX]** Seria bom um aviso sutil sobre os campos que foram inferidos ou ignorados por regra.
+O `agnos verify` não reconhece que essa alteração é um comportamento intencional (by design) e a aponta como uma diferença em relação ao módulo original remoto.
 
-## 3. Gestão e Edição de Configurações (Falta de "Edit")
-O modo entrevista lida muito bem com a "criação" (add-x) e "remoção" (remove-x), bem como purgar módulos inteiros. Mas falha no meio termo.
+## 3. Passos para Reproduzir (Reproducer)
+1. Baixe uma dependência remota utilizando a flag `--as` para renomear o diretório/pacote. 
+   **Exemplo:**
+   ```bash
+   agnos add-dep github.com/MateusMoutinhoOrg/Keep --as database
+   ```
+2. Após o download concluir, rode o comando de verificação:
+   ```bash
+   agnos verify
+   ```
+3. A CLI retornará a seguinte violação na saída:
+   ```text
+   verify found 1 violation(s):
+     - sandbox/deps/database/sandbox.go has drifted from the module it was copied from (run `agnos set-dep database --version <version>`)
+   ```
+4. Se tentarmos consertar executando `agnos set-dep database --version v0.0.7`, a mesma mensagem continuará aparecendo em testes subsequentes do `verify`.
 
-* **Falta de Edição Direta:** Não há opções fluidas como "edit-body-field". Se você configurou um campo `age` (idade) no JSON e esqueceu de colocar um limite `--max 130`, você precisará ir ao arquivo `route.yaml` manualmente, ou invocar o comando de remover (`remove-body-field`) e depois adicioná-lo de novo do zero na entrevista.
+## 4. Análise Técnica (O Efeito "Catch-22")
+A CLI do Agnos tem a regra estrita de que **nenhum contrato dentro de `sandbox/deps/` pode realizar importações de outros pacotes** ou trazer fiação extra (wiring).
+Portanto, o comando de geração (`add-dep` / `set-dep`) exclui as seguintes linhas do arquivo `sandbox.go` que vieram da dependência remota:
+```go
+import (
+	"github.com/MateusMoutinhoOrg/Keep/sandbox/deps"
+)
+```
+e o campo respectivo dentro da struct `Sandbox`:
+```go
+	Deps      *deps.Deps
+```
 
-## 4. Retrato Visual (Preview) da Rota
-Ao rodar vários comandos na mesma rota (ex: `add-param`, `add-header`, `add-body-field`), o usuário vai construindo o contrato da rota às cegas na entrevista.
-* **[Feature Faltante]** Uma opção de "Visualizar Rota" (`view-route-schema`), onde o CLI imprima uma árvore (tree) de como a rota se encontra, com seus headers, parâmetros e árvore do body JSON.
+Ao inspecionar as diferenças dos arquivos (diff) antes e depois da instalação da dependência, percebe-se um **conflito interno na CLI**:
+- **Se o arquivo for idêntico ao remoto** (com a importação e o `Deps` presentes), o `verify` trava reclamando de importações não permitidas:
+  ```text
+  sandbox/deps/database/sandbox.go imports github.com/MateusMoutinhoOrg/Keep/sandbox/deps; sandbox/deps/<x>/ may import nothing at all
+  ```
+- **Se o arquivo sofreu a filtragem do gerador** (com a importação e o `Deps` apagados), o `verify` trava reclamando que o arquivo "desviou" (drifted) do módulo original na web.
 
-## 5. Prós do Modo Entrevista
-Apesar dos atritos nas configurações refinadas (como o JSON body), o Agnos Interview é tecnicamente muito bem feito nos seguintes aspectos:
-* **Recuperação de Erros:** O loop de confirmação é brilhante (definido em `interview_internal.go`). Se o gerador rejeitar um campo inválido, ele não derruba toda a sua entrevista, ele permite alterar exatamente a resposta defeituosa (`PruneRuledOut`) e tentar rodar de novo.
-* **Progressão Guiada:** A lógica do estado (`state.go`) de sugerir o próximo passo com a estrela `★` ("Declare its first route") impede que iniciantes se percam em categorias cujo módulo nem foi inicializado ainda.
-
-## Resumo das Features Faltantes Recomendadas para o Roadmap
-1. Sugerir configuração de body/headers imediatamente após rodar o `add-route`.
-2. Criar um importador de Payload (Body JSON) baseado em um exemplo colado (inferência de tipo).
-3. Opção de ver o "Resumo" da Rota (preview da árvore do schema configurado) por dentro do menu.
-4. Adicionar comandos ou fluxo de edição para parâmetros de rota, query ou chaves JSON já declarados, diminuindo a dependência de `remove -> re-add`.
+## 5. Conclusão
+O comparador de drift do `agnos verify` (que analisa AST ou diff) falha em ignorar intencionalmente a ausência do campo `Deps` e sua respectiva importação para dependências instaladas através da feature de "aliasing" (renomeação remota com a flag `--as`). Como resultado, qualquer dependência aliased ficará eternamente presa nesse erro do validador.

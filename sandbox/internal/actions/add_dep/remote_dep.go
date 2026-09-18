@@ -131,12 +131,7 @@ func ReadRemoteApi(sandbox *api.Sandbox, dir string) (*apishape.Api, error) {
 // comments and all.
 func CopyRemoteApi(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.Api, name string) error {
 	for _, file := range remote.Files {
-		content := sandbox.Deps.Stringsdeps.ReplaceAll(file.Content,
-			"package "+file.Parsed.Package+"\n", "package "+name+"\n")
-
-		content = stripDepsWiring(sandbox, content)
-
-		formatted, err := sandbox.Deps.Goimportsdeps.Format(content)
+		formatted, err := RenderRemoteFile(sandbox, file, name)
 		if err != nil {
 			return sandbox.Deps.Std.Errorf("%s could not be formatted after the package clause was rewritten: %w", file.Name, err)
 		}
@@ -147,6 +142,22 @@ func CopyRemoteApi(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.A
 	}
 
 	return nil
+}
+
+// RenderRemoteFile is the single rendering of one remote contract file into a
+// consumer's sandbox/deps/<name>/: the package clause rewritten, the dependency
+// wiring stripped, then formatted. The install writes what it returns and the
+// drift check compares against what it returns, so the two can never disagree
+// about what a copy of that file looks like — a check that rendered the file
+// its own way would report every copy as drifted the moment stripDepsWiring
+// had anything to remove.
+func RenderRemoteFile(sandbox *api.Sandbox, file apishape.ParsedFile, name string) (string, error) {
+	content := sandbox.Deps.Stringsdeps.ReplaceAll(file.Content,
+		"package "+file.Parsed.Package+"\n", "package "+name+"\n")
+
+	content = stripDepsWiring(sandbox, content)
+
+	return sandbox.Deps.Goimportsdeps.Format(content)
 }
 
 // splitModuleSpec cuts "<module>@<version>" apart. A spec with no version
