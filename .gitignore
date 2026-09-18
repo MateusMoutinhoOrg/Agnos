@@ -4,6 +4,7 @@ bootstrap-trackerdata
 install.sh
 user_test
 builder
+SampleRepo
 blackbox
 front-model
 TestDir
