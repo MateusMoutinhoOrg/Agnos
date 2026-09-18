@@ -7,11 +7,17 @@
 
 A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed, dependency-injected sandbox behind a command-line interface generated from declarations.
 
+<p align="center">
+  <img src="docs/assets/logo.png" alt="Agnos Logo" width="200"/>
+</p>
+
 > [!WARNING]
-> **This project is still under active development.** Its patterns, commands and generated
-> output change frequently and without notice. Using it is **not recommended** unless you
-> are an experienced developer or team comfortable reading the source, tracking breaking
-> changes, and fixing generated code by hand.
+> **Em desenvolvimento (Status: Alpha)**
+>
+> - **Previsão Beta:** até o fim de setembro
+> - **Previsão Stable:** novembro
+>
+> Its patterns, commands and generated output change frequently and without notice. Using it is **not recommended** unless you are an experienced developer or team comfortable reading the source, tracking breaking changes, and fixing generated code by hand.
 
 ---
 
