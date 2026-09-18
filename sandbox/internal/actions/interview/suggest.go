@@ -85,7 +85,7 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 	case "only":
 		return closed(exampleOptions(sandbox, io, ""))
 	case "category":
-		return open(categoryOptions(sandbox, io))
+		return open(categorySuggestion(sandbox, io, verb))
 	case "format":
 		return closed(literalOptions(utils.RouteSchemaFormats))
 	case "clear":
@@ -526,19 +526,71 @@ func runningCommandOptions(sandbox *api.Sandbox) []interviewer.AlternativeOption
 	return options
 }
 
-// categoryOptions is every category the project's own command surface already
-// uses, so a new command joins a heading that exists instead of opening one of
-// its own by a typo.
-func categoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+// categorySuggestion offers the headings of the surface the command being
+// declared belongs to. A route is listed in docs/Routes and a command in
+// docs/Commands, so the two never share a heading — offering a command's
+// categories to add-route is what left every route after the first retyping
+// its own, one typo away from a heading of its own.
+func categorySuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) []interviewer.AlternativeOption {
+	switch verb {
+	case "add-route", "set-route":
+		return routeCategoryOptions(sandbox, io)
+	}
+	return commandCategoryOptions(sandbox, io)
+}
+
+// commandCategoryOptions is every category the project's own command surface
+// already uses, so a new command joins a heading that exists instead of
+// opening one of its own by a typo.
+func commandCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+	categories := []string{}
+	for _, declared := range declaredCommands(sandbox, io) {
+		categories = append(categories, declared.Category)
+	}
+	return categoryOptions(categories)
+}
+
+// routeCategoryOptions is the same list for the server surface, read off the
+// `category` of every declared route.yaml. A route whose declaration will not
+// parse contributes nothing: it has no heading to join.
+func routeCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+	if !io.IsDir(routesDir) {
+		return []interviewer.AlternativeOption{}
+	}
+
+	names := []string{}
+	for _, path := range io.ListDirs(routesDir) {
+		if name := utils.LastSegment(sandbox, path); name != "" {
+			names = append(names, name)
+		}
+	}
+	sandbox.Deps.Sortdeps.Strings(names)
+
+	categories := []string{}
+	for _, name := range names {
+		conf, err := utils.LoadRouteConf(sandbox, io, name)
+		if err != nil {
+			continue
+		}
+		categories = append(categories, conf.Category)
+	}
+
+	return categoryOptions(categories)
+}
+
+// categoryOptions is one row per distinct heading, in the order the surface
+// declares them, with the blanks dropped: a unit with no category is listed
+// under a fallback heading nothing has to be told to reuse.
+func categoryOptions(categories []string) []interviewer.AlternativeOption {
 	options := []interviewer.AlternativeOption{}
 	seen := map[string]bool{}
 
-	for _, declared := range declaredCommands(sandbox, io) {
-		if declared.Category == "" || seen[declared.Category] {
+	for _, category := range categories {
+		if category == "" || seen[category] {
 			continue
 		}
-		seen[declared.Category] = true
-		options = append(options, interviewer.AlternativeOption{Id: declared.Category, Msg: declared.Category})
+		seen[category] = true
+		options = append(options, interviewer.AlternativeOption{Id: category, Msg: category})
 	}
 
 	return options

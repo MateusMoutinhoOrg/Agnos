@@ -1,10 +1,9 @@
-package build
+package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // DefaultStaticMount is the url prefix front-init declares for the static
@@ -21,11 +20,17 @@ const DefaultStaticMount = "/static"
 // what makes that rename a rebuild rather than a silent breakage — every
 // staticref would otherwise keep pointing at a mount nothing answers on.
 //
+// It lives here rather than beside the build's other collectors because
+// RenderExtensionCode renders the front group too, ahead of the build that
+// follows: a var this collector does not fill is a `%!q(<nil>)` in the middle
+// of a Go file, which the format pass then reports as a parse error on a file
+// the next build writes correctly.
+//
 // A missing, unparsable or capture-first static route falls back to
 // DefaultStaticMount: this runs on every build, so it reports nothing and
 // leaves the complaining to CollectRoutes, which parses the same file.
 func CollectFrontMount(sandbox *api.Sandbox, io *smartio.SmartIO) string {
-	content, err := io.ReadFile(utils.RouteConfPath(sandbox, utils.StaticRouteName))
+	content, err := io.ReadFile(RouteConfPath(sandbox, StaticRouteName))
 	if err != nil {
 		return DefaultStaticMount
 	}

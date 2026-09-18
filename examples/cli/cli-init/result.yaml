@@ -10,7 +10,7 @@ tree:
     - file: sandbox/constructors/config/constructor.go
       sha: 20b790d9a9e67ed5df67aaa50ae92f02e3910c48ea178a7999bd7c8ff624beac
     - file: sandbox/internal/cli/climain.go
-      sha: 18f46d76da32981cc3aa7dd53f27bf3bfbe9450a898ee21aee384ccd705d44b5
+      sha: 8d218c3810d14d46e815b69fe8cf386f1f80a8b596502673f4493164e3d022b4
     - file: sandbox/internal/cli/new.go
       sha: 70c4b960ff513933bc881bad643f18abeedfe5c3626fa3306183cbaf665b8ef7
     - file: sandbox/internal/commands/help/entries.yaml
@@ -22,7 +22,7 @@ tree:
     - file: sandbox/internal/commands/version/entries.yaml
       sha: 79d993e7132a86d8a54c44d726973e1bf21c005ba1bf82f8d81482e2e24be3b5
     - file: sandbox/internal/commands/version/handler.go
-      sha: 1d4589df0100fc0c9487783ce7dc72fefe2fb8d5789986fca1bdd4484e7acf44
+      sha: 88e8d3ecbeaa0403266670b06259a0132f46d0bdeda81cfabcb5ac010d031571
     - file: sandbox/internal/commands/version/new.go
       sha: 1511a3f8ee17608298c63cfa7edc88b6c2ebf946b23e13bfc512c000c697160e
     - file: sandbox/new.go

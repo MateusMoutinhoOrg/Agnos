@@ -2,37 +2,11 @@ package start
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/moduleconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
-
-// fallbackGoVersion is the go directive written into a generated go.mod when
-// the toolchain cannot be asked which version it is.
-const fallbackGoVersion = "1.25.0"
-
-// goVersion asks the installed toolchain for its own version, so a generated
-// go.mod does not pin a release older than the compiler that will build it.
-// `go env GOVERSION` answers "go1.26.0"; anything unexpected (no toolchain,
-// no such directory yet) falls back to the constant above.
-func goVersion(sandbox *api.Sandbox, path string) string {
-	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
-		Dir:     path,
-		Program: "go",
-		Args:    []string{"env", "GOVERSION"},
-	})
-	if err != nil || result.ExitCode != 0 {
-		return fallbackGoVersion
-	}
-
-	version := sandbox.Deps.Stringsdeps.TrimPrefix(sandbox.Deps.Stringsdeps.TrimSpace(result.Output), "go")
-	if version == "" {
-		return fallbackGoVersion
-	}
-	return version
-}
 
 func StartInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.StartProps) error {
 
@@ -43,6 +17,8 @@ func StartInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.StartPro
 		"Name":      project_conf.Name,
 		"Version":   project_conf.Version,
 		"ConfigDir": sandbox.Config.ProjectName + "Config",
+		"GoRelease": utils.GoRelease,
+		"GoFloor":   utils.GoFloor,
 	}
 
 	if err := utils.RenderGroup(sandbox, io, "start", vars); err != nil {
@@ -57,7 +33,7 @@ func StartInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.StartPro
 
 		module_conf := moduleconf.NewEmpty(sandbox)
 		module_conf.Module = *props.Module
-		module_conf.GoVersion = goVersion(sandbox, props.Path)
+		module_conf.GoVersion = utils.GoRelease
 
 		if err := write("go.mod", []byte(module_conf.Render())); err != nil {
 			return err

@@ -89,7 +89,8 @@ and any `sandbox-*` on with `sandbox` off.
 
 When declaring one of agnos's own flags, never pass a value that is exactly one of `add-flag`'s
 own spellings (`--identifier --example`) — the argv parser counts it as an occurrence and
-pollutes the declaration.
+pollutes the declaration. `--help` is in that set on every command that does not declare a flag
+of that name: the dispatch reads it as `help <command>` and prints a screen instead of running.
 
 ### Output channels
 

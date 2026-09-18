@@ -1,7 +1,8 @@
 # Commands
 {{ if .CommandDocs }}
-`{{.Name}} <command> [flags] [args]`. `{{.Name}} help <command>` prints
-the same for one command; an empty command line prints the general help and exits 2.
+`{{.Name}} <command> [flags] [args]`. `{{.Name}} help <command>`, or `{{.Name}} <command> --help`,
+prints the same for one command; an empty command line prints the general help and exits 2.
+A command declaring a `--help` flag of its own keeps it, and is described through `help` alone.
 
 One page per command, each rendered from that command's `entries.yaml`
 ([EntriesYaml](../EntriesYaml/doc.md)) on each build — open the one you need rather than this

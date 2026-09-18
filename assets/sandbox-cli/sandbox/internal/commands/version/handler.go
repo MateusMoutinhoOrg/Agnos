@@ -11,6 +11,6 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		sandbox.Deps.Std.Printf("no version set yet\n")
 		return api.ExitOk
 	}
-	sandbox.Deps.Std.Printf("Version:%s\n", sandbox.Config.Version)
+	sandbox.Deps.Std.Printf("Version: %s\n", sandbox.Config.Version)
 	return api.ExitOk
 }

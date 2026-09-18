@@ -1,7 +1,7 @@
 # CliInstall
 
 `{{.Name}}` is a single static binary: no runtime, no dependencies. Pick your platform,
-paste the block, done. Go 1.25+ is needed only to build it from source.
+paste the block, done. Go {{.GoFloor}}+ is needed only to build it from source.
 
 **macOS (Apple Silicon)**
 
@@ -59,7 +59,7 @@ curl.exe -sL https://{{.Module}}/releases/latest/download/windowsi32.exe -o "$di
 [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
 ```
 
-**From a checkout** — needs Go 1.25+:
+**From a checkout** — needs Go {{.GoFloor}}+:
 
 ```bash
 go build -o {{.Name}} ./cmd/main && sudo mv {{.Name}} /usr/local/bin/

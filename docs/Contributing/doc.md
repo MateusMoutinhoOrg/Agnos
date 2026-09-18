@@ -46,7 +46,7 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 | `interview/normalize.go` | the command rewrites a name before writing it down: the entry is the noun, and the confirm screen says what the typed name becomes |
 | `interview/followup.go` | the command leaves a thing half-declared, or finishes one another command started: the entry is the command offered next and the answer it inherits, so the route just declared is not typed again |
 
-`add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
+`add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. `--help` joins that set on any command that does not declare a flag of that name, where the dispatch reads it as a request for that command's help screen. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
 
 ## Add a layer (cli, server, …)
 
@@ -61,7 +61,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` | `sandbox/internal/databaseio/` |
 | Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
-| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `collect_front_mount.go` | `collect_databases.go`, `collect_database_docs.go` |
+| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `utils/front_mount.go` (`RenderExtensionCode` reads it too, so it sits in `utils`) | `collect_databases.go`, `collect_database_docs.go` |
 | Per-unit generator | `generate_command_new.go` | `generate_route_new.go` | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
 | Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/sandbox-front/`, `assets/doc-front/` | `assets/sandbox-database/`, `assets/doc-database/` |
 | Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` | `sandbox-database` |

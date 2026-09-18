@@ -2,7 +2,7 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: docs/Commands/doc.md
-      sha: 76fa529aa57e2c99fb34a5b963e19e7fdcecce8ea0b712cbfd33dd32e962b52b
+      sha: 2ff15f3ac08c490989d6e3a02edce01b49bdd08ee608ffe69042134058c0ff6a
     - file: docs/Commands/greet.md
       sha: ba7169279e2ec040b3d8c5d78ddd70a1f7e31e3fc9518b7f9b81802cc60b2349
     - file: docs/Commands/help.md

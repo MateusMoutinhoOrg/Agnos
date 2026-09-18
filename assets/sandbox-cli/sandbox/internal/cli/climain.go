@@ -31,8 +31,18 @@ const (
 // dispatch does the silencing once, so no handler has to.
 const quietId = "quiet"
 
-// helpId is the command the empty command line falls back to.
-const helpId = "help"
+// helpId is the command the empty command line falls back to, and helpArgId
+// the arg it reads the command to describe from.
+const (
+	helpId    = "help"
+	helpArgId = "command"
+)
+
+// helpFlag is how a command line asks the command it names for its own help
+// screen, instead of running it. A command that declares a flag of that
+// spelling keeps it — `add-command --help "..."` is the help text of the
+// command being declared, not a request for a screen.
+const helpFlag = "--help"
 
 // CliMain reads the verb, finds the command of Cli.Commands that answers to
 // it, binds the rest of the command line to a copy of that command's declared
@@ -42,7 +52,8 @@ const helpId = "help"
 // project.
 // `help` is reached through that same path — it is a declared command whose
 // files `{{.GeneratorName}} build` happens to write itself — and directly only
-// for the empty command line below.
+// for the empty command line below and for the `<command> --help` of
+// runCommand.
 func CliMain(sandbox *api.Sandbox, args []string) int {
 
 	if len(args) == 0 {
@@ -97,6 +108,10 @@ func runHelp(sandbox *api.Sandbox) int {
 // user reads a command line in: the flags, then the leftovers that look like
 // flags, then the positional args, then whatever is still unread.
 func runCommand(sandbox *api.Sandbox, command *api.Command, parser argvdeps.Parser) int {
+	if asksForHelp(command, parser) {
+		return runCommandHelp(sandbox, command)
+	}
+
 	for _, flag := range command.Flags {
 		if !bindFlag(sandbox, command, flag, parser) {
 			return ExitUsage
@@ -122,6 +137,40 @@ func runCommand(sandbox *api.Sandbox, command *api.Command, parser argvdeps.Pars
 	}
 
 	return command.Handler(command)
+}
+
+// asksForHelp reports a command line that carries helpFlag on a command that
+// declares no flag of that spelling — the universal `<command> --help`, which
+// would otherwise be read as the typo checkUnknownFlags reports.
+func asksForHelp(command *api.Command, parser argvdeps.Parser) bool {
+	for _, flag := range command.Flags {
+		for _, identifier := range flag.Identifiers {
+			if identifier == helpFlag {
+				return false
+			}
+		}
+	}
+	return parser.IsPresent([]string{helpFlag})
+}
+
+// runCommandHelp prints one command's own help screen by running the help
+// command with that command's name bound to it, which is the same path
+// '<binary> help <command>' takes — and the same output.
+func runCommandHelp(sandbox *api.Sandbox, command *api.Command) int {
+	if len(command.Identifiers) == 0 {
+		return ExitUsage
+	}
+
+	for index := range sandbox.Cli.Commands {
+		declared := &sandbox.Cli.Commands[index]
+		if answersTo(declared, helpId) && declared.Handler != nil {
+			bound := api.BindCommand(declared)
+			bound.Items[helpArgId] = []any{command.Identifiers[0]}
+			return bound.Handler(bound)
+		}
+	}
+
+	return ExitUsage
 }
 
 // bindFlag reads one declared flag off the command line into command.Items.

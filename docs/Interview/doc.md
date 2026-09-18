@@ -168,6 +168,11 @@ table, the http methods, the compile targets, the schema formats, the keys `--cl
 off). Those lists are read from the project at
 `--path`, not from the binary running the interview.
 
+`--category` is the one *open* list: it offers the headings already in use plus a row for typing
+a new one. The headings are the ones of the surface being added to — the routes' `category` for
+`add-route` and `set-route`, the commands' for `add-command` — because a route is listed in
+`docs/Routes` and a command in `docs/Commands`, and the two never share a heading.
+
 Some of them are read off the thing the command is about rather than off the project: the
 parameters, headers, segments and body properties a route declares — the nested ones by the
 dotted path that names them — are the list `set-param`, `set-header`, `set-segment`,

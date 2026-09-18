@@ -4,20 +4,20 @@ Two tools, nothing else. Every recipe of [Workflow](../Workflow/doc.md) assumes 
 
 | Tool | Version | Needed for |
 | --- | --- | --- |
-| Go | 1.25+ | compiling this project; `{{.GeneratorName}} build` ends in a `go mod tidy` and a compile |
+| Go | {{.GoFloor}}+ | compiling this project; `{{.GeneratorName}} build` ends in a `go mod tidy` and a compile |
 | {{.GeneratorName}} | {{if .GeneratorVersion}}{{.GeneratorVersion}}+{{else}}latest{{end}} | every generated file — the tree cannot be maintained by hand |
 
 {{if .GeneratorVersion}}This tree was rendered by `{{.GeneratorName}} {{.GeneratorVersion}}`, so that is the floor: an older
 binary rewrites it to its own older shape.
 
 {{end}}```bash
-go version      # go1.25.0 or newer
+go version      # go{{.GoRelease}} or newer
 {{.GeneratorName}} version{{if .GeneratorVersion}}  # {{.GeneratorVersion}} or newer{{end}}
 ```
 
-## Go 1.25+
+## Go {{.GoFloor}}+
 
-A distro package is usually older than 1.25; prefer the official tarball or installer.
+A distro package is usually older than {{.GoFloor}}; prefer the official tarball or installer.
 
 | Platform | Install |
 | --- | --- |
@@ -28,7 +28,7 @@ A distro package is usually older than 1.25; prefer the official tarball or inst
 **Linux** — `<arch>` is `amd64`, `arm64` or `386`:
 
 ```bash
-curl -sL https://go.dev/dl/go1.25.0.linux-<arch>.tar.gz -o go.tar.gz
+curl -sL https://go.dev/dl/go{{.GoRelease}}.linux-<arch>.tar.gz -o go.tar.gz
 sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go.tar.gz
 echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile && . ~/.profile
 go version
@@ -67,7 +67,7 @@ curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download
 [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
 ```
 
-**From source** — needs Go 1.25+ first:
+**From source** — needs Go {{.GoFloor}}+ first:
 
 ```bash
 git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos
