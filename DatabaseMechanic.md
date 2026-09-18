@@ -3,6 +3,9 @@
 Uma extensão `sandbox-database` que gera mecanicamente os bancos da aplicação — o código, os
 métodos e a doc — a partir de uma declaração yaml.
 
+`SampleRepo/sandbox/internal/databases/appdatabase/` é leitura de referência, não contrato: ele
+mostra que a ideia fecha sobre o Keep, e a forma abaixo é a que a mecânica gera.
+
 ## A unidade
 
 Um **banco** é `sandbox/internal/databases/<db>/`, declarado por `specs.yaml` e gerado inteiro a
@@ -12,13 +15,17 @@ partir dele. Mesma relação que `commands/<x>/entries.yaml` e `routes/<x>/route
 | Arquivo | Escrito por |
 |---|---|
 | `specs.yaml` | os comandos abaixo, nunca à mão |
-| `api.go` | gerado: `<Table>Item`, `<Table>Filtrage`, o struct `<Db>` com um campo func por método |
+| `api.go` | gerado: `<T>Item`, `<T>New`, `<T>Filtrage`, e o struct `<Db>` com um campo func por método |
 | `new.go` | gerado: o `database.Props` e o wiring de cada campo func |
 | `methods.go` | gerado: o corpo de cada método |
 | `methods_custom.go` | **à mão** — o único escape; nenhum build o reescreve |
 
-`SampleRepo/sandbox/internal/databases/appdatabase/` é a forma exata que a geração tem que
-produzir. O `specs.yaml` que rende aquele diretório byte a byte é o primeiro teste da mecânica.
+**Um banco não é uma superfície da api.** `sandbox/api/` não pode importar `sandbox/internal/`,
+e os métodos de um banco são tipados por tabela — não há `[]Database` genérico que sirva como
+`Cli.Commands` serve para os comandos. Então não há campo em `api.Sandbox`, nem pacote em
+`sandbox/constructors/`: quem precisa do banco o constrói na hora, com
+`<db>.New(sandbox *api.Sandbox) *<Db>`. Construir é de graça — pelo contrato do Keep, `New`
+"touches no key: building one is free and creates nothing until the first record is written".
 
 ## O dep
 
@@ -29,15 +36,16 @@ Keep é um repo agnos, então entra como dep **remoto**, não pelo catálogo
 agnos add-dep github.com/MateusMoutinhoOrg/Keep@<version> --as database
 ```
 
-`database-init` roda isso antes de ligar a chave; o adapter sai `origin: generated`, como em
-`SampleRepo/adapters/libs/database/adapter.yaml`. `sandbox/deps/database/databases.go` é a
-superfície inteira: `Props`, `Schema`, `Item`, `SchemaInstance`, `SchemaItem`, `DatabaseHandle`.
+`database-init` roda isso antes de ligar a chave; o adapter sai `origin: generated`.
+`sandbox/deps/database/databases.go` é a superfície inteira: `Props`, `Schema`, `Item`,
+`SchemaInstance`, `SchemaItem`, `DatabaseHandle`. O `<db>.New` gerado alcança o dep por
+`sandbox.Deps.Database.New(props)` — nenhum `buildDatabase` entra por parâmetro.
 
 ## specs.yaml
 
 ```yaml
 name: appdatabase          # pacote appdatabase, tipo AppDatabase
-path: app                  # Props.Path
+prefix: app                # Props.Path
 tables:
   - name: url
     fields:
@@ -56,25 +64,38 @@ Derivados dos campos, cobrindo praticamente toda a superfície do Keep.
 
 | Do quê | Método | Keep por trás |
 |---|---|---|
-| toda tabela | `Add<T>(props <T>New) (*<T>Item, error)` | `NewItem` |
-| toda tabela | `Find<T>ById(id int64) *<T>Item` | `FindById` |
-| campo `key` | `Find<T>By<Field>(v) *<T>Item` | `FindByKey` |
-| campo `string`/`int`/`float` | `Find<T>By<Field>(v) *<T>Item` | `ListAll` + varredura |
-| toda tabela | `List<T>(f <T>Filtrage) []<T>Item` | `ListAll` + filtro |
-| toda tabela | `Page<T>(position, chunk int) ([]<T>Item, error)` | `List` |
-| toda tabela | `Count<T>() int` | `ListAll` |
+| toda tabela | `Add<T>(props <T>New) (<T>Item, error)` | `NewItem` |
+| toda tabela | `Find<T>ById(id int64) (<T>Item, bool)` | `FindById` |
+| campo `key` | `Find<T>By<Field>(v <tipo>) (<T>Item, bool)` | `FindByKey` |
+| toda tabela | `List<T>(f <T>Filtrage) ([]<T>Item, error)` | `ListAll` + filtro |
+| toda tabela | `Page<T>(position int, chunk int) ([]<T>Item, error)` | `List` |
+| toda tabela | `Count<T>() (int, error)` | `ListAll` |
 | todo campo plano | `Update<T><Field>(id int64, v <tipo>) error` | `Update` |
 | toda tabela | `Remove<T>(id int64) error` | `Remove` |
-| campo `link` | `Get<T><Field>(id int64) *<Target>Item` | `GetLink` |
-| campo `database` | `Add<T><Sub>(parentId int64, props <Sub>New) (*<Sub>Item, error)` e `List<T><Sub>(parentId int64) []<Sub>Item` | `NewSubItem`, `SchemaItem.ListAll` |
+| campo `link` | `Get<T><Field>(id int64) (<Target>Item, bool)` | `GetLink` |
+| campo `database` | `Add<T><Sub>(parentId int64, props <Sub>New) (<Sub>Item, error)` e `List<T><Sub>(parentId int64) ([]<Sub>Item, error)` | `NewSubItem`, `SchemaItem.ListAll` |
 
-Cada tabela rende também o helper privado `build<T>Item(item database.SchemaItem) *<T>Item`,
-que é por onde todo método acima devolve um registro.
+**`Find` só nasce de campo `key`.** É o único que o Keep indexa, então é o único que uma busca
+direta alcança. Um campo `string`, `int` ou `float` se alcança por `List<T>` e nada mais: gerar
+um `Find<T>By<Field>` que varre a tabela inteira seria vender uma varredura com cara de busca
+indexada. Por isso `<T>Filtrage` cobre **todo** campo plano — ele é o único caminho até eles.
 
-`<T>Filtrage` leva um campo por campo plano da tabela: texto vira `<Field>StartsWith` e
-`<Field>Equals`, numérico vira `<Field>Min` e `<Field>Max`. Zero value desliga o filtro — é o
-que `ListUrls` do SampleRepo já faz. `<T>New` é o struct dos campos de um insert, pela regra dos
-mais de três valores.
+Três regras de forma, e elas valem para todo método gerado:
+
+- **Busca devolve `(<T>Item, bool)`, escrita devolve `error`** — a mesma convenção que o Keep já
+  usa em `FindByKey` e `NewItem`. Um método gerado nunca devolve `nil` tanto para "não achei"
+  quanto para "o schema não existe": o que é falha vira `error`, o que é ausência vira `false`.
+- **`sandbox *api.Sandbox` primeiro**, em toda função de `methods.go`:
+  `func AddUrl(sandbox *api.Sandbox, self *AppDatabase, props UrlNew) (UrlItem, error)`. É a
+  regra de `sandbox/internal/`, e o struct `<Db>` guarda o sandbox para fechar sobre ele nos
+  campos func.
+- **Nenhuma asserção de tipo sem `ok`.** `build<T>Item` lê cada campo por
+  `item.Get(name)` e converte na forma vírgula-ok; um valor do tipo errado é `error`, nunca
+  panic.
+
+`<T>New` é o struct dos campos de um insert; `<T>Filtrage` leva um campo por campo plano da
+tabela — texto vira `<Field>StartsWith` e `<Field>Equals`, numérico vira `<Field>Min` e
+`<Field>Max` — e zero value desliga o filtro.
 
 `methods_custom.go` é o escape: mesmo pacote, escrito à mão, para a consulta que o `specs.yaml`
 não descreve. O build nunca o lê nem o reescreve; um nome colidindo com um método gerado é erro
@@ -88,7 +109,7 @@ Categoria nova `Database System`; todos carregam `--path` e `-q`.
 |---|---|
 | `database-init` | instala o dep Keep, escreve `sandbox-database: true`, rende o grupo |
 | `database-purge` | remove `utils.ExtensionFiles(sandbox, ExtensionSandboxDatabase)` mais `sandbox/internal/databases/` e `docs/Databases/` inteiros, escreve `false` |
-| `add-database <db> [--db-path <prefix>]` | escreve `sandbox/internal/databases/<db>/specs.yaml` |
+| `add-database <db> [--prefix <p>]` | escreve `sandbox/internal/databases/<db>/specs.yaml` |
 | `remove-database <db>` | apaga o diretório; recusa enquanto houver `methods_custom.go` |
 | `add-table <table> --database <db>` / `remove-table` | uma tabela do `specs.yaml` |
 | `add-table-field <field> --database <db> --table <t> --type <tipo> [--required] [--target <tabela>]` | um campo |
@@ -104,8 +125,7 @@ Grupo `doc-database`, exigindo `doc` + `sandbox-database`:
 - `assets/doc-database/docs/Databases/{doc.md,props.yaml}` — o índice.
 - `assets/templates/database_page.md`, renderizado uma vez por banco em `docs/Databases/<db>.md`:
   tabelas, campos (nome, tipo, required, target) e cada método gerado com sua assinatura.
-- `generate_database_pages.go` termina em `removeStaleDocPages`, como
-  `generate_route_pages.go`.
+- `generate_database_pages.go` termina em `removeStaleDocPages`, como `generate_route_pages.go`.
 - `database-purge` leva `docs/Databases/` inteiro: o grupo instala só `doc.md` e `props.yaml`, e
   deixar as páginas sem `props.yaml` quebra todo build seguinte.
 
@@ -141,9 +161,16 @@ Grupo `doc-database`, exigindo `doc` + `sandbox-database`:
 - `sandbox-database` exige `sandbox` ligado, como todo `sandbox-<x>`.
 - `false` é parar de gerar, nunca apagar; apagar é o que `database-purge` faz.
 
+## Aceitação
+
+Num projeto de rascunho, com o bootstrap: `database-init`, `add-database`, `add-table`,
+`add-table-field` por tipo de campo — inclusive um `link` e um `database` aninhado — e então
+`build` compilando e idempotente, `verify` limpo, e a página do banco em `docs/Databases/`
+listando o que foi declarado. Fechado isso, o mesmo roteiro vira exemplo nos dois lados de
+`examples/`.
+
 ## Em aberto
 
-- `Add<T>` quando a tabela tem um ou dois campos: struct `<T>New` sempre, ou posicional até três?
-- `Find<T>By<Field>` num campo sem índice é `ListAll` + varredura. Gerar mesmo assim, ou só sob
-  um `indexed: true` no campo?
-- `<T>Filtrage` cresce com a tabela. Todo campo plano, ou só os marcados no `specs.yaml`?
+- `Update<T><Field>` é um método por campo: uma tabela de doze campos rende doze. A alternativa é
+  um `Update<T>(id int64, props <T>Update) error` só, com os campos opcionais. Um por campo é o
+  default até haver motivo contra — é o que dá a assinatura tipada por campo.
