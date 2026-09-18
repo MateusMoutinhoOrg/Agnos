@@ -1,0 +1,20 @@
+package database_purge
+
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+)
+
+// DatabasePurge removes from the project every file the database asset groups
+// would have installed, then runs build as a follow-up step.
+func DatabasePurge(sandbox *api.Sandbox, path string) error {
+	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
+	if err := DatabasePurgeInternal(sandbox, io, path); err != nil {
+		return err
+	}
+	if err := io.Persist(); err != nil {
+		return err
+	}
+	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+}

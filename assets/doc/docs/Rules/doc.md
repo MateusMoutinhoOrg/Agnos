@@ -187,6 +187,33 @@ Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
   only thing between a caller's path and the rest of the embedded asset tree.
 
 Every helper and every var is in [FrontUsage](../FrontUsage/doc.md).
+{{ end }}{{ if .HasDatabase }}
+## Databases
+
+- A database is `sandbox/internal/databases/<db>/`, declared by `specs.yaml` and generated
+  whole from it. `add-database`, `add-table`, `add-table-field`, their `set-` editors and
+  their inverses are its only editors — never by hand. **(verify)**
+- `api.go`, `new.go` and `methods.go` are rewritten by every build. `methods_custom.go` is the
+  one escape: hand-written, in the same package, read and rewritten by nothing. A name it
+  shares with a generated one is a violation. **(verify)**
+- A database is **not** a surface of `sandbox/api/`: its methods are typed by table, so there
+  is no `[]Database` standing where `Cli.Commands` stands. Whoever needs one builds it with
+  `<db>.New(sandbox)`, which touches no key — building one is free and creates nothing until
+  the first record is written.
+- A `Find<T>By<Field>` is generated for a `key` field and for no other: it is the only field
+  the storage indexes. Every other plain field is reached through `List<T>` and its
+  `<T>Filtrage`, so a scan is never sold with the face of an indexed lookup.
+- A search answers `(<T>Item, bool)` and a write answers `error`: what failed is an error,
+  what is absent is a `false`, and no single `nil` ever stands for both.
+- No stored value is asserted into a type without `ok`. A value of the wrong type is an error;
+  a field a record never carried reads as the zero value of its type.
+- Every `link` names a `target` that is a table of the same database, and every `database`
+  field carries `fields` of its own and nests no further — one level is what is generated.
+  **(verify)**
+- No table declares a field named `id`: every record already carries its permanent one.
+  **(verify)**
+
+Every key of a declaration is in [Databases](../Databases/doc.md).
 {{ end }}
 ## Output channels
 

@@ -15,14 +15,15 @@ const ExtensionsConfFile = "extensions.yaml"
 // sandbox-<mechanic>; doc and readme stand on their own because neither needs
 // the sandbox to be generated.
 const (
-	ExtensionSandbox        = "sandbox"
-	ExtensionSandboxDeps    = "sandbox-deps"
-	ExtensionSandboxCli     = "sandbox-cli"
-	ExtensionSandboxServer  = "sandbox-server"
-	ExtensionSandboxFront   = "sandbox-front"
-	ExtensionSandboxExample = "sandbox-example"
-	ExtensionDoc            = "doc"
-	ExtensionReadme         = "readme"
+	ExtensionSandbox         = "sandbox"
+	ExtensionSandboxDeps     = "sandbox-deps"
+	ExtensionSandboxCli      = "sandbox-cli"
+	ExtensionSandboxServer   = "sandbox-server"
+	ExtensionSandboxFront    = "sandbox-front"
+	ExtensionSandboxDatabase = "sandbox-database"
+	ExtensionSandboxExample  = "sandbox-example"
+	ExtensionDoc             = "doc"
+	ExtensionReadme          = "readme"
 )
 
 // ExtensionSpec is one mechanic of the catalog: its key, what a fresh project
@@ -44,6 +45,7 @@ func ExtensionCatalog() []ExtensionSpec {
 		{ExtensionSandboxCli, false, "the cli layer: cmd/main, the dispatch, help and version"},
 		{ExtensionSandboxServer, false, "the http layer: server/, routes/, routeio/"},
 		{ExtensionSandboxFront, false, "the html layer: pageio/ and the pages"},
+		{ExtensionSandboxDatabase, false, "the database layer: databaseio/ and the declared databases"},
 		{ExtensionSandboxExample, true, "the examples/ suite and exec-test"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},
 		{ExtensionReadme, true, "README.md, built from themes.yaml and the doc index"},

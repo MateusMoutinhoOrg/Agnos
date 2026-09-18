@@ -2,7 +2,7 @@ cli-output: "add-dep started with path TestDir dep std \nbuild started with path
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: c3941fda22ece3a7bb1ddc0275b9a9bd2aaae064f01245cccdcf338311620c22
+      sha: 5451fc69efba90a15ff72c1000b280322b59a395dd5499e746b0c9fa54aebd22
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: sandbox/constructors/cli/constructor.go

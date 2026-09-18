@@ -2,6 +2,7 @@ doc: true
 readme: true
 sandbox: true
 sandbox-cli: false
+sandbox-database: false
 sandbox-deps: false
 sandbox-example: true
 sandbox-front: false

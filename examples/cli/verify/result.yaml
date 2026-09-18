@@ -4,7 +4,7 @@ tree:
     - file: AgnosConfig/docs/ReadmeHeader.md
       sha: 08e362d5f66308599226fdf1adfb0c5cc7a13b8d4b2cbf0b02d56350c2beef0b
     - file: AgnosConfig/extensions.yaml
-      sha: 2005721582975cbce188942cffaee11b9703a71615e6c4a1dc7edd073a9464a5
+      sha: 72054191ab76af84f942bca8c0ff029703b92836426c92b5a06369e4496a94da
     - file: AgnosConfig/paths.yaml
       sha: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     - file: AgnosConfig/project.yaml

@@ -186,6 +186,42 @@ type RouteProps struct {
 	Examples        []string
 }
 
+// DatabaseFieldProps describes one field to add to a table of a database's
+// specs.yaml. Table is the table it lands in and Parent the nested collection
+// inside that table, "" for a field of the table itself. Type is one of key,
+// string, int, float, link or database; Target names the table a link points
+// at and belongs to a link alone.
+type DatabaseFieldProps struct {
+	Path     string
+	Database string
+	Table    string
+	Parent   string
+	Name     string
+	Type     string
+	Required bool
+	Target   string
+}
+
+// DatabaseFieldEditProps describes the change set-table-field applies to one
+// field a table already declares. Name is the field as it is declared now and
+// Rename the spelling it takes on ("" leaves it alone); Type and Target
+// overwrite what is there when they are given, and an empty one leaves it as
+// it is. Clear is how a key is taken off again — "required" or "target" —
+// because an empty string cannot say "unset this" and "leave it alone" at
+// once.
+type DatabaseFieldEditProps struct {
+	Path     string
+	Database string
+	Table    string
+	Parent   string
+	Name     string
+	Rename   string
+	Type     string
+	Required bool
+	Target   string
+	Clear    []string
+}
+
 // RouteFieldProps describes one field to add to a route's route.yaml. It
 // covers the three origins that read a value off the request line — a captured
 // path segment, a header and a query parameter — which differ only in where
@@ -549,6 +585,45 @@ type Actions struct {
 	// headers, its query parameters and its body schema — as the lines of
 	// a tree, ready to print.
 	ShowRoute func(path string, route string) ([]string, error)
+
+	// DatabaseInit adds the database layer (the store contract,
+	// sandbox/internal/databaseio and sandbox/internal/databases) to a
+	// project that has none.
+	DatabaseInit func(path string) error
+
+	// DatabasePurge removes the database layer and every database declared
+	// in it.
+	DatabasePurge func(path string) error
+
+	// AddDatabase declares a new database: its specs.yaml, from which its
+	// api.go, new.go and methods.go are generated.
+	AddDatabase func(path string, name string, prefix string) error
+
+	// RemoveDatabase deletes one database package whole. It refuses one
+	// carrying a hand-written methods_custom.go.
+	RemoveDatabase func(path string, name string) error
+
+	// AddTable declares one collection of records on a database.
+	AddTable func(path string, database string, table string) error
+
+	// RemoveTable deletes one collection from a database. It refuses a table
+	// another table still links to.
+	RemoveTable func(path string, database string, table string) error
+
+	// AddTableField declares one field on a table, or on a nested
+	// collection of it.
+	AddTableField func(props DatabaseFieldProps) error
+
+	// SetTableField rewrites one field a table already declares.
+	SetTableField func(props DatabaseFieldEditProps) error
+
+	// RemoveTableField deletes one declared field from a table.
+	RemoveTableField func(props DatabaseFieldProps) error
+
+	// ShowDatabase renders one database's whole declaration — its tables,
+	// their fields and the methods each table generates — as the lines of a
+	// tree, ready to print.
+	ShowDatabase func(path string, database string) ([]string, error)
 
 	// FrontInit adds the html front layer (sandbox/internal/pageio, the
 	// route serving assets/frontend/static and that tree's skeleton) to a

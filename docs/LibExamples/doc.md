@@ -28,6 +28,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `cli-init` | add the cli layer to a project that has none | [example.go](../../examples/lib/cli-init/example.go) |
 | `cli-purge` | remove the cli layer and every command in it | [example.go](../../examples/lib/cli-purge/example.go) |
 | `compile` | cross-compile a project's cmd/main into release/ | [example.go](../../examples/lib/compile/example.go) |
+| `database` |  | [example.go](../../examples/lib/database/example.go) |
 | `deps-init` | add the dependency layer to a project that has none | [example.go](../../examples/lib/deps-init/example.go) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.go](../../examples/lib/deps-purge/example.go) |
 | `disable-extension` |  | [example.go](../../examples/lib/disable-extension/example.go) |

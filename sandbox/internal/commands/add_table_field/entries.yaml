@@ -1,0 +1,72 @@
+args:
+    - description: the field name (the key the record stores it under)
+      examples:
+        - add-table-field alias --database app-database --table url --type key --required
+      name: name
+      required: true
+      type: string
+category: Database System
+examples:
+    - add-table-field alias --database app-database --table url --type key --required
+flags:
+    - description: the database (identifier or package name) the field is declared on
+      examples:
+        - add-table-field alias --database app-database --table url
+      identifiers:
+        - --database
+      name: database
+      required: true
+      type: string
+    - description: the table the field is declared on
+      examples:
+        - add-table-field alias --database app-database --table url
+      identifiers:
+        - --table
+      name: table
+      required: true
+      type: string
+    - description: the nested database field the new field goes inside, instead of the table itself
+      examples:
+        - add-table-field agent --database app-database --table url --parent visits
+      identifiers:
+        - --parent
+      name: parent
+      type: string
+    - default: string
+      description: 'the field type: key, string, int, float, link or database'
+      examples:
+        - add-table-field alias --database app-database --table url --type key
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: an insert must carry this field
+      examples:
+        - add-table-field alias --database app-database --table url --type key --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: the table a link points at (only with --type link)
+      examples:
+        - add-table-field owner --database app-database --table url --type link --target user
+      identifiers:
+        - --target
+      name: target
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare one field on a table of a database
+identifiers:
+    - add-table-field
+long-description: 'Appends one field to a table of the database''s specs.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, a database the Add/List pair for the collection nested under each record, and every plain field an Update and a place in the table''s filtrage.'

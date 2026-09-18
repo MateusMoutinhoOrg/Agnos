@@ -22,15 +22,18 @@ const (
 // The commands that name something that already exists are not here: they are
 // answered from a menu of names read off disk, so there is nothing to rewrite.
 var namedUnits = map[string]string{
-	"add-command":    "command",
-	"add-route":      "route",
-	"add-page":       "page",
-	"add-flag":       "flag",
-	"add-arg":        "argument",
-	"add-param":      "parameter",
-	"add-header":     "header",
-	"add-body-field": "body field",
-	"add-segment":    "segment",
+	"add-command":     "command",
+	"add-route":       "route",
+	"add-page":        "page",
+	"add-flag":        "flag",
+	"add-arg":         "argument",
+	"add-param":       "parameter",
+	"add-header":      "header",
+	"add-body-field":  "body field",
+	"add-segment":     "segment",
+	"add-database":    "database",
+	"add-table":       "table",
+	"add-table-field": "field",
 }
 
 // NormalizedNotes is what the confirm screen has to say beyond the command

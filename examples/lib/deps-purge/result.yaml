@@ -2,7 +2,7 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 2005721582975cbce188942cffaee11b9703a71615e6c4a1dc7edd073a9464a5
+      sha: 72054191ab76af84f942bca8c0ff029703b92836426c92b5a06369e4496a94da
     - file: sandbox/api/config.go
       sha: 88b8f0afa0218d082aaeb582993fb1279c533562f0ee0b0c72a034a5f1c2219a
     - file: sandbox/api/sandbox.go

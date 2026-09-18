@@ -105,6 +105,26 @@ var followUps = map[string][]followUp{
 	"set-route": {
 		{"show-route", "Look at what the route declares now", "route", "route"},
 	},
+	"add-database": {
+		{"add-table", "Declare a table it holds", "name", "database"},
+		{"show-database", "Look at what it declares so far", "name", "database"},
+	},
+	"add-table": {
+		{"add-table-field", "Declare one field of it", "name", "table"},
+		{"add-table", "Declare one more table", "database", "database"},
+		{"show-database", "Look at what the database declares now", "database", "database"},
+	},
+	"add-table-field": {
+		{"add-table-field", "Declare one more field", "table", "table"},
+		{"show-database", "Look at what the database declares now", "database", "database"},
+	},
+	"set-table-field": {
+		{"show-database", "Look at what the database declares now", "database", "database"},
+		{"set-table-field", "Change one more field", "table", "table"},
+	},
+	"show-database": {
+		{"add-table", "Declare one more table", "database", "database"},
+	},
 	"add-command": {
 		{"add-flag", "Give it a flag", "name", "command"},
 		{"add-arg", "Give it an argument", "name", "command"},
@@ -125,9 +145,11 @@ var followUps = map[string][]followUp{
 // the one that was typed: `add-route "Create User"` declares create-user, and
 // a follow-up carrying "Create User" would name a route that does not exist.
 var carriedNames = map[string]bool{
-	"add-route":   true,
-	"add-page":    true,
-	"add-command": true,
+	"add-route":    true,
+	"add-page":     true,
+	"add-command":  true,
+	"add-database": true,
+	"add-table":    true,
 }
 
 // chooseFollowUp offers what comes after the command that has just finished,
@@ -170,7 +192,7 @@ func chooseFollowUp(sandbox *api.Sandbox, io *smartio.SmartIO, finished api.Comm
 		if !found {
 			return api.Command{}, nil, false, nil
 		}
-		return command, carried(sandbox, finished, offer, values), true, nil
+		return command, carried(sandbox, finished, command, offer, values), true, nil
 	}
 
 	return api.Command{}, nil, false, nil
@@ -210,14 +232,42 @@ func followUpQuestion(sandbox *api.Sandbox, finished api.Command, first followUp
 	return sandbox.Deps.Std.Sprintf("What next for %s?", subject)
 }
 
-// carried is the answer the follow-up inherits, bound under the field that
-// follow-up declares it as.
-func carried(sandbox *api.Sandbox, finished api.Command, offer followUp, values map[string][]any) map[string][]any {
-	text := carriedText(sandbox, finished, offer, values)
-	if text == "" {
-		return map[string][]any{}
+// carried is what the follow-up starts with: the answer it inherits, bound
+// under the field that follow-up declares it as, plus every scope field the
+// finished command answered that the next one declares too. The second half is
+// what makes a two-deep unit work — a field of a table is named by its
+// database and its table both, and only one of the two can be the inherited
+// answer.
+//
+// A scope field the next command does not declare is left out: what is bound
+// here is read back as that command's own answers, so it may only hold ids
+// that command has.
+func carried(sandbox *api.Sandbox, finished api.Command, next api.Command, offer followUp, values map[string][]any) map[string][]any {
+	inherited := map[string][]any{}
+
+	for _, id := range scopeFields {
+		text := answeredText(sandbox, values, id)
+		if text == "" || !declaresField(next, id) {
+			continue
+		}
+		inherited[id] = []any{text}
 	}
-	return map[string][]any{offer.To: {text}}
+
+	if text := carriedText(sandbox, finished, offer, values); text != "" {
+		inherited[offer.To] = []any{text}
+	}
+
+	return inherited
+}
+
+// declaresField reports whether one command declares a field under this id.
+func declaresField(command api.Command, id string) bool {
+	for _, field := range FieldsOf(command) {
+		if field.Id == id {
+			return true
+		}
+	}
+	return false
 }
 
 // carriedText is one inherited answer as the value the next command is given:

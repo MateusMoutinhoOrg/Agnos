@@ -174,30 +174,34 @@ assets:
       order: 6
       dir: true
       description: rendered when `sandbox-front` is on
-    readme:
+    sandbox-database:
       order: 7
+      dir: true
+      description: rendered when `sandbox-database` is on
+    readme:
+      order: 8
       dir: true
       description: rendered when `readme` is on
     doc:
-      order: 8
+      order: 9
       dir: true
       description: rendered when `doc` is on
     doc-<x>:
-      order: 9
-      dir: true
-      description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-example, doc-example-cli)"
-    deplist/<dep>:
       order: 10
+      dir: true
+      description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-example, doc-example-cli)"
+    deplist/<dep>:
+      order: 11
       dir: true
       description: one installable contract, dep.yaml beside the target layout it mirrors
     adapterlist/<adapter>:
-      order: 11
+      order: 12
       dir: true
       description: one installable adapter, adapter.yaml beside the target layout it mirrors
     templates:
-      order: 12
+      order: 13
       dir: true
-      description: single-file scaffolds (new.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+      description: single-file scaffolds (new.go, command_*, route_*, page_*, database_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
 cmd/main/main.go:
   order: 5
   gen: true

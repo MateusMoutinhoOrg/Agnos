@@ -1,0 +1,27 @@
+args:
+    - description: the database (identifier or package name) to print
+      examples:
+        - show-database app-database
+      name: database
+      required: true
+      type: string
+category: Database System
+examples:
+    - show-database app-database
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Print one database's whole declaration as a tree
+identifiers:
+    - show-database
+long-description: 'Reads sandbox/internal/databases/<database>/specs.yaml and prints it as a tree: the package it declares and where its keys are written, then every table, the fields it holds, and the signature of every method those fields generate. It is the one command of the database surface that writes nothing and runs no build.'

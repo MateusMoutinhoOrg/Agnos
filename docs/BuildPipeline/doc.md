@@ -4,10 +4,10 @@
 
 ## BuildInternal
 
-1. Read `go.mod`, `AgnosConfig/project.yaml` and `AgnosConfig/extensions.yaml` (hard error if either is missing). Fill any catalog key the declaration lacks with its default and write it back. `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasExample`, `HasDoc` and `HasReadme` are read straight off those keys — nothing is inferred from a directory. `HasAssets` is the one exception and stays a probe (`assets/sandbox/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
+1. Read `go.mod`, `AgnosConfig/project.yaml` and `AgnosConfig/extensions.yaml` (hard error if either is missing). Fill any catalog key the declaration lacks with its default and write it back. `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasDatabase`, `HasExample`, `HasDoc` and `HasReadme` are read straight off those keys — nothing is inferred from a directory. `HasAssets` is the one exception and stays a probe (`assets/sandbox/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
 2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the enabled groups themselves write — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions), which `HasDoc` gates.
 3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `new.go` per command.
-4. Collectors, then the per-unit generators (`GenerateAvailableNews`, `GenerateCommandNew`, `GenerateRouteNew`, each behind its own key), then `utils.RenderGroup` over `utils.RenderableGroups(extensions)` — see [Asset groups](#asset-groups).
+4. Collectors, then the per-unit generators (`GenerateAvailableNews`, `GenerateCommandNew`, `GenerateRouteNew`, `GenerateDatabaseNew`, each behind its own key), then `utils.RenderGroup` over `utils.RenderableGroups(extensions)` — see [Asset groups](#asset-groups).
 
 | Collector | Lists | Var | Feeds |
 |---|---|---|---|
@@ -24,11 +24,13 @@
 | `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (the declaration itself: `Paths`, `Headers`, `Params`, `Body`, `SchemaJson`, `BodyStructs`), **ordered for matching**: most `identifier`s, then longest, then pattern | `route_new.go`, `internal/server/new.go` |
 | `CollectRouteDocs` | `routes/<x>/route.yaml` (visible ones), grouped by category in first-seen order | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Help`, `LongDescription`, `Fields` as table rows, `Body`, `Examples`) | `docs/Routes/doc.md` |
 | `CollectCommandDocs` | `commands/<x>/entries.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Help`, `LongDescription`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
+| `CollectDatabases` | `databases/<x>/specs.yaml` | `Databases` (per database: `Package`, `Type`, `Prefix`, `Tables` as `database.Item` literals, `Records` as the Go structs, `Methods` with `Kind`, `Params`, `Results`, `Args`) | `GenerateDatabaseNew` -> `databases/<x>/{api.go,new.go,methods.go}` |
+| `CollectDatabaseDocs` | `databases/<x>/specs.yaml` | `DatabaseDocs` (per database: `Tables` with their fields as table rows, `Methods` with the whole signature) | `docs/Databases/doc.md`, `GenerateDatabasePages` |
 | `CollectStructure` | `AgnosConfig/structure.yaml` (structureconf) | `Structure` (one `Line` per item, depth-indented and padded to a common description column) | `docs/Structure/doc.md` |
 
 Every render whose destination ends in `.go` is passed through `deps.Goimportsdeps.Format` (`go/format`, i.e. `gofmt`) before it is written, so generated Go is byte-identical to what a formatting editor saves and a regenerated tree diffs to zero. An unparsable render is written unformatted and reported by the runtime compile, not by the renderer.
 
-Template vars: `Module`, `Name` (the project being generated), `GeneratorName` (the cli running the build — `agnos`; every command agnos owns is spelled with it, never with `Name`), `Version`, `ProjectName`, `ConfigDir`, `StructureConfFile`, `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasExample`, `HasDoc`, `HasReadme`, `HasAssets`, `Themes`, plus the collector outputs. The two parsing collectors read the sources as they are on disk at collect time, so a doc comment added to a *generated* contract file shows up on the next build. Native template funcs: `render "<path>"` (read a project file through the transaction, render it with the same vars, nestable) and `copy "<path>"` (verbatim). Missing target = hard error. `README.md` = `render ConfigDir/docs/ReadmeHeader.md` + the `DocIndex` sections + a link to `LICENSE`. It is the single entry point to the docs: there is no index file between it and a doc.
+Template vars: `Module`, `Name` (the project being generated), `GeneratorName` (the cli running the build — `agnos`; every command agnos owns is spelled with it, never with `Name`), `Version`, `ProjectName`, `ConfigDir`, `StructureConfFile`, `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasDatabase`, `HasExample`, `HasDoc`, `HasReadme`, `HasAssets`, `Themes`, plus the collector outputs. The two parsing collectors read the sources as they are on disk at collect time, so a doc comment added to a *generated* contract file shows up on the next build. Native template funcs: `render "<path>"` (read a project file through the transaction, render it with the same vars, nestable) and `copy "<path>"` (verbatim). Missing target = hard error. `README.md` = `render ConfigDir/docs/ReadmeHeader.md` + the `DocIndex` sections + a link to `LICENSE`. It is the single entry point to the docs: there is no index file between it and a doc.
 
 ## Asset groups
 
@@ -44,15 +46,17 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command}.go`, `internal/cli/`, `help`, `version` |
 | `sandbox-server` | `sandbox-server` | `api/{server,route}.go`, `internal/{server,routes/health,routeio}` |
 | `sandbox-front` | `sandbox-front` | `internal/pageio/` |
+| `sandbox-database` | `sandbox-database` | `internal/databaseio/` |
 | `doc` | `doc` | `docs/{Adapters,DepList,EntriesYaml,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
 | `doc-cli` | `doc` + `sandbox-cli` | `docs/{CliInstall,Commands}` |
 | `doc-server` | `doc` + `sandbox-server` | `docs/{RouteYaml,Routes,ServerUsage}` |
 | `doc-front` | `doc` + `sandbox-front` | `docs/FrontUsage` |
+| `doc-database` | `doc` + `sandbox-database` | `docs/Databases` |
 | `doc-example` | `doc` + `sandbox-example` | `docs/LibExamples` |
 | `doc-example-cli` | `doc` + `sandbox-example` + `sandbox-cli` | `docs/CliExamples` |
 | `readme` | `readme` | `README.md` |
 
-A group marked `Code: true` — the five `sandbox*` ones — carries Go the collectors read back
+A group marked `Code: true` — the six `sandbox*` ones — carries Go the collectors read back
 off disk, so `utils.SetExtension` renders it once into the transaction that turns the mechanic
 on. Without that pass the build that follows would collect `sandbox/api/` as it was before the
 mechanic existed and write a `sandbox.go` missing the field `cmd/main/main.go` already uses.
@@ -88,4 +92,4 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Self-hosting
 
-Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/cli/new.go`, `climain.go`, every command's `new.go` and `help`. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/cli/new.go`, `climain.go`, every command's `new.go` and `help`. It turns `sandbox-database` on nowhere: agnos declares no database of its own, so the mechanic is exercised by `examples/{cli,lib}/database` rather than by this tree. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).

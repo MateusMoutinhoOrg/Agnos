@@ -33,10 +33,11 @@ var destructiveVerbs = map[string]bool{
 // counts it in. It is what lets the confirm screen name what is about to go
 // instead of asking to confirm a command line.
 var purgeUnits = map[string]string{
-	"cli-purge":    "command",
-	"server-purge": "route",
-	"front-purge":  "page",
-	"deps-purge":   "dep",
+	"cli-purge":      "command",
+	"server-purge":   "route",
+	"front-purge":    "page",
+	"deps-purge":     "dep",
+	"database-purge": "database",
 }
 
 // DestructiveVerb reports a command that removes or overwrites something the
@@ -90,6 +91,8 @@ func unitOptions(sandbox *api.Sandbox, io *smartio.SmartIO, unit string) []inter
 		return pageOptions(sandbox, io)
 	case "dep":
 		return dirOptions(sandbox, io, utils.ContractsDir)
+	case "database":
+		return dirOptions(sandbox, io, utils.DatabasesDir)
 	}
 	return []interviewer.AlternativeOption{}
 }

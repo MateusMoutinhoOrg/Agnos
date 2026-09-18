@@ -2,7 +2,7 @@ cli-output: "front-purge started with path TestDir \nfront-purge kept assets/fro
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 1d354355676e8ef9a21346c9933bc01d44139e3e6593d83bfc661c9b8421d2a4
+      sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
     - file: assets/frontend/pages/home.html
       sha: a642c3b25062f971d6d28625d24303c6feedf96134f2c1c753a441943fbd4b4b
     - file: assets/frontend/static/scripts/main.js

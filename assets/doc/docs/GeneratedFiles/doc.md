@@ -70,6 +70,14 @@
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
 {{- end }}
+{{- if .HasDatabase }}
+| `sandbox/internal/databaseio/*.go` | `build` | always |
+| `sandbox/internal/databases/<db>/{api.go,new.go,methods.go}` | `build` | always. The records, the `database.Props` and the body of every method, all from `specs.yaml` |
+| `docs/Databases/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
+| `sandbox/internal/databases/<db>/specs.yaml` | `add-database` | once, then rewritten by `add-table` / `add-table-field` / `set-table-field` and their inverses — never by hand |
+| `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
+{{- end }}
 {{- if .HasFront }}
 | `sandbox/internal/pageio/templates.go` | `build` | always. `Render` + the asset helpers; `StaticMount` from the `static` route's first segment |
 | `docs/FrontUsage/` | `build` | always. Both `doc.md` and `props.yaml` |

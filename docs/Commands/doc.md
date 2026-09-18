@@ -75,6 +75,21 @@ positionals bind in order after them. A `repeatable` field is given once per val
 | [`remove-lib-example`](remove-lib-example.md) | Delete an example from examples/lib/ |
 | [`update-test`](update-test.md) | Rewrite one example's golden with what it produces now |
 
+## Database System
+
+| Command | Does |
+| --- | --- |
+| [`add-database`](add-database.md) | Declare a new database in the project |
+| [`add-table`](add-table.md) | Declare one collection of records on a database |
+| [`add-table-field`](add-table-field.md) | Declare one field on a table of a database |
+| [`database-init`](database-init.md) | Add the database layer to the project |
+| [`database-purge`](database-purge.md) | Remove the database layer and every declared database |
+| [`remove-database`](remove-database.md) | Delete one database package whole |
+| [`remove-table`](remove-table.md) | Delete one collection from a database |
+| [`remove-table-field`](remove-table-field.md) | Delete one declared field from a table |
+| [`set-table-field`](set-table-field.md) | Rewrite one declared field of a table |
+| [`show-database`](show-database.md) | Print one database's whole declaration as a tree |
+
 ## Documentation
 
 | Command | Does |

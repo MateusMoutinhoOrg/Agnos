@@ -44,6 +44,7 @@ var areas = []area{
 	{"Cli System", "the commands your program answers to", utils.ExtensionSandboxCli},
 	{"Server System", "the http routes your program answers", utils.ExtensionSandboxServer},
 	{"Front System", "the html pages your server serves", utils.ExtensionSandboxFront},
+	{"Database System", "the records your program stores and reads back", utils.ExtensionSandboxDatabase},
 	{"Deps System", "the libraries your program is allowed to use", utils.ExtensionSandboxDeps},
 	{"Documentation", "the docs/ tree of this project", utils.ExtensionDoc},
 	{"Examples", "the examples that guard this project", utils.ExtensionSandboxExample},
@@ -75,10 +76,11 @@ func areaHelp(category string) string {
 // that is off can still be reached: the init is offered as a step, which is
 // the only place it is ever offered.
 var extensionInit = map[string]string{
-	utils.ExtensionSandboxCli:    "cli-init",
-	utils.ExtensionSandboxServer: "server-init",
-	utils.ExtensionSandboxFront:  "front-init",
-	utils.ExtensionSandboxDeps:   "deps-init",
+	utils.ExtensionSandboxCli:      "cli-init",
+	utils.ExtensionSandboxServer:   "server-init",
+	utils.ExtensionSandboxFront:    "front-init",
+	utils.ExtensionSandboxDeps:     "deps-init",
+	utils.ExtensionSandboxDatabase: "database-init",
 }
 
 // scaffoldedUnits are the units an init writes for itself: help and version
@@ -104,6 +106,7 @@ type projectState struct {
 	Commands   int
 	Routes     int
 	Pages      int
+	Databases  int
 }
 
 // readState reads the state off disk. A project with no project.yaml has not
@@ -133,6 +136,7 @@ func readState(sandbox *api.Sandbox, io *smartio.SmartIO) projectState {
 	state.Commands = ownUnits(commandOptions(sandbox, io))
 	state.Routes = ownUnits(dirOptions(sandbox, io, routesDir))
 	state.Pages = ownUnits(pageOptions(sandbox, io))
+	state.Databases = ownUnits(dirOptions(sandbox, io, utils.DatabasesDir))
 
 	return state
 }
@@ -189,11 +193,15 @@ func nextSteps(state projectState) []step {
 		"add-route", "Declare its first route")
 	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxFront) && state.Pages == 0, true,
 		"add-page", "Add its first page")
+	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxDatabase) && state.Databases == 0, true,
+		"add-database", "Declare its first database")
 
 	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxServer), false,
 		extensionInit[utils.ExtensionSandboxServer], "Give it an http server — the routes it answers")
 	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxServer) && !enabled(state, utils.ExtensionSandboxFront), false,
 		extensionInit[utils.ExtensionSandboxFront], "Give it html pages, served by that server")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxDatabase), false,
+		extensionInit[utils.ExtensionSandboxDatabase], "Give it somewhere to store records — tables it reads and writes")
 	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxDeps), false,
 		extensionInit[utils.ExtensionSandboxDeps], "Give it the dependency layer — deps, adapters, availables")
 

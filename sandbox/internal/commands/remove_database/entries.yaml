@@ -1,0 +1,27 @@
+args:
+    - description: the database (identifier or package name) to delete
+      examples:
+        - remove-database app-database
+      name: name
+      required: true
+      type: string
+category: Database System
+examples:
+    - remove-database app-database
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one database package whole
+identifiers:
+    - remove-database
+long-description: 'Deletes sandbox/internal/databases/<name>/ and runs build without compiling: dropping a database may leave hand-written code calling what is gone. It refuses a package carrying a methods_custom.go, which is the project''s own and which nothing in the declaration describes.'

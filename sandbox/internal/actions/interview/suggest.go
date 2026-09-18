@@ -3,6 +3,7 @@ package interview
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -20,6 +21,7 @@ const (
 // accepts, not names of anything on disk, so they are listed rather than read.
 var (
 	fieldTypes     = []string{"string", "boolean", "int", "float"}
+	tableTypes     = databaseconf.FieldTypes
 	bodyTypes      = []string{"string", "boolean", "int", "float", "object"}
 	routeMethods   = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 	buildRuntimes  = []string{"go", "none"}
@@ -66,12 +68,18 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		return closed(commandOptions(sandbox, io))
 	case "route":
 		return closed(dirOptions(sandbox, io, routesDir))
+	case "database":
+		return closed(dirOptions(sandbox, io, utils.DatabasesDir))
+	case "table":
+		return closed(tableOptions(sandbox, io, answered))
+	case "parent":
+		return closed(nestedTableOptions(sandbox, io, answered))
 	case "method":
 		return closed(literalOptions(routeMethods))
 	case "runtime":
 		return closed(literalOptions(buildRuntimes))
 	case "target":
-		return closed(literalOptions(compileTargets))
+		return targetSuggestion(sandbox, io, verb, answered)
 	case "theme":
 		return closed(themeOptions(sandbox, io))
 	case "only":
@@ -107,34 +115,49 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 // come in and nothing about the command line they add up to, and it is what
 // turns "which parameter?" from a text box into the parameters that route
 // declares.
-var scopeFields = []string{"route", "command"}
+var scopeFields = []string{"route", "command", "database", "table"}
 
 // AskOrder is the order the interview puts one command's fields to the person:
-// the field that scopes the others first, and the declaration's own order
-// after it. Only a required flag is hoisted — an optional one may be skipped,
-// and an arg is already asked before the flags.
+// every field that scopes the others first, in the order they narrow each
+// other — the database before the table it holds — and the declaration's own
+// order after them. Only a required flag is hoisted: an optional one may be
+// skipped, and an arg is already asked before the flags.
 func AskOrder(fields []Field) []Field {
+	hoisted := []Field{}
+	taken := map[int]bool{}
+
 	for _, id := range scopeFields {
 		for index, field := range fields {
-			if field.Id != id || !field.IsFlag || !field.Required {
+			if taken[index] || field.Id != id || !field.IsFlag || !field.Required {
 				continue
 			}
-
-			ordered := []Field{field}
-			ordered = append(ordered, fields[:index]...)
-			return append(ordered, fields[index+1:]...)
+			taken[index] = true
+			hoisted = append(hoisted, field)
+			break
 		}
 	}
 
-	return fields
+	if len(hoisted) == 0 {
+		return fields
+	}
+
+	for index, field := range fields {
+		if !taken[index] {
+			hoisted = append(hoisted, field)
+		}
+	}
+	return hoisted
 }
 
 // clearSuggestion is the keys --clear takes off, which are the command's own:
 // a body property carries the json-schema keywords, a header or a query
 // parameter the keys of a declared field.
 func clearSuggestion(verb string) suggestion {
-	if verb == "set-body-field" {
+	switch verb {
+	case "set-body-field":
 		return closed(literalOptions(utils.RouteBodyFieldClearKeys))
+	case "set-table-field":
+		return closed(literalOptions(utils.DatabaseFieldClearKeys))
 	}
 	return closed(literalOptions(utils.RouteFieldClearKeys))
 }
@@ -148,8 +171,21 @@ func typeSuggestion(verb string) suggestion {
 		return suggestion{}
 	case "add-body-field", "set-body-field":
 		return closed(literalOptions(bodyTypes))
+	case "add-table-field", "set-table-field":
+		return closed(literalOptions(tableTypes))
 	}
 	return closed(literalOptions(fieldTypes))
+}
+
+// targetSuggestion tells the two questions about a target apart: a database
+// field points at a table of its own database, and `compile` names one of the
+// binaries it can cross-build. They are one field id, so the verb decides.
+func targetSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answered map[string][]any) suggestion {
+	switch verb {
+	case "add-table-field", "set-table-field":
+		return closed(tableOptions(sandbox, io, answered))
+	}
+	return closed(literalOptions(compileTargets))
 }
 
 // availableSuggestion offers the declared availables, except on add-available,
@@ -219,6 +255,12 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answ
 		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInPath))
 	case "set-body-field", "remove-body-field":
 		return closed(bodyFieldOptions(sandbox, io, answered))
+	case "remove-database":
+		return closed(dirOptions(sandbox, io, utils.DatabasesDir))
+	case "remove-table":
+		return closed(tableOptions(sandbox, io, answered))
+	case "set-table-field", "remove-table-field":
+		return closed(tableFieldOptions(sandbox, io, answered))
 	case "remove-flag":
 		return closed(commandFieldOptions(sandbox, io, answered, true))
 	case "remove-arg":
@@ -226,6 +268,108 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answ
 	}
 
 	return suggestion{}
+}
+
+// tableOptions is the tables one database of the project declares, read off
+// the --database already answered. A session that has not answered one yet
+// gets no list, exactly as it did before there was one.
+func tableOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+	conf, found := answeredDatabase(sandbox, io, answered)
+	if !found {
+		return []interviewer.AlternativeOption{}
+	}
+
+	options := []interviewer.AlternativeOption{}
+	for _, table := range conf.Tables {
+		options = append(options, interviewer.AlternativeOption{
+			Id:  table.Name,
+			Msg: labelled(sandbox, table.Name, tableSummary(sandbox, table)),
+		})
+	}
+	return options
+}
+
+// tableFieldOptions is every field one table declares, the fields of its
+// nested collections included, by the name the editors of those fields spell.
+func tableFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+	table, found := answeredTable(sandbox, io, answered)
+	if !found {
+		return []interviewer.AlternativeOption{}
+	}
+
+	options := []interviewer.AlternativeOption{}
+	for _, field := range table.Fields {
+		options = append(options, interviewer.AlternativeOption{Id: field.Name, Msg: labelled(sandbox, field.Name, field.Type)})
+		for _, nested := range field.Fields {
+			options = append(options, interviewer.AlternativeOption{
+				Id:  nested.Name,
+				Msg: labelled(sandbox, field.Name+"."+nested.Name, nested.Type),
+			})
+		}
+	}
+	return options
+}
+
+// nestedTableOptions is the nested collections one table declares — the only
+// values --parent accepts, because a field goes inside a `database` field or
+// inside nothing.
+func nestedTableOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+	table, found := answeredTable(sandbox, io, answered)
+	if !found {
+		return []interviewer.AlternativeOption{}
+	}
+
+	options := []interviewer.AlternativeOption{}
+	for _, field := range table.Fields {
+		if field.Type != databaseconf.FieldDatabase {
+			continue
+		}
+		options = append(options, interviewer.AlternativeOption{
+			Id:  field.Name,
+			Msg: labelled(sandbox, field.Name, "a collection nested under each record"),
+		})
+	}
+	return options
+}
+
+// tableSummary is what one table is worth saying in a row: how many fields it
+// holds.
+func tableSummary(sandbox *api.Sandbox, table databaseconf.Table) string {
+	if len(table.Fields) == 1 {
+		return "1 field"
+	}
+	return sandbox.Deps.Std.Sprintf("%d fields", len(table.Fields))
+}
+
+// answeredDatabase is the database the session is working on, read off disk,
+// or false while the question naming it has not been answered.
+func answeredDatabase(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) (*databaseconf.DatabaseConf, bool) {
+	database := answeredText(sandbox, answered, "database")
+	if database == "" {
+		return nil, false
+	}
+
+	conf, err := utils.LoadDatabaseConf(sandbox, io, database)
+	if err != nil {
+		return nil, false
+	}
+	return conf, true
+}
+
+// answeredTable is the table the session is working on: the --table answered,
+// looked up in the --database answered. The interview asks both before any
+// field question, which is what makes this list exist at all.
+func answeredTable(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) (databaseconf.Table, bool) {
+	conf, found := answeredDatabase(sandbox, io, answered)
+	if !found {
+		return databaseconf.Table{}, false
+	}
+
+	index := utils.FindDatabaseTable(sandbox, conf.Tables, answeredText(sandbox, answered, "table"))
+	if index < 0 {
+		return databaseconf.Table{}, false
+	}
+	return conf.Tables[index], true
 }
 
 // commandFieldOptions is the flags, or the args, one command of the project

@@ -60,12 +60,13 @@ assets/                             Go text/templates embedded by asset.go; neve
   sandbox-cli/                      rendered when `sandbox-cli` is on
   sandbox-server/                   rendered when `sandbox-server` is on
   sandbox-front/                    rendered when `sandbox-front` is on
+  sandbox-database/                 rendered when `sandbox-database` is on
   readme/                           rendered when `readme` is on
   doc/                              rendered when `doc` is on
-  doc-<x>/                          rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-example, doc-example-cli)
+  doc-<x>/                          rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-example, doc-example-cli)
   deplist/<dep>/                    one installable contract, dep.yaml beside the target layout it mirrors
   adapterlist/<adapter>/            one installable adapter, adapter.yaml beside the target layout it mirrors
-  templates/                        single-file scaffolds (new.go, command_*, route_*, page_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+  templates/                        single-file scaffolds (new.go, command_*, route_*, page_*, database_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
 cmd/main/main.go                    (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
 docs/                               one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
   **/Index.md                       (gen) written for every doc that has sub-docs

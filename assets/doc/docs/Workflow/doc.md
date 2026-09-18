@@ -188,6 +188,45 @@ From there `{{.GeneratorName}} add-page <name>` declares a page and `remove-page
 html included. A project with no server layer gets one first: a page is answered over http.
 `{{.GeneratorName}} front-purge` removes the layer again, leaving `assets/frontend/` alone.
 {{- end }}
+{{ if .HasDatabase }}
+## Change the database surface
+
+```bash
+{{.GeneratorName}} add-database app-database --prefix app
+{{.GeneratorName}} add-table url --database app-database
+{{.GeneratorName}} add-table-field alias --database app-database --table url --type key --required
+{{.GeneratorName}} add-table-field visits --database app-database --table url --type database
+{{.GeneratorName}} add-table-field agent --database app-database --table url --parent visits
+{{.GeneratorName}} show-database app-database                  # read the declaration back
+```
+
+`set-table-field` and the `remove-` half of each pair are the inverses. Every command rewrites
+`sandbox/internal/databases/<db>/specs.yaml` and runs `build`, which regenerates `api.go`,
+`new.go` and `methods.go` from it — the records, the insert structs, the filtrage and the body
+of every method.
+
+Then call it from wherever needs it:
+
+```go
+db := app_database.New(sandbox)
+url, err := db.AddUrl(app_database.UrlNew{Alias: "gh", Link: "https://github.com"})
+found, ok := db.FindUrlByAlias("gh")
+```
+
+A query the declaration cannot describe goes in `methods_custom.go` beside them, hand-written
+and rewritten by no build. [Databases](../Databases/doc.md) is the whole recipe.
+{{- else }}
+## Add the database layer
+
+```bash
+{{.GeneratorName}} database-init                     # the store contract, databaseio, the mechanic on
+{{.GeneratorName}} add-database app-database         # the first database
+{{.GeneratorName}} add-table url --database app-database
+```
+
+From there `add-table-field` declares what a table holds and every method it generates is
+written for you. `{{.GeneratorName}} database-purge` removes the layer again.
+{{- end }}
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No

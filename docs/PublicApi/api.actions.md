@@ -187,6 +187,38 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 | `Visible` | `bool` |
 | `Examples` | `[]string` |
 
+## `DatabaseFieldProps`
+
+DatabaseFieldProps describes one field to add to a table of a database's specs.yaml. Table is the table it lands in and Parent the nested collection inside that table, "" for a field of the table itself. Type is one of key, string, int, float, link or database; Target names the table a link points at and belongs to a link alone.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Database` | `string` |
+| `Table` | `string` |
+| `Parent` | `string` |
+| `Name` | `string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Target` | `string` |
+
+## `DatabaseFieldEditProps`
+
+DatabaseFieldEditProps describes the change set-table-field applies to one field a table already declares. Name is the field as it is declared now and Rename the spelling it takes on ("" leaves it alone); Type and Target overwrite what is there when they are given, and an empty one leaves it as it is. Clear is how a key is taken off again — "required" or "target" — because an empty string cannot say "unset this" and "leave it alone" at once.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Database` | `string` |
+| `Table` | `string` |
+| `Parent` | `string` |
+| `Name` | `string` |
+| `Rename` | `string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Target` | `string` |
+| `Clear` | `[]string` |
+
 ## `RouteFieldProps`
 
 RouteFieldProps describes one field to add to a route's route.yaml. It covers the three origins that read a value off the request line — a captured path segment, a header and a query parameter — which differ only in where the entry lands. Identifier declares a literal path segment instead of a captured one, and is normalized to start with "/". Array collects a []T field: every occurrence of a query key, or — on the last segment of the path, and there alone — every segment left in the URL. Default, Min and Max are the raw literals typed on the command line ("" means unset); Position is the index to insert at (< 0 appends).
@@ -390,6 +422,16 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetBodyField` | `func(props RouteBodyFieldEditProps) error` | SetBodyField rewrites one property of a route's body json-schema, at the dotted path props.Name. |
 | `ImportBody` | `func(props RouteBodyImportProps) error` | ImportBody declares a route's body json-schema from an example payload, inferring one property per key the example carries. |
 | `ShowRoute` | `func(path string, route string) ([]string, error)` | ShowRoute renders one route's whole declaration — its path, its headers, its query parameters and its body schema — as the lines of a tree, ready to print. |
+| `DatabaseInit` | `func(path string) error` | DatabaseInit adds the database layer (the store contract, sandbox/internal/databaseio and sandbox/internal/databases) to a project that has none. |
+| `DatabasePurge` | `func(path string) error` | DatabasePurge removes the database layer and every database declared in it. |
+| `AddDatabase` | `func(path string, name string, prefix string) error` | AddDatabase declares a new database: its specs.yaml, from which its api.go, new.go and methods.go are generated. |
+| `RemoveDatabase` | `func(path string, name string) error` | RemoveDatabase deletes one database package whole. It refuses one carrying a hand-written methods_custom.go. |
+| `AddTable` | `func(path string, database string, table string) error` | AddTable declares one collection of records on a database. |
+| `RemoveTable` | `func(path string, database string, table string) error` | RemoveTable deletes one collection from a database. It refuses a table another table still links to. |
+| `AddTableField` | `func(props DatabaseFieldProps) error` | AddTableField declares one field on a table, or on a nested collection of it. |
+| `SetTableField` | `func(props DatabaseFieldEditProps) error` | SetTableField rewrites one field a table already declares. |
+| `RemoveTableField` | `func(props DatabaseFieldProps) error` | RemoveTableField deletes one declared field from a table. |
+| `ShowDatabase` | `func(path string, database string) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
 | `FrontInit` | `func(path string) error` | FrontInit adds the html front layer (sandbox/internal/pageio, the route serving assets/frontend/static and that tree's skeleton) to a project that has none, installing the server layer first when it is missing. |
 | `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer, the static route and the route of every declared page, leaving assets/frontend/ untouched. |
 | `AddPage` | `func(props PageProps) error` | AddPage declares a new html page: the route that answers it and the html template under assets/frontend/pages/ that it renders. |

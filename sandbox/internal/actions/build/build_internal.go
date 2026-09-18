@@ -58,6 +58,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	hasCli := extensions_conf.IsEnabled(utils.ExtensionSandboxCli)
 	hasServer := extensions_conf.IsEnabled(utils.ExtensionSandboxServer)
 	hasFront := extensions_conf.IsEnabled(utils.ExtensionSandboxFront)
+	hasDatabase := extensions_conf.IsEnabled(utils.ExtensionSandboxDatabase)
 	hasExample := extensions_conf.IsEnabled(utils.ExtensionSandboxExample)
 	hasDoc := extensions_conf.IsEnabled(utils.ExtensionDoc)
 	hasReadme := extensions_conf.IsEnabled(utils.ExtensionReadme)
@@ -119,6 +120,14 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		return err
 	}
 
+	// The database layer's mirror of CollectRoutes: one entry per declared
+	// database, already carrying the records and the signatures its three
+	// generated files are spelled from.
+	databases, err := CollectDatabases(sandbox, io)
+	if err != nil {
+		return err
+	}
+
 	themes_conf, err := utils.LoadThemesConf(sandbox, io)
 	if err != nil {
 		return err
@@ -176,6 +185,13 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		return err
 	}
 
+	// docs/Databases is rendered from the database declarations themselves, the
+	// same way docs/Routes is rendered from the route ones.
+	database_docs, err := CollectDatabaseDocs(sandbox, io)
+	if err != nil {
+		return err
+	}
+
 	// The docs this build generates are merged in before the index is built:
 	// SmartIO listings read disk, so on a project's first build they are not
 	// there to be walked yet.
@@ -205,6 +221,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"HasCli":              hasCli,
 		"HasServer":           hasServer,
 		"HasFront":            hasFront,
+		"HasDatabase":         hasDatabase,
 		"HasExample":          hasExample,
 		"HasDoc":              hasDoc,
 		"HasReadme":           hasReadme,
@@ -221,6 +238,8 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"CommandDocs":         command_docs,
 		"Routes":              routes,
 		"RouteDocs":           route_docs,
+		"Databases":           databases,
+		"DatabaseDocs":        database_docs,
 		"Themes":              themes_conf.Themes,
 		"DocIndex":            CollectDocIndex(sandbox, docs, themes_conf.Themes),
 		"PublicApi":           public_api,
@@ -257,6 +276,13 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 	}
 
+	// The database layer's mirror of it, one page per declared database.
+	if hasDoc && hasDatabase {
+		if err := GenerateDatabasePages(sandbox, io, database_docs); err != nil {
+			return err
+		}
+	}
+
 	// The same for the contracts: one page per file of sandbox/api and per
 	// contract of sandbox/deps, indexed by the symbols each one declares.
 	if hasDoc && hasSandbox {
@@ -267,6 +293,15 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 
 	if hasServer {
 		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {
+			return err
+		}
+	}
+
+	// A database declares three generated files instead of one: its methods
+	// are typed by table, so nothing reads the declaration back at runtime the
+	// way the cli and the server dispatches do.
+	if hasDatabase {
+		if err := GenerateDatabaseNew(sandbox, io, databases, module_conf.Module); err != nil {
 			return err
 		}
 	}

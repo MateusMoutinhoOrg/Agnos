@@ -92,6 +92,17 @@ agnos start-server             # serves it
 From there `agnos add-page <name>` declares a page and `remove-page` drops it,
 html included. A project with no server layer gets one first: a page is answered over http.
 `agnos front-purge` removes the layer again, leaving `assets/frontend/` alone.
+
+## Add the database layer
+
+```bash
+agnos database-init                     # the store contract, databaseio, the mechanic on
+agnos add-database app-database         # the first database
+agnos add-table url --database app-database
+```
+
+From there `add-table-field` declares what a table holds and every method it generates is
+written for you. `agnos database-purge` removes the layer again.
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No

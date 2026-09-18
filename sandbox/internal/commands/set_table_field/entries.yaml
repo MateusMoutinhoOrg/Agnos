@@ -1,0 +1,86 @@
+args:
+    - description: the field to edit, by the name it is declared under
+      examples:
+        - set-table-field alias --database app-database --table url --type key
+      name: name
+      required: true
+      type: string
+category: Database System
+examples:
+    - set-table-field link --database app-database --table url --required
+flags:
+    - description: the database (identifier or package name) the field is declared on
+      examples:
+        - set-table-field alias --database app-database --table url
+      identifiers:
+        - --database
+      name: database
+      required: true
+      type: string
+    - description: the table the field is declared on
+      examples:
+        - set-table-field alias --database app-database --table url
+      identifiers:
+        - --table
+      name: table
+      required: true
+      type: string
+    - description: the nested database field the field sits inside, instead of the table itself
+      examples:
+        - set-table-field agent --database app-database --table url --parent visits
+      identifiers:
+        - --parent
+      name: parent
+      type: string
+    - description: the name the field is stored under from now on
+      examples:
+        - set-table-field alias --database app-database --table url --rename slug
+      identifiers:
+        - --rename
+      name: rename
+      type: string
+    - description: 'the field type it takes on: key, string, int, float, link or database'
+      examples:
+        - set-table-field redirects --database app-database --table url --type int
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - description: an insert must carry this field
+      examples:
+        - set-table-field link --database app-database --table url --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: the table a link points at (only with --type link)
+      examples:
+        - set-table-field owner --database app-database --table url --target user
+      identifiers:
+        - --target
+      name: target
+      type: string
+    - array: true
+      description: 'a key to take off again: required or target (repeatable)'
+      examples:
+        - set-table-field link --database app-database --table url --clear required
+      identifiers:
+        - --clear
+      name: clear
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rewrite one declared field of a table
+identifiers:
+    - set-table-field
+long-description: 'Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again.'

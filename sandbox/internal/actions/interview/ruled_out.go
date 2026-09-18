@@ -25,11 +25,29 @@ const (
 	uniqueItemsFieldId       = "unique-items"
 	additionalPropsFieldId   = "additional-properties"
 	noAdditionalPropsFieldId = "no-additional-properties"
+	targetFieldId            = "target"
 )
 
 // typeObject is the one declared type that is a json-schema kind rather than a
 // value the cli converts, so add-body-field is the only command that sees it.
 const typeObject = "object"
+
+// The two declared field types of a table that the rules below read: a link is
+// the only one that points at another table, and a nested collection is the
+// only one an insert never writes.
+const (
+	typeLink          = "link"
+	typeNestedRecords = "database"
+)
+
+// tableFieldVerbs are the commands declaring a field of a database table.
+// --target and --required read differently there — a target belongs to a link
+// alone, and a nested collection is never required — and declaring one and
+// editing one are the same declaration, so both are here.
+var tableFieldVerbs = map[string]bool{
+	"add-table-field": true,
+	"set-table-field": true,
+}
 
 // schemaVerbs are the commands declaring a json-schema property instead of an
 // agnos field. Two rules read differently there: a required boolean property
@@ -86,8 +104,20 @@ func RuledOutReason(sandbox *api.Sandbox, command api.Command, field Field, valu
 	typed := kind != ""
 	listed := answeredYes(values, arrayFieldId) || editVerbs[verbOf(command)]
 
+	table := tableFieldVerbs[verbOf(command)]
+
 	switch field.Id {
+	case targetFieldId:
+		if table && typed && kind != typeLink {
+			return "only a reference to another table points at one"
+		}
 	case requiredFieldId:
+		if table {
+			if typed && kind == typeNestedRecords {
+				return "a collection nested under each record is never written when one is inserted"
+			}
+			break
+		}
 		if answeredText(sandbox, values, defaultFieldId) != "" {
 			return "what it falls back to already covers its absence"
 		}

@@ -8,6 +8,7 @@ import (
 	addBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_body_field"
 	addCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_cli_example"
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_command"
+	addDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_database"
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	addDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_doc"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
@@ -17,10 +18,14 @@ import (
 	addParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_param"
 	addRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_route"
 	addSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_segment"
+	addTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_table"
+	addTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_table_field"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	cliPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_purge"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
+	databaseInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/database_init"
+	databasePurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/database_purge"
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	disableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/disable_extension"
@@ -39,6 +44,7 @@ import (
 	removeBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_body_field"
 	removeCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_cli_example"
 	removeCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_command"
+	removeDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_database"
 	removeDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_dep"
 	removeDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_doc"
 	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_flag"
@@ -48,6 +54,8 @@ import (
 	removeParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_param"
 	removeRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_route"
 	removeSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_segment"
+	removeTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table"
+	removeTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table_field"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	serverPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_purge"
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
@@ -59,6 +67,8 @@ import (
 	setParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_param"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
 	setSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_segment"
+	setTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_table_field"
+	showDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_database"
 	showRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_route"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
 	updateTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_tests"
@@ -215,6 +225,36 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.ShowRoute = func(path string, route string) ([]string, error) {
 		return showRouteAction.ShowRoute(sandbox, path, route)
+	}
+	actions.DatabaseInit = func(path string) error {
+		return databaseInitAction.DatabaseInit(sandbox, path)
+	}
+	actions.DatabasePurge = func(path string) error {
+		return databasePurgeAction.DatabasePurge(sandbox, path)
+	}
+	actions.AddDatabase = func(path string, name string, prefix string) error {
+		return addDatabaseAction.AddDatabase(sandbox, path, name, prefix)
+	}
+	actions.RemoveDatabase = func(path string, name string) error {
+		return removeDatabaseAction.RemoveDatabase(sandbox, path, name)
+	}
+	actions.AddTable = func(path string, database string, table string) error {
+		return addTableAction.AddTable(sandbox, path, database, table)
+	}
+	actions.RemoveTable = func(path string, database string, table string) error {
+		return removeTableAction.RemoveTable(sandbox, path, database, table)
+	}
+	actions.AddTableField = func(props api.DatabaseFieldProps) error {
+		return addTableFieldAction.AddTableField(sandbox, props)
+	}
+	actions.SetTableField = func(props api.DatabaseFieldEditProps) error {
+		return setTableFieldAction.SetTableField(sandbox, props)
+	}
+	actions.RemoveTableField = func(props api.DatabaseFieldProps) error {
+		return removeTableFieldAction.RemoveTableField(sandbox, props)
+	}
+	actions.ShowDatabase = func(path string, database string) ([]string, error) {
+		return showDatabaseAction.ShowDatabase(sandbox, path, database)
 	}
 	actions.FrontInit = func(path string) error {
 		return frontInitAction.FrontInit(sandbox, path)

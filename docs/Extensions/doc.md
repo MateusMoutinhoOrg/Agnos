@@ -10,6 +10,7 @@ doc: true
 readme: true
 sandbox: true
 sandbox-cli: true
+sandbox-database: false
 sandbox-deps: true
 sandbox-example: true
 sandbox-front: false
@@ -23,6 +24,7 @@ sandbox-server: false
 | `sandbox-cli` | `cmd/main`, the dispatch, `help`, `version`, `sandbox/api/{cli,command}.go`; `add-command` and the rest |
 | `sandbox-server` | `sandbox/internal/{server,routes,routeio}`, `sandbox/api/{server,route}.go`; `add-route` and the rest |
 | `sandbox-front` | `sandbox/internal/pageio`; `add-page` and `remove-page` |
+| `sandbox-database` | `sandbox/internal/{databaseio,databases}`; `add-database`, `add-table`, `add-table-field` and the rest |
 | `sandbox-example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `exec-test`, `update-test` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |
 | `readme` | `README.md`, built from `AgnosConfig/docs/ReadmeHeader.md` and the doc index |

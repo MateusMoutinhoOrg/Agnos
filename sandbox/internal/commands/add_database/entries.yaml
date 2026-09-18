@@ -1,0 +1,34 @@
+args:
+    - description: the name of the new database (e.g. app-database)
+      examples:
+        - add-database app-database
+      name: name
+      required: true
+      type: string
+category: Database System
+examples:
+    - add-database app-database --prefix app
+flags:
+    - description: the key prefix every record is written under (defaults to the database's own name)
+      examples:
+        - add-database app-database --prefix app
+      identifiers:
+        - --prefix
+      name: prefix
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare a new database in the project
+identifiers:
+    - add-database
+long-description: 'Writes sandbox/internal/databases/<name>/specs.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: ''agnos add-table'' declares the first one.'

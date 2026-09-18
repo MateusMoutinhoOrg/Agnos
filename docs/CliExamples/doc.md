@@ -31,6 +31,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `cli-init` | add the cli layer to a project that has none | [example.sh](../../examples/cli/cli-init/example.sh) |
 | `cli-purge` | remove the cli layer and every command in it | [example.sh](../../examples/cli/cli-purge/example.sh) |
 | `compile` | cross-compile a project's cmd/main into release/ | [example.sh](../../examples/cli/compile/example.sh) |
+| `database` |  | [example.sh](../../examples/cli/database/example.sh) |
 | `deps-init` | add the dependency layer to a project that has none | [example.sh](../../examples/cli/deps-init/example.sh) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.sh](../../examples/cli/deps-purge/example.sh) |
 | `disable-extension` |  | [example.sh](../../examples/cli/disable-extension/example.sh) |

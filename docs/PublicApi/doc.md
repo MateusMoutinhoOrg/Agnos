@@ -24,7 +24,7 @@ struct of function fields, filled by a binder.
 | Page | Declares |
 | --- | --- |
 | [`sandbox/api/sandbox.go`](api.sandbox.md) | `Sandbox` |
-| [`sandbox/api/actions.go`](api.actions.md) | `RuntimeGo`, `RuntimeNone`, `BuildProps`, `CompileProps`, `StartProps`, `ExecTestProps`, `AddDepProps`, `SetDepProps`, `RemoveDepProps`, `AddAdapterProps`, `SetAdapterProps`, `ExtensionInfo`, `DepInfo`, `AdapterInfo`, `FieldProps`, `CommandProps`, `RouteProps`, `RouteFieldProps`, `RouteFieldEditProps`, `RouteBodyProps`, `RouteBodyFieldProps`, `RouteBodyFieldEditProps`, `RouteBodyImportProps`, `PageProps`, `DocProps`, `Actions` |
+| [`sandbox/api/actions.go`](api.actions.md) | `RuntimeGo`, `RuntimeNone`, `BuildProps`, `CompileProps`, `StartProps`, `ExecTestProps`, `AddDepProps`, `SetDepProps`, `RemoveDepProps`, `AddAdapterProps`, `SetAdapterProps`, `ExtensionInfo`, `DepInfo`, `AdapterInfo`, `FieldProps`, `CommandProps`, `RouteProps`, `DatabaseFieldProps`, `DatabaseFieldEditProps`, `RouteFieldProps`, `RouteFieldEditProps`, `RouteBodyProps`, `RouteBodyFieldProps`, `RouteBodyFieldEditProps`, `RouteBodyImportProps`, `PageProps`, `DocProps`, `Actions` |
 | [`sandbox/api/cli.go`](api.cli.md) | `ExitOk`, `ExitFailure`, `ExitUsage`, `Cli` |
 | [`sandbox/api/command.go`](api.command.md) | `CommandArg`, `CommandFlag`, `Command`, `NewCommand`, `BindCommand` |
 | [`sandbox/api/config.go`](api.config.md) | `Config` |

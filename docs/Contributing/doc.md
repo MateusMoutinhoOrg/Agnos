@@ -24,7 +24,7 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `./release/bootstrap
 
 ## Add a command to agnos
 
-Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
+Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Database System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
 
 ```bash
 ./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"
@@ -50,28 +50,30 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 ## Add a layer (cli, server, …)
 
-A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one. The front layer is the third column: it declares no unit of its own, because a page **is** a route.
+A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one. The front layer is the third column: it declares no unit of its own, because a page **is** a route. The database layer is the fourth, and the one that breaks the shape: its methods are typed by table, so there is no generic dispatch and no field of the `Sandbox` — the declaration is spelled out into three generated files instead of being read back at runtime.
 
-| Concept | CLI | Server | Front |
-|---|---|---|---|
-| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) |
-| Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/server/new.go` -> `Server.Routes` | — (served through the server's) |
-| Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — |
-| Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — |
-| Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` |
-| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` |
-| Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) |
-| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `collect_front_mount.go` |
-| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` | — (`generate_route_new.go`) |
-| Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/sandbox-front/`, `assets/doc-front/` |
-| Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` |
-| Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` |
-| Interview gate (`interview/state.go`) | `Cli System` -> `sandbox-cli`, step `cli-init` | `Server System` -> `sandbox-server`, step `server-init` | `Front System` -> `sandbox-front`, step `front-init` |
-| Verify | `check_sandbox.go` et al | `check_routes.go` | — (`check_routes.go`) |
+| Concept | CLI | Server | Front | Database |
+|---|---|---|---|---|
+| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) | `sandbox/deps/database/` (a remote dep, not a catalog one) |
+| Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/server/new.go` -> `Server.Routes` | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
+| Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — | — |
+| Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — | — (the methods are generated, not dispatched) |
+| Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` | `sandbox/internal/databaseio/` |
+| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
+| Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
+| Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `collect_front_mount.go` | `collect_databases.go`, `collect_database_docs.go` |
+| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
+| Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/sandbox-front/`, `assets/doc-front/` | `assets/sandbox-database/`, `assets/doc-database/` |
+| Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` | `sandbox-database` |
+| Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` | `database-init` / `database-purge` |
+| Interview gate (`interview/state.go`) | `Cli System` -> `sandbox-cli`, step `cli-init` | `Server System` -> `sandbox-server`, step `server-init` | `Front System` -> `sandbox-front`, step `front-init` | `Database System` -> `sandbox-database`, step `database-init` |
+| Verify | `check_sandbox.go` et al | `check_routes.go` | — (`check_routes.go`) | `check_databases.go` |
 
 A layer is an extension, so adding one is [Add an extension](#add-an-extension) plus the rows above. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.
 
 `<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders the mechanic's code group into the same transaction, and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole — its `sandbox/constructors/<x>/` included, since that package names what is being removed — then writes the key back as `false`.
+
+`sandbox/internal/databaseio/` is the same third package one layer over: a database may not import another one, so the readers every generated `methods.go` shares live beside them. Its one rule is the layer's: nothing converts a stored value without a comma-ok, so a malformed record is an error and never a panic.
 
 `sandbox/internal/routeio/` exists because a route may not import `internal/server`: shared route code goes in a third package both may import. It is also where the two readers that put the dep names back on a bound route live — `RequestOf` and `ResponseOf`, because `api.Route` carries the request and the response as `any`: `sandbox/api/` may name no type of `sandbox/deps`. `sandbox/internal/pageio/` is the same shape one layer up.
 

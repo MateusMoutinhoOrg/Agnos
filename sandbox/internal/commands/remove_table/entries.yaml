@@ -1,0 +1,35 @@
+args:
+    - description: the table to delete
+      examples:
+        - remove-table url --database app-database
+      name: name
+      required: true
+      type: string
+category: Database System
+examples:
+    - remove-table url --database app-database
+flags:
+    - description: the database (identifier or package name) the table is declared on
+      examples:
+        - remove-table url --database app-database
+      identifiers:
+        - --database
+      name: database
+      required: true
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Delete one collection from a database
+identifiers:
+    - remove-table
+long-description: 'Drops one table from the database''s specs.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first.'

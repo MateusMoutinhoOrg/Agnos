@@ -1,0 +1,21 @@
+cli-output: ""
+exit-code: 0
+tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 428ab81bf3cbe09bbc5c5e6cc49e873bb917d0b8644d52aeca80832361e67113
+    - file: docs/Databases/app_database.md
+      sha: dcefe1f7c69049832c9a35be36b814a77031dd033fa077337ced28281e2908a1
+    - file: docs/Databases/doc.md
+      sha: 462d97f68075b0f565d62b3c78e57d4c4ca7b13bcb28d56eb40491fb84eb7816
+    - file: docs/Databases/props.yaml
+      sha: 6ef97e2279573c6dedfadd7e9d18e0dd43e08614b0cf2ba02f3b364749088cf2
+    - file: sandbox/internal/databaseio/databaseio.go
+      sha: 8b2beb9d1e26f3f0b42eff8192f27592aa3bcba4dd24abdf619723ed1c564350
+    - file: sandbox/internal/databases/app_database/api.go
+      sha: c152cfea27a04e205fc66e0180ecea54ad7380f5b84d96c8481dc6e77a8390b5
+    - file: sandbox/internal/databases/app_database/methods.go
+      sha: 3ba640022dccab7878a8d2b47a6d7dd13df7f6d6432ee8b6fa7d3529f5bd9cb5
+    - file: sandbox/internal/databases/app_database/new.go
+      sha: 48c368242b7082c5742df072790af215c4ec8c6f08cc7ba6ad445bb00e4da356
+    - file: sandbox/internal/databases/app_database/specs.yaml
+      sha: 15afaf225ff5d3c2d4fb85a5073bc601c3f29879313e7acaacf5fa5e038f04e2

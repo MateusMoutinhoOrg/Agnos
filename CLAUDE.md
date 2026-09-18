@@ -20,7 +20,7 @@ of them. In doubt, `docs/Workflow/doc.md`.
 | a template under `assets/`, a collector, the build order | `docs/BuildPipeline/doc.md` |
 | adding a command, action, route, layer, extension, dep, example or doc **to agnos itself** | `docs/Contributing/doc.md` |
 | the recipe every agnos project follows for a change | `docs/Workflow/doc.md` |
-| a declaration's schema | `docs/Structure/doc.md`, `docs/EntriesYaml/doc.md`, `assets/doc-server/docs/RouteYaml/doc.md` |
+| a declaration's schema | `docs/Structure/doc.md`, `docs/EntriesYaml/doc.md`, `assets/doc-server/docs/RouteYaml/doc.md`, `assets/doc-database/docs/Databases/doc.md` |
 | the interactive session | `docs/Interview/doc.md` |
 | the example suite | `docs/CliExamples/doc.md` |
 | which files a build rewrites | `docs/GeneratedFiles/doc.md` |
@@ -31,8 +31,8 @@ of them. In doubt, `docs/Workflow/doc.md`.
 A rule is added or changed in `assets/doc/docs/Rules/doc.md`, never in the rendered copy.
 `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/`
 render from `assets/doc/docs/` into **every** agnos project, this one included; the cli, server,
-front and example docs render from `assets/doc-cli/`, `assets/doc-server/`, `assets/doc-front/`,
-`assets/doc-example{,-cli}/`. Editing one means editing that template, and it has to read
+front, database and example docs render from `assets/doc-cli/`, `assets/doc-server/`,
+`assets/doc-front/`, `assets/doc-database/`, `assets/doc-example{,-cli}/`. Editing one means editing that template, and it has to read
 correctly in a scaffolded project, not only here.
 
 ## Traps
@@ -79,6 +79,7 @@ what every build rewrites. One editor per place a declaration holds something:
 | `AgnosConfig/extensions.yaml` | `enable-extension` / `disable-extension`, or the `<x>-init` / `<x>-purge` pair that owns the key |
 | a command's `entries.yaml` | `add-flag` / `add-arg` / `set-command` and their inverses |
 | a route's `route.yaml` | `add-route`, `set-route`, `add-segment`, `add-header`, `add-param`, `set-body`, `add-body-field`, `import-body`, each with its `set-` and `remove-` pair; `show-route` reads it back and writes nothing |
+| a database's `specs.yaml` | `add-database`, `add-table`, `add-table-field`, each with its `set-` and `remove-` pair; `show-database` reads it back and writes nothing |
 | `examples/<side>/<name>/result.yaml` | `update-test <name>`, or `exec-test --update` |
 | an example | `add-cli-example` / `add-lib-example` and their `remove-` pair |
 | a doc | `agnos add-doc` / `agnos remove-doc` |
@@ -118,6 +119,9 @@ editing only the rendered copy is undone in silence.
 - `assets/deplist/<dep>/**` must render byte-for-byte to the copy this repo runs on.
 - Any new path worth naming gets an entry in `AgnosConfig/structure.yaml`; `verify` fails on an
   entry whose path does not exist.
+- A database's `link` field names a `target` that is a table of the same database, a `database`
+  field carries `fields` and nests no further, and no table declares a field named `id`.
+  `remove-database` refuses a package carrying a `methods_custom.go`.
 - Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
   segment is always `required: true`. `array: true` on the last capture takes every segment left,
   and only there.
@@ -158,9 +162,20 @@ the id its `entries.yaml` declares — `command.GetString("path")`, `command.Get
 `sandbox.Server.Routes` is the http surface the same way, and the server layer mirrors the cli
 layer file for file. The front layer declares no unit of its own: a page **is** a route.
 
+**A database is the one unit with no surface.** `sandbox/internal/databases/<db>/specs.yaml`
+declares tables and fields; `build` renders `api.go` (the `<T>Item`/`<T>New`/`<T>Filtrage`
+records and the `<Db>` struct of function fields), `new.go` (the `database.Props` and the
+wiring) and `methods.go` (every body) from it, with `methods_custom.go` the one hand-written
+escape no build reads. There is no field in `api.Sandbox` and no package in
+`sandbox/constructors/`: the methods are typed by table, so whoever needs one calls
+`<db>.New(sandbox)` on the spot — which touches no key. A `Find<T>By<Field>` is generated for a
+`key` field and for no other, because that is the only one the store indexes; every other plain
+field is reached through `List<T>` and its filtrage.
+
 **Extensions** are declared in `AgnosConfig/extensions.yaml` and nowhere else — `build` never
-infers a mechanic from a directory being present. Eight keys: `sandbox`, `sandbox-deps`,
-`sandbox-cli`, `sandbox-server`, `sandbox-front`, `sandbox-example`, `doc`, `readme`. `false`
+infers a mechanic from a directory being present. Nine keys: `sandbox`, `sandbox-deps`,
+`sandbox-cli`, `sandbox-server`, `sandbox-front`, `sandbox-database`, `sandbox-example`, `doc`,
+`readme`. `false`
 means **stop generating**, never **delete**: what the mechanic wrote stays and becomes the
 project's, and removing it is what `<x>-purge` does.
 

@@ -89,8 +89,10 @@ is marked `★`; the rest are offers.
 | `add-command` | the cli is on and declares no command of its own | ★ |
 | `add-route` | the server is on and declares no route of its own | ★ |
 | `add-page` | the front is on and has no page | ★ |
+| `add-database` | the database layer is on and declares no database | ★ |
 | `server-init` | `sandbox-server` is off | |
 | `front-init` | the server is on and `sandbox-front` is off | |
+| `database-init` | `sandbox-database` is off | |
 | `deps-init` | `sandbox-deps` is off | |
 
 `help`, `version`, `health` and `static` are what an init scaffolds, so they never count as
@@ -104,6 +106,7 @@ owns it is on.
 | `Cli System` | `sandbox-cli` |
 | `Server System` | `sandbox-server` |
 | `Front System` | `sandbox-front` |
+| `Database System` | `sandbox-database` |
 | `Deps System` | `sandbox-deps` |
 | `Examples` | `sandbox-example` |
 | `Documentation` | `doc` |
@@ -159,21 +162,25 @@ confirm screen like any other answer.
 
 A field that names something already in the project is offered as a list instead of a text box —
 the commands declared, the deps installed, the adapters, the availables, the routes, the pages,
-the docs, the examples, the themes of `themes.yaml`, the extensions of the catalog, and the
-closed vocabularies (`string`/`boolean`/`int`/`float`, the http methods, the compile targets,
-the schema formats, the keys `--clear` takes off). Those lists are read from the project at
+the docs, the examples, the databases, the themes of `themes.yaml`, the extensions of the
+catalog, and the closed vocabularies (`string`/`boolean`/`int`/`float`, the field types of a
+table, the http methods, the compile targets, the schema formats, the keys `--clear` takes
+off). Those lists are read from the project at
 `--path`, not from the binary running the interview.
 
 Some of them are read off the thing the command is about rather than off the project: the
 parameters, headers, segments and body properties a route declares — the nested ones by the
 dotted path that names them — are the list `set-param`, `set-header`, `set-segment`,
-`set-body-field` and their `remove-` inverses offer, and a command's own flags and args are the
-list `remove-flag` and `remove-arg` offer.
+`set-body-field` and their `remove-` inverses offer; a command's own flags and args are the
+list `remove-flag` and `remove-arg` offer; and the tables of a database, the fields of a table
+and the collections nested in one are what the `--table`, the name and the `--parent` of
+`add-table-field` and its editors offer.
 
-That is also the one place the question order is not the declaration's: a required `--route` or
-`--command` names the thing the other questions are about, so it is asked first even though the
-command line spells it after the positional it scopes. The command line the answers add up to
-is unchanged.
+That is also the one place the question order is not the declaration's: a required `--route`,
+`--command`, `--database` or `--table` names the thing the other questions are about, so it is
+asked first even though the command line spells it after the positional it scopes. They are
+asked in the order they narrow each other — the database before the table it holds — and the
+command line the answers add up to is unchanged.
 
 ## Nothing destructive under a blind enter
 
