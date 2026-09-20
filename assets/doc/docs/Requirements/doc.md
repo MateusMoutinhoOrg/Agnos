@@ -28,10 +28,7 @@ A distro package is usually older than {{.GoFloor}}; prefer the official tarball
 **Linux** — `<arch>` is `amd64`, `arm64` or `386`:
 
 ```bash
-curl -sL https://go.dev/dl/go{{.GoRelease}}.linux-<arch>.tar.gz -o go.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile && . ~/.profile
-go version
+curl -sL https://go.dev/dl/go{{.GoRelease}}.linux-<arch>.tar.gz -o go.tar.gz && sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go.tar.gz && echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile && . ~/.profile && go version
 ```
 
 An existing Go is replaced, never upgraded in place: delete `/usr/local/go` (or the old
@@ -54,24 +51,19 @@ A single static binary — no runtime, no dependencies. Pick the platform's asse
 **macOS / Linux** — replace `<binary>`:
 
 ```bash
-curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o {{.GeneratorName}}
-chmod +x {{.GeneratorName}} && sudo mv {{.GeneratorName}} /usr/local/bin/
-{{.GeneratorName}} version
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o {{.GeneratorName}} && chmod +x {{.GeneratorName}} && sudo mv {{.GeneratorName}} /usr/local/bin/ && {{.GeneratorName}} version
 ```
 
 **Windows** — PowerShell, replace `<binary>`:
 
 ```powershell
-$dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null
-curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o "$dir\{{.GeneratorName}}.exe"
-[Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
+$dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null; curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o "$dir\{{.GeneratorName}}.exe"; [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
 ```
 
 **From source** — needs Go {{.GoFloor}}+ first:
 
 ```bash
-git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos
-go run ./cmd/main local-install
+git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos && go run ./cmd/main local-install
 ```
 {{- if .HasAssets }}
 
@@ -81,7 +73,6 @@ This project carries its own `assets/` template tree, so an installed `{{.Genera
 to that older binary's shape. Never run one here — build the binary from this tree instead:
 
 ```bash
-go build -o release/bootstrap.bin ./cmd/main
-./release/bootstrap.bin build
+go build -o release/bootstrap.bin ./cmd/main && ./release/bootstrap.bin build
 ```
 {{- end }}
