@@ -1,11 +1,10 @@
 
 
-##  priority mechanism 
-O Mecanismo de de prioridade nas api.Route deve ser o seguinte: 
-se houver as seguintes handlers com identifiers:
-- /a/b/
-- /a/b/c
-- /
-e supondo que a requisicao foi /a/b/c/d
-nesse caso, deve se rodar a funcao handler do identifier "/", se ele nao fizer um write no body ou nao retornar um error, deve se rodar a funcao handler do identifier "/a/b/", se ele nao fizer um write no body ou nao retornar um error, deve se rodar a funcao handler do identifier "/a/b/c/"
+## new Routes Mechanic 
+using  [sampples](New-Server-Mode/samples) refactor the route system.
+
+
+
+### Priority Mechanic:
+the prioriy system workss from top to button, if a  route has priority 0 and other has priority 5, it will run first priority 5 if it not made a write on body or not returned a err, it will run priority 0 until it makes a write on body or return a err
 

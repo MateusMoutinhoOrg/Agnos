@@ -1,0 +1,10 @@
+method: GET
+priority: 5  # 0 is the default priority
+paths:
+  - starts-with-identifier: "/" 
+category: Server
+help: Reports that the server is up
+examples:
+  - "curl localhost:8080/health"
+
+
