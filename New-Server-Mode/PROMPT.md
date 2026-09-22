@@ -9,6 +9,5 @@ se houver as seguintes handlers com identifiers:
 - /a/b/
 - /a/b/c
 - /
-
+e supondo que a requisicao foi /a/b/c/d
 nesse caso, deve se rodar a funcao handler do identifier "/", se ele retornar nil, deve se rodar a funcao handler do identifier "/a/b/", se ele retornar nil, deve se rodar a funcao handler do identifier "/a/b/c/"
-comecando do menor identifier para o mair
