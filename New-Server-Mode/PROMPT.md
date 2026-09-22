@@ -1,6 +1,3 @@
-### Refactor the server system
-
-- change the RouteRandler  Signnature for [handler](New-Server-Mode/samples/handler-sample1.go)
 
 
 ##  priority mechanism 
@@ -10,4 +7,5 @@ se houver as seguintes handlers com identifiers:
 - /a/b/c
 - /
 e supondo que a requisicao foi /a/b/c/d
-nesse caso, deve se rodar a funcao handler do identifier "/", se ele retornar nil, deve se rodar a funcao handler do identifier "/a/b/", se ele retornar nil, deve se rodar a funcao handler do identifier "/a/b/c/"
+nesse caso, deve se rodar a funcao handler do identifier "/", se ele nao fizer um write no body ou nao retornar um error, deve se rodar a funcao handler do identifier "/a/b/", se ele nao fizer um write no body ou nao retornar um error, deve se rodar a funcao handler do identifier "/a/b/c/"
+
