@@ -5,14 +5,14 @@ Two tools, nothing else. Every recipe of [Workflow](../Workflow/doc.md) assumes 
 | Tool | Version | Needed for |
 | --- | --- | --- |
 | Go | 1.25+ | compiling this project; `agnos build` ends in a `go mod tidy` and a compile |
-| agnos | v0.9.1+ | every generated file — the tree cannot be maintained by hand |
+| agnos | v0.9.2+ | every generated file — the tree cannot be maintained by hand |
 
-This tree was rendered by `agnos v0.9.1`, so that is the floor: an older
+This tree was rendered by `agnos v0.9.2`, so that is the floor: an older
 binary rewrites it to its own older shape.
 
 ```bash
 go version      # go1.25.0 or newer
-agnos version  # v0.9.1 or newer
+agnos version  # v0.9.2 or newer
 ```
 
 ## Go 1.25+
@@ -28,10 +28,7 @@ A distro package is usually older than 1.25; prefer the official tarball or inst
 **Linux** — `<arch>` is `amd64`, `arm64` or `386`:
 
 ```bash
-curl -sL https://go.dev/dl/go1.25.0.linux-<arch>.tar.gz -o go.tar.gz
-sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go.tar.gz
-echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile && . ~/.profile
-go version
+curl -sL https://go.dev/dl/go1.25.0.linux-<arch>.tar.gz -o go.tar.gz && sudo rm -rf /usr/local/go && sudo tar -C /usr/local -xzf go.tar.gz && echo 'export PATH=$PATH:/usr/local/go/bin' >> ~/.profile && . ~/.profile && go version
 ```
 
 An existing Go is replaced, never upgraded in place: delete `/usr/local/go` (or the old
@@ -54,24 +51,19 @@ A single static binary — no runtime, no dependencies. Pick the platform's asse
 **macOS / Linux** — replace `<binary>`:
 
 ```bash
-curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o agnos
-chmod +x agnos && sudo mv agnos /usr/local/bin/
-agnos version
+curl -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o agnos && chmod +x agnos && sudo mv agnos /usr/local/bin/ && agnos version
 ```
 
 **Windows** — PowerShell, replace `<binary>`:
 
 ```powershell
-$dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null
-curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o "$dir\agnos.exe"
-[Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
+$dir="$HOME\.local\bin"; New-Item -ItemType Directory -Force -Path $dir | Out-Null; curl.exe -sL https://github.com/MateusMoutinhoOrg/Agnos/releases/latest/download/<binary> -o "$dir\agnos.exe"; [Environment]::SetEnvironmentVariable('PATH', [Environment]::GetEnvironmentVariable('PATH','User') + ";$dir", 'User')
 ```
 
 **From source** — needs Go 1.25+ first:
 
 ```bash
-git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos
-go run ./cmd/main local-install
+git clone https://github.com/MateusMoutinhoOrg/Agnos.git && cd Agnos && go run ./cmd/main local-install
 ```
 
 ## This repository
@@ -80,6 +72,5 @@ This project carries its own `assets/` template tree, so an installed `agnos` wo
 to that older binary's shape. Never run one here — build the binary from this tree instead:
 
 ```bash
-go build -o release/bootstrap.bin ./cmd/main
-./release/bootstrap.bin build
+go build -o release/bootstrap.bin ./cmd/main && ./release/bootstrap.bin build
 ```
