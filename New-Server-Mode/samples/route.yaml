@@ -1,0 +1,5 @@
+method: GET
+paths:
+  - identifier: "/"
+category: "Pages"
+help: "Renders the home page from the embedded html template"
