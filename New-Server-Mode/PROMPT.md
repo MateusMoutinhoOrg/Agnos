@@ -4,7 +4,15 @@
 -  [samples](New-Server-Mode/samples) 
 
 
+### New Handler Assignature:
+```go 
 
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, *response serverdeps.Response) error  {
+	
+	return
+}
+
+```
 ### Priority Mechanic:
 the prioriy system workss rom button to top, if a  route has priority 0 and other has priority 5, it will run first priority 0 if it not made a write on body or not returned a err, it will run priority 5 until it makes a write on body or return a err
 
