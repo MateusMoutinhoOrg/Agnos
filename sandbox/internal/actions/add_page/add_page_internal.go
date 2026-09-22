@@ -55,7 +55,13 @@ func AddPageInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PagePr
 		help = "Renders the " + identifier + " page from the embedded html template"
 	}
 
-	if err := addRouteAction.AddRouteInternal(sandbox, io, props.Name, pageMethod, trigger, help, pageCategory); err != nil {
+	if err := addRouteAction.AddRouteInternal(sandbox, io, api.AddRouteProps{
+		Name:     props.Name,
+		Method:   pageMethod,
+		Trigger:  trigger,
+		Help:     help,
+		Category: pageCategory,
+	}); err != nil {
 		return err
 	}
 

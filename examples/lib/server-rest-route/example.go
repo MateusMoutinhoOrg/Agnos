@@ -32,7 +32,14 @@ func main() {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddRoute("TestDir", "static", "GET", "/static", "Serve a file under /static", "Files"); err != nil {
+	if err := lib.Actions.AddRoute(api.AddRouteProps{
+		Path:     "TestDir",
+		Name:     "static",
+		Method:   "GET",
+		Trigger:  "/static",
+		Help:     "Serve a file under /static",
+		Category: "Files",
+	}); err != nil {
 		panic(err)
 	}
 

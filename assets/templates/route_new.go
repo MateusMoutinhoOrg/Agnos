@@ -7,6 +7,12 @@
 			Examples:    []string{ {{range .Examples}}{{printf "%q" .}}, {{end}} },
 			Default:     {{printf "%q" .Default}},
 			HasDefault:  {{.HasDefault}},
+{{- if .Identifier}}
+			Identifier:  {{printf "%q" .Identifier}},
+{{- end}}
+{{- if .StartsWith}}
+			StartsWith:  {{printf "%q" .StartsWith}},
+{{- end}}
 {{- if .HasMin}}
 			Min:         {{.Min}},
 			HasMin:      true,
@@ -23,9 +29,6 @@ import (
 {{- if .Body.IsJson}}
 	serializables "{{.Module}}/sandbox/deps/serializables"
 {{- end}}
-{{- if .HasBody}}
-	"{{.Module}}/sandbox/deps/serverdeps"
-{{- end}}
 	"{{.Module}}/sandbox/internal/routeio"
 )
 
@@ -41,6 +44,7 @@ func NewRoute(sandbox *api.Sandbox) api.Route {
 
 	route.Name = {{printf "%q" .Name}}
 	route.Method = {{printf "%q" .Method}}
+	route.Priority = {{.Priority}}
 	route.Pattern = {{printf "%q" .Pattern}}
 	route.Category = {{printf "%q" .Category}}
 	route.Help = {{printf "%q" .Help}}
@@ -59,6 +63,9 @@ func NewRoute(sandbox *api.Sandbox) api.Route {
 {{- else}}
 		{
 			Identifier: {{printf "%q" .Identifier}},
+{{- if .StartsWith}}
+			StartsWith: true,
+{{- end}}
 		},
 {{- end}}
 {{- end}}
@@ -88,7 +95,7 @@ func NewRoute(sandbox *api.Sandbox) api.Route {
 		Schema:      {{if .SchemaJson}}BodySchema{{else}}""{{end}},
 	}
 
-	route.Handler = func(bound *api.Route) int {
+	route.Handler = func(bound *api.Route) error {
 		return RouteHandler(sandbox, bound, routeio.ResponseOf(bound))
 	}
 
@@ -122,23 +129,29 @@ const BodySchema = {{printf "%q" .SchemaJson}}
 // The body is the one part of a request the dispatch does not touch, so a
 // handler may refuse a request before a byte of it is read.
 //
-// It returns api.StatusOk when the body passed; on any other status the error
-// response has already been written, and the handler only has to return it.
-func ReadBody(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) ({{.Body.GoType}}, int) {
+// It returns nil when the body passed. Any other failure has already been
+// answered — by this project's own HandleBadRequest or HandleTooLarge, which
+// routeio.Fail hands it to — so the handler only has to return it:
+//
+//	body, err := ReadBody(sandbox, route)
+//	if err != nil {
+//		return err
+//	}
+func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) {
 	var body {{.Body.GoType}}
 
 	raw, err := routeio.RequestOf(route).ReadBody(MaxBodyBytes)
 	if err != nil {
-		return body, routeio.WriteError(sandbox, response, api.StatusPayloadTooLarge, "",
-			"the request body is larger than {{.Body.MaxBytesText}} bytes")
+		return body, routeio.FailWithCause(sandbox, route, api.StatusPayloadTooLarge, "",
+			"the request body is larger than {{.Body.MaxBytesText}} bytes", err.Error())
 	}
 
 	if len(raw) == 0 {
 {{- if .Body.Required}}
-		return body, routeio.WriteError(sandbox, response, api.StatusBadRequest, "",
+		return body, routeio.Fail(sandbox, route, api.StatusBadRequest, "",
 			"this route requires a request body")
 {{- else}}
-		return body, api.StatusOk
+		return body, nil
 {{- end}}
 	}
 {{- if .Body.IsRaw}}
@@ -151,7 +164,7 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route, response serverdeps.Respon
 
 	parsed, field, message, ok := routeio.ValidateSchema(sandbox, {{if .SchemaJson}}BodySchema{{else}}""{{end}}, raw)
 	if !ok {
-		return body, routeio.WriteError(sandbox, response, api.StatusBadRequest, field, message)
+		return body, routeio.Fail(sandbox, route, api.StatusBadRequest, field, message)
 	}
 {{- if .Body.IsObject}}
 
@@ -162,7 +175,7 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route, response serverdeps.Respon
 {{- end}}
 {{- end}}
 
-	return body, api.StatusOk
+	return body, nil
 }
 {{- end}}
 {{- range .BodyStructs}}

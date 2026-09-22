@@ -44,8 +44,8 @@ func ShowRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string) 
 }
 
 // routeHead is what the route says about itself: the package it is declared
-// in, the heading it is listed under, its one-line help, and whether it is
-// kept off the listings.
+// in, the heading it is listed under, its one-line help, the rung of the chain
+// it runs on, and whether it is kept off the listings.
 func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	lines := []string{}
 
@@ -55,6 +55,9 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if conf.Category != "" {
 		lines = append(lines, sandbox.Deps.Std.Sprintf("%scategory  %s", branch, conf.Category))
 	}
+	if conf.Priority != 0 {
+		lines = append(lines, sandbox.Deps.Std.Sprintf("%spriority  %d", branch, conf.Priority))
+	}
 	if conf.Hidden {
 		lines = append(lines, branch+"hidden")
 	}
@@ -63,8 +66,8 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 }
 
 // pathLines is the route's path, segment by segment in the order the URL
-// spells them: a trigger by the literal it matches, a capture by the field it
-// binds.
+// spells them: a trigger by the literal it matches — said as a prefix when it
+// only fixes the beginning of the path — and a capture by the field it binds.
 func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if len(conf.Paths) == 0 {
 		return []string{}
@@ -73,6 +76,10 @@ func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	lines := []string{"", "path"}
 	for _, segment := range conf.Paths {
 		if segment.Field == nil {
+			if segment.StartsWith {
+				lines = append(lines, sandbox.Deps.Std.Sprintf("%s%-20s starts-with, and takes every segment after it", branch, segment.Identifier))
+				continue
+			}
 			lines = append(lines, sandbox.Deps.Std.Sprintf("%s%s", branch, segment.Identifier))
 			continue
 		}
@@ -115,6 +122,12 @@ func fieldText(sandbox *api.Sandbox, field routeconf.Field, name string) string 
 	}
 	if field.HasMax {
 		notes = append(notes, sandbox.Deps.Std.Sprintf("max %s", utils.RouteBoundText(sandbox, field.Max)))
+	}
+	if field.Identifier != "" {
+		notes = append(notes, sandbox.Deps.Std.Sprintf("matches %q", field.Identifier))
+	}
+	if field.StartsWith != "" {
+		notes = append(notes, sandbox.Deps.Std.Sprintf("starts with %q", field.StartsWith))
 	}
 	if field.Description != "" {
 		notes = append(notes, field.Description)

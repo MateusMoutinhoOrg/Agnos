@@ -3,7 +3,7 @@
 Rewrite one declared request header of a route
 
 ```bash
-agnos set-header --route <route> [--rename <rename>] [--type <type>] [--description <description>] [--default <default>] [--required] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] <name>
+agnos set-header --route <route> [--rename <rename>] [--type <type>] [--description <description>] [--default <default>] [--required] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] [--identifier <identifier>] [--starts-with <starts-with>] <name>
 ```
 
 Rewrites one declared header in place and runs build. It is add-header applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so adding a bound that was forgotten never means removing the header and declaring it again.
@@ -22,6 +22,8 @@ Rewrites one declared header in place and runs build. It is add-header applied t
 | `--clear` | string, repeatable |  | a key to take off again: description, examples, default, required, min or max (repeatable) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--identifier` | string |  | match only when the request brings exactly this value, putting the field into what the route matches on |
+| `--starts-with` | string |  | match only when the value the request brings begins with this, putting the field into what the route matches on |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |

@@ -74,6 +74,14 @@ flags:
         - --example
       name: example
       type: string
+    - default: "-1"
+      description: 'the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on'
+      examples:
+        - set-route logger --priority 0
+      identifiers:
+        - --priority
+      name: priority
+      type: int
 help: Rewrite the route-level keys of a route.yaml
 identifiers:
     - set-route

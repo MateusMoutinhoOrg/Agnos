@@ -3,7 +3,7 @@
 Declare a new http route
 
 ```bash
-agnos add-route [--trigger <trigger>] [--method <method>] --help <help> --category <category> [--path <path>] [--quiet] <name>
+agnos add-route [--trigger <trigger>] [--method <method>] --help <help> --category <category> [--path <path>] [--quiet] [--priority <priority>] [--starts-with] <name>
 ```
 
 Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in Server.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>.
@@ -16,6 +16,8 @@ Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then run
 | `--category` | string, required |  | the heading the route is listed under in docs/Routes |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--priority` | int | `0` | the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on |
+| `--starts-with` | boolean |  | make the trigger a prefix, so the route answers every path beginning with it rather than that one path |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |

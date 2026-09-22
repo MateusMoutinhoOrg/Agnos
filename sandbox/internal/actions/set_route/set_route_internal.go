@@ -35,6 +35,12 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 	if long := sandbox.Deps.Stringsdeps.TrimSpace(props.LongDescription); long != "" {
 		conf.LongDescription, changed = long, true
 	}
+	if props.HasPriority {
+		if props.Priority < 0 {
+			return sandbox.Deps.Std.Errorf("--priority %d is negative: the chain runs from zero upwards", props.Priority)
+		}
+		conf.Priority, changed = props.Priority, true
+	}
 	if props.Hidden {
 		conf.Hidden, changed = true, true
 	}
@@ -45,7 +51,7 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 		conf.Examples, changed = utils.AppendUnique(conf.Examples, props.Examples), true
 	}
 	if !changed {
-		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --help, --category, --long-description, --hidden, --visible or --example)")
+		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --priority, --help, --category, --long-description, --hidden, --visible or --example)")
 	}
 
 	sandbox.Deps.Std.Log("set-route updating %s \n", utils.RouteConfPath(sandbox, props.Route))

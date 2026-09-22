@@ -101,6 +101,20 @@ flags:
         - -q
       name: quiet
       type: boolean
+    - description: match only when the request brings exactly this value, putting the field into what the route matches on
+      examples:
+        - set-param mode --route debug --identifier verbose
+      identifiers:
+        - --identifier
+      name: identifier
+      type: string
+    - description: match only when the value the request brings begins with this, putting the field into what the route matches on
+      examples:
+        - set-param mode --route debug --starts-with verb
+      identifiers:
+        - --starts-with
+      name: starts-with
+      type: string
 help: Rewrite one declared query parameter of a route
 identifiers:
     - set-param

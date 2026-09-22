@@ -3,7 +3,7 @@
 Declare a request header on a route
 
 ```bash
-agnos add-header --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
+agnos add-header --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [--identifier <identifier>] [--starts-with <starts-with>] <name>
 ```
 
 Declares one request header on a route and runs build so the route's new.go picks it up. The name is the external spelling and is matched without regard to case; the dispatch answers 400 for a missing --required header or one outside --min/--max, before the handler runs.
@@ -21,6 +21,8 @@ Declares one request header on a route and runs build so the route's new.go pick
 | `--position` | int | `-1` | zero-based index to insert the header at (defaults to the end) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--identifier` | string |  | match only when the request brings exactly this value, putting the field into what the route matches on |
+| `--starts-with` | string |  | match only when the value the request brings begins with this, putting the field into what the route matches on |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |

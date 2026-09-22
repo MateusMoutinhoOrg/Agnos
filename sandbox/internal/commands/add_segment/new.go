@@ -145,6 +145,17 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			HasDefault:  false,
 			Identifiers: []string{"--quiet", "-q"},
 		},
+		{
+			Id:          "starts-with",
+			Type:        "string",
+			Required:    false,
+			Array:       false,
+			Description: "spell a literal segment the path only has to begin with, so the route answers every path under it",
+			Examples:    []string{"add-segment --route logger --starts-with /api"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--starts-with"},
+		},
 	}
 
 	command.Args = []api.CommandArg{

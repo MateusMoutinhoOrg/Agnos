@@ -12,6 +12,7 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		Name:        command.GetString("name"),
 		Rename:      command.GetString("rename"),
 		Identifier:  command.GetString("identifier"),
+		StartsWith:  command.GetString("starts-with"),
 		Description: command.GetString("description"),
 		Examples:    command.GetStrings("example"),
 		Type:        command.GetString("type"),

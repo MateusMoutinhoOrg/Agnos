@@ -156,6 +156,28 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			HasDefault:  false,
 			Identifiers: []string{"--quiet", "-q"},
 		},
+		{
+			Id:          "identifier",
+			Type:        "string",
+			Required:    false,
+			Array:       false,
+			Description: "match only when the request brings exactly this value, putting the field into what the route matches on",
+			Examples:    []string{"set-header authorization --route admin --identifier 'Bearer root'"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--identifier"},
+		},
+		{
+			Id:          "starts-with",
+			Type:        "string",
+			Required:    false,
+			Array:       false,
+			Description: "match only when the value the request brings begins with this, putting the field into what the route matches on",
+			Examples:    []string{"set-header authorization --route admin --starts-with Bearer"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--starts-with"},
+		},
 	}
 
 	command.Args = []api.CommandArg{

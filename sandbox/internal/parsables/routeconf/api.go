@@ -4,6 +4,12 @@ package routeconf
 // declared in a route's route.yaml. Key is the external spelling — the header
 // name (matched without regard to case) or the query key — and it is also the
 // id the bound value is read back under.
+//
+// Identifier and StartsWith are the two value conditions a header or a query
+// parameter may carry. They are what turns a declaration into a match rule:
+// the route only joins the run list when the request brings that name with a
+// value that is exactly Identifier, or that starts with StartsWith. A field
+// declaring neither is bound and never matched on.
 type Field struct {
 	Key         string
 	Description string
@@ -17,14 +23,23 @@ type Field struct {
 	HasMin      bool
 	Max         float64
 	HasMax      bool
+	Identifier  string
+	StartsWith  string
 }
 
 // Segment is one item of a route's `paths` sequence: either a trigger, whose
 // Identifier is the literal it matches in the URL (always starting with "/"),
 // or a capture, whose Field names the segment and types the value. Exactly one
 // of the two is filled.
+//
+// StartsWith turns the trigger into a prefix: the Identifier then matches
+// every path that begins with it on a segment boundary, and the segments left
+// over are matched by whatever follows in `paths`. It is what a route sitting
+// in front of a whole subtree declares — "/" alone matches every request — and
+// it is the one identifier that may spell more than a single segment.
 type Segment struct {
 	Identifier string
+	StartsWith bool
 	Field      *Field
 }
 
@@ -94,7 +109,12 @@ type Body struct {
 // written by `add-route` and rewritten by `add-field` / `remove-field` /
 // `set-route`, never by hand.
 type RouteConf struct {
-	Method          string
+	Method string
+	// Priority is the rung this route runs on when several match one
+	// request: lowest first, zero the default. The chain stops at the first
+	// handler that sets a status, so a low-priority route that writes
+	// nothing is a middleware and a high-priority one is the answer.
+	Priority        int
 	Paths           []Segment
 	Category        string
 	Help            string
@@ -113,7 +133,7 @@ type RouteConf struct {
 	// segment, never this text.
 	Pattern func() string
 	// IdentifierCount is how many trigger segments the route fixes — the
-	// first key the match order sorts by, most specific first.
+	// first key the run order sorts by after Priority, most specific first.
 	IdentifierCount func() int
 	// IdentifierLen is the total number of characters the route's triggers
 	// spell, the tie-break between two routes fixing as many segments.

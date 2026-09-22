@@ -100,6 +100,25 @@ func RouteIdentifierSegment(sandbox *api.Sandbox, raw string) (string, error) {
 	return "/" + inner, nil
 }
 
+// RoutePrefixIdentifier normalizes a `starts-with-identifier`: the leading
+// slash a trigger always carries, no trailing one, and — unlike
+// RouteIdentifierSegment — as many segments as the caller spells, because a
+// prefix names the head of a subtree rather than one place in it. "/" alone is
+// the prefix every path begins with.
+func RoutePrefixIdentifier(sandbox *api.Sandbox, raw string) (string, error) {
+	trimmed := sandbox.Deps.Stringsdeps.TrimSpace(raw)
+	if trimmed == "" {
+		return "", sandbox.Deps.Std.Errorf("a path starts-with-identifier cannot be empty")
+	}
+
+	inner := sandbox.Deps.Stringsdeps.Trim(trimmed, "/")
+	if inner == "" {
+		return "/", nil
+	}
+
+	return "/" + inner, nil
+}
+
 // RouteFieldIn names the three origins that read a value off the request line.
 // They share one Field shape and one set of editors, and differ only in the
 // rules NewRouteField holds each of them to.
@@ -117,6 +136,11 @@ const (
 // captured segment is always required and never defaults, and a header never
 // repeats. An array is a query parameter collecting every occurrence of its
 // key, or the last path segment taking every segment left in the path.
+//
+// A header or a query parameter may also carry a value condition — an exact
+// --identifier or a --starts-with prefix — which puts the field into what the
+// route matches on rather than only into what it binds. A captured segment
+// carries neither: what it matches is whatever sits in its place.
 func NewRouteField(sandbox *api.Sandbox, props api.RouteFieldProps, in string) (routeconf.Field, error) {
 	field := routeconf.Field{
 		Key:         RouteFieldName(sandbox, props.Name),
@@ -147,6 +171,12 @@ func NewRouteField(sandbox *api.Sandbox, props api.RouteFieldProps, in string) (
 			return field, sandbox.Deps.Std.Errorf("a captured path segment cannot carry a default: it is always present when the route matches")
 		}
 		field.Required = true
+	} else {
+		condition, err := RouteFieldCondition(sandbox, props)
+		if err != nil {
+			return field, err
+		}
+		field.Identifier, field.StartsWith = condition.Identifier, condition.StartsWith
 	}
 
 	if props.Default != "" {
@@ -179,6 +209,30 @@ func NewRouteField(sandbox *api.Sandbox, props api.RouteFieldProps, in string) (
 	}
 
 	return field, nil
+}
+
+// RouteCondition is the value condition a header or a query parameter
+// declares: exactly one of the two, or neither. They are taken verbatim —
+// unlike a path identifier, a header value carries no leading slash and no
+// shape this project gets to normalize.
+type RouteCondition struct {
+	Identifier string
+	StartsWith string
+}
+
+// RouteFieldCondition reads the two match conditions off the flags, refusing
+// the pair: a value matches one condition or the other, never both.
+func RouteFieldCondition(sandbox *api.Sandbox, props api.RouteFieldProps) (RouteCondition, error) {
+	condition := RouteCondition{
+		Identifier: sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier),
+		StartsWith: sandbox.Deps.Stringsdeps.TrimSpace(props.StartsWith),
+	}
+
+	if condition.Identifier != "" && condition.StartsWith != "" {
+		return condition, sandbox.Deps.Std.Errorf("a field matches on --identifier or on --starts-with, never both")
+	}
+
+	return condition, nil
 }
 
 // RouteFieldName normalizes a field name. A header name and a query key are
@@ -214,18 +268,19 @@ func FindRouteSegment(sandbox *api.Sandbox, segments []routeconf.Segment, name s
 // FindRoutePathSegment returns the index of the segment key names, looking it
 // up as a capture first and as a literal identifier second, or -1. It is how
 // every editor of `paths` names one segment: a capture answers to its name, a
-// trigger to the identifier it spells.
+// trigger to the identifier it spells — a prefix trigger included, which
+// answers to the same spelling as the exact one it would otherwise be.
 func FindRoutePathSegment(sandbox *api.Sandbox, segments []routeconf.Segment, key string) int {
 	if index := FindRouteSegment(sandbox, segments, key); index >= 0 {
 		return index
 	}
 
-	identifier, err := RouteIdentifierSegment(sandbox, key)
+	prefix, err := RoutePrefixIdentifier(sandbox, key)
 	if err != nil {
 		return -1
 	}
 	for i, segment := range segments {
-		if segment.Field == nil && segment.Identifier == identifier {
+		if segment.Field == nil && segment.Identifier == prefix {
 			return i
 		}
 	}

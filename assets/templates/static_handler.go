@@ -20,16 +20,16 @@ import (
 // `?sha=` is what the pageio helpers stamp on every link they build. It is a
 // cache key and never an input: the file that is served is the one the path
 // names, whatever the sha says. All it decides is cacheHeader below.
-func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
 	relative, ok := safeSegments(sandbox, route.GetStrings("item"))
 	if !ok {
-		return routeio.WriteError(sandbox, response, api.StatusBadRequest, "item",
+		return routeio.Fail(sandbox, route, api.StatusBadRequest, "item",
 			"invalid static asset path")
 	}
 
 	content, err := sandbox.Deps.Embeddeps.ReadFile(pageio.StaticRoot + "/" + relative)
 	if err != nil {
-		return routeio.WriteError(sandbox, response, api.StatusNotFound, "item",
+		return routeio.Fail(sandbox, route, api.StatusNotFound, "item",
 			"static asset not found")
 	}
 
@@ -38,7 +38,7 @@ func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Re
 	response.SetStatus(api.StatusOk)
 	response.Write(content)
 
-	return api.StatusOk
+	return nil
 }
 
 // cacheHeader reports how long the answer may be reused. A request carrying the

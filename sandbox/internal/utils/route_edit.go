@@ -19,7 +19,10 @@ import (
 
 // RouteFieldClearKeys is every key --clear may take off a header, a query
 // parameter or a captured segment.
-var RouteFieldClearKeys = []string{"description", "examples", "default", "required", "array", "min", "max"}
+var RouteFieldClearKeys = []string{
+	"description", "examples", "default", "required", "array", "min", "max",
+	"identifier", "starts-with",
+}
 
 // RouteBodyFieldClearKeys is every keyword --clear may take off a body
 // property.
@@ -74,6 +77,8 @@ func RouteFieldEdited(sandbox *api.Sandbox, current routeconf.Field, props api.R
 		Type:        current.Type,
 		Required:    current.Required,
 		Array:       current.Array,
+		Identifier:  current.Identifier,
+		StartsWith:  current.StartsWith,
 	}
 	if current.HasDefault {
 		built.Default = current.Default
@@ -106,6 +111,12 @@ func RouteFieldEdited(sandbox *api.Sandbox, current routeconf.Field, props api.R
 	if cleared["max"] {
 		built.Max = ""
 	}
+	if cleared["identifier"] {
+		built.Identifier = ""
+	}
+	if cleared["starts-with"] {
+		built.StartsWith = ""
+	}
 
 	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
 		built.Name = value
@@ -135,14 +146,24 @@ func RouteFieldEdited(sandbox *api.Sandbox, current routeconf.Field, props api.R
 		built.Max = value
 	}
 
+	// The two match conditions are one switch: setting either one is what
+	// this field matches on from now on, so the other goes rather than
+	// failing the pair check NewRouteField runs.
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier); value != "" {
+		built.Identifier, built.StartsWith = value, ""
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.StartsWith); value != "" {
+		built.Identifier, built.StartsWith = "", value
+	}
+
 	return NewRouteField(sandbox, built, in)
 }
 
 // RouteFieldEditEmpty reports an edit that changes nothing, so the command can
 // say so instead of rewriting a file with the bytes already in it.
 func RouteFieldEditEmpty(sandbox *api.Sandbox, props api.RouteFieldEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Identifier + props.Description +
-		props.Type + props.Default + props.Min + props.Max)
+	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Identifier + props.StartsWith +
+		props.Description + props.Type + props.Default + props.Min + props.Max)
 	return given == "" && len(props.Examples) == 0 && len(props.Clear) == 0 && !props.Required && !props.Array
 }
 

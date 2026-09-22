@@ -79,6 +79,7 @@ what every build rewrites. One editor per place a declaration holds something:
 | `AgnosConfig/extensions.yaml` | `enable-extension` / `disable-extension`, or the `<x>-init` / `<x>-purge` pair that owns the key |
 | a command's `entries.yaml` | `add-flag` / `add-arg` / `set-command` and their inverses |
 | a route's `route.yaml` | `add-route`, `set-route`, `add-segment`, `add-header`, `add-param`, `set-body`, `add-body-field`, `import-body`, each with its `set-` and `remove-` pair; `show-route` reads it back and writes nothing |
+| `sandbox/internal/server/handle_*.go` | nobody — six files `build` writes **once**, then the project's, like a route's `handler.go` |
 | a database's `specs.yaml` | `add-database`, `add-table`, `add-table-field`, each with its `set-` and `remove-` pair; `show-database` reads it back and writes nothing |
 | `examples/<side>/<name>/result.yaml` | `update-test <name>`, or `exec-test --update` |
 | an example | `add-cli-example` / `add-lib-example` and their `remove-` pair |
@@ -102,7 +103,8 @@ of that name: the dispatch reads it as `help <command>` and prints a screen inst
 
 `sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`, `Bind(deps *deps.Deps)` (an adapter fills
 `deps.Deps` directly), `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`,
-`RouteHandler` for a route. **Every file is an instance of a pattern**: new code copies an
+`RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error` for a
+route and for each of the six `handle_*.go`. **Every file is an instance of a pattern**: new code copies an
 existing sibling exactly — same filenames, same function names, same ordering. `verify` and the
 collectors read shape by convention, so a one-off breaks the machine reader.
 
@@ -125,7 +127,21 @@ editing only the rendered copy is undone in silence.
   `remove-database` refuses a package carrying a `methods_custom.go`.
 - Every `identifier` of a route's `paths` starts with `/` and spells one segment; a captured
   segment is always `required: true`. `array: true` on the last capture takes every segment left,
-  and only there.
+  and only there. A `starts-with-identifier` is the other way of taking the rest: it may spell
+  several segments, it is always last, and a route declares one of it or an `array` capture,
+  never both.
+- **The server is a chain.** Every route matching a request runs, lowest `priority` first, and
+  the first one to call `response.SetStatus` answers it — a handler that writes no status has
+  declined and the next runs, which is the whole of what a middleware is. A `RouteHandler`
+  returns `error`, never a status. A header or a query parameter carrying an `identifier` or a
+  `starts-with-identifier` is part of what the route matches on, so failing one is a non-match,
+  not a `400`.
+- Nothing in the dispatch writes a response: every failure goes through `routeio.Fail` to one of
+  the six `sandbox/internal/server/handle_*.go`, which `build` writes once and never rewrites.
+  `Fail` reaches them through the `Fail` field of `api.Server` because a route package may not
+  import `sandbox/internal/server` — that package imports every route. A failure the dispatch
+  raises with nothing to add carries no message, so the wording is the one that file spells;
+  that is what makes editing it change what the server says.
 - A page is a route with `assets/frontend/pages/<page>.html` beside it — that file is the whole
   of what tells one from any other route. `remove-route` refuses a route that has one.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the

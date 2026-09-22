@@ -3,7 +3,7 @@
 Rewrite one declared segment of a route's path
 
 ```bash
-agnos set-segment --route <route> [--rename <rename>] [--identifier <identifier>] [--type <type>] [--description <description>] [--array] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] <name>
+agnos set-segment --route <route> [--rename <rename>] [--identifier <identifier>] [--type <type>] [--description <description>] [--array] [--min <min>] [--max <max>] [--example <example>...] [--clear <clear>...] [--path <path>] [--quiet] [--starts-with <starts-with>] <name>
 ```
 
 Rewrites one segment of the route's path in place and runs build. It is add-segment applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so editing a segment and declaring one leave the same bytes. --identifier makes the segment a literal, whatever it was before; every other key edits a capture.
@@ -22,6 +22,7 @@ Rewrites one segment of the route's path in place and runs build. It is add-segm
 | `--clear` | string, repeatable |  | a key to take off again: description, examples, required, array, min or max (repeatable) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--starts-with` | string |  | spell a literal segment the path only has to begin with, so the route answers every path under it |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |

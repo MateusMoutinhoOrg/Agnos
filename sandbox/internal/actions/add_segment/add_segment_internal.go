@@ -36,42 +36,92 @@ func AddSegmentInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 }
 
 // checkRestLast refuses a `paths` the new segment left in a shape no matcher
-// can be generated from: the segment taking the rest of the path only reads as
-// a suffix while it is the last one. Which of the two segments moved decides
-// what the message asks for.
+// can be generated from: whatever takes the rest of the path only reads as a
+// suffix while it is the last one. Two things do — a capture declared `array`
+// and a `starts-with` trigger — and a route declaring both says twice what it
+// binds once. Which of the two segments moved decides what the message asks
+// for.
 func checkRestLast(sandbox *api.Sandbox, conf *routeconf.RouteConf, position int) error {
-	at := utils.RouteRestIndex(conf.Paths)
+	rest := utils.RouteRestIndex(conf.Paths)
+	prefix := routePrefixIndex(conf)
+
+	if rest >= 0 && prefix >= 0 {
+		return sandbox.Deps.Std.Errorf(
+			"this route already ends in %q, which takes every segment left in the path: a route has one such segment, not two",
+			conf.Paths[prefix].Identifier)
+	}
+
+	at := rest
+	label := "the captured segment %q"
+	if at < 0 {
+		at = prefix
+		label = "the starts-with segment %q"
+	}
 	if at < 0 || at == len(conf.Paths)-1 {
 		return nil
 	}
 
+	spelling := conf.Paths[at].Identifier
+	if conf.Paths[at].Field != nil {
+		spelling = conf.Paths[at].Field.Key
+	}
+
 	if at == position {
 		return sandbox.Deps.Std.Errorf(
-			"the captured segment %q takes the rest of the path, so it is always the last one: leave --position out to append it",
-			conf.Paths[at].Field.Key)
+			label+" takes the rest of the path, so it is always the last one: leave --position out to append it",
+			spelling)
 	}
 	return sandbox.Deps.Std.Errorf(
-		"the captured segment %q takes the rest of the path, so it is always the last one: put the new segment before it with --position %d",
-		conf.Paths[at].Field.Key, at)
+		label+" takes the rest of the path, so it is always the last one: put the new segment before it with --position %d",
+		spelling, at)
 }
 
-// newSegment builds the segment the flags describe: a trigger, normalized to
-// start with "/", when --identifier is given, and a captured field named on
-// the command line otherwise. --array makes that capture take every segment
-// left in the path, which only the last segment may do.
+// routePrefixIndex returns the index of the `starts-with` trigger, or -1. It is
+// the trigger's half of RouteRestIndex: both name a segment that leaves
+// everything after it unmatched.
+func routePrefixIndex(conf *routeconf.RouteConf) int {
+	for i, segment := range conf.Paths {
+		if segment.Field == nil && segment.StartsWith {
+			return i
+		}
+	}
+	return -1
+}
+
+// newSegment builds the segment the flags describe, one of three shapes:
+// --identifier spells a literal the URL has to match, --starts-with spells a
+// prefix it only has to begin with — which leaves every segment after it
+// unread, so the route answers a whole subtree — and a name captures whatever
+// sits in that place. --array makes a capture take every segment left in the
+// path, which only the last segment may do.
 func newSegment(sandbox *api.Sandbox, conf *routeconf.RouteConf, props api.RouteFieldProps) (routeconf.Segment, error) {
 	identifier := sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier)
+	starts_with := sandbox.Deps.Stringsdeps.TrimSpace(props.StartsWith)
 	named := utils.RouteFieldName(sandbox, props.Name) != ""
-	if identifier == "" && !named {
-		return routeconf.Segment{}, sandbox.Deps.Std.Errorf("a segment needs a name, which captures it, or --identifier, which spells it literally")
+
+	if identifier != "" && starts_with != "" {
+		return routeconf.Segment{}, sandbox.Deps.Std.Errorf("a literal segment is spelled by --identifier or by --starts-with, never both")
 	}
-	if identifier != "" {
+	if identifier == "" && starts_with == "" && !named {
+		return routeconf.Segment{}, sandbox.Deps.Std.Errorf("a segment needs a name, which captures it, or --identifier / --starts-with, which spell it literally")
+	}
+
+	if identifier != "" || starts_with != "" {
 		if named {
-			return routeconf.Segment{}, sandbox.Deps.Std.Errorf("a segment is either a literal (--identifier) or a capture (a name), never both")
+			return routeconf.Segment{}, sandbox.Deps.Std.Errorf("a segment is either a literal (--identifier / --starts-with) or a capture (a name), never both")
 		}
 		if props.Array {
-			return routeconf.Segment{}, sandbox.Deps.Std.Errorf("--array belongs to a capture, which becomes a []T field: a literal segment spells one segment of the URL")
+			return routeconf.Segment{}, sandbox.Deps.Std.Errorf("--array belongs to a capture, which becomes a []T field: a literal segment spells the URL rather than binding it")
 		}
+
+		if starts_with != "" {
+			spelling, err := utils.RoutePrefixIdentifier(sandbox, starts_with)
+			if err != nil {
+				return routeconf.Segment{}, err
+			}
+			return routeconf.Segment{Identifier: spelling, StartsWith: true}, nil
+		}
+
 		spelling, err := utils.RouteIdentifierSegment(sandbox, identifier)
 		if err != nil {
 			return routeconf.Segment{}, err

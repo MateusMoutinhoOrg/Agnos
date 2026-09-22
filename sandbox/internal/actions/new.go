@@ -172,8 +172,8 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.ServerPurge = func(path string) error {
 		return serverPurgeAction.ServerPurge(sandbox, path)
 	}
-	actions.AddRoute = func(path string, name string, method string, trigger string, help string, category string) error {
-		return addRouteAction.AddRoute(sandbox, path, name, method, trigger, help, category)
+	actions.AddRoute = func(props api.AddRouteProps) error {
+		return addRouteAction.AddRoute(sandbox, props)
 	}
 	actions.RemoveRoute = func(path string, name string) error {
 		return removeRouteAction.RemoveRoute(sandbox, path, name)

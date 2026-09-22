@@ -90,6 +90,28 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			HasDefault:  false,
 			Identifiers: []string{"--quiet", "-q"},
 		},
+		{
+			Id:          "priority",
+			Type:        "int",
+			Required:    false,
+			Array:       false,
+			Description: "the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on",
+			Examples:    []string{"add-route logger --trigger / --starts-with --priority 0 --help 'logs every request' --category Server"},
+			Default:     "0",
+			HasDefault:  true,
+			Identifiers: []string{"--priority"},
+		},
+		{
+			Id:          "starts-with",
+			Type:        "boolean",
+			Required:    false,
+			Array:       false,
+			Description: "make the trigger a prefix, so the route answers every path beginning with it rather than that one path",
+			Examples:    []string{"add-route logger --trigger / --starts-with --help 'logs every request' --category Server"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--starts-with"},
+		},
 	}
 
 	command.Args = []api.CommandArg{

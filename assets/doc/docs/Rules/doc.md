@@ -133,10 +133,12 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A route is `sandbox/internal/routes/<name>/`, holding `route.yaml` (the declaration),
   `new.go` (generated) and `handler.go` (hand-written) — the server layer's mirror of a
   command package, snake_case for a kebab-case name. **(verify)**
-- Only `RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int` is
-  exported from a route. It returns the status it answered with, and reaches `400`/`413`/`415`
-  only by propagating one from `ReadBody`: the dispatch settles everything but the body before
-  the handler runs. **(verify)**
+- Only `RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error`
+  is exported from a route. **(verify)**
+- Setting a status on the response is what answers a request and ends the chain. A handler that
+  writes none has declined, and the next route matching that request runs; a handler that
+  returns a non-nil error without answering has failed, and `handle_server_error.go` answers
+  for it. What a handler returns is never the status.
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
   `add-segment` / `set-segment` / `remove-segment`, `add-header` / `set-header` /
   `remove-header`, `add-param` / `set-param` / `remove-param`, `set-body` and
@@ -145,25 +147,50 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   never a remove-and-declare-again, and never by hand: they re-render it with keys in
   alphabetical order and drop comments. `show-route` reads it and writes nothing.
 - Every `identifier` of `paths` starts with `/` and spells exactly one segment; `/` alone is
-  the root. A route declares at least one of them, and every entry of `paths` carries an
-  `identifier` or a `name`, never both. **(verify)**
+  the root. A route declares at least one literal segment, and every entry of `paths` carries
+  exactly one of `identifier`, `starts-with-identifier` and `name`. **(verify)**
+- A `starts-with-identifier` starts with `/` too, may spell more than one segment, and is the
+  last entry of `paths`: everything after it is unmatched by definition. A route declares one
+  of it and an `array` capture, never both — each already takes every segment left. **(verify)**
+- A header or a query parameter may carry one value condition, `identifier` or
+  `starts-with-identifier` and never both, which decides whether the route runs at all. A
+  request that fails one is not a bad request: that route is simply not the one for it.
+  **(verify)**
+- `priority` is the rung a route runs on, lowest first, and is never negative. **(verify)**
 - A captured segment is always `required: true` and never defaulted: it is present whenever
   the route matched. `array: true` on it takes every segment left in the path into a `[]T`
   list, which only the last entry of `paths` may do, and which needs at least one segment to
   match — so its name is declared nowhere else. **(verify)**
 - A name is declared once per origin, and the origins declaring the same name agree on its
   type — one name binds one entry of `Route.Items`. **(verify)**
-- No two routes declare the same method and path pattern. **(verify)**
+- No two routes declare the same method and path pattern *on the same rung*. Sharing a pattern
+  across rungs is what a middleware in front of a route is; sharing a rung as well would leave
+  the order between them undeclared. **(verify)**
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
   subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
 - `Server.Routes` is the whole http surface, one `api.Route` per declared route, built by
   `sandbox/internal/server/new.go` from each package's generated `NewRoute`. The dispatch reads it and
   nothing about the route set is generated per route anywhere else; each request runs on its
   copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
-- Match order is the collector's, not the directory's: most `identifier`s first, then the
-  longest ones, then the routes of fixed length before the ones taking the rest of the path,
-  then the pattern alphabetically. Without it a route on `/` would swallow one on `/home`.
-- A failure is written by `routeio.WriteError` alone, so every route answers one JSON shape.
+- Run order is the collector's, not the directory's: the lowest `priority` first, then — within
+  one rung — most `identifier`s, then the longest ones, then the routes of fixed length before
+  the ones taking the rest of the path, then the pattern alphabetically. Without it a route on
+  `/` would swallow one on `/home`.
+- Nothing in the dispatch writes a response. Every way a request ends without a route answering
+  it is handed to one of the six `sandbox/internal/server/handle_*.go` — one per status, each
+  holding a function with the route handler's own signature. They are written **once**, by the
+  first `build` that finds the server layer, and no build rewrites them: what a project answers
+  when nothing matches is the project's. **(verify)**
+- A failure is raised with `routeio.Fail` — from the dispatch, from a generated `ReadBody` or
+  from a handler — which reaches the right file through the `Fail` field of `api.Server`,
+  because a route package may not import `sandbox/internal/server`. A `Handle*` file answers a
+  failure and never raises one.
+- A failure the dispatch raises with nothing to add — nothing matched, method not allowed —
+  carries no message, so the wording is the one its `Handle*` file spells. One that knows
+  something that file could not — which field would not bind, and why — carries its own.
+  `routeio.FailureOf` is the one reading of that rule.
+- A response body for a failure is written by `routeio.WriteError` alone, so every route answers
+  one JSON shape.
 
 Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
 {{ end }}{{ if .HasFront }}

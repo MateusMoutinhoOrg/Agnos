@@ -28,14 +28,15 @@ type pageVars struct {
 //
 // A template that fails to read or to render is a packaging or authoring
 // mistake, never the caller's — a helper pointed at an asset that is not there
-// is one of them — so it answers 500 and says nothing about the asset tree.
-func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
+// is one of them — so it fails 500 through the project's own HandleServerError
+// and says nothing about the asset tree.
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
 	content, err := pageio.Render(sandbox, pageAsset, pageVars{
 		Title:   {{printf "%q" .Title}},
 		Message: "this page is rendered from assets/frontend/pages/{{.Identifier}}.html",
 	})
 	if err != nil {
-		return routeio.WriteError(sandbox, response, api.StatusFailure, "page",
+		return routeio.Fail(sandbox, route, api.StatusFailure, "page",
 			"could not render the {{.Identifier}} page")
 	}
 
@@ -43,5 +44,5 @@ func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Re
 	response.SetStatus(api.StatusOk)
 	response.Write(content)
 
-	return api.StatusOk
+	return nil
 }

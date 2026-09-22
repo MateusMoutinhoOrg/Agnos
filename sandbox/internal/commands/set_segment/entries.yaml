@@ -94,6 +94,13 @@ flags:
         - -q
       name: quiet
       type: boolean
+    - description: spell a literal segment the path only has to begin with, so the route answers every path under it
+      examples:
+        - set-segment --route logger --starts-with /api
+      identifiers:
+        - --starts-with
+      name: starts-with
+      type: string
 help: Rewrite one declared segment of a route's path
 identifiers:
     - set-segment

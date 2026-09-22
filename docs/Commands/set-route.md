@@ -3,7 +3,7 @@
 Rewrite the route-level keys of a route.yaml
 
 ```bash
-agnos set-route [--method <method>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--path <path>] [--quiet] [--example <example>...] <route>
+agnos set-route [--method <method>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--path <path>] [--quiet] [--example <example>...] [--priority <priority>] <route>
 ```
 
 Overwrites method, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --example appends.
@@ -19,6 +19,7 @@ Overwrites method, help, category, long-description, hidden and examples on one 
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
 | `--example` | string, repeatable |  | an usage example for the route (repeatable) |
+| `--priority` | int | `-1` | the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |

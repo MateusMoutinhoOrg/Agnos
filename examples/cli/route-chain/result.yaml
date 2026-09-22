@@ -1,0 +1,39 @@
+cli-output: |
+    GET /*
+      Logs every request
+      category  Server
+
+    path
+      /                    starts-with, and takes every segment after it
+
+    body      none
+    GET /admin
+      The admin area
+      category  Server
+      priority  5
+
+    path
+      /admin
+
+    headers
+      authorization        string  starts with "Bearer", the bearer token
+
+    body      none
+exit-code: 0
+tree:
+    - file: sandbox/internal/routes/admin/new.go
+      sha: c6db50a15e18cf2e3ff90eab8137320f04161a6ec78c54086f308817a26b3b4e
+    - file: sandbox/internal/routes/admin/route.yaml
+      sha: c4b11b0e94ad32fe6ef1f9a8e991aa1e298bf93d193aac3de674eb291884ac38
+    - file: sandbox/internal/routes/hello/route.yaml
+      sha: d795c2683f2e7d69932f87487147ca3e90137b315e2ca2f330e09c15639b1c53
+    - file: sandbox/internal/routes/logger/new.go
+      sha: df0ff1de624d7704a3485c47e119d91f6e65b8a217bb88e5084e002713a767cb
+    - file: sandbox/internal/routes/logger/route.yaml
+      sha: eb38f993da4895919bba898241a42a3443afad679cdad35320e6362b27a7f2b9
+    - file: sandbox/internal/server/handle_method_not_allowed.go
+      sha: 74a6a38fb2c17bb17e06047acb749933a9c00aa2780d28855096f08a4ad2dba5
+    - file: sandbox/internal/server/handle_not_found.go
+      sha: 025bd11f455495527919213ab814d3407d5d61659743a623a90659f2580e259d
+    - file: sandbox/internal/server/new.go
+      sha: d62d4acba548c7ad85d11f582c44e3359f604f1bd59500401dbf8d11bbe92a31

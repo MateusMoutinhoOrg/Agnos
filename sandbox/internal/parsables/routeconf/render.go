@@ -12,6 +12,9 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 	obj := sandbox.Deps.Serializables.CreateObject()
 
 	obj.AddItemToObject("method", conf.Method)
+	if conf.Priority != 0 {
+		obj.AddItemToObject("priority", int64(conf.Priority))
+	}
 	obj.AddItemToObject("paths", segmentsArray(sandbox, conf.Paths))
 	obj.AddItemToObject("category", conf.Category)
 	obj.AddItemToObject("help", conf.Help)
@@ -48,13 +51,18 @@ func SchemaJson(sandbox *api.Sandbox, conf *RouteConf) string {
 }
 
 // segmentsArray renders `paths` as the ordered sequence it is: one entry per
-// segment, a trigger carrying its `identifier` and a capture its field.
+// segment, a trigger carrying its `identifier` — or its `starts-with-identifier`
+// when it only fixes the beginning of the path — and a capture its field.
 func segmentsArray(sandbox *api.Sandbox, segments []Segment) *serializibles.SerializibleObject {
 	arr := sandbox.Deps.Serializables.CreateArray()
 	for _, segment := range segments {
 		if segment.Field == nil {
 			entry := sandbox.Deps.Serializables.CreateObject()
-			entry.AddItemToObject("identifier", segment.Identifier)
+			if segment.StartsWith {
+				entry.AddItemToObject("starts-with-identifier", segment.Identifier)
+			} else {
+				entry.AddItemToObject("identifier", segment.Identifier)
+			}
 			arr.AddItemToArray(entry)
 			continue
 		}
@@ -84,6 +92,12 @@ func fieldObject(sandbox *api.Sandbox, field Field) *serializibles.SerializibleO
 		entry.AddItemToObject("examples", stringArray(sandbox, field.Examples))
 	}
 	entry.AddItemToObject("type", field.Type)
+	if field.Identifier != "" {
+		entry.AddItemToObject("identifier", field.Identifier)
+	}
+	if field.StartsWith != "" {
+		entry.AddItemToObject("starts-with-identifier", field.StartsWith)
+	}
 	if field.HasDefault {
 		entry.AddItemToObject("default", field.Default)
 	}

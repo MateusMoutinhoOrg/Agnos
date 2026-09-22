@@ -123,19 +123,28 @@ nothing.
 Then write `handler.go` — the whole hand-written half of a route:
 
 ```go
-func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int {
-	body, status := ReadBody(sandbox, route, response)
-	if status != api.StatusOk {
-		return status
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
+	body, err := ReadBody(sandbox, route)
+	if err != nil {
+		return err
 	}
-	return writeJson(sandbox, response, api.StatusCreated, create(sandbox, route.GetString("tenant"), body))
+	response.SetStatus(api.StatusCreated)
+	response.Write(payload(sandbox, create(sandbox, route.GetString("tenant"), body)))
+	return nil
 }
 ```
 
 `route` arrives bound, converted and range-checked — every value read back by the name its
 declaration gives it (`GetString`, `GetInt`, `GetBool`, `GetStrings`) — so a bad request was
-already answered `400` before the handler ran. The body is the exception — it is read only when `ReadBody` asks for
-it. [Routes](../Routes/doc.md) documents the route on the next build, and
+already answered `400` before the handler ran. The body is the exception — it is read only when
+`ReadBody` asks for it.
+
+Setting a status is what answers the request. Several routes may match one request; they run in
+`priority` order and stop at the first one that sets a status, so a handler that writes none has
+declined and the next one runs — that is the whole of what a middleware is. What no route
+answers is answered by the six `sandbox/internal/server/handle_*.go`, which `server-init` writes
+once and no build rewrites: they are where a 404, a 405 or a 500 is worded.
+[Routes](../Routes/doc.md) documents the route on the next build, and
 [ServerUsage](../ServerUsage/doc.md) is the whole recipe.
 {{- else }}
 ## Add the server layer

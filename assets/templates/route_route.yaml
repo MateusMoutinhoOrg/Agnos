@@ -1,5 +1,12 @@
 method: {{.Method}}
+{{- if .Priority}}
+priority: {{.Priority}}
+{{- end}}
 paths:
+{{- if .StartsWith}}
+  - starts-with-identifier: {{printf "%q" .Trigger}}
+{{- else}}
   - identifier: {{printf "%q" .Trigger}}
+{{- end}}
 category: {{printf "%q" .Category}}
 help: {{printf "%q" .Help}}

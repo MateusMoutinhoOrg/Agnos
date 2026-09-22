@@ -171,9 +171,29 @@ type CommandProps struct {
 	Examples        []string
 }
 
+// AddRouteProps describes the route add-route declares. Name is the package it
+// writes, Trigger the first segment of its path (defaulting to the name) and
+// Method the verb it answers, defaulting to GET. StartsWith makes that first
+// segment a prefix, so the route answers a whole subtree rather than one path.
+// Priority is the rung it runs on when several routes match one request:
+// lowest first, zero the default, and a route that writes no status hands the
+// request to the next rung.
+type AddRouteProps struct {
+	Path       string
+	Name       string
+	Method     string
+	Trigger    string
+	StartsWith bool
+	Priority   int
+	Help       string
+	Category   string
+}
+
 // RouteProps carries the route-level keys of route.yaml that set-route may
 // rewrite. Empty strings leave the current value alone; Examples are appended
 // (deduplicated), and Hidden / Visible are the two sides of one switch.
+// Priority is the rung the route runs on, and HasPriority is what tells a
+// priority declared as zero from one not given at all.
 type RouteProps struct {
 	Path            string
 	Route           string
@@ -183,6 +203,8 @@ type RouteProps struct {
 	LongDescription string
 	Hidden          bool
 	Visible         bool
+	Priority        int
+	HasPriority     bool
 	Examples        []string
 }
 
@@ -225,17 +247,25 @@ type DatabaseFieldEditProps struct {
 // RouteFieldProps describes one field to add to a route's route.yaml. It
 // covers the three origins that read a value off the request line — a captured
 // path segment, a header and a query parameter — which differ only in where
-// the entry lands. Identifier declares a literal path segment instead of a
-// captured one, and is normalized to start with "/". Array collects a []T
-// field: every occurrence of a query key, or — on the last segment of the
-// path, and there alone — every segment left in the URL. Default, Min and Max
-// are the raw literals typed on the command line ("" means unset); Position is
-// the index to insert at (< 0 appends).
+// the entry lands. Array collects a []T field: every occurrence of a query
+// key, or — on the last segment of the path, and there alone — every segment
+// left in the URL. Default, Min and Max are the raw literals typed on the
+// command line ("" means unset); Position is the index to insert at (< 0
+// appends).
+//
+// Identifier and StartsWith are the two match conditions, and they mean one
+// thing on a path segment and another on a header or a query parameter. On a
+// path they declare a literal segment instead of a captured one: Identifier
+// the segment the URL has to spell, StartsWith the prefix it only has to begin
+// with. On a header or a query parameter they are conditions on the value the
+// request brings, and the route runs only when they hold. Both are normalized
+// to start with "/" on a path and taken verbatim everywhere else.
 type RouteFieldProps struct {
 	Path        string
 	Route       string
 	Name        string
 	Identifier  string
+	StartsWith  string
 	Description string
 	Examples    []string
 	Type        string
@@ -252,14 +282,17 @@ type RouteFieldProps struct {
 // as it is declared now and Rename the spelling it takes on ("" leaves it
 // alone); every other key overwrites what is there when it is given, and an
 // empty one leaves it as it is. Clear is how a key is taken off again —
-// "description", "examples", "default", "required", "array", "min" or "max" —
-// because an empty string cannot say "unset this" and "leave it alone" at once.
+// "description", "examples", "default", "required", "array", "min", "max",
+// "identifier" or "starts-with" — because an empty string cannot say "unset
+// this" and "leave it alone" at once. Identifier and StartsWith carry the same
+// two meanings they have in RouteFieldProps.
 type RouteFieldEditProps struct {
 	Path        string
 	Route       string
 	Name        string
 	Rename      string
 	Identifier  string
+	StartsWith  string
 	Description string
 	Examples    []string
 	Type        string
@@ -523,7 +556,7 @@ type Actions struct {
 
 	// AddRoute declares a new route: its route.yaml, its generated new.go
 	// and a handler.go to fill in.
-	AddRoute func(path string, name string, method string, trigger string, help string, category string) error
+	AddRoute func(props AddRouteProps) error
 
 	// RemoveRoute deletes one route and unwires it from the dispatch.
 	RemoveRoute func(path string, name string) error

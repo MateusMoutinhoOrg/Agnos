@@ -4,20 +4,20 @@ tree:
     - file: assets/frontend/pages/home.html
       sha: a642c3b25062f971d6d28625d24303c6feedf96134f2c1c753a441943fbd4b4b
     - file: sandbox/internal/routes/health/handler.go
-      sha: 95f40a74f0a10d8c2395b2d69924d0b38dadd2dd4471d8d5e16cc37e3b482cd7
+      sha: 94db227ac65063aebcbe09fbf68ecd536c6ce7537f6339c78bdf549ff159aaf2
     - file: sandbox/internal/routes/health/new.go
-      sha: 3a0ad7f63838ff65fc82701b1e3317562f5bf451cbdca1f205f1767260531b0b
+      sha: f5255875ae12c501c23cdaa27e917e8105413a35d6dce331b8059b03822dd92b
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da
     - file: sandbox/internal/routes/home/handler.go
-      sha: 3506aee2520ae509358938c1955cd2b9bdfb637ec539fc66b55a58d2cfa69cb6
+      sha: 91907660a8eff5fada2c2d84b3ce6884f30da30bfb4e7ee68c8354044d172ec5
     - file: sandbox/internal/routes/home/new.go
-      sha: 695deb20a9a874351c6cc4d1d010ed3cbf1c6f777ef218ac9426624ec43ef457
+      sha: ce62cdc8f6b7630b84e335ad52fb56d3ce69cb43850c0752e3fac847bca4953c
     - file: sandbox/internal/routes/home/route.yaml
       sha: 6276316befcd6a44feb11c0a19fcbd17ce1f0c003ca8c48e74d3ce3531f809a9
     - file: sandbox/internal/routes/static/handler.go
-      sha: 61335e88115834d9f2a3a00e1bebc4a2672358bff9e252ff41487c1bb33e2731
+      sha: 61fec4f4121e4788ece124a0505231e0f8f9b4a4122dc9e9ef05b1ac6fe8efdb
     - file: sandbox/internal/routes/static/new.go
-      sha: c34f154821b415842fd5b2a52960fe2c010b1ec4b620590d32c2079d44d4d963
+      sha: e61c77b1928b1bd52327b518888d75b6d262d20a4fa95b29c83d06ee6a678750
     - file: sandbox/internal/routes/static/route.yaml
       sha: bea2ec05598aeb48c03a16a370f6d3a5bba2a85c1b78fdf5c3546433cf0ef817

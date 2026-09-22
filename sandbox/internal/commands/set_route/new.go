@@ -123,6 +123,17 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			HasDefault:  false,
 			Identifiers: []string{"--example"},
 		},
+		{
+			Id:          "priority",
+			Type:        "int",
+			Required:    false,
+			Array:       false,
+			Description: "the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on",
+			Examples:    []string{"set-route logger --priority 0"},
+			Default:     "-1",
+			HasDefault:  true,
+			Identifiers: []string{"--priority"},
+		},
 	}
 
 	command.Args = []api.CommandArg{

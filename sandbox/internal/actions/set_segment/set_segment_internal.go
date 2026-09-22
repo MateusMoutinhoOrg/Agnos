@@ -12,9 +12,10 @@ import (
 // way remove-segment names one: a capture by its name, a trigger by the
 // identifier it spells.
 //
-// The two kinds are edited by the two halves of add-segment. --identifier
-// makes the segment a trigger spelling that literal, whatever it was before;
-// every other key edits a capture, and a trigger has none of them to edit.
+// The three kinds are edited by the three halves of add-segment. --identifier
+// makes the segment a trigger spelling that literal and --starts-with one
+// spelling that prefix, whatever either was before; every other key edits a
+// capture, and a trigger has none of them to edit.
 func SetSegmentInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteFieldEditProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
@@ -26,7 +27,7 @@ func SetSegmentInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 		return sandbox.Deps.Std.Errorf("set-segment needs the name of the segment to edit")
 	}
 	if utils.RouteFieldEditEmpty(sandbox, props) {
-		return sandbox.Deps.Std.Errorf("set-segment: nothing to change (pass --identifier, --rename, --type, --description, --array, --min, --max, --example or --clear)")
+		return sandbox.Deps.Std.Errorf("set-segment: nothing to change (pass --identifier, --starts-with, --rename, --type, --description, --array, --min, --max, --example or --clear)")
 	}
 
 	index := utils.FindRoutePathSegment(sandbox, conf.Paths, key)
@@ -49,12 +50,27 @@ func SetSegmentInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 }
 
 // editedSegment builds the segment the change leaves behind: a trigger when
-// --identifier is given, and otherwise the capture that was there with the
-// keys written over it.
+// --identifier or --starts-with is given, and otherwise the capture that was
+// there with the keys written over it.
 func editedSegment(sandbox *api.Sandbox, conf *routeconf.RouteConf, index int, props api.RouteFieldEditProps) (routeconf.Segment, error) {
 	current := conf.Paths[index]
 
-	if identifier := sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier); identifier != "" {
+	identifier := sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier)
+	starts_with := sandbox.Deps.Stringsdeps.TrimSpace(props.StartsWith)
+
+	if identifier != "" && starts_with != "" {
+		return routeconf.Segment{}, sandbox.Deps.Std.Errorf("a literal segment is spelled by --identifier or by --starts-with, never both")
+	}
+
+	if starts_with != "" {
+		spelling, err := utils.RoutePrefixIdentifier(sandbox, starts_with)
+		if err != nil {
+			return routeconf.Segment{}, err
+		}
+		return routeconf.Segment{Identifier: spelling, StartsWith: true}, nil
+	}
+
+	if identifier != "" {
 		spelling, err := utils.RouteIdentifierSegment(sandbox, identifier)
 		if err != nil {
 			return routeconf.Segment{}, err
@@ -64,7 +80,7 @@ func editedSegment(sandbox *api.Sandbox, conf *routeconf.RouteConf, index int, p
 
 	if current.Field == nil {
 		return routeconf.Segment{}, sandbox.Deps.Std.Errorf(
-			"the segment %q is a literal, which carries no type, no bounds and no description: --identifier is the whole of what it spells",
+			"the segment %q is a literal, which carries no type, no bounds and no description: --identifier and --starts-with are the whole of what it spells",
 			current.Identifier)
 	}
 
@@ -80,16 +96,36 @@ func editedSegment(sandbox *api.Sandbox, conf *routeconf.RouteConf, index int, p
 }
 
 // checkRestLast refuses a `paths` the edit left in a shape no matcher can be
-// generated from: the segment taking the rest of the path only reads as a
-// suffix while it is the last one, so --array on any other segment is refused
-// where add-segment would have refused it too.
+// generated from: whatever takes the rest of the path only reads as a suffix
+// while it is the last one, so --array and --starts-with on any other segment
+// are refused where add-segment would have refused them too — and a route
+// never carries both, since each one already takes everything left.
 func checkRestLast(sandbox *api.Sandbox, conf *routeconf.RouteConf) error {
-	at := utils.RouteRestIndex(conf.Paths)
-	if at < 0 || at == len(conf.Paths)-1 {
-		return nil
+	rest := utils.RouteRestIndex(conf.Paths)
+	prefix := -1
+	for i, segment := range conf.Paths {
+		if segment.Field == nil && segment.StartsWith {
+			prefix = i
+		}
 	}
 
-	return sandbox.Deps.Std.Errorf(
-		"the captured segment %q takes the rest of the path, so it is always the last one: only the last segment may be an array",
-		conf.Paths[at].Field.Key)
+	if rest >= 0 && prefix >= 0 {
+		return sandbox.Deps.Std.Errorf(
+			"this route already ends in %q, which takes every segment left in the path: a route has one such segment, not two",
+			conf.Paths[prefix].Identifier)
+	}
+
+	if rest >= 0 && rest != len(conf.Paths)-1 {
+		return sandbox.Deps.Std.Errorf(
+			"the captured segment %q takes the rest of the path, so it is always the last one: only the last segment may be an array",
+			conf.Paths[rest].Field.Key)
+	}
+
+	if prefix >= 0 && prefix != len(conf.Paths)-1 {
+		return sandbox.Deps.Std.Errorf(
+			"the starts-with segment %q leaves every segment after it unmatched, so it is always the last one",
+			conf.Paths[prefix].Identifier)
+	}
+
+	return nil
 }

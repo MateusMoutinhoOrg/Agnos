@@ -9,15 +9,20 @@ import (
 // AddRouteInternal writes the two hand-written files of a new route package.
 // It refuses to overwrite an existing route (via io.WriteFile). The trigger is
 // normalized to start with "/", so "users" and "/users" produce the same
-// route.yaml.
-func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, method string, trigger string, help string, category string) error {
-	if sandbox.Deps.Stringsdeps.TrimSpace(help) == "" {
+// route.yaml — and with --starts-with it becomes a prefix instead, which the
+// route answers every path beginning with.
+func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRouteProps) error {
+	if sandbox.Deps.Stringsdeps.TrimSpace(props.Help) == "" {
 		return sandbox.Deps.Std.Errorf("add-route requires --help")
 	}
-	if sandbox.Deps.Stringsdeps.TrimSpace(category) == "" {
+	if sandbox.Deps.Stringsdeps.TrimSpace(props.Category) == "" {
 		return sandbox.Deps.Std.Errorf("add-route requires --category")
 	}
+	if props.Priority < 0 {
+		return sandbox.Deps.Std.Errorf("--priority %d is negative: the chain runs from zero upwards", props.Priority)
+	}
 
+	name := props.Name
 	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
 	}
@@ -30,15 +35,20 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, me
 		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be declared")
 	}
 
+	trigger := props.Trigger
 	if sandbox.Deps.Stringsdeps.TrimSpace(trigger) == "" {
 		trigger = "/" + identifier
 	}
+
 	segment, err := utils.RouteIdentifierSegment(sandbox, trigger)
+	if props.StartsWith {
+		segment, err = utils.RoutePrefixIdentifier(sandbox, trigger)
+	}
 	if err != nil {
 		return err
 	}
 
-	verb, err := utils.RouteMethod(sandbox, method)
+	verb, err := utils.RouteMethod(sandbox, props.Method)
 	if err != nil {
 		return err
 	}
@@ -56,8 +66,10 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, me
 		"Module":     module_conf.Module,
 		"Method":     verb,
 		"Trigger":    segment,
-		"Help":       sandbox.Deps.Stringsdeps.TrimSpace(help),
-		"Category":   sandbox.Deps.Stringsdeps.TrimSpace(category),
+		"StartsWith": props.StartsWith,
+		"Priority":   props.Priority,
+		"Help":       sandbox.Deps.Stringsdeps.TrimSpace(props.Help),
+		"Category":   sandbox.Deps.Stringsdeps.TrimSpace(props.Category),
 	}
 
 	dir := utils.RouteDir(sandbox, name)

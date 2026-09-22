@@ -6,7 +6,16 @@ import (
 )
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
-	add_error := addRouteAction.AddRoute(sandbox, command.GetString("path"), command.GetString("name"), command.GetString("method"), command.GetString("trigger"), command.GetString("help"), command.GetString("category"))
+	add_error := addRouteAction.AddRoute(sandbox, api.AddRouteProps{
+		Path:       command.GetString("path"),
+		Name:       command.GetString("name"),
+		Method:     command.GetString("method"),
+		Trigger:    command.GetString("trigger"),
+		StartsWith: command.GetBool("starts-with"),
+		Priority:   command.GetInt("priority"),
+		Help:       command.GetString("help"),
+		Category:   command.GetString("category"),
+	})
 
 	if add_error != nil {
 		sandbox.Deps.Std.Error("%s\n", add_error.Error())

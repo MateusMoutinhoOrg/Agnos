@@ -55,6 +55,21 @@ flags:
         - -q
       name: quiet
       type: boolean
+    - default: "0"
+      description: 'the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on'
+      examples:
+        - add-route logger --trigger / --starts-with --priority 0 --help 'logs every request' --category Server
+      identifiers:
+        - --priority
+      name: priority
+      type: int
+    - description: make the trigger a prefix, so the route answers every path beginning with it rather than that one path
+      examples:
+        - add-route logger --trigger / --starts-with --help 'logs every request' --category Server
+      identifiers:
+        - --starts-with
+      name: starts-with
+      type: boolean
 help: Declare a new http route
 identifiers:
     - add-route

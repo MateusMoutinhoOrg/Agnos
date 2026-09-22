@@ -54,31 +54,36 @@ body:
 |---|---|
 | `paths` | The URL's segments, in order. Required and never empty |
 | `method` | `GET`/`POST`/`PUT`/`PATCH`/`DELETE`/`HEAD`/`OPTIONS`. Default `GET` |
+| `priority` | The rung this route runs on when several match one request: lowest first, never negative. Default `0`, and written back only when it is not |
 | `category`, `help`, `long-description`, `examples`, `hidden` | As in [EntriesYaml](../EntriesYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
 | `headers`, `params` | Sequences of fields read from the request headers / the query string |
 | `body` | The request body, one object rather than a sequence |
 
 ## Segment keys
 
-There is no `path` key: the URL is the concatenation of `paths`, and a segment is one of two
+There is no `path` key: the URL is the concatenation of `paths`, and a segment is one of three
 kinds.
 
 | Key | Effect |
 |---|---|
-| `identifier` | A literal segment, **always starting with `/`** (`/users`, never `users`). `/` alone is the root; no other holds an inner or trailing slash. Excludes `name` and every field key |
+| `identifier` | A literal segment, **always starting with `/`** (`/users`, never `users`). `/` alone is the root; no other holds an inner or trailing slash. Excludes `starts-with-identifier`, `name` and every field key |
+| `starts-with-identifier` | The same, loosened to a prefix: the path only has to **begin** with it, and every segment after is left unmatched. It may spell more than one segment (`/api/v1`), `/` alone matches every request, and it is always the last entry of `paths` |
 | `name` | A captured segment: it matches anything and is bound under this name, already converted |
 | `type` | `string` (default), `boolean`, `int`, `float` |
 | `description`, `examples`, `min`, `max` | As in [EntriesYaml](../EntriesYaml/doc.md#field-keys) |
 | `required` | Always `true` on a capture — `false` is a `verify` violation, and `default` is refused |
 | `array` | The capture takes **every segment left** in the path, read back with `GetStrings`/`GetInts`/`GetFloats`. Only on the last entry of `paths`, and its name is declared nowhere else |
 
-The first `identifier` is the trigger that names the route. Match order is by specificity, not
-by directory: most `identifier`s first, then the longest `identifier`s, then the routes of
-fixed length before the ones taking the rest of the path, then the pattern alphabetically —
-without which a route on `/` would swallow one on `/home`.
+The first literal segment is the trigger that names the route. Run order is `priority` first,
+lowest rung to highest; within one rung it is specificity, not directory order: most
+`identifier`s first, then the longest `identifier`s, then the routes of fixed length before the
+ones taking the rest of the path, then the pattern alphabetically — without which a route on
+`/` would swallow one on `/home`.
 
 A route ending in an `array` capture matches **one or more** remaining segments, never zero:
-the capture is required like any other, so `/static` does not reach `/static/{rest...}`.
+the capture is required like any other, so `/static` does not reach `/static/{rest...}`. A
+`starts-with-identifier` is the other way of taking the rest of the path, and matches zero
+remaining segments as happily as ten — a route declares one or the other, never both.
 
 ```yaml
 method: GET
@@ -107,6 +112,36 @@ every occurrence of the key; in `paths` it takes the rest of the path).
 One `name` may be declared in more than one place. The value is bound once and filled by the
 first origin, in `paths` → `headers` → `params` order, that brings a value; any one of them
 satisfies `required`, and all of them must agree on `type`.
+
+A header or a query parameter may also carry a **match condition**, which is what puts it into
+what the route matches on rather than only into what it binds:
+
+| Key | Effect |
+|---|---|
+| `identifier` | The route runs only when the request brings exactly this value under that name |
+| `starts-with-identifier` | The route runs only when the value the request brings begins with this |
+
+A field declares one or the other, never both. A request that fails a condition does not fail
+the route — it means this route is not the one for it, so the chain moves on and, if nothing
+else answers, `HandleNotFound` does. That is the difference from `required`, which says the
+route **is** the one and the request is malformed, and answers `400` through `HandleBadRequest`.
+
+```yaml
+method: GET
+priority: 5
+paths:
+  - identifier: "/admin"
+headers:
+  - name: authorization
+    type: string
+    starts-with-identifier: "Bearer"
+```
+
+```
+GET /admin                                  404, this route never ran
+GET /admin  Authorization: Basic abc        404, this route never ran
+GET /admin  Authorization: Bearer abc       this route
+```
 
 ## Reading the values
 
@@ -140,38 +175,100 @@ build rather than being ignored.
 
 ## Generated `ReadBody`
 
-`ReadBody(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response)` is generated
-into the route's own `new.go`, returning what its `body.type` declares:
+`ReadBody(sandbox *api.Sandbox, route *api.Route)` is generated into the route's own `new.go`,
+returning what its `body.type` declares:
 
 | `body.type` | Returns |
 |---|---|
 | `none` | none is generated |
-| `raw` | `([]byte, int)` |
-| `text` | `(string, int)` |
-| `json` with an object `json-schema` | `(Body, int)` |
-| `json` without one | `(*serializables.SerializibleObject, int)` |
+| `raw` | `([]byte, error)` |
+| `text` | `(string, error)` |
+| `json` with an object `json-schema` | `(Body, error)` |
+| `json` without one | `(*serializables.SerializibleObject, error)` |
 
 Every variant does, in order: `Request.ReadBody(MaxBodyBytes)` (`413`), the `required` check
 (`400`) and — for `json` — `routeio.ValidateSchema` against `BodySchema` (`400` on the first
 violation, its field path in the response's `field`). A nested object becomes `Body<Path>`; an
 object inside an array becomes `Body<Path>Item`.
 
-## Dispatch
+A non-nil error means the request has already been answered, by whichever `Handle*` file of
+`sandbox/internal/server/` the failure belongs to, so the handler only has to return it.
 
-`ServerMain` hands every request to one dispatch, which slices the path and tests each route of
-`Server.Routes` in match order. Everything but the body is settled before the handler runs.
+## The chain
 
-| Situation | Status | Answered by |
+`ServerMain` hands every request to one dispatch, which slices the path and collects **every**
+route that matches it — the method, every path identifier, and every header and query-parameter
+condition. Those routes then run in `priority` order, lowest rung first.
+
+A route answers the request by **setting a status**. A route that writes no status has declined,
+and the next one runs; that is the whole of what makes a route a middleware, and nothing else
+distinguishes one:
+
+```go
+func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
+	request := routeio.RequestOf(route)
+	sandbox.Deps.Std.Log("%s %s\n", request.GetMethod(), request.GetPath())
+	return nil // no status: the next route of the chain runs
+}
+```
+
+```yaml
+# routes/logger/route.yaml — runs first, answers nothing
+method: GET
+paths:
+  - starts-with-identifier: "/"
+
+# routes/hello/route.yaml — runs after it, answers
+method: GET
+priority: 5
+paths:
+  - identifier: "/hello"
+```
+
+Two routes on the same rung are ordered by specificity, so a middleware in front of everything
+sits on a lower rung than the routes it guards — `0` for it, `5` for them.
+
+## Failures
+
+Nothing the dispatch does writes a response. Every way a request can end without a route
+answering it is handed to one of six files of `sandbox/internal/server/`, each written once by
+`{{.GeneratorName}} server-init` and never regenerated:
+
+| Situation | File | Status |
 |---|---|---|
-| no route matched the path | 404 | dispatch |
-| path matched, method differs | 405 | dispatch |
-| `content-type` differs | 415 | dispatch |
-| `Content-Length` above `max-bytes` | 413 | dispatch |
-| invalid header/param, missing `required`, out of `min`/`max` | 400 | dispatch |
-| body over `max-bytes` while reading | 413 | `ReadBody` |
-| body absent with `required: true`, invalid json, schema rejected | 400 | `ReadBody` |
-| handler returned `0`, or panicked | 500 | dispatch |
+| no route matched, or every matching route declined | `handle_not_found.go` | 404 |
+| the path matched under another method | `handle_method_not_allowed.go` | 405 |
+| invalid header/param, missing `required`, out of `min`/`max`, body the schema rejected | `handle_bad_request.go` | 400 |
+| `Content-Length` or the body itself above `max-bytes` | `handle_too_large.go` | 413 |
+| `content-type` differs | `handle_wrong_content_type.go` | 415 |
+| a handler returned an error without answering, or panicked | `handle_server_error.go` | 500 |
 
-A failure is written by `routeio.WriteError` as `{"error": "...", "field": "..."}` and logged on
-`deps.Std.Log`. A `RouteHandler` returns the status it answered with; the only way it returns
-`400`/`413`/`415` is by propagating one from `ReadBody`.
+Each holds one function with the route handler's own signature, writes the response itself and
+returns what it could not answer:
+
+```go
+func HandleNotFound(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
+	failure := routeio.FailureOf(route, api.StatusNotFound, "route not found")
+	return routeio.WriteError(sandbox, response, failure.Status, failure.Field, failure.Message)
+}
+```
+
+`routeio.FailureOf` is what the failure says, falling back to what the file says: the two the
+dispatch raises with nothing to add — nothing matched, method not allowed — carry no message, so
+the wording is the one spelled in that file and changing it there changes what the server says.
+The failures that know something the file could not — which field would not bind, and why —
+carry their own.
+
+Raise a failure with `routeio.Fail`, from anywhere:
+
+```go
+return routeio.Fail(sandbox, route, api.StatusFailure, "", "not authorized")
+```
+
+It reaches the right file through `sandbox.Server.Fail`, which is a field on the api rather than
+a call, because a route package may not import `sandbox/internal/server` — that package imports
+every route. `routeio.WriteError` is the writer underneath, and the default body every one of
+them produces is `{"error": "...", "field": "..."}`, logged on `deps.Std.Log` as it is written.
+
+A `Handle*` file answers a failure and never raises one: `routeio.Fail` from inside one comes
+back to it.

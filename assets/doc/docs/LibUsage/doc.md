@@ -64,10 +64,12 @@ drives a command without a command line — bind the values into the copy's `Ite
 `copy.Handler(copy)`.
 
 {{end}}{{if .HasServer}}`lib.Server.Routes` (`[]api.Route`) is the http surface the same way:
-every route the project declares, in match order, each carrying its `paths`, its headers, its
-params, its body and the `Handler` that answers it. `api.BindRoute(&route)` copies one into the
-route a single request runs on, so a caller drives a route without a socket — bind the values
-into the copy's `Items` and call `copy.Handler(copy)`.
+every route the project declares, in run order — lowest `Priority` first — each carrying its
+`paths`, its headers, its params, its body and the `Handler` that answers it.
+`api.BindRoute(&route)` copies one into the route a single request runs on, so a caller drives a
+route without a socket — bind the values into the copy's `Items` and call `copy.Handler(copy)`,
+which returns the failure it did not answer itself and `nil` otherwise. What it answered with is
+the status it wrote on the response, never what it returned.
 
 {{end}}[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
 dependency contracts{{end}} — generated from `sandbox/api/` itself on every build.

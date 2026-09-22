@@ -4,9 +4,9 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
     - file: sandbox/api/route.go
-      sha: f213538f06a304efd6ebd079c86d05a618311265f3685ea548a211ef1a6b0dfb
+      sha: 02f182ae6adf929ed01244c1ed2e881aa563eb80597e2a04e5f01a84b03ab052
     - file: sandbox/api/server.go
-      sha: 15675c204dc00e0fbd8428b635c4093cf73eb75df01dbf46ee0deefea3b2e705
+      sha: e038ba45386ea373d7de8249a25da8f8cfb921807aeed068c77b89de1a1dca54
     - file: sandbox/internal/commands/start_server/entries.yaml
       sha: d463ba2aad26659c3f79bf8b2b54c901220f1c24be7b131fc58bd19d0e8d191d
     - file: sandbox/internal/commands/start_server/handler.go
@@ -14,12 +14,24 @@ tree:
     - file: sandbox/internal/commands/start_server/new.go
       sha: 00651eca5746e0d0b310a467d86ae36ba3af55977b08c6fc22b01e1a187bcdda
     - file: sandbox/internal/routes/health/handler.go
-      sha: 95f40a74f0a10d8c2395b2d69924d0b38dadd2dd4471d8d5e16cc37e3b482cd7
+      sha: 94db227ac65063aebcbe09fbf68ecd536c6ce7537f6339c78bdf549ff159aaf2
     - file: sandbox/internal/routes/health/new.go
-      sha: 3a0ad7f63838ff65fc82701b1e3317562f5bf451cbdca1f205f1767260531b0b
+      sha: f5255875ae12c501c23cdaa27e917e8105413a35d6dce331b8059b03822dd92b
     - file: sandbox/internal/routes/health/route.yaml
       sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da
+    - file: sandbox/internal/server/handle_bad_request.go
+      sha: 7330227fe6d91f887227a7a3bf434206ddf301ab627d526113d36a2b48bce80f
+    - file: sandbox/internal/server/handle_method_not_allowed.go
+      sha: 74a6a38fb2c17bb17e06047acb749933a9c00aa2780d28855096f08a4ad2dba5
+    - file: sandbox/internal/server/handle_not_found.go
+      sha: 025bd11f455495527919213ab814d3407d5d61659743a623a90659f2580e259d
+    - file: sandbox/internal/server/handle_server_error.go
+      sha: 24cbafa921a56a562916449928f41775ef119707c00eb48a0b05d4140b9112d6
+    - file: sandbox/internal/server/handle_too_large.go
+      sha: 8988381a9a67c273e165465e2afd4a293f2e5fd609eec7b9791fd291eb234ac9
+    - file: sandbox/internal/server/handle_wrong_content_type.go
+      sha: 9d30baf77966159b9dc63a2d2f7bc763f48312736f5c832c7aaaf869ec7c728a
     - file: sandbox/internal/server/new.go
-      sha: b739c39000771059135a852f79ad70e2074283e6c6e1eac4238a6d18afc030ce
+      sha: 894d2d036ae2c07cb05fc3dba7cee9a6bbe01ff3b983768647e0ac49341037d9
     - file: sandbox/internal/server/servermain.go
-      sha: ed49c49b65fcbca50bec7f6ce8c6d25ac7ef4d9f1f9ed6e566b6692a33c35530
+      sha: 57dbc7fd75c4da1cbb91256714a4a92310fe30d51b4308e261d41a997a458af6

@@ -71,7 +71,12 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		violations = append(violations, checkRouteRawFields(sandbox, name, string(content))...)
 		violations = append(violations, checkRouteSchemaKeys(sandbox, name, conf)...)
 
-		key := conf.Method + " " + conf.Pattern()
+		// Two routes may share a method and a pattern as long as they sit
+		// on different rungs of the chain — that is what a middleware in
+		// front of a route is. Sharing a rung as well is the ambiguity: the
+		// two would run in an order nothing declares.
+		key := conf.Method + " " + conf.Pattern() +
+			" at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10)
 		if other, taken := patterns[key]; taken {
 			violations = append(violations, routeViolation(name,
 				"declares "+key+", which routes/"+other+" already declares"))
@@ -114,14 +119,16 @@ func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, name string) []s
 		}
 		return append(violations, routeViolation(name,
 			"handler.go declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) int"))
+				routeHandlerName+"(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error"))
 	}
 
 	return append(violations, routeViolation(name, "handler.go exports no "+routeHandlerName))
 }
 
 // isRouteHandler reports whether one parsed declaration is the route handler:
-// a plain exported func of the canonical name, parameters and one int result.
+// a plain exported func of the canonical name, parameters and one error
+// result. The status is what the handler writes on the response, never what it
+// returns — what it returns is the failure it did not answer itself.
 func isRouteHandler(function goimportsdeps.Function) bool {
 	if function.Receiver != "" || len(function.Params) != len(routeHandlerParams) {
 		return false
@@ -131,7 +138,7 @@ func isRouteHandler(function goimportsdeps.Function) bool {
 			return false
 		}
 	}
-	return len(function.Results) == 1 && function.Results[0].Type == "int"
+	return len(function.Results) == 1 && function.Results[0].Type == "error"
 }
 
 // checkRouteDeclaration enforces the rules that survive parsing: the method,
@@ -154,11 +161,16 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 		violations = append(violations, routeViolation(name, "declares no `paths`; a route needs at least one segment"))
 	}
 
+	if conf.Priority < 0 {
+		violations = append(violations, routeViolation(name,
+			"declares a negative `priority`; the chain runs from zero upwards"))
+	}
+
 	triggers := 0
 	for i, segment := range conf.Paths {
 		if segment.Field == nil {
 			triggers++
-			violations = append(violations, checkRouteIdentifier(sandbox, name, segment.Identifier)...)
+			violations = append(violations, checkRouteTrigger(sandbox, name, segment, i == len(conf.Paths)-1)...)
 			continue
 		}
 		violations = append(violations, checkRouteCapture(name, *segment.Field, i == len(conf.Paths)-1)...)
@@ -168,8 +180,54 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 			"declares no `identifier` segment; a route is named by the first literal segment of its path"))
 	}
 
+	violations = append(violations, checkRoutePrefix(sandbox, name, conf)...)
 	violations = append(violations, checkRouteNames(sandbox, name, conf)...)
 	violations = append(violations, checkRouteRestName(sandbox, name, conf)...)
+	violations = append(violations, checkRouteFieldIdentifiers(sandbox, name, conf)...)
+
+	return violations
+}
+
+// checkRoutePrefix keeps the two ways of taking the rest of a path apart: a
+// prefix trigger leaves every segment after it unmatched, and so does an array
+// capture, so a route declaring both says twice what it binds once.
+func checkRoutePrefix(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
+	prefix := false
+	for _, segment := range conf.Paths {
+		if segment.Field == nil && segment.StartsWith {
+			prefix = true
+		}
+	}
+	if !prefix || utils.RouteRestIndex(conf.Paths) < 0 {
+		return nil
+	}
+	return []string{routeViolation(name,
+		"declares both a `starts-with-identifier` and an array capture; each one already takes every segment left in the path")}
+}
+
+// checkRouteFieldIdentifiers enforces the two value conditions a header or a
+// query parameter may carry. They are what puts the field in the match, so a
+// field declaring both says two things about one value.
+func checkRouteFieldIdentifiers(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
+	var violations []string
+
+	origins := []struct {
+		label  string
+		fields []routeconf.Field
+	}{
+		{"header", conf.Headers},
+		{"query", conf.Params},
+	}
+
+	for _, origin := range origins {
+		for _, field := range origin.fields {
+			if field.Identifier != "" && field.StartsWith != "" {
+				violations = append(violations, routeViolation(name,
+					"declares the "+origin.label+" field "+field.Key+
+						" with both an `identifier` and a `starts-with-identifier`; a value matches one condition or the other"))
+			}
+		}
+	}
 
 	return violations
 }
@@ -204,21 +262,42 @@ func checkRouteRestName(sandbox *api.Sandbox, name string, conf *routeconf.Route
 	return violations
 }
 
-// checkRouteIdentifier enforces the leading slash a trigger segment always
-// carries, and that it spells exactly one segment.
-func checkRouteIdentifier(sandbox *api.Sandbox, name string, identifier string) []string {
-	if identifier == "" {
-		return []string{routeViolation(name, "declares an empty path identifier")}
+// checkRouteTrigger enforces what a literal segment may spell. Both kinds
+// carry the leading slash. An `identifier` is exactly one segment; a
+// `starts-with-identifier` may spell several, because it names the head of a
+// whole subtree rather than one place in it — and it is the last entry of
+// `paths`, since everything after it is unmatched by definition.
+func checkRouteTrigger(sandbox *api.Sandbox, name string, segment routeconf.Segment, is_last bool) []string {
+	label := "path identifier"
+	if segment.StartsWith {
+		label = "path starts-with-identifier"
 	}
-	if !sandbox.Deps.Stringsdeps.HasPrefix(identifier, "/") {
-		return []string{routeViolation(name, "declares the path identifier "+identifier+
+
+	if segment.Identifier == "" {
+		return []string{routeViolation(name, "declares an empty "+label)}
+	}
+	if !sandbox.Deps.Stringsdeps.HasPrefix(segment.Identifier, "/") {
+		return []string{routeViolation(name, "declares the "+label+" "+segment.Identifier+
 			", which does not start with '/'")}
 	}
-	if identifier == "/" {
+
+	if segment.StartsWith {
+		if !is_last {
+			return []string{routeViolation(name, "declares the "+label+" "+segment.Identifier+
+				" before the end of `paths`; a starts-with-identifier leaves every segment after it unmatched, so nothing may follow it")}
+		}
+		if segment.Identifier != "/" && sandbox.Deps.Stringsdeps.HasSuffix(segment.Identifier, "/") {
+			return []string{routeViolation(name, "declares the "+label+" "+segment.Identifier+
+				", which holds a trailing slash; spell the segments it fixes and no more")}
+		}
 		return nil
 	}
-	if sandbox.Deps.Stringsdeps.Contains(sandbox.Deps.Stringsdeps.TrimPrefix(identifier, "/"), "/") {
-		return []string{routeViolation(name, "declares the path identifier "+identifier+
+
+	if segment.Identifier == "/" {
+		return nil
+	}
+	if sandbox.Deps.Stringsdeps.Contains(sandbox.Deps.Stringsdeps.TrimPrefix(segment.Identifier, "/"), "/") {
+		return []string{routeViolation(name, "declares the "+label+" "+segment.Identifier+
 			", which holds an inner or trailing slash; an identifier is one segment")}
 	}
 	return nil
@@ -371,6 +450,9 @@ func checkRawField(sandbox *api.Sandbox, name string, origin string, entry *seri
 	label := rawString(entry, "name")
 	if label == "" {
 		label = rawString(entry, "identifier")
+	}
+	if label == "" {
+		label = rawString(entry, "starts-with-identifier")
 	}
 
 	var violations []string

@@ -94,6 +94,20 @@ flags:
         - -q
       name: quiet
       type: boolean
+    - description: match only when the request brings exactly this value, putting the field into what the route matches on
+      examples:
+        - set-header authorization --route admin --identifier 'Bearer root'
+      identifiers:
+        - --identifier
+      name: identifier
+      type: string
+    - description: match only when the value the request brings begins with this, putting the field into what the route matches on
+      examples:
+        - set-header authorization --route admin --starts-with Bearer
+      identifiers:
+        - --starts-with
+      name: starts-with
+      type: string
 help: Rewrite one declared request header of a route
 identifiers:
     - set-header

@@ -18,8 +18,9 @@ const routesDir = "sandbox/internal/routes"
 // map holds is the declaration itself, which the dispatch reads back off
 // Server.Routes at runtime, so nothing here is a Go spelling of the routing.
 //
-// The list comes back ordered for matching, not in listing order: the most
-// specific route first, so a route fixing "/" can never swallow "/home".
+// The list comes back ordered for running, not in listing order: the lowest
+// priority first, then the most specific route, so a route fixing "/" can
+// never swallow "/home".
 func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 	var routes []map[string]any
 
@@ -54,15 +55,20 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 	return routes, nil
 }
 
-// sortRoutes puts the routes in the order the dispatch tests them: the route
-// fixing the most literal segments first, then the one whose literals spell
-// the most characters, then the one of fixed length before the one taking the
-// rest of the path, then by pattern for a stable tie-break. The ordering is
-// the collector's, so Server.Routes is already in match order and the
-// dispatch only has to range.
+// sortRoutes puts the routes in the order the dispatch runs them: the lowest
+// `priority` first — that is the whole of what the chain reads — and then, for
+// the routes sharing one rung, the same specificity order the layer has always
+// had: the route fixing the most literal segments, then the one whose literals
+// spell the most characters, then the one of fixed length before the one
+// taking the rest of the path, then by pattern for a stable tie-break. The
+// ordering is the collector's, so Server.Routes is already in run order and
+// the dispatch only has to range.
 func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
 		left, right := routes[i], routes[j]
+		if left["Priority"] != right["Priority"] {
+			return left["Priority"].(int) < right["Priority"].(int)
+		}
 		if left["IdentifierCount"] != right["IdentifierCount"] {
 			return left["IdentifierCount"].(int) > right["IdentifierCount"].(int)
 		}
@@ -127,7 +133,7 @@ func checkRoutePaths(sandbox *api.Sandbox, name string, conf *routeconf.RouteCon
 	return nil
 }
 
-// routeData is one route as the generated new.go reads it, plus the three keys
+// routeData is one route as the generated new.go reads it, plus the keys
 // sortRoutes orders the set by.
 func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map[string]any {
 	paths := make([]map[string]any, 0, len(conf.Paths))
@@ -146,6 +152,7 @@ func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map
 	return map[string]any{
 		"Name":            name,
 		"Method":          conf.Method,
+		"Priority":        conf.Priority,
 		"Trigger":         routeTrigger(conf),
 		"Pattern":         conf.Pattern(),
 		"IdentifierCount": conf.IdentifierCount(),
@@ -167,7 +174,8 @@ func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map
 }
 
 // routeTrigger is the first literal segment of a route — the one that names it
-// in docs/Routes. A route made of captures alone falls back to its pattern.
+// in docs/Routes, a prefix trigger included. A route made of captures alone
+// falls back to its pattern.
 func routeTrigger(conf *routeconf.RouteConf) string {
 	for _, segment := range conf.Paths {
 		if segment.Field == nil {
@@ -178,12 +186,14 @@ func routeTrigger(conf *routeconf.RouteConf) string {
 }
 
 // segmentData is one entry of `paths` as the generated api.RoutePath literal
-// reads it: a literal segment carries its identifier, a capture its field.
+// reads it: a literal segment carries its identifier and whether that
+// identifier only fixes the beginning of the path, a capture its field.
 func segmentData(sandbox *api.Sandbox, segment routeconf.Segment) map[string]any {
 	if segment.Field == nil {
 		return map[string]any{
 			"HasField":   false,
 			"Identifier": segment.Identifier,
+			"StartsWith": segment.StartsWith,
 		}
 	}
 	return map[string]any{
@@ -209,6 +219,8 @@ func routeFieldData(sandbox *api.Sandbox, field routeconf.Field) map[string]any 
 		"Max":         routeNumberLabel(sandbox, field.Type, field.Max, field.HasMax),
 		"HasMin":      field.HasMin,
 		"HasMax":      field.HasMax,
+		"Identifier":  field.Identifier,
+		"StartsWith":  field.StartsWith,
 	}
 }
 

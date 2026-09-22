@@ -8,7 +8,7 @@ import (
 
 // SetSegment rewrites one declared segment of
 // sandbox/internal/routes/<route>/route.yaml's path, then runs build as a
-// follow-up step so the route's new.go and its match order pick the change up.
+// follow-up step so the route's new.go and its run order pick the change up.
 func SetSegment(sandbox *api.Sandbox, props api.RouteFieldEditProps) error {
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := SetSegmentInternal(sandbox, io, props); err != nil {

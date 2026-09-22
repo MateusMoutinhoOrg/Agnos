@@ -32,7 +32,14 @@ func main() {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddRoute("TestDir", "create-user", "POST", "/users", "Create a user under a tenant", "Users"); err != nil {
+	if err := lib.Actions.AddRoute(api.AddRouteProps{
+		Path:     "TestDir",
+		Name:     "create-user",
+		Method:   "POST",
+		Trigger:  "/users",
+		Help:     "Create a user under a tenant",
+		Category: "Users",
+	}); err != nil {
 		panic(err)
 	}
 

@@ -31,6 +31,15 @@ type RouteField struct {
 	HasMin bool
 	Max    float64
 	HasMax bool
+	// Identifier is the value the request has to bring under this Id for the
+	// route to match at all — an exact comparison, "" when the field carries
+	// no such condition. It is what puts a header or a query parameter into
+	// the match rather than only into the binding.
+	Identifier string
+	// StartsWith is the same condition loosened to a prefix: the value the
+	// request brings has to begin with it. "" when the field carries no such
+	// condition, and never set alongside Identifier.
+	StartsWith string
 }
 
 // RoutePath is one segment of the route's url, in declaration order. Exactly
@@ -41,6 +50,12 @@ type RoutePath struct {
 	// ("/users"); "/" alone fixes the empty path and matches no segment of
 	// its own. It is empty on a capture.
 	Identifier string
+	// StartsWith reports that Identifier only fixes the beginning of the
+	// path: every segment after the ones it spells is left unmatched, so the
+	// route answers a whole subtree. It is always the last entry of Paths,
+	// it may spell more than one segment, and "/" alone matches every
+	// request.
+	StartsWith bool
 	// Field is the captured segment's declaration, nil on a literal. Only
 	// the last entry of Paths may declare an Array, and it then takes every
 	// segment left in the path.
@@ -66,10 +81,31 @@ type RouteBody struct {
 	Schema string
 }
 
+// RouteFailure is one way a request did not get answered: what the dispatch
+// would have written, and why. Every failure the server layer raises — a
+// header that will not bind, a body the schema rejected, a handler that
+// returned an error, a path nothing matched — arrives at one of the project's
+// own Handle* files as this, read off the Failure of the route it is handed.
+type RouteFailure struct {
+	// Status is the http status the failure carries: one of the Status*
+	// constants of server.go.
+	Status int
+	// Field is the header, query parameter, path segment or json path that
+	// failed, "" when the failure names no single value.
+	Field string
+	// Message is the one-line reason, written for whoever called the route.
+	Message string
+	// Cause is what went wrong underneath — an error's text, or the value a
+	// handler panicked with — "" when there is nothing below the message. It
+	// is for the log, not for the caller.
+	Cause string
+}
+
 // Route is one http route of the project, as the sandbox offers it: the whole
 // of what its route.yaml declares, plus the handler behind it. Server.Routes
 // holds one per sandbox/internal/routes/<name>/, each built by that package's
-// generated NewRoute, in match order.
+// generated NewRoute, in run order — lowest Priority first, and most specific
+// within one rung.
 //
 // What Server.Routes holds is the declaration alone: nothing is ever bound
 // onto it. The server dispatch copies it with BindRoute, fills that copy's
@@ -80,6 +116,11 @@ type Route struct {
 	Name string
 	// Method is the http method it answers to ("GET", "POST").
 	Method string
+	// Priority is the rung this route runs on when several match one
+	// request: the dispatch runs them from the lowest upwards and stops at
+	// the first handler that sets a status. Zero is the default, so a route
+	// declaring nothing runs before one declaring 5.
+	Priority int
 	// Pattern is its path as it reads in docs and messages
 	// ("/users/{tenant}/create").
 	Pattern string
@@ -114,6 +155,11 @@ type Route struct {
 	Request  any
 	Response any
 
+	// Failure is why this route is being handed to one of the project's
+	// Handle* files, nil on a normal run. It is set by routeio.Fail, which
+	// is the one way any part of the server layer raises a failure.
+	Failure *RouteFailure
+
 	// GetItem returns every value bound under one Id, nil when none was.
 	GetItem func(id string) []any
 	// GetString returns the first string bound under one Id, "" when none
@@ -134,12 +180,14 @@ type Route struct {
 	GetFloats func(id string) []float64
 
 	// Handler runs the route against one bound copy — the values in its
-	// Items and the response it carries — and returns the status it
-	// answered with. It takes that copy rather than closing over one, so
-	// the declaration on Server.Routes is shared by every request while
-	// nothing bound ever is. It is the route package's own RouteHandler,
-	// closed over the sandbox.
-	Handler func(route *Route) int
+	// Items and the response it carries — and returns the failure it did
+	// not answer itself, nil otherwise. What it answered with is the status
+	// it wrote on the response, never what it returns: a handler that
+	// writes no status hands the request to the next route of the chain. It
+	// takes that copy rather than closing over one, so the declaration on
+	// Server.Routes is shared by every request while nothing bound ever is.
+	// It is the route package's own RouteHandler, closed over the sandbox.
+	Handler func(route *Route) error
 }
 
 // NewRoute returns an empty Route with Items open and every Get* reader bound
@@ -168,6 +216,7 @@ func BindRoute(route *Route) *Route {
 	bound.Items = map[string][]any{}
 	bound.Request = nil
 	bound.Response = nil
+	bound.Failure = nil
 
 	bindRouteReaders(&bound)
 	return &bound

@@ -45,6 +45,7 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 	}
 
 	conf.Method = normalizeMethod(sandbox, readString(specs, "method"))
+	conf.Priority = readInt(specs, "priority")
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
 	conf.Help = readString(specs, "help")
@@ -88,9 +89,11 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 }
 
 // readSegments parses the `paths` sequence into the ordered segments the URL
-// is matched against. Each entry carries either an `identifier` (a trigger) or
-// a `name` (a capture); an entry carrying both, or neither, is refused here
-// rather than generating a route nothing can match.
+// is matched against. Each entry carries exactly one of `identifier` (a
+// trigger the path has to spell), `starts-with-identifier` (a trigger the path
+// only has to begin with) or `name` (a capture); an entry carrying two of
+// them, or none, is refused here rather than generating a route nothing can
+// match.
 func readSegments(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Segment, error) {
 	if item.IsNull() {
 		return []Segment{}, nil
@@ -112,17 +115,29 @@ func readSegments(sandbox *api.Sandbox, item *serializibles.SerializibleObject) 
 		}
 
 		identifier := readString(entry, "identifier")
+		starts_with := readString(entry, "starts-with-identifier")
 		name := readString(entry, "name")
 
-		if identifier != "" && name != "" {
-			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d declares both `identifier` and `name`", i)
+		declared := 0
+		for _, spelling := range []string{identifier, starts_with, name} {
+			if spelling != "" {
+				declared++
+			}
 		}
-		if identifier == "" && name == "" {
-			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `identifier` or a `name`", i)
+		if declared > 1 {
+			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d declares more than one of `identifier`, `starts-with-identifier` and `name`", i)
+		}
+		if declared == 0 {
+			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `identifier`, a `starts-with-identifier` or a `name`", i)
 		}
 
 		if identifier != "" {
 			segments = append(segments, Segment{Identifier: identifier})
+			continue
+		}
+
+		if starts_with != "" {
+			segments = append(segments, Segment{Identifier: starts_with, StartsWith: true})
 			continue
 		}
 
@@ -177,6 +192,8 @@ func readFieldEntry(sandbox *api.Sandbox, item *serializibles.SerializibleObject
 		Type:        normalizeType(readString(item, "type")),
 		Required:    readBool(item, "required"),
 		Array:       readBool(item, "array"),
+		Identifier:  readString(item, "identifier"),
+		StartsWith:  readString(item, "starts-with-identifier"),
 	}
 
 	if min_item, _ := item.GetObjectItem("min"); min_item != nil && !min_item.IsNull() {
@@ -400,6 +417,20 @@ func readString(obj *serializibles.SerializibleObject, key string) string {
 		return ""
 	}
 	return value
+}
+
+// readInt reads a whole-number key as an int, answering 0 for an absent, null
+// or non-numeric one — the same shape readString and readBool have.
+func readInt(obj *serializibles.SerializibleObject, key string) int {
+	item, _ := obj.GetObjectItem(key)
+	if item == nil || item.IsNull() {
+		return 0
+	}
+	value, ok := readNumber(item)
+	if !ok {
+		return 0
+	}
+	return int(value)
 }
 
 func readBool(obj *serializibles.SerializibleObject, key string) bool {

@@ -3,7 +3,7 @@
 Add a segment to a route's path
 
 ```bash
-agnos add-segment --route <route> [--identifier <identifier>] [--type <type>] [--description <description>] [--example <example>...] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [<name>]
+agnos add-segment --route <route> [--identifier <identifier>] [--type <type>] [--description <description>] [--example <example>...] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [--starts-with <starts-with>] [<name>]
 ```
 
 Appends one segment to the route's paths and runs build so the route's new.go picks it up. With --identifier the segment is a literal, normalized to start with /; with a name it is a capture, which is always required and is bound under that name already converted. --array makes that capture take every segment left in the path, which only the last segment of a route may do.
@@ -21,6 +21,7 @@ Appends one segment to the route's paths and runs build so the route's new.go pi
 | `--position` | int | `-1` | zero-based index to insert the segment at (defaults to the end) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--starts-with` | string |  | spell a literal segment the path only has to begin with, so the route answers every path under it |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |

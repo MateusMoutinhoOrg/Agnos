@@ -14,6 +14,8 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		Examples:    command.GetStrings("example"),
 		Type:        command.GetString("type"),
 		Default:     command.GetString("default"),
+		Identifier:  command.GetString("identifier"),
+		StartsWith:  command.GetString("starts-with"),
 		Required:    command.GetBool("required"),
 		Min:         command.GetString("min"),
 		Max:         command.GetString("max"),

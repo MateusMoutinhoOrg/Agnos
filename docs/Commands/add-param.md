@@ -3,7 +3,7 @@
 Declare a query parameter on a route
 
 ```bash
-agnos add-param --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] <name>
+agnos add-param --route <route> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--path <path>] [--quiet] [--identifier <identifier>] [--starts-with <starts-with>] <name>
 ```
 
 Declares one query-string parameter on a route and runs build so the route's new.go picks it up. --array collects every occurrence of the key, read back with GetStrings; the only other place it is accepted is the last segment of a route's paths, which takes the rest of the path.
@@ -22,6 +22,8 @@ Declares one query-string parameter on a route and runs build so the route's new
 | `--position` | int | `-1` | zero-based index to insert the parameter at (defaults to the end) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| `--identifier` | string |  | match only when the request brings exactly this value, putting the field into what the route matches on |
+| `--starts-with` | string |  | match only when the value the request brings begins with this, putting the field into what the route matches on |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
