@@ -16,4 +16,6 @@ local_install.sh
 local_test.sh
 scripts
 TEXTO.md
+version: v0.10.0
+
 TEXTO.txt
