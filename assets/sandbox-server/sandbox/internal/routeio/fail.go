@@ -9,13 +9,14 @@ import (
 // that status — HandleBadRequest, HandleTooLarge, HandleWrongContentType,
 // HandleServerError — through sandbox.Server.Fail.
 //
-// It goes through the api rather than calling sandbox/internal/server directly
-// because that package imports every route package, so no route may import it
-// back. The field on the api is what crosses that line, and it is filled by the
-// generated sandbox/internal/server/new.go.
+// It goes through the api rather than calling sandbox/internal/server/errors
+// because the package that routes to it, sandbox/internal/server/server,
+// imports every route package, so no route may import it back. The field on
+// the api is what crosses that line, and it is filled by the generated
+// sandbox/internal/server/server/new.go.
 //
 // It returns the error the handler returned — the failure's own message when
-// that handler answered it — so a RouteHandler ends on one line:
+// that handler answered it — so an InternalPureHandler ends on one line:
 //
 //	return routeio.Fail(sandbox, route, api.StatusFailure, "", "not authorized")
 func Fail(sandbox *api.Sandbox, route *api.Route, status int, field string, message string) error {

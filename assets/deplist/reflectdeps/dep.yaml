@@ -1,0 +1,4 @@
+default-adapter: reflectdeps
+field: Reflectdeps
+help: Build, fill and call values whose type is known only at run time
+name: reflectdeps

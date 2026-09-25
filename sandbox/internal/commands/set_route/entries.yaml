@@ -9,13 +9,21 @@ category: Server System
 examples:
     - set-route create-user --method POST --example "curl -X POST localhost:8080/users"
 flags:
-    - description: the http method the route answers
+    - array: true
+      description: an http method the route answers (repeatable; replaces the whole list)
       examples:
-        - --method POST
+        - --method GET --method POST
       identifiers:
         - --method
         - -m
       name: method
+      type: string
+    - description: the Content-Type every response of the route carries
+      examples:
+        - --response-type text/plain
+      identifiers:
+        - --response-type
+      name: response-type
       type: string
     - description: one-line description of the route
       examples:
@@ -85,4 +93,4 @@ flags:
 help: Rewrite the route-level keys of a route.yaml
 identifiers:
     - set-route
-long-description: Overwrites method, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --example appends.
+long-description: Overwrites methods, response-type, priority, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends.

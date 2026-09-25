@@ -35,7 +35,7 @@ func main() {
 	// layer, the route serving the static tree, and that tree's skeleton.
 	for _, dir := range []string{
 		"sandbox/internal/pageio",
-		"sandbox/internal/routes/static",
+		"sandbox/internal/routeslist/static",
 		"assets/frontend",
 	} {
 		copyTree("TestDir/"+dir, "AssertDir/"+dir)

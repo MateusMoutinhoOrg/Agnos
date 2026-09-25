@@ -3,6 +3,7 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // Constructor is one contract of sandbox/api/ that the sandbox carries a field
@@ -13,6 +14,10 @@ type Constructor struct {
 	Name string
 	// Package is the sandbox/internal/ directory that builds it ("cli").
 	Package string
+	// Source is the project-relative package whose New<Name> builds it —
+	// sandbox/internal/<Package>, or the one level down
+	// utils.ConstructorSource finds.
+	Source string
 	// HasNew reports that sandbox/internal/<Package>/new.go is there to be
 	// called. A contract with none is a field of the Sandbox that nothing
 	// fills — an api published to be installed elsewhere, say — so
@@ -49,10 +54,12 @@ func CollectConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []Constructo
 		}
 
 		title := sandbox.Deps.Stringsdeps.ToUpper(baseName[:1]) + baseName[1:]
+		source := utils.ConstructorSource(io, baseName)
 		constructors = append(constructors, Constructor{
 			Name:    title,
 			Package: baseName,
-			HasNew:  io.IsFile("sandbox/internal/" + baseName + "/new.go"),
+			Source:  source,
+			HasNew:  io.IsFile(source + "/new.go"),
 		})
 	}
 

@@ -7,7 +7,7 @@ import (
 )
 
 // AddPage scaffolds a new page: the route package answering it under
-// sandbox/internal/routes/<name>/ and the html template it renders under
+// sandbox/internal/routeslist/<name>/ and the html template it renders under
 // assets/frontend/pages/, then runs build as a follow-up step so its new.go
 // and the dispatch arm are generated for it.
 func AddPage(sandbox *api.Sandbox, props api.PageProps) error {

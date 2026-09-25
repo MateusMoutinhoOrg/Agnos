@@ -35,7 +35,7 @@ type followUp struct {
 // followUps is what comes after each command that leaves something
 // half-declared. The order is the order the thing is usually filled in, and
 // the first row is what most sessions want next — a route is declared to carry
-// a body far more often than it is declared to carry a header.
+// a body far more often than it is declared to read a header.
 //
 // A command that finishes what it started has no entry, and a session that
 // runs one goes straight back to the menu.
@@ -44,14 +44,13 @@ var followUps = map[string][]followUp{
 		{"import-body", "Read its body from an example payload", "name", "route"},
 		{"add-body-field", "Declare one property of its body", "name", "route"},
 		{"set-body", "Say what kind of body it takes", "name", "route"},
-		{"add-param", "Declare a query parameter it reads", "name", "route"},
-		{"add-header", "Declare a header it reads", "name", "route"},
-		{"add-segment", "Add a segment to its path", "name", "route"},
+		{"add-parameter", "Declare a value it reads from the query or a header", "name", "route"},
+		{"add-path", "Read one more slice of its path", "name", "route"},
 		{"show-route", "Look at what it declares so far", "name", "route"},
 	},
 	"add-page": {
-		{"add-param", "Declare a query parameter it reads", "name", "route"},
-		{"add-segment", "Add a segment to its path", "name", "route"},
+		{"add-parameter", "Declare a value it reads from the query or a header", "name", "route"},
+		{"add-path", "Read one more slice of its path", "name", "route"},
 		{"show-route", "Look at what it declares so far", "name", "route"},
 	},
 	"import-body": {
@@ -70,37 +69,28 @@ var followUps = map[string][]followUp{
 	"show-route": {
 		{"add-body-field", "Declare one more property of its body", "route", "route"},
 		{"set-body-field", "Change one of its body properties", "route", "route"},
-		{"add-param", "Declare a query parameter it reads", "route", "route"},
-		{"add-header", "Declare a header it reads", "route", "route"},
+		{"add-parameter", "Declare a value it reads from the query or a header", "route", "route"},
 		{"set-route", "Change what the route itself says", "route", "route"},
 	},
 	"set-body": {
 		{"add-body-field", "Declare one property of its body", "route", "route"},
 		{"show-route", "Look at what the route declares now", "route", "route"},
 	},
-	"add-param": {
-		{"add-param", "Declare one more query parameter", "route", "route"},
+	"add-parameter": {
+		{"add-parameter", "Declare one more value it reads", "route", "route"},
 		{"show-route", "Look at what the route declares now", "route", "route"},
 	},
-	"add-header": {
-		{"add-header", "Declare one more header", "route", "route"},
+	"add-path": {
+		{"add-path", "Read one more slice of its path", "route", "route"},
 		{"show-route", "Look at what the route declares now", "route", "route"},
 	},
-	"add-segment": {
-		{"add-segment", "Add one more segment", "route", "route"},
+	"set-parameter": {
 		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"set-parameter", "Change one more value it reads", "route", "route"},
 	},
-	"set-param": {
+	"set-path": {
 		{"show-route", "Look at what the route declares now", "route", "route"},
-		{"set-param", "Change one more query parameter", "route", "route"},
-	},
-	"set-header": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
-		{"set-header", "Change one more header", "route", "route"},
-	},
-	"set-segment": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
-		{"set-segment", "Change one more segment", "route", "route"},
+		{"set-path", "Change one more slice of its path", "route", "route"},
 	},
 	"set-route": {
 		{"show-route", "Look at what the route declares now", "route", "route"},

@@ -6,12 +6,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// serverDir holds the generated dispatch and, beside it, the project's own
-// answer to every way a request can end without a route answering it.
-const serverDir = "sandbox/internal/server"
+// errorsDir holds the project's own answer to every way a request can end
+// without a route answering it, beside the generated dispatch of
+// sandbox/internal/server/server.
+const errorsDir = "sandbox/internal/server/errors"
 
 // errorHandlerFiles is one file per failure the dispatch can raise, in the
-// order the generated sandbox/internal/server/new.go switches on them. Each
+// order the generated sandbox/internal/server/server/new.go switches on them. Each
 // holds one handler with the route handler's own signature.
 var errorHandlerFiles = []string{
 	"handle_not_found.go",
@@ -23,7 +24,7 @@ var errorHandlerFiles = []string{
 }
 
 // GenerateErrorHandlers renders assets/templates/handle_*.go into
-// sandbox/internal/server/ — the six handlers the generated new.go hands a
+// sandbox/internal/server/errors/ — the six handlers the generated new.go hands a
 // failure to, one per status.
 //
 // It is written **once**, the same way a constructor is. A handler already on
@@ -37,7 +38,7 @@ var errorHandlerFiles = []string{
 // missing, and the generated new.go always has something to call.
 func GenerateErrorHandlers(sandbox *api.Sandbox, io *smartio.SmartIO, module string) error {
 	for _, handler := range errorHandlerFiles {
-		dest := serverDir + "/" + handler
+		dest := errorsDir + "/" + handler
 		if io.IsFile(dest) {
 			continue
 		}

@@ -14,7 +14,7 @@ import (
 // and of one route, never the tree they live in.
 const (
 	commandsDir = "sandbox/internal/commands"
-	routesDir   = "sandbox/internal/routes"
+	routesDir   = utils.RoutesDir
 )
 
 // The closed vocabularies agnos itself defines. They are values a command
@@ -90,6 +90,10 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		return closed(literalOptions(utils.RouteSchemaFormats))
 	case "clear":
 		return clearSuggestion(verb)
+	case "font":
+		return closed(literalOptions(routeconf.ParameterFonts))
+	case "trigger-type":
+		return closed(literalOptions(routeconf.TriggerTypes))
 	case "type":
 		return typeSuggestion(verb)
 	case "available":
@@ -150,16 +154,18 @@ func AskOrder(fields []Field) []Field {
 }
 
 // clearSuggestion is the keys --clear takes off, which are the command's own:
-// a body property carries the json-schema keywords, a header or a query
-// parameter the keys of a declared field.
+// a body property carries the json-schema keywords, a path and a parameter the
+// keys of their own entries.
 func clearSuggestion(verb string) suggestion {
 	switch verb {
 	case "set-body-field":
 		return closed(literalOptions(utils.RouteBodyFieldClearKeys))
 	case "set-table-field":
 		return closed(literalOptions(utils.DatabaseFieldClearKeys))
+	case "set-path":
+		return closed(literalOptions(utils.RoutePathClearKeys))
 	}
-	return closed(literalOptions(utils.RouteFieldClearKeys))
+	return closed(literalOptions(utils.RouteParameterClearKeys))
 }
 
 // typeSuggestion picks the vocabulary the declared types come from. A route
@@ -173,6 +179,8 @@ func typeSuggestion(verb string) suggestion {
 		return closed(literalOptions(bodyTypes))
 	case "add-table-field", "set-table-field":
 		return closed(literalOptions(tableTypes))
+	case "add-parameter", "set-parameter":
+		return closed(literalOptions(routeconf.ParameterTypes))
 	}
 	return closed(literalOptions(fieldTypes))
 }
@@ -247,12 +255,10 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answ
 		return closed(exampleOptions(sandbox, io, utils.ExampleLibSide))
 	case "update-test":
 		return closed(exampleOptions(sandbox, io, ""))
-	case "set-param", "remove-param":
-		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInQuery))
-	case "set-header", "remove-header":
-		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInHeader))
-	case "set-segment", "remove-segment":
-		return closed(routeFieldOptions(sandbox, io, answered, utils.RouteFieldInPath))
+	case "set-parameter", "remove-parameter":
+		return closed(routeParameterOptions(sandbox, io, answered))
+	case "set-path", "remove-path":
+		return closed(routePathOptions(sandbox, io, answered))
 	case "set-body-field", "remove-body-field":
 		return closed(bodyFieldOptions(sandbox, io, answered))
 	case "remove-database":
@@ -402,40 +408,38 @@ func commandFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map
 	return options
 }
 
-// routeFieldOptions is what one route declares in one of the three places a
-// request line is read from, by the name the editors of that place spell. It
-// is the answer to the question a person editing a declaration actually has —
-// which parameters does this route have — and it is read off the route that
-// was answered, so a session that has not answered one yet gets no list.
-func routeFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any, in string) []interviewer.AlternativeOption {
+// routePathOptions is every entry of one route's `paths`, by the id its
+// editors spell. It is read off the route that was answered, so a session that
+// has not answered one yet gets no list.
+func routePathOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
 	conf, found := answeredRoute(sandbox, io, answered)
 	if !found {
 		return []interviewer.AlternativeOption{}
 	}
 
-	if in == utils.RouteFieldInPath {
-		options := []interviewer.AlternativeOption{}
-		for _, segment := range conf.Paths {
-			if segment.Field == nil {
-				options = append(options, interviewer.AlternativeOption{Id: segment.Identifier, Msg: segment.Identifier + "  —  a literal segment"})
-				continue
-			}
-			options = append(options, interviewer.AlternativeOption{
-				Id:  segment.Field.Key,
-				Msg: labelled(sandbox, "{"+segment.Field.Key+"}", segment.Field.Description),
-			})
+	options := []interviewer.AlternativeOption{}
+	for _, path := range conf.Paths {
+		label := path.Id
+		if path.Trigger.Exists {
+			label += "  " + path.Trigger.Value
 		}
-		return options
+		options = append(options, interviewer.AlternativeOption{Id: path.Id, Msg: labelled(sandbox, label, path.Description)})
 	}
+	return options
+}
 
-	fields := conf.Headers
-	if in == utils.RouteFieldInQuery {
-		fields = conf.Params
+// routeParameterOptions is every entry of one route's `parameters`, by the key
+// it is read under — the answer to the question a person editing a
+// declaration actually has: which values does this route read.
+func routeParameterOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+	conf, found := answeredRoute(sandbox, io, answered)
+	if !found {
+		return []interviewer.AlternativeOption{}
 	}
 
 	options := []interviewer.AlternativeOption{}
-	for _, field := range fields {
-		options = append(options, interviewer.AlternativeOption{Id: field.Key, Msg: labelled(sandbox, field.Key, field.Description)})
+	for _, parameter := range conf.Parameters {
+		options = append(options, interviewer.AlternativeOption{Id: parameter.Key, Msg: labelled(sandbox, parameter.Key, parameter.Description)})
 	}
 	return options
 }

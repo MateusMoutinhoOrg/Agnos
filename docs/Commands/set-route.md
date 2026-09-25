@@ -3,14 +3,15 @@
 Rewrite the route-level keys of a route.yaml
 
 ```bash
-agnos set-route [--method <method>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--path <path>] [--quiet] [--example <example>...] [--priority <priority>] <route>
+agnos set-route [--method <method>...] [--response-type <response-type>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--path <path>] [--quiet] [--example <example>...] [--priority <priority>] <route>
 ```
 
-Overwrites method, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --example appends.
+Overwrites methods, response-type, priority, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--method`, `-m` | string |  | the http method the route answers |
+| `--method`, `-m` | string, repeatable |  | an http method the route answers (repeatable; replaces the whole list) |
+| `--response-type` | string |  | the Content-Type every response of the route carries |
 | `--help` | string |  | one-line description of the route |
 | `--category` | string |  | the heading the route is listed under in docs/Routes |
 | `--long-description` | string |  | the paragraph docs/Routes prints under the route |

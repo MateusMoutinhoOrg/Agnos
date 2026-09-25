@@ -7,10 +7,11 @@ import (
 	"{{.Module}}/sandbox/internal/routeio"
 )
 
-// RouteHandler answers GET /static/<item...> with one file of pageio.StaticRoot,
-// served straight out of the binary through sandbox.Deps.Embeddeps.
+// InternalPureHandler answers GET /static/<item...> with one file of
+// pageio.StaticRoot, served straight out of the binary through
+// sandbox.Deps.Embeddeps.
 //
-// The captured segments are attacker-controlled and the path they build is
+// entries.Item, the slice of the path after the mount, is attacker-controlled and the path they build is
 // cleaned by the embed adapter before the read, so "/static/../asset.go" would
 // otherwise reach a file outside pageio.StaticRoot. safeSegments is what forbids
 // it: nothing leaves this route that the caller did not name segment by segment
@@ -20,8 +21,8 @@ import (
 // `?sha=` is what the pageio helpers stamp on every link they build. It is a
 // cache key and never an input: the file that is served is the one the path
 // names, whatever the sha says. All it decides is cacheHeader below.
-func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
-	relative, ok := safeSegments(sandbox, route.GetStrings("item"))
+func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error {
+	relative, ok := safeSegments(sandbox, sandbox.Deps.Stringsdeps.Split(sandbox.Deps.Stringsdeps.TrimPrefix(entries.Item, "/"), "/"))
 	if !ok {
 		return routeio.Fail(sandbox, route, api.StatusBadRequest, "item",
 			"invalid static asset path")
@@ -34,7 +35,7 @@ func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Re
 	}
 
 	response.SetHeader("Content-Type", contentTypeOf(sandbox, relative))
-	response.SetHeader("Cache-Control", cacheHeader(sandbox, route.GetString("sha"), content))
+	response.SetHeader("Cache-Control", cacheHeader(sandbox, entries.Sha, content))
 	response.SetStatus(api.StatusOk)
 	response.Write(content)
 
@@ -60,11 +61,9 @@ func cacheHeader(sandbox *api.Sandbox, sha string, content []byte) string {
 // two spellings that move rather than name, and a separator inside a segment
 // means the request path was percent-encoded to hide one of them from the
 // dispatch's split. An empty segment cannot reach here — the dispatch drops
-// those — and is refused anyway rather than trusted.
+// those — and is refused anyway rather than trusted, which is also what
+// refuses an Item the request did not bring at all.
 func safeSegments(sandbox *api.Sandbox, segments []string) (string, bool) {
-	if len(segments) == 0 {
-		return "", false
-	}
 	for _, segment := range segments {
 		if segment == "" || segment == "." || segment == ".." {
 			return "", false

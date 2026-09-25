@@ -59,17 +59,19 @@
 {{- end }}
 {{- if .HasServer }}
 | `sandbox/api/{server.go,route.go}` | `build` | always |
-| `sandbox/internal/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute` |
-| `sandbox/internal/server/servermain.go` | `build` | always. `ServerMain` + the one dispatch that binds a request against `Server.Routes` |
+| `sandbox/internal/server/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute` |
+| `sandbox/internal/server/server/servermain.go` | `build` | always. `ServerMain` + the one dispatch that runs `Server.Routes` as a chain |
+| `sandbox/internal/server/route/{new.go,IsActionable.go,RequestHandler.go}` | `build` | always. The generic base every route is built on: the matcher and the `Entries` binder |
 | `sandbox/internal/routeio/*.go` | `build` | always |
-| `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
-| `sandbox/internal/routes/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, and its `ReadBody` |
+| `sandbox/internal/routeslist/health/{route.yaml,InternalPureHandler.go}` | `build` | always |
+| `sandbox/internal/routeslist/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, a 1:1 image of `route.yaml` |
+| `sandbox/internal/routeslist/<name>/entries.go` | `build` | always. `Entries`, and the `ReadBody` a body calls for |
 | `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/Routes/<route>.md` | `build` | always. One page per visible route; `docs/Routes/doc.md` indexes them |
-| `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-segment` / `add-header` / `add-param` / `set-body` / `add-body-field` / `import-body`, their `set-` editors and their inverses — never by hand |
-| `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
+| `sandbox/internal/routeslist/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-path` / `add-parameter` / `set-body` / `add-body-field` / `import-body`, their `set-` editors and their inverses — never by hand |
+| `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
-| `sandbox/internal/server/handle_*.go` | `build` | once. Six files, one per failure — what this project answers when no route does |
+| `sandbox/internal/server/errors/handle_*.go` | `build` | once. Six files, one per failure — what this project answers when no route does |
 {{- end }}
 {{- if .HasDatabase }}
 | `sandbox/internal/databaseio/*.go` | `build` | always |
@@ -80,11 +82,11 @@
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
 {{- end }}
 {{- if .HasFront }}
-| `sandbox/internal/pageio/templates.go` | `build` | always. `Render` + the asset helpers; `StaticMount` from the `static` route's first segment |
+| `sandbox/internal/pageio/templates.go` | `build` | always. `Render` + the asset helpers; `StaticMount` from the `static` route's first path |
 | `docs/FrontUsage/` | `build` | always. Both `doc.md` and `props.yaml` |
-| `sandbox/internal/routes/static/{route.yaml,handler.go}` | `front-init` | once. Keep `safeSegments` if you edit it |
+| `sandbox/internal/routeslist/static/{route.yaml,InternalPureHandler.go}` | `front-init` | once. Keep `safeSegments` if you edit it |
 | `assets/frontend/static/{styles/main.css,scripts/main.js}` | `front-init` | once |
-| `sandbox/internal/routes/<page>/{route.yaml,handler.go}` | `add-page` | once |
+| `sandbox/internal/routeslist/<page>/{route.yaml,InternalPureHandler.go}` | `add-page` | once |
 | `assets/frontend/pages/<page>.html` | `add-page` | once. Kept as is by a second `add-page` |
 {{- end }}
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |

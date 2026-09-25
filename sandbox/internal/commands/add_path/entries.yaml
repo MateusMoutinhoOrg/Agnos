@@ -1,0 +1,81 @@
+args:
+    - description: the id of the path, the Entries field its slice binds to (normalized to an exported Go name)
+      examples:
+        - add-path tenant --route create-user --start 1 --end 1
+      name: id
+      required: true
+      type: string
+category: Server System
+examples:
+    - add-path tenant --route create-user --start 1 --end 1
+    - add-path version --route api --start 0 --end 0 --trigger /v1
+flags:
+    - description: the route (identifier or package name) that receives the path
+      examples:
+        - add-path tenant --route create-user --start 1 --end 1
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - description: the index of the first request segment the slice reads (defaults to 0)
+      examples:
+        - add-path tenant --route create-user --start 1
+      identifiers:
+        - --start
+      name: start
+      type: string
+    - description: the index of the last request segment the slice reads, -1 for the last one (defaults to -1)
+      examples:
+        - add-path tenant --route create-user --start 1 --end 1
+      identifiers:
+        - --end
+      name: end
+      type: string
+    - description: what the slice has to read as for the route to run; without it the path is a plain capture
+      examples:
+        - add-path version --route api --start 0 --end 0 --trigger /v1
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
+    - description: 'how the trigger is compared: equal, prefix, suffix or regex (defaults to equal)'
+      examples:
+        - add-path file --route assets --start 1 --trigger .css --trigger-type suffix
+      identifiers:
+        - --trigger-type
+      name: trigger-type
+      type: string
+    - description: help text shown for the path
+      examples:
+        - add-path tenant --route create-user --description 'the tenant id'
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - default: "-1"
+      description: zero-based index to insert the path at (defaults to the end)
+      examples:
+        - add-path tenant --route create-user --position 0
+      identifiers:
+        - --position
+      name: position
+      type: int
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-path tenant --route create-user --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Add one slice of the request path to a route
+identifiers:
+    - add-path
+long-description: Inserts one entry into the route's paths and runs build so the route's new.go and entries.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Entries.<Id>, and — with --trigger — only lets the route run when the text matches.

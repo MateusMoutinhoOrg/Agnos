@@ -1,0 +1,111 @@
+args:
+    - description: the key of the parameter to rewrite
+      examples:
+        - set-parameter page --route list-users --type number
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - set-parameter page --route list-users --type number --default 1
+    - set-parameter token --route admin --font header --clear trigger
+flags:
+    - description: the route (identifier or package name) that declares the parameter
+      examples:
+        - set-parameter page --route list-users --type number
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - description: the key the parameter takes on
+      examples:
+        - set-parameter page --route list-users --rename p
+      identifiers:
+        - --rename
+      name: rename
+      type: string
+    - description: 'the new value type: string, number, boolean, datetime or string-array'
+      examples:
+        - set-parameter page --route list-users --type number
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - array: true
+      description: where the value is read from, in order (repeatable; replaces the whole list)
+      examples:
+        - set-parameter token --route admin --font header
+      identifiers:
+        - --font
+      name: font
+      type: string
+    - description: answer 400 when no font brings the value
+      examples:
+        - set-parameter q --route search --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: the new literal bound when no font brings the value
+      examples:
+        - set-parameter page --route list-users --default 1
+      identifiers:
+        - --default
+      name: default
+      type: string
+    - description: the new value the parameter has to match for the route to run
+      examples:
+        - set-parameter authorization --route admin --trigger Bearer
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
+    - description: 'the new comparison: equal, prefix, suffix or regex'
+      examples:
+        - set-parameter authorization --route admin --trigger-type prefix
+      identifiers:
+        - --trigger-type
+      name: trigger-type
+      type: string
+    - description: the new help text
+      examples:
+        - set-parameter page --route list-users --description 'the page to read'
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - array: true
+      description: an extra usage example (repeatable)
+      examples:
+        - set-parameter page --route list-users --example '?page=3'
+      identifiers:
+        - --example
+      name: example
+      type: string
+    - array: true
+      description: 'a key to take off: description, examples, default, required or trigger (repeatable)'
+      examples:
+        - set-parameter page --route list-users --clear default
+      identifiers:
+        - --clear
+      name: clear
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - set-parameter page --route list-users --type number --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rewrite one entry of a route's parameters
+identifiers:
+    - set-parameter
+long-description: 'Rewrites one entry of the route''s parameters in place and runs build. It is add-parameter applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor.'

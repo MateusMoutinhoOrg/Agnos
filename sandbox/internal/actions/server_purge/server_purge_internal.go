@@ -23,7 +23,7 @@ import (
 // which every later build reads as a doc that fails to load.
 var serverDirs = []string{
 	"sandbox/internal/server",
-	"sandbox/internal/routes",
+	utils.RoutesDir,
 	"sandbox/internal/routeio",
 	"sandbox/internal/commands/start_server",
 	"docs/Routes",

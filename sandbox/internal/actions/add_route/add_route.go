@@ -7,9 +7,10 @@ import (
 )
 
 // AddRoute scaffolds a new route package under
-// sandbox/internal/routes/<name>/ — a declared route.yaml and a stub
-// handler.go — then runs build as a follow-up step so its new.go — the
-// api.Route that lands in Server.Routes — is generated for it.
+// sandbox/internal/routeslist/<name>/ — a declared route.yaml and a stub
+// InternalPureHandler.go — then runs build as a follow-up step so its new.go —
+// the api.Route that lands in Server.Routes — and its entries.go are
+// generated for it.
 func AddRoute(sandbox *api.Sandbox, props api.AddRouteProps) error {
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddRouteInternal(sandbox, io, props); err != nil {

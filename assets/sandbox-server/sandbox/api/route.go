@@ -1,65 +1,101 @@
 package api
 
-// RouteField is one value a route binds off a request — the parsed form of one
-// captured segment of `paths`, or of one entry under `headers` or `params` in
-// that route's route.yaml. It is matched by Id: the header name, the query key
-// or the name the captured segment is declared under, all read back with the
-// Get* readers of Route.
-type RouteField struct {
-	// Type is the declared type: "string", "boolean", "int" or "float".
-	Type string
-	// Id is the name the field is declared and read back under.
-	Id string
-	// Required reports that the request is rejected without it.
-	Required bool
-	// Array reports that every occurrence is kept, not just the first; on
-	// the last captured segment of `paths` it takes every segment left in
-	// the path.
-	Array bool
-	// Description is the one-line help text.
-	Description string
-	// Examples are whole requests the docs print.
-	Examples []string
-	// Default is the value bound when the field is absent, spelled as it
-	// is written in route.yaml.
-	Default string
-	// HasDefault tells a declared empty default from no default at all.
-	HasDefault bool
-	// Min and Max bound a numeric value; HasMin and HasMax tell a bound of
-	// zero from no bound.
-	Min    float64
-	HasMin bool
-	Max    float64
-	HasMax bool
-	// Identifier is the value the request has to bring under this Id for the
-	// route to match at all — an exact comparison, "" when the field carries
-	// no such condition. It is what puts a header or a query parameter into
-	// the match rather than only into the binding.
-	Identifier string
-	// StartsWith is the same condition loosened to a prefix: the value the
-	// request brings has to begin with it. "" when the field carries no such
-	// condition, and never set alongside Identifier.
-	StartsWith string
+// TriggerType is how a Trigger compares the text it is handed.
+type TriggerType int
+
+const (
+	// EqualTrigger matches a text that is exactly the trigger's Value.
+	EqualTrigger TriggerType = iota
+	// PrefixTrigger matches a text that begins with the Value.
+	PrefixTrigger
+	// SuffixTrigger matches a text that ends with the Value.
+	SuffixTrigger
+	// RegexTrigger matches a text the Value, a regular expression, matches.
+	RegexTrigger
+)
+
+// Trigger is the condition a path slice or a parameter value has to meet for
+// a route to run at all — the parsed form of one `trigger:` of route.yaml.
+// Failing it is a non-match, never a 400: the request is for some other route.
+type Trigger struct {
+	// Exist tells a declared trigger from none at all; an entry with none
+	// matches whatever the request brought.
+	Exist bool
+	// Type is how Value is compared.
+	Type TriggerType
+	// Value is what the text is compared against.
+	Value string
 }
 
-// RoutePath is one segment of the route's url, in declaration order. Exactly
-// one of the two is filled: a literal the request path has to spell, or a
-// captured field that matches whatever sits in its place.
-type RoutePath struct {
-	// Identifier is the literal segment, leading slash included
-	// ("/users"); "/" alone fixes the empty path and matches no segment of
-	// its own. It is empty on a capture.
-	Identifier string
-	// StartsWith reports that Identifier only fixes the beginning of the
-	// path: every segment after the ones it spells is left unmatched, so the
-	// route answers a whole subtree. It is always the last entry of Paths,
-	// it may spell more than one segment, and "/" alone matches every
-	// request.
-	StartsWith bool
-	// Field is the captured segment's declaration, nil on a literal. Only
-	// the last entry of Paths may declare an Array, and it then takes every
-	// segment left in the path.
-	Field *RouteField
+// Path is one entry of `paths` in route.yaml: the slice of request segments
+// from Start to End, both inclusive, End -1 standing for the last segment. The
+// slice reads as "/" followed by its segments joined by "/", and is bound to
+// the Entries field tagged with its Id.
+type Path struct {
+	// Id is the Entries field the slice is bound to.
+	Id string
+	// Start is the index of the first segment of the slice.
+	Start int
+	// End is the index of the last segment of the slice, -1 for the last
+	// segment of the request.
+	End int
+	// Description is the one-line help text.
+	Description string
+	// Trigger is what the slice has to match for the route to run.
+	Trigger Trigger
+}
+
+// ParameterFont is one place of the request a Parameter is read from.
+type ParameterFont int
+
+const (
+	// HeaderParam reads a request header, matched without regard to case.
+	HeaderParam ParameterFont = iota
+	// QueryParam reads a query-string parameter.
+	QueryParam
+)
+
+// ParameterType is the type a Parameter is converted to before it reaches
+// Entries.
+type ParameterType int
+
+const (
+	// StringType is bound as a string.
+	StringType ParameterType = iota
+	// NumberType is bound as a float64.
+	NumberType
+	// BooleanType is bound as a bool: true/1 or false/0.
+	BooleanType
+	// DateTimeType is bound as a string that has to read as RFC 3339.
+	DateTimeType
+	// StringArrayType is bound as a []string: every occurrence of a query
+	// key, or a header's comma-separated values.
+	StringArrayType
+)
+
+// Parameter is one entry of `parameters` in route.yaml: one value read off the
+// request under Key, from the first of Fonts that carries it, and bound to the
+// Entries field tagged with its Id.
+type Parameter struct {
+	// Id is the Entries field the value is bound to.
+	Id string
+	// Key is the query key or the header name the value is read under.
+	Key string
+	// Fonts are the places the value is read from, in order: the first one
+	// that brings a value wins.
+	Fonts []ParameterFont
+	// Required reports that the request is answered 400 without it.
+	Required bool
+	// Type is what the value is converted to.
+	Type ParameterType
+	// Default is the value bound when the request brings none, spelled as
+	// route.yaml writes it; HasDefault tells an empty default from none.
+	Default    string
+	HasDefault bool
+	// Trigger is what the value has to match for the route to run.
+	Trigger Trigger
+	// Description is the one-line help text.
+	Description string
 }
 
 // RouteBody is the request body a route declares — the parsed form of `body:`
@@ -103,35 +139,26 @@ type RouteFailure struct {
 
 // Route is one http route of the project, as the sandbox offers it: the whole
 // of what its route.yaml declares, plus the handler behind it. Server.Routes
-// holds one per sandbox/internal/routes/<name>/, each built by that package's
-// generated NewRoute, in run order — lowest Priority first, and most specific
-// within one rung.
+// holds one per sandbox/internal/routeslist/<name>/, each built by that
+// package's generated NewRoute, in run order — lowest Priority first.
 //
 // What Server.Routes holds is the declaration alone: nothing is ever bound
-// onto it. The server dispatch copies it with BindRoute, fills that copy's
-// Items from the path, the headers and the query string, and hands it to
-// Handler; a caller holding the sandbox can do the same.
+// onto it. The dispatch copies it with BindRoute, puts the request and the
+// response on the copy, and hands the copy to IsActionable and RequestHandler.
 type Route struct {
 	// Name is the package directory of the route, snake_case.
 	Name string
-	// Method is the http method it answers to ("GET", "POST").
-	Method string
+	// AcceptMethods are the http methods it answers to ("GET", "POST").
+	AcceptMethods []string
 	// Priority is the rung this route runs on when several match one
 	// request: the dispatch runs them from the lowest upwards and stops at
-	// the first handler that sets a status. Zero is the default, so a route
-	// declaring nothing runs before one declaring 5.
+	// the first handler that sets a status.
 	Priority int
-	// Pattern is its path as it reads in docs and messages
-	// ("/users/{tenant}/create").
+	// ResponseType is the Content-Type set on the response before the
+	// handler runs; the handler may set another.
+	ResponseType string
+	// Pattern is its path as it reads in docs and messages.
 	Pattern string
-	// Paths are the url's segments, in declaration order.
-	Paths []RoutePath
-	// Headers are the request headers it binds, in declaration order.
-	Headers []RouteField
-	// Params are the query parameters it binds, in declaration order.
-	Params []RouteField
-	// Body is the request body declaration.
-	Body RouteBody
 	// Category groups it on the generated Routes page.
 	Category string
 	// Help is the one-line description.
@@ -142,16 +169,27 @@ type Route struct {
 	Examples []string
 	// Hidden keeps it off the Routes page without disabling it.
 	Hidden bool
+	// Paths are the slices of the request path it reads, in declaration
+	// order.
+	Paths []Path
+	// Parameters are the headers and query parameters it reads, in
+	// declaration order.
+	Parameters []Parameter
+	// Body is the request body declaration.
+	Body RouteBody
 
-	// Items holds the values bound to the declaration: one entry per field
-	// Id, in request order for an array, one element long for a scalar,
-	// absent when nothing was bound. The Get* fields read it.
-	Items map[string][]any
+	// InternalPurehandler is the route package's own InternalPureHandler,
+	// closed over the sandbox: a func(route *Route, entries *Entries,
+	// response *serverdeps.Response) error whose Entries is that package's
+	// generated struct. It is held as any because every route's Entries is a
+	// type of its own; RequestHandler builds and fills one through
+	// Deps.Reflectdeps and calls it.
+	InternalPurehandler any
 
-	// Request is the http request this instance was bound from and
-	// Response the one being written. Both are handed over as any:
-	// sandbox/api may name no type of sandbox/deps, so the server layer
-	// reads them back through routeio.RequestOf and routeio.ResponseOf.
+	// Request is the http request this copy was bound from and Response the
+	// one being written. Both are handed over as any: sandbox/api may name no
+	// type of sandbox/deps, so the server layer reads them back through
+	// routeio.RequestOf and routeio.ResponseOf.
 	Request  any
 	Response any
 
@@ -160,126 +198,41 @@ type Route struct {
 	// is the one way any part of the server layer raises a failure.
 	Failure *RouteFailure
 
-	// GetItem returns every value bound under one Id, nil when none was.
-	GetItem func(id string) []any
-	// GetString returns the first string bound under one Id, "" when none
-	// was.
-	GetString func(id string) string
-	// GetBool returns the first boolean bound under one Id, false when none
-	// was.
-	GetBool func(id string) bool
-	// GetInt returns the first int bound under one Id, 0 when none was.
-	GetInt func(id string) int
-	// GetFloat returns the first float bound under one Id, 0 when none was.
-	GetFloat func(id string) float64
-	// GetStrings returns every string bound under one Id, in order.
-	GetStrings func(id string) []string
-	// GetInts returns every int bound under one Id, in order.
-	GetInts func(id string) []int
-	// GetFloats returns every float bound under one Id, in order.
-	GetFloats func(id string) []float64
-
-	// Handler runs the route against one bound copy — the values in its
-	// Items and the response it carries — and returns the failure it did
-	// not answer itself, nil otherwise. What it answered with is the status
-	// it wrote on the response, never what it returns: a handler that
-	// writes no status hands the request to the next route of the chain. It
-	// takes that copy rather than closing over one, so the declaration on
-	// Server.Routes is shared by every request while nothing bound ever is.
-	// It is the route package's own RouteHandler, closed over the sandbox.
-	Handler func(route *Route) error
+	// IsActionable reports whether one bound copy — its Request set — is for
+	// this route: the method is accepted, and every path slice and every
+	// parameter declaring a trigger matches it.
+	IsActionable func(bound *Route) bool
+	// MatchesPath reports whether one bound copy's request path is for this
+	// route whatever its method — what tells a 405 from a 404.
+	MatchesPath func(bound *Route) bool
+	// RequestHandler binds one bound copy's request onto a fresh Entries and
+	// runs InternalPurehandler with it. It returns the failure the handler
+	// did not answer itself, nil otherwise; what it answered with is the
+	// status it wrote, and a handler writing none hands the request to the
+	// next route of the chain.
+	RequestHandler func(bound *Route) error
 }
 
-// NewRoute returns an empty Route with Items open and every Get* reader bound
-// to it. A generated NewRoute fills the declaration and the handler on top of
-// what this returns, so every route reads its values the same way.
+// NewRoute returns an empty Route with every slice open. The generic
+// sandbox/internal/server/route.NewRoute fills the matcher and the handler on
+// top of it, and a route's generated NewRoute its declaration.
 func NewRoute() *Route {
-	route := &Route{
-		Examples: []string{},
-		Paths:    []RoutePath{},
-		Headers:  []RouteField{},
-		Params:   []RouteField{},
-		Items:    map[string][]any{},
+	return &Route{
+		AcceptMethods: []string{},
+		Examples:      []string{},
+		Paths:         []Path{},
+		Parameters:    []Parameter{},
 	}
-
-	bindRouteReaders(route)
-	return route
 }
 
 // BindRoute copies one declaration into the route a single request runs on:
-// the same declared fields — the slices are read-only and shared — with Items
-// empty, the readers pointed at the copy and the handler carried over. The
-// dispatch calls it once per request, so two requests in flight never share a
-// bound value.
+// the same declared fields — the slices are read-only and shared — with no
+// request, response or failure yet. The dispatch calls it once per request, so
+// two requests in flight never share a bound value.
 func BindRoute(route *Route) *Route {
 	bound := *route
-	bound.Items = map[string][]any{}
 	bound.Request = nil
 	bound.Response = nil
 	bound.Failure = nil
-
-	bindRouteReaders(&bound)
 	return &bound
-}
-
-// bindRouteReaders points every Get* field of a route at that route's own
-// Items. A copy has to be read back through it: the readers are closures, so
-// the ones copied off the declaration would still read the declaration's.
-func bindRouteReaders(route *Route) {
-	route.GetItem = func(id string) []any {
-		return route.Items[id]
-	}
-	route.GetString = func(id string) string {
-		value, _ := firstRouteItem(route, id).(string)
-		return value
-	}
-	route.GetBool = func(id string) bool {
-		value, _ := firstRouteItem(route, id).(bool)
-		return value
-	}
-	route.GetInt = func(id string) int {
-		value, _ := firstRouteItem(route, id).(int)
-		return value
-	}
-	route.GetFloat = func(id string) float64 {
-		value, _ := firstRouteItem(route, id).(float64)
-		return value
-	}
-	route.GetStrings = func(id string) []string {
-		values := []string{}
-		for _, item := range route.Items[id] {
-			if value, ok := item.(string); ok {
-				values = append(values, value)
-			}
-		}
-		return values
-	}
-	route.GetInts = func(id string) []int {
-		values := []int{}
-		for _, item := range route.Items[id] {
-			if value, ok := item.(int); ok {
-				values = append(values, value)
-			}
-		}
-		return values
-	}
-	route.GetFloats = func(id string) []float64 {
-		values := []float64{}
-		for _, item := range route.Items[id] {
-			if value, ok := item.(float64); ok {
-				values = append(values, value)
-			}
-		}
-		return values
-	}
-}
-
-// firstRouteItem is the one value of an Id a scalar reader wants, nil when
-// nothing was bound under it.
-func firstRouteItem(route *Route, id string) any {
-	items := route.Items[id]
-	if len(items) == 0 {
-		return nil
-	}
-	return items[0]
 }

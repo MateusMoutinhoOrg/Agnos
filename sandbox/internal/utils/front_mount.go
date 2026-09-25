@@ -26,7 +26,7 @@ const DefaultStaticMount = "/static"
 // of a Go file, which the format pass then reports as a parse error on a file
 // the next build writes correctly.
 //
-// A missing, unparsable or capture-first static route falls back to
+// A missing, unparsable or trigger-less-first static route falls back to
 // DefaultStaticMount: this runs on every build, so it reports nothing and
 // leaves the complaining to CollectRoutes, which parses the same file.
 func CollectFrontMount(sandbox *api.Sandbox, io *smartio.SmartIO) string {
@@ -40,9 +40,9 @@ func CollectFrontMount(sandbox *api.Sandbox, io *smartio.SmartIO) string {
 		return DefaultStaticMount
 	}
 
-	if len(conf.Paths) == 0 || conf.Paths[0].Identifier == "" {
+	if len(conf.Paths) == 0 || !conf.Paths[0].Trigger.Exists || conf.Paths[0].Trigger.Value == "" {
 		return DefaultStaticMount
 	}
 
-	return conf.Paths[0].Identifier
+	return conf.Paths[0].Trigger.Value
 }

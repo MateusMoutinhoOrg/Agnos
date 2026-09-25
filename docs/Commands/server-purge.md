@@ -6,7 +6,7 @@ Remove the http server layer and every route in it
 agnos server-purge [--path <path>] [--quiet]
 ```
 
-Drops sandbox/internal/{server,routes,routeio} and the start-server command, then re-renders. The cli layer and the installed deps are left in place.
+Drops sandbox/internal/{server,routeslist,routeio} and the start-server command, then re-renders. The cli layer and the installed deps are left in place.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

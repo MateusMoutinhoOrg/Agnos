@@ -1,4 +1,4 @@
-package server
+package errors
 
 import (
 	"{{.Module}}/sandbox/api"

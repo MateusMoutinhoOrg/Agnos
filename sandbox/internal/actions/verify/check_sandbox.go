@@ -148,7 +148,8 @@ var constructorExempt = []string{"sandbox.go", "command.go", "route.go"}
 
 // checkSandboxConstructors enforces that the package building a contract builds
 // it under the one name the generated constructor calls: sandbox/api/<x>.go is
-// a field of the Sandbox, so sandbox/internal/<x>/new.go declares New<X>.
+// a field of the Sandbox, so sandbox/internal/<x>/new.go — or the one level
+// down utils.ConstructorSource finds — declares New<X>.
 //
 // A contract with no sandbox/internal/<x>/new.go passes. Such a field is one
 // this repo does not fill — an api published for a consumer to install, say —
@@ -164,7 +165,7 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []strin
 
 		base := sandbox.Deps.Stringsdeps.TrimSuffix(name, ".go")
 		constructor := "New" + sandbox.Deps.Stringsdeps.ToUpper(base[:1]) + base[1:]
-		newFile := "sandbox/internal/" + base + "/new.go"
+		newFile := utils.ConstructorSource(io, base) + "/new.go"
 
 		if !io.IsFile(newFile) {
 			continue

@@ -7,7 +7,7 @@ import (
 )
 
 // RemoveRouteInternal deletes every file under
-// sandbox/internal/routes/<name>/ plus the directory itself. The generated
+// sandbox/internal/routeslist/<name>/ plus the directory itself. The generated
 // health route is refused: it is rendered by build, not declared. So is a
 // route with an html template beside it — that is a page, and dropping its
 // route alone would leave the html orphaned, so remove-page is the editor for

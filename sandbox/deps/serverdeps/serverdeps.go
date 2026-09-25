@@ -9,7 +9,7 @@ package serverdeps
 // The contract is deliberately unopinionated: it opens the port, applies the
 // timeouts and hands every request to the one Handler. Routing, method
 // dispatch, path parameters, 404 and 405 are the generated
-// sandbox/internal/server/servermain.go's business, never the library's.
+// sandbox/internal/server/server/servermain.go's business, never the library's.
 // Only builtin types cross this boundary — no `time.Time`, no `io.Reader`, no
 // type of the concrete library.
 

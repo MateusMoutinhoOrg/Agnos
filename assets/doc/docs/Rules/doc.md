@@ -56,8 +56,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
   `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
 - Every `sandbox/api/<x>.go` other than `sandbox.go`, `command.go` and `route.go` is a field of
-  the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go`
-  declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
+  the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go` —
+  or `sandbox/internal/<x>/<x>/new.go`, for a layer split into packages — declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
   such file is a field nothing fills, and no constructor is written for it. **(verify)**
 - `sandbox/new.go` is one `<x>.Constructor(&self)` per directory of `sandbox/constructors/`,
   in name order, and nothing else. The directories are the list, so a constructor written by
@@ -130,64 +130,58 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 {{ end }}{{ if .HasServer }}
 ## Routes
 
-- A route is `sandbox/internal/routes/<name>/`, holding `route.yaml` (the declaration),
-  `new.go` (generated) and `handler.go` (hand-written) — the server layer's mirror of a
-  command package, snake_case for a kebab-case name. **(verify)**
-- Only `RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error`
-  is exported from a route. **(verify)**
+- A route is `sandbox/internal/routeslist/<name>/`, holding `route.yaml` (the declaration),
+  `new.go` and `entries.go` (generated) and `InternalPureHandler.go` (hand-written) — the
+  server layer's mirror of a command package, snake_case for a kebab-case name. **(verify)**
+- Only `InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error`
+  is exported from a route's hand-written half. **(verify)**
+- `new.go` is a 1:1 image of `route.yaml`, built on the generic
+  `sandbox/internal/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
+  one field per path, one per parameter, each tagged `id:"<id>"` — plus the `ReadBody` a body
+  calls for. The generic `RequestHandler` fills `Entries` by those tags through
+  `Deps.Reflectdeps`.
 - Setting a status on the response is what answers a request and ends the chain. A handler that
   writes none has declined, and the next route matching that request runs; a handler that
   returns a non-nil error without answering has failed, and `handle_server_error.go` answers
   for it. What a handler returns is never the status.
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
-  `add-segment` / `set-segment` / `remove-segment`, `add-header` / `set-header` /
-  `remove-header`, `add-param` / `set-param` / `remove-param`, `set-body` and
-  `add-body-field` / `set-body-field` / `remove-body-field` / `import-body` — one editor per
-  place the file holds something and one `set-` per `add-`, so a bound that was forgotten is
-  never a remove-and-declare-again, and never by hand: they re-render it with keys in
-  alphabetical order and drop comments. `show-route` reads it and writes nothing.
-- Every `identifier` of `paths` starts with `/` and spells exactly one segment; `/` alone is
-  the root. A route declares at least one literal segment, and every entry of `paths` carries
-  exactly one of `identifier`, `starts-with-identifier` and `name`. **(verify)**
-- A `starts-with-identifier` starts with `/` too, may spell more than one segment, and is the
-  last entry of `paths`: everything after it is unmatched by definition. A route declares one
-  of it and an `array` capture, never both — each already takes every segment left. **(verify)**
-- A header or a query parameter may carry one value condition, `identifier` or
-  `starts-with-identifier` and never both, which decides whether the route runs at all. A
-  request that fails one is not a bad request: that route is simply not the one for it.
-  **(verify)**
-- `priority` is the rung a route runs on, lowest first, and is never negative. **(verify)**
-- A captured segment is always `required: true` and never defaulted: it is present whenever
-  the route matched. `array: true` on it takes every segment left in the path into a `[]T`
-  list, which only the last entry of `paths` may do, and which needs at least one segment to
-  match — so its name is declared nowhere else. **(verify)**
-- A name is declared once per origin, and the origins declaring the same name agree on its
-  type — one name binds one entry of `Route.Items`. **(verify)**
+  `add-path` / `set-path` / `remove-path`, `add-parameter` / `set-parameter` /
+  `remove-parameter`, `set-body` and `add-body-field` / `set-body-field` / `remove-body-field` /
+  `import-body` — one editor per place the file holds something and one `set-` per `add-`, and
+  never by hand: they re-render it with keys in alphabetical order and drop comments.
+  `show-route` reads it and writes nothing.
+- `methods`, `priority` and `response-type` are required on every route; `priority` is never
+  negative, and `methods` holds known methods only. **(verify)**
+- A route declares at least one path. A path's `start` is never negative and its `end` is `-1`
+  or not before `start`; a `trigger` has a known type (`equal`, `prefix`, `suffix`, `regex`), a
+  value, and — for a regex — one that compiles. **(verify)**
+- Every `id` of `paths` and `parameters` is an exported Go name, unique across both and never
+  `FullRoute` or `Body`: each one names one field of `Entries`. **(verify)**
+- A parameter declares a known type and at least one known font; it is never both `required`
+  and defaulted, and a `boolean` is never `required`. **(verify)**
+- A trigger decides whether the route runs at all. A request that fails one is not a bad
+  request: that route is simply not the one for it.
 - No two routes declare the same method and path pattern *on the same rung*. Sharing a pattern
   across rungs is what a middleware in front of a route is; sharing a rung as well would leave
   the order between them undeclared. **(verify)**
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
   subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
-- `Server.Routes` is the whole http surface, one `api.Route` per declared route, built by
-  `sandbox/internal/server/new.go` from each package's generated `NewRoute`. The dispatch reads it and
-  nothing about the route set is generated per route anywhere else; each request runs on its
-  copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
-- Run order is the collector's, not the directory's: the lowest `priority` first, then — within
-  one rung — most `identifier`s, then the longest ones, then the routes of fixed length before
-  the ones taking the rest of the path, then the pattern alphabetically. Without it a route on
-  `/` would swallow one on `/home`.
+- `Server.Routes` is the whole http surface, one `*api.Route` per declared route, built by
+  `sandbox/internal/server/server/new.go` from each package's generated `NewRoute`. The dispatch
+  reads it and nothing about the route set is generated per route anywhere else; each request
+  runs on its copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
+- Run order is the collector's, not the directory's: the lowest `priority` first, then by name.
 - Nothing in the dispatch writes a response. Every way a request ends without a route answering
-  it is handed to one of the six `sandbox/internal/server/handle_*.go` — one per status, each
-  holding a function with the route handler's own signature. They are written **once**, by the
-  first `build` that finds the server layer, and no build rewrites them: what a project answers
-  when nothing matches is the project's. **(verify)**
+  it is handed to one of the six `sandbox/internal/server/errors/handle_*.go` — one per status.
+  They are written **once**, by the first `build` that finds the server layer, and no build
+  rewrites them: what a project answers when nothing matches is the project's. **(verify)**
 - A failure is raised with `routeio.Fail` — from the dispatch, from a generated `ReadBody` or
   from a handler — which reaches the right file through the `Fail` field of `api.Server`,
-  because a route package may not import `sandbox/internal/server`. A `Handle*` file answers a
-  failure and never raises one.
+  because a route package may not import `sandbox/internal/server/server`. A `Handle*` file
+  answers a failure and never raises one.
 - A failure the dispatch raises with nothing to add — nothing matched, method not allowed —
   carries no message, so the wording is the one its `Handle*` file spells. One that knows
-  something that file could not — which field would not bind, and why — carries its own.
+  something that file could not — which parameter would not bind, and why — carries its own.
   `routeio.FailureOf` is the one reading of that rule.
 - A response body for a failure is written by `routeio.WriteError` alone, so every route answers
   one JSON shape.
@@ -208,9 +202,9 @@ Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
 - A page renders through `pageio.Render` alone, which is what registers `staticref`, `cssref`,
   `jsref`, `dirref`, `inline` and `include`. A helper pointed at an asset that is not there
   fails the render, so a dead link is a `500` and never a silent `404`.
-- `pageio.StaticMount` is generated from the `identifier` of the first segment of the `static`
+- `pageio.StaticMount` is generated from the trigger value of the first path of the `static`
   route: the mount is declared in one place, and renaming it moves every link.
-- Whoever edits `sandbox/internal/routes/static/handler.go` keeps `safeSegments`: it is the
+- Whoever edits `sandbox/internal/routeslist/static/InternalPureHandler.go` keeps `safeSegments`: it is the
   only thing between a caller's path and the rest of the embedded asset tree.
 
 Every helper and every var is in [FrontUsage](../FrontUsage/doc.md).

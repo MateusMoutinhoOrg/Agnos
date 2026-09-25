@@ -26,4 +26,4 @@ flags:
 help: Delete one declared route
 identifiers:
     - remove-route
-long-description: 'Removes sandbox/internal/routes/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone.'
+long-description: 'Removes sandbox/internal/routeslist/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone.'

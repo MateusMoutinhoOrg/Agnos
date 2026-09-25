@@ -42,8 +42,8 @@ the commands that give it one — with the route already answered, so it is neve
 
 | After | Offered |
 | --- | --- |
-| `add-route`, `add-page` | `import-body`, `add-body-field`, `set-body`, `add-param`, `add-header`, `add-segment`, `show-route` |
-| `add-body-field`, `add-param`, `add-header`, `add-segment` | one more of the same, then `show-route` |
+| `add-route`, `add-page` | `import-body`, `add-body-field`, `set-body`, `add-parameter`, `add-path`, `show-route` |
+| `add-body-field`, `add-parameter`, `add-path` | one more of the same, then `show-route` |
 | `import-body`, `set-body`, `set-body-field` | `show-route`, then the editors of what it wrote |
 | `add-command` | `add-flag`, `add-arg`, `set-command` |
 | `add-flag`, `add-arg` | one more of the same, or the other |
@@ -174,9 +174,9 @@ a new one. The headings are the ones of the surface being added to — the route
 `docs/Routes` and a command in `docs/Commands`, and the two never share a heading.
 
 Some of them are read off the thing the command is about rather than off the project: the
-parameters, headers, segments and body properties a route declares — the nested ones by the
-dotted path that names them — are the list `set-param`, `set-header`, `set-segment`,
-`set-body-field` and their `remove-` inverses offer; a command's own flags and args are the
+parameters, paths and body properties a route declares — the nested ones by the dotted path
+that names them — are the list `set-parameter`, `set-path`, `set-body-field` and their
+`remove-` inverses offer; a command's own flags and args are the
 list `remove-flag` and `remove-arg` offer; and the tables of a database, the fields of a table
 and the collections nested in one are what the `--table`, the name and the `--parent` of
 `add-table-field` and its editors offer.

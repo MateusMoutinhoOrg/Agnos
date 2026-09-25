@@ -9,18 +9,17 @@ import (
 
 // routesDir holds one declared route per sub-directory, the server layer's
 // mirror of sandbox/internal/commands.
-const routesDir = "sandbox/internal/routes"
+const routesDir = utils.RoutesDir
 
-// CollectRoutes reads every sandbox/internal/routes/<name>/route.yaml and
-// returns one data map per route, for the generated
-// sandbox/internal/routes/<name>/new.go and the {{range .Routes}} loop of
-// sandbox/internal/server/new.go. It is the server layer's CollectCommands: what the
-// map holds is the declaration itself, which the dispatch reads back off
-// Server.Routes at runtime, so nothing here is a Go spelling of the routing.
+// CollectRoutes reads every sandbox/internal/routeslist/<name>/route.yaml and
+// returns one data map per route, for the generated new.go and entries.go of
+// that route and the {{range .Routes}} loop of
+// sandbox/internal/server/server/new.go. It is the server layer's
+// CollectCommands: what the map holds is the declaration itself, which the
+// dispatch reads back off Server.Routes at runtime.
 //
-// The list comes back ordered for running, not in listing order: the lowest
-// priority first, then the most specific route, so a route fixing "/" can
-// never swallow "/home".
+// The list comes back ordered for running: the lowest priority first, then by
+// name, so two builds of one tree always lay the chain down the same way.
 func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 	var routes []map[string]any
 
@@ -37,14 +36,10 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("routes/%s/route.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", name, err)
 		}
 
 		if err := checkRouteSchema(sandbox, name, conf); err != nil {
-			return nil, err
-		}
-
-		if err := checkRoutePaths(sandbox, name, conf); err != nil {
 			return nil, err
 		}
 
@@ -56,29 +51,16 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 }
 
 // sortRoutes puts the routes in the order the dispatch runs them: the lowest
-// `priority` first — that is the whole of what the chain reads — and then, for
-// the routes sharing one rung, the same specificity order the layer has always
-// had: the route fixing the most literal segments, then the one whose literals
-// spell the most characters, then the one of fixed length before the one
-// taking the rest of the path, then by pattern for a stable tie-break. The
-// ordering is the collector's, so Server.Routes is already in run order and
-// the dispatch only has to range.
+// `priority` first — that is the whole of what the chain reads — and then by
+// name for a stable tie-break. The ordering is the collector's, so
+// Server.Routes is already in run order and the dispatch only has to range.
 func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
 		left, right := routes[i], routes[j]
 		if left["Priority"] != right["Priority"] {
 			return left["Priority"].(int) < right["Priority"].(int)
 		}
-		if left["IdentifierCount"] != right["IdentifierCount"] {
-			return left["IdentifierCount"].(int) > right["IdentifierCount"].(int)
-		}
-		if left["IdentifierLen"] != right["IdentifierLen"] {
-			return left["IdentifierLen"].(int) > right["IdentifierLen"].(int)
-		}
-		if left["HasRest"] != right["HasRest"] {
-			return !left["HasRest"].(bool)
-		}
-		return left["Pattern"].(string) < right["Pattern"].(string)
+		return left["Name"].(string) < right["Name"].(string)
 	})
 }
 
@@ -87,7 +69,7 @@ func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 // accepts what the declaration means to reject.
 func checkRouteSchema(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) error {
 	for _, key := range schemaUnknownKeys(conf.Body.Schema) {
-		return sandbox.Deps.Std.Errorf("routes/%s/route.yaml: json-schema key %q is outside the supported subset", name, key)
+		return sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: json-schema key %q is outside the supported subset", name, key)
 	}
 	return nil
 }
@@ -106,61 +88,26 @@ func schemaUnknownKeys(schema *routeconf.Schema) []string {
 	return unknown
 }
 
-// checkRoutePaths refuses a `paths` the dispatch cannot match: the segment
-// taking the rest of the path only reads as a suffix if it is the last one,
-// and what it binds is a list, which no header or query parameter of the same
-// name could go on filling.
-func checkRoutePaths(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) error {
-	at := utils.RouteRestIndex(conf.Paths)
-	if at < 0 {
-		return nil
-	}
-
-	if at != len(conf.Paths)-1 {
-		return sandbox.Deps.Std.Errorf("routes/%s/route.yaml: the captured segment %q is an array before the end of `paths`; only the last segment takes the rest of the path", name, conf.Paths[at].Field.Key)
-	}
-
-	key := conf.Paths[at].Field.Key
-	for _, origin := range []struct {
-		label  string
-		fields []routeconf.Field
-	}{{"header", conf.Headers}, {"query parameter", conf.Params}} {
-		if utils.FindRouteField(sandbox, origin.fields, key) >= 0 {
-			return sandbox.Deps.Std.Errorf("routes/%s/route.yaml: %q is both the segment taking the rest of the path and a declared %s; the two cannot fill one field", name, key, origin.label)
-		}
-	}
-
-	return nil
-}
-
-// routeData is one route as the generated new.go reads it, plus the keys
-// sortRoutes orders the set by.
+// routeData is one route as the generated new.go and entries.go read it.
 func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map[string]any {
 	paths := make([]map[string]any, 0, len(conf.Paths))
-	for _, segment := range conf.Paths {
-		paths = append(paths, segmentData(sandbox, segment))
+	for _, path := range conf.Paths {
+		paths = append(paths, pathData(path))
 	}
-	headers := make([]map[string]any, 0, len(conf.Headers))
-	for _, field := range conf.Headers {
-		headers = append(headers, routeFieldData(sandbox, field))
-	}
-	params := make([]map[string]any, 0, len(conf.Params))
-	for _, field := range conf.Params {
-		params = append(params, routeFieldData(sandbox, field))
+	parameters := make([]map[string]any, 0, len(conf.Parameters))
+	for _, parameter := range conf.Parameters {
+		parameters = append(parameters, parameterData(parameter))
 	}
 
 	return map[string]any{
 		"Name":            name,
-		"Method":          conf.Method,
+		"Methods":         conf.Methods,
 		"Priority":        conf.Priority,
+		"ResponseType":    conf.ResponseType,
 		"Trigger":         routeTrigger(conf),
 		"Pattern":         conf.Pattern(),
-		"IdentifierCount": conf.IdentifierCount(),
-		"IdentifierLen":   conf.IdentifierLen(),
-		"HasRest":         utils.RouteRestIndex(conf.Paths) >= 0,
 		"Paths":           paths,
-		"Headers":         headers,
-		"Params":          params,
+		"Parameters":      parameters,
 		"Category":        conf.Category,
 		"Help":            conf.Help,
 		"LongDescription": conf.LongDescription,
@@ -173,70 +120,107 @@ func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map
 	}
 }
 
-// routeTrigger is the first literal segment of a route — the one that names it
-// in docs/Routes, a prefix trigger included. A route made of captures alone
-// falls back to its pattern.
+// routeTrigger is the value of the first path trigger of a route — the one
+// that names it in docs/Routes. A route whose paths declare none falls back to
+// its pattern.
 func routeTrigger(conf *routeconf.RouteConf) string {
-	for _, segment := range conf.Paths {
-		if segment.Field == nil {
-			return segment.Identifier
+	for _, path := range conf.Paths {
+		if path.Trigger.Exists {
+			return path.Trigger.Value
 		}
 	}
 	return conf.Pattern()
 }
 
-// segmentData is one entry of `paths` as the generated api.RoutePath literal
-// reads it: a literal segment carries its identifier and whether that
-// identifier only fixes the beginning of the path, a capture its field.
-func segmentData(sandbox *api.Sandbox, segment routeconf.Segment) map[string]any {
-	if segment.Field == nil {
-		return map[string]any{
-			"HasField":   false,
-			"Identifier": segment.Identifier,
-			"StartsWith": segment.StartsWith,
+// triggerConst is the api.TriggerType constant a trigger type spells.
+func triggerConst(kind string) string {
+	switch kind {
+	case "prefix":
+		return "api.PrefixTrigger"
+	case "suffix":
+		return "api.SuffixTrigger"
+	case "regex":
+		return "api.RegexTrigger"
+	}
+	return "api.EqualTrigger"
+}
+
+// triggerData is one trigger as the generated api.Trigger literal reads it.
+func triggerData(trigger routeconf.Trigger) map[string]any {
+	return map[string]any{
+		"Exist": trigger.Exists,
+		"Type":  triggerConst(trigger.Type),
+		"Value": trigger.Value,
+	}
+}
+
+// pathData is one entry of `paths` as the generated api.Path literal reads it.
+func pathData(path routeconf.Path) map[string]any {
+	return map[string]any{
+		"Id":          path.Id,
+		"Start":       path.Start,
+		"End":         path.End,
+		"Description": path.Description,
+		"Trigger":     triggerData(path.Trigger),
+	}
+}
+
+// parameterData is one entry of `parameters` as the generated api.Parameter
+// literal and the Entries field read it.
+func parameterData(parameter routeconf.Parameter) map[string]any {
+	fonts := make([]string, 0, len(parameter.Fonts))
+	for _, font := range parameter.Fonts {
+		if font == "header" {
+			fonts = append(fonts, "api.HeaderParam")
+			continue
 		}
+		fonts = append(fonts, "api.QueryParam")
 	}
+
 	return map[string]any{
-		"HasField": true,
-		"Field":    routeFieldData(sandbox, *segment.Field),
+		"Id":          parameter.Id,
+		"Key":         parameter.Key,
+		"Fonts":       fonts,
+		"Required":    parameter.Required,
+		"Type":        parameterTypeConst(parameter.Type),
+		"GoType":      parameterGoType(parameter.Type),
+		"Default":     parameter.Default,
+		"HasDefault":  parameter.HasDefault,
+		"Description": parameter.Description,
+		"Trigger":     triggerData(parameter.Trigger),
 	}
 }
 
-// routeFieldData is one declared field as the generated api.RouteField literal
-// reads it — the server layer's fieldData, with the header name or the query
-// key standing where a flag's identifiers would.
-func routeFieldData(sandbox *api.Sandbox, field routeconf.Field) map[string]any {
-	return map[string]any{
-		"Key":         field.Key,
-		"Type":        field.Type,
-		"IsArray":     field.Array,
-		"Required":    field.Required,
-		"HasDefault":  field.HasDefault,
-		"Default":     field.Default,
-		"Description": field.Description,
-		"Examples":    field.Examples,
-		"Min":         routeNumberLabel(sandbox, field.Type, field.Min, field.HasMin),
-		"Max":         routeNumberLabel(sandbox, field.Type, field.Max, field.HasMax),
-		"HasMin":      field.HasMin,
-		"HasMax":      field.HasMax,
-		"Identifier":  field.Identifier,
-		"StartsWith":  field.StartsWith,
+// parameterTypeConst is the api.ParameterType constant a parameter type spells.
+func parameterTypeConst(kind string) string {
+	switch kind {
+	case "number":
+		return "api.NumberType"
+	case "boolean":
+		return "api.BooleanType"
+	case "datetime":
+		return "api.DateTimeType"
+	case "string-array":
+		return "api.StringArrayType"
 	}
+	return "api.StringType"
 }
 
-// routeNumberLabel renders a min/max bound as the literal it has in
-// route.yaml ("" when the bound is unset).
-func routeNumberLabel(sandbox *api.Sandbox, kind string, value float64, has bool) string {
-	if !has {
-		return ""
+// parameterGoType is the Go type of the Entries field a parameter binds to.
+func parameterGoType(kind string) string {
+	switch kind {
+	case "number":
+		return "float64"
+	case "boolean":
+		return "bool"
+	case "string-array":
+		return "[]string"
 	}
-	if kind == "int" {
-		return sandbox.Deps.Stringsdeps.FormatInt(int64(value), 10)
-	}
-	return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+	return "string"
 }
 
-// bodyData is the route's body declaration as the generated new.go reads it.
+// bodyData is the route's body declaration as the generated new.go and
+// entries.go read it.
 func bodyData(sandbox *api.Sandbox, conf *routeconf.RouteConf) map[string]any {
 	body := conf.Body
 	return map[string]any{
@@ -273,7 +257,7 @@ func bodyGoType(body routeconf.Body) string {
 }
 
 // bodyStructs flattens the declared json-schema into the Go structs the
-// generated new.go declares: Body for the root object, Body<Path> for a
+// generated entries.go declares: Body for the root object, Body<Path> for a
 // nested object and Body<Path>Item for the object an array holds.
 func bodyStructs(sandbox *api.Sandbox, conf *routeconf.RouteConf) []map[string]any {
 	body := conf.Body

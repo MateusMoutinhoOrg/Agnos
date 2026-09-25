@@ -11,11 +11,13 @@ import (
 func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 	obj := sandbox.Deps.Serializables.CreateObject()
 
-	obj.AddItemToObject("method", conf.Method)
-	if conf.Priority != 0 {
-		obj.AddItemToObject("priority", int64(conf.Priority))
+	obj.AddItemToObject("methods", stringArray(sandbox, conf.Methods))
+	obj.AddItemToObject("priority", int64(conf.Priority))
+	obj.AddItemToObject("response-type", conf.ResponseType)
+	obj.AddItemToObject("paths", pathsArray(sandbox, conf.Paths))
+	if len(conf.Parameters) > 0 {
+		obj.AddItemToObject("parameters", parametersArray(sandbox, conf.Parameters))
 	}
-	obj.AddItemToObject("paths", segmentsArray(sandbox, conf.Paths))
 	obj.AddItemToObject("category", conf.Category)
 	obj.AddItemToObject("help", conf.Help)
 	if conf.LongDescription != "" {
@@ -26,12 +28,6 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 	}
 	if conf.Hidden {
 		obj.AddItemToObject("hidden", true)
-	}
-	if len(conf.Headers) > 0 {
-		obj.AddItemToObject("headers", fieldsArray(sandbox, conf.Headers))
-	}
-	if len(conf.Params) > 0 {
-		obj.AddItemToObject("params", fieldsArray(sandbox, conf.Params))
 	}
 	if conf.Body.Type != BodyNone {
 		obj.AddItemToObject("body", bodyObject(sandbox, conf.Body))
@@ -50,69 +46,63 @@ func SchemaJson(sandbox *api.Sandbox, conf *RouteConf) string {
 	return sandbox.Deps.Serializables.SerializeToJson(schemaObject(sandbox, conf.Body.Schema))
 }
 
-// segmentsArray renders `paths` as the ordered sequence it is: one entry per
-// segment, a trigger carrying its `identifier` — or its `starts-with-identifier`
-// when it only fixes the beginning of the path — and a capture its field.
-func segmentsArray(sandbox *api.Sandbox, segments []Segment) *serializibles.SerializibleObject {
+// pathsArray renders `paths` as the ordered sequence it is: one entry per
+// path slice, its trigger included when it declares one.
+func pathsArray(sandbox *api.Sandbox, paths []Path) *serializibles.SerializibleObject {
 	arr := sandbox.Deps.Serializables.CreateArray()
-	for _, segment := range segments {
-		if segment.Field == nil {
-			entry := sandbox.Deps.Serializables.CreateObject()
-			if segment.StartsWith {
-				entry.AddItemToObject("starts-with-identifier", segment.Identifier)
-			} else {
-				entry.AddItemToObject("identifier", segment.Identifier)
-			}
-			arr.AddItemToArray(entry)
-			continue
+	for _, path := range paths {
+		entry := sandbox.Deps.Serializables.CreateObject()
+		entry.AddItemToObject("id", path.Id)
+		if path.Description != "" {
+			entry.AddItemToObject("description", path.Description)
 		}
-		arr.AddItemToArray(fieldObject(sandbox, *segment.Field))
+		entry.AddItemToObject("start", int64(path.Start))
+		entry.AddItemToObject("end", int64(path.End))
+		if path.Trigger.Exists {
+			entry.AddItemToObject("trigger", triggerObject(sandbox, path.Trigger))
+		}
+		arr.AddItemToArray(entry)
 	}
 	return arr
 }
 
-// fieldsArray renders headers/params in the canonical ordered sequence shape.
-func fieldsArray(sandbox *api.Sandbox, fields []Field) *serializibles.SerializibleObject {
+// parametersArray renders `parameters` in declaration order. `key` is written
+// only when it differs from `id`, the one spelling it defaults to.
+func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializibles.SerializibleObject {
 	arr := sandbox.Deps.Serializables.CreateArray()
-	for _, field := range fields {
-		arr.AddItemToArray(fieldObject(sandbox, field))
+	for _, parameter := range parameters {
+		entry := sandbox.Deps.Serializables.CreateObject()
+		entry.AddItemToObject("id", parameter.Id)
+		if parameter.Key != "" && parameter.Key != parameter.Id {
+			entry.AddItemToObject("key", parameter.Key)
+		}
+		if parameter.Description != "" {
+			entry.AddItemToObject("description", parameter.Description)
+		}
+		if len(parameter.Examples) > 0 {
+			entry.AddItemToObject("examples", stringArray(sandbox, parameter.Examples))
+		}
+		entry.AddItemToObject("type", parameter.Type)
+		entry.AddItemToObject("fonts", stringArray(sandbox, parameter.Fonts))
+		if parameter.Required {
+			entry.AddItemToObject("required", true)
+		}
+		if parameter.HasDefault {
+			entry.AddItemToObject("default", parameter.Default)
+		}
+		if parameter.Trigger.Exists {
+			entry.AddItemToObject("trigger", triggerObject(sandbox, parameter.Trigger))
+		}
+		arr.AddItemToArray(entry)
 	}
 	return arr
 }
 
-// fieldObject renders one field — a captured segment, a header or a query
-// parameter — as its declaration entry.
-func fieldObject(sandbox *api.Sandbox, field Field) *serializibles.SerializibleObject {
+// triggerObject renders one `trigger`.
+func triggerObject(sandbox *api.Sandbox, trigger Trigger) *serializibles.SerializibleObject {
 	entry := sandbox.Deps.Serializables.CreateObject()
-	entry.AddItemToObject("name", field.Key)
-	if field.Description != "" {
-		entry.AddItemToObject("description", field.Description)
-	}
-	if len(field.Examples) > 0 {
-		entry.AddItemToObject("examples", stringArray(sandbox, field.Examples))
-	}
-	entry.AddItemToObject("type", field.Type)
-	if field.Identifier != "" {
-		entry.AddItemToObject("identifier", field.Identifier)
-	}
-	if field.StartsWith != "" {
-		entry.AddItemToObject("starts-with-identifier", field.StartsWith)
-	}
-	if field.HasDefault {
-		entry.AddItemToObject("default", field.Default)
-	}
-	if field.Required {
-		entry.AddItemToObject("required", true)
-	}
-	if field.Array {
-		entry.AddItemToObject("array", true)
-	}
-	if field.HasMin {
-		entry.AddItemToObject("min", numberValue(field.Min))
-	}
-	if field.HasMax {
-		entry.AddItemToObject("max", numberValue(field.Max))
-	}
+	entry.AddItemToObject("type", trigger.Type)
+	entry.AddItemToObject("value", trigger.Value)
 	return entry
 }
 

@@ -2,15 +2,19 @@ package add_route
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
+// InternalPureHandlerFile is the one hand-written file of a route package.
+const InternalPureHandlerFile = "InternalPureHandler.go"
+
 // AddRouteInternal writes the two hand-written files of a new route package.
-// It refuses to overwrite an existing route (via io.WriteFile). The trigger is
-// normalized to start with "/", so "users" and "/users" produce the same
-// route.yaml — and with --starts-with it becomes a prefix instead, which the
-// route answers every path beginning with.
+// It refuses to overwrite an existing route (via io.WriteFile). The route
+// starts with one path, `Route`, reading the whole request path and matching
+// the trigger — "/" followed by the name unless --trigger says otherwise, an
+// equal comparison unless --trigger-type does.
 func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRouteProps) error {
 	if sandbox.Deps.Stringsdeps.TrimSpace(props.Help) == "" {
 		return sandbox.Deps.Std.Errorf("add-route requires --help")
@@ -40,17 +44,23 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		trigger = "/" + identifier
 	}
 
-	segment, err := utils.RouteIdentifierSegment(sandbox, trigger)
-	if props.StartsWith {
-		segment, err = utils.RoutePrefixIdentifier(sandbox, trigger)
-	}
+	path, err := utils.NewRoutePath(sandbox, api.RoutePathProps{
+		Id:          "Route",
+		TriggerType: props.TriggerType,
+		Trigger:     trigger,
+	})
 	if err != nil {
 		return err
 	}
 
-	verb, err := utils.RouteMethod(sandbox, props.Method)
+	methods, err := utils.RouteMethodList(sandbox, props.Methods)
 	if err != nil {
 		return err
+	}
+
+	response_type := sandbox.Deps.Stringsdeps.TrimSpace(props.ResponseType)
+	if response_type == "" {
+		response_type = routeconf.DefaultResponseType
 	}
 
 	sandbox.Deps.Std.Log("add-route creating %s \n", utils.RouteDir(sandbox, name))
@@ -60,31 +70,30 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		return err
 	}
 
+	conf := routeconf.NewEmpty(sandbox)
+	conf.Methods = methods
+	conf.Priority = props.Priority
+	conf.ResponseType = response_type
+	conf.Paths = []routeconf.Path{path}
+	conf.Category = sandbox.Deps.Stringsdeps.TrimSpace(props.Category)
+	conf.Help = sandbox.Deps.Stringsdeps.TrimSpace(props.Help)
+
+	dir := utils.RouteDir(sandbox, name)
+	if err := io.WriteFile(dir+"/route.yaml", []byte(conf.Render())); err != nil {
+		return err
+	}
+
 	vars := map[string]interface{}{
 		"Identifier": identifier,
 		"Package":    pkg,
 		"Module":     module_conf.Module,
-		"Method":     verb,
-		"Trigger":    segment,
-		"StartsWith": props.StartsWith,
-		"Priority":   props.Priority,
-		"Help":       sandbox.Deps.Stringsdeps.TrimSpace(props.Help),
-		"Category":   sandbox.Deps.Stringsdeps.TrimSpace(props.Category),
+		"Methods":    sandbox.Deps.Stringsdeps.Join(methods, ", "),
+		"Trigger":    path.Trigger.Value,
 	}
 
-	dir := utils.RouteDir(sandbox, name)
-
-	route, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/route_route.yaml", vars)
+	handler, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/route_internal_pure_handler.go", vars)
 	if err != nil {
 		return err
 	}
-	if err := io.WriteFile(dir+"/route.yaml", route); err != nil {
-		return err
-	}
-
-	handler, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/route_handler.go", vars)
-	if err != nil {
-		return err
-	}
-	return io.WriteFile(dir+"/handler.go", handler)
+	return io.WriteFile(dir+"/"+InternalPureHandlerFile, handler)
 }

@@ -12,12 +12,11 @@ import (
 	add_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_dep"
 	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_doc"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_flag"
-	add_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_header"
 	add_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_lib_example"
 	add_page "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_page"
-	add_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_param"
+	add_parameter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_parameter"
+	add_path "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_path"
 	add_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_route"
-	add_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_segment"
 	add_table "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_table"
 	add_table_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/add_table_field"
 	build "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/build"
@@ -51,12 +50,11 @@ import (
 	remove_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_dep"
 	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_doc"
 	remove_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_flag"
-	remove_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_header"
 	remove_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_lib_example"
 	remove_page "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_page"
-	remove_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_param"
+	remove_parameter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_parameter"
+	remove_path "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_path"
 	remove_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_route"
-	remove_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_segment"
 	remove_table "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_table"
 	remove_table_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_table_field"
 	server_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server_init"
@@ -66,10 +64,9 @@ import (
 	set_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_body_field"
 	set_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_command"
 	set_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_dep"
-	set_header "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_header"
-	set_param "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_param"
+	set_parameter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_parameter"
+	set_path "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_path"
 	set_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_route"
-	set_segment "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_segment"
 	set_table_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_table_field"
 	show_database "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/show_database"
 	show_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/show_route"
@@ -97,12 +94,11 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		add_dep.NewCommand(sandbox),
 		add_doc.NewCommand(sandbox),
 		add_flag.NewCommand(sandbox),
-		add_header.NewCommand(sandbox),
 		add_lib_example.NewCommand(sandbox),
 		add_page.NewCommand(sandbox),
-		add_param.NewCommand(sandbox),
+		add_parameter.NewCommand(sandbox),
+		add_path.NewCommand(sandbox),
 		add_route.NewCommand(sandbox),
-		add_segment.NewCommand(sandbox),
 		add_table.NewCommand(sandbox),
 		add_table_field.NewCommand(sandbox),
 		build.NewCommand(sandbox),
@@ -136,12 +132,11 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		remove_dep.NewCommand(sandbox),
 		remove_doc.NewCommand(sandbox),
 		remove_flag.NewCommand(sandbox),
-		remove_header.NewCommand(sandbox),
 		remove_lib_example.NewCommand(sandbox),
 		remove_page.NewCommand(sandbox),
-		remove_param.NewCommand(sandbox),
+		remove_parameter.NewCommand(sandbox),
+		remove_path.NewCommand(sandbox),
 		remove_route.NewCommand(sandbox),
-		remove_segment.NewCommand(sandbox),
 		remove_table.NewCommand(sandbox),
 		remove_table_field.NewCommand(sandbox),
 		server_init.NewCommand(sandbox),
@@ -151,10 +146,9 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		set_body_field.NewCommand(sandbox),
 		set_command.NewCommand(sandbox),
 		set_dep.NewCommand(sandbox),
-		set_header.NewCommand(sandbox),
-		set_param.NewCommand(sandbox),
+		set_parameter.NewCommand(sandbox),
+		set_path.NewCommand(sandbox),
 		set_route.NewCommand(sandbox),
-		set_segment.NewCommand(sandbox),
 		set_table_field.NewCommand(sandbox),
 		show_database.NewCommand(sandbox),
 		show_route.NewCommand(sandbox),

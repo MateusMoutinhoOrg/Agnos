@@ -1,12 +1,13 @@
 # Routes
 {{ if .RouteDocs }}
 Every route this server answers, one page each, generated from
-`sandbox/internal/routes/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)) on each build —
+`sandbox/internal/routeslist/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)) on each build —
 open the one you need rather than this whole page. Hidden routes are not listed.
 
-A path is matched segment by segment, most specific route first. A path nothing matches is
-`404`; one matched under another method is `405`. Every field of a route is bound, converted and
-range-checked before the handler runs — a failure there is `400`, never the handler's call.
+Routes run lowest `priority` first; every path and every parameter trigger of a route has to
+match for it to run. A path nothing matches is `404`; one matched under another method is `405`.
+Every parameter of a route is bound and converted before the handler runs — a failure there is
+`400`, never the handler's call.
 {{- range .RouteDocs }}
 
 ## {{ .Category }}

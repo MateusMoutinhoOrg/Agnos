@@ -1,7 +1,7 @@
-cli-output: "import-body reading sandbox/internal/routes/create_user/route.yaml from the example \nimport-body adding active \nimport-body adding address \nimport-body adding age \nimport-body adding created_at \nimport-body adding email \nimport-body adding id \nimport-body adding nickname \nimport-body adding score \nimport-body adding site \nimport-body adding tags \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "import-body reading sandbox/internal/routeslist/create_user/route.yaml from the example \nimport-body adding active \nimport-body adding address \nimport-body adding age \nimport-body adding created_at \nimport-body adding email \nimport-body adding id \nimport-body adding nickname \nimport-body adding score \nimport-body adding site \nimport-body adding tags \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/routes/create_user/new.go
-      sha: 5a68aed000c6f40e20feb150655503b5ba1633c0217f3dfc779de534c9ddc685
-    - file: sandbox/internal/routes/create_user/route.yaml
-      sha: 1fbb1327deb7885f870050358725851b901efa0c73909e07bd9f3044407bd198
+    - file: sandbox/internal/routeslist/create_user/entries.go
+      sha: 868cfc266bfce5f16459ae4feaeac7fa85efb260361b4a7f404c230da5604c4a
+    - file: sandbox/internal/routeslist/create_user/route.yaml
+      sha: b8b4132fc55f26a72c980ddfe56e73ab7c1a5c45fa430bcbdf4e9f499c9ca2ce

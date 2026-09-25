@@ -7,7 +7,7 @@ import (
 )
 
 // RemoveBodyField deletes one property of the body json-schema of
-// sandbox/internal/routes/<route>/route.yaml, then runs build as a follow-up
+// sandbox/internal/routeslist/<route>/route.yaml, then runs build as a follow-up
 // step. The build renders only: dropping a property may leave hand-written
 // code referring to what is gone.
 func RemoveBodyField(sandbox *api.Sandbox, path string, route string, name string) error {

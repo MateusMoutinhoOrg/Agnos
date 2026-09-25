@@ -25,6 +25,17 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 
 	command.Flags = []api.CommandFlag{
 		{
+			Id:          "trigger",
+			Type:        "string",
+			Required:    false,
+			Array:       false,
+			Description: "the whole request path the page answers on, / included (defaults to /<name>)",
+			Examples:    []string{"add-page about --trigger /about-us"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--trigger"},
+		},
+		{
 			Id:          "path",
 			Type:        "string",
 			Required:    false,
@@ -45,17 +56,6 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Default:     "",
 			HasDefault:  false,
 			Identifiers: []string{"--quiet", "-q"},
-		},
-		{
-			Id:          "trigger",
-			Type:        "string",
-			Required:    false,
-			Array:       false,
-			Description: "the literal segment the page answers on, / included (defaults to /<name>)",
-			Examples:    []string{},
-			Default:     "",
-			HasDefault:  false,
-			Identifiers: []string{"--trigger"},
 		},
 		{
 			Id:          "title",

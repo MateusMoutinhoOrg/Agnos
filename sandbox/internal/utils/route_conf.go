@@ -34,7 +34,7 @@ func ValidateRouteName(sandbox *api.Sandbox, name string) error {
 			letter == '-'
 		if !valid {
 			return sandbox.Deps.Std.Errorf(
-				"invalid route name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/routes/%s and a Go package name)",
+				"invalid route name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/routeslist/%s and a Go package name)",
 				name, RoutePackage(sandbox, name))
 		}
 	}
@@ -47,9 +47,13 @@ func RoutePackage(sandbox *api.Sandbox, name string) string {
 	return sandbox.Deps.Stringsdeps.ReplaceAll(RouteIdentifier(sandbox, name), "-", "_")
 }
 
+// RoutesDir holds one declared route per sub-directory, the server layer's
+// mirror of sandbox/internal/commands.
+const RoutesDir = "sandbox/internal/routeslist"
+
 // RouteDir is the project-relative directory holding a route package.
 func RouteDir(sandbox *api.Sandbox, name string) string {
-	return "sandbox/internal/routes/" + RoutePackage(sandbox, name)
+	return RoutesDir + "/" + RoutePackage(sandbox, name)
 }
 
 // RouteConfPath is the project-relative path of a route's route.yaml.
@@ -57,7 +61,7 @@ func RouteConfPath(sandbox *api.Sandbox, name string) string {
 	return RouteDir(sandbox, name) + "/route.yaml"
 }
 
-// LoadRouteConf reads and parses sandbox/internal/routes/<name>/route.yaml.
+// LoadRouteConf reads and parses sandbox/internal/routeslist/<name>/route.yaml.
 func LoadRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*routeconf.RouteConf, error) {
 	if err := ValidateRouteName(sandbox, name); err != nil {
 		return nil, err
@@ -68,236 +72,238 @@ func LoadRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*rou
 	}
 	conf, err := routeconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("routes/%s/route.yaml: %w", RoutePackage(sandbox, name), err)
+		return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", RoutePackage(sandbox, name), err)
 	}
 	return conf, nil
 }
 
-// SaveRouteConf renders conf back over sandbox/internal/routes/<name>/route.yaml.
+// SaveRouteConf renders conf back over sandbox/internal/routeslist/<name>/route.yaml.
 func SaveRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *routeconf.RouteConf) error {
 	return io.WriteFileOverwrite(RouteConfPath(sandbox, name), []byte(conf.Render()))
 }
 
-// RouteIdentifierSegment normalizes a trigger segment to the one spelling a
-// declaration carries: always starting with "/", never holding another one.
-// "users" and "/users" are the same request; "/a/b" and "/users/" are refused,
-// because a trigger is one segment and the leading slash is what makes it read
-// as a path everywhere it is printed.
-func RouteIdentifierSegment(sandbox *api.Sandbox, raw string) (string, error) {
-	trimmed := sandbox.Deps.Stringsdeps.TrimSpace(raw)
-	if trimmed == "" {
-		return "", sandbox.Deps.Std.Errorf("a path identifier cannot be empty")
+// RouteTrigger normalizes a trigger typed on the command line: its type
+// defaults to equal, and an equal, prefix or suffix trigger compared against a
+// path slice reads with the leading slash every slice carries — "users" and
+// "/users" are the same request. A regex is taken verbatim.
+func RouteTrigger(sandbox *api.Sandbox, kind string, value string, onPath bool) (routeconf.Trigger, error) {
+	value = sandbox.Deps.Stringsdeps.TrimSpace(value)
+	kind = sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(kind))
+
+	if value == "" {
+		if kind != "" {
+			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-type %q needs a --trigger to compare against", kind)
+		}
+		return routeconf.Trigger{}, nil
+	}
+	if kind == "" {
+		kind = "equal"
+	}
+	if !contains(routeconf.TriggerTypes, kind) {
+		return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("unknown trigger type %q (use one of %s)", kind, sandbox.Deps.Stringsdeps.Join(routeconf.TriggerTypes, ", "))
 	}
 
-	inner := sandbox.Deps.Stringsdeps.Trim(trimmed, "/")
-	if inner == "" {
-		return "/", nil
-	}
-	if sandbox.Deps.Stringsdeps.Contains(inner, "/") {
-		return "", sandbox.Deps.Std.Errorf("invalid path identifier %q: an identifier is one segment, so it holds no inner or trailing slash", raw)
+	if kind == "regex" {
+		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(value, ""); err != nil {
+			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("invalid regex trigger %q: %s", value, err.Error())
+		}
+	} else if onPath && kind != "suffix" {
+		value = "/" + sandbox.Deps.Stringsdeps.TrimLeft(value, "/")
 	}
 
-	return "/" + inner, nil
+	return routeconf.Trigger{Exists: true, Type: kind, Value: value}, nil
 }
 
-// RoutePrefixIdentifier normalizes a `starts-with-identifier`: the leading
-// slash a trigger always carries, no trailing one, and — unlike
-// RouteIdentifierSegment — as many segments as the caller spells, because a
-// prefix names the head of a subtree rather than one place in it. "/" alone is
-// the prefix every path begins with.
-func RoutePrefixIdentifier(sandbox *api.Sandbox, raw string) (string, error) {
-	trimmed := sandbox.Deps.Stringsdeps.TrimSpace(raw)
-	if trimmed == "" {
-		return "", sandbox.Deps.Std.Errorf("a path starts-with-identifier cannot be empty")
+// RouteEntryId turns a path id or a parameter key typed on the command line
+// into the exported Go name its Entries field carries: "user-id" -> "UserId",
+// "item" -> "Item".
+func RouteEntryId(sandbox *api.Sandbox, raw string) string {
+	parts := sandbox.Deps.Stringsdeps.FieldsFunc(sandbox.Deps.Stringsdeps.TrimSpace(raw), func(r rune) bool {
+		return r == '-' || r == '_' || r == ' ' || r == '.'
+	})
+	id := ""
+	for _, part := range parts {
+		id += sandbox.Deps.Stringsdeps.ToUpper(part[:1]) + part[1:]
 	}
-
-	inner := sandbox.Deps.Stringsdeps.Trim(trimmed, "/")
-	if inner == "" {
-		return "/", nil
-	}
-
-	return "/" + inner, nil
+	return id
 }
 
-// RouteFieldIn names the three origins that read a value off the request line.
-// They share one Field shape and one set of editors, and differ only in the
-// rules NewRouteField holds each of them to.
-const (
-	// RouteFieldInPath is a captured segment of the route's `paths`.
-	RouteFieldInPath = "path"
-	// RouteFieldInHeader is a declared request header.
-	RouteFieldInHeader = "header"
-	// RouteFieldInQuery is a declared query-string parameter.
-	RouteFieldInQuery = "query"
-)
+// RouteReservedIds are the Entries fields every route carries whatever it
+// declares, so no path or parameter may take them.
+var RouteReservedIds = []string{"FullRoute", "Body"}
 
-// NewRouteField builds a routeconf.Field from the raw values typed on the
-// command line, holding to the rules of the origin it is declared in: a
-// captured segment is always required and never defaults, and a header never
-// repeats. An array is a query parameter collecting every occurrence of its
-// key, or the last path segment taking every segment left in the path.
-//
-// A header or a query parameter may also carry a value condition — an exact
-// --identifier or a --starts-with prefix — which puts the field into what the
-// route matches on rather than only into what it binds. A captured segment
-// carries neither: what it matches is whatever sits in its place.
-func NewRouteField(sandbox *api.Sandbox, props api.RouteFieldProps, in string) (routeconf.Field, error) {
-	field := routeconf.Field{
-		Key:         RouteFieldName(sandbox, props.Name),
+// RouteSegmentIndex reads a --start or --end typed on the command line, "" as
+// the fallback given.
+func RouteSegmentIndex(sandbox *api.Sandbox, label string, raw string, fallback int) (int, error) {
+	raw = sandbox.Deps.Stringsdeps.TrimSpace(raw)
+	if raw == "" {
+		return fallback, nil
+	}
+	value, err := sandbox.Deps.Stringsdeps.Atoi(raw)
+	if err != nil {
+		return 0, sandbox.Deps.Std.Errorf("--%s %q is not a whole number", label, raw)
+	}
+	return value, nil
+}
+
+// NewRoutePath builds a routeconf.Path from the raw values typed on the
+// command line, holding it to the rules verify checks: an id, a start that is
+// not negative and an end that is -1 or not before it.
+func NewRoutePath(sandbox *api.Sandbox, props api.RoutePathProps) (routeconf.Path, error) {
+	path := routeconf.Path{
+		Id:          RouteEntryId(sandbox, props.Id),
+		Description: sandbox.Deps.Stringsdeps.TrimSpace(props.Description),
+	}
+	if path.Id == "" {
+		return path, sandbox.Deps.Std.Errorf("a path needs an id")
+	}
+
+	start, err := RouteSegmentIndex(sandbox, "start", props.Start, 0)
+	if err != nil {
+		return path, err
+	}
+	end, err := RouteSegmentIndex(sandbox, "end", props.End, routeconf.LastSegment)
+	if err != nil {
+		return path, err
+	}
+	if start < 0 {
+		return path, sandbox.Deps.Std.Errorf("--start %d is negative: a slice starts at segment 0 or later", start)
+	}
+	if end != routeconf.LastSegment && end < start {
+		return path, sandbox.Deps.Std.Errorf("--end %d is before --start %d: use -1 for the last segment", end, start)
+	}
+	path.Start, path.End = start, end
+
+	trigger, err := RouteTrigger(sandbox, props.TriggerType, props.Trigger, true)
+	if err != nil {
+		return path, err
+	}
+	path.Trigger = trigger
+
+	return path, nil
+}
+
+// NewRouteParameter builds a routeconf.Parameter from the raw values typed on
+// the command line: a known type, known fonts (the query string when none is
+// given), and a default that parses as the type and never sits beside
+// `required`.
+func NewRouteParameter(sandbox *api.Sandbox, props api.RouteParameterProps) (routeconf.Parameter, error) {
+	parameter := routeconf.Parameter{
+		Key:         sandbox.Deps.Stringsdeps.TrimSpace(props.Name),
 		Description: sandbox.Deps.Stringsdeps.TrimSpace(props.Description),
 		Examples:    props.Examples,
 		Required:    props.Required,
-		Array:       props.Array,
+		Fonts:       []string{},
 	}
-	if field.Key == "" {
-		return field, sandbox.Deps.Std.Errorf("a field needs a name")
-	}
-
-	kind, ok := FieldType(sandbox, props.Type)
-	if !ok {
-		return field, sandbox.Deps.Std.Errorf("unknown type %q (use string, boolean, int or float)", props.Type)
-	}
-	field.Type = kind
-
-	if field.Array && in == RouteFieldInHeader {
-		return field, sandbox.Deps.Std.Errorf("only a query parameter or the last path segment may be an array")
-	}
-	if field.Required && kind == "boolean" {
-		return field, sandbox.Deps.Std.Errorf("a boolean field cannot be required (its absence already means false)")
+	parameter.Id = RouteEntryId(sandbox, parameter.Key)
+	if parameter.Id == "" {
+		return parameter, sandbox.Deps.Std.Errorf("a parameter needs a name")
 	}
 
-	if in == RouteFieldInPath {
-		if props.Default != "" {
-			return field, sandbox.Deps.Std.Errorf("a captured path segment cannot carry a default: it is always present when the route matches")
+	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(props.Type))
+	if kind == "" {
+		kind = "string"
+	}
+	if !contains(routeconf.ParameterTypes, kind) {
+		return parameter, sandbox.Deps.Std.Errorf("unknown parameter type %q (use one of %s)", props.Type, sandbox.Deps.Stringsdeps.Join(routeconf.ParameterTypes, ", "))
+	}
+	parameter.Type = kind
+
+	for _, raw := range props.Fonts {
+		font := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+		if !contains(routeconf.ParameterFonts, font) {
+			return parameter, sandbox.Deps.Std.Errorf("unknown font %q (use one of %s)", raw, sandbox.Deps.Stringsdeps.Join(routeconf.ParameterFonts, ", "))
 		}
-		field.Required = true
-	} else {
-		condition, err := RouteFieldCondition(sandbox, props)
-		if err != nil {
-			return field, err
-		}
-		field.Identifier, field.StartsWith = condition.Identifier, condition.StartsWith
-	}
-
-	if props.Default != "" {
-		if field.Required {
-			return field, sandbox.Deps.Std.Errorf("a field cannot be both required and carry a default (the default already covers its absence)")
-		}
-		if err := RouteCheckLiteral(sandbox, kind, "default", props.Default); err != nil {
-			return field, err
-		}
-		field.HasDefault = true
-		field.Default = props.Default
-	}
-
-	if props.Min != "" {
-		value, err := RouteParseBound(sandbox, kind, "min", props.Min)
-		if err != nil {
-			return field, err
-		}
-		field.Min, field.HasMin = value, true
-	}
-	if props.Max != "" {
-		value, err := RouteParseBound(sandbox, kind, "max", props.Max)
-		if err != nil {
-			return field, err
-		}
-		field.Max, field.HasMax = value, true
-	}
-	if field.HasMin && field.HasMax && field.Min > field.Max {
-		return field, sandbox.Deps.Std.Errorf("min (%s) is greater than max (%s)", props.Min, props.Max)
-	}
-
-	return field, nil
-}
-
-// RouteCondition is the value condition a header or a query parameter
-// declares: exactly one of the two, or neither. They are taken verbatim —
-// unlike a path identifier, a header value carries no leading slash and no
-// shape this project gets to normalize.
-type RouteCondition struct {
-	Identifier string
-	StartsWith string
-}
-
-// RouteFieldCondition reads the two match conditions off the flags, refusing
-// the pair: a value matches one condition or the other, never both.
-func RouteFieldCondition(sandbox *api.Sandbox, props api.RouteFieldProps) (RouteCondition, error) {
-	condition := RouteCondition{
-		Identifier: sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier),
-		StartsWith: sandbox.Deps.Stringsdeps.TrimSpace(props.StartsWith),
-	}
-
-	if condition.Identifier != "" && condition.StartsWith != "" {
-		return condition, sandbox.Deps.Std.Errorf("a field matches on --identifier or on --starts-with, never both")
-	}
-
-	return condition, nil
-}
-
-// RouteFieldName normalizes a field name. A header name and a query key are
-// external spellings, so only the surrounding space is trimmed: their own
-// punctuation is theirs to keep.
-func RouteFieldName(sandbox *api.Sandbox, name string) string {
-	return sandbox.Deps.Stringsdeps.TrimSpace(name)
-}
-
-// FindRouteField returns the index of the field named name in fields, or -1.
-func FindRouteField(sandbox *api.Sandbox, fields []routeconf.Field, name string) int {
-	key := RouteFieldName(sandbox, name)
-	for i, field := range fields {
-		if field.Key == key {
-			return i
+		if !contains(parameter.Fonts, font) {
+			parameter.Fonts = append(parameter.Fonts, font)
 		}
 	}
-	return -1
-}
+	if len(parameter.Fonts) == 0 {
+		parameter.Fonts = []string{"query"}
+	}
 
-// FindRouteSegment returns the index of the captured segment named name in
-// segments, or -1. A trigger segment carries no name and never matches.
-func FindRouteSegment(sandbox *api.Sandbox, segments []routeconf.Segment, name string) int {
-	key := RouteFieldName(sandbox, name)
-	for i, segment := range segments {
-		if segment.Field != nil && segment.Field.Key == key {
-			return i
+	if parameter.Required && kind == "boolean" {
+		return parameter, sandbox.Deps.Std.Errorf("a boolean parameter cannot be required (its absence already means false)")
+	}
+
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Default); value != "" {
+		if parameter.Required {
+			return parameter, sandbox.Deps.Std.Errorf("a parameter cannot be both required and carry a default (the default already covers its absence)")
 		}
-	}
-	return -1
-}
-
-// FindRoutePathSegment returns the index of the segment key names, looking it
-// up as a capture first and as a literal identifier second, or -1. It is how
-// every editor of `paths` names one segment: a capture answers to its name, a
-// trigger to the identifier it spells — a prefix trigger included, which
-// answers to the same spelling as the exact one it would otherwise be.
-func FindRoutePathSegment(sandbox *api.Sandbox, segments []routeconf.Segment, key string) int {
-	if index := FindRouteSegment(sandbox, segments, key); index >= 0 {
-		return index
+		if err := RouteCheckParameterLiteral(sandbox, kind, value); err != nil {
+			return parameter, err
+		}
+		parameter.Default, parameter.HasDefault = value, true
 	}
 
-	prefix, err := RoutePrefixIdentifier(sandbox, key)
+	trigger, err := RouteTrigger(sandbox, props.TriggerType, props.Trigger, false)
 	if err != nil {
-		return -1
+		return parameter, err
 	}
-	for i, segment := range segments {
-		if segment.Field == nil && segment.Identifier == prefix {
+	parameter.Trigger = trigger
+
+	return parameter, nil
+}
+
+// RouteCheckParameterLiteral reports whether a raw default parses as the
+// parameter type it is declared for.
+func RouteCheckParameterLiteral(sandbox *api.Sandbox, kind string, raw string) error {
+	switch kind {
+	case "number":
+		if _, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
+			return sandbox.Deps.Std.Errorf("default %q is not a number", raw)
+		}
+	case "boolean":
+		if raw != "true" && raw != "false" {
+			return sandbox.Deps.Std.Errorf("default %q is not true or false", raw)
+		}
+	}
+	return nil
+}
+
+// FindRoutePath returns the index of the path whose id is the one typed, or
+// -1.
+func FindRoutePath(sandbox *api.Sandbox, paths []routeconf.Path, id string) int {
+	wanted := RouteEntryId(sandbox, id)
+	for i, path := range paths {
+		if path.Id == wanted {
 			return i
 		}
 	}
 	return -1
 }
 
-// RouteRestIndex returns the index of the segment that takes the rest of the
-// path — the one capture declared `array: true` — or -1 when the route fixes
-// its length. It is the one reading of that rule, shared by the editor, the
-// collector and verify.
-func RouteRestIndex(segments []routeconf.Segment) int {
-	for i, segment := range segments {
-		if segment.Field != nil && segment.Field.Array {
+// FindRouteParameter returns the index of the parameter read under the key
+// typed — or whose id is its exported spelling — or -1.
+func FindRouteParameter(sandbox *api.Sandbox, parameters []routeconf.Parameter, name string) int {
+	key := sandbox.Deps.Stringsdeps.TrimSpace(name)
+	id := RouteEntryId(sandbox, key)
+	for i, parameter := range parameters {
+		if parameter.Key == key || parameter.Id == id {
 			return i
 		}
 	}
 	return -1
+}
+
+// RouteIdTaken reports whether id is already an Entries field of the route —
+// reserved, a path or a parameter — skipping the entry being edited, named by
+// its current id ("" skips nothing).
+func RouteIdTaken(conf *routeconf.RouteConf, id string, editing string) bool {
+	if contains(RouteReservedIds, id) {
+		return true
+	}
+	for _, path := range conf.Paths {
+		if path.Id == id && path.Id != editing {
+			return true
+		}
+	}
+	for _, parameter := range conf.Parameters {
+		if parameter.Id == id && parameter.Id != editing {
+			return true
+		}
+	}
+	return false
 }
 
 // CheckRoutePosition validates a --position against the list it will be
@@ -315,45 +321,45 @@ func CheckRoutePosition(sandbox *api.Sandbox, kind string, position int, size in
 	return position, nil
 }
 
-// InsertRouteField places field at position inside fields (appending when
+// InsertRoutePath places path at position inside paths (appending when
 // position is negative or past the end).
-func InsertRouteField(fields []routeconf.Field, field routeconf.Field, position int) []routeconf.Field {
-	if position < 0 || position >= len(fields) {
-		return append(fields, field)
+func InsertRoutePath(paths []routeconf.Path, path routeconf.Path, position int) []routeconf.Path {
+	if position < 0 || position >= len(paths) {
+		return append(paths, path)
 	}
-	out := make([]routeconf.Field, 0, len(fields)+1)
-	out = append(out, fields[:position]...)
-	out = append(out, field)
-	out = append(out, fields[position:]...)
+	out := make([]routeconf.Path, 0, len(paths)+1)
+	out = append(out, paths[:position]...)
+	out = append(out, path)
+	out = append(out, paths[position:]...)
 	return out
 }
 
-// RemoveRouteField drops the field at index from fields.
-func RemoveRouteField(fields []routeconf.Field, index int) []routeconf.Field {
-	out := make([]routeconf.Field, 0, len(fields)-1)
-	out = append(out, fields[:index]...)
-	out = append(out, fields[index+1:]...)
+// RemoveRoutePath drops the path at index from paths.
+func RemoveRoutePath(paths []routeconf.Path, index int) []routeconf.Path {
+	out := make([]routeconf.Path, 0, len(paths)-1)
+	out = append(out, paths[:index]...)
+	out = append(out, paths[index+1:]...)
 	return out
 }
 
-// InsertRouteSegment places segment at position inside segments (appending
-// when position is negative or past the end).
-func InsertRouteSegment(segments []routeconf.Segment, segment routeconf.Segment, position int) []routeconf.Segment {
-	if position < 0 || position >= len(segments) {
-		return append(segments, segment)
+// InsertRouteParameter places parameter at position inside parameters
+// (appending when position is negative or past the end).
+func InsertRouteParameter(parameters []routeconf.Parameter, parameter routeconf.Parameter, position int) []routeconf.Parameter {
+	if position < 0 || position >= len(parameters) {
+		return append(parameters, parameter)
 	}
-	out := make([]routeconf.Segment, 0, len(segments)+1)
-	out = append(out, segments[:position]...)
-	out = append(out, segment)
-	out = append(out, segments[position:]...)
+	out := make([]routeconf.Parameter, 0, len(parameters)+1)
+	out = append(out, parameters[:position]...)
+	out = append(out, parameter)
+	out = append(out, parameters[position:]...)
 	return out
 }
 
-// RemoveRouteSegment drops the segment at index from segments.
-func RemoveRouteSegment(segments []routeconf.Segment, index int) []routeconf.Segment {
-	out := make([]routeconf.Segment, 0, len(segments)-1)
-	out = append(out, segments[:index]...)
-	out = append(out, segments[index+1:]...)
+// RemoveRouteParameter drops the parameter at index from parameters.
+func RemoveRouteParameter(parameters []routeconf.Parameter, index int) []routeconf.Parameter {
+	out := make([]routeconf.Parameter, 0, len(parameters)-1)
+	out = append(out, parameters[:index]...)
+	out = append(out, parameters[index+1:]...)
 	return out
 }
 
@@ -371,16 +377,52 @@ func RouteMethod(sandbox *api.Sandbox, raw string) (string, error) {
 	return "", sandbox.Deps.Std.Errorf("unknown method %q (use one of %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteMethods, ", "))
 }
 
+// RouteMethodList normalizes a repeated --method into the list route.yaml
+// declares, deduplicated in the order typed; none at all is GET.
+func RouteMethodList(sandbox *api.Sandbox, raws []string) ([]string, error) {
+	methods := []string{}
+	for _, raw := range raws {
+		method, err := RouteMethod(sandbox, raw)
+		if err != nil {
+			return nil, err
+		}
+		if !contains(methods, method) {
+			methods = append(methods, method)
+		}
+	}
+	if len(methods) == 0 {
+		methods = []string{routeconf.DefaultMethod}
+	}
+	return methods, nil
+}
+
 // RouteMethods is every http method a route may declare.
 var RouteMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 
+// contains reports whether list holds value.
+func contains(list []string, value string) bool {
+	for _, one := range list {
+		if one == value {
+			return true
+		}
+	}
+	return false
+}
+
+// RouteFieldName normalizes a name typed on the command line — a body
+// property, say — trimming only the surrounding space: the punctuation of an
+// external spelling is its own to keep.
+func RouteFieldName(sandbox *api.Sandbox, name string) string {
+	return sandbox.Deps.Stringsdeps.TrimSpace(name)
+}
+
 // RouteCheckLiteral reports whether a raw command-line literal parses as the
-// field's type.
+// given type.
 func RouteCheckLiteral(sandbox *api.Sandbox, kind string, label string, raw string) error {
 	return checkLiteral(sandbox, kind, label, raw)
 }
 
-// RouteParseBound reads a min/max literal for a numeric field.
+// RouteParseBound reads a min/max literal for a numeric body property.
 func RouteParseBound(sandbox *api.Sandbox, kind string, label string, raw string) (float64, error) {
 	return parseBound(sandbox, kind, label, raw)
 }

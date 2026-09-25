@@ -1,0 +1,15 @@
+methods:
+  - GET
+priority: 0
+response-type: application/json
+paths:
+  - id: Route
+    start: 0
+    end: -1
+    trigger:
+      type: equal
+      value: /health
+category: Server
+help: Reports that the server is up
+examples:
+  - curl localhost:8080/health

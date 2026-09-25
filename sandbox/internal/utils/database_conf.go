@@ -11,7 +11,7 @@ import (
 // is, only against specs.yaml instead of route.yaml.
 
 // DatabasesDir holds one declared database per sub-directory, the database
-// layer's mirror of sandbox/internal/routes.
+// layer's mirror of sandbox/internal/routeslist.
 const DatabasesDir = "sandbox/internal/databases"
 
 // DatabaseSpecsFile is the declaration every database directory carries, the

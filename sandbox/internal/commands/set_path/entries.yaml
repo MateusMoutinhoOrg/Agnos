@@ -1,0 +1,88 @@
+args:
+    - description: the id of the path to rewrite
+      examples:
+        - set-path tenant --route create-user --end 2
+      name: id
+      required: true
+      type: string
+category: Server System
+examples:
+    - set-path tenant --route create-user --end 2
+    - set-path Route --route logger --trigger-type prefix
+flags:
+    - description: the route (identifier or package name) that declares the path
+      examples:
+        - set-path tenant --route create-user --end 2
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - description: the id the path takes on
+      examples:
+        - set-path tenant --route create-user --rename Org
+      identifiers:
+        - --rename
+      name: rename
+      type: string
+    - description: the new index of the first segment
+      examples:
+        - set-path tenant --route create-user --start 2
+      identifiers:
+        - --start
+      name: start
+      type: string
+    - description: the new index of the last segment, -1 for the last one
+      examples:
+        - set-path tenant --route create-user --end -1
+      identifiers:
+        - --end
+      name: end
+      type: string
+    - description: the new value the slice has to read as
+      examples:
+        - set-path Route --route create-user --trigger /users
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
+    - description: 'the new comparison: equal, prefix, suffix or regex'
+      examples:
+        - set-path Route --route logger --trigger-type prefix
+      identifiers:
+        - --trigger-type
+      name: trigger-type
+      type: string
+    - description: the new help text
+      examples:
+        - set-path tenant --route create-user --description 'the tenant id'
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - array: true
+      description: 'a key to take off: trigger or description (repeatable)'
+      examples:
+        - set-path tenant --route create-user --clear trigger
+      identifiers:
+        - --clear
+      name: clear
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - set-path tenant --route create-user --end 2 --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rewrite one entry of a route's paths
+identifiers:
+    - set-path
+long-description: 'Rewrites one entry of the route''s paths in place and runs build. It is add-path applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor.'

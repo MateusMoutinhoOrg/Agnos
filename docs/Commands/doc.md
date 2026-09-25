@@ -45,24 +45,21 @@ positionals bind in order after them. A `repeatable` field is given once per val
 | Command | Does |
 | --- | --- |
 | [`add-body-field`](add-body-field.md) | Declare a property of a route's body json-schema |
-| [`add-header`](add-header.md) | Declare a request header on a route |
-| [`add-param`](add-param.md) | Declare a query parameter on a route |
+| [`add-parameter`](add-parameter.md) | Declare one value a route reads from the query string or the headers |
+| [`add-path`](add-path.md) | Add one slice of the request path to a route |
 | [`add-route`](add-route.md) | Declare a new http route |
-| [`add-segment`](add-segment.md) | Add a segment to a route's path |
 | [`import-body`](import-body.md) | Infer a route's body json-schema from an example payload |
 | [`remove-body-field`](remove-body-field.md) | Delete one property from a route's body json-schema |
-| [`remove-header`](remove-header.md) | Delete one declared header from a route |
-| [`remove-param`](remove-param.md) | Delete one declared query parameter from a route |
+| [`remove-parameter`](remove-parameter.md) | Delete one entry of a route's parameters |
+| [`remove-path`](remove-path.md) | Delete one entry of a route's paths |
 | [`remove-route`](remove-route.md) | Delete one declared route |
-| [`remove-segment`](remove-segment.md) | Delete one segment from a route's path |
 | [`server-init`](server-init.md) | Add the http server layer to the project |
 | [`server-purge`](server-purge.md) | Remove the http server layer and every route in it |
 | [`set-body`](set-body.md) | Rewrite the body keys of a route.yaml |
 | [`set-body-field`](set-body-field.md) | Rewrite one property of a route's body json-schema |
-| [`set-header`](set-header.md) | Rewrite one declared request header of a route |
-| [`set-param`](set-param.md) | Rewrite one declared query parameter of a route |
+| [`set-parameter`](set-parameter.md) | Rewrite one entry of a route's parameters |
+| [`set-path`](set-path.md) | Rewrite one entry of a route's paths |
 | [`set-route`](set-route.md) | Rewrite the route-level keys of a route.yaml |
-| [`set-segment`](set-segment.md) | Rewrite one declared segment of a route's path |
 | [`show-route`](show-route.md) | Print one route's whole declaration as a tree |
 
 ## Examples

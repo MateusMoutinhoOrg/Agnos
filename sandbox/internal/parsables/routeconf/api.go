@@ -1,46 +1,42 @@
 package routeconf
 
-// Field is one header, one query parameter or one captured path segment
-// declared in a route's route.yaml. Key is the external spelling — the header
-// name (matched without regard to case) or the query key — and it is also the
-// id the bound value is read back under.
-//
-// Identifier and StartsWith are the two value conditions a header or a query
-// parameter may carry. They are what turns a declaration into a match rule:
-// the route only joins the run list when the request brings that name with a
-// value that is exactly Identifier, or that starts with StartsWith. A field
-// declaring neither is bound and never matched on.
-type Field struct {
-	Key         string
-	Description string
-	Examples    []string
-	Type        string // "string" | "boolean" | "int" | "float"
-	Default     string
-	HasDefault  bool
-	Required    bool
-	Array       bool
-	Min         float64
-	HasMin      bool
-	Max         float64
-	HasMax      bool
-	Identifier  string
-	StartsWith  string
+// Trigger is the condition a path slice or a parameter value has to meet for
+// the route to join the run list: the text compared, and how. Exists is false
+// on an entry that declares none — a plain capture, or a parameter that is
+// bound and never matched on.
+type Trigger struct {
+	Exists bool
+	Type   string // "equal" | "prefix" | "suffix" | "regex"
+	Value  string
 }
 
-// Segment is one item of a route's `paths` sequence: either a trigger, whose
-// Identifier is the literal it matches in the URL (always starting with "/"),
-// or a capture, whose Field names the segment and types the value. Exactly one
-// of the two is filled.
-//
-// StartsWith turns the trigger into a prefix: the Identifier then matches
-// every path that begins with it on a segment boundary, and the segments left
-// over are matched by whatever follows in `paths`. It is what a route sitting
-// in front of a whole subtree declares — "/" alone matches every request — and
-// it is the one identifier that may spell more than a single segment.
-type Segment struct {
-	Identifier string
-	StartsWith bool
-	Field      *Field
+// Path is one entry of a route's `paths`: the slice of request segments from
+// Start to End, both inclusive, End -1 standing for the last segment. The slice
+// is read as "/" + its segments joined by "/", compared against Trigger when
+// one is declared, and bound to Entries.<Id> either way.
+type Path struct {
+	Id          string
+	Start       int
+	End         int
+	Trigger     Trigger
+	Description string
+}
+
+// Parameter is one entry of a route's `parameters`: one value read off the
+// request under Key, from the first of Fonts that carries it, and bound to
+// Entries.<Id>. Key is the external spelling — the query key or the header
+// name, a header matched without regard to case — and defaults to Id.
+type Parameter struct {
+	Id          string
+	Key         string
+	Type        string   // "string" | "number" | "boolean" | "datetime" | "string-array"
+	Fonts       []string // "query" | "header", in the order they are read
+	Required    bool
+	Default     string
+	HasDefault  bool
+	Trigger     Trigger
+	Description string
+	Examples    []string
 }
 
 // SchemaProperty is one named property of an object Schema, kept as an ordered
@@ -102,42 +98,37 @@ type Body struct {
 	HasSchema   bool
 }
 
-// RouteConf is the parsed form of sandbox/internal/routes/<name>/route.yaml —
+// RouteConf is the parsed form of sandbox/internal/routeslist/<name>/route.yaml —
 // the declarative description of one http route, which `agnos build` turns
-// into the api.Route of that route's generated new.go, and which the dispatch
-// in sandbox/internal/server/servermain.go reads every request against. It is
-// written by `add-route` and rewritten by `add-field` / `remove-field` /
-// `set-route`, never by hand.
+// into that route's generated new.go and entries.go. It is written by
+// `add-route` and rewritten by the path, parameter and body editors, never by
+// hand.
 type RouteConf struct {
-	Method string
+	Methods []string
 	// Priority is the rung this route runs on when several match one
-	// request: lowest first, zero the default. The chain stops at the first
-	// handler that sets a status, so a low-priority route that writes
-	// nothing is a middleware and a high-priority one is the answer.
-	Priority        int
-	Paths           []Segment
+	// request: lowest first. It is required: HasPriority tells a declared 0
+	// from none at all.
+	Priority    int
+	HasPriority bool
+	// ResponseType is the Content-Type the dispatch sets before the handler
+	// runs. It is required.
+	ResponseType    string
+	Paths           []Path
+	Parameters      []Parameter
 	Category        string
 	Help            string
 	LongDescription string
 	Examples        []string
 	Hidden          bool
-	Headers         []Field
-	Params          []Field
 	Body            Body
+	// Legacy lists every key of a pre-routeslist declaration found in the
+	// file (`method`, `headers`, `params`), which verify reports by name.
+	Legacy []string
 
 	// Render serializes the declaration back to the route.yaml shape.
 	Render func() string
-	// Pattern is the route's path as it reads in docs and messages: every
-	// segment in order, a trigger bringing its own leading slash and a
-	// capture entering as "/{name}". The dispatch matches segment by
-	// segment, never this text.
+	// Pattern is the route's path as it reads in docs and messages.
 	Pattern func() string
-	// IdentifierCount is how many trigger segments the route fixes — the
-	// first key the run order sorts by after Priority, most specific first.
-	IdentifierCount func() int
-	// IdentifierLen is the total number of characters the route's triggers
-	// spell, the tie-break between two routes fixing as many segments.
-	IdentifierLen func() int
 	// SchemaJson is the declared json-schema as canonical JSON — the text
 	// baked into the generated BodySchema constant — or "" when the body
 	// declares none.

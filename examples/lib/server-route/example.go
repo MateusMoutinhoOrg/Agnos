@@ -12,8 +12,8 @@ import (
 // entry of every place its declaration holds something.
 //
 // It calls the same actions `agnos server-init`, `agnos add-route`,
-// `agnos add-segment`, `agnos add-header`, `agnos add-param`, `agnos set-body`
-// and `agnos add-body-field` call, and writes only inside TestDir.
+// `agnos add-path`, `agnos add-parameter`, `agnos set-body` and
+// `agnos add-body-field` call, and writes only inside TestDir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -33,30 +33,31 @@ func main() {
 	}
 
 	if err := lib.Actions.AddRoute(api.AddRouteProps{
-		Path:     "TestDir",
-		Name:     "create-user",
-		Method:   "POST",
-		Trigger:  "/users",
-		Help:     "Create a user under a tenant",
-		Category: "Users",
+		Path:        "TestDir",
+		Name:        "create-user",
+		Methods:     []string{"POST"},
+		Trigger:     "/users/",
+		TriggerType: "prefix",
+		Help:        "Create a user under a tenant",
+		Category:    "Users",
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddSegment(api.RouteFieldProps{
-		Path: "TestDir", Route: "create-user", Name: "tenant", Type: "string", Position: -1,
+	if err := lib.Actions.AddPath(api.RoutePathProps{
+		Path: "TestDir", Route: "create-user", Id: "tenant", Start: "1", End: "1", Position: -1,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddHeader(api.RouteFieldProps{
-		Path: "TestDir", Route: "create-user", Name: "authorization", Type: "string", Required: true, Position: -1,
+	if err := lib.Actions.AddParameter(api.RouteParameterProps{
+		Path: "TestDir", Route: "create-user", Name: "authorization", Fonts: []string{"header"}, Required: true, Position: -1,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddParam(api.RouteFieldProps{
-		Path: "TestDir", Route: "create-user", Name: "page", Type: "int", Default: "1", Min: "1", Position: -1,
+	if err := lib.Actions.AddParameter(api.RouteParameterProps{
+		Path: "TestDir", Route: "create-user", Name: "page", Type: "number", Default: "1", Position: -1,
 	}); err != nil {
 		panic(err)
 	}
@@ -74,13 +75,14 @@ func main() {
 	}
 
 	// What result.yaml records: the declaration this example wrote and the
-	// api.Route build generated from it — the same set the cli side copies.
-	assert_dir := "AssertDir/sandbox/internal/routes/create_user"
+	// api.Route and Entries build generated from it — the same set the cli
+	// side copies.
+	assert_dir := "AssertDir/sandbox/internal/routeslist/create_user"
 	if err := os.MkdirAll(assert_dir, 0o755); err != nil {
 		panic(err)
 	}
-	for _, file := range []string{"route.yaml", "new.go"} {
-		content, err := os.ReadFile("TestDir/sandbox/internal/routes/create_user/" + file)
+	for _, file := range []string{"route.yaml", "new.go", "entries.go"} {
+		content, err := os.ReadFile("TestDir/sandbox/internal/routeslist/create_user/" + file)
 		if err != nil {
 			panic(err)
 		}

@@ -1,23 +1,29 @@
-cli-output: "remove-route removing sandbox/internal/routes/about \nremove-page removing assets/frontend/pages/about.html \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "remove-route removing sandbox/internal/routeslist/about \nremove-page removing assets/frontend/pages/about.html \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: assets/frontend/pages/home.html
       sha: a642c3b25062f971d6d28625d24303c6feedf96134f2c1c753a441943fbd4b4b
-    - file: sandbox/internal/routes/health/handler.go
-      sha: 94db227ac65063aebcbe09fbf68ecd536c6ce7537f6339c78bdf549ff159aaf2
-    - file: sandbox/internal/routes/health/new.go
-      sha: f5255875ae12c501c23cdaa27e917e8105413a35d6dce331b8059b03822dd92b
-    - file: sandbox/internal/routes/health/route.yaml
-      sha: 733ac7275ee4fc8e476202e3d4b5111c7b1c7b30456e5e298dcb8b7f093793da
-    - file: sandbox/internal/routes/home/handler.go
-      sha: 91907660a8eff5fada2c2d84b3ce6884f30da30bfb4e7ee68c8354044d172ec5
-    - file: sandbox/internal/routes/home/new.go
-      sha: ce62cdc8f6b7630b84e335ad52fb56d3ce69cb43850c0752e3fac847bca4953c
-    - file: sandbox/internal/routes/home/route.yaml
-      sha: 6276316befcd6a44feb11c0a19fcbd17ce1f0c003ca8c48e74d3ce3531f809a9
-    - file: sandbox/internal/routes/static/handler.go
-      sha: 61fec4f4121e4788ece124a0505231e0f8f9b4a4122dc9e9ef05b1ac6fe8efdb
-    - file: sandbox/internal/routes/static/new.go
-      sha: e61c77b1928b1bd52327b518888d75b6d262d20a4fa95b29c83d06ee6a678750
-    - file: sandbox/internal/routes/static/route.yaml
-      sha: bea2ec05598aeb48c03a16a370f6d3a5bba2a85c1b78fdf5c3546433cf0ef817
+    - file: sandbox/internal/routeslist/health/InternalPureHandler.go
+      sha: a3a1d774ea62c9c24f5c49e8f0706324da6f0828563a09d85e671e19593b29bd
+    - file: sandbox/internal/routeslist/health/entries.go
+      sha: b0283d2aeae2ae3560211d1c2b191081ca4cda8a70d5e4fcf8c8c514c7e6f391
+    - file: sandbox/internal/routeslist/health/new.go
+      sha: 09ca3c6f9f11b23f70d7e69b096943d722738f0f6d3b3214c69bf661896b3b17
+    - file: sandbox/internal/routeslist/health/route.yaml
+      sha: 82116371f1ae2754ac7312dd908131cd1cf5945d08b880606a2b24bf921acd93
+    - file: sandbox/internal/routeslist/home/InternalPureHandler.go
+      sha: 55a173416cd07ce6eee59c446f2eb166fb9381ab3c99d3cd6555d00d71943f51
+    - file: sandbox/internal/routeslist/home/entries.go
+      sha: cb93833b7ce176593083a411a9bae067f0104f049d3f572c09fcdde28500b631
+    - file: sandbox/internal/routeslist/home/new.go
+      sha: 8165782b37870b16e8c23f9cda6b4460b927d815717f768e5ba5ae6c37127242
+    - file: sandbox/internal/routeslist/home/route.yaml
+      sha: 2cf20d50ade6009134c3104326007ccf741e323d655f13e914523381f5b35df4
+    - file: sandbox/internal/routeslist/static/InternalPureHandler.go
+      sha: 359fe471cf228b831b17c159203d4cd1b7ab21f6bc504cd2891b8f3e5f21d399
+    - file: sandbox/internal/routeslist/static/entries.go
+      sha: 80bf561f0868332572c4ae06ec3d3845675a10635b60203389c1cb24aae399d3
+    - file: sandbox/internal/routeslist/static/new.go
+      sha: af340cb690c13cf4261fe6c6c0fa39a998389ea440bde5f7accf8848e66c274d
+    - file: sandbox/internal/routeslist/static/route.yaml
+      sha: 01fa14b282f95d4b6d4006fefd0bd7bab7499e022e3fb5f3941fe0b3df410e9f

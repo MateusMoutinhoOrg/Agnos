@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"set-route"}
 	command.Category = "Server System"
 	command.Help = "Rewrite the route-level keys of a route.yaml"
-	command.LongDescription = "Overwrites method, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --example appends."
+	command.LongDescription = "Overwrites methods, response-type, priority, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends."
 	command.Examples = []string{"set-route create-user --method POST --example \"curl -X POST localhost:8080/users\""}
 	command.Hidden = false
 
@@ -28,12 +28,23 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Id:          "method",
 			Type:        "string",
 			Required:    false,
-			Array:       false,
-			Description: "the http method the route answers",
-			Examples:    []string{"--method POST"},
+			Array:       true,
+			Description: "an http method the route answers (repeatable; replaces the whole list)",
+			Examples:    []string{"--method GET --method POST"},
 			Default:     "",
 			HasDefault:  false,
 			Identifiers: []string{"--method", "-m"},
+		},
+		{
+			Id:          "response-type",
+			Type:        "string",
+			Required:    false,
+			Array:       false,
+			Description: "the Content-Type every response of the route carries",
+			Examples:    []string{"--response-type text/plain"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--response-type"},
 		},
 		{
 			Id:          "help",

@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"show-route"}
 	command.Category = "Server System"
 	command.Help = "Print one route's whole declaration as a tree"
-	command.LongDescription = "Reads sandbox/internal/routes/<route>/route.yaml and prints it as a tree: the request line the route answers, then every place the declaration holds something — the segments of its path, its headers, its query parameters and the json-schema of its body, property by property with the keywords declared on each. It is the one command of the route surface that writes nothing and runs no build."
+	command.LongDescription = "Reads sandbox/internal/routeslist/<route>/route.yaml and prints it as a tree: the request line the route answers, then every place the declaration holds something — its paths, its parameters and the json-schema of its body, property by property with the keywords declared on each. It is the one command of the route surface that writes nothing and runs no build."
 	command.Examples = []string{"show-route create-user"}
 	command.Hidden = false
 

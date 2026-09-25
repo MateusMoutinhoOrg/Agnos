@@ -56,8 +56,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
   `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
 - Every `sandbox/api/<x>.go` other than `sandbox.go`, `command.go` and `route.go` is a field of
-  the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go`
-  declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
+  the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go` —
+  or `sandbox/internal/<x>/<x>/new.go`, for a layer split into packages — declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
   such file is a field nothing fills, and no constructor is written for it. **(verify)**
 - `sandbox/new.go` is one `<x>.Constructor(&self)` per directory of `sandbox/constructors/`,
   in name order, and nothing else. The directories are the list, so a constructor written by

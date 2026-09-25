@@ -8,6 +8,13 @@ examples:
     - add-page home --trigger / --title Home
     - add-page about --title About
 flags:
+    - description: the whole request path the page answers on, / included (defaults to /<name>)
+      examples:
+        - add-page about --trigger /about-us
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
     - default: .
       description: the dir holding the project (defaults to the current directory)
       identifiers:
@@ -20,11 +27,6 @@ flags:
         - -q
       name: quiet
       type: boolean
-    - description: the literal segment the page answers on, / included (defaults to /<name>)
-      identifiers:
-        - --trigger
-      name: trigger
-      type: string
     - description: the <title> the scaffolded page carries (defaults to the page name)
       identifiers:
         - --title

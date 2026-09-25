@@ -11,63 +11,36 @@ func BindMethods(sandbox *api.Sandbox, conf *RouteConf) {
 	conf.Pattern = func() string {
 		return Pattern(conf)
 	}
-	conf.IdentifierCount = func() int {
-		return IdentifierCount(conf)
-	}
-	conf.IdentifierLen = func() int {
-		return IdentifierLen(conf)
-	}
 	conf.SchemaJson = func() string {
 		return SchemaJson(sandbox, conf)
 	}
 }
 
-// Pattern is the route's path as docs and messages spell it: every segment in
-// order, a trigger bringing its own leading slash and a capture entering as
-// "/{name}" — or "/{name...}" for the last one, when it takes every segment
-// left in the path. A prefix trigger ends in "*", so "/" alone reads as "/*"
-// and is told apart from the route that answers the root and nothing else. A
-// route with no segment at all reads as "/".
+// Pattern is the route's path as docs and messages spell it: one piece per
+// entry of `paths`, in order. An `equal` trigger is its value, a `prefix` its
+// value followed by "*", a `suffix` "*" followed by its value, a `regex` its
+// value between "~(" and ")", and a plain capture "{Id}". A route with no
+// path at all reads as "/".
 func Pattern(conf *RouteConf) string {
 	pattern := ""
-	for _, segment := range conf.Paths {
-		if segment.Field != nil {
-			if segment.Field.Array {
-				pattern += "/{" + segment.Field.Key + "...}"
-				continue
-			}
-			pattern += "/{" + segment.Field.Key + "}"
+	for _, path := range conf.Paths {
+		if !path.Trigger.Exists {
+			pattern += "{" + path.Id + "}"
 			continue
 		}
-		pattern += segment.Identifier
-		if segment.StartsWith {
-			pattern += "*"
+		switch path.Trigger.Type {
+		case "prefix":
+			pattern += path.Trigger.Value + "*"
+		case "suffix":
+			pattern += "*" + path.Trigger.Value
+		case "regex":
+			pattern += "~(" + path.Trigger.Value + ")"
+		default:
+			pattern += path.Trigger.Value
 		}
 	}
 	if pattern == "" {
 		return "/"
 	}
 	return pattern
-}
-
-// IdentifierCount is how many trigger segments the route fixes.
-func IdentifierCount(conf *RouteConf) int {
-	count := 0
-	for _, segment := range conf.Paths {
-		if segment.Field == nil {
-			count++
-		}
-	}
-	return count
-}
-
-// IdentifierLen is the total number of characters the route's triggers spell.
-func IdentifierLen(conf *RouteConf) int {
-	length := 0
-	for _, segment := range conf.Paths {
-		if segment.Field == nil {
-			length += len(segment.Identifier)
-		}
-	}
-	return length
 }

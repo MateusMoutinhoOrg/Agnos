@@ -6,7 +6,7 @@ import (
 )
 
 // A page is a route with an html asset beside it, so it needs no declaration
-// of its own: sandbox/internal/routes/<page>/route.yaml is the declaration and
+// of its own: sandbox/internal/routeslist/<page>/route.yaml is the declaration and
 // assets/frontend/pages/<page>.html is the content. The helpers below are the
 // one place that pairing is spelled, so add-page, remove-page, remove-route
 // and front-purge all read it the same way.

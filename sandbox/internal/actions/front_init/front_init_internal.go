@@ -61,7 +61,7 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 }
 
 // writeStaticRoute scaffolds the route serving assets/frontend/static, leaving
-// an existing one alone: like any route's handler.go it is written once and
+// an existing one alone: like any route's InternalPureHandler.go it is written once and
 // then the project's — and its safeSegments check is what stands between a
 // caller's path and the rest of the asset tree, so re-rendering over an edited
 // copy would undo a deliberate change without saying so.
@@ -76,7 +76,7 @@ func writeStaticRoute(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string
 	if err := utils.RenderTemplateToDest(sandbox, io, "templates/static_route.yaml", vars, dir+"/route.yaml"); err != nil {
 		return err
 	}
-	return utils.RenderTemplateToDest(sandbox, io, "templates/static_handler.go", vars, dir+"/handler.go")
+	return utils.RenderTemplateToDest(sandbox, io, "templates/static_handler.go", vars, dir+"/InternalPureHandler.go")
 }
 
 // writeFrontSkeleton writes the two starting files of assets/frontend/ through

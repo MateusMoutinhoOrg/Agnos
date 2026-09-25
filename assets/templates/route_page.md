@@ -7,10 +7,10 @@
 {{- end }}
 {{- if .Route.Fields }}
 
-| Field | In | Type | Default | Description |
-| --- | --- | --- | --- | --- |
+| Entries | Read from | In | Type | Default | Description |
+| --- | --- | --- | --- | --- | --- |
 {{- range .Route.Fields }}
-| `{{ .Key }}` | {{ .In }} | {{ .Type }} | {{ .Default }} | {{ .Description }} |
+| `{{ .Id }}` | {{ .Key }} | {{ .In }} | {{ .Type }} | {{ .Default }} | {{ .Description }} |
 {{- end }}
 {{- end }}
 {{- with .Route.Body }}
@@ -26,4 +26,4 @@ Body: {{ . }}
 ```
 {{- end }}
 
-`sandbox/internal/routes/{{ .Route.Name }}/` · {{ .Category }} · [every route](doc.md) · [RouteYaml](../RouteYaml/doc.md)
+`sandbox/internal/routeslist/{{ .Route.Name }}/` · {{ .Category }} · [every route](doc.md) · [RouteYaml](../RouteYaml/doc.md)

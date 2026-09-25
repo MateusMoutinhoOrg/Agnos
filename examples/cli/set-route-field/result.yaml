@@ -1,7 +1,9 @@
-cli-output: "set-param updating page in sandbox/internal/routes/create_user/route.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "set-parameter rewriting page of sandbox/internal/routeslist/create_user/route.yaml \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/routes/create_user/new.go
-      sha: ed0968bb8ac4c148e8169a378f441498f8e9cf8f7ac27095e784ada2afaf6c37
-    - file: sandbox/internal/routes/create_user/route.yaml
-      sha: 9b693481b6da131934acf47f14d27cdf8b5f00a3d5359b8479ad4a2093e28244
+    - file: sandbox/internal/routeslist/create_user/entries.go
+      sha: 60cf8f60d01d2f72f7dcd9eff6fd53518df184b44b9160173047b4d5cdfe93ce
+    - file: sandbox/internal/routeslist/create_user/new.go
+      sha: 8fc8281fb72db3d00b802bdacc6ae5e43d9adc797252daa9f2077db5fa721bf8
+    - file: sandbox/internal/routeslist/create_user/route.yaml
+      sha: e0905fa444159c3f5980a0ef59c01855e09ecbd2cdf158b75e6d332285ad9f6a

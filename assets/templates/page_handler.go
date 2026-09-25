@@ -20,7 +20,7 @@ type pageVars struct {
 	Message string
 }
 
-// RouteHandler answers {{.Method}} {{.Trigger}} with the rendered page. It
+// InternalPureHandler answers {{.Method}} {{.Trigger}} with the rendered page. It
 // renders through pageio.Render rather than sandbox.Deps.Embeddeps.RenderTemplate,
 // which is what puts the asset helpers — staticref, dirref, cssref, jsref,
 // inline, include — in reach of the page, so the html names a directory
@@ -30,7 +30,7 @@ type pageVars struct {
 // mistake, never the caller's — a helper pointed at an asset that is not there
 // is one of them — so it fails 500 through the project's own HandleServerError
 // and says nothing about the asset tree.
-func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error {
 	content, err := pageio.Render(sandbox, pageAsset, pageVars{
 		Title:   {{printf "%q" .Title}},
 		Message: "this page is rendered from assets/frontend/pages/{{.Identifier}}.html",
@@ -40,7 +40,6 @@ func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Re
 			"could not render the {{.Identifier}} page")
 	}
 
-	response.SetHeader("Content-Type", "text/html; charset=utf-8")
 	response.SetStatus(api.StatusOk)
 	response.Write(content)
 

@@ -2,38 +2,41 @@ cli-output: |
     GET /*
       Logs every request
       category  Server
+      priority  0
+      response  application/json
 
-    path
-      /                    starts-with, and takes every segment after it
+    paths
+      Route                segments 0..-1  prefix "/"
 
     body      none
-    GET /admin
+    GET /admin*
       The admin area
       category  Server
       priority  5
+      response  application/json
 
-    path
-      /admin
+    paths
+      Route                segments 0..-1  prefix "/admin"
 
-    headers
-      authorization        string  starts with "Bearer", the bearer token
+    parameters
+      Authorization        string  "authorization" from header, prefix "Bearer", the bearer token
 
     body      none
 exit-code: 0
 tree:
-    - file: sandbox/internal/routes/admin/new.go
-      sha: c6db50a15e18cf2e3ff90eab8137320f04161a6ec78c54086f308817a26b3b4e
-    - file: sandbox/internal/routes/admin/route.yaml
-      sha: c4b11b0e94ad32fe6ef1f9a8e991aa1e298bf93d193aac3de674eb291884ac38
-    - file: sandbox/internal/routes/hello/route.yaml
-      sha: d795c2683f2e7d69932f87487147ca3e90137b315e2ca2f330e09c15639b1c53
-    - file: sandbox/internal/routes/logger/new.go
-      sha: df0ff1de624d7704a3485c47e119d91f6e65b8a217bb88e5084e002713a767cb
-    - file: sandbox/internal/routes/logger/route.yaml
-      sha: eb38f993da4895919bba898241a42a3443afad679cdad35320e6362b27a7f2b9
-    - file: sandbox/internal/server/handle_method_not_allowed.go
-      sha: 74a6a38fb2c17bb17e06047acb749933a9c00aa2780d28855096f08a4ad2dba5
-    - file: sandbox/internal/server/handle_not_found.go
-      sha: 025bd11f455495527919213ab814d3407d5d61659743a623a90659f2580e259d
-    - file: sandbox/internal/server/new.go
-      sha: d62d4acba548c7ad85d11f582c44e3359f604f1bd59500401dbf8d11bbe92a31
+    - file: sandbox/internal/routeslist/admin/new.go
+      sha: 51c678787cd5a47afa5f8696b474ac47dad600de1350c6c8bf56c4e5e26ff48a
+    - file: sandbox/internal/routeslist/admin/route.yaml
+      sha: e108bcccd1bc1c262e795cd881dde62cd00eae87a9916ac8ec3676b72ac96d36
+    - file: sandbox/internal/routeslist/hello/route.yaml
+      sha: 9b4ff0a368dba6de46c183d9eedcc7787d483031d7ec26905d481e37d12e8eea
+    - file: sandbox/internal/routeslist/logger/new.go
+      sha: 9d9c8f461feea67e01f128c6fff401ada4d66594901c9ffb39c0718eed485638
+    - file: sandbox/internal/routeslist/logger/route.yaml
+      sha: 277c50ec407a4793a05089b444281388ad7cbcb44b1507ac8496885fc597ba61
+    - file: sandbox/internal/server/errors/handle_method_not_allowed.go
+      sha: 479403c4df7038f1efa6f4d82ae70750955254f21e114b68f7ca4631474f345d
+    - file: sandbox/internal/server/errors/handle_not_found.go
+      sha: 56b9f6190455dfa77b7a9f169928d7aa15386a084be37610f4be1e668d818e7a
+    - file: sandbox/internal/server/server/new.go
+      sha: 3dbea1d3a2d3be9b2669afd565ef6b9952130ba9dcee0f5c7d8347dbe016af0b

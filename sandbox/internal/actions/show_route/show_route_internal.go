@@ -7,8 +7,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// The indents the tree is drawn with. A route is four lists deep at most — the
-// path, the headers, the params and a body schema nested inside itself — so
+// The indents the tree is drawn with. A route is three lists deep at most —
+// the paths, the parameters and a body schema nested inside itself — so
 // the depth is carried as a prefix rather than drawn with box characters,
 // which keeps a line the same whether it is copied into a terminal or a doc.
 const (
@@ -18,11 +18,11 @@ const (
 
 // ShowRouteInternal reads one route.yaml and renders it as the lines of a
 // tree: the request line the route answers, then each place the declaration
-// holds something — the segments of its path, its headers, its query
-// parameters and the json-schema of its body, property by property.
+// holds something — its paths, its parameters and the json-schema of its
+// body, property by property.
 //
 // It is the one command of the route surface that writes nothing. A route is
-// declared by six editors, each of which prints the file it changed and
+// declared by several editors, each of which prints the file it changed and
 // nothing else, so the declaration as a whole was only ever readable as yaml.
 // This is that declaration said the way the editors talk about it.
 func ShowRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string) ([]string, error) {
@@ -32,12 +32,11 @@ func ShowRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string) 
 	}
 
 	lines := []string{
-		sandbox.Deps.Std.Sprintf("%s %s", conf.Method, conf.Pattern()),
+		sandbox.Deps.Std.Sprintf("%s %s", sandbox.Deps.Stringsdeps.Join(conf.Methods, ","), conf.Pattern()),
 	}
 	lines = append(lines, routeHead(sandbox, conf)...)
 	lines = append(lines, pathLines(sandbox, conf)...)
-	lines = append(lines, fieldLines(sandbox, "headers", conf.Headers)...)
-	lines = append(lines, fieldLines(sandbox, "params", conf.Params)...)
+	lines = append(lines, parameterLines(sandbox, conf)...)
 	lines = append(lines, bodyLines(sandbox, conf)...)
 
 	return lines, nil
@@ -55,9 +54,8 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if conf.Category != "" {
 		lines = append(lines, sandbox.Deps.Std.Sprintf("%scategory  %s", branch, conf.Category))
 	}
-	if conf.Priority != 0 {
-		lines = append(lines, sandbox.Deps.Std.Sprintf("%spriority  %d", branch, conf.Priority))
-	}
+	lines = append(lines, sandbox.Deps.Std.Sprintf("%spriority  %d", branch, conf.Priority))
+	lines = append(lines, sandbox.Deps.Std.Sprintf("%sresponse  %s", branch, conf.ResponseType))
 	if conf.Hidden {
 		lines = append(lines, branch+"hidden")
 	}
@@ -65,86 +63,68 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	return lines
 }
 
-// pathLines is the route's path, segment by segment in the order the URL
-// spells them: a trigger by the literal it matches — said as a prefix when it
-// only fixes the beginning of the path — and a capture by the field it binds.
+// pathLines is the route's paths, one line each: the Entries field it binds,
+// the segments it reads and the trigger they have to match.
 func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if len(conf.Paths) == 0 {
 		return []string{}
 	}
 
-	lines := []string{"", "path"}
-	for _, segment := range conf.Paths {
-		if segment.Field == nil {
-			if segment.StartsWith {
-				lines = append(lines, sandbox.Deps.Std.Sprintf("%s%-20s starts-with, and takes every segment after it", branch, segment.Identifier))
-				continue
-			}
-			lines = append(lines, sandbox.Deps.Std.Sprintf("%s%s", branch, segment.Identifier))
-			continue
+	lines := []string{"", "paths"}
+	for _, path := range conf.Paths {
+		text := sandbox.Deps.Std.Sprintf("%-20s segments %d..%d", path.Id, path.Start, path.End)
+
+		notes := []string{}
+		if path.Trigger.Exists {
+			notes = append(notes, sandbox.Deps.Std.Sprintf("%s %q", path.Trigger.Type, path.Trigger.Value))
 		}
-		lines = append(lines, branch+fieldText(sandbox, *segment.Field, "{"+segment.Field.Key+"}"))
+		if path.Description != "" {
+			notes = append(notes, path.Description)
+		}
+		lines = append(lines, branch+withNotes(sandbox, text, notes))
 	}
 
 	return lines
 }
 
-// fieldLines is one of the two lists that read a value off the request line,
-// under the heading its editors name it by.
-func fieldLines(sandbox *api.Sandbox, heading string, fields []routeconf.Field) []string {
-	if len(fields) == 0 {
+// parameterLines is the route's parameters, one line each: the Entries field
+// it binds and the Go type it binds to, then where it is read from and every
+// rule the dispatch holds a request to before the handler runs.
+func parameterLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
+	if len(conf.Parameters) == 0 {
 		return []string{}
 	}
 
-	lines := []string{"", heading}
-	for _, field := range fields {
-		lines = append(lines, branch+fieldText(sandbox, field, field.Key))
+	lines := []string{"", "parameters"}
+	for _, parameter := range conf.Parameters {
+		text := sandbox.Deps.Std.Sprintf("%-20s %s", parameter.Id, parameter.Type)
+
+		notes := []string{sandbox.Deps.Std.Sprintf("%q from %s", parameter.Key, sandbox.Deps.Stringsdeps.Join(parameter.Fonts, ", "))}
+		if parameter.Required {
+			notes = append(notes, "required")
+		}
+		if parameter.HasDefault {
+			notes = append(notes, sandbox.Deps.Std.Sprintf("default %s", parameter.Default))
+		}
+		if parameter.Trigger.Exists {
+			notes = append(notes, sandbox.Deps.Std.Sprintf("%s %q", parameter.Trigger.Type, parameter.Trigger.Value))
+		}
+		if parameter.Description != "" {
+			notes = append(notes, parameter.Description)
+		}
+		lines = append(lines, branch+withNotes(sandbox, text, notes))
 	}
 
 	return lines
 }
 
-// fieldText is one header, query parameter or captured segment on one line:
-// what it is called, the Go type it binds to, and every rule the dispatch
-// holds a request to before the handler runs.
-func fieldText(sandbox *api.Sandbox, field routeconf.Field, name string) string {
-	text := sandbox.Deps.Std.Sprintf("%-20s %s", name, typeText(field))
-
-	notes := []string{}
-	if field.Required {
-		notes = append(notes, "required")
-	}
-	if field.HasDefault {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("default %s", field.Default))
-	}
-	if field.HasMin {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("min %s", utils.RouteBoundText(sandbox, field.Min)))
-	}
-	if field.HasMax {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("max %s", utils.RouteBoundText(sandbox, field.Max)))
-	}
-	if field.Identifier != "" {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("matches %q", field.Identifier))
-	}
-	if field.StartsWith != "" {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("starts with %q", field.StartsWith))
-	}
-	if field.Description != "" {
-		notes = append(notes, field.Description)
-	}
-
+// withNotes joins one line's text and its notes, the notes said after two
+// spaces and separated by commas.
+func withNotes(sandbox *api.Sandbox, text string, notes []string) string {
 	if len(notes) == 0 {
 		return text
 	}
 	return sandbox.Deps.Std.Sprintf("%s  %s", text, sandbox.Deps.Stringsdeps.Join(notes, ", "))
-}
-
-// typeText is a field's declared type, said as the Go value it binds to.
-func typeText(field routeconf.Field) string {
-	if field.Array {
-		return "[]" + field.Type
-	}
-	return field.Type
 }
 
 // bodyLines is the request body: the envelope the dispatch settles before a

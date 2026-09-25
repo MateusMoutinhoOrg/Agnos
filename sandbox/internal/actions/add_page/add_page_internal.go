@@ -7,13 +7,14 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// pageMethod and pageCategory are fixed: a page is read by a browser
-// navigating to it, and it is listed in docs/Routes under a heading of its own
-// so the pages of a project read as a set rather than scattered among its api
-// routes.
+// pageMethod, pageResponseType and pageCategory are fixed: a page is html read
+// by a browser navigating to it, and it is listed in docs/Routes under a
+// heading of its own so the pages of a project read as a set rather than
+// scattered among its api routes.
 const (
-	pageMethod   = "GET"
-	pageCategory = "Pages"
+	pageMethod       = "GET"
+	pageResponseType = "text/html; charset=utf-8"
+	pageCategory     = "Pages"
 )
 
 // AddPageInternal writes the two halves of a new page — the route package that
@@ -56,11 +57,12 @@ func AddPageInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PagePr
 	}
 
 	if err := addRouteAction.AddRouteInternal(sandbox, io, api.AddRouteProps{
-		Name:     props.Name,
-		Method:   pageMethod,
-		Trigger:  trigger,
-		Help:     help,
-		Category: pageCategory,
+		Name:         props.Name,
+		Methods:      []string{pageMethod},
+		Trigger:      trigger,
+		ResponseType: pageResponseType,
+		Help:         help,
+		Category:     pageCategory,
 	}); err != nil {
 		return err
 	}
@@ -71,7 +73,7 @@ func AddPageInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PagePr
 // writePage overwrites the stub handler add-route just left with one that
 // renders the page, and writes the html template beside it.
 func writePage(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PageProps, identifier string, trigger string) error {
-	segment, err := utils.RouteIdentifierSegment(sandbox, trigger)
+	path, err := utils.NewRoutePath(sandbox, api.RoutePathProps{Id: "Route", Trigger: trigger})
 	if err != nil {
 		return err
 	}
@@ -91,11 +93,11 @@ func writePage(sandbox *api.Sandbox, io *smartio.SmartIO, props api.PageProps, i
 		"Package":    utils.RoutePackage(sandbox, props.Name),
 		"Module":     module_conf.Module,
 		"Method":     pageMethod,
-		"Trigger":    segment,
+		"Trigger":    path.Trigger.Value,
 		"Title":      title,
 	}
 
-	handler := utils.RouteDir(sandbox, props.Name) + "/handler.go"
+	handler := utils.RouteDir(sandbox, props.Name) + "/" + addRouteAction.InternalPureHandlerFile
 	if err := utils.RenderTemplateToDest(sandbox, io, "templates/page_handler.go", vars, handler); err != nil {
 		return err
 	}

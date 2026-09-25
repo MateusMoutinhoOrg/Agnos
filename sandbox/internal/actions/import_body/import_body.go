@@ -7,7 +7,7 @@ import (
 )
 
 // ImportBody declares the body json-schema of
-// sandbox/internal/routes/<route>/route.yaml from an example payload, then
+// sandbox/internal/routeslist/<route>/route.yaml from an example payload, then
 // runs build as a follow-up step so the Body struct, BodySchema and ReadBody
 // pick the properties up.
 func ImportBody(sandbox *api.Sandbox, props api.RouteBodyImportProps) error {

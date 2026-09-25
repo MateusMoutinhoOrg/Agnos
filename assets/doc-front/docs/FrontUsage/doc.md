@@ -1,7 +1,7 @@
 # FrontUsage
 
 The front layer answers html. A **page** is a route with a template beside it:
-`sandbox/internal/routes/<page>/` declares and handles it,
+`sandbox/internal/routeslist/<page>/` declares and handles it,
 `assets/frontend/pages/<page>.html` is what it renders. `sandbox/internal/pageio` is the
 render layer both sides go through, and it is the directory `build` reads the layer from.
 
@@ -18,8 +18,8 @@ render layer both sides go through, and it is the directory `build` reads the la
 Then `{{.Name}} start-server` serves them.
 
 `front-init` runs `server-init` first when the project has no server layer. A page is a
-route, so `docs/Routes` lists it and every route editor (`set-route`, `add-param`,
-`add-header`, …) works on its `route.yaml`.
+route, so `docs/Routes` lists it and every route editor (`set-route`, `add-parameter`,
+`add-path`, …) works on its `route.yaml`.
 
 ## Generated vs yours
 
@@ -27,11 +27,11 @@ route, so `docs/Routes` lists it and every route editor (`set-route`, `add-param
 |---|---|---|
 | `sandbox/internal/pageio/templates.go` | `build` | always |
 | `docs/FrontUsage/` | `build` | always |
-| `sandbox/internal/routes/static/{route.yaml,handler.go}` | `front-init` | once |
+| `sandbox/internal/routeslist/static/{route.yaml,InternalPureHandler.go}` | `front-init` | once |
 | `assets/frontend/static/styles/main.css`, `.../scripts/main.js` | `front-init` | once |
-| `sandbox/internal/routes/<page>/{route.yaml,handler.go}` | `add-page` | once |
+| `sandbox/internal/routeslist/<page>/{route.yaml,InternalPureHandler.go}` | `add-page` | once |
 | `assets/frontend/pages/<page>.html` | `add-page` | once |
-| `sandbox/internal/routes/<page>/new.go` | `build` | always |
+| `sandbox/internal/routeslist/<page>/{new.go,entries.go}` | `build` | always |
 
 `once` files are a starting point and yours from the moment they exist. To go back to the
 scaffolded one: `{{.GeneratorName}} remove-route static && {{.GeneratorName}} front-init` for
@@ -39,7 +39,7 @@ the static route, `{{.GeneratorName}} remove-page <page> && {{.GeneratorName}} a
 for a page — that one deletes the html too. `{{.GeneratorName}} front-purge` followed by
 `front-init` returns the whole layer without touching `assets/frontend/`.
 
-Whoever edits `sandbox/internal/routes/static/handler.go` keeps `safeSegments`: it is the only
+Whoever edits `sandbox/internal/routeslist/static/InternalPureHandler.go` keeps `safeSegments`: it is the only
 thing between a caller's `/static/<path>` and the rest of the embedded asset tree.
 
 ## Helpers
@@ -73,8 +73,8 @@ content, err := pageio.Render(deps, pageAsset, pageVars{Title: "Home"})
 
 ## The mount
 
-`pageio.StaticMount` is generated from the `identifier` of the first segment of
-`sandbox/internal/routes/static/route.yaml`, which is `/static` as scaffolded. Move it with
-`{{.GeneratorName}} remove-segment` / `add-segment --identifier /assets` and the next build
+`pageio.StaticMount` is generated from the trigger `value` of the first path of
+`sandbox/internal/routeslist/static/route.yaml`, which is `/static` as scaffolded. Move it with
+`{{.GeneratorName}} set-path Mount --route static --trigger /assets` and the next build
 moves every link the helpers write. Editing the constant instead does nothing: it is rewritten
 from the declaration.

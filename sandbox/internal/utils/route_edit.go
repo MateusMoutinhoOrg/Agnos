@@ -5,7 +5,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 )
 
-// The edit helpers below are what `set-segment`, `set-header`, `set-param` and
+// The edit helpers below are what `set-path`, `set-parameter` and
 // `set-body-field` are: a declaration already on disk read back as the command
 // line that would have written it, the keys being changed written over that,
 // and the whole built again by the same constructor the add- side calls. A
@@ -17,12 +17,12 @@ import (
 // the changes so that clearing and setting the same key in one line reads as
 // the change.
 
-// RouteFieldClearKeys is every key --clear may take off a header, a query
-// parameter or a captured segment.
-var RouteFieldClearKeys = []string{
-	"description", "examples", "default", "required", "array", "min", "max",
-	"identifier", "starts-with",
-}
+// RoutePathClearKeys is every key --clear may take off an entry of `paths`.
+var RoutePathClearKeys = []string{"trigger", "description"}
+
+// RouteParameterClearKeys is every key --clear may take off an entry of
+// `parameters`.
+var RouteParameterClearKeys = []string{"description", "examples", "default", "required", "trigger"}
 
 // RouteBodyFieldClearKeys is every keyword --clear may take off a body
 // property.
@@ -61,33 +61,83 @@ func RouteClearSet(sandbox *api.Sandbox, clear []string, known []string) (map[st
 	return cleared, nil
 }
 
-// RouteFieldEdited rebuilds one declared header, query parameter or captured
-// segment with the changes applied, holding the result to every rule
-// NewRouteField holds a new one to.
-func RouteFieldEdited(sandbox *api.Sandbox, current routeconf.Field, props api.RouteFieldEditProps, in string) (routeconf.Field, error) {
-	cleared, err := RouteClearSet(sandbox, props.Clear, RouteFieldClearKeys)
+// RoutePathEdited rebuilds one entry of `paths` with the changes applied,
+// holding the result to every rule NewRoutePath holds a new one to.
+func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.RoutePathEditProps) (routeconf.Path, error) {
+	cleared, err := RouteClearSet(sandbox, props.Clear, RoutePathClearKeys)
 	if err != nil {
-		return routeconf.Field{}, err
+		return routeconf.Path{}, err
 	}
 
-	built := api.RouteFieldProps{
+	built := api.RoutePathProps{
+		Id:          current.Id,
+		Start:       sandbox.Deps.Stringsdeps.FormatInt(int64(current.Start), 10),
+		End:         sandbox.Deps.Stringsdeps.FormatInt(int64(current.End), 10),
+		Description: current.Description,
+	}
+	if current.Trigger.Exists {
+		built.TriggerType, built.Trigger = current.Trigger.Type, current.Trigger.Value
+	}
+
+	if cleared["trigger"] {
+		built.TriggerType, built.Trigger = "", ""
+	}
+	if cleared["description"] {
+		built.Description = ""
+	}
+
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
+		built.Id = value
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Start); value != "" {
+		built.Start = value
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.End); value != "" {
+		built.End = value
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Description); value != "" {
+		built.Description = value
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Trigger); value != "" {
+		built.Trigger = value
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.TriggerType); value != "" {
+		built.TriggerType = value
+	}
+
+	return NewRoutePath(sandbox, built)
+}
+
+// RoutePathEditEmpty reports an edit that changes nothing, so the command can
+// say so instead of rewriting a file with the bytes already in it.
+func RoutePathEditEmpty(sandbox *api.Sandbox, props api.RoutePathEditProps) bool {
+	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Start + props.End +
+		props.TriggerType + props.Trigger + props.Description)
+	return given == "" && len(props.Clear) == 0
+}
+
+// RouteParameterEdited rebuilds one entry of `parameters` with the changes
+// applied, holding the result to every rule NewRouteParameter holds a new one
+// to.
+func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, props api.RouteParameterEditProps) (routeconf.Parameter, error) {
+	cleared, err := RouteClearSet(sandbox, props.Clear, RouteParameterClearKeys)
+	if err != nil {
+		return routeconf.Parameter{}, err
+	}
+
+	built := api.RouteParameterProps{
 		Name:        current.Key,
+		Type:        current.Type,
+		Fonts:       current.Fonts,
+		Required:    current.Required,
 		Description: current.Description,
 		Examples:    current.Examples,
-		Type:        current.Type,
-		Required:    current.Required,
-		Array:       current.Array,
-		Identifier:  current.Identifier,
-		StartsWith:  current.StartsWith,
 	}
 	if current.HasDefault {
 		built.Default = current.Default
 	}
-	if current.HasMin {
-		built.Min = RouteBoundText(sandbox, current.Min)
-	}
-	if current.HasMax {
-		built.Max = RouteBoundText(sandbox, current.Max)
+	if current.Trigger.Exists {
+		built.TriggerType, built.Trigger = current.Trigger.Type, current.Trigger.Value
 	}
 
 	if cleared["description"] {
@@ -102,24 +152,24 @@ func RouteFieldEdited(sandbox *api.Sandbox, current routeconf.Field, props api.R
 	if cleared["required"] {
 		built.Required = false
 	}
-	if cleared["array"] {
-		built.Array = false
-	}
-	if cleared["min"] {
-		built.Min = ""
-	}
-	if cleared["max"] {
-		built.Max = ""
-	}
-	if cleared["identifier"] {
-		built.Identifier = ""
-	}
-	if cleared["starts-with"] {
-		built.StartsWith = ""
+	if cleared["trigger"] {
+		built.TriggerType, built.Trigger = "", ""
 	}
 
 	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
 		built.Name = value
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); value != "" {
+		built.Type = value
+	}
+	if len(props.Fonts) > 0 {
+		built.Fonts = props.Fonts
+	}
+	if props.Required {
+		built.Required = true
+	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Default); value != "" {
+		built.Default = value
 	}
 	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Description); value != "" {
 		built.Description = value
@@ -127,44 +177,21 @@ func RouteFieldEdited(sandbox *api.Sandbox, current routeconf.Field, props api.R
 	if len(props.Examples) > 0 {
 		built.Examples = AppendUnique(built.Examples, props.Examples)
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); value != "" {
-		built.Type = value
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Trigger); value != "" {
+		built.Trigger = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Default); value != "" {
-		built.Default = value
-	}
-	if props.Required {
-		built.Required = true
-	}
-	if props.Array {
-		built.Array = true
-	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Min); value != "" {
-		built.Min = value
-	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Max); value != "" {
-		built.Max = value
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.TriggerType); value != "" {
+		built.TriggerType = value
 	}
 
-	// The two match conditions are one switch: setting either one is what
-	// this field matches on from now on, so the other goes rather than
-	// failing the pair check NewRouteField runs.
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Identifier); value != "" {
-		built.Identifier, built.StartsWith = value, ""
-	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.StartsWith); value != "" {
-		built.Identifier, built.StartsWith = "", value
-	}
-
-	return NewRouteField(sandbox, built, in)
+	return NewRouteParameter(sandbox, built)
 }
 
-// RouteFieldEditEmpty reports an edit that changes nothing, so the command can
-// say so instead of rewriting a file with the bytes already in it.
-func RouteFieldEditEmpty(sandbox *api.Sandbox, props api.RouteFieldEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Identifier + props.StartsWith +
-		props.Description + props.Type + props.Default + props.Min + props.Max)
-	return given == "" && len(props.Examples) == 0 && len(props.Clear) == 0 && !props.Required && !props.Array
+// RouteParameterEditEmpty reports an edit that changes nothing.
+func RouteParameterEditEmpty(sandbox *api.Sandbox, props api.RouteParameterEditProps) bool {
+	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Type + props.Default +
+		props.TriggerType + props.Trigger + props.Description)
+	return given == "" && len(props.Fonts) == 0 && len(props.Examples) == 0 && len(props.Clear) == 0 && !props.Required
 }
 
 // RouteBodyFieldEdit is one edited body property: the schema it becomes,

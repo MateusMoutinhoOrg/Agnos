@@ -1,17 +1,17 @@
 cli-output: |
-    POST /users/{tenant}
+    POST /users/*{Tenant}
       Create a user under a tenant
       category  Users
+      priority  0
+      response  application/json
 
-    path
-      /users
-      {tenant}             string  required
+    paths
+      Route                segments 0..-1  prefix "/users/"
+      Tenant               segments 1..1
 
-    headers
-      authorization        string  required
-
-    params
-      page                 int  default 1, min 1
+    parameters
+      Authorization        string  "authorization" from header, required
+      Page                 number  "page" from query, default 1
 
     body      json, application/json, at most 1048576 bytes
       address              object
@@ -20,5 +20,5 @@ cli-output: |
       tags                 []string  max-items 10, unique-items
 exit-code: 0
 tree:
-    - file: sandbox/internal/routes/create_user/route.yaml
-      sha: 1dee23a79b5e3b971167352895ab05b51dd9e4bb54f36a8a54ab5c22c4060abb
+    - file: sandbox/internal/routeslist/create_user/route.yaml
+      sha: 200ef1ec44ad3eaca8cc72da435d01a67c58013d67c1a9068a2c83d25d1c6d94

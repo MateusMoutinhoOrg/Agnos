@@ -3,16 +3,16 @@
 Declare a new html page
 
 ```bash
-agnos add-page [--path <path>] [--quiet] [--trigger <trigger>] [--title <title>] [--help <help>] <name>
+agnos add-page [--trigger <trigger>] [--path <path>] [--quiet] [--title <title>] [--help <help>] <name>
 ```
 
 Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
+| `--trigger` | string |  | the whole request path the page answers on, / included (defaults to /<name>) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
-| `--trigger` | string |  | the literal segment the page answers on, / included (defaults to /<name>) |
 | `--title` | string |  | the <title> the scaffolded page carries (defaults to the page name) |
 | `--help` | string |  | one-line description of the page, for docs/Routes (defaults to one derived from the name) |
 

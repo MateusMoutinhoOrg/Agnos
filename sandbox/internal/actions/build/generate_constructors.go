@@ -8,7 +8,7 @@ import (
 
 // GenerateConstructors renders assets/templates/constructor.go into
 // sandbox/constructors/<x>/constructor.go once per contract of sandbox/api/
-// that has a sandbox/internal/<x>/new.go to call — the Constructor(sandbox)
+// that has a new.go to call, at utils.ConstructorSource — the Constructor(sandbox)
 // that fills Sandbox.<X>.
 //
 // It is written **once**. A constructor already on disk is left exactly as it
@@ -31,6 +31,7 @@ func GenerateConstructors(sandbox *api.Sandbox, io *smartio.SmartIO, constructor
 			"Module":        module,
 			"Name":          constructor.Name,
 			"Package":       constructor.Package,
+			"Source":        constructor.Source,
 			"GeneratorName": generatorName(sandbox),
 		}
 

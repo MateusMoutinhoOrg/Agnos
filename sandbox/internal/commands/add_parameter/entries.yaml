@@ -1,0 +1,105 @@
+args:
+    - description: the query key or header name it is read under; its Entries field is the exported spelling of it
+      examples:
+        - add-parameter page --route list-users --type number
+      name: name
+      required: true
+      type: string
+category: Server System
+examples:
+    - add-parameter page --route list-users --type number --default 1
+    - add-parameter authorization --route admin --font header --trigger Bearer --trigger-type prefix
+flags:
+    - description: the route (identifier or package name) that receives the parameter
+      examples:
+        - add-parameter page --route list-users
+      identifiers:
+        - --route
+      name: route
+      required: true
+      type: string
+    - default: string
+      description: 'the value type: string, number, boolean, datetime or string-array (defaults to string)'
+      examples:
+        - add-parameter page --route list-users --type number
+      identifiers:
+        - --type
+      name: type
+      type: string
+    - array: true
+      description: 'where the value is read from, in order: query or header (repeatable; defaults to query)'
+      examples:
+        - add-parameter token --route admin --font header --font query
+      identifiers:
+        - --font
+      name: font
+      type: string
+    - description: answer 400 when no font brings the value (not for booleans or parameters with --default)
+      examples:
+        - add-parameter q --route search --required
+      identifiers:
+        - --required
+      name: required
+      type: boolean
+    - description: the literal bound when no font brings the value (cannot be combined with --required)
+      examples:
+        - add-parameter page --route list-users --type number --default 1
+      identifiers:
+        - --default
+      name: default
+      type: string
+    - description: what the value has to match for the route to run at all, putting the parameter into what the route matches on
+      examples:
+        - add-parameter authorization --route admin --font header --trigger Bearer --trigger-type prefix
+      identifiers:
+        - --trigger
+      name: trigger
+      type: string
+    - description: 'how the trigger is compared: equal, prefix, suffix or regex (defaults to equal)'
+      examples:
+        - add-parameter authorization --route admin --font header --trigger Bearer --trigger-type prefix
+      identifiers:
+        - --trigger-type
+      name: trigger-type
+      type: string
+    - description: help text shown for the parameter
+      examples:
+        - add-parameter page --route list-users --description 'the page to read'
+      identifiers:
+        - --description
+      name: description
+      type: string
+    - array: true
+      description: an usage example for the parameter (repeatable)
+      examples:
+        - add-parameter page --route list-users --example '?page=2'
+      identifiers:
+        - --example
+      name: example
+      type: string
+    - default: "-1"
+      description: zero-based index to insert the parameter at (defaults to the end)
+      examples:
+        - add-parameter page --route list-users --position 0
+      identifiers:
+        - --position
+      name: position
+      type: int
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - add-parameter page --route list-users --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Declare one value a route reads from the query string or the headers
+identifiers:
+    - add-parameter
+long-description: Declares one value a route reads and runs build so the route's new.go and entries.go pick it up. It is read under its name from the first of its --font that brings it, converted to its --type and bound to Entries.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.

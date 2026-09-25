@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"remove-route"}
 	command.Category = "Server System"
 	command.Help = "Delete one declared route"
-	command.LongDescription = "Removes sandbox/internal/routes/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone."
+	command.LongDescription = "Removes sandbox/internal/routeslist/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone."
 	command.Examples = []string{"remove-route create-user"}
 	command.Hidden = false
 

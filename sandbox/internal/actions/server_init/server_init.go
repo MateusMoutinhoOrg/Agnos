@@ -9,9 +9,10 @@ import (
 )
 
 // serverDeps are the contracts the server layer calls into: the socket itself,
-// the three output channels, text conversion, sorting and the JSON codec the
-// error body and the schema validator are written through.
-var serverDeps = []string{"std", "stringsdeps", "sortdeps", "serializables", "serverdeps"}
+// the three output channels, text conversion, sorting, the JSON codec the
+// error body and the schema validator are written through, and the reflection
+// that fills a route's Entries.
+var serverDeps = []string{"std", "stringsdeps", "sortdeps", "serializables", "serverdeps", "reflectdeps"}
 
 // cliDep is the one further contract the implicit cli-init needs, installed
 // only when this project has no cli layer yet.

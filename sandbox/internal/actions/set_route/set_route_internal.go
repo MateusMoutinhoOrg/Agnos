@@ -8,7 +8,8 @@ import (
 
 // SetRouteInternal parses the target route's route.yaml, overwrites every
 // route-level key the caller supplied (empty strings are "leave as is";
-// --example appends) and writes the file back.
+// --method replaces the whole list; --example appends) and writes the file
+// back.
 func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
@@ -19,12 +20,15 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 	}
 
 	changed := false
-	if raw := sandbox.Deps.Stringsdeps.TrimSpace(props.Method); raw != "" {
-		method, err := utils.RouteMethod(sandbox, raw)
+	if len(props.Methods) > 0 {
+		methods, err := utils.RouteMethodList(sandbox, props.Methods)
 		if err != nil {
 			return err
 		}
-		conf.Method, changed = method, true
+		conf.Methods, changed = methods, true
+	}
+	if response_type := sandbox.Deps.Stringsdeps.TrimSpace(props.ResponseType); response_type != "" {
+		conf.ResponseType, changed = response_type, true
 	}
 	if help := sandbox.Deps.Stringsdeps.TrimSpace(props.Help); help != "" {
 		conf.Help, changed = help, true
@@ -51,7 +55,7 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 		conf.Examples, changed = utils.AppendUnique(conf.Examples, props.Examples), true
 	}
 	if !changed {
-		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --priority, --help, --category, --long-description, --hidden, --visible or --example)")
+		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --response-type, --priority, --help, --category, --long-description, --hidden, --visible or --example)")
 	}
 
 	sandbox.Deps.Std.Log("set-route updating %s \n", utils.RouteConfPath(sandbox, props.Route))

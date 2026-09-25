@@ -8,16 +8,16 @@ import (
 
 // routesDir holds one declared route per sub-directory; the pages this purge
 // drops are the ones with an html template beside them.
-const routesDir = "sandbox/internal/routes"
+const routesDir = utils.RoutesDir
 
 // frontDirs are the directories the front layer owns whole: the render layer
 // itself and the route serving the static tree. The asset group only names the
 // files it installs, so removing those one by one would leave the generated
-// neighbours behind — the static route's new.go with no route.yaml and no
-// handler.go next to it.
+// neighbours behind — the static route's new.go and entries.go with no
+// route.yaml and no InternalPureHandler.go next to them.
 var frontDirs = []string{
 	"sandbox/internal/pageio",
-	"sandbox/internal/routes/static",
+	utils.RoutesDir + "/" + utils.StaticRouteName,
 }
 
 // FrontPurgeInternal removes from the target project every file that the
@@ -26,7 +26,7 @@ var frontDirs = []string{
 // of every declared page, then drops any directory the removal left empty.
 //
 // A page's route goes with the layer for the same reason server-purge drops
-// sandbox/internal/routes whole: its handler.go imports pageio, so leaving it
+// sandbox/internal/routeslist whole: its InternalPureHandler.go imports pageio, so leaving it
 // behind would hand back a tree that does not compile. What it renders does
 // not go with it — assets/frontend/ is the project's own content, written by
 // hand, so front-init followed by add-page puts the routes back over html that

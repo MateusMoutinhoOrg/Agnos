@@ -17,7 +17,7 @@ const (
 // different one down. utils.CommandIdentifier is what rewrites it — lowercased,
 // spaces and underscores turned into dashes — and every one of these commands
 // funnels through it, whether it is spelled CommandIdentifier, FieldName,
-// RouteIdentifier or RouteFieldName.
+// RouteIdentifier, RouteEntryId or RouteFieldName.
 //
 // The commands that name something that already exists are not here: they are
 // answered from a menu of names read off disk, so there is nothing to rewrite.
@@ -27,10 +27,9 @@ var namedUnits = map[string]string{
 	"add-page":        "page",
 	"add-flag":        "flag",
 	"add-arg":         "argument",
-	"add-param":       "parameter",
-	"add-header":      "header",
+	"add-parameter":   "parameter",
 	"add-body-field":  "body field",
-	"add-segment":     "segment",
+	"add-path":        "path",
 	"add-database":    "database",
 	"add-table":       "table",
 	"add-table-field": "field",

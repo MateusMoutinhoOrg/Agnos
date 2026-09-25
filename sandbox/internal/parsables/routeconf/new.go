@@ -5,8 +5,12 @@ import (
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 )
 
-// DefaultMethod is the http method a route that declares none answers to.
+// DefaultMethod is the http method `add-route` declares when it is given none.
 const DefaultMethod = "GET"
+
+// DefaultResponseType is the response-type `add-route` declares when it is
+// given none.
+const DefaultResponseType = "application/json"
 
 // DefaultMaxBytes is the body size limit a route that declares none carries,
 // one mebibyte.
@@ -19,6 +23,23 @@ const DefaultJsonContentType = "application/json"
 // BodyNone is the body type of a route that takes no body — the default, and
 // the one shape that generates no ReadBody at all.
 const BodyNone = "none"
+
+// LastSegment is the End of a path slice that runs through the last segment
+// of the request, whatever its length.
+const LastSegment = -1
+
+// TriggerTypes is every way a trigger compares a value, in the order docs
+// list them.
+var TriggerTypes = []string{"equal", "prefix", "suffix", "regex"}
+
+// ParameterTypes is every type a parameter may declare.
+var ParameterTypes = []string{"string", "number", "boolean", "datetime", "string-array"}
+
+// ParameterFonts is every place a parameter may be read from.
+var ParameterFonts = []string{"query", "header"}
+
+// legacyKeys are the top-level keys of the declaration routeslist replaced.
+var legacyKeys = []string{"method", "headers", "params"}
 
 // New parses one route.yaml body into a RouteConf.
 func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
@@ -37,46 +58,50 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 	}
 
 	conf := &RouteConf{
-		Paths:    []Segment{},
-		Examples: []string{},
-		Headers:  []Field{},
-		Params:   []Field{},
-		Body:     Body{Type: BodyNone, MaxBytes: DefaultMaxBytes},
+		Methods:    []string{},
+		Paths:      []Path{},
+		Parameters: []Parameter{},
+		Examples:   []string{},
+		Legacy:     []string{},
+		Body:       Body{Type: BodyNone, MaxBytes: DefaultMaxBytes},
 	}
 
-	conf.Method = normalizeMethod(sandbox, readString(specs, "method"))
-	conf.Priority = readInt(specs, "priority")
+	for _, method := range readStringArray(specs, "methods") {
+		conf.Methods = append(conf.Methods, normalizeMethod(sandbox, method))
+	}
+	if priority_item, _ := specs.GetObjectItem("priority"); priority_item != nil && !priority_item.IsNull() {
+		conf.Priority = readInt(specs, "priority")
+		conf.HasPriority = true
+	}
+	conf.ResponseType = readString(specs, "response-type")
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
 	conf.Help = readString(specs, "help")
 	conf.LongDescription = readString(specs, "long-description")
 	conf.Hidden = readBool(specs, "hidden")
 
+	for _, key := range legacyKeys {
+		if item, _ := specs.GetObjectItem(key); item != nil && !item.IsNull() {
+			conf.Legacy = append(conf.Legacy, key)
+		}
+	}
+
 	paths_item, _ := specs.GetObjectItem("paths")
 	if paths_item != nil {
-		segments, err := readSegments(sandbox, paths_item)
+		paths, err := readPaths(sandbox, paths_item)
 		if err != nil {
 			return nil, err
 		}
-		conf.Paths = segments
+		conf.Paths = paths
 	}
 
-	headers_item, _ := specs.GetObjectItem("headers")
-	if headers_item != nil {
-		fields, err := readFieldCollection(sandbox, headers_item)
+	parameters_item, _ := specs.GetObjectItem("parameters")
+	if parameters_item != nil {
+		parameters, err := readParameters(sandbox, parameters_item)
 		if err != nil {
 			return nil, err
 		}
-		conf.Headers = fields
-	}
-
-	params_item, _ := specs.GetObjectItem("params")
-	if params_item != nil {
-		fields, err := readFieldCollection(sandbox, params_item)
-		if err != nil {
-			return nil, err
-		}
-		conf.Params = fields
+		conf.Parameters = parameters
 	}
 
 	body_item, _ := specs.GetObjectItem("body")
@@ -88,18 +113,15 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 	return conf, nil
 }
 
-// readSegments parses the `paths` sequence into the ordered segments the URL
-// is matched against. Each entry carries exactly one of `identifier` (a
-// trigger the path has to spell), `starts-with-identifier` (a trigger the path
-// only has to begin with) or `name` (a capture); an entry carrying two of
-// them, or none, is refused here rather than generating a route nothing can
-// match.
-func readSegments(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Segment, error) {
+// readPaths parses the `paths` sequence. Each entry needs an `id`; `start`
+// defaults to 0 and `end` to the last segment, so an entry declaring neither
+// reads the whole path.
+func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Path, error) {
 	if item.IsNull() {
-		return []Segment{}, nil
+		return []Path{}, nil
 	}
 	if !item.IsArray() {
-		return nil, sandbox.Deps.Std.Errorf("`paths` must be a sequence of segments")
+		return nil, sandbox.Deps.Std.Errorf("`paths` must be a sequence of path slices")
 	}
 
 	size, err := item.GetArraySize()
@@ -107,57 +129,43 @@ func readSegments(sandbox *api.Sandbox, item *serializibles.SerializibleObject) 
 		return nil, err
 	}
 
-	segments := make([]Segment, 0, size)
+	paths := make([]Path, 0, size)
 	for i := 0; i < size; i++ {
 		entry := item.GetArrayItem(i)
 		if entry == nil || !entry.IsObject() {
 			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d is not an object", i)
 		}
 
-		identifier := readString(entry, "identifier")
-		starts_with := readString(entry, "starts-with-identifier")
-		name := readString(entry, "name")
-
-		declared := 0
-		for _, spelling := range []string{identifier, starts_with, name} {
-			if spelling != "" {
-				declared++
-			}
+		path := Path{
+			Id:          readString(entry, "id"),
+			Start:       0,
+			End:         LastSegment,
+			Trigger:     readTrigger(entry),
+			Description: readString(entry, "description"),
 		}
-		if declared > 1 {
-			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d declares more than one of `identifier`, `starts-with-identifier` and `name`", i)
+		if path.Id == "" {
+			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `id`", i)
 		}
-		if declared == 0 {
-			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `identifier`, a `starts-with-identifier` or a `name`", i)
+		if start_item, _ := entry.GetObjectItem("start"); start_item != nil && !start_item.IsNull() {
+			path.Start = readInt(entry, "start")
 		}
-
-		if identifier != "" {
-			segments = append(segments, Segment{Identifier: identifier})
-			continue
+		if end_item, _ := entry.GetObjectItem("end"); end_item != nil && !end_item.IsNull() {
+			path.End = readInt(entry, "end")
 		}
-
-		if starts_with != "" {
-			segments = append(segments, Segment{Identifier: starts_with, StartsWith: true})
-			continue
-		}
-
-		field := readFieldEntry(sandbox, entry)
-		field.Key = name
-		segments = append(segments, Segment{Field: &field})
+		paths = append(paths, path)
 	}
 
-	return segments, nil
+	return paths, nil
 }
 
-// readFieldCollection parses a headers/params declaration into an ordered
-// slice of Field. Only the canonical YAML sequence is accepted: a header and a
-// query key are external spellings, so each entry carries an explicit `name`.
-func readFieldCollection(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Field, error) {
+// readParameters parses the `parameters` sequence. Each entry needs an `id`;
+// `key` defaults to it, and `fonts` to the query string alone.
+func readParameters(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Parameter, error) {
 	if item.IsNull() {
-		return []Field{}, nil
+		return []Parameter{}, nil
 	}
 	if !item.IsArray() {
-		return nil, sandbox.Deps.Std.Errorf("`headers` and `params` must be sequences of fields")
+		return nil, sandbox.Deps.Std.Errorf("`parameters` must be a sequence of parameters")
 	}
 
 	size, err := item.GetArraySize()
@@ -165,57 +173,51 @@ func readFieldCollection(sandbox *api.Sandbox, item *serializibles.SerializibleO
 		return nil, err
 	}
 
-	fields := make([]Field, 0, size)
+	parameters := make([]Parameter, 0, size)
 	for i := 0; i < size; i++ {
 		entry := item.GetArrayItem(i)
 		if entry == nil || !entry.IsObject() {
-			continue
+			return nil, sandbox.Deps.Std.Errorf("`parameters` entry #%d is not an object", i)
 		}
 
-		field := readFieldEntry(sandbox, entry)
-		field.Key = readString(entry, "name")
-		if field.Key == "" {
-			return nil, sandbox.Deps.Std.Errorf("headers/params entry #%d needs a name", i)
+		parameter := Parameter{
+			Id:          readString(entry, "id"),
+			Key:         readString(entry, "key"),
+			Type:        normalizeType(readString(entry, "type")),
+			Fonts:       readStringArray(entry, "fonts"),
+			Required:    readBool(entry, "required"),
+			Trigger:     readTrigger(entry),
+			Description: readString(entry, "description"),
+			Examples:    readStringArray(entry, "examples"),
 		}
-		fields = append(fields, field)
+		if parameter.Id == "" {
+			return nil, sandbox.Deps.Std.Errorf("`parameters` entry #%d needs an `id`", i)
+		}
+		if parameter.Key == "" {
+			parameter.Key = parameter.Id
+		}
+		if default_item, _ := entry.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
+			parameter.HasDefault = true
+			parameter.Default = anyToString(sandbox, default_item)
+		}
+		parameters = append(parameters, parameter)
 	}
 
-	return fields, nil
+	return parameters, nil
 }
 
-// readFieldEntry parses the attributes shared by every field shape; the caller
-// assigns Key.
-func readFieldEntry(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Field {
-	field := Field{
-		Examples:    readStringArray(item, "examples"),
-		Description: readString(item, "description"),
-		Type:        normalizeType(readString(item, "type")),
-		Required:    readBool(item, "required"),
-		Array:       readBool(item, "array"),
-		Identifier:  readString(item, "identifier"),
-		StartsWith:  readString(item, "starts-with-identifier"),
+// readTrigger parses the `trigger` object of a path or a parameter; an entry
+// with none comes back with Exists false.
+func readTrigger(entry *serializibles.SerializibleObject) Trigger {
+	item, _ := entry.GetObjectItem("trigger")
+	if item == nil || !item.IsObject() {
+		return Trigger{}
 	}
-
-	if min_item, _ := item.GetObjectItem("min"); min_item != nil && !min_item.IsNull() {
-		field.Min, field.HasMin = readNumber(min_item)
+	return Trigger{
+		Exists: true,
+		Type:   readString(item, "type"),
+		Value:  readString(item, "value"),
 	}
-	if max_item, _ := item.GetObjectItem("max"); max_item != nil && !max_item.IsNull() {
-		field.Max, field.HasMax = readNumber(max_item)
-	}
-
-	if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
-		field.HasDefault = true
-		field.Default = anyToString(sandbox, default_item)
-	}
-
-	// `required` is meaningless for a boolean (absent means false) or for a
-	// field that carries a default (the default covers its absence), so it is
-	// dropped here and never reaches the generated dispatch.
-	if field.Type == "boolean" || field.HasDefault {
-		field.Required = false
-	}
-
-	return field
 }
 
 // readBody parses the `body` object, filling in the defaults a declaration
@@ -368,13 +370,9 @@ func readSchemaInt(item *serializibles.SerializibleObject, key string) (int, boo
 }
 
 // normalizeMethod maps the method spellings accepted in route.yaml onto the
-// upper-case set the dispatch compares against; "" is the default GET.
+// upper-case set the dispatch compares against.
 func normalizeMethod(sandbox *api.Sandbox, raw string) string {
-	method := sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
-	if method == "" {
-		return DefaultMethod
-	}
-	return method
+	return sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
 }
 
 // normalizeBodyType maps the body-type spellings accepted in route.yaml onto
@@ -393,17 +391,18 @@ func normalizeBodyType(raw string) string {
 }
 
 // normalizeType maps the type spellings accepted in route.yaml onto the
-// canonical set used everywhere else.
+// canonical set used everywhere else; an unknown spelling is kept, so verify
+// can name it.
 func normalizeType(raw string) string {
 	switch raw {
+	case "", "string":
+		return "string"
 	case "bool", "boolean":
 		return "boolean"
-	case "int", "integer":
-		return "int"
-	case "float", "double", "number":
-		return "float"
+	case "int", "integer", "float", "double", "number":
+		return "number"
 	default:
-		return "string"
+		return raw
 	}
 }
 

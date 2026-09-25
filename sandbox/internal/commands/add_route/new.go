@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"add-route"}
 	command.Category = "Server System"
 	command.Help = "Declare a new http route"
-	command.LongDescription = "Writes sandbox/internal/routes/<name>/route.yaml and a stub handler.go, then runs build so the route's new.go — the api.Route that lands in Server.Routes — is generated. The trigger is normalized to start with /, and defaults to /<name>."
+	command.LongDescription = "Writes sandbox/internal/routeslist/<name>/route.yaml — one path, Route, reading the whole request path against the trigger — and a stub InternalPureHandler.go, then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. priority and response-type are always written."
 	command.Examples = []string{"add-route create-user --trigger /users --method POST --help \"Create a user\" --category Users"}
 	command.Hidden = false
 
@@ -29,22 +29,44 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Type:        "string",
 			Required:    false,
 			Array:       false,
-			Description: "the first literal segment of the path, always starting with / (defaults to /<name>)",
+			Description: "what the whole request path is compared against; an equal, prefix or regex trigger is normalized to start with / (defaults to /<name>)",
 			Examples:    []string{"--trigger /users"},
 			Default:     "",
 			HasDefault:  false,
 			Identifiers: []string{"--trigger"},
 		},
 		{
-			Id:          "method",
+			Id:          "trigger-type",
 			Type:        "string",
 			Required:    false,
 			Array:       false,
-			Description: "the http method the route answers: GET, POST, PUT, PATCH, DELETE, HEAD or OPTIONS",
+			Description: "how the trigger is compared against the whole request path: equal, prefix, suffix or regex (defaults to equal)",
+			Examples:    []string{"add-route logger --trigger / --trigger-type prefix --help 'logs every request' --category Server"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--trigger-type"},
+		},
+		{
+			Id:          "method",
+			Type:        "string",
+			Required:    false,
+			Array:       true,
+			Description: "an http method the route answers: GET, POST, PUT, PATCH, DELETE, HEAD or OPTIONS (repeatable; defaults to GET)",
 			Examples:    []string{"--method POST"},
-			Default:     "GET",
-			HasDefault:  true,
+			Default:     "",
+			HasDefault:  false,
 			Identifiers: []string{"--method", "-m"},
+		},
+		{
+			Id:          "response-type",
+			Type:        "string",
+			Required:    false,
+			Array:       false,
+			Description: "the Content-Type every response of the route carries (defaults to application/json)",
+			Examples:    []string{"--response-type text/plain"},
+			Default:     "",
+			HasDefault:  false,
+			Identifiers: []string{"--response-type"},
 		},
 		{
 			Id:          "help",
@@ -96,21 +118,10 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Required:    false,
 			Array:       false,
 			Description: "the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on",
-			Examples:    []string{"add-route logger --trigger / --starts-with --priority 0 --help 'logs every request' --category Server"},
+			Examples:    []string{"add-route logger --trigger / --trigger-type prefix --priority 0 --help 'logs every request' --category Server"},
 			Default:     "0",
 			HasDefault:  true,
 			Identifiers: []string{"--priority"},
-		},
-		{
-			Id:          "starts-with",
-			Type:        "boolean",
-			Required:    false,
-			Array:       false,
-			Description: "make the trigger a prefix, so the route answers every path beginning with it rather than that one path",
-			Examples:    []string{"add-route logger --trigger / --starts-with --help 'logs every request' --category Server"},
-			Default:     "",
-			HasDefault:  false,
-			Identifiers: []string{"--starts-with"},
 		},
 	}
 
@@ -120,7 +131,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Type:        "string",
 			Required:    true,
 			Array:       false,
-			Description: "the route name (becomes the directory sandbox/internal/routes/<name> and its Go package)",
+			Description: "the route name (becomes the directory sandbox/internal/routeslist/<name> and its Go package)",
 			Examples:    []string{"add-route create-user"},
 			Default:     "",
 			HasDefault:  false,

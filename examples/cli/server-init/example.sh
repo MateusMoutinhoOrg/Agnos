@@ -15,8 +15,8 @@ cp TestDir/sandbox/api/server.go AssertDir/sandbox/api/server.go
 cp TestDir/sandbox/api/route.go AssertDir/sandbox/api/route.go
 mkdir -p AssertDir/sandbox/internal/server
 cp -R TestDir/sandbox/internal/server/. AssertDir/sandbox/internal/server/
-mkdir -p AssertDir/sandbox/internal/routes
-cp -R TestDir/sandbox/internal/routes/. AssertDir/sandbox/internal/routes/
+mkdir -p AssertDir/sandbox/internal/routeslist
+cp -R TestDir/sandbox/internal/routeslist/. AssertDir/sandbox/internal/routeslist/
 mkdir -p AssertDir/sandbox/internal/commands/start_server
 cp -R TestDir/sandbox/internal/commands/start_server/. AssertDir/sandbox/internal/commands/start_server/
 

@@ -171,33 +171,36 @@ type CommandProps struct {
 	Examples        []string
 }
 
-// AddRouteProps describes the route add-route declares. Name is the package it
-// writes, Trigger the first segment of its path (defaulting to the name) and
-// Method the verb it answers, defaulting to GET. StartsWith makes that first
-// segment a prefix, so the route answers a whole subtree rather than one path.
-// Priority is the rung it runs on when several routes match one request:
-// lowest first, zero the default, and a route that writes no status hands the
-// request to the next rung.
+// AddRouteProps describes one route to scaffold. Trigger is the whole-path
+// value its first path compares against ("" is "/" followed by the name),
+// TriggerType how ("equal", "prefix",
+// "suffix" or "regex"; "" is equal). Methods are the http methods it answers
+// to ([] is GET) and ResponseType the Content-Type its responses carry ("" is
+// application/json). Priority is required in route.yaml, so it is always
+// written, zero included.
 type AddRouteProps struct {
-	Path       string
-	Name       string
-	Method     string
-	Trigger    string
-	StartsWith bool
-	Priority   int
-	Help       string
-	Category   string
+	Path         string
+	Name         string
+	Methods      []string
+	Trigger      string
+	TriggerType  string
+	Priority     int
+	ResponseType string
+	Help         string
+	Category     string
 }
 
 // RouteProps carries the route-level keys of route.yaml that set-route may
-// rewrite. Empty strings leave the current value alone; Examples are appended
-// (deduplicated), and Hidden / Visible are the two sides of one switch.
+// rewrite. Empty strings leave the current value alone; Methods replace the
+// whole list when any is given; Examples are appended (deduplicated), and
+// Hidden / Visible are the two sides of one switch.
 // Priority is the rung the route runs on, and HasPriority is what tells a
 // priority declared as zero from one not given at all.
 type RouteProps struct {
 	Path            string
 	Route           string
-	Method          string
+	Methods         []string
+	ResponseType    string
 	Help            string
 	Category        string
 	LongDescription string
@@ -244,63 +247,83 @@ type DatabaseFieldEditProps struct {
 	Clear    []string
 }
 
-// RouteFieldProps describes one field to add to a route's route.yaml. It
-// covers the three origins that read a value off the request line — a captured
-// path segment, a header and a query parameter — which differ only in where
-// the entry lands. Array collects a []T field: every occurrence of a query
-// key, or — on the last segment of the path, and there alone — every segment
-// left in the URL. Default, Min and Max are the raw literals typed on the
-// command line ("" means unset); Position is the index to insert at (< 0
-// appends).
-//
-// Identifier and StartsWith are the two match conditions, and they mean one
-// thing on a path segment and another on a header or a query parameter. On a
-// path they declare a literal segment instead of a captured one: Identifier
-// the segment the URL has to spell, StartsWith the prefix it only has to begin
-// with. On a header or a query parameter they are conditions on the value the
-// request brings, and the route runs only when they hold. Both are normalized
-// to start with "/" on a path and taken verbatim everywhere else.
-type RouteFieldProps struct {
+// RoutePathProps describes one entry to add to a route's `paths`. Id is the
+// Entries field the slice binds to; Start and End are the raw segment indexes
+// typed on the command line ("" is 0 and -1, the whole path); Trigger is what
+// the slice has to read as for the route to run and TriggerType how it is
+// compared ("" is equal) — a path with no Trigger is a plain capture.
+// Position is the index to insert at (< 0 appends).
+type RoutePathProps struct {
 	Path        string
 	Route       string
-	Name        string
-	Identifier  string
-	StartsWith  string
+	Id          string
+	Start       string
+	End         string
+	TriggerType string
+	Trigger     string
 	Description string
-	Examples    []string
-	Type        string
-	Default     string
-	Required    bool
-	Array       bool
-	Min         string
-	Max         string
 	Position    int
 }
 
-// RouteFieldEditProps describes the change set-segment, set-header or
-// set-param applies to one field a route already declares. Name is the field
-// as it is declared now and Rename the spelling it takes on ("" leaves it
-// alone); every other key overwrites what is there when it is given, and an
-// empty one leaves it as it is. Clear is how a key is taken off again —
-// "description", "examples", "default", "required", "array", "min", "max",
-// "identifier" or "starts-with" — because an empty string cannot say "unset
-// this" and "leave it alone" at once. Identifier and StartsWith carry the same
-// two meanings they have in RouteFieldProps.
-type RouteFieldEditProps struct {
+// RoutePathEditProps describes the change set-path applies to one entry of a
+// route's `paths`. Id is the entry as it is declared now and Rename the id it
+// takes on ("" leaves it alone); every other key overwrites what is there when
+// it is given. Clear takes "trigger" or "description" off again.
+type RoutePathEditProps struct {
+	Path        string
+	Route       string
+	Id          string
+	Rename      string
+	Start       string
+	End         string
+	TriggerType string
+	Trigger     string
+	Description string
+	Clear       []string
+}
+
+// RouteParameterProps describes one entry to add to a route's `parameters`.
+// Name is the query key or header name it is read under — its Entries field is
+// the exported spelling of it. Type is "string", "number", "boolean",
+// "datetime" or "string-array"; Fonts are where it is read from, in order
+// ([] is the query string alone). Default is the raw literal typed on the
+// command line ("" means unset). Trigger and TriggerType are a condition on
+// the value that puts the parameter into what the route matches on. Position
+// is the index to insert at (< 0 appends).
+type RouteParameterProps struct {
+	Path        string
+	Route       string
+	Name        string
+	Type        string
+	Fonts       []string
+	Required    bool
+	Default     string
+	TriggerType string
+	Trigger     string
+	Description string
+	Examples    []string
+	Position    int
+}
+
+// RouteParameterEditProps describes the change set-parameter applies to one
+// entry of a route's `parameters`. Name is the key as it is declared now and
+// Rename the key it takes on ("" leaves it alone); Fonts replace the whole
+// list when any is given; every other key overwrites what is there when it is
+// given. Clear takes "description", "examples", "default", "required" or
+// "trigger" off again.
+type RouteParameterEditProps struct {
 	Path        string
 	Route       string
 	Name        string
 	Rename      string
-	Identifier  string
-	StartsWith  string
+	Type        string
+	Fonts       []string
+	Required    bool
+	Default     string
+	TriggerType string
+	Trigger     string
 	Description string
 	Examples    []string
-	Type        string
-	Default     string
-	Required    bool
-	Array       bool
-	Min         string
-	Max         string
 	Clear       []string
 }
 
@@ -546,7 +569,8 @@ type Actions struct {
 	RemoveArg func(path string, command string, name string) error
 
 	// ServerInit adds the http server layer (sandbox/internal/server, the
-	// routeio package, the health route and the start-server command) to a
+	// routeio package, the health route of sandbox/internal/routeslist and
+	// the start-server command) to a
 	// project that has none, installing the CLI layer first when it is
 	// missing.
 	ServerInit func(path string) error
@@ -555,7 +579,7 @@ type Actions struct {
 	ServerPurge func(path string) error
 
 	// AddRoute declares a new route: its route.yaml, its generated new.go
-	// and a handler.go to fill in.
+	// and entries.go, and an InternalPureHandler.go to fill in.
 	AddRoute func(props AddRouteProps) error
 
 	// RemoveRoute deletes one route and unwires it from the dispatch.
@@ -564,26 +588,28 @@ type Actions struct {
 	// SetRoute rewrites the route-level keys of one route's route.yaml.
 	SetRoute func(props RouteProps) error
 
-	// AddSegment appends one segment to a route's path: a literal one when
-	// props.Identifier is set, a captured one otherwise — and, with
-	// props.Array, one taking every segment left in the path.
-	AddSegment func(props RouteFieldProps) error
+	// AddPath declares one slice of the request path on a route: the
+	// segments it reads, and the trigger they have to match when it declares
+	// one.
+	AddPath func(props RoutePathProps) error
 
-	// RemoveSegment deletes one segment from a route's path, named either
-	// by its capture name or by the identifier it spells.
-	RemoveSegment func(path string, route string, name string) error
+	// SetPath rewrites one entry of a route's `paths`, named by its id.
+	SetPath func(props RoutePathEditProps) error
 
-	// AddHeader declares one request header on a route.
-	AddHeader func(props RouteFieldProps) error
+	// RemovePath deletes one entry of a route's `paths`, named by its id.
+	RemovePath func(path string, route string, id string) error
 
-	// RemoveHeader deletes one declared header from a route.
-	RemoveHeader func(path string, route string, name string) error
+	// AddParameter declares one value a route reads off the query string or
+	// the headers.
+	AddParameter func(props RouteParameterProps) error
 
-	// AddParam declares one query-string parameter on a route.
-	AddParam func(props RouteFieldProps) error
+	// SetParameter rewrites one entry of a route's `parameters`, named by
+	// its key.
+	SetParameter func(props RouteParameterEditProps) error
 
-	// RemoveParam deletes one declared query parameter from a route.
-	RemoveParam func(path string, route string, name string) error
+	// RemoveParameter deletes one entry of a route's `parameters`, named by
+	// its key.
+	RemoveParameter func(path string, route string, name string) error
 
 	// SetBody rewrites the body keys of one route's route.yaml.
 	SetBody func(props RouteBodyProps) error
@@ -596,16 +622,6 @@ type Actions struct {
 	// json-schema.
 	RemoveBodyField func(path string, route string, name string) error
 
-	// SetSegment rewrites one declared segment of a route's path, named
-	// either by its capture name or by the identifier it spells.
-	SetSegment func(props RouteFieldEditProps) error
-
-	// SetHeader rewrites one declared request header of a route.
-	SetHeader func(props RouteFieldEditProps) error
-
-	// SetParam rewrites one declared query parameter of a route.
-	SetParam func(props RouteFieldEditProps) error
-
 	// SetBodyField rewrites one property of a route's body json-schema, at
 	// the dotted path props.Name.
 	SetBodyField func(props RouteBodyFieldEditProps) error
@@ -614,8 +630,8 @@ type Actions struct {
 	// payload, inferring one property per key the example carries.
 	ImportBody func(props RouteBodyImportProps) error
 
-	// ShowRoute renders one route's whole declaration — its path, its
-	// headers, its query parameters and its body schema — as the lines of
+	// ShowRoute renders one route's whole declaration — its paths, its
+	// parameters and its body schema — as the lines of
 	// a tree, ready to print.
 	ShowRoute func(path string, route string) ([]string, error)
 

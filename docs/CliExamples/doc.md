@@ -24,8 +24,8 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `add-flag` | declare one flag on a command | [example.sh](../../examples/cli/add-flag/example.sh) |
 | `add-lib-example` | create an example under examples/lib/ | [example.sh](../../examples/cli/add-lib-example/example.sh) |
 | `add-page` |  | [example.sh](../../examples/cli/add-page/example.sh) |
+| `add-path-range` |  | [example.sh](../../examples/cli/add-path-range/example.sh) |
 | `add-remote-dep` |  | [example.sh](../../examples/cli/add-remote-dep/example.sh) |
-| `add-rest-segment` |  | [example.sh](../../examples/cli/add-rest-segment/example.sh) |
 | `add-route` |  | [example.sh](../../examples/cli/add-route/example.sh) |
 | `build` | regenerate every generated file of a project | [example.sh](../../examples/cli/build/example.sh) |
 | `cli-init` | add the cli layer to a project that has none | [example.sh](../../examples/cli/cli-init/example.sh) |

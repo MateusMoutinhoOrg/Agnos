@@ -46,7 +46,7 @@ func main() {
 
 	// What result.yaml records: the same set the cli side copies.
 	for _, dir := range []string{
-		"sandbox/internal/routes",
+		"sandbox/internal/routeslist",
 		"assets/frontend/pages",
 	} {
 		copyTree("TestDir/"+dir, "AssertDir/"+dir)

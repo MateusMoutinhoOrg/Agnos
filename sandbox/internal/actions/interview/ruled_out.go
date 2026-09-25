@@ -4,8 +4,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-// The field ids the declaration commands — add-flag, add-arg, add-param,
-// add-header, add-segment, add-body-field and set-body — constrain each other
+// The field ids the declaration commands — add-flag, add-arg, add-path,
+// add-parameter, add-body-field and set-body — constrain each other
 // by. No other command of the surface declares one of them, which is what lets
 // the table below be keyed by id alone.
 const (
@@ -26,7 +26,8 @@ const (
 	additionalPropsFieldId   = "additional-properties"
 	noAdditionalPropsFieldId = "no-additional-properties"
 	targetFieldId            = "target"
-	startsWithFieldId        = "starts-with"
+	triggerTypeFieldId       = "trigger-type"
+	triggerFieldId           = "trigger"
 )
 
 // typeObject is the one declared type that is a json-schema kind rather than a
@@ -60,26 +61,14 @@ var schemaVerbs = map[string]bool{
 	"set-body-field": true,
 }
 
-// segmentVerbs are the commands declaring one entry of a route's `paths`.
-// --identifier and --starts-with read differently there: on a path they spell
-// the segment itself, so either one is the whole of the declaration and every
-// other question about it — its name, its type, its bounds — has no answer. On
-// a header or a query parameter the same two flags are conditions on a value
-// that is still named and typed as usual.
-var segmentVerbs = map[string]bool{
-	"add-segment": true,
-	"set-segment": true,
-}
-
 // editVerbs are the commands that rewrite a declaration instead of writing
 // one. They are the one place an unanswered field is not a fact: everywhere
 // else a skipped --type means the declared default and a no to --array means
 // not a list, while here both mean "leave it as it is" — and the type left as
 // it is may well be the one the keyword applies to.
 var editVerbs = map[string]bool{
-	"set-segment":    true,
-	"set-header":     true,
-	"set-param":      true,
+	"set-path":       true,
+	"set-parameter":  true,
 	"set-body-field": true,
 }
 
@@ -102,7 +91,7 @@ func RuledOut(sandbox *api.Sandbox, command api.Command, field Field, values map
 // answers with what it took away and the confirm screen says so.
 //
 // Every one of them is a rule the action behind the command enforces with an
-// error: utils.NewField and utils.NewRouteField for the fields,
+// error: utils.NewField and utils.NewRouteParameter for the fields,
 // utils.RouteBodyPropertySchema for the schema keywords, set-body for its own
 // pair.
 func RuledOutReason(sandbox *api.Sandbox, command api.Command, field Field, values map[string][]any) string {
@@ -118,43 +107,16 @@ func RuledOutReason(sandbox *api.Sandbox, command api.Command, field Field, valu
 
 	table := tableFieldVerbs[verbOf(command)]
 
-	// The two match conditions exclude each other everywhere, and on a path
-	// segment they also exclude the capture the segment would otherwise be.
-	segment := segmentVerbs[verbOf(command)]
-	spelled := answeredText(sandbox, values, identifierFieldId) != "" ||
-		answeredText(sandbox, values, startsWithFieldId) != ""
-
 	switch field.Id {
-	case identifierFieldId:
-		if answeredText(sandbox, values, startsWithFieldId) != "" {
-			return "a value matches one condition or the other, never both"
-		}
-		if segment && answeredText(sandbox, values, nameFieldId) != "" {
-			return "a segment is either spelled out or captured under a name, never both"
-		}
-	case startsWithFieldId:
-		if answeredText(sandbox, values, identifierFieldId) != "" {
-			return "a value matches one condition or the other, never both"
-		}
-		if segment && answeredText(sandbox, values, nameFieldId) != "" {
-			return "a segment is either spelled out or captured under a name, never both"
-		}
-	case nameFieldId:
-		if segment && spelled {
-			return "a segment is either spelled out or captured under a name, never both"
+	case triggerTypeFieldId:
+		if !editVerbs[verbOf(command)] && verbOf(command) != "add-route" && answeredText(sandbox, values, triggerFieldId) == "" {
+			return "there is nothing to compare without a value to match"
 		}
 	case targetFieldId:
 		if table && typed && kind != typeLink {
 			return "only a reference to another table points at one"
 		}
-	case arrayFieldId:
-		if segment && spelled {
-			return "a segment spelled out matches the url rather than binding a value, so it is never a list"
-		}
 	case requiredFieldId:
-		if segment && spelled {
-			return "a segment spelled out matches the url rather than binding a value"
-		}
 		if table {
 			if typed && kind == typeNestedRecords {
 				return "a collection nested under each record is never written when one is inserted"

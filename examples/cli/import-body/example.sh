@@ -27,6 +27,6 @@ agnos import-body create-user --file TestDir/payload.json --required --infer-for
 
 # What result.yaml records: the schema the payload was read as, and the Body
 # struct build generated from it. The lib side copies the same set.
-mkdir -p AssertDir/sandbox/internal/routes/create_user
-cp TestDir/sandbox/internal/routes/create_user/route.yaml AssertDir/sandbox/internal/routes/create_user/route.yaml
-cp TestDir/sandbox/internal/routes/create_user/new.go AssertDir/sandbox/internal/routes/create_user/new.go
+mkdir -p AssertDir/sandbox/internal/routeslist/create_user
+cp TestDir/sandbox/internal/routeslist/create_user/route.yaml AssertDir/sandbox/internal/routeslist/create_user/route.yaml
+cp TestDir/sandbox/internal/routeslist/create_user/entries.go AssertDir/sandbox/internal/routeslist/create_user/entries.go

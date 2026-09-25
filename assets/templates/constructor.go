@@ -2,11 +2,11 @@ package {{.Package}}
 
 import (
 	api "{{.Module}}/sandbox/api"
-	{{.Package}} "{{.Module}}/sandbox/internal/{{.Package}}"
+	{{.Package}} "{{.Module}}/{{.Source}}"
 )
 
 // Constructor fills Sandbox.{{.Name}}, building it with the
-// New{{.Name}} of sandbox/internal/{{.Package}}. sandbox/new.go calls it
+// New{{.Name}} of {{.Source}}. sandbox/new.go calls it
 // once, along with the Constructor of every other package under
 // sandbox/constructors/.
 //

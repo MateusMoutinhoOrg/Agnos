@@ -55,15 +55,15 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Concept | CLI | Server | Front | Database |
 |---|---|---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps` + `templatedeps`) | `sandbox/deps/database/` (a remote dep, not a catalog one) |
-| Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/server/new.go` -> `Server.Routes` | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
+| Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/server/server/new.go` -> `Server.Routes` (found by `utils.ConstructorSource`, one level down) | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
 | Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — | — |
-| Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/servermain.go` | — | — (the methods are generated, not dispatched) |
+| Dispatch (generic) | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/server/servermain.go`, over the generic `sandbox/internal/server/route/` (`IsActionable`, `RequestHandler`) | — | — (the methods are generated, not dispatched) |
 | Shared package | — | `sandbox/internal/routeio/` | `sandbox/internal/pageio/` | `sandbox/internal/databaseio/` |
-| Answer to bad input | the dispatch, exit 2 | `server/handle_*.go`, written once by `build` | — (the server's) | — |
-| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routes/<name>/route.yaml` -> generated `new.go` | `routes/<page>/route.yaml` + `assets/frontend/pages/<page>.html` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
+| Answer to bad input | the dispatch, exit 2 | `server/errors/handle_*.go`, written once by `build` | — (the server's) | — |
+| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routeslist/<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | `routeslist/<page>/route.yaml` + `assets/frontend/pages/<page>.html` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | `utils/front_mount.go` (`RenderExtensionCode` reads it too, so it sits in `utils`) | `collect_databases.go`, `collect_database_docs.go` |
-| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (+ `generate_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
+| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
 | Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/sandbox-front/`, `assets/doc-front/` | `assets/sandbox-database/`, `assets/doc-database/` |
 | Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` | `sandbox-database` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` | `database-init` / `database-purge` |
@@ -76,9 +76,11 @@ A layer is an extension, so adding one is [Add an extension](#add-an-extension) 
 
 `sandbox/internal/databaseio/` is the same third package one layer over: a database may not import another one, so the readers every generated `methods.go` shares live beside them. Its one rule is the layer's: nothing converts a stored value without a comma-ok, so a malformed record is an error and never a panic.
 
-`sandbox/internal/routeio/` exists because a route may not import `internal/server`: shared route code goes in a third package both may import. It is also where the two readers that put the dep names back on a bound route live — `RequestOf` and `ResponseOf`, because `api.Route` carries the request and the response as `any`: `sandbox/api/` may name no type of `sandbox/deps`. `sandbox/internal/pageio/` is the same shape one layer up.
+`sandbox/internal/routeio/` exists because a route may not import `internal/server/server`: shared route code goes in a third package both may import. It is also where the two readers that put the dep names back on a bound route live — `RequestOf` and `ResponseOf`, because `api.Route` carries the request and the response as `any`: `sandbox/api/` may name no type of `sandbox/deps`. `sandbox/internal/pageio/` is the same shape one layer up.
 
-That same import rule is why `routeio.Fail` reaches the project's `handle_*.go` through the `Fail` field of `api.Server` rather than by calling them: `internal/server` imports every route package, so nothing under `routes/` may import it back, and a function field on the api is how this repo already crosses that line everywhere else. The six files are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/new.go` always has something to call.
+That same import rule is why `routeio.Fail` reaches the project's `handle_*.go` through the `Fail` field of `api.Server` rather than by calling them: `internal/server/server` imports every route package, so nothing under `routeslist/` may import it back, and a function field on the api is how this repo already crosses that line everywhere else. The six files are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/server/new.go` always has something to call.
+
+A route's `Entries` is a type of its own per route, so the generic `RequestHandler` builds, fills and calls it through `sandbox.Deps.Reflectdeps` — the one catalog dep `server-init` installs for that alone. `api/route.go` holds it as `InternalPurehandler any` for the same reason.
 
 ## Add an extension
 
@@ -154,8 +156,8 @@ Some files are written once and never rewritten, each by a different mechanic �
 | File | Written by | Guard |
 |---|---|---|
 | `sandbox/constructors/<x>/constructor.go` | `build`, `generate_constructors.go` | `io.IsFile(dest)` |
-| `sandbox/internal/server/handle_*.go` | `build`, `generate_error_handlers.go` | `io.IsFile(dest)` |
+| `sandbox/internal/server/errors/handle_*.go` | `build`, `generate_error_handlers.go` | `io.IsFile(dest)` |
 | `sandbox/internal/commands/start_server/*` | `server-init` | `io.IsDir(dir)` |
-| `routes/<name>/{route.yaml,handler.go}` | `add-route` | `io.WriteFile`, which refuses an existing path |
+| `routeslist/<name>/{route.yaml,InternalPureHandler.go}` | `add-route` | `io.WriteFile`, which refuses an existing path |
 
 A write-once file may **not** live in an asset group: `utils.RenderGroupExcept` writes every file of a group with `WriteFileOverwrite` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.

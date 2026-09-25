@@ -1,5 +1,9 @@
 package utils
 
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+)
+
 // ConstructorsDir is the project-relative directory holding the sandbox's
 // constructor packages. Every directory under it is one package whose
 // Constructor(sandbox) fills a field of the Sandbox, and sandbox/new.go is
@@ -20,4 +24,17 @@ func ConstructorDir(name string) string {
 // constructor.go.
 func ConstructorPath(name string) string {
 	return ConstructorDir(name) + "/" + ConstructorFile
+}
+
+// ConstructorSource is the project-relative package whose New<Name> builds one
+// contract of sandbox/api/: sandbox/internal/<name>, or
+// sandbox/internal/<name>/<name> when the layer splits its package into
+// several — the server's route, server and errors — and keeps the one that
+// builds the contract under its own name one level down.
+func ConstructorSource(io *smartio.SmartIO, name string) string {
+	nested := "sandbox/internal/" + name + "/" + name
+	if io.IsFile(nested + "/new.go") {
+		return nested
+	}
+	return "sandbox/internal/" + name
 }

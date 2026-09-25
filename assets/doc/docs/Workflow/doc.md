@@ -84,65 +84,64 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 
 ```bash
 {{.GeneratorName}} add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
-{{.GeneratorName}} set-route <route> --method PUT --example "curl localhost:8080/users"
-{{.GeneratorName}} add-segment <name> --route <route>            # a capture; --identifier /users for a literal
-{{.GeneratorName}} add-segment <name> --route <route> --array    # the last one, taking the rest of the path
-{{.GeneratorName}} add-header <name> --route <route> --required
-{{.GeneratorName}} add-param <name> --route <route> --type int --default 1 --min 1
+{{.GeneratorName}} set-route <route> --method PUT --response-type text/plain --example "curl localhost:8080/users"
+{{.GeneratorName}} add-path <id> --route <route> --start 1 --end 1          # one slice of the path
+{{.GeneratorName}} add-path <id> --route <route> --start 0 --end 0 --trigger /v1
+{{.GeneratorName}} add-parameter <name> --route <route> --font header --required
+{{.GeneratorName}} add-parameter <name> --route <route> --type number --default 1
 {{.GeneratorName}} set-body <route> --type json --required --max-bytes 2097152
 {{.GeneratorName}} add-body-field <dotted.name> --route <route> --format email --required
 {{.GeneratorName}} import-body <route> --file payload.json --required --infer-format
-{{.GeneratorName}} set-segment <name> --route <route> --type int  # and set-header / set-param
+{{.GeneratorName}} set-path <id> --route <route> --end -1                  # and set-parameter
 {{.GeneratorName}} set-body-field <dotted.name> --route <route> --max 130 --clear format
-{{.GeneratorName}} show-route <route>                            # the whole declaration as a tree
-{{.GeneratorName}} remove-segment <name> --route <route>         # and remove-header / remove-param /
+{{.GeneratorName}} show-route <route>                                      # the whole declaration as a tree
+{{.GeneratorName}} remove-parameter <name> --route <route>                 # and remove-path
 {{.GeneratorName}} remove-body-field <dotted.name> --route <route>
 {{.GeneratorName}} remove-route <route>
 ```
 
-`add-route` writes `sandbox/internal/routes/<name>/route.yaml` (the declaration) and a stub
-`handler.go` (yours), then generates `new.go` — the `api.Route` that lands in
-`Server.Routes`, which the dispatch reads every request against.
+`add-route` writes `sandbox/internal/routeslist/<name>/route.yaml` (the declaration, `priority`
+and `response-type` always included) and a stub `InternalPureHandler.go` (yours), then
+generates `new.go` — the `api.Route` that lands in `Server.Routes`, a 1:1 image of the yaml —
+and `entries.go` — the `Entries` the handler is handed.
 One editor per place the declaration holds something, so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
 it passes through; `set-body` covers the envelope around the schema — how the body is read,
 whether it is required, its size limit and its content-type.
 
-Each `add-` has a `set-` beside it, so a bound that was forgotten is added to the declaration
+Each `add-` has a `set-` beside it, so a key that was forgotten is added to the declaration
 that is there instead of removing it and declaring it again: the keys given are written over
 the ones already declared, `--clear <key>` takes one off, and the result goes through the same
 constructor the `add-` side calls. `import-body` is `add-body-field` run once per key of an
 example payload — a document pasted with `--json` or read with `--file`, inferring a type per
 key, the objects and lists around them and, with `--infer-format`, the four formats a string
 may spell; it never writes over a property already declared, and `--replace` starts the schema
-over. `show-route` prints the whole declaration as a tree — the path, the headers, the
-parameters and the body schema property by property — and is the one of them that writes
-nothing.
+over. `show-route` prints the whole declaration as a tree — the paths, the parameters and the
+body schema property by property — and is the one of them that writes nothing.
 
-Then write `handler.go` — the whole hand-written half of a route:
+Then write `InternalPureHandler.go` — the whole hand-written half of a route:
 
 ```go
-func RouteHandler(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error {
 	body, err := ReadBody(sandbox, route)
 	if err != nil {
 		return err
 	}
 	response.SetStatus(api.StatusCreated)
-	response.Write(payload(sandbox, create(sandbox, route.GetString("tenant"), body)))
+	response.Write(payload(sandbox, create(sandbox, entries.Tenant, body)))
 	return nil
 }
 ```
 
-`route` arrives bound, converted and range-checked — every value read back by the name its
-declaration gives it (`GetString`, `GetInt`, `GetBool`, `GetStrings`) — so a bad request was
-already answered `400` before the handler ran. The body is the exception — it is read only when
-`ReadBody` asks for it.
+`entries` arrives bound and converted — one field per path and per parameter, named by its id —
+so a bad request was already answered `400` before the handler ran. The body is the exception —
+it is read only when `ReadBody` asks for it.
 
 Setting a status is what answers the request. Several routes may match one request; they run in
 `priority` order and stop at the first one that sets a status, so a handler that writes none has
 declined and the next one runs — that is the whole of what a middleware is. What no route
-answers is answered by the six `sandbox/internal/server/handle_*.go`, which `server-init` writes
+answers is answered by the six `sandbox/internal/server/errors/handle_*.go`, which `server-init` writes
 once and no build rewrites: they are where a 404, a 405 or a 500 is worded.
 [Routes](../Routes/doc.md) documents the route on the next build, and
 [ServerUsage](../ServerUsage/doc.md) is the whole recipe.
@@ -155,7 +154,7 @@ once and no build rewrites: they are where a 404, a 405 or a 500 is worded.
 ```
 
 From there `{{.GeneratorName}} add-route <name> --trigger /<path> --help "..." --category "..."` declares a
-route and `{{.GeneratorName}} add-segment` / `add-header` / `add-param` / `add-body-field` its fields. A
+route and `{{.GeneratorName}} add-path` / `add-parameter` / `add-body-field` what it reads. A
 project with no CLI gets one first: a server needs a command that starts it.
 `{{.GeneratorName}} server-purge` removes the layer again.
 {{- end }}
@@ -332,7 +331,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | `sandbox/internal/commands/<name>/handler.go` | a command does something |
 {{- end }}
 {{- if .HasServer }}
-| `sandbox/internal/routes/<name>/handler.go` | a route answers something |
+| `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | a route answers something |
 {{- end }}
 {{- if .HasFront }}
 | `assets/frontend/pages/<page>.html`, `assets/frontend/static/**` | a page looks like something |

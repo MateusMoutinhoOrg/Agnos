@@ -12,12 +12,11 @@ import (
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	addDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_doc"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
-	addHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_header"
 	addLibExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_lib_example"
 	addPageAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_page"
-	addParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_param"
+	addParameterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_parameter"
+	addPathAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_path"
 	addRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_route"
-	addSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_segment"
 	addTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_table"
 	addTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_table_field"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
@@ -48,12 +47,11 @@ import (
 	removeDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_dep"
 	removeDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_doc"
 	removeFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_flag"
-	removeHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_header"
 	removeLibExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_lib_example"
 	removePageAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_page"
-	removeParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_param"
+	removeParameterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_parameter"
+	removePathAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_path"
 	removeRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_route"
-	removeSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_segment"
 	removeTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table"
 	removeTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table_field"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
@@ -63,10 +61,9 @@ import (
 	setBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body_field"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	setDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_dep"
-	setHeaderAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_header"
-	setParamAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_param"
+	setParameterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_parameter"
+	setPathAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_path"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
-	setSegmentAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_segment"
 	setTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_table_field"
 	showDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_database"
 	showRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_route"
@@ -181,23 +178,23 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.SetRoute = func(props api.RouteProps) error {
 		return setRouteAction.SetRoute(sandbox, props)
 	}
-	actions.AddSegment = func(props api.RouteFieldProps) error {
-		return addSegmentAction.AddSegment(sandbox, props)
+	actions.AddPath = func(props api.RoutePathProps) error {
+		return addPathAction.AddPath(sandbox, props)
 	}
-	actions.RemoveSegment = func(path string, route string, name string) error {
-		return removeSegmentAction.RemoveSegment(sandbox, path, route, name)
+	actions.SetPath = func(props api.RoutePathEditProps) error {
+		return setPathAction.SetPath(sandbox, props)
 	}
-	actions.AddHeader = func(props api.RouteFieldProps) error {
-		return addHeaderAction.AddHeader(sandbox, props)
+	actions.RemovePath = func(path string, route string, id string) error {
+		return removePathAction.RemovePath(sandbox, path, route, id)
 	}
-	actions.RemoveHeader = func(path string, route string, name string) error {
-		return removeHeaderAction.RemoveHeader(sandbox, path, route, name)
+	actions.AddParameter = func(props api.RouteParameterProps) error {
+		return addParameterAction.AddParameter(sandbox, props)
 	}
-	actions.AddParam = func(props api.RouteFieldProps) error {
-		return addParamAction.AddParam(sandbox, props)
+	actions.SetParameter = func(props api.RouteParameterEditProps) error {
+		return setParameterAction.SetParameter(sandbox, props)
 	}
-	actions.RemoveParam = func(path string, route string, name string) error {
-		return removeParamAction.RemoveParam(sandbox, path, route, name)
+	actions.RemoveParameter = func(path string, route string, name string) error {
+		return removeParameterAction.RemoveParameter(sandbox, path, route, name)
 	}
 	actions.SetBody = func(props api.RouteBodyProps) error {
 		return setBodyAction.SetBody(sandbox, props)
@@ -207,15 +204,6 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.RemoveBodyField = func(path string, route string, name string) error {
 		return removeBodyFieldAction.RemoveBodyField(sandbox, path, route, name)
-	}
-	actions.SetSegment = func(props api.RouteFieldEditProps) error {
-		return setSegmentAction.SetSegment(sandbox, props)
-	}
-	actions.SetHeader = func(props api.RouteFieldEditProps) error {
-		return setHeaderAction.SetHeader(sandbox, props)
-	}
-	actions.SetParam = func(props api.RouteFieldEditProps) error {
-		return setParamAction.SetParam(sandbox, props)
 	}
 	actions.SetBodyField = func(props api.RouteBodyFieldEditProps) error {
 		return setBodyFieldAction.SetBodyField(sandbox, props)
