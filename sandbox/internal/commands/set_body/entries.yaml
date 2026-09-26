@@ -11,7 +11,7 @@ examples:
     - set-body upload-avatar --type raw --content-type application/octet-stream
     - set-body ping --type none
 flags:
-    - description: 'how the body is read: none, raw, text or json'
+    - description: 'how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded, read into a map[string][]string)'
       examples:
         - set-body create-user --type json
       identifiers:

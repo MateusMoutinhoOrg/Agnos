@@ -35,6 +35,7 @@ func ShowRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string) 
 		sandbox.Deps.Std.Sprintf("%s %s", sandbox.Deps.Stringsdeps.Join(conf.Methods, ","), conf.Pattern()),
 	}
 	lines = append(lines, routeHead(sandbox, conf)...)
+	lines = append(lines, chainLine(sandbox, io, route)...)
 	lines = append(lines, pathLines(sandbox, conf)...)
 	lines = append(lines, parameterLines(sandbox, conf)...)
 	lines = append(lines, bodyLines(sandbox, conf)...)
@@ -55,12 +56,57 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 		lines = append(lines, sandbox.Deps.Std.Sprintf("%scategory  %s", branch, conf.Category))
 	}
 	lines = append(lines, sandbox.Deps.Std.Sprintf("%spriority  %d", branch, conf.Priority))
+	if conf.Phase == routeconf.PhaseAfter {
+		lines = append(lines, branch+"phase     after, once the request has been answered")
+	}
+	if conf.HasSegments {
+		lines = append(lines, sandbox.Deps.Std.Sprintf("%ssegments  %d", branch, conf.Segments))
+	}
 	lines = append(lines, sandbox.Deps.Std.Sprintf("%sresponse  %s", branch, conf.ResponseType))
 	if conf.Hidden {
 		lines = append(lines, branch+"hidden")
 	}
 
 	return lines
+}
+
+// triggerNote words one trigger: its type and value, and the two switches on
+// it when they are set.
+func triggerNote(sandbox *api.Sandbox, trigger routeconf.Trigger) string {
+	text := sandbox.Deps.Std.Sprintf("%s %q", trigger.Type, trigger.Value)
+	if trigger.IgnoreCase {
+		text += " ignoring case"
+	}
+	if trigger.Negate {
+		text = "not " + text
+	}
+	return text
+}
+
+// chainLine is where the route sits in the chain: its place in run order, and
+// the routes on either side of it. It is empty when the chain cannot be read,
+// which a route on its own never needs to be shown for.
+func chainLine(sandbox *api.Sandbox, io *smartio.SmartIO, route string) []string {
+	chain, err := utils.LoadRouteChain(sandbox, io)
+	if err != nil {
+		return []string{}
+	}
+
+	name := utils.RoutePackage(sandbox, route)
+	for index, entry := range chain {
+		if entry.Name != name {
+			continue
+		}
+		text := sandbox.Deps.Std.Sprintf("%schain     #%d of %d", branch, index+1, len(chain))
+		if index > 0 {
+			text += ", after " + utils.RouteIdentifier(sandbox, chain[index-1].Name)
+		}
+		if index < len(chain)-1 {
+			text += ", before " + utils.RouteIdentifier(sandbox, chain[index+1].Name)
+		}
+		return []string{text}
+	}
+	return []string{}
 }
 
 // pathLines is the route's paths, one line each: the Entries field it binds,
@@ -75,8 +121,11 @@ func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 		text := sandbox.Deps.Std.Sprintf("%-20s segments %d..%d", path.Id, path.Start, path.End)
 
 		notes := []string{}
+		if path.Type != "" && path.Type != routeconf.DefaultPathType {
+			notes = append(notes, path.Type)
+		}
 		if path.Trigger.Exists {
-			notes = append(notes, sandbox.Deps.Std.Sprintf("%s %q", path.Trigger.Type, path.Trigger.Value))
+			notes = append(notes, triggerNote(sandbox, path.Trigger))
 		}
 		if path.Description != "" {
 			notes = append(notes, path.Description)
@@ -107,7 +156,7 @@ func parameterLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 			notes = append(notes, sandbox.Deps.Std.Sprintf("default %s", parameter.Default))
 		}
 		if parameter.Trigger.Exists {
-			notes = append(notes, sandbox.Deps.Std.Sprintf("%s %q", parameter.Trigger.Type, parameter.Trigger.Value))
+			notes = append(notes, triggerNote(sandbox, parameter.Trigger))
 		}
 		if parameter.Description != "" {
 			notes = append(notes, parameter.Description)

@@ -1,0 +1,28 @@
+category: Server System
+flags:
+    - default: "10"
+      description: how many rungs apart two routes land (defaults to 10)
+      examples:
+        - rebalance-routes --step 100
+      identifiers:
+        - --step
+      name: step
+      type: int
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - rebalance-routes --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Lay the chain down again with room between its rungs
+identifiers:
+    - rebalance-routes
+long-description: Gives every route a priority of its own, --step apart, in the order the chain runs them now — each phase on its own ladder — so --before and --after have room again. The generated health route keeps its rung.

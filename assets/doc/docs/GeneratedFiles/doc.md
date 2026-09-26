@@ -71,7 +71,7 @@
 | `sandbox/internal/routeslist/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-path` / `add-parameter` / `set-body` / `add-body-field` / `import-body`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
-| `sandbox/internal/server/errors/handle_*.go` | `build` | once. Six files, one per failure — what this project answers when no route does |
+| `sandbox/internal/server/errors/handle_*.go` | `build` | once. Eight files, one per failure — what this project answers when no route does |
 {{- end }}
 {{- if .HasDatabase }}
 | `sandbox/internal/databaseio/*.go` | `build` | always |

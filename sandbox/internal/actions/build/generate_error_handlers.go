@@ -18,14 +18,16 @@ var errorHandlerFiles = []string{
 	"handle_not_found.go",
 	"handle_method_not_allowed.go",
 	"handle_bad_request.go",
+	"handle_unauthorized.go",
+	"handle_forbidden.go",
 	"handle_too_large.go",
 	"handle_wrong_content_type.go",
 	"handle_server_error.go",
 }
 
 // GenerateErrorHandlers renders assets/templates/handle_*.go into
-// sandbox/internal/server/errors/ — the six handlers the generated new.go hands a
-// failure to, one per status.
+// sandbox/internal/server/errors/ — the eight handlers the generated new.go
+// hands a failure to, one per status.
 //
 // It is written **once**, the same way a constructor is. A handler already on
 // disk is left exactly as it is, however far it has drifted from what the

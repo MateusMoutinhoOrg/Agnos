@@ -75,7 +75,14 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 	case "parent":
 		return closed(nestedTableOptions(sandbox, io, answered))
 	case "method":
-		return closed(literalOptions(routeMethods))
+		if verb == "explain-route" {
+			return closed(literalOptions(routeMethods))
+		}
+		return closed(literalOptions(append(append([]string{}, routeMethods...), routeconf.AnyMethod)))
+	case "before", "after":
+		return closed(dirOptions(sandbox, io, routesDir))
+	case "phase":
+		return closed(literalOptions(routeconf.Phases))
 	case "runtime":
 		return closed(literalOptions(buildRuntimes))
 	case "target":
@@ -181,6 +188,8 @@ func typeSuggestion(verb string) suggestion {
 		return closed(literalOptions(tableTypes))
 	case "add-parameter", "set-parameter":
 		return closed(literalOptions(routeconf.ParameterTypes))
+	case "add-path", "set-path":
+		return closed(literalOptions(routeconf.PathTypes))
 	}
 	return closed(literalOptions(fieldTypes))
 }

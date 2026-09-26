@@ -32,6 +32,13 @@ flags:
         - --end
       name: end
       type: string
+    - description: 'what the slice converts to: string (the default), integer, number or uuid; anything but string reads one segment (--start equal to --end), and a segment that does not convert makes the route a non-match'
+      examples:
+        - add-path article --route get-article --start 1 --end 1 --type integer
+      identifiers:
+        - --type
+      name: type
+      type: string
     - description: what the slice has to read as for the route to run; without it the path is a plain capture
       examples:
         - add-path version --route api --start 0 --end 0 --trigger /v1
@@ -39,13 +46,27 @@ flags:
         - --trigger
       name: trigger
       type: string
-    - description: 'how the trigger is compared: equal, prefix, suffix or regex (defaults to equal)'
+    - description: 'how the trigger is compared: equal, prefix (segment by segment), text-prefix, suffix or regex — or starts-with, ends-with, exact, matches (defaults to equal)'
       examples:
         - add-path file --route assets --start 1 --trigger .css --trigger-type suffix
       identifiers:
         - --trigger-type
       name: trigger-type
       type: string
+    - description: 'invert the trigger: the route runs when the slice does not match it'
+      examples:
+        - add-path not-login --route admin-guard --trigger /admin/login --trigger-negate
+      identifiers:
+        - --trigger-negate
+      name: trigger-negate
+      type: boolean
+    - description: compare the trigger without regard to case
+      examples:
+        - add-path version --route api --start 0 --end 0 --trigger /v1 --trigger-ignore-case
+      identifiers:
+        - --trigger-ignore-case
+      name: trigger-ignore-case
+      type: boolean
     - description: help text shown for the path
       examples:
         - add-path tenant --route create-user --description 'the tenant id'

@@ -1,5 +1,19 @@
 # Server — proposta de mudanças
 
+**Status (2026-09-26): implementado**, exceto os itens marcados como pendentes abaixo. Onde a
+implementação divergiu do plano:
+
+| Item | Plano | Como ficou | Por quê |
+|---|---|---|---|
+| §1.1 `prefix` | por segmento sempre | por segmento **em path**; em valor de parâmetro é prefixo de texto | `Bearer abc` não tem segmentos |
+| §5.2 binding | só tipados sem barra | todo path de **um segmento** (`start == end`) entrega o segmento puro (`"hello"`); range mantém `"/a/b"` | `{slug}` chegava como `"/hello"` |
+| §3.5 405 | "nenhuma rota rodou" | rotas `ANY` não contam | um guard `ANY` escondia todo 405 |
+| §3.4 middleware | trigger padrão `/<name>` | trigger padrão `/`, categoria `Middleware` | middleware sem trigger guarda tudo |
+| §7.2 `add-route` | `--help`/`--category` opcionais | opcionais; categoria padrão `Routes` | — |
+| §6.1 form | `Request.ReadForm` | idem, reusando o body em cache | `net/url` fica no adapter |
+| §9 aviso "guard só GET" | aviso do verify | **pendente** — o verify só tem erros, não avisos | — |
+
+
 Escopo: `sandbox-server` (templates em `assets/sandbox-server/`, `assets/doc-server/`), os
 comandos `*-route`, `*-path`, `*-parameter`, `*-body*`, a parsable `routeconf`, o collector
 `collect_routes.go` e o `check_routes.go`. Tudo abaixo é implementado no template e rodado via

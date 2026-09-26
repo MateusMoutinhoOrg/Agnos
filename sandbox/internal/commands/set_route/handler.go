@@ -6,13 +6,17 @@ import (
 )
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
-	// --priority defaults to -1, the one value the declaration refuses, so
-	// setting the rung to 0 is told apart from not naming one at all.
-	priority := command.GetInt("priority")
-
+	// --priority and --segments declare no default, so a value typed as 0
+	// is told apart from none by whether anything was bound at all.
 	set_error := setRouteAction.SetRoute(sandbox, api.RouteProps{
-		Priority:        priority,
-		HasPriority:     priority >= 0,
+		Priority:        command.GetInt("priority"),
+		HasPriority:     command.GetItem("priority") != nil,
+		Before:          command.GetString("before"),
+		After:           command.GetString("after"),
+		Segments:        command.GetInt("segments"),
+		HasSegments:     command.GetItem("segments") != nil,
+		Phase:           command.GetString("phase"),
+		Clear:           command.GetStrings("clear"),
 		Path:            command.GetString("path"),
 		Route:           command.GetString("route"),
 		Methods:         command.GetStrings("method"),

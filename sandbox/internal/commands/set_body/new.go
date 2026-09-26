@@ -29,7 +29,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Type:        "string",
 			Required:    false,
 			Array:       false,
-			Description: "how the body is read: none, raw, text or json",
+			Description: "how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded, read into a map[string][]string)",
 			Examples:    []string{"set-body create-user --type json"},
 			Default:     "",
 			HasDefault:  false,

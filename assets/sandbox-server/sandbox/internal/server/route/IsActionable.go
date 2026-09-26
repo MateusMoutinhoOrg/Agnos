@@ -26,7 +26,7 @@ func IsActionable(sandbox *api.Sandbox, route *api.Route) bool {
 			continue
 		}
 		values := ParameterValues(sandbox, request, parameter)
-		if len(values) == 0 || !MatchTrigger(sandbox, parameter.Trigger, values[0]) {
+		if len(values) == 0 || !MatchTrigger(sandbox, parameter.Trigger, values[0], false) {
 			return false
 		}
 	}
@@ -35,22 +35,60 @@ func IsActionable(sandbox *api.Sandbox, route *api.Route) bool {
 }
 
 // MatchesPath reports whether the request path of one bound route is for it,
-// whatever the method: every entry of Paths finds its slice, and the slice
-// matches the entry's trigger when it declares one.
+// whatever the method: the path has the Segments the route declares, and every
+// entry of Paths finds its slice, converts to its Type and matches its trigger
+// when it declares one.
 func MatchesPath(sandbox *api.Sandbox, route *api.Route) bool {
 	segments := SplitPath(sandbox, routeio.RequestOf(route).GetPath())
+
+	if route.Segments > 0 && len(segments) != route.Segments {
+		return false
+	}
 
 	for _, path := range route.Paths {
 		text, ok := PathSlice(sandbox, segments, path)
 		if !ok {
 			return false
 		}
-		if path.Trigger.Exist && !MatchTrigger(sandbox, path.Trigger, text) {
+		if _, ok := PathValue(sandbox, path, text); !ok {
+			return false
+		}
+		if path.Trigger.Exist && !MatchTrigger(sandbox, path.Trigger, text, true) {
 			return false
 		}
 	}
 
 	return true
+}
+
+// uuidPattern is what a uuid path has to read as: 8-4-4-4-12 hex digits.
+const uuidPattern = `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`
+
+// PathValue converts the slice one entry of Paths read to the value its
+// Entries field carries, in its Type: a path of one segment (Start equal to
+// End) binds the segment itself — "42", not "/42" — and a range binds the
+// slice as its trigger reads it, leading slash included. It reports false when
+// the slice does not convert — which makes the route a non-match, not a bad
+// request. MatchesPath and RequestHandler both read a path through it, so what
+// decides the match and what fills Entries never disagree.
+func PathValue(sandbox *api.Sandbox, path api.Path, text string) (any, bool) {
+	if path.Type == api.StringPath && path.Start != path.End {
+		return text, true
+	}
+
+	segment := sandbox.Deps.Stringsdeps.TrimPrefix(text, "/")
+	switch path.Type {
+	case api.IntegerPath:
+		value, err := sandbox.Deps.Stringsdeps.Atoi(segment)
+		return value, err == nil
+	case api.NumberPath:
+		value, err := sandbox.Deps.Stringsdeps.ParseFloat(segment, 64)
+		return value, err == nil
+	case api.UuidPath:
+		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(uuidPattern, segment)
+		return segment, err == nil && matched
+	}
+	return segment, true
 }
 
 // SplitPath slices a raw request path into its segments, dropping the empty
@@ -86,23 +124,49 @@ func PathSlice(sandbox *api.Sandbox, segments []string, path api.Path) (string, 
 	return "/" + sandbox.Deps.Stringsdeps.Join(segments[path.Start:end+1], "/"), true
 }
 
-// MatchTrigger reports whether one text meets a trigger.
-func MatchTrigger(sandbox *api.Sandbox, trigger api.Trigger, text string) bool {
+// MatchTrigger reports whether one text meets a trigger: the comparison its
+// Type names, run without regard to case when it declares IgnoreCase, and
+// inverted when it declares Negate. Segmented is true for a path slice, the
+// one text a prefix reads segment by segment.
+func MatchTrigger(sandbox *api.Sandbox, trigger api.Trigger, text string, segmented bool) bool {
+	return compareTrigger(sandbox, trigger, text, segmented) != trigger.Negate
+}
+
+// compareTrigger is the comparison of MatchTrigger before Negate. On a path
+// slice a prefix holds on a segment boundary alone — "/admin" is "/admin" or
+// "/admin/…", never "/administrator" — which is what tells it from a
+// text-prefix. A parameter value has no segments, so there the two are one.
+func compareTrigger(sandbox *api.Sandbox, trigger api.Trigger, text string, segmented bool) bool {
+	value := trigger.Value
+	if trigger.IgnoreCase && trigger.Type != api.RegexTrigger {
+		value = sandbox.Deps.Stringsdeps.ToLower(value)
+		text = sandbox.Deps.Stringsdeps.ToLower(text)
+	}
+
 	switch trigger.Type {
 	case api.PrefixTrigger:
-		return sandbox.Deps.Stringsdeps.HasPrefix(text, trigger.Value)
+		if !segmented {
+			return sandbox.Deps.Stringsdeps.HasPrefix(text, value)
+		}
+		value = sandbox.Deps.Stringsdeps.TrimSuffix(value, "/")
+		return value == "" || text == value || sandbox.Deps.Stringsdeps.HasPrefix(text, value+"/")
+	case api.TextPrefixTrigger:
+		return sandbox.Deps.Stringsdeps.HasPrefix(text, value)
 	case api.SuffixTrigger:
-		return sandbox.Deps.Stringsdeps.HasSuffix(text, trigger.Value)
+		return sandbox.Deps.Stringsdeps.HasSuffix(text, value)
 	case api.RegexTrigger:
-		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(trigger.Value, text)
+		if trigger.IgnoreCase {
+			value = "(?i)" + value
+		}
+		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(value, text)
 		return err == nil && matched
 	}
-	return text == trigger.Value
+	return text == value
 }
 
 // ParameterValues is the raw values one parameter brings, from the first of
 // its Fonts that carries any: every occurrence of a query key or every
-// comma-separated value of a header for a string-array, one value otherwise.
+// comma-separated value of a header for an array type, one value otherwise.
 // It is empty when no font carries the parameter.
 func ParameterValues(sandbox *api.Sandbox, request serverdeps.Request, parameter api.Parameter) []string {
 	for _, font := range parameter.Fonts {
@@ -122,17 +186,19 @@ func fontValues(sandbox *api.Sandbox, request serverdeps.Request, parameter api.
 	switch font {
 	case api.HeaderParam:
 		raw := request.GetHeader(parameter.Key)
-		if parameter.Type == api.StringArrayType {
+		if isArrayType(parameter.Type) {
 			raws = sandbox.Deps.Stringsdeps.Split(raw, ",")
 		} else {
 			raws = []string{raw}
 		}
 	case api.QueryParam:
-		if parameter.Type == api.StringArrayType {
+		if isArrayType(parameter.Type) {
 			raws = request.GetQueryAll(parameter.Key)
 		} else {
 			raws = []string{request.GetQueryParam(parameter.Key)}
 		}
+	case api.CookieParam:
+		raws = []string{request.GetCookie(parameter.Key)}
 	}
 
 	values := []string{}
@@ -145,10 +211,16 @@ func fontValues(sandbox *api.Sandbox, request serverdeps.Request, parameter api.
 	return values
 }
 
+// isArrayType reports a parameter type bound from every value the request
+// brings rather than the first.
+func isArrayType(kind api.ParameterType) bool {
+	return kind == api.StringArrayType || kind == api.IntegerArrayType
+}
+
 // acceptsMethod reports whether a request method is one of the route's.
 func acceptsMethod(route *api.Route, method string) bool {
 	for _, accepted := range route.AcceptMethods {
-		if accepted == method {
+		if accepted == method || accepted == api.AnyMethod {
 			return true
 		}
 	}

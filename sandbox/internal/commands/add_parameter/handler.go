@@ -7,18 +7,20 @@ import (
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	err := addParameterAction.AddParameter(sandbox, api.RouteParameterProps{
-		Path:        command.GetString("path"),
-		Route:       command.GetString("route"),
-		Name:        command.GetString("name"),
-		Type:        command.GetString("type"),
-		Fonts:       command.GetStrings("font"),
-		Required:    command.GetBool("required"),
-		Default:     command.GetString("default"),
-		TriggerType: command.GetString("trigger-type"),
-		Trigger:     command.GetString("trigger"),
-		Description: command.GetString("description"),
-		Examples:    command.GetStrings("example"),
-		Position:    command.GetInt("position"),
+		Path:              command.GetString("path"),
+		Route:             command.GetString("route"),
+		Name:              command.GetString("name"),
+		Type:              command.GetString("type"),
+		Fonts:             command.GetStrings("font"),
+		Required:          command.GetBool("required"),
+		Default:           command.GetString("default"),
+		TriggerType:       command.GetString("trigger-type"),
+		TriggerNegate:     command.GetBool("trigger-negate"),
+		TriggerIgnoreCase: command.GetBool("trigger-ignore-case"),
+		Trigger:           command.GetString("trigger"),
+		Description:       command.GetString("description"),
+		Examples:          command.GetStrings("example"),
+		Position:          command.GetInt("position"),
 	})
 	if err != nil {
 		sandbox.Deps.Std.Error("%s\n", err.Error())

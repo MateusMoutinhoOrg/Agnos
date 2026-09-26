@@ -108,7 +108,7 @@ func routeDoc(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) Rout
 			Id:          path.Id,
 			Key:         routeDocSlice(sandbox, path),
 			In:          "path",
-			Type:        "string" + routeDocTrigger(path.Trigger),
+			Type:        path.Type + routeDocTrigger(path.Trigger),
 			Description: docCell(sandbox, path.Description),
 		})
 	}
@@ -146,7 +146,14 @@ func routeDocTrigger(trigger routeconf.Trigger) string {
 	if !trigger.Exists {
 		return ""
 	}
-	return ", " + trigger.Type + " `" + trigger.Value + "`"
+	text := ", " + trigger.Type + " `" + trigger.Value + "`"
+	if trigger.IgnoreCase {
+		text += " ignoring case"
+	}
+	if trigger.Negate {
+		text = ", not" + text[1:]
+	}
+	return text
 }
 
 // routeDocBody is the one line describing a route's body: its kind, whether it

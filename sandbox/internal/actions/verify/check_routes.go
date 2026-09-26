@@ -28,7 +28,8 @@ const routeHandlerFile = "InternalPureHandler.go"
 // Entries and the response being written.
 var routeHandlerParams = []string{"*api.Sandbox", "*api.Route", "*Entries", "*serverdeps.Response"}
 
-// routeMethods is every http method a route may declare.
+// routeMethods is every http method a route may declare beside ANY, which
+// stands alone.
 var routeMethods = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 
 // schemaKeys is the subset of JSON Schema a route's body may declare.
@@ -90,7 +91,8 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		// two would run in an order nothing declares.
 		for _, method := range conf.Methods {
 			key := method + " " + conf.Pattern() +
-				" at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10)
+				" at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10) +
+				" in the " + conf.Phase + " phase"
 			if other, taken := patterns[key]; taken {
 				violations = append(violations, routeViolation(name,
 					"declares "+key+", which "+routesDir+"/"+other+" already declares"))
@@ -180,9 +182,32 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 		violations = append(violations, routeViolation(name, "declares no `methods`; a route answers one method at least"))
 	}
 	for _, method := range conf.Methods {
+		if method == routeconf.AnyMethod {
+			if len(conf.Methods) > 1 {
+				violations = append(violations, routeViolation(name,
+					"declares "+routeconf.AnyMethod+" beside other methods; "+routeconf.AnyMethod+" already accepts every one"))
+			}
+			continue
+		}
 		if !contains(routeMethods, method) {
 			violations = append(violations, routeViolation(name, "declares the unknown method "+method))
 		}
+	}
+
+	if conf.HasSegments && conf.Segments < 1 {
+		violations = append(violations, routeViolation(name,
+			"declares `segments` below 1; leave it out for a route that takes any count"))
+	}
+	if !contains(routeconf.Phases, conf.Phase) {
+		violations = append(violations, routeViolation(name, "declares the unknown phase "+conf.Phase+
+			" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.Phases, ", ")+")"))
+	}
+	if conf.Phase == routeconf.PhaseAfter && conf.Body.Type != routeconf.BodyNone {
+		violations = append(violations, routeViolation(name,
+			"declares a body in the after phase; the request was answered before it runs, so nothing reads it"))
+	}
+	if !contains(routeconf.BodyTypes, conf.Body.Type) {
+		violations = append(violations, routeViolation(name, "declares the unknown body type "+conf.Body.Type))
 	}
 
 	if len(conf.Paths) == 0 {
@@ -213,6 +238,14 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 		if path.End != routeconf.LastSegment && path.End < path.Start {
 			violations = append(violations, routeViolation(name,
 				"declares the path "+path.Id+" with an `end` before its `start`; -1 is the last segment"))
+		}
+		if !contains(routeconf.PathTypes, path.Type) {
+			violations = append(violations, routeViolation(name,
+				"declares the path "+path.Id+" with the unknown type "+path.Type+
+					" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.PathTypes, ", ")+")"))
+		} else if path.Type != routeconf.DefaultPathType && path.Start != path.End {
+			violations = append(violations, routeViolation(name,
+				"declares the path "+path.Id+" of type "+path.Type+" over more than one segment; a typed path reads one, so `start` and `end` are the same index"))
 		}
 		violations = append(violations, checkRouteTrigger(sandbox, name, "path "+path.Id, path.Trigger)...)
 	}

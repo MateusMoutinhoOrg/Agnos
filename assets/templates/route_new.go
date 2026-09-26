@@ -1,5 +1,5 @@
 {{- define "trigger" -}}
-api.Trigger{Exist: {{.Exist}}, Type: {{.Type}}, Value: {{printf "%q" .Value}}}
+api.Trigger{Exist: {{.Exist}}, Type: {{.Type}}, Value: {{printf "%q" .Value}}, Negate: {{.Negate}}, IgnoreCase: {{.IgnoreCase}}}
 {{- end -}}
 package {{.Name}}
 
@@ -24,6 +24,8 @@ func NewRoute(sandbox *api.Sandbox) *api.Route {
 	self.AcceptMethods = []string{ {{range .Methods}}{{printf "%q" .}}, {{end}} }
 	self.Priority = {{.Priority}}
 	self.ResponseType = {{printf "%q" .ResponseType}}
+	self.Segments = {{.Segments}}
+	self.After = {{.After}}
 	self.Pattern = {{printf "%q" .Pattern}}
 	self.Category = {{printf "%q" .Category}}
 	self.Help = {{printf "%q" .Help}}
@@ -37,6 +39,7 @@ func NewRoute(sandbox *api.Sandbox) *api.Route {
 			Id:          {{printf "%q" .Id}},
 			Start:       {{.Start}},
 			End:         {{.End}},
+			Type:        {{.Type}},
 			Description: {{printf "%q" .Description}},
 			Trigger:     {{template "trigger" .Trigger}},
 		},

@@ -3,7 +3,9 @@ category: Server
 help: Starts the http server
 long-description: |
   Opens the port and serves every route declared under
-  sandbox/internal/routes, until the process is stopped.
+  sandbox/internal/routeslist, until the process is stopped. An interrupt
+  (Ctrl+C) or a termination request stops it gracefully: no new request is
+  taken, and the ones in flight get --shutdown-timeout-ms to finish.
 examples:
   - "start-server"
   - "start-server --addr :3000"
@@ -27,5 +29,12 @@ flags:
     description: how long a response has to be written, in milliseconds
     examples:
       - "start-server --write-timeout-ms 30000"
+    type: int
+    default: "10000"
+  - name: shutdown_timeout_ms
+    identifiers: ["--shutdown-timeout-ms"]
+    description: how long the requests in flight have to finish once the server is asked to stop, in milliseconds (0 waits for them)
+    examples:
+      - "start-server --shutdown-timeout-ms 5000"
     type: int
     default: "10000"

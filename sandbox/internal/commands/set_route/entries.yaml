@@ -10,7 +10,7 @@ examples:
     - set-route create-user --method POST --example "curl -X POST localhost:8080/users"
 flags:
     - array: true
-      description: an http method the route answers (repeatable; replaces the whole list)
+      description: an http method the route answers, or ANY for every one (repeatable; replaces the whole list)
       examples:
         - --method GET --method POST
       identifiers:
@@ -60,6 +60,57 @@ flags:
         - --visible
       name: visible
       type: boolean
+    - description: 'the rung this route runs on when several match one request: lowest first, and a route that answers nothing hands the request on'
+      examples:
+        - set-route logger --priority 0
+      identifiers:
+        - --priority
+      name: priority
+      type: int
+    - description: move to one rung below the route named, so it runs first (excludes --priority)
+      examples:
+        - set-route admin-guard --before admin
+      identifiers:
+        - --before
+      name: before
+      type: string
+    - description: move to one rung above the route named, so it runs next (excludes --priority)
+      examples:
+        - set-route fallback --after admin
+      identifiers:
+        - --after
+      name: after
+      type: string
+    - description: how many segments the request path has to have for the route to run
+      examples:
+        - set-route get-article --segments 2
+      identifiers:
+        - --segments
+      name: segments
+      type: int
+    - description: 'when the route runs: before (the chain) or after, once the request has been answered'
+      examples:
+        - set-route access-log --phase after
+      identifiers:
+        - --phase
+      name: phase
+      type: string
+    - array: true
+      description: 'a key to take off: segments (repeatable)'
+      examples:
+        - set-route get-article --clear segments
+      identifiers:
+        - --clear
+      name: clear
+      type: string
+    - array: true
+      description: an usage example for the route (repeatable)
+      examples:
+        - set-route create-user --example 'curl localhost:8080/users'
+      identifiers:
+        - --example
+      name: example
+      type: string
     - default: .
       description: the dir holding the project (defaults to the current directory)
       examples:
@@ -74,23 +125,7 @@ flags:
         - -q
       name: quiet
       type: boolean
-    - array: true
-      description: an usage example for the route (repeatable)
-      examples:
-        - set-route create-user --example "curl localhost:8080/users"
-      identifiers:
-        - --example
-      name: example
-      type: string
-    - default: "-1"
-      description: 'the rung this route runs on when several match one request: lowest first, and a route that writes no status hands the request on'
-      examples:
-        - set-route logger --priority 0
-      identifiers:
-        - --priority
-      name: priority
-      type: int
 help: Rewrite the route-level keys of a route.yaml
 identifiers:
     - set-route
-long-description: Overwrites methods, response-type, priority, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends.
+long-description: Overwrites methods, response-type, priority, segments, phase, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.

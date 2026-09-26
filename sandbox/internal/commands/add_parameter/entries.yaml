@@ -19,17 +19,17 @@ flags:
       required: true
       type: string
     - default: string
-      description: 'the value type: string, number, boolean, datetime or string-array (defaults to string)'
+      description: 'the value type: string, integer, number, boolean, datetime, string-array or integer-array (defaults to string)'
       examples:
-        - add-parameter page --route list-users --type number
+        - add-parameter page --route list-users --type integer
       identifiers:
         - --type
       name: type
       type: string
     - array: true
-      description: 'where the value is read from, in order: query or header (repeatable; defaults to query)'
+      description: 'where the value is read from, in order: query, header or cookie (repeatable; defaults to query)'
       examples:
-        - add-parameter token --route admin --font header --font query
+        - add-parameter session --route admin --font cookie
       identifiers:
         - --font
       name: font
@@ -55,13 +55,27 @@ flags:
         - --trigger
       name: trigger
       type: string
-    - description: 'how the trigger is compared: equal, prefix, suffix or regex (defaults to equal)'
+    - description: 'how the trigger is compared: equal, prefix, text-prefix, suffix or regex — or starts-with, ends-with, exact, matches (defaults to equal; on a value, prefix and text-prefix are the same)'
       examples:
         - add-parameter authorization --route admin --font header --trigger Bearer --trigger-type prefix
       identifiers:
         - --trigger-type
       name: trigger-type
       type: string
+    - description: 'invert the trigger: the route runs when the value does not match it'
+      examples:
+        - add-parameter authorization --route public --font header --trigger Bearer --trigger-type prefix --trigger-negate
+      identifiers:
+        - --trigger-negate
+      name: trigger-negate
+      type: boolean
+    - description: compare the trigger without regard to case
+      examples:
+        - add-parameter authorization --route admin --font header --trigger bearer --trigger-type prefix --trigger-ignore-case
+      identifiers:
+        - --trigger-ignore-case
+      name: trigger-ignore-case
+      type: boolean
     - description: help text shown for the parameter
       examples:
         - add-parameter page --route list-users --description 'the page to read'

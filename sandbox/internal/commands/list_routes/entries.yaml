@@ -1,0 +1,22 @@
+category: Server System
+examples:
+    - list-routes
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - list-routes --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: List every route in the order the chain runs them
+identifiers:
+    - list-routes
+long-description: 'Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them: the chain first, lowest priority first, then the routes of the after phase. Writes nothing.'

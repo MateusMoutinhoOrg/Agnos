@@ -22,11 +22,15 @@ const removePrefix = "remove-"
 
 // destructiveVerbs are the commands that take something away and are not
 // spelled remove-<unit>. They are listed because nothing about their name says
-// so: disable-extension stops a mechanic generating, and publish reaches a
-// release out of this machine and cannot be taken back.
+// so: disable-extension stops a mechanic generating, publish reaches a
+// release out of this machine and cannot be taken back, rename-route moves a
+// route's hand-written files, and rebalance-routes rewrites the priority of
+// every route.
 var destructiveVerbs = map[string]bool{
 	"disable-extension": true,
 	"publish":           true,
+	"rename-route":      true,
+	"rebalance-routes":  true,
 }
 
 // purgeUnits is the layer each purge takes with it, said as the unit a person

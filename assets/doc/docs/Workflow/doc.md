@@ -83,25 +83,32 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 ## Change the route surface
 
 ```bash
-{{.GeneratorName}} add-route <name> --trigger /<path> --method POST --help "one line" --category "Users"
+{{.GeneratorName}} add-route <name> --pattern '/users/{id:integer}' --method POST --help "one line" --category "Users"
+{{.GeneratorName}} add-route <name> --trigger /admin --trigger-type prefix   # /admin and under, never /administrator
+{{.GeneratorName}} add-route <name> --middleware --trigger /admin --before <route>
 {{.GeneratorName}} set-route <route> --method PUT --response-type text/plain --example "curl localhost:8080/users"
-{{.GeneratorName}} add-path <id> --route <route> --start 1 --end 1          # one slice of the path
+{{.GeneratorName}} add-path <id> --route <route> --start 1 --end 1 --type integer   # one slice of the path
 {{.GeneratorName}} add-path <id> --route <route> --start 0 --end 0 --trigger /v1
 {{.GeneratorName}} add-parameter <name> --route <route> --font header --required
-{{.GeneratorName}} add-parameter <name> --route <route> --type number --default 1
+{{.GeneratorName}} add-parameter <name> --route <route> --type integer --default 1
 {{.GeneratorName}} set-body <route> --type json --required --max-bytes 2097152
 {{.GeneratorName}} add-body-field <dotted.name> --route <route> --format email --required
 {{.GeneratorName}} import-body <route> --file payload.json --required --infer-format
 {{.GeneratorName}} set-path <id> --route <route> --end -1                  # and set-parameter
 {{.GeneratorName}} set-body-field <dotted.name> --route <route> --max 130 --clear format
 {{.GeneratorName}} show-route <route>                                      # the whole declaration as a tree
+{{.GeneratorName}} list-routes                                             # the chain, in run order
+{{.GeneratorName}} explain-route GET /admin/users --header authorization=x   # which routes one request reaches
+{{.GeneratorName}} rename-route <route> <name>
+{{.GeneratorName}} rebalance-routes --step 10                              # room between the rungs again
 {{.GeneratorName}} remove-parameter <name> --route <route>                 # and remove-path
 {{.GeneratorName}} remove-body-field <dotted.name> --route <route>
 {{.GeneratorName}} remove-route <route>
 ```
 
 `add-route` writes `sandbox/internal/routeslist/<name>/route.yaml` (the declaration, `priority`
-and `response-type` always included) and a stub `InternalPureHandler.go` (yours), then
+and `response-type` always included — `100` for a route, `10` for a `--middleware`) and a stub
+`InternalPureHandler.go` (yours), then
 generates `new.go` — the `api.Route` that lands in `Server.Routes`, a 1:1 image of the yaml —
 and `entries.go` — the `Entries` the handler is handed.
 One editor per place the declaration holds something, so every key of
@@ -117,8 +124,9 @@ constructor the `add-` side calls. `import-body` is `add-body-field` run once pe
 example payload — a document pasted with `--json` or read with `--file`, inferring a type per
 key, the objects and lists around them and, with `--infer-format`, the four formats a string
 may spell; it never writes over a property already declared, and `--replace` starts the schema
-over. `show-route` prints the whole declaration as a tree — the paths, the parameters and the
-body schema property by property — and is the one of them that writes nothing.
+over. `show-route` prints the whole declaration as a tree, `list-routes` the chain, and
+`explain-route` which routes one request reaches and why the others are skipped — the three
+write nothing, and `explain-route` is the first step when a route does not run.
 
 Then write `InternalPureHandler.go` — the whole hand-written half of a route:
 
@@ -138,22 +146,23 @@ func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entrie
 so a bad request was already answered `400` before the handler ran. The body is the exception —
 it is read only when `ReadBody` asks for it.
 
-Setting a status is what answers the request. Several routes may match one request; they run in
-`priority` order and stop at the first one that sets a status, so a handler that writes none has
-declined and the next one runs — that is the whole of what a middleware is. What no route
-answers is answered by the six `sandbox/internal/server/errors/handle_*.go`, which `server-init` writes
-once and no build rewrites: they are where a 404, a 405 or a 500 is worded.
+Setting a status or writing a byte is what answers the request. Several routes may match one
+request; they run in `priority` order and stop at the first one that answers, so a handler that
+does neither has declined and the next one runs — that is the whole of what a middleware is, and
+`route.Locals` carries what it learned to the routes after it. What no route answers is answered
+by the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and no build
+rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 [Routes](../Routes/doc.md) documents the route on the next build, and
 [ServerUsage](../ServerUsage/doc.md) is the whole recipe.
 {{- else }}
 ## Add the server layer
 
 ```bash
-{{.GeneratorName}} server-init      # serverdeps, sandbox/internal/server, the health route, start-server
+{{.GeneratorName}} server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
 {{.Name}} start-server  # listens on :8080
 ```
 
-From there `{{.GeneratorName}} add-route <name> --trigger /<path> --help "..." --category "..."` declares a
+From there `{{.GeneratorName}} add-route <name> --pattern '/<path>/{id}'` declares a
 route and `{{.GeneratorName}} add-path` / `add-parameter` / `add-body-field` what it reads. A
 project with no CLI gets one first: a server needs a command that starts it.
 `{{.GeneratorName}} server-purge` removes the layer again.

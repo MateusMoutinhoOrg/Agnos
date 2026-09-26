@@ -24,12 +24,15 @@ type Server struct {
 	Fail func(route *Route) error
 }
 
-// ServeProps describes one run of the http server: the address to listen on
-// and the two timeouts, in milliseconds, a request and a response are held to.
+// ServeProps describes one run of the http server: the address to listen on,
+// the two timeouts, in milliseconds, a request and a response are held to, and
+// how long the requests in flight get to finish once the process is asked to
+// stop (0 waits for them).
 type ServeProps struct {
-	Addr           string
-	ReadTimeoutMs  int
-	WriteTimeoutMs int
+	Addr              string
+	ReadTimeoutMs     int
+	WriteTimeoutMs    int
+	ShutdownTimeoutMs int
 }
 
 const (
@@ -39,10 +42,30 @@ const (
 	StatusCreated = 201
 	// StatusNoContent reports success with nothing to send back.
 	StatusNoContent = 204
+	// StatusMovedPermanently sends the caller to Location for good.
+	StatusMovedPermanently = 301
+	// StatusFound sends the caller to Location this once.
+	StatusFound = 302
+	// StatusSeeOther sends the caller to Location with a GET, after a
+	// form was handled.
+	StatusSeeOther = 303
+	// StatusNotModified reports that the caller's cached copy is current.
+	StatusNotModified = 304
+	// StatusTemporaryRedirect sends the caller to Location this once,
+	// keeping its method.
+	StatusTemporaryRedirect = 307
+	// StatusPermanentRedirect sends the caller to Location for good,
+	// keeping its method.
+	StatusPermanentRedirect = 308
 	// StatusBadRequest reports a request the dispatch could not bind: a
 	// missing required field, an unparsable value, one out of range, or a
 	// body the declared schema rejects.
 	StatusBadRequest = 400
+	// StatusUnauthorized reports a request that carries no valid
+	// credentials.
+	StatusUnauthorized = 401
+	// StatusForbidden reports credentials that are valid and not enough.
+	StatusForbidden = 403
 	// StatusNotFound reports that no declared route matches the path.
 	StatusNotFound = 404
 	// StatusMethodNotAllowed reports a path a route matches under another
@@ -56,7 +79,14 @@ const (
 	// StatusUnsupportedMedia reports a content type the route does not
 	// declare.
 	StatusUnsupportedMedia = 415
+	// StatusUnprocessable reports a well-formed request whose content
+	// breaks a rule of the domain.
+	StatusUnprocessable = 422
+	// StatusTooManyRequests reports a caller over its rate.
+	StatusTooManyRequests = 429
 	// StatusFailure reports a well-formed request the route could not carry
 	// out.
 	StatusFailure = 500
+	// StatusUnavailable reports a server that cannot answer right now.
+	StatusUnavailable = 503
 )

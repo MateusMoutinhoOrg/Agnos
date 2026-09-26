@@ -25,17 +25,17 @@ flags:
         - --rename
       name: rename
       type: string
-    - description: 'the new value type: string, number, boolean, datetime or string-array'
+    - description: 'the new value type: string, integer, number, boolean, datetime, string-array or integer-array'
       examples:
-        - set-parameter page --route list-users --type number
+        - set-parameter page --route list-users --type integer
       identifiers:
         - --type
       name: type
       type: string
     - array: true
-      description: where the value is read from, in order (repeatable; replaces the whole list)
+      description: 'where the value is read from, in order: query, header or cookie (repeatable; replaces the whole list)'
       examples:
-        - set-parameter token --route admin --font header
+        - set-parameter token --route admin --font header --font cookie
       identifiers:
         - --font
       name: font
@@ -61,13 +61,27 @@ flags:
         - --trigger
       name: trigger
       type: string
-    - description: 'the new comparison: equal, prefix, suffix or regex'
+    - description: 'the new comparison: equal, prefix, text-prefix, suffix or regex — or starts-with, ends-with, exact, matches'
       examples:
         - set-parameter authorization --route admin --trigger-type prefix
       identifiers:
         - --trigger-type
       name: trigger-type
       type: string
+    - description: invert the trigger (take it off with --clear trigger-negate)
+      examples:
+        - set-parameter authorization --route public --trigger-negate
+      identifiers:
+        - --trigger-negate
+      name: trigger-negate
+      type: boolean
+    - description: compare the trigger without regard to case (take it off with --clear trigger-ignore-case)
+      examples:
+        - set-parameter authorization --route admin --trigger-ignore-case
+      identifiers:
+        - --trigger-ignore-case
+      name: trigger-ignore-case
+      type: boolean
     - description: the new help text
       examples:
         - set-parameter page --route list-users --description 'the page to read'
@@ -84,7 +98,7 @@ flags:
       name: example
       type: string
     - array: true
-      description: 'a key to take off: description, examples, default, required or trigger (repeatable)'
+      description: 'a key to take off: description, examples, default, required, trigger, trigger-negate or trigger-ignore-case (repeatable)'
       examples:
         - set-parameter page --route list-users --clear default
       identifiers:

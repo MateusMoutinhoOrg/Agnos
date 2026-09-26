@@ -30,6 +30,7 @@ import (
 	disableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/disable_extension"
 	enableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/enable_extension"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
+	explainRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_route"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
 	importBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/import_body"
@@ -37,6 +38,8 @@ import (
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
 	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
 	listExtensionsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_extensions"
+	listRoutesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_routes"
+	rebalanceRoutesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rebalance_routes"
 	removeAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_adapter"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
 	removeAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_available"
@@ -54,6 +57,7 @@ import (
 	removeRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_route"
 	removeTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table"
 	removeTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table_field"
+	renameRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_route"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	serverPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_purge"
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
@@ -213,6 +217,18 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.ShowRoute = func(path string, route string) ([]string, error) {
 		return showRouteAction.ShowRoute(sandbox, path, route)
+	}
+	actions.ListRoutes = func(path string) ([]string, error) {
+		return listRoutesAction.ListRoutes(sandbox, path)
+	}
+	actions.ExplainRoute = func(props api.ExplainRouteProps) ([]string, error) {
+		return explainRouteAction.ExplainRoute(sandbox, props)
+	}
+	actions.RenameRoute = func(props api.RenameRouteProps) error {
+		return renameRouteAction.RenameRoute(sandbox, props)
+	}
+	actions.RebalanceRoutes = func(props api.RebalanceRoutesProps) error {
+		return rebalanceRoutesAction.RebalanceRoutes(sandbox, props)
 	}
 	actions.DatabaseInit = func(path string) error {
 		return databaseInitAction.DatabaseInit(sandbox, path)

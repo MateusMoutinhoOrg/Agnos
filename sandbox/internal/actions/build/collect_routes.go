@@ -50,13 +50,18 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 	return routes, nil
 }
 
-// sortRoutes puts the routes in the order the dispatch runs them: the lowest
-// `priority` first — that is the whole of what the chain reads — and then by
-// name for a stable tie-break. The ordering is the collector's, so
-// Server.Routes is already in run order and the dispatch only has to range.
+// sortRoutes puts the routes in the order the dispatch runs them: the `before`
+// phase first, then the `after` one, each by the lowest `priority` first —
+// that is the whole of what the chain reads — and then by name for a stable
+// tie-break. It is utils.SortRouteChain's order, over the collector's maps.
+// The ordering is the collector's, so Server.Routes is already in run order
+// and the dispatch only has to range.
 func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
 		left, right := routes[i], routes[j]
+		if left["After"] != right["After"] {
+			return right["After"].(bool)
+		}
 		if left["Priority"] != right["Priority"] {
 			return left["Priority"].(int) < right["Priority"].(int)
 		}
@@ -104,6 +109,8 @@ func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map
 		"Methods":         conf.Methods,
 		"Priority":        conf.Priority,
 		"ResponseType":    conf.ResponseType,
+		"Segments":        conf.Segments,
+		"After":           conf.Phase == routeconf.PhaseAfter,
 		"Trigger":         routeTrigger(conf),
 		"Pattern":         conf.Pattern(),
 		"Paths":           paths,
@@ -137,6 +144,8 @@ func triggerConst(kind string) string {
 	switch kind {
 	case "prefix":
 		return "api.PrefixTrigger"
+	case "text-prefix":
+		return "api.TextPrefixTrigger"
 	case "suffix":
 		return "api.SuffixTrigger"
 	case "regex":
@@ -148,9 +157,11 @@ func triggerConst(kind string) string {
 // triggerData is one trigger as the generated api.Trigger literal reads it.
 func triggerData(trigger routeconf.Trigger) map[string]any {
 	return map[string]any{
-		"Exist": trigger.Exists,
-		"Type":  triggerConst(trigger.Type),
-		"Value": trigger.Value,
+		"Exist":      trigger.Exists,
+		"Type":       triggerConst(trigger.Type),
+		"Value":      trigger.Value,
+		"Negate":     trigger.Negate,
+		"IgnoreCase": trigger.IgnoreCase,
 	}
 }
 
@@ -160,9 +171,35 @@ func pathData(path routeconf.Path) map[string]any {
 		"Id":          path.Id,
 		"Start":       path.Start,
 		"End":         path.End,
+		"Type":        pathTypeConst(path.Type),
+		"GoType":      pathGoType(path.Type),
 		"Description": path.Description,
 		"Trigger":     triggerData(path.Trigger),
 	}
+}
+
+// pathTypeConst is the api.PathType constant a path type spells.
+func pathTypeConst(kind string) string {
+	switch kind {
+	case "integer":
+		return "api.IntegerPath"
+	case "number":
+		return "api.NumberPath"
+	case "uuid":
+		return "api.UuidPath"
+	}
+	return "api.StringPath"
+}
+
+// pathGoType is the Go type of the Entries field a path binds to.
+func pathGoType(kind string) string {
+	switch kind {
+	case "integer":
+		return "int"
+	case "number":
+		return "float64"
+	}
+	return "string"
 }
 
 // parameterData is one entry of `parameters` as the generated api.Parameter
@@ -170,11 +207,14 @@ func pathData(path routeconf.Path) map[string]any {
 func parameterData(parameter routeconf.Parameter) map[string]any {
 	fonts := make([]string, 0, len(parameter.Fonts))
 	for _, font := range parameter.Fonts {
-		if font == "header" {
+		switch font {
+		case "header":
 			fonts = append(fonts, "api.HeaderParam")
-			continue
+		case "cookie":
+			fonts = append(fonts, "api.CookieParam")
+		default:
+			fonts = append(fonts, "api.QueryParam")
 		}
-		fonts = append(fonts, "api.QueryParam")
 	}
 
 	return map[string]any{
@@ -194,6 +234,8 @@ func parameterData(parameter routeconf.Parameter) map[string]any {
 // parameterTypeConst is the api.ParameterType constant a parameter type spells.
 func parameterTypeConst(kind string) string {
 	switch kind {
+	case "integer":
+		return "api.IntegerType"
 	case "number":
 		return "api.NumberType"
 	case "boolean":
@@ -202,6 +244,8 @@ func parameterTypeConst(kind string) string {
 		return "api.DateTimeType"
 	case "string-array":
 		return "api.StringArrayType"
+	case "integer-array":
+		return "api.IntegerArrayType"
 	}
 	return "api.StringType"
 }
@@ -209,12 +253,16 @@ func parameterTypeConst(kind string) string {
 // parameterGoType is the Go type of the Entries field a parameter binds to.
 func parameterGoType(kind string) string {
 	switch kind {
+	case "integer":
+		return "int"
 	case "number":
 		return "float64"
 	case "boolean":
 		return "bool"
 	case "string-array":
 		return "[]string"
+	case "integer-array":
+		return "[]int"
 	}
 	return "string"
 }
@@ -233,6 +281,7 @@ func bodyData(sandbox *api.Sandbox, conf *routeconf.RouteConf) map[string]any {
 		"IsRaw":        body.Type == "raw",
 		"IsText":       body.Type == "text",
 		"IsJson":       body.Type == "json",
+		"IsForm":       body.Type == "form",
 		"IsObject":     body.HasSchema && body.Schema != nil && body.Schema.Type == "object",
 		"GoType":       bodyGoType(body),
 	}
@@ -247,6 +296,8 @@ func bodyGoType(body routeconf.Body) string {
 		return "[]byte"
 	case "text":
 		return "string"
+	case "form":
+		return "map[string][]string"
 	case "json":
 		if body.HasSchema && body.Schema != nil && body.Schema.Type == "object" {
 			return "Body"

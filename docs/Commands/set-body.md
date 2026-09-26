@@ -10,7 +10,7 @@ Overwrites the body keys of one route.yaml: how the body is read, whether it is 
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--type` | string |  | how the body is read: none, raw, text or json |
+| `--type` | string |  | how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded, read into a map[string][]string) |
 | `--required` | boolean |  | answer 400 when the body is absent or empty |
 | `--optional` | boolean |  | accept an absent body again |
 | `--max-bytes` | int | `-1` | the longest body accepted, in bytes; a longer one is answered 413 |

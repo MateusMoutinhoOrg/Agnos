@@ -297,7 +297,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {
 			return err
 		}
-		// Written once and never again: the six files that say what this
+		// Written once and never again: the eight files that say what this
 		// project answers when no route does.
 		if err := GenerateErrorHandlers(sandbox, io, module_conf.Module); err != nil {
 			return err

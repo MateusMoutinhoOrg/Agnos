@@ -39,6 +39,13 @@ flags:
         - --end
       name: end
       type: string
+    - description: 'the new type: string, integer, number or uuid'
+      examples:
+        - set-path article --route get-article --type integer
+      identifiers:
+        - --type
+      name: type
+      type: string
     - description: the new value the slice has to read as
       examples:
         - set-path Route --route create-user --trigger /users
@@ -46,13 +53,27 @@ flags:
         - --trigger
       name: trigger
       type: string
-    - description: 'the new comparison: equal, prefix, suffix or regex'
+    - description: 'the new comparison: equal, prefix, text-prefix, suffix or regex — or starts-with, ends-with, exact, matches'
       examples:
         - set-path Route --route logger --trigger-type prefix
       identifiers:
         - --trigger-type
       name: trigger-type
       type: string
+    - description: invert the trigger (take it off with --clear trigger-negate)
+      examples:
+        - set-path NotLogin --route admin-guard --trigger-negate
+      identifiers:
+        - --trigger-negate
+      name: trigger-negate
+      type: boolean
+    - description: compare the trigger without regard to case (take it off with --clear trigger-ignore-case)
+      examples:
+        - set-path Route --route admin --trigger-ignore-case
+      identifiers:
+        - --trigger-ignore-case
+      name: trigger-ignore-case
+      type: boolean
     - description: the new help text
       examples:
         - set-path tenant --route create-user --description 'the tenant id'
@@ -61,7 +82,7 @@ flags:
       name: description
       type: string
     - array: true
-      description: 'a key to take off: trigger or description (repeatable)'
+      description: 'a key to take off: trigger, trigger-negate, trigger-ignore-case, type or description (repeatable)'
       examples:
         - set-path tenant --route create-user --clear trigger
       identifiers:

@@ -1,0 +1,52 @@
+cli-output: |
+    GET /get-article/{Article:integer}
+      category  Routes
+      priority  100
+      segments  2
+      response  application/json
+      chain     #2 of 4, after files, before get-comment
+
+    paths
+      GetArticle           segments 0..0  equal "/get-article"
+      Article              segments 1..1  integer
+
+    body      none
+    GET /users/{User:uuid}/comments/{Comment}
+      category  Routes
+      priority  100
+      segments  4
+      response  application/json
+      chain     #3 of 4, after get-article, before health
+
+    paths
+      Users                segments 0..0  equal "/users"
+      User                 segments 1..1  uuid
+      Comments             segments 2..2  equal "/comments"
+      Comment              segments 3..3
+
+    body      none
+    GET /files/{*File}
+      category  Routes
+      priority  100
+      response  application/json
+      chain     #1 of 4, before get-article
+
+    paths
+      Files                segments 0..0  equal "/files"
+      File                 segments 1..-1
+
+    body      none
+exit-code: 0
+tree:
+    - file: sandbox/internal/routeslist/files/entries.go
+      sha: 3dca97b58e3b740edfa5df6f8eb0b14a4bdd48d7d3f9063f00f7e5531b4bc113
+    - file: sandbox/internal/routeslist/files/route.yaml
+      sha: a2b973df11fb292b0978cdd3282c4afed1d1b9093ce53f9a9f08a52f38b00e8f
+    - file: sandbox/internal/routeslist/get_article/entries.go
+      sha: 417da592f184e8d01907996c729d4c1726fb989cc12604b98697a4bdd3cdf8ba
+    - file: sandbox/internal/routeslist/get_article/route.yaml
+      sha: fc4ef0789496d99e639d4630059f0f9b3f67becf92e2c2d9ce000c7f3aeb9a15
+    - file: sandbox/internal/routeslist/get_comment/entries.go
+      sha: 1024fc7b9e9ebab5b1867be3e7ecafddd45f132044dea363c96edd5ee6ebb59c
+    - file: sandbox/internal/routeslist/get_comment/route.yaml
+      sha: 9c0a60886832ce1a5cde2e173d82cbb8bb1acc06991db97765fe1959f41ee338

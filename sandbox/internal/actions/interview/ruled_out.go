@@ -28,6 +28,11 @@ const (
 	targetFieldId            = "target"
 	triggerTypeFieldId       = "trigger-type"
 	triggerFieldId           = "trigger"
+	triggerNegateFieldId     = "trigger-negate"
+	triggerIgnoreCaseFieldId = "trigger-ignore-case"
+	priorityFieldId          = "priority"
+	beforeFieldId            = "before"
+	afterFieldId             = "after"
 )
 
 // typeObject is the one declared type that is a json-schema kind rather than a
@@ -107,10 +112,43 @@ func RuledOutReason(sandbox *api.Sandbox, command api.Command, field Field, valu
 
 	table := tableFieldVerbs[verbOf(command)]
 
+	// add-route takes its paths from a --pattern or from a --trigger: the
+	// two rules below are the ones AddRouteInternal refuses by. Its --pattern
+	// shares an id with a body property's regex, so the verb tells them
+	// apart.
+	if verbOf(command) == "add-route" {
+		switch field.Id {
+		case triggerFieldId, triggerTypeFieldId, triggerNegateFieldId, triggerIgnoreCaseFieldId:
+			if answeredText(sandbox, values, patternFieldId) != "" {
+				return "the pattern already says what the path looks like"
+			}
+		case patternFieldId:
+			if answeredText(sandbox, values, triggerFieldId) != "" || answeredText(sandbox, values, triggerTypeFieldId) != "" {
+				return "the value to match already says what the path looks like"
+			}
+			return ""
+		}
+	}
+
 	switch field.Id {
 	case triggerTypeFieldId:
 		if !editVerbs[verbOf(command)] && verbOf(command) != "add-route" && answeredText(sandbox, values, triggerFieldId) == "" {
 			return "there is nothing to compare without a value to match"
+		}
+	case triggerNegateFieldId, triggerIgnoreCaseFieldId:
+		if !editVerbs[verbOf(command)] && verbOf(command) != "add-route" && answeredText(sandbox, values, triggerFieldId) == "" {
+			return "there is nothing to compare without a value to match"
+		}
+	case beforeFieldId:
+		if answeredText(sandbox, values, priorityFieldId) != "" {
+			return "the priority already says where it runs"
+		}
+	case afterFieldId:
+		if answeredText(sandbox, values, priorityFieldId) != "" {
+			return "the priority already says where it runs"
+		}
+		if answeredText(sandbox, values, beforeFieldId) != "" {
+			return "the route it runs before already says where it runs"
 		}
 	case targetFieldId:
 		if table && typed && kind != typeLink {

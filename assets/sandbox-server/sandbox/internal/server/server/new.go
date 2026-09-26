@@ -47,6 +47,10 @@ func NewServer(sandbox *api.Sandbox) api.Server {
 				return errors.HandleMethodNotAllowed(sandbox, route, response)
 			case api.StatusBadRequest:
 				return errors.HandleBadRequest(sandbox, route, response)
+			case api.StatusUnauthorized:
+				return errors.HandleUnauthorized(sandbox, route, response)
+			case api.StatusForbidden:
+				return errors.HandleForbidden(sandbox, route, response)
 			case api.StatusPayloadTooLarge:
 				return errors.HandleTooLarge(sandbox, route, response)
 			case api.StatusUnsupportedMedia:

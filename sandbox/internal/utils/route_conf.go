@@ -82,36 +82,84 @@ func SaveRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf 
 	return io.WriteFileOverwrite(RouteConfPath(sandbox, name), []byte(conf.Render()))
 }
 
+// RouteTriggerAliases maps the spellings a trigger type may be typed in onto
+// the one route.yaml carries; the canonical names map onto themselves.
+var RouteTriggerAliases = map[string]string{
+	"starts-with": "prefix",
+	"ends-with":   "suffix",
+	"exact":       "equal",
+	"equals":      "equal",
+	"matches":     "regex",
+}
+
+// RouteTriggerType normalizes a trigger type typed on the command line: an
+// alias becomes the type it stands for, and anything that is neither is
+// refused with the list of both.
+func RouteTriggerType(sandbox *api.Sandbox, raw string) (string, error) {
+	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	if canonical, is := RouteTriggerAliases[kind]; is {
+		kind = canonical
+	}
+	if !contains(routeconf.TriggerTypes, kind) {
+		return "", sandbox.Deps.Std.Errorf("unknown trigger type %q (use one of %s, or starts-with, ends-with, exact, matches)",
+			raw, sandbox.Deps.Stringsdeps.Join(routeconf.TriggerTypes, ", "))
+	}
+	return kind, nil
+}
+
+// RouteTriggerProps is one trigger as it is typed on the command line: the
+// value, how it is compared ("" is equal), and the two switches on it. OnPath
+// reports a trigger compared against a path slice, which reads with the
+// leading slash every slice carries — "users" and "/users" are the same
+// request.
+type RouteTriggerProps struct {
+	Type       string
+	Value      string
+	Negate     bool
+	IgnoreCase bool
+	OnPath     bool
+}
+
 // RouteTrigger normalizes a trigger typed on the command line: its type
-// defaults to equal, and an equal, prefix or suffix trigger compared against a
-// path slice reads with the leading slash every slice carries — "users" and
-// "/users" are the same request. A regex is taken verbatim.
-func RouteTrigger(sandbox *api.Sandbox, kind string, value string, onPath bool) (routeconf.Trigger, error) {
-	value = sandbox.Deps.Stringsdeps.TrimSpace(value)
-	kind = sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(kind))
+// defaults to equal and takes the aliases of RouteTriggerAliases, and every
+// type but suffix and regex compared against a path slice gets its leading
+// slash. A regex is taken verbatim, and has to compile.
+func RouteTrigger(sandbox *api.Sandbox, props RouteTriggerProps) (routeconf.Trigger, error) {
+	value := sandbox.Deps.Stringsdeps.TrimSpace(props.Value)
+	raw_kind := sandbox.Deps.Stringsdeps.TrimSpace(props.Type)
 
 	if value == "" {
-		if kind != "" {
-			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-type %q needs a --trigger to compare against", kind)
+		if raw_kind != "" {
+			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-type %q needs a --trigger to compare against", raw_kind)
+		}
+		if props.Negate || props.IgnoreCase {
+			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-negate and --trigger-ignore-case need a --trigger to apply to")
 		}
 		return routeconf.Trigger{}, nil
 	}
-	if kind == "" {
-		kind = "equal"
+	if raw_kind == "" {
+		raw_kind = "equal"
 	}
-	if !contains(routeconf.TriggerTypes, kind) {
-		return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("unknown trigger type %q (use one of %s)", kind, sandbox.Deps.Stringsdeps.Join(routeconf.TriggerTypes, ", "))
+	kind, err := RouteTriggerType(sandbox, raw_kind)
+	if err != nil {
+		return routeconf.Trigger{}, err
 	}
 
 	if kind == "regex" {
 		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(value, ""); err != nil {
 			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("invalid regex trigger %q: %s", value, err.Error())
 		}
-	} else if onPath && kind != "suffix" {
+	} else if props.OnPath && kind != "suffix" {
 		value = "/" + sandbox.Deps.Stringsdeps.TrimLeft(value, "/")
 	}
 
-	return routeconf.Trigger{Exists: true, Type: kind, Value: value}, nil
+	return routeconf.Trigger{
+		Exists:     true,
+		Type:       kind,
+		Value:      value,
+		Negate:     props.Negate,
+		IgnoreCase: props.IgnoreCase,
+	}, nil
 }
 
 // RouteEntryId turns a path id or a parameter key typed on the command line
@@ -174,7 +222,25 @@ func NewRoutePath(sandbox *api.Sandbox, props api.RoutePathProps) (routeconf.Pat
 	}
 	path.Start, path.End = start, end
 
-	trigger, err := RouteTrigger(sandbox, props.TriggerType, props.Trigger, true)
+	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(props.Type))
+	if kind == "" {
+		kind = routeconf.DefaultPathType
+	}
+	if !contains(routeconf.PathTypes, kind) {
+		return path, sandbox.Deps.Std.Errorf("unknown path type %q (use one of %s)", props.Type, sandbox.Deps.Stringsdeps.Join(routeconf.PathTypes, ", "))
+	}
+	if kind != routeconf.DefaultPathType && start != end {
+		return path, sandbox.Deps.Std.Errorf("a path of type %s reads one segment: give it the same --start and --end", kind)
+	}
+	path.Type = kind
+
+	trigger, err := RouteTrigger(sandbox, RouteTriggerProps{
+		Type:       props.TriggerType,
+		Value:      props.Trigger,
+		Negate:     props.TriggerNegate,
+		IgnoreCase: props.TriggerIgnoreCase,
+		OnPath:     true,
+	})
 	if err != nil {
 		return path, err
 	}
@@ -236,7 +302,12 @@ func NewRouteParameter(sandbox *api.Sandbox, props api.RouteParameterProps) (rou
 		parameter.Default, parameter.HasDefault = value, true
 	}
 
-	trigger, err := RouteTrigger(sandbox, props.TriggerType, props.Trigger, false)
+	trigger, err := RouteTrigger(sandbox, RouteTriggerProps{
+		Type:       props.TriggerType,
+		Value:      props.Trigger,
+		Negate:     props.TriggerNegate,
+		IgnoreCase: props.TriggerIgnoreCase,
+	})
 	if err != nil {
 		return parameter, err
 	}
@@ -249,6 +320,10 @@ func NewRouteParameter(sandbox *api.Sandbox, props api.RouteParameterProps) (rou
 // parameter type it is declared for.
 func RouteCheckParameterLiteral(sandbox *api.Sandbox, kind string, raw string) error {
 	switch kind {
+	case "integer", "integer-array":
+		if _, err := sandbox.Deps.Stringsdeps.Atoi(raw); err != nil {
+			return sandbox.Deps.Std.Errorf("default %q is not a whole number", raw)
+		}
 	case "number":
 		if _, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
 			return sandbox.Deps.Std.Errorf("default %q is not a number", raw)
@@ -364,21 +439,26 @@ func RemoveRouteParameter(parameters []routeconf.Parameter, index int) []routeco
 }
 
 // RouteMethod normalizes an http method, refusing one no route may answer.
+// ANY — or * — accepts every method.
 func RouteMethod(sandbox *api.Sandbox, raw string) (string, error) {
 	method := sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
 	if method == "" {
 		return routeconf.DefaultMethod, nil
+	}
+	if method == "*" || method == routeconf.AnyMethod {
+		return routeconf.AnyMethod, nil
 	}
 	for _, known := range RouteMethods {
 		if known == method {
 			return method, nil
 		}
 	}
-	return "", sandbox.Deps.Std.Errorf("unknown method %q (use one of %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteMethods, ", "))
+	return "", sandbox.Deps.Std.Errorf("unknown method %q (use one of %s, or ANY)", raw, sandbox.Deps.Stringsdeps.Join(RouteMethods, ", "))
 }
 
 // RouteMethodList normalizes a repeated --method into the list route.yaml
-// declares, deduplicated in the order typed; none at all is GET.
+// declares, deduplicated in the order typed; none at all is GET. ANY stands
+// alone, since it already accepts every method.
 func RouteMethodList(sandbox *api.Sandbox, raws []string) ([]string, error) {
 	methods := []string{}
 	for _, raw := range raws {
@@ -392,6 +472,9 @@ func RouteMethodList(sandbox *api.Sandbox, raws []string) ([]string, error) {
 	}
 	if len(methods) == 0 {
 		methods = []string{routeconf.DefaultMethod}
+	}
+	if contains(methods, routeconf.AnyMethod) && len(methods) > 1 {
+		return nil, sandbox.Deps.Std.Errorf("--method ANY already accepts every method: pass it alone")
 	}
 	return methods, nil
 }

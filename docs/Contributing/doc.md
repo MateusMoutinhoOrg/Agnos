@@ -80,7 +80,9 @@ A layer is an extension, so adding one is [Add an extension](#add-an-extension) 
 
 That same import rule is why `routeio.Fail` reaches the project's `handle_*.go` through the `Fail` field of `api.Server` rather than by calling them: `internal/server/server` imports every route package, so nothing under `routeslist/` may import it back, and a function field on the api is how this repo already crosses that line everywhere else. The six files are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/server/new.go` always has something to call.
 
-A route's `Entries` is a type of its own per route, so the generic `RequestHandler` builds, fills and calls it through `sandbox.Deps.Reflectdeps` — the one catalog dep `server-init` installs for that alone. `api/route.go` holds it as `InternalPurehandler any` for the same reason.
+A route's `Entries` is a type of its own per route, so the generic `RequestHandler` builds, fills and calls it through `sandbox.Deps.Reflectdeps` — the one catalog dep `server-init` installs for that alone. `api/route.go` holds it as `InternalPurehandler any` for the same reason. `signaldeps` is the other one it installs, for the graceful shutdown `ServerMain` hooks on.
+
+The matcher exists twice: the generated `sandbox/internal/server/route/IsActionable.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
 
 ## Add an extension
 

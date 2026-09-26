@@ -30,13 +30,37 @@ const LastSegment = -1
 
 // TriggerTypes is every way a trigger compares a value, in the order docs
 // list them.
-var TriggerTypes = []string{"equal", "prefix", "suffix", "regex"}
+var TriggerTypes = []string{"equal", "prefix", "text-prefix", "suffix", "regex"}
 
 // ParameterTypes is every type a parameter may declare.
-var ParameterTypes = []string{"string", "number", "boolean", "datetime", "string-array"}
+var ParameterTypes = []string{"string", "integer", "number", "boolean", "datetime", "string-array", "integer-array"}
 
 // ParameterFonts is every place a parameter may be read from.
-var ParameterFonts = []string{"query", "header"}
+var ParameterFonts = []string{"query", "header", "cookie"}
+
+// PathTypes is every type a path may declare. Anything but a string is one
+// segment long, and a segment that will not convert is a non-match.
+var PathTypes = []string{"string", "integer", "number", "uuid"}
+
+// DefaultPathType is the type of a path that declares none.
+const DefaultPathType = "string"
+
+// AnyMethod is the one entry of `methods` that matches every http method.
+const AnyMethod = "ANY"
+
+// PhaseBefore is the phase of a route that runs as a rung of the chain — the
+// default — and PhaseAfter the one of a route that runs once it has answered.
+const PhaseBefore = "before"
+const PhaseAfter = "after"
+
+// Phases is every phase a route may declare.
+var Phases = []string{PhaseBefore, PhaseAfter}
+
+// BodyTypes is every body type a route may declare.
+var BodyTypes = []string{"none", "raw", "text", "json", "form"}
+
+// DefaultFormContentType is the content type a `type: form` body requires.
+const DefaultFormContentType = "application/x-www-form-urlencoded"
 
 // legacyKeys are the top-level keys of the declaration routeslist replaced.
 var legacyKeys = []string{"method", "headers", "params"}
@@ -74,6 +98,14 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 		conf.HasPriority = true
 	}
 	conf.ResponseType = readString(specs, "response-type")
+	if segments_item, _ := specs.GetObjectItem("segments"); segments_item != nil && !segments_item.IsNull() {
+		conf.Segments = readInt(specs, "segments")
+		conf.HasSegments = true
+	}
+	conf.Phase = readString(specs, "phase")
+	if conf.Phase == "" {
+		conf.Phase = PhaseBefore
+	}
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
 	conf.Help = readString(specs, "help")
@@ -140,11 +172,15 @@ func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]
 			Id:          readString(entry, "id"),
 			Start:       0,
 			End:         LastSegment,
+			Type:        readString(entry, "type"),
 			Trigger:     readTrigger(entry),
 			Description: readString(entry, "description"),
 		}
 		if path.Id == "" {
 			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `id`", i)
+		}
+		if path.Type == "" {
+			path.Type = DefaultPathType
 		}
 		if start_item, _ := entry.GetObjectItem("start"); start_item != nil && !start_item.IsNull() {
 			path.Start = readInt(entry, "start")
@@ -214,9 +250,11 @@ func readTrigger(entry *serializibles.SerializibleObject) Trigger {
 		return Trigger{}
 	}
 	return Trigger{
-		Exists: true,
-		Type:   readString(item, "type"),
-		Value:  readString(item, "value"),
+		Exists:     true,
+		Type:       readString(item, "type"),
+		Value:      readString(item, "value"),
+		Negate:     readBool(item, "negate"),
+		IgnoreCase: readBool(item, "ignore-case"),
 	}
 }
 
@@ -238,6 +276,9 @@ func readBody(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Body
 
 	if body.ContentType == "" && body.Type == "json" {
 		body.ContentType = DefaultJsonContentType
+	}
+	if body.ContentType == "" && body.Type == "form" {
+		body.ContentType = DefaultFormContentType
 	}
 
 	if schema_item, _ := item.GetObjectItem("json-schema"); schema_item != nil && schema_item.IsObject() {
@@ -372,7 +413,11 @@ func readSchemaInt(item *serializibles.SerializibleObject, key string) (int, boo
 // normalizeMethod maps the method spellings accepted in route.yaml onto the
 // upper-case set the dispatch compares against.
 func normalizeMethod(sandbox *api.Sandbox, raw string) string {
-	return sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	method := sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	if method == "*" {
+		return AnyMethod
+	}
+	return method
 }
 
 // normalizeBodyType maps the body-type spellings accepted in route.yaml onto
@@ -385,6 +430,8 @@ func normalizeBodyType(raw string) string {
 		return "text"
 	case "json":
 		return "json"
+	case "form":
+		return "form"
 	default:
 		return BodyNone
 	}
@@ -399,7 +446,9 @@ func normalizeType(raw string) string {
 		return "string"
 	case "bool", "boolean":
 		return "boolean"
-	case "int", "integer", "float", "double", "number":
+	case "int", "integer":
+		return "integer"
+	case "float", "double", "number":
 		return "number"
 	default:
 		return raw

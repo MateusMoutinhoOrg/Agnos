@@ -15,10 +15,13 @@ in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 | `hashdeps` | `Hashdeps` | `hashdeps` | `crypto/sha256`, `encoding/hex` | SHA-256 of a byte slice, lower-case hex |
 | `interviewer` | `Interviewer` | `interviewer` | `os`, `os/exec`, `bufio` | Ask a person a question and get the answer back typed. Arrow-key menus over stdin in raw mode, numbered prompts where there is no terminal |
 | `iodeps` | `Iodeps` | `iodeps` | `os`, `path/filepath` | Filesystem. `WriteFile` creates parents; `RemoveDir` removes files too; `Join`/`Dir` build host paths |
-| `requestdeps` | `Requestdeps` | `requestdeps` | `net/http` (30s timeout) | Per-call HTTP request |
+| `reflectdeps` | `Reflectdeps` | `reflectdeps` | `reflect` | Build, fill and call a value whose type is known only at run time. Installed by `server-init`, for the generic `RequestHandler` |
+| `requestdeps` | `Requestdeps` | `reflectdeps` | `Reflectdeps` | `reflectdeps` | `reflect` | Build, fill and call a value whose type is known only at run time. Installed by `server-init`, for the generic `RequestHandler` |
+| `requestdeps` | `net/http` (30s timeout) | Per-call HTTP request |
 | `rundeps` | `Rundeps` | `rundeps` | `os/exec` | Run a program to completion; stdout+stderr merged; non-zero exit is `Result.ExitCode`, not an error |
 | `serializables` | `Serializables` | `serializables` | `encoding/json` + a bundled YAML codec | Generic JSON/YAML values. The YAML side reads the block subset (no anchors, aliases or explicit tags) |
-| `serverdeps` | `Serverdeps` | `serverdeps` | `net/http` | Http server: opens the port, applies timeouts, hands every request to one handler. Installed by `server-init` |
+| `serverdeps` | `Serverdeps` | `serverdeps` | `net/http`, `net/url` | Http server: opens the port, applies timeouts, hands every request to one handler; headers, cookies, a form body. Installed by `server-init` |
+| `signaldeps` | `Signaldeps` | `signaldeps` | `os/signal` | Run a function once when the process is asked to stop. Installed by `server-init`, for a graceful shutdown |
 | `sortdeps` | `Sortdeps` | `sortdeps`, `reflectsort` | `sort` / `reflect` | Sort a string slice, or any slice by a less function |
 | `std` | `Std` | `std` | `time`, `fmt`, `runtime`, `os.Stdout/Stderr` | Clock, `Sprintf`, the host `Goos` and the three output channels. Installed by `cli-init` |
 | `stringsdeps` | `Stringsdeps` | `stringsdeps` | `strings`, `strconv` | Text manipulation and string/number conversion |

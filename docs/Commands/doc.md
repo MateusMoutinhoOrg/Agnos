@@ -48,11 +48,15 @@ positionals bind in order after them. A `repeatable` field is given once per val
 | [`add-parameter`](add-parameter.md) | Declare one value a route reads from the query string or the headers |
 | [`add-path`](add-path.md) | Add one slice of the request path to a route |
 | [`add-route`](add-route.md) | Declare a new http route |
+| [`explain-route`](explain-route.md) | Show which routes one request reaches, without a server |
 | [`import-body`](import-body.md) | Infer a route's body json-schema from an example payload |
+| [`list-routes`](list-routes.md) | List every route in the order the chain runs them |
+| [`rebalance-routes`](rebalance-routes.md) | Lay the chain down again with room between its rungs |
 | [`remove-body-field`](remove-body-field.md) | Delete one property from a route's body json-schema |
 | [`remove-parameter`](remove-parameter.md) | Delete one entry of a route's parameters |
 | [`remove-path`](remove-path.md) | Delete one entry of a route's paths |
 | [`remove-route`](remove-route.md) | Delete one declared route |
+| [`rename-route`](rename-route.md) | Rename one route |
 | [`server-init`](server-init.md) | Add the http server layer to the project |
 | [`server-purge`](server-purge.md) | Remove the http server layer and every route in it |
 | [`set-body`](set-body.md) | Rewrite the body keys of a route.yaml |

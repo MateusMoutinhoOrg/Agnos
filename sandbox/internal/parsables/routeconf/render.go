@@ -14,6 +14,12 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 	obj.AddItemToObject("methods", stringArray(sandbox, conf.Methods))
 	obj.AddItemToObject("priority", int64(conf.Priority))
 	obj.AddItemToObject("response-type", conf.ResponseType)
+	if conf.HasSegments {
+		obj.AddItemToObject("segments", int64(conf.Segments))
+	}
+	if conf.Phase != "" && conf.Phase != PhaseBefore {
+		obj.AddItemToObject("phase", conf.Phase)
+	}
 	obj.AddItemToObject("paths", pathsArray(sandbox, conf.Paths))
 	if len(conf.Parameters) > 0 {
 		obj.AddItemToObject("parameters", parametersArray(sandbox, conf.Parameters))
@@ -58,6 +64,9 @@ func pathsArray(sandbox *api.Sandbox, paths []Path) *serializibles.SerializibleO
 		}
 		entry.AddItemToObject("start", int64(path.Start))
 		entry.AddItemToObject("end", int64(path.End))
+		if path.Type != "" && path.Type != DefaultPathType {
+			entry.AddItemToObject("type", path.Type)
+		}
 		if path.Trigger.Exists {
 			entry.AddItemToObject("trigger", triggerObject(sandbox, path.Trigger))
 		}
@@ -103,6 +112,12 @@ func triggerObject(sandbox *api.Sandbox, trigger Trigger) *serializibles.Seriali
 	entry := sandbox.Deps.Serializables.CreateObject()
 	entry.AddItemToObject("type", trigger.Type)
 	entry.AddItemToObject("value", trigger.Value)
+	if trigger.Negate {
+		entry.AddItemToObject("negate", true)
+	}
+	if trigger.IgnoreCase {
+		entry.AddItemToObject("ignore-case", true)
+	}
 	return entry
 }
 

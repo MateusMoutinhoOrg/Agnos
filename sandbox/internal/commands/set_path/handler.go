@@ -7,16 +7,19 @@ import (
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	err := setPathAction.SetPath(sandbox, api.RoutePathEditProps{
-		Path:        command.GetString("path"),
-		Route:       command.GetString("route"),
-		Id:          command.GetString("id"),
-		Rename:      command.GetString("rename"),
-		Start:       command.GetString("start"),
-		End:         command.GetString("end"),
-		TriggerType: command.GetString("trigger-type"),
-		Trigger:     command.GetString("trigger"),
-		Description: command.GetString("description"),
-		Clear:       command.GetStrings("clear"),
+		Path:              command.GetString("path"),
+		Route:             command.GetString("route"),
+		Id:                command.GetString("id"),
+		Rename:            command.GetString("rename"),
+		Start:             command.GetString("start"),
+		End:               command.GetString("end"),
+		TriggerType:       command.GetString("trigger-type"),
+		TriggerNegate:     command.GetBool("trigger-negate"),
+		TriggerIgnoreCase: command.GetBool("trigger-ignore-case"),
+		Type:              command.GetString("type"),
+		Trigger:           command.GetString("trigger"),
+		Description:       command.GetString("description"),
+		Clear:             command.GetStrings("clear"),
 	})
 	if err != nil {
 		sandbox.Deps.Std.Error("%s\n", err.Error())

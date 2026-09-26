@@ -35,6 +35,10 @@ type ServerProps struct {
 	// WriteTimeoutMs is how long a response has to be written, in
 	// milliseconds. Zero means no timeout.
 	WriteTimeoutMs int
+	// ShutdownTimeoutMs is how long Shutdown waits for the requests in
+	// flight, in milliseconds, before it closes them. Zero means it waits
+	// for every one.
+	ShutdownTimeoutMs int
 	// Handler is called once per request, whatever the method or the path.
 	// Everything the request needs to be answered is reachable from the two
 	// arguments; the handler returns once the response is written.
@@ -62,6 +66,15 @@ type Request struct {
 	// GetHeader returns the first value of the named header, matched
 	// without regard to case, or "" when it is absent.
 	GetHeader func(key string) string
+	// GetHeaders returns every header of the request, each name in its
+	// canonical spelling ("Content-Type") with every value it was sent with.
+	GetHeaders func() map[string][]string
+	// GetHost returns the host the request was sent to, port included when
+	// the request named one ("example.com", "localhost:8080").
+	GetHost func() string
+	// GetCookie returns the value of the named cookie, or "" when the
+	// request carries none by that name.
+	GetCookie func(name string) string
 	// GetQueryParam returns the first value of the named query parameter,
 	// or "" when it is absent.
 	GetQueryParam func(name string) string
@@ -73,6 +86,10 @@ type Request struct {
 	// cannot be read. The body is read once: a second call returns what the
 	// first one read.
 	ReadBody func(limit int) ([]byte, error)
+	// ReadForm reads the request body the way ReadBody does and parses it
+	// as application/x-www-form-urlencoded: every key with every value, in
+	// the order they appear.
+	ReadForm func(limit int) (map[string][]string, error)
 	// GetRemoteAddr returns the address the request came from, in the
 	// host:port spelling.
 	GetRemoteAddr func() string
@@ -83,6 +100,12 @@ type Request struct {
 type Response struct {
 	// SetHeader sets one response header, replacing whatever value it had.
 	SetHeader func(key string, value string)
+	// AddHeader adds one value to a response header, keeping the ones it
+	// had — what a second Set-Cookie needs.
+	AddHeader func(key string, value string)
+	// GetHeader returns the first value a response header carries so far,
+	// or "" when it has none.
+	GetHeader func(key string) string
 	// SetStatus writes the status line. It is called at most once, before
 	// any Write; without it the status is 200.
 	SetStatus func(code int)

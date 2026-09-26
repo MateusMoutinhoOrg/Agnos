@@ -6,8 +6,13 @@ type TriggerType int
 const (
 	// EqualTrigger matches a text that is exactly the trigger's Value.
 	EqualTrigger TriggerType = iota
-	// PrefixTrigger matches a text that begins with the Value.
+	// PrefixTrigger matches a text that is the Value or continues it with a
+	// new segment: "/admin" matches "/admin" and "/admin/users", never
+	// "/administrator". A Value of "/" matches every path.
 	PrefixTrigger
+	// TextPrefixTrigger matches a text that begins with the Value, whatever
+	// follows it: "/admin" matches "/administrator" too.
+	TextPrefixTrigger
 	// SuffixTrigger matches a text that ends with the Value.
 	SuffixTrigger
 	// RegexTrigger matches a text the Value, a regular expression, matches.
@@ -25,7 +30,29 @@ type Trigger struct {
 	Type TriggerType
 	// Value is what the text is compared against.
 	Value string
+	// Negate inverts the comparison: the trigger holds when the text does
+	// not match.
+	Negate bool
+	// IgnoreCase compares without regard to case.
+	IgnoreCase bool
 }
+
+// PathType is what one segment a Path reads has to convert to. A segment
+// that will not is a non-match: the url is for some other route.
+type PathType int
+
+const (
+	// StringPath takes any slice, bound as a string.
+	StringPath PathType = iota
+	// IntegerPath takes one segment reading as a whole number, bound as an
+	// int.
+	IntegerPath
+	// NumberPath takes one segment reading as a number, bound as a float64.
+	NumberPath
+	// UuidPath takes one segment reading as a canonical uuid, bound as a
+	// string.
+	UuidPath
+)
 
 // Path is one entry of `paths` in route.yaml: the slice of request segments
 // from Start to End, both inclusive, End -1 standing for the last segment. The
@@ -39,6 +66,9 @@ type Path struct {
 	// End is the index of the last segment of the slice, -1 for the last
 	// segment of the request.
 	End int
+	// Type is what the slice converts to; anything but StringPath reads one
+	// segment alone.
+	Type PathType
 	// Description is the one-line help text.
 	Description string
 	// Trigger is what the slice has to match for the route to run.
@@ -53,6 +83,8 @@ const (
 	HeaderParam ParameterFont = iota
 	// QueryParam reads a query-string parameter.
 	QueryParam
+	// CookieParam reads a request cookie.
+	CookieParam
 )
 
 // ParameterType is the type a Parameter is converted to before it reaches
@@ -71,7 +103,15 @@ const (
 	// StringArrayType is bound as a []string: every occurrence of a query
 	// key, or a header's comma-separated values.
 	StringArrayType
+	// IntegerType is bound as an int.
+	IntegerType
+	// IntegerArrayType is bound as a []int, read the way a StringArrayType
+	// is.
+	IntegerArrayType
 )
+
+// AnyMethod is the one entry of AcceptMethods that accepts every http method.
+const AnyMethod = "ANY"
 
 // Parameter is one entry of `parameters` in route.yaml: one value read off the
 // request under Key, from the first of Fonts that carries it, and bound to the
@@ -103,7 +143,7 @@ type Parameter struct {
 // handler runs; reading the body itself is the handler's to ask for, through
 // the ReadBody its own package generates.
 type RouteBody struct {
-	// Type is the declared type: "none", "raw", "text" or "json".
+	// Type is the declared type: "none", "raw", "text", "json" or "form".
 	Type string
 	// Required reports that an absent or empty body is rejected.
 	Required bool
@@ -148,7 +188,8 @@ type RouteFailure struct {
 type Route struct {
 	// Name is the package directory of the route, snake_case.
 	Name string
-	// AcceptMethods are the http methods it answers to ("GET", "POST").
+	// AcceptMethods are the http methods it answers to ("GET", "POST"), or
+	// AnyMethod alone for every one.
 	AcceptMethods []string
 	// Priority is the rung this route runs on when several match one
 	// request: the dispatch runs them from the lowest upwards and stops at
@@ -157,6 +198,12 @@ type Route struct {
 	// ResponseType is the Content-Type set on the response before the
 	// handler runs; the handler may set another.
 	ResponseType string
+	// Segments is how many segments the request path has to have for the
+	// route to run, 0 for any count.
+	Segments int
+	// After reports a route of the `after` phase: it runs once the chain
+	// has answered, whatever answered it, and never answers itself.
+	After bool
 	// Pattern is its path as it reads in docs and messages.
 	Pattern string
 	// Category groups it on the generated Routes page.
@@ -192,6 +239,12 @@ type Route struct {
 	// routeio.RequestOf and routeio.ResponseOf.
 	Request  any
 	Response any
+
+	// Locals is one request's scratch space, shared by every route of the
+	// chain that runs for it: what a middleware stores there, the routes
+	// after it read. Read and write it through routeio.SetLocal and
+	// routeio.GetLocal.
+	Locals map[string]any
 
 	// Failure is why this route is being handed to one of the project's
 	// Handle* files, nil on a normal run. It is set by routeio.Fail, which
@@ -233,6 +286,7 @@ func BindRoute(route *Route) *Route {
 	bound := *route
 	bound.Request = nil
 	bound.Response = nil
+	bound.Locals = nil
 	bound.Failure = nil
 	return &bound
 }

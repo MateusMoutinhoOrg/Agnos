@@ -30,6 +30,7 @@ import (
 	disable_extension "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/disable_extension"
 	enable_extension "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/enable_extension"
 	exec_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/exec_test"
+	explain_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/explain_route"
 	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_init"
 	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front_purge"
 	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
@@ -38,8 +39,10 @@ import (
 	list_adapters "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_adapters"
 	list_deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_deps"
 	list_extensions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_extensions"
+	list_routes "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_routes"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
+	rebalance_routes "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/rebalance_routes"
 	remove_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_adapter"
 	remove_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_arg"
 	remove_available "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_available"
@@ -57,6 +60,7 @@ import (
 	remove_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_route"
 	remove_table "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_table"
 	remove_table_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/remove_table_field"
+	rename_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/rename_route"
 	server_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server_init"
 	server_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server_purge"
 	set_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/set_adapter"
@@ -112,6 +116,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		disable_extension.NewCommand(sandbox),
 		enable_extension.NewCommand(sandbox),
 		exec_test.NewCommand(sandbox),
+		explain_route.NewCommand(sandbox),
 		front_init.NewCommand(sandbox),
 		front_purge.NewCommand(sandbox),
 		help.NewCommand(sandbox),
@@ -120,8 +125,10 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		list_adapters.NewCommand(sandbox),
 		list_deps.NewCommand(sandbox),
 		list_extensions.NewCommand(sandbox),
+		list_routes.NewCommand(sandbox),
 		local_install.NewCommand(sandbox),
 		publish.NewCommand(sandbox),
+		rebalance_routes.NewCommand(sandbox),
 		remove_adapter.NewCommand(sandbox),
 		remove_arg.NewCommand(sandbox),
 		remove_available.NewCommand(sandbox),
@@ -139,6 +146,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		remove_route.NewCommand(sandbox),
 		remove_table.NewCommand(sandbox),
 		remove_table_field.NewCommand(sandbox),
+		rename_route.NewCommand(sandbox),
 		server_init.NewCommand(sandbox),
 		server_purge.NewCommand(sandbox),
 		set_adapter.NewCommand(sandbox),

@@ -1,0 +1,51 @@
+args:
+    - description: the http method of the request
+      examples:
+        - explain-route GET /admin/users
+      name: method
+      required: true
+      type: string
+    - description: the request path, query string included
+      examples:
+        - explain-route GET '/articles/42?page=2'
+      name: request-path
+      required: true
+      type: string
+category: Server System
+examples:
+    - explain-route GET /admin/users --header 'x-token=abc'
+flags:
+    - array: true
+      description: a header the request carries, as key=value (repeatable)
+      examples:
+        - explain-route GET /admin --header 'authorization=Bearer abc'
+      identifiers:
+        - --header
+      name: header
+      type: string
+    - array: true
+      description: a cookie the request carries, as key=value (repeatable)
+      examples:
+        - explain-route GET /admin --cookie session=abc
+      identifiers:
+        - --cookie
+      name: cookie
+      type: string
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - explain-route --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Show which routes one request reaches, without a server
+identifiers:
+    - explain-route
+long-description: Walks the chain the way the generated dispatch does and prints, route by route, whether it runs for the request or why it is skipped — the segment count, a path that is missing, will not convert or fails its trigger, the method, a parameter trigger — and a 400 its binding would answer. What a handler does once it runs is its own code, so the last line says what the request ends on when none answers. Writes nothing.

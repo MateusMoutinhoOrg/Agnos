@@ -18,11 +18,11 @@ import (
 // the change.
 
 // RoutePathClearKeys is every key --clear may take off an entry of `paths`.
-var RoutePathClearKeys = []string{"trigger", "description"}
+var RoutePathClearKeys = []string{"trigger", "trigger-negate", "trigger-ignore-case", "type", "description"}
 
 // RouteParameterClearKeys is every key --clear may take off an entry of
 // `parameters`.
-var RouteParameterClearKeys = []string{"description", "examples", "default", "required", "trigger"}
+var RouteParameterClearKeys = []string{"description", "examples", "default", "required", "trigger", "trigger-negate", "trigger-ignore-case"}
 
 // RouteBodyFieldClearKeys is every keyword --clear may take off a body
 // property.
@@ -73,14 +73,26 @@ func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.Rou
 		Id:          current.Id,
 		Start:       sandbox.Deps.Stringsdeps.FormatInt(int64(current.Start), 10),
 		End:         sandbox.Deps.Stringsdeps.FormatInt(int64(current.End), 10),
+		Type:        current.Type,
 		Description: current.Description,
 	}
 	if current.Trigger.Exists {
 		built.TriggerType, built.Trigger = current.Trigger.Type, current.Trigger.Value
+		built.TriggerNegate, built.TriggerIgnoreCase = current.Trigger.Negate, current.Trigger.IgnoreCase
 	}
 
 	if cleared["trigger"] {
 		built.TriggerType, built.Trigger = "", ""
+		built.TriggerNegate, built.TriggerIgnoreCase = false, false
+	}
+	if cleared["trigger-negate"] {
+		built.TriggerNegate = false
+	}
+	if cleared["trigger-ignore-case"] {
+		built.TriggerIgnoreCase = false
+	}
+	if cleared["type"] {
+		built.Type = ""
 	}
 	if cleared["description"] {
 		built.Description = ""
@@ -104,6 +116,15 @@ func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.Rou
 	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.TriggerType); value != "" {
 		built.TriggerType = value
 	}
+	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); value != "" {
+		built.Type = value
+	}
+	if props.TriggerNegate {
+		built.TriggerNegate = true
+	}
+	if props.TriggerIgnoreCase {
+		built.TriggerIgnoreCase = true
+	}
 
 	return NewRoutePath(sandbox, built)
 }
@@ -111,9 +132,9 @@ func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.Rou
 // RoutePathEditEmpty reports an edit that changes nothing, so the command can
 // say so instead of rewriting a file with the bytes already in it.
 func RoutePathEditEmpty(sandbox *api.Sandbox, props api.RoutePathEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Start + props.End +
+	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Start + props.End + props.Type +
 		props.TriggerType + props.Trigger + props.Description)
-	return given == "" && len(props.Clear) == 0
+	return given == "" && len(props.Clear) == 0 && !props.TriggerNegate && !props.TriggerIgnoreCase
 }
 
 // RouteParameterEdited rebuilds one entry of `parameters` with the changes
@@ -138,10 +159,17 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 	}
 	if current.Trigger.Exists {
 		built.TriggerType, built.Trigger = current.Trigger.Type, current.Trigger.Value
+		built.TriggerNegate, built.TriggerIgnoreCase = current.Trigger.Negate, current.Trigger.IgnoreCase
 	}
 
 	if cleared["description"] {
 		built.Description = ""
+	}
+	if cleared["trigger-negate"] {
+		built.TriggerNegate = false
+	}
+	if cleared["trigger-ignore-case"] {
+		built.TriggerIgnoreCase = false
 	}
 	if cleared["examples"] {
 		built.Examples = nil
@@ -154,6 +182,7 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 	}
 	if cleared["trigger"] {
 		built.TriggerType, built.Trigger = "", ""
+		built.TriggerNegate, built.TriggerIgnoreCase = false, false
 	}
 
 	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
@@ -183,6 +212,12 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.TriggerType); value != "" {
 		built.TriggerType = value
 	}
+	if props.TriggerNegate {
+		built.TriggerNegate = true
+	}
+	if props.TriggerIgnoreCase {
+		built.TriggerIgnoreCase = true
+	}
 
 	return NewRouteParameter(sandbox, built)
 }
@@ -191,7 +226,8 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 func RouteParameterEditEmpty(sandbox *api.Sandbox, props api.RouteParameterEditProps) bool {
 	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Type + props.Default +
 		props.TriggerType + props.Trigger + props.Description)
-	return given == "" && len(props.Fonts) == 0 && len(props.Examples) == 0 && len(props.Clear) == 0 && !props.Required
+	return given == "" && len(props.Fonts) == 0 && len(props.Examples) == 0 && len(props.Clear) == 0 &&
+		!props.Required && !props.TriggerNegate && !props.TriggerIgnoreCase
 }
 
 // RouteBodyFieldEdit is one edited body property: the schema it becomes,

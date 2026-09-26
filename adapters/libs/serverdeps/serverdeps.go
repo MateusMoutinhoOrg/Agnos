@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"net/http"
+	"net/url"
 	"time"
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
@@ -43,7 +44,12 @@ func newServer(props serverdeps.ServerProps) serverdeps.Server {
 			return err
 		},
 		Shutdown: func() error {
-			return inner.Shutdown(context.Background())
+			if props.ShutdownTimeoutMs <= 0 {
+				return inner.Shutdown(context.Background())
+			}
+			ctx, cancel := context.WithTimeout(context.Background(), time.Duration(props.ShutdownTimeoutMs)*time.Millisecond)
+			defer cancel()
+			return inner.Shutdown(ctx)
 		},
 	}
 }
@@ -56,6 +62,15 @@ func newRequest(request *http.Request) serverdeps.Request {
 	var body_err error
 	read := false
 
+	read_body := func(limit int) ([]byte, error) {
+		if read {
+			return body, body_err
+		}
+		read = true
+		body, body_err = readBody(request, limit)
+		return body, body_err
+	}
+
 	return serverdeps.Request{
 		GetMethod: func() string {
 			return request.Method
@@ -66,19 +81,40 @@ func newRequest(request *http.Request) serverdeps.Request {
 		GetHeader: func(key string) string {
 			return request.Header.Get(key)
 		},
+		GetHeaders: func() map[string][]string {
+			headers := map[string][]string{}
+			for key, values := range request.Header {
+				headers[key] = append([]string{}, values...)
+			}
+			return headers
+		},
+		GetHost: func() string {
+			return request.Host
+		},
+		GetCookie: func(name string) string {
+			cookie, err := request.Cookie(name)
+			if err != nil {
+				return ""
+			}
+			return cookie.Value
+		},
 		GetQueryParam: func(name string) string {
 			return request.URL.Query().Get(name)
 		},
 		GetQueryAll: func(name string) []string {
 			return request.URL.Query()[name]
 		},
-		ReadBody: func(limit int) ([]byte, error) {
-			if read {
-				return body, body_err
+		ReadBody: read_body,
+		ReadForm: func(limit int) (map[string][]string, error) {
+			raw, err := read_body(limit)
+			if err != nil {
+				return map[string][]string{}, err
 			}
-			read = true
-			body, body_err = readBody(request, limit)
-			return body, body_err
+			values, err := url.ParseQuery(string(raw))
+			if err != nil {
+				return map[string][]string{}, err
+			}
+			return values, nil
 		},
 		GetRemoteAddr: func() string {
 			return request.RemoteAddr
@@ -115,6 +151,12 @@ func newResponse(writer http.ResponseWriter) serverdeps.Response {
 	return serverdeps.Response{
 		SetHeader: func(key string, value string) {
 			writer.Header().Set(key, value)
+		},
+		AddHeader: func(key string, value string) {
+			writer.Header().Add(key, value)
+		},
+		GetHeader: func(key string) string {
+			return writer.Header().Get(key)
 		},
 		SetStatus: func(code int) {
 			writer.WriteHeader(code)

@@ -8,7 +8,7 @@ tree:
     - file: docs/Adapters/props.yaml
       sha: 358d3f1dfa734fbad170a428773afc67c618522e8e295438475bdaec7d76ffb9
     - file: docs/DepList/doc.md
-      sha: 2494f66e9561732e31858cc1beb70f1eb84c23ad5da26e94479893e050c2af95
+      sha: 55cab6eaa81896cc92327bd97ab25f0f15e28ed9fcb145f4bc31fe1508ca1c96
     - file: docs/DepList/props.yaml
       sha: 2cc46fc3b38a91764ba6ec7d5e8bb661ee7dac155f5782369459e4cd1dd29468
     - file: docs/EntriesYaml/doc.md
@@ -58,7 +58,7 @@ tree:
     - file: docs/Structure/props.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 9ac4437d5bf0308ed8b0e41387c3ccf602797bc640d2482d1a73bba49dde52d5
+      sha: 3f015d0bbf6532ca2a1961b873a4978548ff667bb56aea38665553d14a350c05
     - file: docs/Workflow/props.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b
     - file: sandbox/internal/config/new.go

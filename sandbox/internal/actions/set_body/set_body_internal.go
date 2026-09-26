@@ -60,8 +60,8 @@ func SetBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteB
 }
 
 // setType rewrites how the body is read, carrying the content-type along: a
-// json body demands one, and a route that takes no body demands none, so the
-// dispatch stops answering 415 for a request it no longer reads.
+// json or a form body demands its own, and a route that takes no body demands
+// none, so the dispatch stops answering 415 for a request it no longer reads.
 func setType(sandbox *api.Sandbox, conf *routeconf.RouteConf, props api.RouteBodyProps, raw string) error {
 	kind, err := utils.RouteBodyType(sandbox, raw)
 	if err != nil {
@@ -75,8 +75,10 @@ func setType(sandbox *api.Sandbox, conf *routeconf.RouteConf, props api.RouteBod
 		switch {
 		case kind == routeconf.BodyNone:
 			conf.Body.ContentType = ""
-		case kind == "json" && conf.Body.ContentType == "":
+		case kind == "json" && (conf.Body.ContentType == "" || conf.Body.ContentType == routeconf.DefaultFormContentType):
 			conf.Body.ContentType = routeconf.DefaultJsonContentType
+		case kind == "form" && (conf.Body.ContentType == "" || conf.Body.ContentType == routeconf.DefaultJsonContentType):
+			conf.Body.ContentType = routeconf.DefaultFormContentType
 		}
 	}
 

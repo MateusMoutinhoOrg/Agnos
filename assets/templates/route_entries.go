@@ -19,7 +19,7 @@ import (
 type Entries struct {
 	FullRoute string `id:"FullRoute"`
 {{- range .Paths}}
-	{{.Id}} string `id:"{{.Id}}"`
+	{{.Id}} {{.GoType}} `id:"{{.Id}}"`
 {{- end}}
 {{- range .Parameters}}
 	{{.Id}} {{.GoType}} `id:"{{.Id}}"`
@@ -85,6 +85,14 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) 
 {{- else if .Body.IsText}}
 
 	body = string(raw)
+{{- else if .Body.IsForm}}
+
+	form, err := routeio.RequestOf(route).ReadForm(MaxBodyBytes)
+	if err != nil {
+		return body, routeio.FailWithCause(sandbox, route, api.StatusBadRequest, "",
+			"the request body is not a valid form", err.Error())
+	}
+	body = form
 {{- else}}
 
 	parsed, field, message, ok := routeio.ValidateSchema(sandbox, {{if .SchemaJson}}BodySchema{{else}}""{{end}}, raw)

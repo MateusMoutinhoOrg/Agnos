@@ -173,29 +173,57 @@ type CommandProps struct {
 
 // AddRouteProps describes one route to scaffold. Trigger is the whole-path
 // value its first path compares against ("" is "/" followed by the name),
-// TriggerType how ("equal", "prefix",
-// "suffix" or "regex"; "" is equal). Methods are the http methods it answers
-// to ([] is GET) and ResponseType the Content-Type its responses carry ("" is
-// application/json). Priority is required in route.yaml, so it is always
-// written, zero included.
+// TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or
+// the aliases starts-with, ends-with, exact, equals and matches; "" is equal —
+// prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two
+// switches on it. Pattern declares the paths from one url shape instead
+// ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType.
+// Methods are the http methods it answers to ([] is GET — ANY for a
+// Middleware) and ResponseType the Content-Type its responses carry ("" is
+// application/json — text/plain for a Middleware).
+//
+// Priority is the rung it runs on, used only when HasPriority is set; without
+// it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for
+// a Middleware. Before and After name another route to land one rung below or
+// above instead, and exclude Priority. Phase is "before" (the chain, the
+// default) or "after".
 type AddRouteProps struct {
-	Path         string
-	Name         string
-	Methods      []string
-	Trigger      string
-	TriggerType  string
-	Priority     int
-	ResponseType string
-	Help         string
-	Category     string
+	Path              string
+	Name              string
+	Methods           []string
+	Trigger           string
+	TriggerType       string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Pattern           string
+	Middleware        bool
+	Priority          int
+	HasPriority       bool
+	Before            string
+	After             string
+	Phase             string
+	ResponseType      string
+	Help              string
+	Category          string
 }
+
+// DefaultRoutePriority is the rung a route lands on when it names none —
+// high enough to leave the rungs below it to the middlewares in front.
+const DefaultRoutePriority = 100
+
+// DefaultMiddlewarePriority is the rung `add-route --middleware` lands on
+// when it names none: below every route left on DefaultRoutePriority.
+const DefaultMiddlewarePriority = 10
 
 // RouteProps carries the route-level keys of route.yaml that set-route may
 // rewrite. Empty strings leave the current value alone; Methods replace the
 // whole list when any is given; Examples are appended (deduplicated), and
 // Hidden / Visible are the two sides of one switch.
 // Priority is the rung the route runs on, and HasPriority is what tells a
-// priority declared as zero from one not given at all.
+// priority declared as zero from one not given at all; Before and After name
+// another route to land one rung below or above instead. Segments is the
+// segment count the request path has to have, read when HasSegments is set.
+// Phase is "before" or "after". Clear takes "segments" off again.
 type RouteProps struct {
 	Path            string
 	Route           string
@@ -208,7 +236,40 @@ type RouteProps struct {
 	Visible         bool
 	Priority        int
 	HasPriority     bool
+	Before          string
+	After           string
+	Segments        int
+	HasSegments     bool
+	Phase           string
 	Examples        []string
+	Clear           []string
+}
+
+// RenameRouteProps describes one route to rename: Route as it is declared
+// now, Name the name it takes on.
+type RenameRouteProps struct {
+	Path  string
+	Route string
+	Name  string
+}
+
+// RebalanceRoutesProps describes one rebalance of the chain: every route is
+// laid down again Step rungs apart, in the order it runs now, the first one on
+// Step.
+type RebalanceRoutesProps struct {
+	Path string
+	Step int
+}
+
+// ExplainRouteProps describes one request to run against the declared routes
+// without a server: its Method and its Path (query string included), and the
+// Headers and Cookies it carries as "key=value" entries.
+type ExplainRouteProps struct {
+	Path        string
+	Method      string
+	RequestPath string
+	Headers     []string
+	Cookies     []string
 }
 
 // DatabaseFieldProps describes one field to add to a table of a database's
@@ -251,80 +312,95 @@ type DatabaseFieldEditProps struct {
 // Entries field the slice binds to; Start and End are the raw segment indexes
 // typed on the command line ("" is 0 and -1, the whole path); Trigger is what
 // the slice has to read as for the route to run and TriggerType how it is
-// compared ("" is equal) — a path with no Trigger is a plain capture.
-// Position is the index to insert at (< 0 appends).
+// compared ("" is equal) — a path with no Trigger is a plain capture — and
+// TriggerNegate / TriggerIgnoreCase the two switches on it. Type is what the
+// slice converts to: "string" (the default), "integer", "number" or "uuid",
+// anything but string reading one segment alone. Position is the index to
+// insert at (< 0 appends).
 type RoutePathProps struct {
-	Path        string
-	Route       string
-	Id          string
-	Start       string
-	End         string
-	TriggerType string
-	Trigger     string
-	Description string
-	Position    int
+	Path              string
+	Route             string
+	Id                string
+	Start             string
+	End               string
+	Type              string
+	TriggerType       string
+	Trigger           string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Position          int
 }
 
 // RoutePathEditProps describes the change set-path applies to one entry of a
 // route's `paths`. Id is the entry as it is declared now and Rename the id it
 // takes on ("" leaves it alone); every other key overwrites what is there when
-// it is given. Clear takes "trigger" or "description" off again.
+// it is given. Clear takes "trigger", "trigger-negate",
+// "trigger-ignore-case", "type" or "description" off again.
 type RoutePathEditProps struct {
-	Path        string
-	Route       string
-	Id          string
-	Rename      string
-	Start       string
-	End         string
-	TriggerType string
-	Trigger     string
-	Description string
-	Clear       []string
+	Path              string
+	Route             string
+	Id                string
+	Rename            string
+	Start             string
+	End               string
+	Type              string
+	TriggerType       string
+	Trigger           string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Clear             []string
 }
 
 // RouteParameterProps describes one entry to add to a route's `parameters`.
 // Name is the query key or header name it is read under — its Entries field is
-// the exported spelling of it. Type is "string", "number", "boolean",
-// "datetime" or "string-array"; Fonts are where it is read from, in order
-// ([] is the query string alone). Default is the raw literal typed on the
+// the exported spelling of it. Type is "string", "integer", "number",
+// "boolean", "datetime", "string-array" or "integer-array"; Fonts are where
+// it is read from, in order — "query", "header", "cookie" ([] is the query
+// string alone). Default is the raw literal typed on the
 // command line ("" means unset). Trigger and TriggerType are a condition on
 // the value that puts the parameter into what the route matches on. Position
 // is the index to insert at (< 0 appends).
 type RouteParameterProps struct {
-	Path        string
-	Route       string
-	Name        string
-	Type        string
-	Fonts       []string
-	Required    bool
-	Default     string
-	TriggerType string
-	Trigger     string
-	Description string
-	Examples    []string
-	Position    int
+	Path              string
+	Route             string
+	Name              string
+	Type              string
+	Fonts             []string
+	Required          bool
+	Default           string
+	TriggerType       string
+	Trigger           string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Examples          []string
+	Position          int
 }
 
 // RouteParameterEditProps describes the change set-parameter applies to one
 // entry of a route's `parameters`. Name is the key as it is declared now and
 // Rename the key it takes on ("" leaves it alone); Fonts replace the whole
 // list when any is given; every other key overwrites what is there when it is
-// given. Clear takes "description", "examples", "default", "required" or
-// "trigger" off again.
+// given. Clear takes "description", "examples", "default", "required",
+// "trigger", "trigger-negate" or "trigger-ignore-case" off again.
 type RouteParameterEditProps struct {
-	Path        string
-	Route       string
-	Name        string
-	Rename      string
-	Type        string
-	Fonts       []string
-	Required    bool
-	Default     string
-	TriggerType string
-	Trigger     string
-	Description string
-	Examples    []string
-	Clear       []string
+	Path              string
+	Route             string
+	Name              string
+	Rename            string
+	Type              string
+	Fonts             []string
+	Required          bool
+	Default           string
+	TriggerType       string
+	Trigger           string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Examples          []string
+	Clear             []string
 }
 
 // RouteBodyProps describes the body envelope of one route — everything about
@@ -634,6 +710,21 @@ type Actions struct {
 	// parameters and its body schema — as the lines of
 	// a tree, ready to print.
 	ShowRoute func(path string, route string) ([]string, error)
+
+	// ListRoutes renders every declared route as one line, in the order the
+	// dispatch runs them: the chain, then the `after` phase.
+	ListRoutes func(path string) ([]string, error)
+
+	// ExplainRoute runs one request against the declared routes without a
+	// server and renders, route by route, whether it runs and why not.
+	ExplainRoute func(props ExplainRouteProps) ([]string, error)
+
+	// RenameRoute moves one route package to a new name.
+	RenameRoute func(props RenameRouteProps) error
+
+	// RebalanceRoutes gives every route a rung of its own, props.Step
+	// apart, in the order the chain runs them now.
+	RebalanceRoutes func(props RebalanceRoutesProps) error
 
 	// DatabaseInit adds the database layer (the store contract,
 	// sandbox/internal/databaseio and sandbox/internal/databases) to a

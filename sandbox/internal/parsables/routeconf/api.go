@@ -5,9 +5,11 @@ package routeconf
 // on an entry that declares none — a plain capture, or a parameter that is
 // bound and never matched on.
 type Trigger struct {
-	Exists bool
-	Type   string // "equal" | "prefix" | "suffix" | "regex"
-	Value  string
+	Exists     bool
+	Type       string // "equal" | "prefix" | "text-prefix" | "suffix" | "regex"
+	Value      string
+	Negate     bool
+	IgnoreCase bool
 }
 
 // Path is one entry of a route's `paths`: the slice of request segments from
@@ -18,6 +20,7 @@ type Path struct {
 	Id          string
 	Start       int
 	End         int
+	Type        string // "string" | "integer" | "number" | "uuid"
 	Trigger     Trigger
 	Description string
 }
@@ -29,8 +32,8 @@ type Path struct {
 type Parameter struct {
 	Id          string
 	Key         string
-	Type        string   // "string" | "number" | "boolean" | "datetime" | "string-array"
-	Fonts       []string // "query" | "header", in the order they are read
+	Type        string   // "string" | "integer" | "number" | "boolean" | "datetime" | "string-array" | "integer-array"
+	Fonts       []string // "query" | "header" | "cookie", in the order they are read
 	Required    bool
 	Default     string
 	HasDefault  bool
@@ -90,7 +93,7 @@ type Schema struct {
 // Schema on demand, so a handler can refuse a request before a byte of the body
 // is read.
 type Body struct {
-	Type        string // "none" | "raw" | "text" | "json"
+	Type        string // "none" | "raw" | "text" | "json" | "form"
 	Required    bool
 	MaxBytes    int
 	ContentType string
@@ -112,7 +115,14 @@ type RouteConf struct {
 	HasPriority bool
 	// ResponseType is the Content-Type the dispatch sets before the handler
 	// runs. It is required.
-	ResponseType    string
+	ResponseType string
+	// Segments is how many segments the request path has to have for the
+	// route to run; HasSegments is false on a route that takes any count.
+	Segments    int
+	HasSegments bool
+	// Phase is when the route runs: "before" (the default) as a rung of the
+	// chain, or "after", once the chain has answered.
+	Phase           string
 	Paths           []Path
 	Parameters      []Parameter
 	Category        string

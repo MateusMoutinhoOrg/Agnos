@@ -11,7 +11,7 @@ import (
 // property is found, inserted and dropped the same way on either side.
 
 // RouteBodyTypes is every value a route's `body.type` may spell.
-var RouteBodyTypes = []string{"none", "raw", "text", "json"}
+var RouteBodyTypes = []string{"none", "raw", "text", "json", "form"}
 
 // RouteBodyType normalizes a body type, taking the aliases the parser takes
 // ("bytes" for raw, "string" for text) and refusing anything else.
@@ -25,6 +25,8 @@ func RouteBodyType(sandbox *api.Sandbox, raw string) (string, error) {
 		return "text", nil
 	case "json":
 		return "json", nil
+	case "form":
+		return "form", nil
 	}
 	return "", sandbox.Deps.Std.Errorf("unknown body type %q (use %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteBodyTypes, ", "))
 }

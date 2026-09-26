@@ -1,0 +1,33 @@
+args:
+    - description: the route to rename (identifier or package name)
+      examples:
+        - rename-route create-user register-user
+      name: route
+      required: true
+      type: string
+    - description: the name it takes on
+      examples:
+        - rename-route create-user register-user
+      name: name
+      required: true
+      type: string
+category: Server System
+flags:
+    - default: .
+      description: the dir holding the project (defaults to the current directory)
+      examples:
+        - rename-route --path ./my-project
+      identifiers:
+        - --path
+      name: path
+      type: string
+    - description: Quiets the cli output
+      identifiers:
+        - --quiet
+        - -q
+      name: quiet
+      type: boolean
+help: Rename one route
+identifiers:
+    - rename-route
+long-description: 'Moves sandbox/internal/routeslist/<route>/ to sandbox/internal/routeslist/<name>/, rewriting the package clause of every hand-written Go file, and runs build so new.go, entries.go and the server''s route list follow it. A page is refused: remove-page and add-page own its html.'

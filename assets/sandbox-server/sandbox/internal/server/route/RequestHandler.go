@@ -58,7 +58,9 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 		}
 	}
 
-	if route.ResponseType != "" {
+	// A route of the `after` phase runs on an answered response, whose
+	// headers are gone already.
+	if route.ResponseType != "" && !route.After {
 		response.SetHeader("Content-Type", route.ResponseType)
 	}
 
@@ -72,7 +74,8 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 }
 
 // bindValues reads every value the route declares off the request, keyed by
-// the id its Entries field is tagged with. A required parameter the request
+// the id its Entries field is tagged with — a path in the type it declares,
+// through the same PathValue that matched it. A required parameter the request
 // does not bring, or a value that will not convert, is raised through
 // routeio.Fail: it reports false, with what that failure returned.
 func bindValues(sandbox *api.Sandbox, route *api.Route, request serverdeps.Request) (map[string]any, bool, error) {
@@ -81,7 +84,8 @@ func bindValues(sandbox *api.Sandbox, route *api.Route, request serverdeps.Reque
 	segments := SplitPath(sandbox, request.GetPath())
 	for _, path := range route.Paths {
 		text, _ := PathSlice(sandbox, segments, path)
-		values[path.Id] = text
+		value, _ := PathValue(sandbox, path, text)
+		values[path.Id] = value
 	}
 
 	for _, parameter := range route.Parameters {
@@ -115,6 +119,19 @@ func parseValue(sandbox *api.Sandbox, parameter api.Parameter, raws []string) (a
 	raw := raws[0]
 
 	switch parameter.Type {
+	case api.IntegerType:
+		value, err := sandbox.Deps.Stringsdeps.Atoi(raw)
+		return value, err == nil
+	case api.IntegerArrayType:
+		values := []int{}
+		for _, one := range raws {
+			value, err := sandbox.Deps.Stringsdeps.Atoi(one)
+			if err != nil {
+				return nil, false
+			}
+			values = append(values, value)
+		}
+		return values, true
 	case api.NumberType:
 		value, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64)
 		return value, err == nil
@@ -139,6 +156,10 @@ func parseValue(sandbox *api.Sandbox, parameter api.Parameter, raws []string) (a
 // server's own words rather than the conversion library's.
 func typeMessage(kind api.ParameterType) string {
 	switch kind {
+	case api.IntegerType:
+		return "is not a whole number"
+	case api.IntegerArrayType:
+		return "holds a value that is not a whole number"
 	case api.NumberType:
 		return "is not a valid number"
 	case api.BooleanType:

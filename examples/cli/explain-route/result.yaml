@@ -1,0 +1,55 @@
+cli-output: |
+    GET /admin/users
+      10   admin-guard              runs
+      100  admin                    runs
+      100  get-article              skipped: path Articles: "/admin" fails equal "/articles"
+      100  health                   skipped: path Route: "/admin/users" fails equal "/health"
+      500  not-api                  runs
+
+    the first route that answers ends the chain; if none does: 404
+    GET /administrator
+      10   admin-guard              skipped: path Route: "/administrator" fails prefix "/admin"
+      100  admin                    skipped: path Route: "/administrator" fails prefix "/admin"
+      100  get-article              skipped: the route takes 2 segments, the path has 1
+      100  health                   skipped: path Route: "/administrator" fails equal "/health"
+      500  not-api                  runs
+
+    the first route that answers ends the chain; if none does: 404
+    GET /articles/abc
+      10   admin-guard              skipped: path Route: "/articles/abc" fails prefix "/admin"
+      100  admin                    skipped: path Route: "/articles/abc" fails prefix "/admin"
+      100  get-article              skipped: path Article: "abc" is not a valid integer
+      100  health                   skipped: path Route: "/articles/abc" fails equal "/health"
+      500  not-api                  runs
+
+    the first route that answers ends the chain; if none does: 404
+    GET /articles/42?page=x
+      10   admin-guard              skipped: path Route: "/articles/42" fails prefix "/admin"
+      100  admin                    skipped: path Route: "/articles/42" fails prefix "/admin"
+      100  get-article              answers 400, parameter "page" is not a valid integer, before its handler runs
+      100  health                   skipped: path Route: "/articles/42" fails equal "/health"
+      500  not-api                  not reached: get-article answered first
+
+    the request ends on get-article
+    POST /admin
+      10   admin-guard              runs
+      100  admin                    skipped: the method POST is not one of GET
+      100  get-article              skipped: the route takes 2 segments, the path has 1
+      100  health                   skipped: path Route: "/admin" fails equal "/health"
+      500  not-api                  skipped: the method POST is not one of GET
+
+    if no route answers: 405, a route takes the path under another method
+    HEAD /api/health
+      10   admin-guard              skipped: path Route: "/api/health" fails prefix "/admin"
+      100  admin                    skipped: path Route: "/api/health" fails prefix "/admin"
+      100  get-article              skipped: path Articles: "/api" fails equal "/articles"
+      100  health                   skipped: path Route: "/api/health" fails equal "/health"
+      500  not-api                  skipped: path Route: "/api/health" fails not prefix "/api"
+
+    nothing declares HEAD for it: the dispatch runs the chain again as a GET, and answers 404 when nothing answers that
+exit-code: 0
+tree:
+    - file: sandbox/internal/routeslist/admin_guard/route.yaml
+      sha: a3d81eea06aa3160ab6407dd2aa77f40b1e93f418a3a15adf72c849de8baa951
+    - file: sandbox/internal/routeslist/not_api/route.yaml
+      sha: a5b10a09727822bf71be52b2feebf57e443d2463918614a154d8ba36fb36395a

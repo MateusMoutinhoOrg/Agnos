@@ -48,6 +48,9 @@ var followUps = map[string][]followUp{
 		{"add-path", "Read one more slice of its path", "name", "route"},
 		{"show-route", "Look at what it declares so far", "name", "route"},
 	},
+	"rename-route": {
+		{"show-route", "Look at the route under its new name", "name", "route"},
+	},
 	"add-page": {
 		{"add-parameter", "Declare a value it reads from the query or a header", "name", "route"},
 		{"add-path", "Read one more slice of its path", "name", "route"},

@@ -9,6 +9,7 @@ func NewEmpty(sandbox *api.Sandbox) *RouteConf {
 		Methods:      []string{DefaultMethod},
 		HasPriority:  true,
 		ResponseType: DefaultResponseType,
+		Phase:        PhaseBefore,
 		Paths:        []Path{},
 		Parameters:   []Parameter{},
 		Examples:     []string{},

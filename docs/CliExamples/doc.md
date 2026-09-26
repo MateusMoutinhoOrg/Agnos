@@ -36,6 +36,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `deps-purge` | remove the dependency layer and every installed dep | [example.sh](../../examples/cli/deps-purge/example.sh) |
 | `disable-extension` |  | [example.sh](../../examples/cli/disable-extension/example.sh) |
 | `enable-extension` |  | [example.sh](../../examples/cli/enable-extension/example.sh) |
+| `explain-route` |  | [example.sh](../../examples/cli/explain-route/example.sh) |
 | `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
 | `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
 | `import-body` | read a whole body json-schema off one example payload | [example.sh](../../examples/cli/import-body/example.sh) |
@@ -54,6 +55,8 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `remove-lib-example` | delete an example of examples/lib/ | [example.sh](../../examples/cli/remove-lib-example/example.sh) |
 | `remove-page` |  | [example.sh](../../examples/cli/remove-page/example.sh) |
 | `route-chain` |  | [example.sh](../../examples/cli/route-chain/example.sh) |
+| `route-middleware` |  | [example.sh](../../examples/cli/route-middleware/example.sh) |
+| `route-pattern` |  | [example.sh](../../examples/cli/route-pattern/example.sh) |
 | `server-init` |  | [example.sh](../../examples/cli/server-init/example.sh) |
 | `set-adapter` |  | [example.sh](../../examples/cli/set-adapter/example.sh) |
 | `set-command` | rewrite the command-level keys of a command | [example.sh](../../examples/cli/set-command/example.sh) |

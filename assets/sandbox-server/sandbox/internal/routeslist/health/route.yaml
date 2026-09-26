@@ -1,6 +1,6 @@
 methods:
   - GET
-priority: 0
+priority: 100
 response-type: application/json
 paths:
   - id: Route
