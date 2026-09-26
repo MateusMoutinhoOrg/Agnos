@@ -1,6 +1,8 @@
 cli-output: "creating assets/frontend/about.html, answered on /about \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
+    - file: assets/frontend/404.html
+      sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
     - file: assets/frontend/about.html
       sha: e68343f7220e428ef82934f8138750dce598fa05ddbae013355656ed2ab4d4b9
     - file: assets/frontend/blog/post.html

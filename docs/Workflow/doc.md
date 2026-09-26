@@ -84,7 +84,7 @@ project with no CLI gets one first: a server needs a command that starts it.
 ## Add the front layer
 
 ```bash
-agnos front-init      # frontio, the frontend route, assets/frontend/index.html
+agnos front-init      # frontio, the frontend route, assets/frontend/{index,404}.html
 agnos start-server  # serves every file of assets/frontend
 ```
 

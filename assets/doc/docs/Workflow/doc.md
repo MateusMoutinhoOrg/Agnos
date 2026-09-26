@@ -183,7 +183,7 @@ routes the page's js calls. [FrontUsage](../FrontUsage/doc.md) is the whole reci
 ## Add the front layer
 
 ```bash
-{{.GeneratorName}} front-init      # frontio, the frontend route, assets/frontend/index.html
+{{.GeneratorName}} front-init      # frontio, the frontend route, assets/frontend/{index,404}.html
 {{.Name}} start-server  # serves every file of assets/frontend
 ```
 

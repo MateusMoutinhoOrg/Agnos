@@ -1,6 +1,8 @@
 cli-output: "remove-page removing assets/frontend/about.html \nbuild started with path TestDir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
+    - file: assets/frontend/404.html
+      sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
     - file: assets/frontend/blog/post.html
       sha: 7ed53914addf03012f7e3a4a0b4133ba991cfa6dfad4c298317bd29b7f583ac4
     - file: assets/frontend/index.html

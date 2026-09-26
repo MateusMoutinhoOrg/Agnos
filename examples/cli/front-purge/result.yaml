@@ -3,6 +3,8 @@ exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
       sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
+    - file: assets/frontend/404.html
+      sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
     - file: assets/frontend/about.html
       sha: e68343f7220e428ef82934f8138750dce598fa05ddbae013355656ed2ab4d4b9
     - file: assets/frontend/index.html

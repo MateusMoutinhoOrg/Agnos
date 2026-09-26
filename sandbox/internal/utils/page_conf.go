@@ -23,6 +23,11 @@ const FrontendRouteName = "frontend"
 // FrontendIndexPage is the page front-init scaffolds, the one "/" answers.
 const FrontendIndexPage = "index"
 
+// FrontendNotFoundPage is the page front-init scaffolds for a path that names
+// no file: the frontend route answers it with a 404. It is frontio.NotFound
+// spelled as a page name.
+const FrontendNotFoundPage = "404"
+
 // pageExtension is what a page name is written with on disk. The frontend
 // route tries it after the bare path, so /about answers about.html.
 const pageExtension = ".html"
@@ -108,6 +113,21 @@ func WritePage(sandbox *api.Sandbox, io *smartio.SmartIO, name string, title str
 		"Title": title,
 		"File":  PageName(sandbox, name) + pageExtension,
 	})
+	if err != nil {
+		return err
+	}
+	return io.WriteFile(page, content)
+}
+
+// WriteNotFoundPage renders the scaffold of FrontendNotFoundPage, a formatted
+// page with no template syntax left in it, into its PageAsset. Like WritePage,
+// io.WriteFile refuses an existing file, so a caller that means to keep one
+// checks first.
+func WriteNotFoundPage(sandbox *api.Sandbox, io *smartio.SmartIO) error {
+	page := PageAsset(sandbox, FrontendNotFoundPage)
+	sandbox.Deps.Std.Log("creating %s, answered on every path that names no file \n", page)
+
+	content, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/page_not_found.html", map[string]interface{}{})
 	if err != nil {
 		return err
 	}

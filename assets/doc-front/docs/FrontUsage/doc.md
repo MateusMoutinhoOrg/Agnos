@@ -8,7 +8,7 @@ served the same way. Dynamic data comes from api routes the page's js calls.
 ## Bring it up
 
 ```bash
-{{.GeneratorName}} front-init                    # frontio, the frontend route, assets/frontend/index.html
+{{.GeneratorName}} front-init                    # frontio, the frontend route, assets/frontend/{index,404}.html
 {{.GeneratorName}} add-page about --title About  # assets/frontend/about.html, answered on /about
 {{.GeneratorName}} add-page blog/post            # assets/frontend/blog/post.html, answered on /blog/post
 {{.GeneratorName}} remove-page about             # deletes the html
@@ -29,8 +29,9 @@ before it. It reads, in order, the first one of these that exists:
 | `/` | `index.html` |
 | `/<p>` | `<p>`, `<p>.html`, `<p>/index.html` |
 
-A path that names no file is declined, so the chain goes on and `handle_not_found.go` answers
-`404`. Every file is sent with the `Content-Type` of its extension (`frontio.ContentTypeOf`,
+A path that names no file is answered `404` with `404.html`, the formatted page `front-init`
+writes — restyle it by editing it. Delete it and such a path is declined instead, so the chain
+goes on and `handle_not_found.go` answers the `404`. Every file is sent with the `Content-Type` of its extension (`frontio.ContentTypeOf`,
 unknown ones as `application/octet-stream`) and `Cache-Control: no-cache`.
 
 ## A bundler's build
@@ -41,7 +42,7 @@ build it, then build {{.Name}}: the binary embeds whatever is there. Links stay 
 
 For a single-page app whose router owns the url, set `spaFallback = true` in
 `sandbox/internal/routeslist/frontend/InternalPureHandler.go`: a path with no extension that
-names no file is then answered with `index.html`. A missing `/app.js` still declines.
+names no file is then answered with `index.html`. A missing `/app.js` still gets the `404`.
 
 ## Generated vs yours
 
@@ -52,6 +53,7 @@ names no file is then answered with `index.html`. A missing `/app.js` still decl
 | `sandbox/internal/routeslist/frontend/{route.yaml,InternalPureHandler.go}` | `front-init` | once |
 | `sandbox/internal/routeslist/frontend/{new.go,entries.go}` | `build` | always |
 | `assets/frontend/index.html` | `front-init` | once, kept if already there |
+| `assets/frontend/404.html` | `front-init` | once, kept if already there |
 | `assets/frontend/<page>.html` | `add-page` | once, refused if already there |
 
 The frontend route is a route like any other: every editor of its `route.yaml` works on it, and

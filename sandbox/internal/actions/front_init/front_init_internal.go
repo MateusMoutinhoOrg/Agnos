@@ -8,8 +8,8 @@ import (
 )
 
 // FrontInitInternal turns the front mechanic on in the project's declaration,
-// then writes the two halves that are the project's from the moment they
-// exist: the frontend route and the index page of assets/frontend/. The group
+// then writes what is the project's from the moment it exists: the frontend
+// route, and the index and 404 pages of assets/frontend/. The group
 // itself is rendered by the follow-up build, like every other mechanic.
 //
 // A project with no server layer is given one first, on this same open
@@ -42,6 +42,10 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 	}
 
 	if err := writeIndexPage(sandbox, io); err != nil {
+		return err
+	}
+
+	if err := writeNotFoundPage(sandbox, io); err != nil {
 		return err
 	}
 
@@ -80,4 +84,17 @@ func writeIndexPage(sandbox *api.Sandbox, io *smartio.SmartIO) error {
 		return nil
 	}
 	return utils.WritePage(sandbox, io, utils.FrontendIndexPage, "Home")
+}
+
+// writeNotFoundPage writes assets/frontend/404.html, the formatted page the
+// frontend route answers with a 404 when a path names no file, and like
+// writeIndexPage keeps one already there: it is the project's content from the
+// moment it exists, so restyling it is an edit to that file.
+func writeNotFoundPage(sandbox *api.Sandbox, io *smartio.SmartIO) error {
+	page := utils.PageAsset(sandbox, utils.FrontendNotFoundPage)
+	if io.IsFile(page) {
+		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", page)
+		return nil
+	}
+	return utils.WriteNotFoundPage(sandbox, io)
 }

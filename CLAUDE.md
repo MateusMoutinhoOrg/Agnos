@@ -153,7 +153,8 @@ editing only the rendered copy is undone in silence.
 - A page is a file of `assets/frontend/` and nothing else — no route, no declaration. The
   `frontend` route `front-init` writes (priority `1000`, after every api route) serves the whole
   tree through the generated `sandbox/internal/frontio/`, whose `SafePath` keeps a caller's path
-  inside it; a path naming no file is declined, so the `404` stays `handle_not_found.go`'s.
+  inside it; a path naming no file is answered `404` with the `assets/frontend/404.html`
+  `front-init` writes, and declined only when that file is gone.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
   reverse.
 

@@ -24,6 +24,9 @@ const (
 	Root = "frontend"
 	// Index is the file a directory is answered with, "/" included.
 	Index = "index.html"
+	// NotFound is the file a path naming no file is answered with, under a
+	// 404. front-init writes it once; it is the project's to restyle.
+	NotFound = "404.html"
 	// RevalidateCache is the cache header every file is served with: the
 	// browser may store the answer but must ask before reusing it, so a new
 	// build is picked up on the next load whatever the file is named.
