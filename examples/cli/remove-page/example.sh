@@ -5,14 +5,12 @@
 
 agnos start --path TestDir --project-name Test --module Test -q
 agnos front-init --path TestDir -q
-agnos add-page home --trigger / --title "Home" --path TestDir -q
 agnos add-page about --title "About" --path TestDir -q
+agnos add-page blog/post --path TestDir -q
 
 agnos remove-page about --path TestDir
 
-# What result.yaml records: the pages left. `about` is gone from both places a
-# page lives, and `home` was not touched.
-mkdir -p AssertDir/sandbox/internal/routeslist
-cp -R TestDir/sandbox/internal/routeslist/. AssertDir/sandbox/internal/routeslist/
-mkdir -p AssertDir/assets/frontend/pages
-cp -R TestDir/assets/frontend/pages/. AssertDir/assets/frontend/pages/
+# What result.yaml records: the pages left. about.html is gone, and index.html
+# and blog/post.html were not touched.
+mkdir -p AssertDir/assets/frontend
+cp -R TestDir/assets/frontend/. AssertDir/assets/frontend/

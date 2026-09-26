@@ -24,10 +24,12 @@ const removePrefix = "remove-"
 // spelled remove-<unit>. They are listed because nothing about their name says
 // so: disable-extension stops a mechanic generating, publish reaches a
 // release out of this machine and cannot be taken back, rename-route moves a
-// route's hand-written files, and rebalance-routes rewrites the priority of
-// every route.
+// route's hand-written files, rebalance-routes rewrites the priority of every
+// route, and front-purge drops the frontend route — a purge like the others,
+// but one that takes no page with it, so it has no unit to count.
 var destructiveVerbs = map[string]bool{
 	"disable-extension": true,
+	"front-purge":       true,
 	"publish":           true,
 	"rename-route":      true,
 	"rebalance-routes":  true,
@@ -39,7 +41,6 @@ var destructiveVerbs = map[string]bool{
 var purgeUnits = map[string]string{
 	"cli-purge":      "command",
 	"server-purge":   "route",
-	"front-purge":    "page",
 	"deps-purge":     "dep",
 	"database-purge": "database",
 }
@@ -91,8 +92,6 @@ func unitOptions(sandbox *api.Sandbox, io *smartio.SmartIO, unit string) []inter
 		return commandOptions(sandbox, io)
 	case "route":
 		return dirOptions(sandbox, io, routesDir)
-	case "page":
-		return pageOptions(sandbox, io)
 	case "dep":
 		return dirOptions(sandbox, io, utils.ContractsDir)
 	case "database":

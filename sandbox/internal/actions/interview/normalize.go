@@ -25,7 +25,6 @@ var namedUnits = map[string]string{
 	"add-command":     "command",
 	"add-route":       "route",
 	"rename-route":    "route",
-	"add-page":        "page",
 	"add-flag":        "flag",
 	"add-arg":         "argument",
 	"add-parameter":   "parameter",

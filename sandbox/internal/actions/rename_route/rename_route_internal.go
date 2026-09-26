@@ -15,9 +15,7 @@ var generatedRouteFiles = []string{"new.go", "entries.go"}
 // rewriting the package clause of each Go file, and removes the old
 // directory. The route.yaml moves as it is: nothing in it names the package.
 //
-// A page is refused — its html under assets/frontend/pages/ carries the name
-// too, and remove-page / add-page is the pair that owns both — and so is the
-// generated health route.
+// The generated health route is refused.
 func RenameRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RenameRouteProps) error {
 	if err := utils.ValidateRouteName(sandbox, props.Route); err != nil {
 		return err
@@ -42,10 +40,6 @@ func RenameRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Re
 	}
 	if io.IsDir(new_dir) {
 		return sandbox.Deps.Std.Errorf("route %q already exists in %s", utils.RouteIdentifier(sandbox, props.Name), new_dir)
-	}
-	if utils.IsPage(sandbox, io, props.Route) {
-		return sandbox.Deps.Std.Errorf("route %q is a page (%s is beside it): a page is renamed with remove-page and add-page",
-			utils.RouteIdentifier(sandbox, props.Route), utils.PageAsset(sandbox, props.Route))
 	}
 
 	sandbox.Deps.Std.Log("rename-route moving %s to %s \n", old_dir, new_dir)

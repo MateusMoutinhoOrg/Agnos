@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"front-purge"}
 	command.Category = "Front System"
 	command.Help = "Remove the html front layer from the project"
-	command.LongDescription = "Removes sandbox/internal/pageio, the static route and the route of every declared page, then rebuilds. assets/frontend/ is left untouched: pages, styles and scripts are hand-written content, so front-init followed by add-page puts the routes back over it."
+	command.LongDescription = "Removes sandbox/internal/frontio and the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project's content, so front-init puts the route back over it."
 	command.Examples = []string{"front-purge"}
 	command.Hidden = false
 

@@ -6,10 +6,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-// AddPage scaffolds a new page: the route package answering it under
-// sandbox/internal/routeslist/<name>/ and the html template it renders under
-// assets/frontend/pages/, then runs build as a follow-up step so its new.go
-// and the dispatch arm are generated for it.
+// AddPage scaffolds a new page — assets/frontend/<name>.html — then runs build
+// as a follow-up step. The build renders only: a page adds no Go, so there is
+// nothing to compile.
 func AddPage(sandbox *api.Sandbox, props api.PageProps) error {
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddPageInternal(sandbox, io, props); err != nil {
@@ -18,5 +17,5 @@ func AddPage(sandbox *api.Sandbox, props api.PageProps) error {
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
+	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

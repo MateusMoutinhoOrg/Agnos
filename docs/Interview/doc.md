@@ -42,7 +42,7 @@ the commands that give it one — with the route already answered, so it is neve
 
 | After | Offered |
 | --- | --- |
-| `add-route`, `add-page` | `import-body`, `add-body-field`, `set-body`, `add-parameter`, `add-path`, `show-route` |
+| `add-route` | `import-body`, `add-body-field`, `set-body`, `add-parameter`, `add-path`, `show-route` |
 | `add-body-field`, `add-parameter`, `add-path` | one more of the same, then `show-route` |
 | `import-body`, `set-body`, `set-body-field` | `show-route`, then the editors of what it wrote |
 | `add-command` | `add-flag`, `add-arg`, `set-command` |
@@ -88,14 +88,14 @@ is marked `★`; the rest are offers.
 | `cli-init` | `sandbox-cli` is off | ★ |
 | `add-command` | the cli is on and declares no command of its own | ★ |
 | `add-route` | the server is on and declares no route of its own | ★ |
-| `add-page` | the front is on and has no page | ★ |
+| `add-page` | the front is on and `assets/frontend/` holds no html but `index.html` | ★ |
 | `add-database` | the database layer is on and declares no database | ★ |
 | `server-init` | `sandbox-server` is off | |
 | `front-init` | the server is on and `sandbox-front` is off | |
 | `database-init` | `sandbox-database` is off | |
 | `deps-init` | `sandbox-deps` is off | |
 
-`help`, `version`, `health` and `static` are what an init scaffolds, so they never count as
+`help`, `version`, `health`, `frontend` and `index` are what an init scaffolds, so they never count as
 units the project declared itself.
 
 **Areas** — one row per category of the command surface, offered only while the mechanic that

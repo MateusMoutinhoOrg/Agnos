@@ -676,14 +676,12 @@ func themeOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.Alter
 	return options
 }
 
-// pageOptions is every route with an html template beside it — the one test
-// that tells a page from any other route.
+// pageOptions is every html file under assets/frontend/, named the way
+// remove-page spells a page ("index", "blog/post").
 func pageOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
 	options := []interviewer.AlternativeOption{}
-	for _, option := range dirOptions(sandbox, io, routesDir) {
-		if utils.IsPage(sandbox, io, option.Id) {
-			options = append(options, option)
-		}
+	for _, page := range utils.ListPages(sandbox, io) {
+		options = append(options, interviewer.AlternativeOption{Id: page, Msg: page})
 	}
 	return options
 }

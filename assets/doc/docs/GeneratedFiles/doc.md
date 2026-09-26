@@ -82,12 +82,11 @@
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
 {{- end }}
 {{- if .HasFront }}
-| `sandbox/internal/pageio/templates.go` | `build` | always. `Render` + the asset helpers; `StaticMount` from the `static` route's first path |
+| `sandbox/internal/frontio/frontio.go` | `build` | always. `Resolve`, `SafePath`, `ContentTypeOf` |
 | `docs/FrontUsage/` | `build` | always. Both `doc.md` and `props.yaml` |
-| `sandbox/internal/routeslist/static/{route.yaml,InternalPureHandler.go}` | `front-init` | once. Keep `safeSegments` if you edit it |
-| `assets/frontend/static/{styles/main.css,scripts/main.js}` | `front-init` | once |
-| `sandbox/internal/routeslist/<page>/{route.yaml,InternalPureHandler.go}` | `add-page` | once |
-| `assets/frontend/pages/<page>.html` | `add-page` | once. Kept as is by a second `add-page` |
+| `sandbox/internal/routeslist/frontend/{route.yaml,InternalPureHandler.go}` | `front-init` | once. `spaFallback` is yours to turn on |
+| `assets/frontend/index.html` | `front-init` | once. Kept if already there |
+| `assets/frontend/<page>.html` | `add-page` | once. Refused if already there |
 {{- end }}
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |
 {{- if .HasExample }}

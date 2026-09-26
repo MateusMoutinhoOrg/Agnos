@@ -6,10 +6,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-// RemovePage deletes one page whole — its route package and the html template
-// it renders — then runs build as a follow-up step so the dispatch stops
-// naming it. The build renders only: dropping a page may leave hand-written
-// code referring to what is gone.
+// RemovePage deletes one page — assets/frontend/<name>.html — then runs build
+// as a follow-up step. The build renders only: a page carries no Go.
 func RemovePage(sandbox *api.Sandbox, path string, name string) error {
 	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := RemovePageInternal(sandbox, io, name); err != nil {

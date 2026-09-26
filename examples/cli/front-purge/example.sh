@@ -5,15 +5,15 @@
 
 agnos start --path TestDir --project-name Test --module Test -q
 agnos front-init --path TestDir -q
-agnos add-page home --trigger / --title "Home" --path TestDir -q
+agnos add-page about --title "About" --path TestDir -q
 
 agnos front-purge --path TestDir
 
 # What result.yaml records: what the purge left. sandbox/internal/routeslist holds
-# the health route alone — pageio, the static route and the page's route are
-# gone, because their handlers import a package that no longer exists — while
-# assets/frontend is untouched, so front-init + add-page put the routes back
-# over the same content.
+# the health route alone — frontio and the frontend route are gone, because the
+# route's handler imports a package that no longer exists — while
+# assets/frontend is untouched, so front-init puts the route back over the
+# same content.
 mkdir -p AssertDir/sandbox/internal/routeslist
 cp -R TestDir/sandbox/internal/routeslist/. AssertDir/sandbox/internal/routeslist/
 mkdir -p AssertDir/assets/frontend

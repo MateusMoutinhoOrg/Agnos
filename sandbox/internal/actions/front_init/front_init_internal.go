@@ -7,18 +7,9 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// staticStyle and staticScript are the two files the skeleton carries. They
-// are not decoration: //go:embed keeps no empty directory, so a `dirref
-// "styles"` against a directory that does not exist is an error at render
-// time, and the scaffolded page names both directories.
-const (
-	staticStyle  = utils.StaticAssetsDir + "/styles/main.css"
-	staticScript = utils.StaticAssetsDir + "/scripts/main.js"
-)
-
 // FrontInitInternal turns the front mechanic on in the project's declaration,
 // then writes the two halves that are the project's from the moment they
-// exist: the static route and the skeleton of assets/frontend/. The group
+// exist: the frontend route and the index page of assets/frontend/. The group
 // itself is rendered by the follow-up build, like every other mechanic.
 //
 // A project with no server layer is given one first, on this same open
@@ -46,68 +37,47 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 		"Module": module_conf.Module,
 	}
 
-	if err := writeStaticRoute(sandbox, io, vars); err != nil {
+	if err := writeFrontendRoute(sandbox, io, vars); err != nil {
 		return err
 	}
 
-	if err := writeFrontSkeleton(sandbox, io, vars); err != nil {
+	if err := writeIndexPage(sandbox, io); err != nil {
 		return err
 	}
 
-	// The static route is written before the mechanic is turned on because
-	// pageio's StaticMount is read off that declaration: the build that follows
-	// has to find the route already there to render the group against it.
 	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxFront, true)
 }
 
-// writeStaticRoute scaffolds the route serving assets/frontend/static, leaving
-// an existing one alone: like any route's InternalPureHandler.go it is written once and
-// then the project's — and its safeSegments check is what stands between a
-// caller's path and the rest of the asset tree, so re-rendering over an edited
-// copy would undo a deliberate change without saying so.
-func writeStaticRoute(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
-	dir := utils.RouteDir(sandbox, utils.StaticRouteName)
+// writeFrontendRoute scaffolds the route serving assets/frontend, leaving an
+// existing one alone: like any route's InternalPureHandler.go it is written
+// once and then the project's — turning spaFallback on is an edit to it — so
+// re-rendering over an edited copy would undo a deliberate change without
+// saying so. The path check it relies on lives in the generated frontio, so a
+// fix to it reaches the project on the next build whatever this file holds.
+func writeFrontendRoute(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
+	dir := utils.RouteDir(sandbox, utils.FrontendRouteName)
 
 	if io.IsDir(dir) {
 		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", dir)
 		return nil
 	}
 
-	if err := utils.RenderTemplateToDest(sandbox, io, "templates/static_route.yaml", vars, dir+"/route.yaml"); err != nil {
+	if err := utils.RenderTemplateToDest(sandbox, io, "templates/frontend_route.yaml", vars, dir+"/route.yaml"); err != nil {
 		return err
 	}
-	return utils.RenderTemplateToDest(sandbox, io, "templates/static_handler.go", vars, dir+"/InternalPureHandler.go")
+	return utils.RenderTemplateToDest(sandbox, io, "templates/frontend_handler.go", vars, dir+"/InternalPureHandler.go")
 }
 
-// writeFrontSkeleton writes the two starting files of assets/frontend/ through
-// io.WriteFile, which refuses to overwrite: everything under that tree is the
-// project's content, so a second front-init — after a front-purge, say — finds
-// them already there and leaves what was written in between untouched.
-//
-// assets/frontend/pages/ is deliberately left empty; add-page is what fills it.
-func writeFrontSkeleton(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
-	skeleton := []struct {
-		template string
-		dest     string
-	}{
-		{"templates/front_main.css", staticStyle},
-		{"templates/front_main.js", staticScript},
+// writeIndexPage writes assets/frontend/index.html, the page "/" answers, the
+// way add-page writes any other — and like it, keeps one already there:
+// everything under that tree is the project's content, so a second front-init
+// (after a front-purge, say) leaves what was written in between untouched.
+// It is also what keeps the tree from being empty, which //go:embed would drop.
+func writeIndexPage(sandbox *api.Sandbox, io *smartio.SmartIO) error {
+	page := utils.PageAsset(sandbox, utils.FrontendIndexPage)
+	if io.IsFile(page) {
+		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", page)
+		return nil
 	}
-
-	for _, file := range skeleton {
-		if io.IsFile(file.dest) {
-			sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", file.dest)
-			continue
-		}
-
-		content, err := sandbox.Deps.Embeddeps.RenderTemplate(file.template, vars)
-		if err != nil {
-			return err
-		}
-		if err := io.WriteFile(file.dest, content); err != nil {
-			return err
-		}
-	}
-
-	return nil
+	return utils.WritePage(sandbox, io, utils.FrontendIndexPage, "Home")
 }

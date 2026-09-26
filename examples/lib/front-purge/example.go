@@ -32,7 +32,7 @@ func main() {
 	}
 
 	if err := lib.Actions.AddPage(api.PageProps{
-		Path: "TestDir", Name: "home", Trigger: "/", Title: "Home",
+		Path: "TestDir", Name: "about", Title: "About",
 	}); err != nil {
 		panic(err)
 	}

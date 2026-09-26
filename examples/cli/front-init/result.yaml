@@ -1,19 +1,17 @@
-cli-output: "add-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep sortdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serializables \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serverdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep reflectdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep signaldeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep embeddeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep templatedeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep hashdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nfront-init started with path TestDir \nserver-init started with path TestDir \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "add-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep sortdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serializables \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serverdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep reflectdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep signaldeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep embeddeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nfront-init started with path TestDir \nserver-init started with path TestDir \ncli-init started with path TestDir \ncreating assets/frontend/index.html, answered on / \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
       sha: 8745e680fab635300a9727bce27432054ce0d2e403270937afc8717dbb96794c
-    - file: assets/frontend/static/scripts/main.js
-      sha: 092a48d1f45f5024d3307ee1d75af78a0d140b5f81600c2c51c12c0dd7c66a85
-    - file: assets/frontend/static/styles/main.css
-      sha: 735ddf9858cbe7853198c30e4b283a3d6ba2398dc3428765c45676b787d6eeef
-    - file: sandbox/internal/pageio/templates.go
-      sha: c6f4b54bc3c1ca1946e91049171c796b92a6a7ef20391e21a8d9353325387cca
-    - file: sandbox/internal/routeslist/static/InternalPureHandler.go
-      sha: 359fe471cf228b831b17c159203d4cd1b7ab21f6bc504cd2891b8f3e5f21d399
-    - file: sandbox/internal/routeslist/static/entries.go
-      sha: 80bf561f0868332572c4ae06ec3d3845675a10635b60203389c1cb24aae399d3
-    - file: sandbox/internal/routeslist/static/new.go
-      sha: e088e1b414b52beb6b3c4bf1adfff8febdd610b095cf53fa5fb33f8f66c1f7fd
-    - file: sandbox/internal/routeslist/static/route.yaml
-      sha: 6207de5e53cd8dc2ad995ba1da2cd2041a89478220aca539c25239948c0453f7
+    - file: assets/frontend/index.html
+      sha: 732abc93f6ea971bd74abce29385273fe101c5105ad2e60b8268ba24ee2fbd23
+    - file: sandbox/internal/frontio/frontio.go
+      sha: cca153a8efe721c1df6fac9a9edf384a2cb642b1f9987563d1b7ea25188b2cdf
+    - file: sandbox/internal/routeslist/frontend/InternalPureHandler.go
+      sha: 45786297b39bd2961bf5dce610e4e862a8dffc8130d7c57b1cc7796d65f73dca
+    - file: sandbox/internal/routeslist/frontend/entries.go
+      sha: 033d1c89c510c37f469a3b16edcf893f21a9da6c8cb2c02e737b1316c7dba463
+    - file: sandbox/internal/routeslist/frontend/new.go
+      sha: df5acc6c0b9da61383633810272a0ee6eb39fdea44f714d1470335b5a3b93c6c
+    - file: sandbox/internal/routeslist/frontend/route.yaml
+      sha: 5668920287a070b50cb1b32992664036a8e74f325e1fdc06aefa0075fb08d3f9

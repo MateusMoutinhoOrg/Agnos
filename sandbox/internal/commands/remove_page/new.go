@@ -18,8 +18,8 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Name = "remove_page"
 	command.Identifiers = []string{"remove-page"}
 	command.Category = "Front System"
-	command.Help = "Remove an html page"
-	command.LongDescription = "Deletes the page's route package and its html template both. A route with no html beside it is not a page: remove-route is the editor for those."
+	command.Help = "Remove an html page from assets/frontend/"
+	command.LongDescription = "Deletes assets/frontend/<name>.html. The name is spelled as add-page spells it: the path under assets/frontend/ without .html."
 	command.Examples = []string{"remove-page about"}
 	command.Hidden = false
 

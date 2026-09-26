@@ -3,7 +3,7 @@ cli-output: |
     sandbox-deps       off  the dependency layer: sandbox/deps/, adapters/, availables
     sandbox-cli        off  the cli layer: cmd/main, the dispatch, help and version
     sandbox-server     off  the http layer: server/, routes/, routeio/
-    sandbox-front      off  the html layer: pageio/ and the pages
+    sandbox-front      off  the front layer: frontio/ and the route serving assets/frontend/
     sandbox-database   off  the database layer: databaseio/ and the declared databases
     sandbox-example    on   the examples/ suite and exec-test
     doc                on   the docs/ tree and its Index.md files

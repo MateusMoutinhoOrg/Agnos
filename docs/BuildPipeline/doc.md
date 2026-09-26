@@ -45,7 +45,7 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `sandbox-deps` | `sandbox-deps` | `sandbox/deps/deps.go` |
 | `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command}.go`, `internal/cli/`, `help`, `version` |
 | `sandbox-server` | `sandbox-server` | `api/{server,route}.go`, `internal/{server,routes/health,routeio}` |
-| `sandbox-front` | `sandbox-front` | `internal/pageio/` |
+| `sandbox-front` | `sandbox-front` | `internal/frontio/` |
 | `sandbox-database` | `sandbox-database` | `internal/databaseio/` |
 | `doc` | `doc` | `docs/{Adapters,DepList,EntriesYaml,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
 | `doc-cli` | `doc` + `sandbox-cli` | `docs/{CliInstall,Commands}` |

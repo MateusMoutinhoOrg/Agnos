@@ -18,4 +18,4 @@ flags:
 help: Add the html front layer to the project
 identifiers:
     - front-init
-long-description: 'Installs the deps the front layer needs, renders sandbox/internal/pageio and writes, once, the route serving assets/frontend/static and that tree''s skeleton. A project with no server layer is given one first: a page is answered over http.'
+long-description: 'Installs the deps the front layer needs, renders sandbox/internal/frontio and writes, once, the frontend route serving every file of assets/frontend and that tree''s index.html. A project with no server layer is given one first: the front is answered over http.'

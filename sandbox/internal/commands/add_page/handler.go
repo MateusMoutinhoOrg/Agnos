@@ -7,11 +7,9 @@ import (
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 	add_error := addPageAction.AddPage(sandbox, api.PageProps{
-		Path:    command.GetString("path"),
-		Name:    command.GetString("name"),
-		Trigger: command.GetString("trigger"),
-		Title:   command.GetString("title"),
-		Help:    command.GetString("help"),
+		Path:  command.GetString("path"),
+		Name:  command.GetString("name"),
+		Title: command.GetString("title"),
 	})
 
 	if add_error != nil {

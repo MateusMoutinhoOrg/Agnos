@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"front-init"}
 	command.Category = "Front System"
 	command.Help = "Add the html front layer to the project"
-	command.LongDescription = "Installs the deps the front layer needs, renders sandbox/internal/pageio and writes, once, the route serving assets/frontend/static and that tree's skeleton. A project with no server layer is given one first: a page is answered over http."
+	command.LongDescription = "Installs the deps the front layer needs, renders sandbox/internal/frontio and writes, once, the frontend route serving every file of assets/frontend and that tree's index.html. A project with no server layer is given one first: the front is answered over http."
 	command.Examples = []string{"front-init", "front-init --path ./my-project"}
 	command.Hidden = false
 

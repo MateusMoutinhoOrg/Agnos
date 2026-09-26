@@ -44,7 +44,7 @@ func ExtensionCatalog() []ExtensionSpec {
 		{ExtensionSandboxDeps, false, "the dependency layer: sandbox/deps/, adapters/, availables"},
 		{ExtensionSandboxCli, false, "the cli layer: cmd/main, the dispatch, help and version"},
 		{ExtensionSandboxServer, false, "the http layer: server/, routes/, routeio/"},
-		{ExtensionSandboxFront, false, "the html layer: pageio/ and the pages"},
+		{ExtensionSandboxFront, false, "the front layer: frontio/ and the route serving assets/frontend/"},
 		{ExtensionSandboxDatabase, false, "the database layer: databaseio/ and the declared databases"},
 		{ExtensionSandboxExample, true, "the examples/ suite and exec-test"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},

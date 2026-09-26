@@ -227,7 +227,6 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"HasExample":          hasExample,
 		"HasDoc":              hasDoc,
 		"HasReadme":           hasReadme,
-		"StaticMount":         utils.CollectFrontMount(sandbox, io),
 		"HasAssets":           hasAssets,
 		"Constructors":        constructors,
 		"ConstructorPackages": CollectConstructorPackages(sandbox, io, constructors),

@@ -103,10 +103,10 @@ positionals bind in order after them. A `repeatable` field is given once per val
 
 | Command | Does |
 | --- | --- |
-| [`add-page`](add-page.md) | Declare a new html page |
+| [`add-page`](add-page.md) | Scaffold a new html page under assets/frontend/ |
 | [`front-init`](front-init.md) | Add the html front layer to the project |
 | [`front-purge`](front-purge.md) | Remove the html front layer from the project |
-| [`remove-page`](remove-page.md) | Remove an html page |
+| [`remove-page`](remove-page.md) | Remove an html page from assets/frontend/ |
 
 ## Core Commands
 

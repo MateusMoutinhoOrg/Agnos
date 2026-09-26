@@ -201,7 +201,7 @@ assets:
     templates:
       order: 13
       dir: true
-      description: single-file scaffolds (new.go, command_*, route_*, page_*, database_*, static_*, front_main.*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+      description: single-file scaffolds (new.go, command_*, route_*, page_*, database_*, frontend_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
 cmd/main/main.go:
   order: 5
   gen: true

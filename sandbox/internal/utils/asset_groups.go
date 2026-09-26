@@ -138,12 +138,6 @@ func RenderExtensionCode(sandbox *api.Sandbox, io *smartio.SmartIO, name string)
 
 		return RenderGroup(sandbox, io, group.Name, map[string]interface{}{
 			"Module": module_conf.Module,
-			// The front group's pageio names the mount its links are built
-			// against. The build that follows renders it again off the same
-			// declaration, so the value is not new here — leaving it out is,
-			// and an unfilled var renders a verbatim `%!q(<nil>)` into a Go
-			// file the format pass then refuses.
-			"StaticMount": CollectFrontMount(sandbox, io),
 		})
 	}
 

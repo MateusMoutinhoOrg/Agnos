@@ -205,26 +205,20 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
 {{ end }}{{ if .HasFront }}
-## Pages
+## Front
 
-- A page is a route with an html template beside it: `assets/frontend/pages/<page>.html` is
-  the whole of what tells one from any other route, and `add-page` / `remove-page` are its
-  editors — `remove-route` refuses a route that has one, so no html is ever orphaned.
-- A page's route and its html are written once and then the project's, `add-page` keeping an
-  html that is already there. Only `sandbox/internal/pageio/` is rewritten by every build, so
-  a fix to the scaffolded route or page reaches a project by
-  `remove-page <p> && add-page <p>`, never on its own.
-- Everything under `assets/frontend/` is hand-written content and survives `front-purge`; the
-  routes reading it do not, because their handlers import `pageio`.
-- A page renders through `pageio.Render` alone, which is what registers `staticref`, `cssref`,
-  `jsref`, `dirref`, `inline` and `include`. A helper pointed at an asset that is not there
-  fails the render, so a dead link is a `500` and never a silent `404`.
-- `pageio.StaticMount` is generated from the trigger value of the first path of the `static`
-  route: the mount is declared in one place, and renaming it moves every link.
-- Whoever edits `sandbox/internal/routeslist/static/InternalPureHandler.go` keeps `safeSegments`: it is the
-  only thing between a caller's path and the rest of the embedded asset tree.
+- A page is a file of `assets/frontend/` and nothing else. The `frontend` route serves the
+  whole tree, so a file dropped there by hand or by a bundler is as much a page as one
+  `add-page` wrote; `add-page` / `remove-page` only write and delete the html.
+- Everything under `assets/frontend/` is the project's content: no build writes there,
+  `add-page` refuses an existing file, and `front-purge` leaves the tree whole.
+- The `frontend` route is written once and then the project's. Only
+  `sandbox/internal/frontio/` is rewritten by every build, and `frontio.SafePath` is what keeps
+  a caller's path inside `assets/frontend/`: the handler resolves every path through it.
+- The `frontend` route runs at priority `1000`, after every api route, and declines a path
+  that names no file, so the `404` stays `handle_not_found.go`'s.
 
-Every helper and every var is in [FrontUsage](../FrontUsage/doc.md).
+How a path is resolved, and a bundler's build, is in [FrontUsage](../FrontUsage/doc.md).
 {{ end }}{{ if .HasDatabase }}
 ## Databases
 

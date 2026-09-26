@@ -1,20 +1,13 @@
 args:
-    - description: the page name (becomes the route, its Go package and the html file)
+    - description: the page, as its path under assets/frontend/ without .html (blog/post; index is the one / answers)
       name: name
       required: true
       type: string
 category: Front System
 examples:
-    - add-page home --trigger / --title Home
     - add-page about --title About
+    - add-page blog/post
 flags:
-    - description: the whole request path the page answers on, / included (defaults to /<name>)
-      examples:
-        - add-page about --trigger /about-us
-      identifiers:
-        - --trigger
-      name: trigger
-      type: string
     - default: .
       description: the dir holding the project (defaults to the current directory)
       identifiers:
@@ -32,12 +25,7 @@ flags:
         - --title
       name: title
       type: string
-    - description: one-line description of the page, for docs/Routes (defaults to one derived from the name)
-      identifiers:
-        - --help
-      name: help
-      type: string
-help: Declare a new html page
+help: Scaffold a new html page under assets/frontend/
 identifiers:
     - add-page
-long-description: Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge.
+long-description: 'Writes assets/frontend/<name>.html, plain html the frontend route serves as soon as it exists: /<name> answers it, and index is the page / answers. A name may carry slashes (blog/post). An existing file is refused. A page is a file and nothing else, so one written by hand or by a bundler is as much a page as one this command scaffolded.'

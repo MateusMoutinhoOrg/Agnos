@@ -32,8 +32,8 @@ func main() {
 	}
 
 	for _, page := range []api.PageProps{
-		{Path: "TestDir", Name: "home", Trigger: "/", Title: "Home"},
 		{Path: "TestDir", Name: "about", Title: "About"},
+		{Path: "TestDir", Name: "blog/post"},
 	} {
 		if err := lib.Actions.AddPage(page); err != nil {
 			panic(err)
@@ -45,12 +45,7 @@ func main() {
 	}
 
 	// What result.yaml records: the same set the cli side copies.
-	for _, dir := range []string{
-		"sandbox/internal/routeslist",
-		"assets/frontend/pages",
-	} {
-		copyTree("TestDir/"+dir, "AssertDir/"+dir)
-	}
+	copyTree("TestDir/assets/frontend", "AssertDir/assets/frontend")
 }
 
 // copyTree copies every file under source into dest, keeping the place each

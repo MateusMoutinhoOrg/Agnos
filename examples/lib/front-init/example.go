@@ -31,11 +31,11 @@ func main() {
 		panic(err)
 	}
 
-	// What result.yaml records: the same set the cli side copies — the render
-	// layer, the route serving the static tree, and that tree's skeleton.
+	// What result.yaml records: the same set the cli side copies — the file
+	// layer, the route serving assets/frontend, and that tree's index.html.
 	for _, dir := range []string{
-		"sandbox/internal/pageio",
-		"sandbox/internal/routeslist/static",
+		"sandbox/internal/frontio",
+		"sandbox/internal/routeslist/frontend",
 		"assets/frontend",
 	} {
 		copyTree("TestDir/"+dir, "AssertDir/"+dir)

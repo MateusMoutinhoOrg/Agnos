@@ -6,12 +6,11 @@
 agnos start --path TestDir --project-name Test --module Test -q
 agnos front-init --path TestDir -q
 
-agnos add-page home --trigger / --title "Home" --path TestDir
+agnos add-page about --title "About" --path TestDir
+agnos add-page blog/post --path TestDir -q
 
-# What result.yaml records: the two halves of a page — the route that answers it
-# and the html it renders — plus the new.go the follow-up build generated
-# from the declaration.
-mkdir -p AssertDir/sandbox/internal/routeslist/home
-cp -R TestDir/sandbox/internal/routeslist/home/. AssertDir/sandbox/internal/routeslist/home/
-mkdir -p AssertDir/assets/frontend/pages
-cp TestDir/assets/frontend/pages/home.html AssertDir/assets/frontend/pages/home.html
+# What result.yaml records: the whole of what a page is — one html file under
+# assets/frontend, beside the index.html front-init wrote. No route is
+# declared: the frontend route serves every file of that tree.
+mkdir -p AssertDir/assets/frontend
+cp -R TestDir/assets/frontend/. AssertDir/assets/frontend/

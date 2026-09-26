@@ -84,14 +84,14 @@ project with no CLI gets one first: a server needs a command that starts it.
 ## Add the front layer
 
 ```bash
-agnos front-init                  # pageio, the static route, assets/frontend/
-agnos add-page home --trigger /   # a page answering GET /
-agnos start-server             # serves it
+agnos front-init      # frontio, the frontend route, assets/frontend/index.html
+agnos start-server  # serves every file of assets/frontend
 ```
 
-From there `agnos add-page <name>` declares a page and `remove-page` drops it,
-html included. A project with no server layer gets one first: a page is answered over http.
-`agnos front-purge` removes the layer again, leaving `assets/frontend/` alone.
+From there any file under `assets/frontend/` is served; `agnos add-page <name>`
+scaffolds an html one and `remove-page` deletes it. A project with no server layer gets one
+first: the front is answered over http. `agnos front-purge` removes the layer
+again, leaving `assets/frontend/` alone.
 
 ## Add the database layer
 

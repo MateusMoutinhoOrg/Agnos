@@ -51,11 +51,6 @@ var followUps = map[string][]followUp{
 	"rename-route": {
 		{"show-route", "Look at the route under its new name", "name", "route"},
 	},
-	"add-page": {
-		{"add-parameter", "Declare a value it reads from the query or a header", "name", "route"},
-		{"add-path", "Read one more slice of its path", "name", "route"},
-		{"show-route", "Look at what it declares so far", "name", "route"},
-	},
 	"import-body": {
 		{"show-route", "Look at what the route declares now", "route", "route"},
 		{"set-body-field", "Change one of the properties it read", "route", "route"},
@@ -139,7 +134,6 @@ var followUps = map[string][]followUp{
 // a follow-up carrying "Create User" would name a route that does not exist.
 var carriedNames = map[string]bool{
 	"add-route":    true,
-	"add-page":     true,
 	"add-command":  true,
 	"add-database": true,
 	"add-table":    true,

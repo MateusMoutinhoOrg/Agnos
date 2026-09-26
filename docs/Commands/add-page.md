@@ -1,28 +1,26 @@
 # `add-page`
 
-Declare a new html page
+Scaffold a new html page under assets/frontend/
 
 ```bash
-agnos add-page [--trigger <trigger>] [--path <path>] [--quiet] [--title <title>] [--help <help>] <name>
+agnos add-page [--path <path>] [--quiet] [--title <title>] <name>
 ```
 
-Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge.
+Writes assets/frontend/<name>.html, plain html the frontend route serves as soon as it exists: /<name> answers it, and index is the page / answers. A name may carry slashes (blog/post). An existing file is refused. A page is a file and nothing else, so one written by hand or by a bundler is as much a page as one this command scaffolded.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
-| `--trigger` | string |  | the whole request path the page answers on, / included (defaults to /<name>) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output |
 | `--title` | string |  | the <title> the scaffolded page carries (defaults to the page name) |
-| `--help` | string |  | one-line description of the page, for docs/Routes (defaults to one derived from the name) |
 
 | Argument | Type | Default | Description |
 | --- | --- | --- | --- |
-| `name` | string, required |  | the page name (becomes the route, its Go package and the html file) |
+| `name` | string, required |  | the page, as its path under assets/frontend/ without .html (blog/post; index is the one / answers) |
 
 ```bash
-agnos add-page home --trigger / --title Home
 agnos add-page about --title About
+agnos add-page blog/post
 ```
 
 Front System · [every command](doc.md) · [EntriesYaml](../EntriesYaml/doc.md)

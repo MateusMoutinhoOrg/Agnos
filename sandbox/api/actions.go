@@ -502,17 +502,14 @@ type RouteBodyImportProps struct {
 	InferFormat bool
 }
 
-// PageProps describes one html page to declare: the project directory, the
-// name the page carries (it becomes the route, its Go package and the html
-// file), the literal path segment it answers on ("" defaults to /<name>), the
-// <title> the scaffolded html carries ("" defaults to the name) and the
-// one-line help its route.yaml is declared with ("" derives one from the name).
+// PageProps describes one html page to scaffold: the project directory, the
+// name the page carries — its path under assets/frontend/ without the .html,
+// slashes allowed ("blog/post"), "index" the page "/" answers — and the
+// <title> the scaffolded html carries ("" defaults to the name).
 type PageProps struct {
-	Path    string
-	Name    string
-	Trigger string
-	Title   string
-	Help    string
+	Path  string
+	Name  string
+	Title string
 }
 
 // DocProps describes one doc to create under docs/. Name is the doc's
@@ -765,21 +762,21 @@ type Actions struct {
 	// tree, ready to print.
 	ShowDatabase func(path string, database string) ([]string, error)
 
-	// FrontInit adds the html front layer (sandbox/internal/pageio, the
-	// route serving assets/frontend/static and that tree's skeleton) to a
+	// FrontInit adds the front layer (sandbox/internal/frontio, the route
+	// serving every file of assets/frontend and that tree's index.html) to a
 	// project that has none, installing the server layer first when it is
 	// missing.
 	FrontInit func(path string) error
 
-	// FrontPurge removes the front layer, the static route and the route of
-	// every declared page, leaving assets/frontend/ untouched.
+	// FrontPurge removes the front layer and the frontend route, leaving
+	// assets/frontend/ untouched.
 	FrontPurge func(path string) error
 
-	// AddPage declares a new html page: the route that answers it and the
-	// html template under assets/frontend/pages/ that it renders.
+	// AddPage scaffolds a new html page, assets/frontend/<name>.html, which
+	// the frontend route serves as soon as it exists.
 	AddPage func(props PageProps) error
 
-	// RemovePage deletes one page, its route and its html template both.
+	// RemovePage deletes one page, assets/frontend/<name>.html.
 	RemovePage func(path string, name string) error
 
 	// AddDoc creates one doc directory under docs/, with its props.yaml and

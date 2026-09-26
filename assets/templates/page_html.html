@@ -3,12 +3,10 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>{{ "{{ .Title }}" }}</title>
-    {{ "{{ dirref \"styles\" }}" }}
-    {{ "{{ dirref \"scripts\" }}" }}
+    <title>{{html .Title}}</title>
   </head>
   <body>
-    <h1>{{ "{{ .Title }}" }}</h1>
-    <p>{{ "{{ .Message }}" }}</p>
+    <h1>{{html .Title}}</h1>
+    <p>served from assets/frontend/{{html .File}}</p>
   </body>
 </html>

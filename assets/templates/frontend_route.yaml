@@ -1,0 +1,11 @@
+methods:
+    - GET
+priority: 1000
+response-type: text/html; charset=utf-8
+paths:
+    - id: Rest
+      description: the file under assets/frontend; none is its index.html
+      start: 0
+      end: -1
+category: Assets
+help: Serves any file of the embedded assets/frontend tree

@@ -18,23 +18,12 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Name = "add_page"
 	command.Identifiers = []string{"add-page"}
 	command.Category = "Front System"
-	command.Help = "Declare a new html page"
-	command.LongDescription = "Declares the route that answers the page and writes the html template it renders under assets/frontend/pages/. The trigger defaults to /<name>; --trigger / declares the home page. An html file already there is kept, which is the way back from a front-purge."
-	command.Examples = []string{"add-page home --trigger / --title Home", "add-page about --title About"}
+	command.Help = "Scaffold a new html page under assets/frontend/"
+	command.LongDescription = "Writes assets/frontend/<name>.html, plain html the frontend route serves as soon as it exists: /<name> answers it, and index is the page / answers. A name may carry slashes (blog/post). An existing file is refused. A page is a file and nothing else, so one written by hand or by a bundler is as much a page as one this command scaffolded."
+	command.Examples = []string{"add-page about --title About", "add-page blog/post"}
 	command.Hidden = false
 
 	command.Flags = []api.CommandFlag{
-		{
-			Id:          "trigger",
-			Type:        "string",
-			Required:    false,
-			Array:       false,
-			Description: "the whole request path the page answers on, / included (defaults to /<name>)",
-			Examples:    []string{"add-page about --trigger /about-us"},
-			Default:     "",
-			HasDefault:  false,
-			Identifiers: []string{"--trigger"},
-		},
 		{
 			Id:          "path",
 			Type:        "string",
@@ -68,17 +57,6 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			HasDefault:  false,
 			Identifiers: []string{"--title"},
 		},
-		{
-			Id:          "help",
-			Type:        "string",
-			Required:    false,
-			Array:       false,
-			Description: "one-line description of the page, for docs/Routes (defaults to one derived from the name)",
-			Examples:    []string{},
-			Default:     "",
-			HasDefault:  false,
-			Identifiers: []string{"--help"},
-		},
 	}
 
 	command.Args = []api.CommandArg{
@@ -87,7 +65,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Type:        "string",
 			Required:    true,
 			Array:       false,
-			Description: "the page name (becomes the route, its Go package and the html file)",
+			Description: "the page, as its path under assets/frontend/ without .html (blog/post; index is the one / answers)",
 			Examples:    []string{},
 			Default:     "",
 			HasDefault:  false,

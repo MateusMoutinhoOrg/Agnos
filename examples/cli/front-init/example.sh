@@ -8,13 +8,13 @@ agnos start --path TestDir --project-name Test --module Test -q
 agnos front-init --path TestDir
 
 # What result.yaml records: the paths this example asserts, copied out of
-# TestDir. sandbox/internal/routeslist/static proves the server layer came with it —
-# a page is answered over http — and assets/frontend holds the skeleton the
-# helpers link against, which //go:embed would not keep if it were empty.
-mkdir -p AssertDir/sandbox/internal/pageio
-cp -R TestDir/sandbox/internal/pageio/. AssertDir/sandbox/internal/pageio/
-mkdir -p AssertDir/sandbox/internal/routeslist/static
-cp -R TestDir/sandbox/internal/routeslist/static/. AssertDir/sandbox/internal/routeslist/static/
+# TestDir. sandbox/internal/routeslist/frontend proves the server layer came
+# with it — the front is answered over http — and assets/frontend holds the
+# index.html "/" answers, which also keeps //go:embed from dropping the tree.
+mkdir -p AssertDir/sandbox/internal/frontio
+cp -R TestDir/sandbox/internal/frontio/. AssertDir/sandbox/internal/frontio/
+mkdir -p AssertDir/sandbox/internal/routeslist/frontend
+cp -R TestDir/sandbox/internal/routeslist/frontend/. AssertDir/sandbox/internal/routeslist/frontend/
 mkdir -p AssertDir/assets/frontend
 cp -R TestDir/assets/frontend/. AssertDir/assets/frontend/
 

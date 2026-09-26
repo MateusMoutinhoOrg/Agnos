@@ -150,8 +150,10 @@ editing only the rendered copy is undone in silence.
   may not import `sandbox/internal/server/server` — that package imports every route. A failure the dispatch
   raises with nothing to add carries no message, so the wording is the one that file spells;
   that is what makes editing it change what the server says.
-- A page is a route with `assets/frontend/pages/<page>.html` beside it — that file is the whole
-  of what tells one from any other route. `remove-route` refuses a route that has one.
+- A page is a file of `assets/frontend/` and nothing else — no route, no declaration. The
+  `frontend` route `front-init` writes (priority `1000`, after every api route) serves the whole
+  tree through the generated `sandbox/internal/frontio/`, whose `SafePath` keeps a caller's path
+  inside it; a path naming no file is declined, so the `404` stays `handle_not_found.go`'s.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
   reverse.
 
@@ -185,7 +187,8 @@ contract/adapter pairs are hand-written; everything else is generated.
 binds a command line onto a copy of the matched declaration, and a handler reads its values by
 the id its `entries.yaml` declares — `command.GetString("path")`, `command.GetBool("quiet")`.
 `sandbox.Server.Routes` is the http surface the same way, and the server layer mirrors the cli
-layer file for file. The front layer declares no unit of its own: a page **is** a route.
+layer file for file. The front layer declares no unit of its own: a page **is** a file of
+`assets/frontend/`, served by one route.
 
 **A database is the one unit with no surface.** `sandbox/internal/databases/<db>/specs.yaml`
 declares tables and fields; `build` renders `api.go` (the `<T>Item`/`<T>New`/`<T>Filtrage`

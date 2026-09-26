@@ -172,38 +172,25 @@ project with no CLI gets one first: a server needs a command that starts it.
 ## Change the page surface
 
 ```bash
-{{.GeneratorName}} add-page <name> --trigger /<path> --title "One Line"
-{{.GeneratorName}} remove-page <name>                             # the route and the html both
+{{.GeneratorName}} add-page <name> --title "One Line"   # assets/frontend/<name>.html, answered on /<name>
+{{.GeneratorName}} remove-page <name>                   # deletes the html
 ```
 
-`add-page` writes the route that answers the page (`route.yaml` + a `handler.go` rendering
-through `pageio`) and `assets/frontend/pages/<name>.html`, then generates its `new.go` like
-any other route's. A page **is** a route, so every editor of
-[RouteYaml](../RouteYaml/doc.md) works on its declaration and [Routes](../Routes/doc.md)
-documents it.
-
-Then write the html, naming assets rather than hardcoding links:
-
-```html
-{{"{{ dirref \"styles\" }}"}}
-<h1>{{"{{ .Title }}"}}</h1>
-```
-
-Every `{{"{{ .Field }}"}}` of the page is one exported field of the `pageVars` struct in its
-handler, so a new variable is a compile error until it is declared.
-[FrontUsage](../FrontUsage/doc.md) is the whole recipe.
+A page is a file of `assets/frontend/`, served as it is by the `frontend` route: write it by
+hand, scaffold it with `add-page`, or point a bundler's output there. Data comes from api
+routes the page's js calls. [FrontUsage](../FrontUsage/doc.md) is the whole recipe.
 {{- else }}
 ## Add the front layer
 
 ```bash
-{{.GeneratorName}} front-init                  # pageio, the static route, assets/frontend/
-{{.GeneratorName}} add-page home --trigger /   # a page answering GET /
-{{.Name}} start-server             # serves it
+{{.GeneratorName}} front-init      # frontio, the frontend route, assets/frontend/index.html
+{{.Name}} start-server  # serves every file of assets/frontend
 ```
 
-From there `{{.GeneratorName}} add-page <name>` declares a page and `remove-page` drops it,
-html included. A project with no server layer gets one first: a page is answered over http.
-`{{.GeneratorName}} front-purge` removes the layer again, leaving `assets/frontend/` alone.
+From there any file under `assets/frontend/` is served; `{{.GeneratorName}} add-page <name>`
+scaffolds an html one and `remove-page` deletes it. A project with no server layer gets one
+first: the front is answered over http. `{{.GeneratorName}} front-purge` removes the layer
+again, leaving `assets/frontend/` alone.
 {{- end }}
 {{ if .HasDatabase }}
 ## Change the database surface
@@ -343,7 +330,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | a route answers something |
 {{- end }}
 {{- if .HasFront }}
-| `assets/frontend/pages/<page>.html`, `assets/frontend/static/**` | a page looks like something |
+| `assets/frontend/**` | the site looks like something |
 {{- end }}
 | `sandbox/internal/<pkg>/*.go` | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |

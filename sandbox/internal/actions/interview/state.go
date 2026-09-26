@@ -43,7 +43,7 @@ var areas = []area{
 	{"Core Commands", "build it, check it, install it, publish it", ""},
 	{"Cli System", "the commands your program answers to", utils.ExtensionSandboxCli},
 	{"Server System", "the http routes your program answers", utils.ExtensionSandboxServer},
-	{"Front System", "the html pages your server serves", utils.ExtensionSandboxFront},
+	{"Front System", "a website your server serves: any html, css or js you put in assets/frontend", utils.ExtensionSandboxFront},
 	{"Database System", "the records your program stores and reads back", utils.ExtensionSandboxDatabase},
 	{"Deps System", "the libraries your program is allowed to use", utils.ExtensionSandboxDeps},
 	{"Documentation", "the docs/ tree of this project", utils.ExtensionDoc},
@@ -84,15 +84,16 @@ var extensionInit = map[string]string{
 }
 
 // scaffoldedUnits are the units an init writes for itself: help and version
-// from assets/sandbox-cli/, health from assets/sandbox-server/, and the static
-// route front-init scaffolds. A layer holding nothing else has no unit of its
-// own yet — which is what makes "declare its first one" the step after its
+// from assets/sandbox-cli/, health from assets/sandbox-server/, and the
+// frontend route and the index page front-init scaffolds. A layer holding
+// nothing else has no unit of its own yet — which is what makes "declare its first one" the step after its
 // init, instead of a step no project ever sees.
 var scaffoldedUnits = map[string]bool{
-	"help":    true,
-	"version": true,
-	"health":  true,
-	"static":  true,
+	"help":     true,
+	"version":  true,
+	"health":   true,
+	"frontend": true,
+	"index":    true,
 }
 
 // projectState is the project at --path as the menus need it: whether there is

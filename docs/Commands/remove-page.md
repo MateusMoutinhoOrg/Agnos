@@ -1,12 +1,12 @@
 # `remove-page`
 
-Remove an html page
+Remove an html page from assets/frontend/
 
 ```bash
 agnos remove-page [--path <path>] [--quiet] <name>
 ```
 
-Deletes the page's route package and its html template both. A route with no html beside it is not a page: remove-route is the editor for those.
+Deletes assets/frontend/<name>.html. The name is spelled as add-page spells it: the path under assets/frontend/ without .html.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
