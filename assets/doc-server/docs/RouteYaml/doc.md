@@ -2,9 +2,9 @@
 
 `sandbox/internal/routeslist/<name>/route.yaml` declares one http route. `{{.GeneratorName}} build`
 generates two files beside it: `new.go`, the `api.Route` that lands in `Server.Routes` — a 1:1
-image of the yaml, built on the generic base of `sandbox/internal/server/route` — and
+image of the yaml, built on the generic base of `sandbox/internal/generated/server/route` — and
 `entries.go`, the `Entries` struct the route's `InternalPureHandler` is handed, plus the
-`ReadBody` its body calls for. The dispatch in `sandbox/internal/server/server/servermain.go` is
+`ReadBody` its body calls for. The dispatch in `sandbox/internal/generated/server/server/servermain.go` is
 generic: it reads every request against those declarations, and nothing about a route is spelled
 in Go anywhere else.
 
@@ -337,7 +337,7 @@ return routeio.Fail(sandbox, route, api.StatusFailure, "", "not authorized")
 ```
 
 It reaches the right file through `sandbox.Server.Fail`, which is a field on the api rather than
-a call, because a route package may not import `sandbox/internal/server/server` — that package
+a call, because a route package may not import `sandbox/internal/generated/server/server` — that package
 imports every route. `routeio.WriteError` is the writer underneath, and the default body every one of
 them produces is `{"error": "...", "field": "..."}`, logged on `deps.Std.Log` as it is written.
 

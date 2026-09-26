@@ -3,7 +3,7 @@ package errors
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/routeio"
+	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 
 // HandleUnauthorized answers a request a route refused for carrying no valid

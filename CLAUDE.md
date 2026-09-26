@@ -147,12 +147,12 @@ editing only the rendered copy is undone in silence.
 - Nothing in the dispatch writes a response: every failure goes through `routeio.Fail` to one of
   the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and never
   rewrites. `Fail` reaches them through the `Fail` field of `api.Server` because a route package
-  may not import `sandbox/internal/server/server` — that package imports every route. A failure the dispatch
+  may not import `sandbox/internal/generated/server/server` — that package imports every route. A failure the dispatch
   raises with nothing to add carries no message, so the wording is the one that file spells;
   that is what makes editing it change what the server says.
 - A page is a file of `assets/frontend/` and nothing else — no route, no declaration. The
   `frontend` route `front-init` writes (priority `1000`, after every api route) serves the whole
-  tree through the generated `sandbox/internal/frontio/`, whose `SafePath` keeps a caller's path
+  tree through the generated `sandbox/internal/generated/frontio/`, whose `SafePath` keeps a caller's path
   inside it; a path naming no file is answered `404` with the `assets/frontend/404.html`
   `front-init` writes, and declined only when that file is gone.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
@@ -168,7 +168,9 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 - **`sandbox/`** — the closed core. It imports only `sandbox/` packages, the stdlib included, so
   text, sorting, hashing and templating come from `sandbox.Deps.<Contract>` too. `api/` holds
   contracts, `deps/` dependency contracts, `internal/` the logic, and `constructors/` is the one
-  open list. **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and nothing
+  open list. `internal/generated/` holds every package `build` rewrites whole (cli, config,
+  routeio, frontio, databaseio, server/route, server/server) and nothing hand-written; a package
+  mixing both — a command, a route, a database — stays under `internal/`. **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and nothing
   else standing for the outside world: holding the api is holding everything.
 - **`adapters/`** — the only place OS-bound and third-party code lives.
 - **`assets/`** — every generated file's template, one group per extension; `assets/<group>/<path>`

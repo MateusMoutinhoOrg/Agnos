@@ -8,8 +8,8 @@ tree:
     - file: sandbox/api/sandbox.go
       sha: 7ee634ba18ddf71244bba1900cd34f9fe71d9420ed07caa0771701c8ca3494b8
     - file: sandbox/constructors/config/constructor.go
-      sha: 20b790d9a9e67ed5df67aaa50ae92f02e3910c48ea178a7999bd7c8ff624beac
-    - file: sandbox/internal/config/new.go
+      sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
+    - file: sandbox/internal/generated/config/new.go
       sha: 8d0e3eb9ca1c9698963400613ce190ac150a50f8cdf9b1a8ff6df8b65cf10403
     - file: sandbox/new.go
       sha: f847863fac092efbf9dd16653c97f93915d670927b1d14b8a7570e57540f835e

@@ -20,6 +20,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   [GeneratedFiles](../GeneratedFiles/doc.md), `(gen)` in [Structure](../Structure/doc.md).
   Change the declaration it is rendered from, or the template under `assets/`
   when this project carries one for it, then run `build`.
+- `sandbox/internal/generated/` holds every package `build` rewrites whole and nothing else: no
+  file there is ever edited, and no hand-written package is ever put there. A package mixing a
+  generated file with a hand-written one — a command, a route, a database — stays under
+  `sandbox/internal/`.
 - Generated `.go` is gofmt'ed as it is written, so a regenerated tree diffs to zero against one
   a formatting editor has saved.
 - `build` compiles `./cmd/... ./sandbox/... ./adapters/...`, never `./...`:
@@ -121,7 +125,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A command's `entries.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
   hand: they re-render it with keys in alphabetical order and drop comments.
 - `Cli.Commands` is the whole command surface, one `api.Command` per declared command, built by
-  `sandbox/internal/cli/new.go` from each package's generated `NewCommand`. The dispatch and
+  `sandbox/internal/generated/cli/new.go` from each package's generated `NewCommand`. The dispatch and
   both help screens read it; nothing about the command set is generated per command anywhere
   else. Each run binds to its own copy of the declaration, made by `api.BindCommand`, so what
   the slice holds is never written to.

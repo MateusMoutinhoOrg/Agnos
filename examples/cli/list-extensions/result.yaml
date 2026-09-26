@@ -1,5 +1,5 @@
 cli-output: |
-    sandbox            on   the sandbox core: sandbox/new.go, api/sandbox.go, internal/config
+    sandbox            on   the sandbox core: sandbox/new.go, api/sandbox.go, internal/generated/config
     sandbox-deps       off  the dependency layer: sandbox/deps/, adapters/, availables
     sandbox-cli        off  the cli layer: cmd/main, the dispatch, help and version
     sandbox-server     off  the http layer: server/, routes/, routeio/

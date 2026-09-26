@@ -48,7 +48,7 @@ names no file is then answered with `index.html`. A missing `/app.js` still gets
 
 | Path | Written by | Rewrite |
 |---|---|---|
-| `sandbox/internal/frontio/frontio.go` | `build` | always |
+| `sandbox/internal/generated/frontio/frontio.go` | `build` | always |
 | `docs/FrontUsage/` | `build` | always |
 | `sandbox/internal/routeslist/frontend/{route.yaml,InternalPureHandler.go}` | `front-init` | once |
 | `sandbox/internal/routeslist/frontend/{new.go,entries.go}` | `build` | always |

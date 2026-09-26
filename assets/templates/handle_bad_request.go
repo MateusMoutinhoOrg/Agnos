@@ -3,7 +3,7 @@ package errors
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/routeio"
+	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 
 // HandleBadRequest answers a request a route could not bind: a missing

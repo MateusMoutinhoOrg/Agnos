@@ -8,7 +8,7 @@ import (
 
 // GenerateCommandNew renders assets/templates/new.go once per command into
 // sandbox/internal/commands/<name>/new.go — the api.Command that package
-// declares, derived from its entries.yaml, which sandbox/internal/cli/new.go
+// declares, derived from its entries.yaml, which sandbox/internal/generated/cli/new.go
 // collects into Cli.Commands.
 func GenerateCommandNew(sandbox *api.Sandbox, io *smartio.SmartIO, commands []map[string]any, module string) error {
 	for _, command := range commands {

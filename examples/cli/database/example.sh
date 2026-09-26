@@ -42,8 +42,8 @@ agnos add-table-field at --database app-database --table url --parent visits --t
 # on. The lib side copies the same set.
 mkdir -p AssertDir/sandbox/internal/databases
 cp -R TestDir/sandbox/internal/databases/. AssertDir/sandbox/internal/databases/
-mkdir -p AssertDir/sandbox/internal/databaseio
-cp -R TestDir/sandbox/internal/databaseio/. AssertDir/sandbox/internal/databaseio/
+mkdir -p AssertDir/sandbox/internal/generated/databaseio
+cp -R TestDir/sandbox/internal/generated/databaseio/. AssertDir/sandbox/internal/generated/databaseio/
 mkdir -p AssertDir/docs/Databases
 cp -R TestDir/docs/Databases/. AssertDir/docs/Databases/
 mkdir -p AssertDir/AgnosConfig

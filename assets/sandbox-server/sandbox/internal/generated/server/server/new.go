@@ -2,7 +2,7 @@ package server
 
 import (
 	api "{{.Module}}/sandbox/api"
-	routeio "{{.Module}}/sandbox/internal/routeio"
+	routeio "{{.Module}}/sandbox/internal/generated/routeio"
 	errors "{{.Module}}/sandbox/internal/server/errors"
 {{- range .Routes}}
 	routeslist_{{.Name}} "{{$.Module}}/sandbox/internal/routeslist/{{.Name}}"

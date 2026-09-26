@@ -35,9 +35,10 @@ sandbox/                            closed: imports nothing outside sandbox/, no
     deps.go                         (gen) Deps struct, one <Title> <dir>.Sandbox per dir
     <x>/<x>.go                      type Sandbox struct of func fields
   internal/                         the logic; unreachable from outside the sandbox
-    config/new.go                   (gen) NewConfig(sandbox) api.Config: ProjectName, Version
-    cli/new.go                      (gen) NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain
-    cli/climain.go                  (gen) CliMain, the one dispatch, read off Cli.Commands
+    generated/                      (gen) every package the build rewrites whole; never edited by hand
+      config/new.go                 (gen) NewConfig(sandbox) api.Config: ProjectName, Version
+      cli/new.go                    (gen) NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain
+      cli/climain.go                (gen) CliMain, the one dispatch, read off Cli.Commands
     commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)
     actions/new.go                  NewActions(sandbox) api.Actions: one assignment per action
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)

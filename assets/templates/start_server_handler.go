@@ -2,7 +2,7 @@ package start_server
 
 import (
 	"{{.Module}}/sandbox/api"
-	server "{{.Module}}/sandbox/internal/server/server"
+	server "{{.Module}}/sandbox/internal/generated/server/server"
 )
 
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {

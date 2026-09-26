@@ -38,7 +38,7 @@ cp TestDir/sandbox/internal/routeslist/admin/new.go AssertDir/sandbox/internal/r
 
 # server/server/new.go is where the run order shows: the routes are laid down lowest
 # priority first, and beside them the switch that reaches the six handlers.
-mkdir -p AssertDir/sandbox/internal/server/server AssertDir/sandbox/internal/server/errors
-cp TestDir/sandbox/internal/server/server/new.go AssertDir/sandbox/internal/server/server/new.go
+mkdir -p AssertDir/sandbox/internal/generated/server/server AssertDir/sandbox/internal/server/errors
+cp TestDir/sandbox/internal/generated/server/server/new.go AssertDir/sandbox/internal/generated/server/server/new.go
 cp TestDir/sandbox/internal/server/errors/handle_not_found.go AssertDir/sandbox/internal/server/errors/handle_not_found.go
 cp TestDir/sandbox/internal/server/errors/handle_method_not_allowed.go AssertDir/sandbox/internal/server/errors/handle_method_not_allowed.go

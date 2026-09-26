@@ -3,7 +3,7 @@ package errors
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/routeio"
+	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 
 // HandleTooLarge answers a request body longer than the `max-bytes` its

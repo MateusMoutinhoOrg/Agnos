@@ -19,11 +19,11 @@ sandbox-server: false
 
 | Key | What agnos generates and looks after |
 |---|---|
-| `sandbox` | the core: `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/constructors/<x>/constructor.go`, `sandbox/api/config.go`, `sandbox/internal/config/new.go` |
+| `sandbox` | the core: `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/constructors/<x>/constructor.go`, `sandbox/api/config.go`, `sandbox/internal/generated/config/new.go` |
 | `sandbox-deps` | `sandbox/deps/deps.go`, each available's `new.go`; `add-dep` and the rest of the dependency commands |
 | `sandbox-cli` | `cmd/main`, the dispatch, `help`, `version`, `sandbox/api/{cli,command}.go`; `add-command` and the rest |
 | `sandbox-server` | `sandbox/internal/{server,routeslist,routeio}`, `sandbox/api/{server,route}.go`; `add-route` and the rest |
-| `sandbox-front` | `sandbox/internal/frontio` and the `frontend` route serving `assets/frontend/`; `add-page` and `remove-page` |
+| `sandbox-front` | `sandbox/internal/generated/frontio` and the `frontend` route serving `assets/frontend/`; `add-page` and `remove-page` |
 | `sandbox-database` | `sandbox/internal/{databaseio,databases}`; `add-database`, `add-table`, `add-table-field` and the rest |
 | `sandbox-example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `exec-test`, `update-test` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |

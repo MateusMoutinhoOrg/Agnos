@@ -79,18 +79,24 @@ sandbox:
       dir: true
       description: the logic; unreachable from outside the sandbox
       children:
-        config/new.go:
+        generated:
           order: 1
+          dir: true
           gen: true
-          description: "NewConfig(sandbox) api.Config: ProjectName, Version"
-        cli/new.go:
-          order: 2
-          gen: true
-          description: "NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain"
-        cli/climain.go:
-          order: 3
-          gen: true
-          description: CliMain, the one dispatch, read off Cli.Commands
+          description: every package the build rewrites whole; never edited by hand
+          children:
+            config/new.go:
+              order: 1
+              gen: true
+              description: "NewConfig(sandbox) api.Config: ProjectName, Version"
+            cli/new.go:
+              order: 2
+              gen: true
+              description: "NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain"
+            cli/climain.go:
+              order: 3
+              gen: true
+              description: CliMain, the one dispatch, read off Cli.Commands
         commands/<name>:
           order: 4
           dir: true

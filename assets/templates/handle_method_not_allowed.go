@@ -3,7 +3,7 @@ package errors
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/routeio"
+	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 
 // HandleMethodNotAllowed answers a request whose path a route declares,

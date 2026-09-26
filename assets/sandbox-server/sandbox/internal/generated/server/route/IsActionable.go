@@ -3,7 +3,7 @@ package route
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/routeio"
+	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 
 // IsActionable reports whether one bound route — its Request set — is for the

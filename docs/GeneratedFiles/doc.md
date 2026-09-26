@@ -16,7 +16,7 @@
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
 | `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
 | `sandbox/api/config.go` | `build` | always. The `Config` contract: `ProjectName`, `Version` |
-| `sandbox/internal/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
+| `sandbox/internal/generated/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
 | `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |
 | `docs/PublicApi/<contract>.md` | `build` | always. One page per file of `sandbox/api/` and per contract of `sandbox/deps/`; `docs/PublicApi/doc.md` indexes them by the symbols each declares |
@@ -34,8 +34,8 @@
 | `docs/Commands/<command>.md` | `build` | always. One page per visible command; `docs/Commands/doc.md` indexes them |
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
-| `sandbox/internal/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
-| `sandbox/internal/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
+| `sandbox/internal/generated/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
+| `sandbox/internal/generated/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
 | `sandbox/internal/commands/help/{entries.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/commands/version/{entries.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command` |
@@ -46,7 +46,8 @@
 | `examples/lib/<name>/example.go` | `add-lib-example` | once. A stub that already runs |
 | `examples/<side>/<name>/result.yaml` | `exec-test` | on `update-test <name>`, on `--update` or when absent — never by hand |
 
-Everything not listed is yours: `sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
+Everything under `sandbox/internal/generated/` is `always`. Everything not listed is yours:
+`sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
 and `sandbox/deps/` that you write, their `sandbox/internal/<x>/new.go` and `adapters/libs/`
 halves, and any
 directory of `adapters/availables/` other than `standard`.

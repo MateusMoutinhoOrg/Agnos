@@ -7,13 +7,13 @@ tree:
       sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
     - file: assets/frontend/index.html
       sha: 732abc93f6ea971bd74abce29385273fe101c5105ad2e60b8268ba24ee2fbd23
-    - file: sandbox/internal/frontio/frontio.go
+    - file: sandbox/internal/generated/frontio/frontio.go
       sha: 97ee5fbd362161ec3d68f434591f5cdad5bfe8ba350216f6480669ec01199e86
     - file: sandbox/internal/routeslist/frontend/InternalPureHandler.go
-      sha: 46bd9e8238d87808c53c643249ecc3f9d076436789265e618639b2f4dd951d56
+      sha: 69e858e0157dfe0023bdf3a1803034ba0883b8ae4c68f43e1b885561ef6b02fb
     - file: sandbox/internal/routeslist/frontend/entries.go
       sha: 033d1c89c510c37f469a3b16edcf893f21a9da6c8cb2c02e737b1316c7dba463
     - file: sandbox/internal/routeslist/frontend/new.go
-      sha: df5acc6c0b9da61383633810272a0ee6eb39fdea44f714d1470335b5a3b93c6c
+      sha: 7a2cf76460800cbfb01a679320edf2892ae849719460b10325c7a732d5d330d5
     - file: sandbox/internal/routeslist/frontend/route.yaml
       sha: 5668920287a070b50cb1b32992664036a8e74f325e1fdc06aefa0075fb08d3f9

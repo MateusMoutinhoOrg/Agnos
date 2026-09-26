@@ -48,7 +48,7 @@ bootstrap; nenhum arquivo gerado é editado à mão.
 | `text-prefix` (novo nome do comportamento atual) | qualquer texto que comece com `/admin` |
 | `equal`, `suffix`, `regex` | sem mudança |
 
-`MatchTrigger` (`assets/sandbox-server/sandbox/internal/server/route/IsActionable.go`):
+`MatchTrigger` (`assets/sandbox-server/sandbox/internal/generated/server/route/IsActionable.go`):
 
 ```go
 case api.PrefixTrigger:
@@ -188,7 +188,7 @@ Locals map[string]any
 - `dispatch` cria `locals := map[string]any{}` **uma vez por request** e faz
   `bound.Locals = locals` em cada `BindRoute`.
 - Handlers de erro (`failRequest`, `recoverRoute`) recebem o mesmo mapa.
-- Helpers tipados em `assets/sandbox-server/sandbox/internal/routeio/locals.go`:
+- Helpers tipados em `assets/sandbox-server/sandbox/internal/generated/routeio/locals.go`:
 
 ```go
 func SetLocal(route *api.Route, key string, value any)

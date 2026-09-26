@@ -6,7 +6,7 @@ import (
 {{- if .Body.IsJson}}
 	serializables "{{.Module}}/sandbox/deps/serializables"
 {{- end}}
-	"{{.Module}}/sandbox/internal/routeio"
+	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 {{- end}}
 

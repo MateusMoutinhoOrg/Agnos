@@ -15,6 +15,13 @@ const ConstructorsDir = "sandbox/constructors"
 // in, the one name sandbox/new.go's import of that package resolves against.
 const ConstructorFile = "constructor.go"
 
+// GeneratedDir is the project-relative directory holding every package the
+// build rewrites whole — cli, config, routeio, frontio, databaseio and the
+// server's route and server. Nothing under it is the project's to edit; the
+// packages that mix a generated file with a hand-written one (a command, a
+// route, a database) stay beside it under sandbox/internal/.
+const GeneratedDir = "sandbox/internal/generated"
+
 // ConstructorDir is the project-relative directory of one constructor package.
 func ConstructorDir(name string) string {
 	return ConstructorsDir + "/" + name
@@ -27,14 +34,21 @@ func ConstructorPath(name string) string {
 }
 
 // ConstructorSource is the project-relative package whose New<Name> builds one
-// contract of sandbox/api/: sandbox/internal/<name>, or
-// sandbox/internal/<name>/<name> when the layer splits its package into
-// several — the server's route, server and errors — and keeps the one that
-// builds the contract under its own name one level down.
+// contract of sandbox/api/. A generated layer lives under GeneratedDir —
+// sandbox/internal/generated/<name>, or sandbox/internal/generated/<name>/<name>
+// when the layer splits its package into several (the server's route and
+// server) and keeps the one that builds the contract under its own name one
+// level down. A contract the project writes itself lives at
+// sandbox/internal/<name>, with the same one-level-down fallback.
 func ConstructorSource(io *smartio.SmartIO, name string) string {
-	nested := "sandbox/internal/" + name + "/" + name
-	if io.IsFile(nested + "/new.go") {
-		return nested
+	for _, root := range []string{GeneratedDir, "sandbox/internal"} {
+		nested := root + "/" + name + "/" + name
+		if io.IsFile(nested + "/new.go") {
+			return nested
+		}
+		if io.IsFile(root + "/" + name + "/new.go") {
+			return root + "/" + name
+		}
 	}
 	return "sandbox/internal/" + name
 }

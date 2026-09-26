@@ -4,46 +4,36 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
     - file: sandbox/api/route.go
-      sha: 43aa49e05704d91aaa7d5c7fd7da2a01ee2e8b7a3c689343f5edd3f71699de1b
+      sha: 97f6f821553243a10858774d6fbad74f2129e65ac5a2e61dd92d47862a5e77ad
     - file: sandbox/api/server.go
-      sha: b203e4edff24d5f4c5b89f5252777aa3f3177dac253b2a20566e165af3f96878
+      sha: e8e757042b8a405c6a5de25edf04634144f766354efd5da17cf8b6ecd84eccc2
     - file: sandbox/internal/commands/start_server/entries.yaml
       sha: 0dbc8a9c41944e2116a1295ac9b84cface1e656ef314ecbfe0e53d8e7b42f87a
     - file: sandbox/internal/commands/start_server/handler.go
-      sha: e201cdbeee861b98487615bc2420fbcb0fd9d704de9d7de7dd4c260a9739d935
+      sha: 30ad4e5d6059be34487c619411833c6277227d9ae2a2a05e27c9c708adc3800f
     - file: sandbox/internal/commands/start_server/new.go
-      sha: db6c7d29910b07c28f99ad0f25a95c547c65c6b9f25e4385878bc45e8ab73908
+      sha: ac009770762a583fa2d15de330b02ff768536d4036e6a67fc8622b62533079b2
     - file: sandbox/internal/routeslist/health/InternalPureHandler.go
       sha: a3a1d774ea62c9c24f5c49e8f0706324da6f0828563a09d85e671e19593b29bd
     - file: sandbox/internal/routeslist/health/entries.go
       sha: b0283d2aeae2ae3560211d1c2b191081ca4cda8a70d5e4fcf8c8c514c7e6f391
     - file: sandbox/internal/routeslist/health/new.go
-      sha: 393db4682c16277dc854f3bac073493fa2aad26e698602c71347cb42fa5dd829
+      sha: d8cc16464e5a34293ebc13c3f3e9ba48cbd17f9d61c7d63ed71ad4df1c172c3e
     - file: sandbox/internal/routeslist/health/route.yaml
       sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9
     - file: sandbox/internal/server/errors/handle_bad_request.go
-      sha: ac0eb5b1f842a6a0f878af1c948b9a5d368278c0a49c6327aee29ed33326075e
+      sha: 5537acd9381a80d79951f7f9b1ee3bccae4921829500054c3d10a178ea578721
     - file: sandbox/internal/server/errors/handle_forbidden.go
-      sha: 6b29ae0b40c14972b9654214bdcef65b503717699d07b56e8f777d75f883d9e4
+      sha: 7a8b893b12879d894572dd4093f26d3d5ab2e1bb9f31fdd9ea8b90ad110d49cb
     - file: sandbox/internal/server/errors/handle_method_not_allowed.go
-      sha: 479403c4df7038f1efa6f4d82ae70750955254f21e114b68f7ca4631474f345d
+      sha: 9c2070aba9c11bfcde4ec8901815f3aa377b38e81e08a34d7b16c875c1fbe06e
     - file: sandbox/internal/server/errors/handle_not_found.go
-      sha: 56b9f6190455dfa77b7a9f169928d7aa15386a084be37610f4be1e668d818e7a
+      sha: 370197b74a9ce986d4dbbcf7aa7a1edde0c45b14f5b839dff468c55ee52d868a
     - file: sandbox/internal/server/errors/handle_server_error.go
-      sha: 9d618fca973e57f17a392888e531f7461c37750eee5015281a82b0cb1bc5aa06
+      sha: ea1f86fe3c68711e1bd5892366fa3f092701e02309a353730f6ebbbee889a127
     - file: sandbox/internal/server/errors/handle_too_large.go
-      sha: 758af7045e2dbbc80d3bb0e4c11673da12464f112bf5378386f9f630e3021174
+      sha: 8497d34310e24966201d8ec31c45e63273389455f3edc626f1fe48d26e001e2d
     - file: sandbox/internal/server/errors/handle_unauthorized.go
-      sha: 48916c2c34b31b89320d926e9fd97d2e52385cd428a3ff1919de2eebf1303d18
+      sha: 013aab03cab814ce4701a431f2deea85153527161145ae39056329d78c0f6b97
     - file: sandbox/internal/server/errors/handle_wrong_content_type.go
-      sha: 61db547b7e2ed28aac86efb8d1ec0b6e8e1462045617c8854ede1e14a2da08d8
-    - file: sandbox/internal/server/route/IsActionable.go
-      sha: 719215304ffb0d1212f15c12cfbf25fd0e1a74f8d7182947be96ef9a7a428181
-    - file: sandbox/internal/server/route/RequestHandler.go
-      sha: 797bb845da48e673929702ad727effe67553a00c6da02b781d2485d4c015a49f
-    - file: sandbox/internal/server/route/new.go
-      sha: ef5c5a11694a705302a6bde4f7ee1e7fd8601552df4036101d1dd34106161273
-    - file: sandbox/internal/server/server/new.go
-      sha: a52b14299f5268d65a613fa2d710cebdd9c82c817c7dfb2e6805da1b32101fe4
-    - file: sandbox/internal/server/server/servermain.go
-      sha: 4da540a0bdd3a278ea4cfa6154cad1fbb5a72718ccc3247033ea855b73f97ffe
+      sha: 077a57e723f32854f7a2fdd031c9a0d16b810faac74fa1ac7e6aa116f63ab94f

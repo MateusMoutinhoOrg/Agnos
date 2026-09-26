@@ -10,7 +10,7 @@ import (
 // assets/templates/route_entries.go once per route into
 // sandbox/internal/routeslist/<name>/: new.go, the api.Route that package
 // declares — a 1:1 image of its route.yaml — which
-// sandbox/internal/server/server/new.go collects into Server.Routes, and
+// sandbox/internal/generated/server/server/new.go collects into Server.Routes, and
 // entries.go, the Entries struct its InternalPureHandler is handed plus the
 // ReadBody its body declaration calls for. It is the server layer's
 // GenerateCommandNew; the module path is merged in because both files import

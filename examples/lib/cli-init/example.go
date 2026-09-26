@@ -34,7 +34,7 @@ func main() {
 	if err := os.CopyFS("AssertDir/cmd", os.DirFS("TestDir/cmd")); err != nil {
 		panic(err)
 	}
-	if err := os.CopyFS("AssertDir/sandbox/internal/cli", os.DirFS("TestDir/sandbox/internal/cli")); err != nil {
+	if err := os.CopyFS("AssertDir/sandbox/internal/generated/cli", os.DirFS("TestDir/sandbox/internal/generated/cli")); err != nil {
 		panic(err)
 	}
 	if err := os.CopyFS("AssertDir/sandbox/internal/commands", os.DirFS("TestDir/sandbox/internal/commands")); err != nil {

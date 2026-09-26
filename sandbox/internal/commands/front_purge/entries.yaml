@@ -17,4 +17,4 @@ flags:
 help: Remove the html front layer from the project
 identifiers:
     - front-purge
-long-description: 'Removes sandbox/internal/frontio and the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project''s content, so front-init puts the route back over it.'
+long-description: 'Removes sandbox/internal/generated/frontio and the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project''s content, so front-init puts the route back over it.'

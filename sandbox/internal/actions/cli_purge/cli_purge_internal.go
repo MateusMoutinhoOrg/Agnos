@@ -22,7 +22,7 @@ import (
 // them. Removing only the installed two would leave a directory of pages with
 // no props.yaml, which every later build reads as a doc that fails to load.
 var cliDirs = []string{
-	"sandbox/internal/cli",
+	utils.GeneratedDir + "/cli",
 	"sandbox/internal/commands",
 	"docs/Commands",
 	utils.ConstructorDir("cli"),

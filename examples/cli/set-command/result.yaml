@@ -16,4 +16,4 @@ tree:
     - file: sandbox/internal/commands/greet/handler.go
       sha: b65d5636e16aceb058b357657c83779be3fc7a7011fa779a60328f3929d0c27a
     - file: sandbox/internal/commands/greet/new.go
-      sha: a0e6a61c1c0eae09c03b13f82d8c3f50aac241cf02d492904c85fe7546c679a8
+      sha: 2ca058a34dde47dd5bcb00ed260719f94cebfb7f703360b09b6ada5dc4da5b5e

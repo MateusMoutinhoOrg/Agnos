@@ -6,7 +6,7 @@ import (
 
 // NewCommand builds this command's declaration — the whole of what its
 // entries.yaml says — and closes CommandHandler over the sandbox as the
-// handler behind it. It is called once, by sandbox/internal/cli/new.go, and
+// handler behind it. It is called once, by sandbox/internal/generated/cli/new.go, and
 // what it returns is one entry of Cli.Commands: the declaration alone, which
 // the dispatch copies with api.BindCommand before binding a command line onto
 // it.
@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"front-init"}
 	command.Category = "Front System"
 	command.Help = "Add the html front layer to the project"
-	command.LongDescription = "Installs the deps the front layer needs, renders sandbox/internal/frontio and writes, once, the frontend route serving every file of assets/frontend and that tree's index.html and 404.html. A project with no server layer is given one first: the front is answered over http."
+	command.LongDescription = "Installs the deps the front layer needs, renders sandbox/internal/generated/frontio and writes, once, the frontend route serving every file of assets/frontend and that tree's index.html and 404.html. A project with no server layer is given one first: the front is answered over http."
 	command.Examples = []string{"front-init", "front-init --path ./my-project"}
 	command.Hidden = false
 

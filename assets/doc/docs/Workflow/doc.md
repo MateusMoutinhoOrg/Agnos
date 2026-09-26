@@ -72,7 +72,7 @@ handler ran. [Commands](../Commands/doc.md) documents the command on the next bu
 ## Add the CLI layer
 
 ```bash
-{{.GeneratorName}} cli-init     # sandbox/internal/cli, cmd/main, the help and version commands, argvdeps + std
+{{.GeneratorName}} cli-init     # sandbox/internal/generated/cli, cmd/main, the help and version commands, argvdeps + std
 ```
 
 From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."` declares a command and
@@ -332,7 +332,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 {{- if .HasFront }}
 | `assets/frontend/**` | the site looks like something |
 {{- end }}
-| `sandbox/internal/<pkg>/*.go` | logic worth reusing |
+| `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |
 | `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
@@ -340,6 +340,11 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 Everything else is regenerated over. Two more files are yours: `{{.ConfigDir}}/docs/ReadmeHeader.md`
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into
 its License section — put whatever license you want there.
+
+A project built before `sandbox/internal/generated/` existed keeps its old copies: after the
+first `build`, `git rm -r` whichever of `sandbox/internal/{cli,config,routeio,frontio,databaseio}`
+and `sandbox/internal/server/{route,server}` it holds, and point every hand-written import of
+`sandbox/internal/{routeio,frontio,databaseio}` at `sandbox/internal/generated/<same>`.
 
 ## Ship
 {{ if .HasCli }}

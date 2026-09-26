@@ -6,7 +6,7 @@ import (
 
 // NewCommand builds this command's declaration — the whole of what its
 // entries.yaml says — and closes CommandHandler over the sandbox as the
-// handler behind it. It is called once, by sandbox/internal/cli/new.go, and
+// handler behind it. It is called once, by sandbox/internal/generated/cli/new.go, and
 // what it returns is one entry of Cli.Commands: the declaration alone, which
 // the dispatch copies with api.BindCommand before binding a command line onto
 // it.

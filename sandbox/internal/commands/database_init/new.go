@@ -6,7 +6,7 @@ import (
 
 // NewCommand builds this command's declaration — the whole of what its
 // entries.yaml says — and closes CommandHandler over the sandbox as the
-// handler behind it. It is called once, by sandbox/internal/cli/new.go, and
+// handler behind it. It is called once, by sandbox/internal/generated/cli/new.go, and
 // what it returns is one entry of Cli.Commands: the declaration alone, which
 // the dispatch copies with api.BindCommand before binding a command line onto
 // it.
@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"database-init"}
 	command.Category = "Database System"
 	command.Help = "Add the database layer to the project"
-	command.LongDescription = "Installs the store the database layer is built over as a remote dep under sandbox/deps/database, renders sandbox/internal/databaseio and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so 'agnos add-database' is the step that follows."
+	command.LongDescription = "Installs the store the database layer is built over as a remote dep under sandbox/deps/database, renders sandbox/internal/generated/databaseio and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so 'agnos add-database' is the step that follows."
 	command.Examples = []string{"database-init", "database-init --path ./my-project"}
 	command.Hidden = false
 

@@ -10,10 +10,10 @@ import (
 // HandleServerError — through sandbox.Server.Fail.
 //
 // It goes through the api rather than calling sandbox/internal/server/errors
-// because the package that routes to it, sandbox/internal/server/server,
+// because the package that routes to it, sandbox/internal/generated/server/server,
 // imports every route package, so no route may import it back. The field on
 // the api is what crosses that line, and it is filled by the generated
-// sandbox/internal/server/server/new.go.
+// sandbox/internal/generated/server/server/new.go.
 //
 // It returns the error the handler returned — the failure's own message when
 // that handler answered it — so an InternalPureHandler ends on one line:

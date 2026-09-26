@@ -14,7 +14,7 @@ const routesDir = utils.RoutesDir
 // CollectRoutes reads every sandbox/internal/routeslist/<name>/route.yaml and
 // returns one data map per route, for the generated new.go and entries.go of
 // that route and the {{range .Routes}} loop of
-// sandbox/internal/server/server/new.go. It is the server layer's
+// sandbox/internal/generated/server/server/new.go. It is the server layer's
 // CollectCommands: what the map holds is the declaration itself, which the
 // dispatch reads back off Server.Routes at runtime.
 //

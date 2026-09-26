@@ -7,12 +7,12 @@ a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yam
 | Concept | CLI | Server |
 |---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
-| Dispatch | `sandbox/internal/cli/climain.go` | `sandbox/internal/server/server/servermain.go` |
+| Dispatch | `sandbox/internal/generated/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go` |
 | Declared unit | `commands/<name>/entries.yaml` | `routeslist/<name>/route.yaml` |
 | Generated declaration | `new.go` -> `NewCommand` | `new.go` -> `NewRoute`, `entries.go` -> `Entries` |
-| Generic matcher and binder | the dispatch | `sandbox/internal/server/route/` (`IsActionable`, `RequestHandler`) |
+| Generic matcher and binder | the dispatch | `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) |
 | Surface on the sandbox | `Cli.Commands` | `Server.Routes` |
-| Built by | `sandbox/internal/cli/new.go` | `sandbox/internal/server/server/new.go` |
+| Built by | `sandbox/internal/generated/cli/new.go` | `sandbox/internal/generated/server/server/new.go` |
 | Hand-written half | `handler.go` -> `CommandHandler` | `InternalPureHandler.go` -> `InternalPureHandler` |
 | Answer to bad input | the dispatch, exit 2 | `sandbox/internal/server/errors/handle_*.go`, yours |
 | Install / remove | `cli-init` / `cli-purge` | `server-init` / `server-purge` |

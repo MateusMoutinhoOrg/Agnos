@@ -8,11 +8,11 @@ import (
 
 // errorsDir holds the project's own answer to every way a request can end
 // without a route answering it, beside the generated dispatch of
-// sandbox/internal/server/server.
+// sandbox/internal/generated/server/server.
 const errorsDir = "sandbox/internal/server/errors"
 
 // errorHandlerFiles is one file per failure the dispatch can raise, in the
-// order the generated sandbox/internal/server/server/new.go switches on them. Each
+// order the generated sandbox/internal/generated/server/server/new.go switches on them. Each
 // holds one handler with the route handler's own signature.
 var errorHandlerFiles = []string{
 	"handle_not_found.go",

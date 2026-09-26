@@ -48,7 +48,7 @@ const helpFlag = "--help"
 // it, binds the rest of the command line to a copy of that command's declared
 // flags and args, and calls its handler. Nothing here is generated per command:
 // every command is one declaration built by its own NewCommand and collected by
-// sandbox/internal/cli/new.go, so this dispatch is the same file in every
+// sandbox/internal/generated/cli/new.go, so this dispatch is the same file in every
 // project.
 // `help` is reached through that same path — it is a declared command whose
 // files `{{.GeneratorName}} build` happens to write itself — and directly only

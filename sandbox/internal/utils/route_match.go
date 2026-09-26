@@ -5,7 +5,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 )
 
-// The matcher below is the generated sandbox/internal/server/route/IsActionable.go
+// The matcher below is the generated sandbox/internal/generated/server/route/IsActionable.go
 // read against a route.yaml instead of an api.Route, so explain-route can say
 // which routes a request reaches without a server. The two are kept one for
 // one — a change to one is a change to the other, and the explain-route

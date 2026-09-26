@@ -12,7 +12,7 @@ import (
 // neighbours behind — the frontend route's new.go and entries.go with no
 // route.yaml and no InternalPureHandler.go next to them.
 var frontDirs = []string{
-	"sandbox/internal/frontio",
+	utils.GeneratedDir + "/frontio",
 	utils.RoutesDir + "/" + utils.FrontendRouteName,
 }
 

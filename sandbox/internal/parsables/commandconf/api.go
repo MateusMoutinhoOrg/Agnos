@@ -23,7 +23,7 @@ type Field struct {
 // CommandConf is the parsed form of sandbox/internal/commands/<name>/entries.yaml
 // — the declarative description of one command the user writes by hand and
 // `agnos build` turns into the api.Command of that command's generated
-// new.go, which the dispatch in sandbox/internal/cli/climain.go reads a
+// new.go, which the dispatch in sandbox/internal/generated/cli/climain.go reads a
 // command line against.
 type CommandConf struct {
 	Identifiers     []string

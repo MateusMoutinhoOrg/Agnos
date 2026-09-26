@@ -192,7 +192,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | File | Written when |
 | --- | --- |
 | `sandbox/internal/commands/<name>/handler.go` | a command does something |
-| `sandbox/internal/<pkg>/*.go` | logic worth reusing |
+| `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |
 | `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
@@ -200,6 +200,11 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 Everything else is regenerated over. Two more files are yours: `AgnosConfig/docs/ReadmeHeader.md`
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into
 its License section — put whatever license you want there.
+
+A project built before `sandbox/internal/generated/` existed keeps its old copies: after the
+first `build`, `git rm -r` whichever of `sandbox/internal/{cli,config,routeio,frontio,databaseio}`
+and `sandbox/internal/server/{route,server}` it holds, and point every hand-written import of
+`sandbox/internal/{routeio,frontio,databaseio}` at `sandbox/internal/generated/<same>`.
 
 ## Ship
 

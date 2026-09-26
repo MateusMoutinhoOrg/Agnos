@@ -20,6 +20,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   [GeneratedFiles](../GeneratedFiles/doc.md), `(gen)` in [Structure](../Structure/doc.md).
   Change the declaration it is rendered from{{ if .HasAssets }}, or the template under `assets/`
   when this project carries one for it{{ end }}, then run `build`.
+- `sandbox/internal/generated/` holds every package `build` rewrites whole and nothing else: no
+  file there is ever edited, and no hand-written package is ever put there. A package mixing a
+  generated file with a hand-written one — a command, a route, a database — stays under
+  `sandbox/internal/`.
 - Generated `.go` is gofmt'ed as it is written, so a regenerated tree diffs to zero against one
   a formatting editor has saved.
 - `build` compiles `./cmd/... ./sandbox/... ./adapters/...`, never `./...`{{ if .HasAssets }}:
@@ -123,7 +127,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A command's `entries.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
   hand: they re-render it with keys in alphabetical order and drop comments.
 - `Cli.Commands` is the whole command surface, one `api.Command` per declared command, built by
-  `sandbox/internal/cli/new.go` from each package's generated `NewCommand`. The dispatch and
+  `sandbox/internal/generated/cli/new.go` from each package's generated `NewCommand`. The dispatch and
   both help screens read it; nothing about the command set is generated per command anywhere
   else. Each run binds to its own copy of the declaration, made by `api.BindCommand`, so what
   the slice holds is never written to.
@@ -136,7 +140,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Only `InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error`
   is exported from a route's hand-written half. **(verify)**
 - `new.go` is a 1:1 image of `route.yaml`, built on the generic
-  `sandbox/internal/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
+  `sandbox/internal/generated/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
   one field per path, one per parameter, each tagged `id:"<id>"` — plus the `ReadBody` a body
   calls for. The generic `RequestHandler` fills `Entries` by those tags through
   `Deps.Reflectdeps`.
@@ -183,7 +187,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
   subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
 - `Server.Routes` is the whole http surface, one `*api.Route` per declared route, built by
-  `sandbox/internal/server/server/new.go` from each package's generated `NewRoute`. The dispatch
+  `sandbox/internal/generated/server/server/new.go` from each package's generated `NewRoute`. The dispatch
   reads it and nothing about the route set is generated per route anywhere else; each request
   runs on its copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
 - Run order is the collector's, not the directory's: the `before` phase, then the `after` one,
@@ -194,7 +198,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   rewrites them: what a project answers when nothing matches is the project's. **(verify)**
 - A failure is raised with `routeio.Fail` — from the dispatch, from a generated `ReadBody` or
   from a handler — which reaches the right file through the `Fail` field of `api.Server`,
-  because a route package may not import `sandbox/internal/server/server`. A `Handle*` file
+  because a route package may not import `sandbox/internal/generated/server/server`. A `Handle*` file
   answers a failure and never raises one.
 - A failure the dispatch raises with nothing to add — nothing matched, method not allowed —
   carries no message, so the wording is the one its `Handle*` file spells. One that knows
@@ -213,7 +217,7 @@ Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
 - Everything under `assets/frontend/` is the project's content: no build writes there,
   `add-page` refuses an existing file, and `front-purge` leaves the tree whole.
 - The `frontend` route is written once and then the project's. Only
-  `sandbox/internal/frontio/` is rewritten by every build, and `frontio.SafePath` is what keeps
+  `sandbox/internal/generated/frontio/` is rewritten by every build, and `frontio.SafePath` is what keeps
   a caller's path inside `assets/frontend/`: the handler resolves every path through it.
 - The `frontend` route runs at priority `1000`, after every api route, and answers a path that
   names no file with `assets/frontend/404.html` under a `404`; only with that file gone does it

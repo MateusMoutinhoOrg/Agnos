@@ -35,5 +35,5 @@ for route in admin admin_auth access_log; do
 done
 cp TestDir/sandbox/internal/routeslist/admin_auth/InternalPureHandler.go AssertDir/sandbox/internal/routeslist/admin_auth/InternalPureHandler.go
 cp TestDir/sandbox/internal/routeslist/access_log/InternalPureHandler.go AssertDir/sandbox/internal/routeslist/access_log/InternalPureHandler.go
-mkdir -p AssertDir/sandbox/internal/server/server
-cp TestDir/sandbox/internal/server/server/new.go AssertDir/sandbox/internal/server/server/new.go
+mkdir -p AssertDir/sandbox/internal/generated/server/server
+cp TestDir/sandbox/internal/generated/server/server/new.go AssertDir/sandbox/internal/generated/server/server/new.go

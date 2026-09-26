@@ -3,7 +3,7 @@ package frontend
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/frontio"
+	"{{.Module}}/sandbox/internal/generated/frontio"
 )
 
 // spaFallback answers a path that names no file, and has no extension, with

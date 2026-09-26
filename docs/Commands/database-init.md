@@ -6,7 +6,7 @@ Add the database layer to the project
 agnos database-init [--path <path>] [--quiet]
 ```
 
-Installs the store the database layer is built over as a remote dep under sandbox/deps/database, renders sandbox/internal/databaseio and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so 'agnos add-database' is the step that follows.
+Installs the store the database layer is built over as a remote dep under sandbox/deps/database, renders sandbox/internal/generated/databaseio and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so 'agnos add-database' is the step that follows.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

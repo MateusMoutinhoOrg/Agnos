@@ -19,7 +19,7 @@
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
 | `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
 | `sandbox/api/config.go` | `build` | always. The `Config` contract: `ProjectName`, `Version` |
-| `sandbox/internal/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
+| `sandbox/internal/generated/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
 {{- end }}
 {{- if .HasDoc }}
 | `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |
@@ -49,8 +49,8 @@
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
 {{- end }}
 | `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
-| `sandbox/internal/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
-| `sandbox/internal/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
+| `sandbox/internal/generated/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
+| `sandbox/internal/generated/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
 | `sandbox/internal/commands/help/{entries.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/commands/version/{entries.yaml,handler.go}` | `build` | always |
 | `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command` |
@@ -59,10 +59,10 @@
 {{- end }}
 {{- if .HasServer }}
 | `sandbox/api/{server.go,route.go}` | `build` | always |
-| `sandbox/internal/server/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute` |
-| `sandbox/internal/server/server/servermain.go` | `build` | always. `ServerMain` + the one dispatch that runs `Server.Routes` as a chain |
-| `sandbox/internal/server/route/{new.go,IsActionable.go,RequestHandler.go}` | `build` | always. The generic base every route is built on: the matcher and the `Entries` binder |
-| `sandbox/internal/routeio/*.go` | `build` | always |
+| `sandbox/internal/generated/server/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute` |
+| `sandbox/internal/generated/server/server/servermain.go` | `build` | always. `ServerMain` + the one dispatch that runs `Server.Routes` as a chain |
+| `sandbox/internal/generated/server/route/{new.go,IsActionable.go,RequestHandler.go}` | `build` | always. The generic base every route is built on: the matcher and the `Entries` binder |
+| `sandbox/internal/generated/routeio/*.go` | `build` | always |
 | `sandbox/internal/routeslist/health/{route.yaml,InternalPureHandler.go}` | `build` | always |
 | `sandbox/internal/routeslist/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, a 1:1 image of `route.yaml` |
 | `sandbox/internal/routeslist/<name>/entries.go` | `build` | always. `Entries`, and the `ReadBody` a body calls for |
@@ -74,7 +74,7 @@
 | `sandbox/internal/server/errors/handle_*.go` | `build` | once. Eight files, one per failure — what this project answers when no route does |
 {{- end }}
 {{- if .HasDatabase }}
-| `sandbox/internal/databaseio/*.go` | `build` | always |
+| `sandbox/internal/generated/databaseio/*.go` | `build` | always |
 | `sandbox/internal/databases/<db>/{api.go,new.go,methods.go}` | `build` | always. The records, the `database.Props` and the body of every method, all from `specs.yaml` |
 | `docs/Databases/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
@@ -82,7 +82,7 @@
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
 {{- end }}
 {{- if .HasFront }}
-| `sandbox/internal/frontio/frontio.go` | `build` | always. `Resolve`, `SafePath`, `ContentTypeOf` |
+| `sandbox/internal/generated/frontio/frontio.go` | `build` | always. `Resolve`, `SafePath`, `ContentTypeOf` |
 | `docs/FrontUsage/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/internal/routeslist/frontend/{route.yaml,InternalPureHandler.go}` | `front-init` | once. `spaFallback` is yours to turn on |
 | `assets/frontend/index.html` | `front-init` | once. Kept if already there |
@@ -98,7 +98,8 @@
 | `examples/<side>/<name>/result.yaml` | `exec-test` | on `update-test <name>`, on `--update` or when absent — never by hand |
 {{- end }}
 
-Everything not listed is yours: `sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
+Everything under `sandbox/internal/generated/` is `always`. Everything not listed is yours:
+`sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
 and `sandbox/deps/` that you write, their `sandbox/internal/<x>/new.go` and `adapters/libs/`
 halves, and any
 directory of `adapters/availables/` other than `standard`.

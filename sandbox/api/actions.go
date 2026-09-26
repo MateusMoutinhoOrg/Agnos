@@ -724,7 +724,7 @@ type Actions struct {
 	RebalanceRoutes func(props RebalanceRoutesProps) error
 
 	// DatabaseInit adds the database layer (the store contract,
-	// sandbox/internal/databaseio and sandbox/internal/databases) to a
+	// sandbox/internal/generated/databaseio and sandbox/internal/databases) to a
 	// project that has none.
 	DatabaseInit func(path string) error
 
@@ -762,7 +762,7 @@ type Actions struct {
 	// tree, ready to print.
 	ShowDatabase func(path string, database string) ([]string, error)
 
-	// FrontInit adds the front layer (sandbox/internal/frontio, the route
+	// FrontInit adds the front layer (sandbox/internal/generated/frontio, the route
 	// serving every file of assets/frontend and that tree's index.html) to a
 	// project that has none, installing the server layer first when it is
 	// missing.

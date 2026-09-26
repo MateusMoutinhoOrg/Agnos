@@ -7,7 +7,7 @@ import (
 )
 
 // DatabaseInitInternal turns the database mechanic on in the project's
-// declaration. The group itself — sandbox/internal/databaseio, the code every
+// declaration. The group itself — sandbox/internal/generated/databaseio, the code every
 // generated methods.go shares — is rendered by utils.SetExtension into this
 // same transaction, and the databases themselves by the follow-up build.
 //

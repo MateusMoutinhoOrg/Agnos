@@ -24,7 +24,8 @@ import (
 var serverDirs = []string{
 	"sandbox/internal/server",
 	utils.RoutesDir,
-	"sandbox/internal/routeio",
+	utils.GeneratedDir + "/server",
+	utils.GeneratedDir + "/routeio",
 	"sandbox/internal/commands/start_server",
 	"docs/Routes",
 	utils.ConstructorDir("server"),

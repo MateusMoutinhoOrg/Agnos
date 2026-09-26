@@ -2,11 +2,11 @@ package config
 
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	config "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/config"
+	config "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/config"
 )
 
 // Constructor fills Sandbox.Config, building it with the
-// NewConfig of sandbox/internal/config. sandbox/new.go calls it
+// NewConfig of sandbox/internal/generated/config. sandbox/new.go calls it
 // once, along with the Constructor of every other package under
 // sandbox/constructors/.
 //

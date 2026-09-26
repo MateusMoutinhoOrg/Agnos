@@ -528,7 +528,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `ExplainRoute` | `func(props ExplainRouteProps) ([]string, error)` | ExplainRoute runs one request against the declared routes without a server and renders, route by route, whether it runs and why not. |
 | `RenameRoute` | `func(props RenameRouteProps) error` | RenameRoute moves one route package to a new name. |
 | `RebalanceRoutes` | `func(props RebalanceRoutesProps) error` | RebalanceRoutes gives every route a rung of its own, props.Step apart, in the order the chain runs them now. |
-| `DatabaseInit` | `func(path string) error` | DatabaseInit adds the database layer (the store contract, sandbox/internal/databaseio and sandbox/internal/databases) to a project that has none. |
+| `DatabaseInit` | `func(path string) error` | DatabaseInit adds the database layer (the store contract, sandbox/internal/generated/databaseio and sandbox/internal/databases) to a project that has none. |
 | `DatabasePurge` | `func(path string) error` | DatabasePurge removes the database layer and every database declared in it. |
 | `AddDatabase` | `func(path string, name string, prefix string) error` | AddDatabase declares a new database: its specs.yaml, from which its api.go, new.go and methods.go are generated. |
 | `RemoveDatabase` | `func(path string, name string) error` | RemoveDatabase deletes one database package whole. It refuses one carrying a hand-written methods_custom.go. |
@@ -538,7 +538,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetTableField` | `func(props DatabaseFieldEditProps) error` | SetTableField rewrites one field a table already declares. |
 | `RemoveTableField` | `func(props DatabaseFieldProps) error` | RemoveTableField deletes one declared field from a table. |
 | `ShowDatabase` | `func(path string, database string) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
-| `FrontInit` | `func(path string) error` | FrontInit adds the front layer (sandbox/internal/frontio, the route serving every file of assets/frontend and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
+| `FrontInit` | `func(path string) error` | FrontInit adds the front layer (sandbox/internal/generated/frontio, the route serving every file of assets/frontend and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
 | `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer and the frontend route, leaving assets/frontend/ untouched. |
 | `AddPage` | `func(props PageProps) error` | AddPage scaffolds a new html page, assets/frontend/<name>.html, which the frontend route serves as soon as it exists. |
 | `RemovePage` | `func(path string, name string) error` | RemovePage deletes one page, assets/frontend/<name>.html. |

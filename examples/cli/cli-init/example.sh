@@ -11,8 +11,8 @@ agnos cli-init --path TestDir
 # TestDir. The lib side copies the same set.
 mkdir -p AssertDir/cmd
 cp -R TestDir/cmd/. AssertDir/cmd/
-mkdir -p AssertDir/sandbox/internal/cli
-cp -R TestDir/sandbox/internal/cli/. AssertDir/sandbox/internal/cli/
+mkdir -p AssertDir/sandbox/internal/generated/cli
+cp -R TestDir/sandbox/internal/generated/cli/. AssertDir/sandbox/internal/generated/cli/
 mkdir -p AssertDir/sandbox/internal/commands
 cp -R TestDir/sandbox/internal/commands/. AssertDir/sandbox/internal/commands/
 

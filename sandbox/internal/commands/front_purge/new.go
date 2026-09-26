@@ -6,7 +6,7 @@ import (
 
 // NewCommand builds this command's declaration — the whole of what its
 // entries.yaml says — and closes CommandHandler over the sandbox as the
-// handler behind it. It is called once, by sandbox/internal/cli/new.go, and
+// handler behind it. It is called once, by sandbox/internal/generated/cli/new.go, and
 // what it returns is one entry of Cli.Commands: the declaration alone, which
 // the dispatch copies with api.BindCommand before binding a command line onto
 // it.
@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"front-purge"}
 	command.Category = "Front System"
 	command.Help = "Remove the html front layer from the project"
-	command.LongDescription = "Removes sandbox/internal/frontio and the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project's content, so front-init puts the route back over it."
+	command.LongDescription = "Removes sandbox/internal/generated/frontio and the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project's content, so front-init puts the route back over it."
 	command.Examples = []string{"front-purge"}
 	command.Hidden = false
 

@@ -34,7 +34,7 @@ func main() {
 	// What result.yaml records: the same set the cli side copies — the file
 	// layer, the route serving assets/frontend, and that tree's index.html.
 	for _, dir := range []string{
-		"sandbox/internal/frontio",
+		"sandbox/internal/generated/frontio",
 		"sandbox/internal/routeslist/frontend",
 		"assets/frontend",
 	} {

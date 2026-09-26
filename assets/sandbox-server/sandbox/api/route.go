@@ -267,7 +267,7 @@ type Route struct {
 }
 
 // NewRoute returns an empty Route with every slice open. The generic
-// sandbox/internal/server/route.NewRoute fills the matcher and the handler on
+// sandbox/internal/generated/server/route.NewRoute fills the matcher and the handler on
 // top of it, and a route's generated NewRoute its declaration.
 func NewRoute() *Route {
 	return &Route{
