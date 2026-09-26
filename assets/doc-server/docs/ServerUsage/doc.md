@@ -21,10 +21,17 @@ a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yam
 
 ```bash
 {{.GeneratorName}} server-init  # serverdeps, signaldeps, the server layer, the health route, start-server
-{{.Name}} start-server  # listens on :8080; Ctrl+C shuts it down gracefully
-{{.Name}} start-server --addr :3000 --read-timeout-ms 30000 --shutdown-timeout-ms 5000
-curl localhost:8080/health
+{{.Name}} start-server  # listens on the first free port of 3000..4000; Ctrl+C shuts it down gracefully
+{{.Name}} start-server --addr 4000:5000 --read-timeout-ms 30000 --shutdown-timeout-ms 5000
+curl localhost:3000/health
 ```
+
+`--addr` is a port (`8080`), a range the server takes the first free port of (`4000:5000`), either
+one behind a host (`127.0.0.1:4000:5000`), or a plain `host:port` (`:8080`). The address it landed
+on is printed to stdout — `server listening on :3001` — so a test running several servers reads it
+from there. A project whose `start-server` predates the range keeps its old `:8080` default, since
+`entries.yaml` is the project's: `{{.GeneratorName}} remove-flag addr --command start-server`, then
+`add-flag` it again with `--default 3000:4000`.
 
 `server-init` installs the CLI layer first when the project has none — a server needs a command
 that starts it. `server-purge` removes the server layer again and leaves the CLI in place.
@@ -33,7 +40,7 @@ A Go caller skips the command entirely:
 
 ```go
 sandbox := sandbox.New(&deps)
-err := sandbox.Server.Serve(api.ServeProps{Addr: ":8080", ReadTimeoutMs: 10000, WriteTimeoutMs: 10000, ShutdownTimeoutMs: 10000})
+err := sandbox.Server.Serve(api.ServeProps{Addr: "3000:4000", ReadTimeoutMs: 10000, WriteTimeoutMs: 10000, ShutdownTimeoutMs: 10000})
 ```
 
 `Serve` blocks until the server stops. The first interrupt or termination request stops it

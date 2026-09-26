@@ -18,7 +18,7 @@ package serverdeps
 // rather than injected once: what the sandbox holds is this one-field struct.
 type Sandbox struct {
 	// NewServer builds a server over the given props. It binds nothing until
-	// Server.Listen is called.
+	// Server.Bind or Server.Listen is called.
 	NewServer func(props ServerProps) Server
 }
 
@@ -47,8 +47,13 @@ type ServerProps struct {
 
 // Server is one built-but-not-yet-listening http server.
 type Server struct {
-	// Listen binds the address and serves until Shutdown is called or the
-	// server fails. It blocks.
+	// Bind opens the address without serving it yet, and reports why it
+	// could not — the address is taken, the host is unknown. It does not
+	// block. Calling it is optional: Listen binds first when it was not.
+	Bind func() error
+	// Listen serves the address Bind opened — binding it first when Bind
+	// was not called — until Shutdown is called or the server fails. It
+	// blocks.
 	Listen func() error
 	// Shutdown stops the server, letting the requests in flight finish.
 	Shutdown func() error

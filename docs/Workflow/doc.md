@@ -72,7 +72,7 @@ handler ran. [Commands](../Commands/doc.md) documents the command on the next bu
 
 ```bash
 agnos server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
-agnos start-server  # listens on :8080
+agnos start-server  # listens on the first free port of 3000..4000
 ```
 
 From there `agnos add-route <name> --pattern '/<path>/{id}'` declares a

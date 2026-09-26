@@ -8,7 +8,7 @@ Sandbox is the http-server library injected whole as the Deps.Serverdeps field. 
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `NewServer` | `func(props ServerProps) Server` | NewServer builds a server over the given props. It binds nothing until Server.Listen is called. |
+| `NewServer` | `func(props ServerProps) Server` | NewServer builds a server over the given props. It binds nothing until Server.Bind or Server.Listen is called. |
 
 ## `ServerProps`
 
@@ -28,7 +28,8 @@ Server is one built-but-not-yet-listening http server.
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `Listen` | `func() error` | Listen binds the address and serves until Shutdown is called or the server fails. It blocks. |
+| `Bind` | `func() error` | Bind opens the address without serving it yet, and reports why it could not — the address is taken, the host is unknown. It does not block. Calling it is optional: Listen binds first when it was not. |
+| `Listen` | `func() error` | Listen serves the address Bind opened — binding it first when Bind was not called — until Shutdown is called or the server fails. It blocks. |
 | `Shutdown` | `func() error` | Shutdown stops the server, letting the requests in flight finish. |
 
 ## `Request`

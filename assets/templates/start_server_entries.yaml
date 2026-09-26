@@ -8,15 +8,16 @@ long-description: |
   taken, and the ones in flight get --shutdown-timeout-ms to finish.
 examples:
   - "start-server"
-  - "start-server --addr :3000"
+  - "start-server --addr 4000:5000"
 flags:
   - name: addr
     identifiers: ["--addr"]
-    description: the address the server listens on
+    description: the port the server listens on, or a range of ports it takes the first free one of, with or without a host (8080, 4000:5000, 127.0.0.1:4000:5000, :8080)
     examples:
-      - "start-server --addr :3000"
+      - "start-server --addr 4000:5000"
+      - "start-server --addr 8080"
     type: string
-    default: ":8080"
+    default: "3000:4000"
   - name: read_timeout_ms
     identifiers: ["--read-timeout-ms"]
     description: how long a request has to arrive, in milliseconds

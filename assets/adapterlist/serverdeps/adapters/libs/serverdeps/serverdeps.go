@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"io"
+	"net"
 	"net/http"
 	"net/url"
 	"time"
@@ -32,12 +33,31 @@ func newServer(props serverdeps.ServerProps) serverdeps.Server {
 		}),
 	}
 
+	// listener is what Bind opened, kept for Listen to serve: binding and
+	// serving are two steps so the sandbox can tell an address it cannot
+	// open from a server that failed while running.
+	var listener net.Listener
+	bind := func() error {
+		opened, err := net.Listen("tcp", props.Addr)
+		if err != nil {
+			return err
+		}
+		listener = opened
+		return nil
+	}
+
 	return serverdeps.Server{
+		Bind: bind,
 		Listen: func() error {
+			if listener == nil {
+				if err := bind(); err != nil {
+					return err
+				}
+			}
 			// A server stopped through Shutdown is a clean stop, not a
 			// failure: net/http reports it as ErrServerClosed, which the
 			// contract turns back into a nil error.
-			err := inner.ListenAndServe()
+			err := inner.Serve(listener)
 			if errors.Is(err, http.ErrServerClosed) {
 				return nil
 			}

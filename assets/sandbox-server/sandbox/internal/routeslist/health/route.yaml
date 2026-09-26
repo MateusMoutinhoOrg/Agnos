@@ -12,4 +12,4 @@ paths:
 category: Server
 help: Reports that the server is up
 examples:
-  - curl localhost:8080/health
+  - curl localhost:3000/health

@@ -24,7 +24,9 @@ type Server struct {
 	Fail func(route *Route) error
 }
 
-// ServeProps describes one run of the http server: the address to listen on,
+// ServeProps describes one run of the http server: the address to listen on
+// — host:port (":8080"), a bare port ("8080"), or a range of ports tried in
+// turn, with or without a host ("3000:4000", "127.0.0.1:3000:4000") —
 // the two timeouts, in milliseconds, a request and a response are held to, and
 // how long the requests in flight get to finish once the process is asked to
 // stop (0 waits for them).

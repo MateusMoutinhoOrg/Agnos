@@ -159,7 +159,7 @@ rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 
 ```bash
 {{.GeneratorName}} server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
-{{.Name}} start-server  # listens on :8080
+{{.Name}} start-server  # listens on the first free port of 3000..4000
 ```
 
 From there `{{.GeneratorName}} add-route <name> --pattern '/<path>/{id}'` declares a
