@@ -4,16 +4,18 @@ cli-output: |
       category  Server
       priority  0
       response  application/json
+      chain     #1 of 4, before admin
 
     paths
       Route                segments 0..-1  prefix "/"
 
     body      none
-    GET /admin*
+    GET /admin/*
       The admin area
       category  Server
       priority  5
       response  application/json
+      chain     #2 of 4, after logger, before hello
 
     paths
       Route                segments 0..-1  prefix "/admin"
@@ -25,13 +27,13 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/routeslist/admin/new.go
-      sha: 51c678787cd5a47afa5f8696b474ac47dad600de1350c6c8bf56c4e5e26ff48a
+      sha: 1147e499801408afcb9cbd9de487bfe7f123f72fdde4a272bad2a8303550e58a
     - file: sandbox/internal/routeslist/admin/route.yaml
       sha: e108bcccd1bc1c262e795cd881dde62cd00eae87a9916ac8ec3676b72ac96d36
     - file: sandbox/internal/routeslist/hello/route.yaml
       sha: 9b4ff0a368dba6de46c183d9eedcc7787d483031d7ec26905d481e37d12e8eea
     - file: sandbox/internal/routeslist/logger/new.go
-      sha: 9d9c8f461feea67e01f128c6fff401ada4d66594901c9ffb39c0718eed485638
+      sha: a9188c954875dfce77f5dc4f906fbb54fe700d83aef2245995e1c5bf59697a5c
     - file: sandbox/internal/routeslist/logger/route.yaml
       sha: 277c50ec407a4793a05089b444281388ad7cbcb44b1507ac8496885fc597ba61
     - file: sandbox/internal/server/errors/handle_method_not_allowed.go
@@ -39,4 +41,4 @@ tree:
     - file: sandbox/internal/server/errors/handle_not_found.go
       sha: 56b9f6190455dfa77b7a9f169928d7aa15386a084be37610f4be1e668d818e7a
     - file: sandbox/internal/server/server/new.go
-      sha: 3dbea1d3a2d3be9b2669afd565ef6b9952130ba9dcee0f5c7d8347dbe016af0b
+      sha: f773f11a39e44a9ad7f85347f7b78b58411b46b6f8ed2b2d97c357c6b63f3925

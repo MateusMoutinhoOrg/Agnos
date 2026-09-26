@@ -1,9 +1,10 @@
 cli-output: |
-    POST /users/*{Tenant}
+    POST /users/{Tenant}/*
       Create a user under a tenant
       category  Users
-      priority  0
+      priority  100
       response  application/json
+      chain     #1 of 2, before health
 
     paths
       Route                segments 0..-1  prefix "/users/"
@@ -21,4 +22,4 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/routeslist/create_user/route.yaml
-      sha: 200ef1ec44ad3eaca8cc72da435d01a67c58013d67c1a9068a2c83d25d1c6d94
+      sha: faa0ea89d25396985682e9c820b8f46545fa771c73d94524f47e164874bc24c9

@@ -4,6 +4,6 @@ tree:
     - file: sandbox/internal/routeslist/create_user/entries.go
       sha: 60cf8f60d01d2f72f7dcd9eff6fd53518df184b44b9160173047b4d5cdfe93ce
     - file: sandbox/internal/routeslist/create_user/new.go
-      sha: 8fc8281fb72db3d00b802bdacc6ae5e43d9adc797252daa9f2077db5fa721bf8
+      sha: 58097db1496373719eb85d4a394a954f255f60a5f45e22e6172c94e5240f74f6
     - file: sandbox/internal/routeslist/create_user/route.yaml
-      sha: e0905fa444159c3f5980a0ef59c01855e09ecbd2cdf158b75e6d332285ad9f6a
+      sha: 8fb498e08476f24f118c433f46760218bd6c52c4506c09b6579c61827d3d7553
