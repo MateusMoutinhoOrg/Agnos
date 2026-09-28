@@ -12,7 +12,7 @@ Triggers leem os segmentos; o verbo vem sempre primeiro.
 |---|---|---|
 | `args[]` | `paths[]` | `id`, `start`, `end`, `type` (`string`, `integer`, `number`, `uuid`; um intervalo liga `[]string`), `trigger`, `required`, `default`, `description` |
 | `flags[]` | `parameters[]` | `id`, `key` (`--<key>`), `aliases` (`-o`), `fonts` (`flag`, `env`), `type` (`string`, `integer`, `number`, `boolean`, `string-array`, `integer-array`), `required`, `default`, `min`, `max`, `enum`, `pattern`, `trigger` |
-| `priority`, `phase`, `segments`, `category`, `help`, `long-description`, `examples`, `hidden` | idem | — |
+| `priority`, `segments`, `category`, `help`, `long-description`, `examples`, `hidden` | idem | — |
 | `strict` | — | default `true`; `false` em middleware |
 
 - O texto de um trigger é o dos segmentos juntados por espaço. `prefix` é por segmento.
@@ -45,8 +45,7 @@ help: Add a flag to a command
 1. Coleta todo comando que casa.
 2. Roda em `priority` crescente, com `Entries` ligado e `props` compartilhado.
 3. O primeiro que responde encerra a cadeia.
-4. Roda os de `phase: after`, com `Entries.AnsweredStatus`.
-5. Se ninguém respondeu, vai para `handle_not_found.go`.
+4. Se ninguém respondeu, vai para `handle_not_found.go`.
 
 Responder é `response.SetStatus(code)` ou `response.Printf(...)` (que fixa `ExitOk`).
 `response.Error` e `response.Log` não respondem. Um handler que não responde recusou, e o próximo
@@ -101,7 +100,7 @@ sandbox/internal/commands/<snake>/
 
 | Comando | Par | Flags |
 |---|---|---|
-| `add-command` | `add-route` | `--trigger*`, `--pattern`, `--middleware`, `--priority`, `--before`, `--after`, `--phase`, `--help`, `--category` |
+| `add-command` | `add-route` | `--trigger*`, `--pattern`, `--middleware`, `--priority`, `--before`, `--after`, `--help`, `--category` |
 | `set-command` | `set-route` | as mesmas + `--strict`, `--loose`, `--clear` |
 | `remove-command`, `rename-command` | `remove-route`, `rename-route` | — |
 | `rebalance-commands` | `rebalance-routes` | `--step` |
