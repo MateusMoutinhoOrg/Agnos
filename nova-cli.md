@@ -74,6 +74,32 @@ stub que não responde.
 | `help`, `version` | 100 | comandos |
 | `handle_not_found.go` | — | argv vazio → help geral |
 
+### 3.1 Na doc e no help
+
+O `build` cruza cada comando com os middlewares cujo trigger casa o pattern dele. A doc e o
+`help <command>` mostram o que o usuário pode digitar, venha de onde vier.
+
+| Página | Mostra |
+|---|---|
+| `docs/Commands/doc.md` | seção `## Middlewares` separada das categorias: middleware · roda antes de (pattern/trigger) · prioridade · flags que acrescenta |
+| `docs/Commands/<comando>.md` | linha de uso com as flags dos middlewares; tabela de flags com a coluna `De`: `—` para as próprias, link para o middleware nas herdadas |
+| `docs/Commands/<middleware>.md` | trigger, prioridade, flags e a lista de comandos na frente dos quais ele roda |
+
+```
+agnos add-flag <name> --command <c> [--type <t>] [--path <p>] [--quiet]
+```
+
+| Flag | Type | Default | De |
+|---|---|---|---|
+| `--command`, `-c` | string, required | | — |
+| `--path` | string | `.` | [project](project.md) |
+| `--quiet`, `-q` | boolean | | [project](project.md) |
+
+- **Flag com trigger:** um middleware cujo trigger depende do valor de uma flag entra marcado como `só quando --x …`.
+- **`regex`:** um arg `regex` não tem como ser cruzado sem o argv. O middleware entra como `pode rodar`, e `explain-command` dá a resposta exata.
+- **Sem flags:** um middleware sem flags não aparece na página do comando, só na lista do próprio middleware.
+- **Rotas:** a mesma regra vale para `docs/Routes/`, com os parameters herdados na tabela de `Entries` da rota.
+
 ## 4. Arquivos
 
 ```
@@ -109,11 +135,28 @@ sandbox/internal/commands/<snake>/
 | `add-arg`, `set-arg`, `remove-arg` | `*-path` | as de `add-path` + `--required`, `--default` |
 | `add-flag`, `set-flag`, `remove-flag` | `*-parameter` | as de `add-parameter` sem `--font`, + `--key` (repetível), `--min`, `--max`, `--enum`, `--pattern` |
 
-## 6. Ordem
+## 6. Rotas: remover `phase`
 
+A rota perde a fase `after`: uma cadeia só, como a cli.
+
+| Onde | Sai |
+|---|---|
+| `route.yaml` | a chave `phase`; `verify` passa a nomeá-la como declaração antiga, como `method` e `headers` |
+| `api.Route`, `route_new.go` | `After`, `AnsweredStatus` |
+| `route_entries.go`, `RequestHandler.go` | `Entries.AnsweredStatus` e o ramo `route.After` |
+| `servermain.go`, `routeio/tracked.go` | `runAfter`, `runAfterRoute`, a resposta congelada |
+| `route_middleware_handler.go` | o stub da fase `after` |
+| `add-route`, `set-route` | `--phase` |
+| `rebalance-routes`, `list-routes`, `show-route`, `explain-route`, `collect_routes.go`, `utils/route_{conf,chain}.go`, `check_routes.go`, `interview/suggest.go` | a segunda escada e o que a lê |
+| `RouteYaml`, `Routes`, `ServerUsage`, `Rules` (templates), `CLAUDE.md` | a fase `after` e `AnsweredStatus` |
+| `examples/` | goldens com `phase`, via `exec-test --update` |
+
+## 7. Ordem
+
+0. Remover `phase` das rotas (§6).
 1. `Trigger` compartilhado + `one-of`.
 2. `cliio`, `handle_*`, `CommandResponse`, `commandprops.go`.
 3. Dispatch em cadeia, `command.yaml`, `entries.go`, `InternalPureHandler`.
 4. Migrar os comandos do agnos com uma action oculta `migrate-commands` e criar o middleware `project`; depois remover a action.
-5. `check_commands.go`, verbos da §5, `help-flag`, `--pattern`.
+5. `check_commands.go`, verbos da §5, `help-flag`, `--pattern`, doc e help com middlewares (§3.1: `command_page.md`, `doc-cli/docs/Commands/doc.md`, `route_page.md`).
 6. Docs (`CommandYaml`, `Rules`, `Contributing`, `CLAUDE.md`: stdout do handler sai por `response`), interview, exemplos, `exec-test --update`, bump de versão.
