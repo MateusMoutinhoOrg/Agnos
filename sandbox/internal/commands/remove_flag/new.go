@@ -23,8 +23,8 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "remove-flag <Name>"
 	self.Category = "Cli System"
-	self.Help = "Remove a flag from a command's entries.yaml"
-	self.LongDescription = "Drops one flag declaration (matched by its name or by one of its identifiers)\nfrom sandbox/internal/commands/<command>/entries.yaml and runs build so the\ncommand's new.go forgets it."
+	self.Help = "Remove a flag from a command's command.yaml"
+	self.LongDescription = "Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it."
 	self.Examples = []string{"remove-flag output --command exec", "remove-flag --out --command exec"}
 	self.Hidden = false
 
@@ -48,7 +48,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Required:    true,
 			Default:     "",
 			HasDefault:  false,
-			Description: "the flag name (or one of its identifiers, e.g. --out)",
+			Description: "the flag name, its id, or one of its keys, e.g. --out",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
 		},
 	}
@@ -63,7 +63,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the command (identifier or package name) that owns the flag",
+			Description: "the command (a verb or its package name) that owns the flag",
 		},
 	}
 

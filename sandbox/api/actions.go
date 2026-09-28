@@ -167,21 +167,20 @@ type FlagProps struct {
 }
 
 // ArgProps describes one arg to declare in a command's command.yaml: the
-// segments Start to End of the command line (End -1 the last one), bound to
-// the Entries field Name becomes. Start defaults, when HasStart is false, to
-// the first segment no arg reads yet, and End to Start — to the last segment
-// when Array is set. Type is string, integer, number or uuid for a
-// one-segment arg; the Trigger* fields are what the segments have to match for
-// the command to run at all. Position is the index to insert at (< 0 appends).
+// segments Start to End of the command line — the raw indexes typed on the
+// command line, "" being the first segment no arg reads yet and Start again,
+// "-1" the last segment — bound to the Entries field Name becomes. Type is
+// string, integer, number or uuid, anything but string reading one segment
+// alone; Trigger and TriggerType are what the segments, joined by a space,
+// have to match for the command to run at all, and TriggerNegate /
+// TriggerIgnoreCase the two switches on it. Position is the index to insert at
+// (< 0 appends).
 type ArgProps struct {
 	Path              string
 	Command           string
 	Name              string
-	Start             int
-	HasStart          bool
-	End               int
-	HasEnd            bool
-	Array             bool
+	Start             string
+	End               string
 	Type              string
 	Required          bool
 	Default           string
@@ -193,10 +192,118 @@ type ArgProps struct {
 	Position          int
 }
 
+// ArgEditProps describes the change set-arg applies to one arg a command
+// declares. Name is the arg as it is declared now and Rename the name it takes
+// on ("" leaves it alone); every other key overwrites what is there when it is
+// given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case",
+// "type", "required", "default" or "description" off again.
+type ArgEditProps struct {
+	Path              string
+	Command           string
+	Name              string
+	Rename            string
+	Start             string
+	End               string
+	Type              string
+	Required          bool
+	Default           string
+	Trigger           string
+	TriggerType       string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Clear             []string
+}
+
+// FlagEditProps describes the change set-flag applies to one flag a command
+// declares. Name is the flag as it is declared now — its name, its id or one
+// of its keys — and Rename the name it takes on ("" leaves it alone); Keys
+// replace the spellings when any is given, Enum the accepted values, and every
+// other key overwrites what is there when it is given. Clear takes "keys",
+// "type", "required", "default", "min", "max", "enum", "pattern", "trigger",
+// "trigger-negate", "trigger-ignore-case" or "description" off again.
+type FlagEditProps struct {
+	Path              string
+	Command           string
+	Name              string
+	Rename            string
+	Keys              []string
+	Type              string
+	Required          bool
+	Default           string
+	Min               string
+	Max               string
+	Enum              []string
+	Pattern           string
+	Trigger           string
+	TriggerType       string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Clear             []string
+}
+
+// AddCommandProps describes one command to scaffold. Name is its package and
+// the verb its first arg answers to on segment 0; Trigger is another value
+// that arg compares against ("" is the name, or every command line for a
+// Middleware), TriggerType how ("" is equal — prefix for a Middleware), and
+// TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares
+// the args from one command-line shape instead ("route add {name}
+// {*rest}") and excludes Trigger and TriggerType. A Middleware is not strict,
+// runs on DefaultMiddlewarePriority and answers nothing.
+//
+// Priority is the rung it runs on, used only when HasPriority is set; Before
+// and After name another command to land one rung below or above instead,
+// and exclude Priority.
+type AddCommandProps struct {
+	Path              string
+	Name              string
+	Trigger           string
+	TriggerType       string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Pattern           string
+	Middleware        bool
+	Priority          int
+	HasPriority       bool
+	Before            string
+	After             string
+	Help              string
+	Category          string
+}
+
+// RenameCommandProps describes one command to rename: Command as it is
+// declared now, Name the name it takes on.
+type RenameCommandProps struct {
+	Path    string
+	Command string
+	Name    string
+}
+
+// RebalanceCommandsProps describes one rebalance of the cli chain: every
+// command is laid down again Step rungs apart, in the order it runs now, the
+// first one on Step.
+type RebalanceCommandsProps struct {
+	Path string
+	Step int
+}
+
+// ExplainCommandProps describes one command line to run against the declared
+// commands without running any: Argv is the line, as it would be typed after
+// the binary name.
+type ExplainCommandProps struct {
+	Path string
+	Argv []string
+}
+
 // SetCommandProps carries the command-level keys of command.yaml that
 // set-command may rewrite. Empty strings leave the current value alone;
 // Identifiers — further verbs the command answers to — and Examples are
-// appended (deduplicated).
+// appended (deduplicated), and Hidden / Visible, Strict / Loose are the two
+// sides of one switch each. Priority is the rung the command runs on, read
+// when HasPriority is set; Before and After name another command to land one
+// rung below or above instead. Segments is the segment count the command line
+// has to have, read when HasSegments is set. Clear takes "segments" off again.
 type SetCommandProps struct {
 	Path            string
 	Command         string
@@ -205,8 +312,17 @@ type SetCommandProps struct {
 	LongDescription string
 	Hidden          bool
 	Visible         bool
+	Strict          bool
+	Loose           bool
+	Priority        int
+	HasPriority     bool
+	Before          string
+	After           string
+	Segments        int
+	HasSegments     bool
 	Identifiers     []string
 	Examples        []string
+	Clear           []string
 }
 
 // AddRouteProps describes one route to scaffold. Trigger is the whole-path
@@ -653,27 +769,53 @@ type Actions struct {
 	// CliPurge removes the CLI layer and every command declared in it.
 	CliPurge func(path string) error
 
-	// AddCommand declares a new command: its entries.yaml, its generated
-	// new.go and a handler.go to fill in.
-	AddCommand func(path string, name string, help string, category string) error
+	// AddCommand declares a new command: its command.yaml, its generated
+	// new.go and entries.go, and an InternalPureHandler.go to fill in.
+	AddCommand func(props AddCommandProps) error
 
-	// RemoveCommand deletes one command and unwires it from the dispatcher.
+	// RemoveCommand deletes one command and unwires it from the dispatch.
 	RemoveCommand func(path string, name string) error
 
 	// SetCommand rewrites the command-level keys of one command's
-	// entries.yaml.
+	// command.yaml.
 	SetCommand func(props SetCommandProps) error
+
+	// RenameCommand moves one command to a new name: its package, and the
+	// verb its first arg answers to when that verb was its name.
+	RenameCommand func(props RenameCommandProps) error
+
+	// RebalanceCommands lays every command down again, Step rungs apart, in
+	// the order the chain runs them now.
+	RebalanceCommands func(props RebalanceCommandsProps) error
+
+	// ListCommands renders every declared command as one line, in the order
+	// the dispatch runs them.
+	ListCommands func(path string) ([]string, error)
+
+	// ShowCommand renders one command's whole declaration — its args, its
+	// flags and the middlewares in front of it — as the lines of a tree.
+	ShowCommand func(path string, command string) ([]string, error)
+
+	// ExplainCommand runs one command line against the declared commands
+	// without running any, and says, command by command, whether it runs.
+	ExplainCommand func(props ExplainCommandProps) ([]string, error)
 
 	// AddFlag declares one flag on a command.
 	AddFlag func(props FlagProps) error
 
+	// SetFlag rewrites one declared flag of a command.
+	SetFlag func(props FlagEditProps) error
+
 	// RemoveFlag deletes one declared flag from a command.
 	RemoveFlag func(path string, command string, name string) error
 
-	// AddArg declares one positional argument on a command.
+	// AddArg declares one arg — a slice of the segments — on a command.
 	AddArg func(props ArgProps) error
 
-	// RemoveArg deletes one declared positional argument from a command.
+	// SetArg rewrites one declared arg of a command.
+	SetArg func(props ArgEditProps) error
+
+	// RemoveArg deletes one declared arg from a command.
 	RemoveArg func(path string, command string, name string) error
 
 	// ServerInit adds the http server layer (sandbox/internal/server, the

@@ -8,9 +8,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
+// CommandClearKeys is every key --clear may take off a command.
+var CommandClearKeys = []string{"segments", "examples"}
+
 // SetCommandInternal parses the target command's command.yaml, overwrites
 // every command-level key the caller supplied (empty strings are "leave as
-// is"; --identifier and --example append) and writes the file back. A further
+// is"; --identifier and --example append; --before and --after land it one
+// rung from another command) and writes the file back. A further
 // --identifier is one more verb the arg on segment 0 answers to: its equal
 // trigger becomes a one-of.
 func SetCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.SetCommandProps) error {
@@ -20,6 +24,9 @@ func SetCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Set
 	}
 	if props.Hidden && props.Visible {
 		return sandbox.Deps.Std.Errorf("--hidden and --visible are mutually exclusive")
+	}
+	if props.Strict && props.Loose {
+		return sandbox.Deps.Std.Errorf("--strict and --loose are mutually exclusive")
 	}
 
 	changed := false
@@ -31,6 +38,45 @@ func SetCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Set
 	}
 	if long := sandbox.Deps.Stringsdeps.TrimSpace(props.LongDescription); long != "" {
 		conf.LongDescription, changed = long, true
+	}
+	cleared, err := utils.RouteClearSet(sandbox, props.Clear, CommandClearKeys)
+	if err != nil {
+		return err
+	}
+	if cleared["segments"] {
+		conf.Segments, conf.HasSegments, changed = 0, false, true
+	}
+	if cleared["examples"] {
+		conf.Examples, changed = []string{}, true
+	}
+
+	relative, has_relative, err := utils.CommandRelativePriority(sandbox, io, props.Before, props.After)
+	if err != nil {
+		return err
+	}
+	if has_relative && props.HasPriority {
+		return sandbox.Deps.Std.Errorf("--priority excludes --before and --after: name the rung, or the command it sits next to")
+	}
+	if has_relative {
+		props.Priority, props.HasPriority = relative, true
+	}
+	if props.HasPriority {
+		if props.Priority < 0 {
+			return sandbox.Deps.Std.Errorf("--priority %d is negative: the chain runs from zero upwards", props.Priority)
+		}
+		conf.Priority, conf.HasPriority, changed = props.Priority, true, true
+	}
+	if props.HasSegments {
+		if props.Segments < 1 {
+			return sandbox.Deps.Std.Errorf("--segments %d is below 1: clear it with --clear segments for a command that takes any count", props.Segments)
+		}
+		conf.Segments, conf.HasSegments, changed = props.Segments, true, true
+	}
+	if props.Strict {
+		conf.Strict, changed = true, true
+	}
+	if props.Loose {
+		conf.Strict, changed = false, true
 	}
 	if props.Hidden {
 		conf.Hidden, changed = true, true
@@ -48,7 +94,7 @@ func SetCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Set
 		conf.Examples, changed = utils.AppendUnique(conf.Examples, props.Examples), true
 	}
 	if !changed {
-		return sandbox.Deps.Std.Errorf("set-command: nothing to change (pass --help, --category, --long-description, --hidden, --visible, --identifier or --example)")
+		return sandbox.Deps.Std.Errorf("set-command: nothing to change (pass --help, --category, --long-description, --priority, --before, --after, --segments, --strict, --loose, --clear, --hidden, --visible, --identifier or --example)")
 	}
 
 	sandbox.Deps.Std.Log("set-command updating %s \n", utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, props.Command)))

@@ -164,18 +164,15 @@ FlagProps describes one flag to declare in a command's command.yaml. Name is the
 
 ## `ArgProps`
 
-ArgProps describes one arg to declare in a command's command.yaml: the segments Start to End of the command line (End -1 the last one), bound to the Entries field Name becomes. Start defaults, when HasStart is false, to the first segment no arg reads yet, and End to Start — to the last segment when Array is set. Type is string, integer, number or uuid for a one-segment arg; the Trigger* fields are what the segments have to match for the command to run at all. Position is the index to insert at (< 0 appends).
+ArgProps describes one arg to declare in a command's command.yaml: the segments Start to End of the command line — the raw indexes typed on the command line, "" being the first segment no arg reads yet and Start again, "-1" the last segment — bound to the Entries field Name becomes. Type is string, integer, number or uuid, anything but string reading one segment alone; Trigger and TriggerType are what the segments, joined by a space, have to match for the command to run at all, and TriggerNegate / TriggerIgnoreCase the two switches on it. Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Command` | `string` |
 | `Name` | `string` |
-| `Start` | `int` |
-| `HasStart` | `bool` |
-| `End` | `int` |
-| `HasEnd` | `bool` |
-| `Array` | `bool` |
+| `Start` | `string` |
+| `End` | `string` |
 | `Type` | `string` |
 | `Required` | `bool` |
 | `Default` | `string` |
@@ -186,9 +183,105 @@ ArgProps describes one arg to declare in a command's command.yaml: the segments 
 | `Description` | `string` |
 | `Position` | `int` |
 
+## `ArgEditProps`
+
+ArgEditProps describes the change set-arg applies to one arg a command declares. Name is the arg as it is declared now and Rename the name it takes on ("" leaves it alone); every other key overwrites what is there when it is given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case", "type", "required", "default" or "description" off again.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Command` | `string` |
+| `Name` | `string` |
+| `Rename` | `string` |
+| `Start` | `string` |
+| `End` | `string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Default` | `string` |
+| `Trigger` | `string` |
+| `TriggerType` | `string` |
+| `TriggerNegate` | `bool` |
+| `TriggerIgnoreCase` | `bool` |
+| `Description` | `string` |
+| `Clear` | `[]string` |
+
+## `FlagEditProps`
+
+FlagEditProps describes the change set-flag applies to one flag a command declares. Name is the flag as it is declared now — its name, its id or one of its keys — and Rename the name it takes on ("" leaves it alone); Keys replace the spellings when any is given, Enum the accepted values, and every other key overwrites what is there when it is given. Clear takes "keys", "type", "required", "default", "min", "max", "enum", "pattern", "trigger", "trigger-negate", "trigger-ignore-case" or "description" off again.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Command` | `string` |
+| `Name` | `string` |
+| `Rename` | `string` |
+| `Keys` | `[]string` |
+| `Type` | `string` |
+| `Required` | `bool` |
+| `Default` | `string` |
+| `Min` | `string` |
+| `Max` | `string` |
+| `Enum` | `[]string` |
+| `Pattern` | `string` |
+| `Trigger` | `string` |
+| `TriggerType` | `string` |
+| `TriggerNegate` | `bool` |
+| `TriggerIgnoreCase` | `bool` |
+| `Description` | `string` |
+| `Clear` | `[]string` |
+
+## `AddCommandProps`
+
+AddCommandProps describes one command to scaffold. Name is its package and the verb its first arg answers to on segment 0; Trigger is another value that arg compares against ("" is the name, or every command line for a Middleware), TriggerType how ("" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the args from one command-line shape instead ("route add {name} {*rest}") and excludes Trigger and TriggerType. A Middleware is not strict, runs on DefaultMiddlewarePriority and answers nothing. Priority is the rung it runs on, used only when HasPriority is set; Before and After name another command to land one rung below or above instead, and exclude Priority.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+| `Trigger` | `string` |
+| `TriggerType` | `string` |
+| `TriggerNegate` | `bool` |
+| `TriggerIgnoreCase` | `bool` |
+| `Pattern` | `string` |
+| `Middleware` | `bool` |
+| `Priority` | `int` |
+| `HasPriority` | `bool` |
+| `Before` | `string` |
+| `After` | `string` |
+| `Help` | `string` |
+| `Category` | `string` |
+
+## `RenameCommandProps`
+
+RenameCommandProps describes one command to rename: Command as it is declared now, Name the name it takes on.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Command` | `string` |
+| `Name` | `string` |
+
+## `RebalanceCommandsProps`
+
+RebalanceCommandsProps describes one rebalance of the cli chain: every command is laid down again Step rungs apart, in the order it runs now, the first one on Step.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Step` | `int` |
+
+## `ExplainCommandProps`
+
+ExplainCommandProps describes one command line to run against the declared commands without running any: Argv is the line, as it would be typed after the binary name.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Argv` | `[]string` |
+
 ## `SetCommandProps`
 
-SetCommandProps carries the command-level keys of command.yaml that set-command may rewrite. Empty strings leave the current value alone; Identifiers — further verbs the command answers to — and Examples are appended (deduplicated).
+SetCommandProps carries the command-level keys of command.yaml that set-command may rewrite. Empty strings leave the current value alone; Identifiers — further verbs the command answers to — and Examples are appended (deduplicated), and Hidden / Visible, Strict / Loose are the two sides of one switch each. Priority is the rung the command runs on, read when HasPriority is set; Before and After name another command to land one rung below or above instead. Segments is the segment count the command line has to have, read when HasSegments is set. Clear takes "segments" off again.
 
 | Field | Type |
 | --- | --- |
@@ -199,8 +292,17 @@ SetCommandProps carries the command-level keys of command.yaml that set-command 
 | `LongDescription` | `string` |
 | `Hidden` | `bool` |
 | `Visible` | `bool` |
+| `Strict` | `bool` |
+| `Loose` | `bool` |
+| `Priority` | `int` |
+| `HasPriority` | `bool` |
+| `Before` | `string` |
+| `After` | `string` |
+| `Segments` | `int` |
+| `HasSegments` | `bool` |
 | `Identifiers` | `[]string` |
 | `Examples` | `[]string` |
+| `Clear` | `[]string` |
 
 ## `AddRouteProps`
 
@@ -527,13 +629,20 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `RemoveAvailable` | `func(path string, available string) error` | RemoveAvailable deletes one available. The standard one is refused: it is what cmd/main/main.go imports. |
 | `CliInit` | `func(path string) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
 | `CliPurge` | `func(path string) error` | CliPurge removes the CLI layer and every command declared in it. |
-| `AddCommand` | `func(path string, name string, help string, category string) error` | AddCommand declares a new command: its entries.yaml, its generated new.go and a handler.go to fill in. |
-| `RemoveCommand` | `func(path string, name string) error` | RemoveCommand deletes one command and unwires it from the dispatcher. |
-| `SetCommand` | `func(props SetCommandProps) error` | SetCommand rewrites the command-level keys of one command's entries.yaml. |
+| `AddCommand` | `func(props AddCommandProps) error` | AddCommand declares a new command: its command.yaml, its generated new.go and entries.go, and an InternalPureHandler.go to fill in. |
+| `RemoveCommand` | `func(path string, name string) error` | RemoveCommand deletes one command and unwires it from the dispatch. |
+| `SetCommand` | `func(props SetCommandProps) error` | SetCommand rewrites the command-level keys of one command's command.yaml. |
+| `RenameCommand` | `func(props RenameCommandProps) error` | RenameCommand moves one command to a new name: its package, and the verb its first arg answers to when that verb was its name. |
+| `RebalanceCommands` | `func(props RebalanceCommandsProps) error` | RebalanceCommands lays every command down again, Step rungs apart, in the order the chain runs them now. |
+| `ListCommands` | `func(path string) ([]string, error)` | ListCommands renders every declared command as one line, in the order the dispatch runs them. |
+| `ShowCommand` | `func(path string, command string) ([]string, error)` | ShowCommand renders one command's whole declaration — its args, its flags and the middlewares in front of it — as the lines of a tree. |
+| `ExplainCommand` | `func(props ExplainCommandProps) ([]string, error)` | ExplainCommand runs one command line against the declared commands without running any, and says, command by command, whether it runs. |
 | `AddFlag` | `func(props FlagProps) error` | AddFlag declares one flag on a command. |
+| `SetFlag` | `func(props FlagEditProps) error` | SetFlag rewrites one declared flag of a command. |
 | `RemoveFlag` | `func(path string, command string, name string) error` | RemoveFlag deletes one declared flag from a command. |
-| `AddArg` | `func(props ArgProps) error` | AddArg declares one positional argument on a command. |
-| `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared positional argument from a command. |
+| `AddArg` | `func(props ArgProps) error` | AddArg declares one arg — a slice of the segments — on a command. |
+| `SetArg` | `func(props ArgEditProps) error` | SetArg rewrites one declared arg of a command. |
+| `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared arg from a command. |
 | `ServerInit` | `func(path string) error` | ServerInit adds the http server layer (sandbox/internal/server, the routeio package, the health route of sandbox/internal/routeslist and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
 | `ServerPurge` | `func(path string) error` | ServerPurge removes the server layer and every route declared in it. |
 | `AddRoute` | `func(props AddRouteProps) error` | AddRoute declares a new route: its route.yaml, its generated new.go and entries.go, and an InternalPureHandler.go to fill in. |

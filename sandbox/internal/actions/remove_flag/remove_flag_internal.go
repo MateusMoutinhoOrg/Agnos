@@ -15,10 +15,7 @@ func RemoveFlagInternal(sandbox *api.Sandbox, io *smartio.SmartIO, command strin
 		return err
 	}
 
-	index := utils.FindCommandFlag(conf, utils.CommandEntryId(sandbox, name))
-	if index < 0 {
-		index = utils.FindCommandFlag(conf, name)
-	}
+	index := utils.FindCommandFlagNamed(sandbox, conf, name)
 	if index < 0 {
 		return sandbox.Deps.Std.Errorf("command %q has no flag named %q", command, name)
 	}

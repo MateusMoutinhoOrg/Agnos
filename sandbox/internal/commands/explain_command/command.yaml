@@ -1,0 +1,14 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: explain-command
+    - description: the command line to explain, after a bare -- so its flags are not read as this command's
+      end: -1
+      id: Argv
+      start: 1
+category: Cli System
+help: Run a command line against the declared commands without running any
+priority: 100

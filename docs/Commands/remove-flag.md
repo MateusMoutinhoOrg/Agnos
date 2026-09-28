@@ -1,20 +1,20 @@
 # `remove-flag`
 
-Remove a flag from a command's entries.yaml
+Remove a flag from a command's command.yaml
 
 ```bash
-agnos remove-flag <Name> --command <target> [--help] [--path <path>] [--quiet]
+agnos remove-flag <Name> --command <command> [--help] [--path <path>] [--quiet]
 ```
 
-Drops one flag declaration (matched by its name or by one of its identifiers) from sandbox/internal/commands/<command>/entries.yaml and runs build so the command's new.go forgets it.
+Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Name` | string, required |  | the flag name (or one of its identifiers, e.g. --out) |
+| `Name` | string, required |  | the flag name, its id, or one of its keys, e.g. --out |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--command`, `-c` | string, required |  | the command (identifier or package name) that owns the flag | — |
+| `--command`, `-c` | string, required |  | the command (a verb or its package name) that owns the flag | — |
 | `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |

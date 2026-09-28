@@ -26,6 +26,7 @@ func VerifyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) erro
 	violations = append(violations, CheckDeplist(sandbox, io, module_conf.Module)...)
 	violations = append(violations, CheckAdapterlist(sandbox, io, module_conf.Module)...)
 	violations = append(violations, CheckRemoteDeps(sandbox, io, path)...)
+	violations = append(violations, CheckCommands(sandbox, io)...)
 	violations = append(violations, CheckRoutes(sandbox, io)...)
 	violations = append(violations, CheckDatabases(sandbox, io)...)
 	violations = append(violations, CheckDocs(sandbox, io)...)

@@ -345,7 +345,7 @@ func flagToken(sandbox *api.Sandbox, flag commandconf.Flag) string {
 	if flag.Type == "boolean" {
 		return key
 	}
-	token := key + " <" + sandbox.Deps.Stringsdeps.TrimPrefix(commandconf.DefaultKey(sandbox, flag.Id), "--") + ">"
+	token := key + " <" + sandbox.Deps.Stringsdeps.TrimLeft(key, "-") + ">"
 	if flag.Type == "string-array" || flag.Type == "integer-array" {
 		token += "..."
 	}

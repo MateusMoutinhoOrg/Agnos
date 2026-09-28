@@ -1,0 +1,58 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: set-flag
+    - description: the flag to rewrite (its name, its id or one of its keys)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+flags:
+    - description: the command (a verb or its package name) that declares the flag
+      id: Target
+      keys:
+        - --command
+        - -c
+      required: true
+    - description: the name the flag takes on
+      id: Rename
+    - description: a spelling the flag answers to; the ones given replace the declared ones (repeatable)
+      id: Key
+      type: string-array
+    - description: string, integer, number, boolean, string-array or integer-array
+      id: Type
+    - description: a command line without the flag is a usage error
+      id: Required
+      type: boolean
+    - description: the literal bound when the flag is absent
+      id: Default
+    - description: smallest accepted value (integer/number only)
+      id: Min
+    - description: largest accepted value (integer/number only)
+      id: Max
+    - description: a value the flag accepts; the ones given replace the declared ones (repeatable)
+      id: Enum
+      type: string-array
+    - description: a regular expression every value has to match
+      id: Pattern
+    - description: what the value has to read as for the command to run
+      id: Trigger
+    - description: 'how the trigger is compared: equal, prefix, text-prefix, suffix, regex or one-of'
+      id: TriggerType
+    - description: invert the trigger
+      id: TriggerNegate
+      type: boolean
+    - description: compare the trigger without regard to case
+      id: TriggerIgnoreCase
+      type: boolean
+    - description: the one-line help text
+      id: Description
+    - description: 'a key to take off: keys, type, required, default, min, max, enum, pattern, trigger, trigger-negate, trigger-ignore-case or description (repeatable)'
+      id: Clear
+      type: string-array
+help: Rewrite one flag of a command's command.yaml
+priority: 100

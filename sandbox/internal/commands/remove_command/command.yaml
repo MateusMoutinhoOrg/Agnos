@@ -5,7 +5,7 @@ args:
       trigger:
         type: equal
         value: remove-command
-    - description: the command to delete (identifier or package name)
+    - description: the command to delete (a verb or its package name)
       end: 1
       id: Name
       required: true
@@ -15,8 +15,5 @@ examples:
     - remove-command my-feature
     - remove-command my-feature --path ./my-project
 help: Delete a command package from the project
-long-description: |-
-    Deletes sandbox/internal/commands/<name>/ (entries.yaml, new.go, handler.go
-    and anything else inside) and runs build so the dispatch and help stop
-    answering to it. The generated help command cannot be removed.
+long-description: Deletes sandbox/internal/commands/<name>/ (command.yaml, new.go, entries.go, InternalPureHandler.go and anything else in it), then runs build so the dispatch stops running it. help, version and help-flag are generated and refused.
 priority: 100

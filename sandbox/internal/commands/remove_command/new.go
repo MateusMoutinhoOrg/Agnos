@@ -24,7 +24,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "remove-command <Name>"
 	self.Category = "Cli System"
 	self.Help = "Delete a command package from the project"
-	self.LongDescription = "Deletes sandbox/internal/commands/<name>/ (entries.yaml, new.go, handler.go\nand anything else inside) and runs build so the dispatch and help stop\nanswering to it. The generated help command cannot be removed."
+	self.LongDescription = "Deletes sandbox/internal/commands/<name>/ (command.yaml, new.go, entries.go, InternalPureHandler.go and anything else in it), then runs build so the dispatch stops running it. help, version and help-flag are generated and refused."
 	self.Examples = []string{"remove-command my-feature", "remove-command my-feature --path ./my-project"}
 	self.Hidden = false
 
@@ -48,7 +48,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Required:    true,
 			Default:     "",
 			HasDefault:  false,
-			Description: "the command to delete (identifier or package name)",
+			Description: "the command to delete (a verb or its package name)",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
 		},
 	}

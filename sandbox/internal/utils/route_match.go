@@ -199,3 +199,136 @@ func routeParameterConverts(sandbox *api.Sandbox, parameter routeconf.Parameter,
 	}
 	return true
 }
+
+// RouteMiddlewareReach crosses one route with another that runs on a lower
+// rung — a middleware in front of it — the way MiddlewareReach crosses two
+// commands: whether it runs in front of every request of the route (its
+// methods take the route's, every path trigger holds on the route's literal
+// segments), may run (a trigger reads a segment the route captures, or a
+// regex), or never does; and, when one of its parameters declares a trigger,
+// the condition that adds.
+func RouteMiddlewareReach(sandbox *api.Sandbox, middleware *routeconf.RouteConf, route *routeconf.RouteConf) (Reach, string) {
+	if middleware.Priority >= route.Priority {
+		return NoReach, ""
+	}
+
+	reach := Runs
+	if !routeMethodsMeet(middleware, route) {
+		return NoReach, ""
+	}
+	if !contains(middleware.Methods, routeconf.AnyMethod) && contains(route.Methods, routeconf.AnyMethod) {
+		reach = MayRun
+	}
+	if middleware.HasSegments && (!route.HasSegments || route.Segments != middleware.Segments) {
+		if route.HasSegments {
+			return NoReach, ""
+		}
+		reach = MayRun
+	}
+
+	words := routeLiteralSegments(sandbox, route)
+	for _, path := range middleware.Paths {
+		if !path.Trigger.Exists {
+			continue
+		}
+		switch routeTriggerReach(sandbox, path, words) {
+		case NoReach:
+			return NoReach, ""
+		case MayRun:
+			reach = MayRun
+		}
+	}
+
+	conditions := []string{}
+	for _, parameter := range middleware.Parameters {
+		if parameter.Trigger.Exists {
+			conditions = append(conditions, parameter.Key+" "+DescribeTrigger(sandbox, parameter.Trigger))
+		}
+	}
+	if len(conditions) == 0 {
+		return reach, ""
+	}
+	return reach, "only when " + sandbox.Deps.Stringsdeps.Join(conditions, " and ")
+}
+
+// routeMethodsMeet reports whether two routes share a method they answer.
+func routeMethodsMeet(middleware *routeconf.RouteConf, route *routeconf.RouteConf) bool {
+	if contains(middleware.Methods, routeconf.AnyMethod) || contains(route.Methods, routeconf.AnyMethod) {
+		return true
+	}
+	for _, method := range middleware.Methods {
+		if contains(route.Methods, method) {
+			return true
+		}
+	}
+	return false
+}
+
+// routeLiteralSegments is, segment by segment, the one segment a route's
+// request path is known to carry there: what an equal trigger of its paths
+// spells.
+func routeLiteralSegments(sandbox *api.Sandbox, route *routeconf.RouteConf) map[int]string {
+	words := map[int]string{}
+	for _, path := range route.Paths {
+		if !path.Trigger.Exists || path.Trigger.Negate || path.Trigger.Type != "equal" {
+			continue
+		}
+		offset := 0
+		for _, segment := range sandbox.Deps.Stringsdeps.Split(path.Trigger.Value, "/") {
+			if segment == "" {
+				continue
+			}
+			if _, known := words[path.Start+offset]; !known {
+				words[path.Start+offset] = segment
+			}
+			offset++
+		}
+	}
+	return words
+}
+
+// routeTriggerReach is triggerReach for a path of a middleware route, over the
+// route's literal segments.
+func routeTriggerReach(sandbox *api.Sandbox, path routeconf.Path, words map[int]string) Reach {
+	trigger := path.Trigger
+	if trigger.Type == "regex" {
+		return MayRun
+	}
+
+	known := []string{}
+	complete := path.End != routeconf.LastSegment
+	for index := path.Start; path.End == routeconf.LastSegment || index <= path.End; index++ {
+		word, has := words[index]
+		if !has {
+			complete = false
+			break
+		}
+		known = append(known, word)
+	}
+	if path.End == routeconf.LastSegment {
+		complete = false
+	}
+
+	text := "/" + sandbox.Deps.Stringsdeps.Join(known, "/")
+	if complete {
+		return boolReach(MatchTrigger(sandbox, trigger, text, true))
+	}
+
+	if trigger.Type == "prefix" && !trigger.Negate {
+		value := []string{}
+		for _, segment := range sandbox.Deps.Stringsdeps.Split(trigger.Value, "/") {
+			if segment != "" {
+				value = append(value, segment)
+			}
+		}
+		if len(value) <= len(known) {
+			return boolReach(MatchTrigger(sandbox, trigger, text, true))
+		}
+		for index, word := range known {
+			if value[index] != word {
+				return NoReach
+			}
+		}
+	}
+	return MayRun
+}

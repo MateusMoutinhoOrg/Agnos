@@ -14,15 +14,12 @@ category: Cli System
 examples:
     - remove-arg file --command exec
 flags:
-    - description: the command (identifier or package name) that owns the arg
+    - description: the command (a verb or its package name) that owns the arg
       id: Target
       keys:
         - --command
         - -c
       required: true
-help: Remove a positional arg from a command's entries.yaml
-long-description: |-
-    Drops one positional arg declaration from
-    sandbox/internal/commands/<command>/entries.yaml and runs build so the
-    command's new.go forgets it. Later args shift up.
+help: Remove an arg from a command's command.yaml
+long-description: Drops one arg declaration from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it.
 priority: 100

@@ -30,15 +30,18 @@ import (
 	disableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/disable_extension"
 	enableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/enable_extension"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
+	explainCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_command"
 	explainRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_route"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
 	importBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/import_body"
 	interviewAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/interview"
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
+	listCommandsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_commands"
 	listDepsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_deps"
 	listExtensionsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_extensions"
 	listRoutesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_routes"
+	rebalanceCommandsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rebalance_commands"
 	rebalanceRoutesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rebalance_routes"
 	removeAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_adapter"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
@@ -57,18 +60,22 @@ import (
 	removeRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_route"
 	removeTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table"
 	removeTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table_field"
+	renameCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_command"
 	renameRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_route"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	serverPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_purge"
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
+	setArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_arg"
 	setBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body"
 	setBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body_field"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	setDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_dep"
+	setFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_flag"
 	setParameterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_parameter"
 	setPathAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_path"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
 	setTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_table_field"
+	showCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_command"
 	showDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_database"
 	showRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_route"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
@@ -146,8 +153,8 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.CliPurge = func(path string) error {
 		return cliPurgeAction.CliPurge(sandbox, path)
 	}
-	actions.AddCommand = func(path string, name string, help string, category string) error {
-		return addCommandAction.AddCommand(sandbox, path, name, help, category)
+	actions.AddCommand = func(props api.AddCommandProps) error {
+		return addCommandAction.AddCommand(sandbox, props)
 	}
 	actions.RemoveCommand = func(path string, name string) error {
 		return removeCommandAction.RemoveCommand(sandbox, path, name)
@@ -155,14 +162,35 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.SetCommand = func(props api.SetCommandProps) error {
 		return setCommandAction.SetCommand(sandbox, props)
 	}
+	actions.RenameCommand = func(props api.RenameCommandProps) error {
+		return renameCommandAction.RenameCommand(sandbox, props)
+	}
+	actions.RebalanceCommands = func(props api.RebalanceCommandsProps) error {
+		return rebalanceCommandsAction.RebalanceCommands(sandbox, props)
+	}
+	actions.ListCommands = func(path string) ([]string, error) {
+		return listCommandsAction.ListCommands(sandbox, path)
+	}
+	actions.ShowCommand = func(path string, command string) ([]string, error) {
+		return showCommandAction.ShowCommand(sandbox, path, command)
+	}
+	actions.ExplainCommand = func(props api.ExplainCommandProps) ([]string, error) {
+		return explainCommandAction.ExplainCommand(sandbox, props)
+	}
 	actions.AddFlag = func(props api.FlagProps) error {
 		return addFlagAction.AddFlag(sandbox, props)
+	}
+	actions.SetFlag = func(props api.FlagEditProps) error {
+		return setFlagAction.SetFlag(sandbox, props)
 	}
 	actions.RemoveFlag = func(path string, command string, name string) error {
 		return removeFlagAction.RemoveFlag(sandbox, path, command, name)
 	}
 	actions.AddArg = func(props api.ArgProps) error {
 		return addArgAction.AddArg(sandbox, props)
+	}
+	actions.SetArg = func(props api.ArgEditProps) error {
+		return setArgAction.SetArg(sandbox, props)
 	}
 	actions.RemoveArg = func(path string, command string, name string) error {
 		return removeArgAction.RemoveArg(sandbox, path, command, name)

@@ -8,18 +8,23 @@ import (
 
 func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	add_error := addFlagAction.AddFlag(sandbox, api.FlagProps{
-		Path:        props.Path,
-		Command:     entries.Target,
-		Name:        entries.Name,
-		Keys:        entries.Identifier,
-		Description: entries.Description,
-		Type:        entries.Type,
-		Default:     entries.Default,
-		Required:    entries.Required,
-		Array:       entries.Array,
-		Min:         entries.Min,
-		Max:         entries.Max,
-		Position:    entries.Position,
+		Path:              props.Path,
+		Command:           entries.Target,
+		Name:              entries.Name,
+		Keys:              entries.Key,
+		Type:              entries.Type,
+		Required:          entries.Required,
+		Default:           entries.Default,
+		Min:               entries.Min,
+		Max:               entries.Max,
+		Enum:              entries.Enum,
+		Pattern:           entries.Pattern,
+		Trigger:           entries.Trigger,
+		TriggerType:       entries.TriggerType,
+		TriggerNegate:     entries.TriggerNegate,
+		TriggerIgnoreCase: entries.TriggerIgnoreCase,
+		Description:       entries.Description,
+		Position:          entries.Position,
 	})
 	if add_error != nil {
 		return cliio.Fail(sandbox, api.ExitFailure, "", add_error.Error())

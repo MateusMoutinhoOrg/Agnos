@@ -31,15 +31,22 @@ lists the flags of the middlewares in front of it too.
 
 | Command | Does |
 | --- | --- |
-| [`add-arg`](add-arg.md) | Add a positional arg to a command's entries.yaml |
+| [`add-arg`](add-arg.md) | Add an arg to a command's command.yaml |
 | [`add-command`](add-command.md) | Scaffold a new command package in the project |
-| [`add-flag`](add-flag.md) | Add a flag to a command's entries.yaml |
+| [`add-flag`](add-flag.md) | Add a flag to a command's command.yaml |
 | [`cli-init`](cli-init.md) | Initializes the CLI layer for the project |
 | [`cli-purge`](cli-purge.md) | Removes the CLI layer from the project |
-| [`remove-arg`](remove-arg.md) | Remove a positional arg from a command's entries.yaml |
+| [`explain-command`](explain-command.md) | Run a command line against the declared commands without running any |
+| [`list-commands`](list-commands.md) | List every command in the order the chain runs them |
+| [`rebalance-commands`](rebalance-commands.md) | Lay the cli chain down again with room between its rungs |
+| [`remove-arg`](remove-arg.md) | Remove an arg from a command's command.yaml |
 | [`remove-command`](remove-command.md) | Delete a command package from the project |
-| [`remove-flag`](remove-flag.md) | Remove a flag from a command's entries.yaml |
-| [`set-command`](set-command.md) | Update the command-level keys of a command's entries.yaml |
+| [`remove-flag`](remove-flag.md) | Remove a flag from a command's command.yaml |
+| [`rename-command`](rename-command.md) | Rename a command: its package, and the verb it answered to by its name |
+| [`set-arg`](set-arg.md) | Rewrite one arg of a command's command.yaml |
+| [`set-command`](set-command.md) | Update the command-level keys of a command's command.yaml |
+| [`set-flag`](set-flag.md) | Rewrite one flag of a command's command.yaml |
+| [`show-command`](show-command.md) | Print one command's declaration as a tree: args, flags and the middlewares in front of it |
 
 ## Server System
 

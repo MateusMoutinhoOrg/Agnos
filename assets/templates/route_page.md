@@ -7,10 +7,18 @@
 {{- end }}
 {{- if .Route.Fields }}
 
-| Entries | Read from | In | Type | Default | Description |
-| --- | --- | --- | --- | --- | --- |
+| Entries | Read from | In | Type | Default | Description | From |
+| --- | --- | --- | --- | --- | --- | --- |
 {{- range .Route.Fields }}
-| `{{ .Id }}` | {{ .Key }} | {{ .In }} | {{ .Type }} | {{ .Default }} | {{ .Description }} |
+| `{{ .Id }}` | {{ .Key }} | {{ .In }} | {{ .Type }} | {{ .Default }} | {{ .Description }} | {{ if .From }}[{{ .From }}]({{ .FromPage }}){{ else }}—{{ end }} |
+{{- end }}
+{{- end }}
+{{- if .Route.Middlewares }}
+
+| Runs in front of it | When |
+| --- | --- |
+{{- range .Route.Middlewares }}
+| [`{{ .Name }}`]({{ .Page }}) | {{ with .Condition }}{{ . }}{{ else }}always{{ end }} |
 {{- end }}
 {{- end }}
 {{- with .Route.Body }}

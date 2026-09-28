@@ -1,0 +1,15 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: show-command
+    - description: the command to show (its name or a verb it answers to)
+      end: 1
+      id: Target
+      required: true
+      start: 1
+category: Cli System
+help: 'Print one command''s declaration as a tree: args, flags and the middlewares in front of it'
+priority: 100

@@ -15,8 +15,17 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 		LongDescription: entries.LongDescription,
 		Hidden:          entries.Hidden,
 		Visible:         entries.Visible,
+		Strict:          entries.Strict,
+		Loose:           entries.Loose,
+		Priority:        entries.Priority,
+		HasPriority:     entries.Priority >= 0,
+		Before:          entries.Before,
+		After:           entries.After,
+		Segments:        entries.Segments,
+		HasSegments:     entries.Segments >= 0,
 		Identifiers:     entries.Identifier,
 		Examples:        entries.Example,
+		Clear:           entries.Clear,
 	})
 	if set_error != nil {
 		return cliio.Fail(sandbox, api.ExitFailure, "", set_error.Error())

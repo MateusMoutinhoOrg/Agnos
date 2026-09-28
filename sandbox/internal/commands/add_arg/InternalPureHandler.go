@@ -8,15 +8,20 @@ import (
 
 func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	add_error := addArgAction.AddArg(sandbox, api.ArgProps{
-		Path:        props.Path,
-		Command:     entries.Target,
-		Name:        entries.Name,
-		Description: entries.Description,
-		Type:        entries.Type,
-		Default:     entries.Default,
-		Required:    entries.Required,
-		Array:       entries.Array,
-		Position:    entries.Position,
+		Path:              props.Path,
+		Command:           entries.Target,
+		Name:              entries.Name,
+		Start:             entries.Start,
+		End:               entries.End,
+		Type:              entries.Type,
+		Required:          entries.Required,
+		Default:           entries.Default,
+		Trigger:           entries.Trigger,
+		TriggerType:       entries.TriggerType,
+		TriggerNegate:     entries.TriggerNegate,
+		TriggerIgnoreCase: entries.TriggerIgnoreCase,
+		Description:       entries.Description,
+		Position:          entries.Position,
 	})
 	if add_error != nil {
 		return cliio.Fail(sandbox, api.ExitFailure, "", add_error.Error())

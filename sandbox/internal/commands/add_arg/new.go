@@ -23,8 +23,8 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "add-arg <Name>"
 	self.Category = "Cli System"
-	self.Help = "Add a positional arg to a command's entries.yaml"
-	self.LongDescription = "Inserts one positional arg declaration into\nsandbox/internal/commands/<command>/entries.yaml (at --position, else at the\nend) and runs build so the command's new.go declares it. Positional args bind\nby order; an array arg must stay last."
+	self.Help = "Add an arg to a command's command.yaml"
+	self.LongDescription = "Inserts one arg — the segments --start to --end of the command line — into sandbox/internal/commands/<command>/command.yaml (at --position, else at the end) and runs build. An arg given no --start reads the first segment no arg reads yet; with --trigger it is part of what the command matches on."
 	self.Examples = []string{"add-arg file --type string --required --description \"the file to process\" --command exec", "add-arg count --type int --min 1 --position 0 --command exec"}
 	self.Hidden = false
 
@@ -48,7 +48,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Required:    true,
 			Default:     "",
 			HasDefault:  false,
-			Description: "the arg name (the id the handler reads it back by)",
+			Description: "the arg name; its exported Go form is the Entries field the handler reads (file-name -> entries.FileName)",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
 		},
 	}
@@ -63,7 +63,29 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the command (identifier or package name) that receives the field",
+			Description: "the command (a verb or its package name) that receives the arg",
+		},
+		{
+			Id:          "Start",
+			Keys:        []string{"--start"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "the first segment the arg reads (defaults to the first no arg reads yet)",
+		},
+		{
+			Id:          "End",
+			Keys:        []string{"--end"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "the last segment the arg reads, -1 for the last one (defaults to --start)",
 		},
 		{
 			Id:          "Type",
@@ -74,7 +96,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  true,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the value type: string, boolean, int or float (defaults to string)",
+			Description: "what one segment converts to: string (the default), integer, number or uuid; anything but string reads one segment, and one that does not convert makes the command a non-match",
 		},
 		{
 			Id:          "Description",
@@ -85,18 +107,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "help text shown for the field",
-		},
-		{
-			Id:          "Example",
-			Keys:        []string{"--example", "-e"},
-			Type:        api.StringArrayFlag,
-			Required:    false,
-			Default:     "",
-			HasDefault:  false,
-			Pattern:     "",
-			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "an usage example for the field (repeatable)",
+			Description: "the one-line help text of the arg",
 		},
 		{
 			Id:          "Default",
@@ -107,7 +118,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the literal assigned when the field is absent (cannot be combined with --required)",
+			Description: "the literal bound when the arg is absent (cannot be combined with --required)",
 		},
 		{
 			Id:          "Required",
@@ -118,40 +129,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "fail with a usage error when the field is not provided (not for booleans or fields with --default)",
-		},
-		{
-			Id:          "Array",
-			Keys:        []string{"--array"},
-			Type:        api.BooleanFlag,
-			Required:    false,
-			Default:     "",
-			HasDefault:  false,
-			Pattern:     "",
-			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "collect every occurrence into a []T field instead of a single value",
-		},
-		{
-			Id:          "Min",
-			Keys:        []string{"--min"},
-			Type:        api.StringFlag,
-			Required:    false,
-			Default:     "",
-			HasDefault:  false,
-			Pattern:     "",
-			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "smallest accepted value (int/float only)",
-		},
-		{
-			Id:          "Max",
-			Keys:        []string{"--max"},
-			Type:        api.StringFlag,
-			Required:    false,
-			Default:     "",
-			HasDefault:  false,
-			Pattern:     "",
-			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "largest accepted value (int/float only)",
+			Description: "a command line matching the command without the arg is a usage error",
 		},
 		{
 			Id:          "Position",
@@ -162,7 +140,51 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  true,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "zero-based index to insert the field at (defaults to the end)",
+			Description: "zero-based index to insert the arg at (defaults to the end)",
+		},
+		{
+			Id:          "Trigger",
+			Keys:        []string{"--trigger"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "what the segments, joined by a space, have to read as for the command to run; without it the arg is a plain capture",
+		},
+		{
+			Id:          "TriggerType",
+			Keys:        []string{"--trigger-type"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "how the trigger is compared: equal, prefix (word by word), text-prefix, suffix, regex or one-of (defaults to equal)",
+		},
+		{
+			Id:          "TriggerNegate",
+			Keys:        []string{"--trigger-negate"},
+			Type:        api.BooleanFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "invert the trigger: the command runs when the segments do not match it",
+		},
+		{
+			Id:          "TriggerIgnoreCase",
+			Keys:        []string{"--trigger-ignore-case"},
+			Type:        api.BooleanFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "compare the trigger without regard to case",
 		},
 	}
 

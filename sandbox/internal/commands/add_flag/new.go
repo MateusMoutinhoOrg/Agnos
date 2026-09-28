@@ -23,9 +23,9 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "add-flag <Name>"
 	self.Category = "Cli System"
-	self.Help = "Add a flag to a command's entries.yaml"
-	self.LongDescription = "Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml\nand runs build so the command's new.go declares it. Without --identifier the\nflag answers to --<name>. Refuses a name or identifier the command already\nuses."
-	self.Examples = []string{"add-flag output --identifier --out --identifier -o --type string --required --command exec", "add-flag verbose --type boolean --description \"print every step\" --command exec", "add-flag retries --type int --min 0 --max 5 --default 1 --command exec"}
+	self.Help = "Add a flag to a command's command.yaml"
+	self.LongDescription = "Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its entries.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses."
+	self.Examples = []string{"add-flag output --key --out --key -o --required --command exec", "add-flag verbose --type boolean --description 'print every step' --command exec", "add-flag retries --type integer --min 0 --max 5 --default 1 --command exec", "add-flag tag --type string-array --enum a --enum b --command exec"}
 	self.Hidden = false
 
 	self.Args = []api.CommandArg{
@@ -48,22 +48,22 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Required:    true,
 			Default:     "",
 			HasDefault:  false,
-			Description: "the flag name (the id the handler reads it back by, e.g. command.GetString(\"out-file\"))",
+			Description: "the flag name; its exported Go form is the Entries field the handler reads (out-file -> entries.OutFile)",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
 		},
 	}
 
 	self.Flags = []api.CommandFlag{
 		{
-			Id:          "Identifier",
-			Keys:        []string{"--identifier", "-i"},
+			Id:          "Key",
+			Keys:        []string{"--key"},
 			Type:        api.StringArrayFlag,
 			Required:    false,
 			Default:     "",
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "a cli identifier for the flag, e.g. --out or -o (repeatable; defaults to --<name>)",
+			Description: "a spelling the flag answers to, e.g. --out or -o (repeatable; defaults to --<name>)",
 		},
 		{
 			Id:          "Target",
@@ -74,7 +74,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the command (identifier or package name) that receives the field",
+			Description: "the command (a verb or its package name) that receives the flag",
 		},
 		{
 			Id:          "Type",
@@ -85,7 +85,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  true,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the value type: string, boolean, int or float (defaults to string)",
+			Description: "the value type: string, integer, number, boolean, string-array or integer-array (defaults to string)",
 		},
 		{
 			Id:          "Description",
@@ -96,18 +96,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "help text shown for the field",
-		},
-		{
-			Id:          "Example",
-			Keys:        []string{"--example", "-e"},
-			Type:        api.StringArrayFlag,
-			Required:    false,
-			Default:     "",
-			HasDefault:  false,
-			Pattern:     "",
-			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "an usage example for the field (repeatable)",
+			Description: "the one-line help text of the flag",
 		},
 		{
 			Id:          "Default",
@@ -118,7 +107,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the literal assigned when the field is absent (cannot be combined with --required)",
+			Description: "the literal bound when the flag is absent (cannot be combined with --required)",
 		},
 		{
 			Id:          "Required",
@@ -129,18 +118,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "fail with a usage error when the field is not provided (not for booleans or fields with --default)",
-		},
-		{
-			Id:          "Array",
-			Keys:        []string{"--array"},
-			Type:        api.BooleanFlag,
-			Required:    false,
-			Default:     "",
-			HasDefault:  false,
-			Pattern:     "",
-			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "collect every occurrence into a []T field instead of a single value",
+			Description: "a command line without the flag is a usage error (not for a boolean, nor with --default)",
 		},
 		{
 			Id:          "Min",
@@ -151,7 +129,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "smallest accepted value (int/float only)",
+			Description: "smallest accepted value (integer/number only)",
 		},
 		{
 			Id:          "Max",
@@ -162,7 +140,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "largest accepted value (int/float only)",
+			Description: "largest accepted value (integer/number only)",
 		},
 		{
 			Id:          "Position",
@@ -173,7 +151,73 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  true,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "zero-based index to insert the field at (defaults to the end)",
+			Description: "zero-based index to insert the flag at (defaults to the end)",
+		},
+		{
+			Id:          "Enum",
+			Keys:        []string{"--enum"},
+			Type:        api.StringArrayFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "a value the flag accepts, every other refused (repeatable)",
+		},
+		{
+			Id:          "Pattern",
+			Keys:        []string{"--pattern"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "a regular expression every value has to match",
+		},
+		{
+			Id:          "Trigger",
+			Keys:        []string{"--trigger"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "what the value has to read as for the command to run at all",
+		},
+		{
+			Id:          "TriggerType",
+			Keys:        []string{"--trigger-type"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "how the trigger is compared: equal, prefix, text-prefix, suffix, regex or one-of (defaults to equal)",
+		},
+		{
+			Id:          "TriggerNegate",
+			Keys:        []string{"--trigger-negate"},
+			Type:        api.BooleanFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "invert the trigger: the command runs when the value does not match it",
+		},
+		{
+			Id:          "TriggerIgnoreCase",
+			Keys:        []string{"--trigger-ignore-case"},
+			Type:        api.BooleanFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "compare the trigger without regard to case",
 		},
 	}
 

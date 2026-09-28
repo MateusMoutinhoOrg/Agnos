@@ -457,7 +457,8 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 
 // NewCommandArg builds one arg from what was typed on the command line: its
 // Entries id, the segments it reads — from next, the first no arg reads yet,
-// when no start is given — its type, and the default and trigger it declares.
+// when no start is given, to its start when no end is — its type, and the
+// default and trigger it declares.
 func NewCommandArg(sandbox *api.Sandbox, props api.ArgProps, next int) (commandconf.Arg, error) {
 	strs := sandbox.Deps.Stringsdeps
 	arg := commandconf.Arg{
@@ -470,18 +471,23 @@ func NewCommandArg(sandbox *api.Sandbox, props api.ArgProps, next int) (commandc
 	}
 
 	arg.Start = next
-	if props.HasStart {
-		arg.Start = props.Start
+	if raw := strs.TrimSpace(props.Start); raw != "" {
+		value, err := strs.Atoi(raw)
+		if err != nil {
+			return arg, sandbox.Deps.Std.Errorf("--start %q is not a segment index", raw)
+		}
+		arg.Start = value
 	}
 	if arg.Start < 0 {
 		return arg, sandbox.Deps.Std.Errorf("the command already reads to its last segment: give the arg a --start before it")
 	}
 	arg.End = arg.Start
-	if props.Array {
-		arg.End = commandconf.LastSegment
-	}
-	if props.HasEnd {
-		arg.End = props.End
+	if raw := strs.TrimSpace(props.End); raw != "" {
+		value, err := strs.Atoi(raw)
+		if err != nil {
+			return arg, sandbox.Deps.Std.Errorf("--end %q is not a segment index (use -1 for the last one)", raw)
+		}
+		arg.End = value
 	}
 	if arg.End != commandconf.LastSegment && arg.End < arg.Start {
 		return arg, sandbox.Deps.Std.Errorf("--end %d is before --start %d", arg.End, arg.Start)
@@ -528,4 +534,17 @@ var GeneratedCommands = []string{"help", "version", "help_flag"}
 // GeneratedCommands.
 func IsGeneratedCommand(sandbox *api.Sandbox, name string) bool {
 	return contains(GeneratedCommands, CommandPackage(sandbox, name))
+}
+
+// FindCommandFlagNamed is the index of the flag a user named: by its Entries
+// id ("out-file" -> OutFile), by one of its keys ("--out"), or by a key
+// without its dashes ("command" for --command). -1 when none answers to it.
+func FindCommandFlagNamed(sandbox *api.Sandbox, conf *commandconf.CommandConf, name string) int {
+	name = sandbox.Deps.Stringsdeps.TrimSpace(name)
+	for _, candidate := range []string{CommandEntryId(sandbox, name), name, "--" + name, "-" + name} {
+		if index := FindCommandFlag(conf, candidate); index >= 0 {
+			return index
+		}
+	}
+	return -1
 }

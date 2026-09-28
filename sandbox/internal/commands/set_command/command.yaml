@@ -5,16 +5,16 @@ args:
       trigger:
         type: equal
         value: set-command
-    - description: the command to update (identifier or package name)
+    - description: the command to update (a verb or its package name)
       end: 1
       id: Name
       required: true
       start: 1
 category: Cli System
 examples:
-    - set-command exec --help "run the thing" --category Core
-    - set-command exec --identifier run --example "exec file.txt"
-    - set-command exec --hidden
+    - set-command exec --identifier run --example 'exec file.txt'
+    - set-command exec --priority 50
+    - set-command logger --loose
 flags:
     - description: new one-line help text
       id: Help
@@ -40,10 +40,27 @@ flags:
     - description: show the command in help listings again
       id: Visible
       type: boolean
-help: Update the command-level keys of a command's entries.yaml
-long-description: |
-    Rewrites help, category, long-description and hidden in
-    sandbox/internal/commands/<name>/entries.yaml, and appends extra
-    identifiers / examples, then runs build so help output is regenerated.
-    Keys not passed are left untouched.
+    - default: "-1"
+      description: the rung this command runs on, lowest first
+      id: Priority
+      type: integer
+    - description: land one rung below the command named (excludes --priority)
+      id: Before
+    - description: land one rung above the command named (excludes --priority)
+      id: After
+    - default: "-1"
+      description: how many segments the command line has to have for the command to run
+      id: Segments
+      type: integer
+    - description: every token of the line has to be read by the command or a middleware in front of it
+      id: Strict
+      type: boolean
+    - description: 'turn the command into a middleware: tokens it does not read are the next command''s to declare'
+      id: Loose
+      type: boolean
+    - description: 'a key to take off: segments, or examples before --example lists them again (repeatable)'
+      id: Clear
+      type: string-array
+help: Update the command-level keys of a command's command.yaml
+long-description: Overwrites help, category, long-description, priority, segments, strict and hidden on one command, appends further verbs (--identifier) and examples, and runs build. Empty options leave the current value alone; --before and --after place the command one rung from another; --clear takes a key off.
 priority: 100

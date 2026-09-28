@@ -17,4 +17,11 @@ type Entries struct {
 	Example         []string `id:"Example"`
 	Hidden          bool     `id:"Hidden"`
 	Visible         bool     `id:"Visible"`
+	Priority        int      `id:"Priority"`
+	Before          string   `id:"Before"`
+	After           string   `id:"After"`
+	Segments        int      `id:"Segments"`
+	Strict          bool     `id:"Strict"`
+	Loose           bool     `id:"Loose"`
+	Clear           []string `id:"Clear"`
 }

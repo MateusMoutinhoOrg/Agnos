@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // RouteDocField is one path slice or parameter as docs/Routes prints it: the
@@ -16,6 +17,19 @@ type RouteDocField struct {
 	Type        string
 	Default     string
 	Description string
+	// From is, for a parameter a middleware in front of the route reads,
+	// that middleware — "" for one of the route's own — and FromPage its
+	// page.
+	From     string
+	FromPage string
+}
+
+// RouteDocReach is one route that runs in front of another one: its page, and
+// the condition it runs on, "" when it always does.
+type RouteDocReach struct {
+	Name      string
+	Page      string
+	Condition string
 }
 
 // RouteDoc is one route's section of docs/Routes, rendered from its route.yaml
@@ -29,6 +43,8 @@ type RouteDoc struct {
 	Fields          []RouteDocField
 	Body            string
 	Examples        []string
+	// Middlewares are the routes on a lower rung that run in front of it.
+	Middlewares []RouteDocReach
 }
 
 // RouteDocGroup is one category section of docs/Routes, holding the routes
@@ -43,7 +59,9 @@ const routeDocOther = "Other"
 
 // CollectRouteDocs renders every sandbox/internal/routeslist/<name>/route.yaml into
 // the sections docs/Routes prints, grouped by category in first-seen order —
-// the server layer's CollectCommandDocs. Hidden routes are skipped.
+// the server layer's CollectCommandDocs. Hidden routes are skipped. Every
+// route is crossed with every route on a lower rung whose triggers hold on it,
+// so its page lists the parameters the middlewares in front of it read.
 //
 // The declaration is the only source: a route, a field or an example reaches
 // the page by being declared with `add-route`, `add-path`, `add-parameter` or
@@ -53,6 +71,11 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGrou
 	var groups []RouteDocGroup
 	index := map[string]int{}
 
+	type entry struct {
+		name string
+		conf *routeconf.RouteConf
+	}
+	entries := []entry{}
 	for _, dir := range io.ListDirs(routesDir) {
 		name := lastSegmentOf(sandbox, dir)
 		if name == "" {
@@ -68,12 +91,15 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGrou
 		if err != nil {
 			return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", name, err)
 		}
+		entries = append(entries, entry{name: name, conf: conf})
+	}
 
-		if conf.Hidden {
+	for _, current := range entries {
+		if current.conf.Hidden {
 			continue
 		}
 
-		category := conf.Category
+		category := current.conf.Category
 		if category == "" {
 			category = routeDocOther
 		}
@@ -85,7 +111,28 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGrou
 			groups = append(groups, RouteDocGroup{Category: category})
 		}
 
-		groups[position].Routes = append(groups[position].Routes, routeDoc(sandbox, name, conf))
+		doc := routeDoc(sandbox, current.name, current.conf)
+		for _, other := range entries {
+			if other.name == current.name || other.conf.Hidden {
+				continue
+			}
+			reach, condition := utils.RouteMiddlewareReach(sandbox, other.conf, current.conf)
+			if reach == utils.NoReach {
+				continue
+			}
+			page := other.name + docPageExt
+			doc.Middlewares = append(doc.Middlewares, RouteDocReach{
+				Name:      utils.RouteIdentifier(sandbox, other.name),
+				Page:      page,
+				Condition: reachCondition(reach, condition),
+			})
+			for _, parameter := range other.conf.Parameters {
+				field := routeDocParameter(sandbox, parameter)
+				field.From, field.FromPage = utils.RouteIdentifier(sandbox, other.name), page
+				doc.Fields = append(doc.Fields, field)
+			}
+		}
+		groups[position].Routes = append(groups[position].Routes, doc)
 	}
 
 	return groups, nil
@@ -113,25 +160,30 @@ func routeDoc(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) Rout
 		})
 	}
 	for _, parameter := range conf.Parameters {
-		value := ""
-		if parameter.HasDefault {
-			value = "`" + parameter.Default + "`"
-		}
-		label := parameter.Type
-		if parameter.Required {
-			label += ", required"
-		}
-		doc.Fields = append(doc.Fields, RouteDocField{
-			Id:          parameter.Id,
-			Key:         "`" + parameter.Key + "`",
-			In:          sandbox.Deps.Stringsdeps.Join(parameter.Fonts, ", "),
-			Type:        label + routeDocTrigger(parameter.Trigger),
-			Default:     value,
-			Description: docCell(sandbox, parameter.Description),
-		})
+		doc.Fields = append(doc.Fields, routeDocParameter(sandbox, parameter))
 	}
 
 	return doc
+}
+
+// routeDocParameter is one parameter as its table row.
+func routeDocParameter(sandbox *api.Sandbox, parameter routeconf.Parameter) RouteDocField {
+	value := ""
+	if parameter.HasDefault {
+		value = "`" + parameter.Default + "`"
+	}
+	label := parameter.Type
+	if parameter.Required {
+		label += ", required"
+	}
+	return RouteDocField{
+		Id:          parameter.Id,
+		Key:         "`" + parameter.Key + "`",
+		In:          sandbox.Deps.Stringsdeps.Join(parameter.Fonts, ", "),
+		Type:        label + routeDocTrigger(parameter.Trigger),
+		Default:     value,
+		Description: docCell(sandbox, parameter.Description),
+	}
 }
 
 // routeDocSlice spells the segments a path reads: "0..-1" is the whole path.

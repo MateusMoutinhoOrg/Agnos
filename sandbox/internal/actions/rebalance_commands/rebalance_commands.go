@@ -1,0 +1,20 @@
+package rebalance_commands
+
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+)
+
+// RebalanceCommands lays the chain down again Step rungs apart, then runs build
+// so every new.go carries its new priority.
+func RebalanceCommands(sandbox *api.Sandbox, props api.RebalanceCommandsProps) error {
+	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := RebalanceCommandsInternal(sandbox, io, props); err != nil {
+		return err
+	}
+	if err := io.Persist(); err != nil {
+		return err
+	}
+	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
+}

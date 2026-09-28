@@ -6,11 +6,11 @@ Delete a command package from the project
 agnos remove-command <Name> [--help] [--path <path>] [--quiet]
 ```
 
-Deletes sandbox/internal/commands/<name>/ (entries.yaml, new.go, handler.go and anything else inside) and runs build so the dispatch and help stop answering to it. The generated help command cannot be removed.
+Deletes sandbox/internal/commands/<name>/ (command.yaml, new.go, entries.go, InternalPureHandler.go and anything else in it), then runs build so the dispatch stops running it. help, version and help-flag are generated and refused.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Name` | string, required |  | the command to delete (identifier or package name) |
+| `Name` | string, required |  | the command to delete (a verb or its package name) |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |

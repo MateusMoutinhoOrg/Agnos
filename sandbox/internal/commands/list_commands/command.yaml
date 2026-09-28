@@ -1,0 +1,10 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: list-commands
+category: Cli System
+help: List every command in the order the chain runs them
+priority: 100

@@ -1,29 +1,31 @@
 # `add-arg`
 
-Add a positional arg to a command's entries.yaml
+Add an arg to a command's command.yaml
 
 ```bash
-agnos add-arg <Name> --command <target> [--type <type>] [--description <description>] [--example <example>...] [--default <default>] [--required] [--array] [--min <min>] [--max <max>] [--position <position>] [--help] [--path <path>] [--quiet]
+agnos add-arg <Name> --command <command> [--start <start>] [--end <end>] [--type <type>] [--description <description>] [--default <default>] [--required] [--position <position>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--help] [--path <path>] [--quiet]
 ```
 
-Inserts one positional arg declaration into sandbox/internal/commands/<command>/entries.yaml (at --position, else at the end) and runs build so the command's new.go declares it. Positional args bind by order; an array arg must stay last.
+Inserts one arg — the segments --start to --end of the command line — into sandbox/internal/commands/<command>/command.yaml (at --position, else at the end) and runs build. An arg given no --start reads the first segment no arg reads yet; with --trigger it is part of what the command matches on.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Name` | string, required |  | the arg name (the id the handler reads it back by) |
+| `Name` | string, required |  | the arg name; its exported Go form is the Entries field the handler reads (file-name -> entries.FileName) |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--command`, `-c` | string, required |  | the command (identifier or package name) that receives the field | — |
-| `--type`, `-t` | string | `string` | the value type: string, boolean, int or float (defaults to string) | — |
-| `--description`, `-d` | string |  | help text shown for the field | — |
-| `--example`, `-e` | string-array |  | an usage example for the field (repeatable) | — |
-| `--default` | string |  | the literal assigned when the field is absent (cannot be combined with --required) | — |
-| `--required`, `-r` | boolean |  | fail with a usage error when the field is not provided (not for booleans or fields with --default) | — |
-| `--array` | boolean |  | collect every occurrence into a []T field instead of a single value | — |
-| `--min` | string |  | smallest accepted value (int/float only) | — |
-| `--max` | string |  | largest accepted value (int/float only) | — |
-| `--position` | integer | `-1` | zero-based index to insert the field at (defaults to the end) | — |
+| `--command`, `-c` | string, required |  | the command (a verb or its package name) that receives the arg | — |
+| `--start` | string |  | the first segment the arg reads (defaults to the first no arg reads yet) | — |
+| `--end` | string |  | the last segment the arg reads, -1 for the last one (defaults to --start) | — |
+| `--type`, `-t` | string | `string` | what one segment converts to: string (the default), integer, number or uuid; anything but string reads one segment, and one that does not convert makes the command a non-match | — |
+| `--description`, `-d` | string |  | the one-line help text of the arg | — |
+| `--default` | string |  | the literal bound when the arg is absent (cannot be combined with --required) | — |
+| `--required`, `-r` | boolean |  | a command line matching the command without the arg is a usage error | — |
+| `--position` | integer | `-1` | zero-based index to insert the arg at (defaults to the end) | — |
+| `--trigger` | string |  | what the segments, joined by a space, have to read as for the command to run; without it the arg is a plain capture | — |
+| `--trigger-type` | string |  | how the trigger is compared: equal, prefix (word by word), text-prefix, suffix, regex or one-of (defaults to equal) | — |
+| `--trigger-negate` | boolean |  | invert the trigger: the command runs when the segments do not match it | — |
+| `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
 | `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |

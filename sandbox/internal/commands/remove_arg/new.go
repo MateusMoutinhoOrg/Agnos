@@ -23,8 +23,8 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "remove-arg <Name>"
 	self.Category = "Cli System"
-	self.Help = "Remove a positional arg from a command's entries.yaml"
-	self.LongDescription = "Drops one positional arg declaration from\nsandbox/internal/commands/<command>/entries.yaml and runs build so the\ncommand's new.go forgets it. Later args shift up."
+	self.Help = "Remove an arg from a command's command.yaml"
+	self.LongDescription = "Drops one arg declaration from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it."
 	self.Examples = []string{"remove-arg file --command exec"}
 	self.Hidden = false
 
@@ -63,7 +63,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the command (identifier or package name) that owns the arg",
+			Description: "the command (a verb or its package name) that owns the arg",
 		},
 	}
 

@@ -1,0 +1,20 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: rename-command
+    - description: the command to rename (its name or a verb it answers to)
+      end: 1
+      id: Target
+      required: true
+      start: 1
+    - description: the name it takes on
+      end: 2
+      id: Name
+      required: true
+      start: 2
+category: Cli System
+help: 'Rename a command: its package, and the verb it answered to by its name'
+priority: 100

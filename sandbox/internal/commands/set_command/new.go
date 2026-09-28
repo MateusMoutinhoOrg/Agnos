@@ -23,9 +23,9 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "set-command <Name>"
 	self.Category = "Cli System"
-	self.Help = "Update the command-level keys of a command's entries.yaml"
-	self.LongDescription = "Rewrites help, category, long-description and hidden in\nsandbox/internal/commands/<name>/entries.yaml, and appends extra\nidentifiers / examples, then runs build so help output is regenerated.\nKeys not passed are left untouched.\n"
-	self.Examples = []string{"set-command exec --help \"run the thing\" --category Core", "set-command exec --identifier run --example \"exec file.txt\"", "set-command exec --hidden"}
+	self.Help = "Update the command-level keys of a command's command.yaml"
+	self.LongDescription = "Overwrites help, category, long-description, priority, segments, strict and hidden on one command, appends further verbs (--identifier) and examples, and runs build. Empty options leave the current value alone; --before and --after place the command one rung from another; --clear takes a key off."
+	self.Examples = []string{"set-command exec --identifier run --example 'exec file.txt'", "set-command exec --priority 50", "set-command logger --loose"}
 	self.Hidden = false
 
 	self.Args = []api.CommandArg{
@@ -48,7 +48,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Required:    true,
 			Default:     "",
 			HasDefault:  false,
-			Description: "the command to update (identifier or package name)",
+			Description: "the command to update (a verb or its package name)",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
 		},
 	}
@@ -130,6 +130,83 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
 			Description: "show the command in help listings again",
+		},
+		{
+			Id:          "Priority",
+			Keys:        []string{"--priority"},
+			Type:        api.IntegerFlag,
+			Required:    false,
+			Default:     "-1",
+			HasDefault:  true,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "the rung this command runs on, lowest first",
+		},
+		{
+			Id:          "Before",
+			Keys:        []string{"--before"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "land one rung below the command named (excludes --priority)",
+		},
+		{
+			Id:          "After",
+			Keys:        []string{"--after"},
+			Type:        api.StringFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "land one rung above the command named (excludes --priority)",
+		},
+		{
+			Id:          "Segments",
+			Keys:        []string{"--segments"},
+			Type:        api.IntegerFlag,
+			Required:    false,
+			Default:     "-1",
+			HasDefault:  true,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "how many segments the command line has to have for the command to run",
+		},
+		{
+			Id:          "Strict",
+			Keys:        []string{"--strict"},
+			Type:        api.BooleanFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "every token of the line has to be read by the command or a middleware in front of it",
+		},
+		{
+			Id:          "Loose",
+			Keys:        []string{"--loose"},
+			Type:        api.BooleanFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "turn the command into a middleware: tokens it does not read are the next command's to declare",
+		},
+		{
+			Id:          "Clear",
+			Keys:        []string{"--clear"},
+			Type:        api.StringArrayFlag,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
+			Description: "a key to take off: segments, or examples before --example lists them again (repeatable)",
 		},
 	}
 

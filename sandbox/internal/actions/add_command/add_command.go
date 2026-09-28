@@ -7,16 +7,17 @@ import (
 )
 
 // AddCommand scaffolds a new command package under
-// sandbox/internal/commands/<name>/ — a hand-written entries.yaml and a stub
-// handler.go — then runs build as a follow-up step so its new.go — the
-// api.Command that lands in Cli.Commands — is generated for it.
-func AddCommand(sandbox *api.Sandbox, path string, name string, help string, category string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := AddCommandInternal(sandbox, io, name, help, category); err != nil {
+// sandbox/internal/commands/<name>/ — a hand-written command.yaml and a stub
+// InternalPureHandler.go — then runs build as a follow-up step so its new.go
+// and entries.go — the api.Command that lands in Cli.Commands — are generated
+// for it.
+func AddCommand(sandbox *api.Sandbox, props api.AddCommandProps) error {
+	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := AddCommandInternal(sandbox, io, props); err != nil {
 		return err
 	}
 	if err := io.Persist(); err != nil {
 		return err
 	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

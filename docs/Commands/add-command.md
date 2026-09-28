@@ -3,10 +3,10 @@
 Scaffold a new command package in the project
 
 ```bash
-agnos add-command <Name> --help <help> --category <category> [--path <path>] [--quiet]
+agnos add-command <Name> --help <help> [--category <category>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--path <path>] [--quiet]
 ```
 
-Creates sandbox/internal/commands/<name>/ with a hand-written entries.yaml and a stub handler.go, then runs build so new.go and the dispatch pick it up. Refuses to overwrite an existing command.
+Creates sandbox/internal/commands/<name>/ with a hand-written command.yaml and a stub InternalPureHandler.go, then runs build so new.go, entries.go and the dispatch pick it up. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses to overwrite an existing command.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -15,7 +15,16 @@ Creates sandbox/internal/commands/<name>/ with a hand-written entries.yaml and a
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--help` | string, required |  | one-line help text for the new command | — |
-| `--category` | string, required |  | the category the new command is grouped under in help output | — |
+| `--category` | string |  | the heading the command is listed under in help and docs/Commands (defaults to Commands, or Middleware for a --middleware) | — |
+| `--trigger` | string |  | what the words of the command line from segment 0 are compared against (defaults to the name, or every line for a --middleware); a one-of takes its values comma-separated | — |
+| `--trigger-type` | string |  | how the trigger is compared: equal, prefix (word by word), text-prefix, suffix, regex or one-of — or starts-with, ends-with, exact, matches, any-of (defaults to equal, or prefix for a --middleware) | — |
+| `--trigger-negate` | boolean |  | invert the trigger: the command runs for every line that does not match it | — |
+| `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
+| `--pattern` | string |  | the command-line shape the command answers, compiled into its args: literal words, {name}, {name:integer\|number\|uuid} and a last {*rest}; without {*rest} the segment count is fixed (excludes --trigger and --trigger-type) | — |
+| `--middleware` | boolean |  | declare a middleware: every command line unless --trigger says otherwise, not strict, priority 10, and a stub handler that hands the line on | — |
+| `--priority` | integer | `-1` | the rung this command runs on when several match one command line, lowest first (defaults to 100, or 10 for a --middleware) | — |
+| `--before` | string |  | land one rung below the command named, so it runs first (excludes --priority) | — |
+| `--after` | string |  | land one rung above the command named, so it runs next (excludes --priority) | — |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 
@@ -25,8 +34,9 @@ Creates sandbox/internal/commands/<name>/ with a hand-written entries.yaml and a
 | [`project`](project.md) | always |
 
 ```bash
-agnos add-command my-feature
-agnos add-command my-feature --path ./my-project
+agnos add-command my-feature --help 'Do the feature'
+agnos add-command route-add --pattern 'route add {name}' --help 'Add a route'
+agnos add-command profile --middleware --help 'Read --profile in front of every command'
 ```
 
 Cli System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
