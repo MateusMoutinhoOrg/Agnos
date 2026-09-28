@@ -43,7 +43,6 @@ import (
 	list_extensions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_extensions"
 	list_routes "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/list_routes"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/local_install"
-	migrate_commands "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/migrate_commands"
 	project "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/project"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/publish"
 	rebalance_routes "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/rebalance_routes"
@@ -134,7 +133,6 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		list_extensions.NewCommand(sandbox),
 		list_routes.NewCommand(sandbox),
 		local_install.NewCommand(sandbox),
-		migrate_commands.NewCommand(sandbox),
 		publish.NewCommand(sandbox),
 		rebalance_routes.NewCommand(sandbox),
 		remove_adapter.NewCommand(sandbox),
