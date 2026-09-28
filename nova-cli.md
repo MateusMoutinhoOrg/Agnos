@@ -11,13 +11,13 @@ Triggers leem os segmentos; o verbo vem sempre primeiro.
 | `command.yaml` | Par em `route.yaml` | Chaves |
 |---|---|---|
 | `args[]` | `paths[]` | `id`, `start`, `end`, `type` (`string`, `integer`, `number`, `uuid`; um intervalo liga `[]string`), `trigger`, `required`, `default`, `description` |
-| `flags[]` | `parameters[]` | `id`, `key` (`--<key>`), `aliases` (`-o`), `fonts` (`flag`, `env`), `type` (`string`, `integer`, `number`, `boolean`, `string-array`, `integer-array`), `required`, `default`, `min`, `max`, `enum`, `pattern`, `trigger` |
+| `flags[]` | `parameters[]` | `id`, `keys` (as grafias que o usuário digita: `[--command, -c]`; default `[--<id em kebab-case>]`), `type` (`string`, `integer`, `number`, `boolean`, `string-array`, `integer-array`), `required`, `default`, `min`, `max`, `enum`, `pattern`, `trigger` |
 | `priority`, `segments`, `category`, `help`, `long-description`, `examples`, `hidden` | idem | — |
 | `strict` | — | default `true`; `false` em middleware |
 
 - O texto de um trigger é o dos segmentos juntados por espaço. `prefix` é por segmento.
 - Falhar um trigger ou um tipo em `args` é não-casamento. Faltar um `required` ou falhar a conversão de uma flag é erro de uso.
-- `api.Trigger` e `MatchTrigger` passam a ser compartilhados pelas duas extensões (`assets/sandbox/sandbox/api/trigger.go`, `generated/trigger/`) e ganham o tipo `one-of` (`values: [...]`), usado para aliases.
+- `api.Trigger` e `MatchTrigger` passam a ser compartilhados pelas duas extensões (`assets/sandbox/sandbox/api/trigger.go`, `generated/trigger/`) e ganham o tipo `one-of` (`values: [...]`), usado quando um comando responde a mais de um nome.
 - O default de `add-command <name>` é `args[0]` com `start: 0`, `end: 0`, `equal <name>`.
 
 ```yaml
@@ -26,7 +26,7 @@ args:
   - { id: Command, start: 0, end: 0, trigger: { type: equal, value: add-flag } }
   - { id: Name, start: 1, end: 1, required: true }
 flags:
-  - { id: Target, key: command, aliases: [-c], required: true }
+  - { id: Target, keys: [--command, -c], required: true }
 category: Cli System
 help: Add a flag to a command
 ```
@@ -107,7 +107,7 @@ sandbox/internal/commands/<snake>/
 | `list-commands`, `show-command` | `list-routes`, `show-route` | só leem |
 | `explain-command -- <argv…>` | `explain-route` | só lê |
 | `add-arg`, `set-arg`, `remove-arg` | `*-path` | as de `add-path` + `--required`, `--default` |
-| `add-flag`, `set-flag`, `remove-flag` | `*-parameter` | as de `add-parameter` + `--alias`, `--min`, `--max`, `--enum`, `--pattern` |
+| `add-flag`, `set-flag`, `remove-flag` | `*-parameter` | as de `add-parameter` sem `--font`, + `--key` (repetível), `--min`, `--max`, `--enum`, `--pattern` |
 
 ## 6. Ordem
 
