@@ -6,7 +6,7 @@ Lay the chain down again with room between its rungs
 agnos rebalance-routes [--step <step>] [--path <path>] [--quiet]
 ```
 
-Gives every route a priority of its own, --step apart, in the order the chain runs them now — each phase on its own ladder — so --before and --after have room again. The generated health route keeps its rung.
+Gives every route a priority of its own, --step apart, in the order the chain runs them now, so --before and --after have room again. The generated health route keeps its rung.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

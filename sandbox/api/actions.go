@@ -185,8 +185,7 @@ type CommandProps struct {
 // Priority is the rung it runs on, used only when HasPriority is set; without
 // it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for
 // a Middleware. Before and After name another route to land one rung below or
-// above instead, and exclude Priority. Phase is "before" (the chain, the
-// default) or "after".
+// above instead, and exclude Priority.
 type AddRouteProps struct {
 	Path              string
 	Name              string
@@ -201,7 +200,6 @@ type AddRouteProps struct {
 	HasPriority       bool
 	Before            string
 	After             string
-	Phase             string
 	ResponseType      string
 	Help              string
 	Category          string
@@ -223,7 +221,7 @@ const DefaultMiddlewarePriority = 10
 // priority declared as zero from one not given at all; Before and After name
 // another route to land one rung below or above instead. Segments is the
 // segment count the request path has to have, read when HasSegments is set.
-// Phase is "before" or "after". Clear takes "segments" off again.
+// Clear takes "segments" off again.
 type RouteProps struct {
 	Path            string
 	Route           string
@@ -240,7 +238,6 @@ type RouteProps struct {
 	After           string
 	Segments        int
 	HasSegments     bool
-	Phase           string
 	Examples        []string
 	Clear           []string
 }
@@ -709,7 +706,7 @@ type Actions struct {
 	ShowRoute func(path string, route string) ([]string, error)
 
 	// ListRoutes renders every declared route as one line, in the order the
-	// dispatch runs them: the chain, then the `after` phase.
+	// dispatch runs them.
 	ListRoutes func(path string) ([]string, error)
 
 	// ExplainRoute runs one request against the declared routes without a

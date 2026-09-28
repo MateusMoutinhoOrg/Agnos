@@ -50,8 +50,8 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 	return routes, nil
 }
 
-// sortRoutes puts the routes in the order the dispatch runs them: the `before`
-// phase first, then the `after` one, each by the lowest `priority` first —
+// sortRoutes puts the routes in the order the dispatch runs them: the lowest
+// `priority` first —
 // that is the whole of what the chain reads — and then by name for a stable
 // tie-break. It is utils.SortRouteChain's order, over the collector's maps.
 // The ordering is the collector's, so Server.Routes is already in run order
@@ -59,9 +59,6 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
 		left, right := routes[i], routes[j]
-		if left["After"] != right["After"] {
-			return right["After"].(bool)
-		}
 		if left["Priority"] != right["Priority"] {
 			return left["Priority"].(int) < right["Priority"].(int)
 		}
@@ -110,7 +107,6 @@ func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map
 		"Priority":        conf.Priority,
 		"ResponseType":    conf.ResponseType,
 		"Segments":        conf.Segments,
-		"After":           conf.Phase == routeconf.PhaseAfter,
 		"Trigger":         routeTrigger(conf),
 		"Pattern":         conf.Pattern(),
 		"Paths":           paths,

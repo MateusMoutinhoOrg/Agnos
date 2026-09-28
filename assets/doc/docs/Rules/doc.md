@@ -141,8 +141,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   is exported from a route's hand-written half. **(verify)**
 - `new.go` is a 1:1 image of `route.yaml`, built on the generic
   `sandbox/internal/generated/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
-  one field per path, one per parameter, `Body` when a body is declared and `AnsweredStatus` in
-  the `after` phase, each tagged `id:"<id>"` — plus the `ReadBody` a body calls for. The generic
+  one field per path, one per parameter and `Body` when a body is declared, each tagged
+  `id:"<id>"` — plus the `ReadBody` a body calls for. The generic
   `RequestHandler` reads the body before the handler runs and fills `Entries` by those tags
   through `Deps.Reflectdeps`. A handler is handed no request: what it reads is declared.
 - Setting a status or writing a byte on the response is what answers a request and ends the
@@ -154,8 +154,6 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   request; a middleware hands what it learned to the routes after it by setting a field of it.
   `sandbox/api/routeprops.go` declares those fields: `build` writes it **once**, then it is the
   project's.
-- A route of the `after` phase runs once the request has been answered, on a frozen response:
-  it never answers, and it declares no body. **(verify)**
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
   `add-path` / `set-path` / `remove-path`, `add-parameter` / `set-parameter` /
   `remove-parameter`, `set-body` and `add-body-field` / `set-body-field` / `remove-body-field` /
@@ -165,7 +163,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   `explain-route` read them and write nothing.
 - `methods`, `priority` and `response-type` are required on every route; `priority` is never
   negative, and `methods` holds known methods only — or `ANY`, alone. `segments`, when
-  declared, is at least `1`; `phase` is `before` or `after`. **(verify)**
+  declared, is at least `1`; a `phase` key is an old declaration. **(verify)**
 - `add-route` lands a route on rung `100` and a `--middleware` on `10`, so a guard goes in front
   of the routes it guards without renumbering them; `--before` / `--after` place one next to
   another, and `rebalance-routes` makes room again.
@@ -184,7 +182,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `405` is answered when a route with explicit `methods` matched the path under another method
   and no route with explicit `methods` ran; an `ANY` route running does not hide it. A `HEAD`
   nothing declares runs the chain again as a `GET`.
-- No two routes declare the same method and path pattern *on the same rung of the same phase*.
+- No two routes declare the same method and path pattern *on the same rung*.
   Sharing a pattern across rungs is what a middleware in front of a route is; sharing a rung as
   well would leave the order between them undeclared. **(verify)**
 - A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
@@ -193,8 +191,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   `sandbox/internal/generated/server/server/new.go` from each package's generated `NewRoute`. The dispatch
   reads it and nothing about the route set is generated per route anywhere else; each request
   runs on its copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
-- Run order is the collector's, not the directory's: the `before` phase, then the `after` one,
-  each lowest `priority` first, then by name.
+- Run order is the collector's, not the directory's: lowest `priority` first, then by name.
 - Nothing in the dispatch writes a response. Every way a request ends without a route answering
   it is handed to one of the eight `sandbox/internal/server/errors/handle_*.go` — one per status.
   They are written **once**, by the first `build` that finds the server layer, and no build

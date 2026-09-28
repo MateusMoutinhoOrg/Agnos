@@ -15,7 +15,6 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		After:           command.GetString("after"),
 		Segments:        command.GetInt("segments"),
 		HasSegments:     command.GetItem("segments") != nil,
-		Phase:           command.GetString("phase"),
 		Clear:           command.GetStrings("clear"),
 		Path:            command.GetString("path"),
 		Route:           command.GetString("route"),

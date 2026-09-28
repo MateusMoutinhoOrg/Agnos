@@ -6,7 +6,7 @@ List every route in the order the chain runs them
 agnos list-routes [--path <path>] [--quiet]
 ```
 
-Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them: the chain first, lowest priority first, then the routes of the after phase. Writes nothing.
+Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them, lowest priority first. Writes nothing.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |

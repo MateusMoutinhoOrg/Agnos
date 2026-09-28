@@ -91,8 +91,7 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		// two would run in an order nothing declares.
 		for _, method := range conf.Methods {
 			key := method + " " + conf.Pattern() +
-				" at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10) +
-				" in the " + conf.Phase + " phase"
+				" at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10)
 			if other, taken := patterns[key]; taken {
 				violations = append(violations, routeViolation(name,
 					"declares "+key+", which "+routesDir+"/"+other+" already declares"))
@@ -136,7 +135,7 @@ func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, name string) []s
 		}
 		return append(violations, routeViolation(name,
 			routeHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error"))
+				routeHandlerName+"(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error"))
 	}
 
 	return append(violations, routeViolation(name, routeHandlerFile+" exports no "+routeHandlerName))
@@ -164,6 +163,11 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 	var violations []string
 
 	for _, key := range conf.Legacy {
+		if key == "phase" {
+			violations = append(violations, routeViolation(name,
+				"declares `phase`, which is gone: every route is a rung of the one chain, so drop the key"))
+			continue
+		}
 		violations = append(violations, routeViolation(name,
 			"declares `"+key+"`, which routeslist replaced: `methods` lists the methods, and `parameters` (with `fonts`) the headers and query parameters"))
 	}
@@ -197,14 +201,6 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 	if conf.HasSegments && conf.Segments < 1 {
 		violations = append(violations, routeViolation(name,
 			"declares `segments` below 1; leave it out for a route that takes any count"))
-	}
-	if !contains(routeconf.Phases, conf.Phase) {
-		violations = append(violations, routeViolation(name, "declares the unknown phase "+conf.Phase+
-			" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.Phases, ", ")+")"))
-	}
-	if conf.Phase == routeconf.PhaseAfter && conf.Body.Type != routeconf.BodyNone {
-		violations = append(violations, routeViolation(name,
-			"declares a body in the after phase; the request was answered before it runs, so nothing reads it"))
 	}
 	if !contains(routeconf.BodyTypes, conf.Body.Type) {
 		violations = append(violations, routeViolation(name, "declares the unknown body type "+conf.Body.Type))

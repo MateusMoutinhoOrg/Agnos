@@ -56,9 +56,6 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 		lines = append(lines, sandbox.Deps.Std.Sprintf("%scategory  %s", branch, conf.Category))
 	}
 	lines = append(lines, sandbox.Deps.Std.Sprintf("%spriority  %d", branch, conf.Priority))
-	if conf.Phase == routeconf.PhaseAfter {
-		lines = append(lines, branch+"phase     after, once the request has been answered")
-	}
 	if conf.HasSegments {
 		lines = append(lines, sandbox.Deps.Std.Sprintf("%ssegments  %d", branch, conf.Segments))
 	}

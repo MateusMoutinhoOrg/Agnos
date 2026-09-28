@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"list-routes"}
 	command.Category = "Server System"
 	command.Help = "List every route in the order the chain runs them"
-	command.LongDescription = "Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them: the chain first, lowest priority first, then the routes of the after phase. Writes nothing."
+	command.LongDescription = "Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them, lowest priority first. Writes nothing."
 	command.Examples = []string{"list-routes"}
 	command.Hidden = false
 

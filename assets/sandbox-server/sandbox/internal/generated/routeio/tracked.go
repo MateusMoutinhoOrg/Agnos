@@ -39,22 +39,3 @@ func Tracked(response serverdeps.Response) (serverdeps.Response, func() int) {
 		return status
 	}
 }
-
-// Frozen wraps a response that has already been answered, for the routes of
-// the `after` phase: every call that would change it is reported and dropped,
-// and reading its headers still works.
-func Frozen(sandbox *api.Sandbox, response serverdeps.Response) serverdeps.Response {
-	frozen := response
-	refuse := func(what string) {
-		sandbox.Deps.Std.Log("an after route tried to %s an answered response \n", what)
-	}
-
-	frozen.SetStatus = func(code int) { refuse("set the status of") }
-	frozen.SetHeader = func(key string, value string) { refuse("set a header on") }
-	frozen.AddHeader = func(key string, value string) { refuse("add a header to") }
-	frozen.Write = func(body []byte) error {
-		refuse("write to")
-		return nil
-	}
-	return frozen
-}

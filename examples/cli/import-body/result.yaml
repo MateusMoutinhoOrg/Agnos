@@ -2,6 +2,6 @@ cli-output: "import-body reading sandbox/internal/routeslist/create_user/route.y
 exit-code: 0
 tree:
     - file: sandbox/internal/routeslist/create_user/entries.go
-      sha: a46c5d65607db3c6f0b134425270bbc80f8943f77779a60953927870258c2180
+      sha: 0c69265a79eccdd45bc02a5a109a6624797257fc065dde449c00360b96170fee
     - file: sandbox/internal/routeslist/create_user/route.yaml
       sha: cac001f8e474ee1f3f1051203eef056e0e70aa692e15f04ff72853b05842a322

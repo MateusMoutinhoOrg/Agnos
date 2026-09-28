@@ -211,9 +211,6 @@ type Route struct {
 	// Segments is how many segments the request path has to have for the
 	// route to run, 0 for any count.
 	Segments int
-	// After reports a route of the `after` phase: it runs once the chain
-	// has answered, whatever answered it, and never answers itself.
-	After bool
 	// Pattern is its path as it reads in docs and messages.
 	Pattern string
 	// Category groups it on the generated Routes page.
@@ -262,11 +259,6 @@ type Route struct {
 	// argument: what a middleware sets on it, the routes after it read.
 	Props *RouteProps
 
-	// AnsweredStatus is the status the request was answered with, set by the
-	// dispatch before the routes of the `after` phase run and bound onto
-	// their Entries.AnsweredStatus; 0 on every other run.
-	AnsweredStatus int
-
 	// Failure is why this route is being handed to one of the project's
 	// Handle* files, nil on a normal run. It is set by routeio.Raise, which
 	// is the one way any part of the server layer raises a failure.
@@ -308,7 +300,6 @@ func BindRoute(route *Route) *Route {
 	bound.Request = nil
 	bound.Response = nil
 	bound.Props = nil
-	bound.AnsweredStatus = 0
 	bound.Failure = nil
 	return &bound
 }

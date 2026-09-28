@@ -83,13 +83,6 @@ flags:
         - --after
       name: after
       type: string
-    - description: 'when the route runs: before (the chain, the default) or after, once the request has been answered and without being able to change the answer'
-      examples:
-        - add-route access-log --middleware --phase after
-      identifiers:
-        - --phase
-      name: phase
-      type: string
     - description: the Content-Type every response of the route carries (defaults to application/json, or text/plain for a --middleware)
       examples:
         - --response-type text/plain

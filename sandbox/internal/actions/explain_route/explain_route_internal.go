@@ -32,34 +32,29 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 	ran := false
 	method_mismatch := false
 	answered := ""
-	phase := routeconf.PhaseBefore
 
 	for _, entry := range chain {
-		if entry.Conf.Phase != phase {
-			phase = entry.Conf.Phase
-			lines = append(lines, "", "after the answer")
-		}
 
 		match := utils.MatchRouteRequest(sandbox, entry.Conf, request)
 		name := utils.RouteIdentifier(sandbox, entry.Name)
 		head := sandbox.Deps.Std.Sprintf("  %-4d %-24s", entry.Conf.Priority, name)
 
 		if !match.Runs {
-			if match.MethodMismatch && phase == routeconf.PhaseBefore {
+			if match.MethodMismatch {
 				method_mismatch = true
 			}
 			lines = append(lines, head+" skipped: "+match.Reason)
 			continue
 		}
 
-		if phase == routeconf.PhaseBefore && answered != "" {
+		if answered != "" {
 			lines = append(lines, head+" not reached: "+answered+" answered first")
 			continue
 		}
-		if phase == routeconf.PhaseBefore && !isAny(entry.Conf) {
+		if !isAny(entry.Conf) {
 			ran = true
 		}
-		if match.Failure != "" && phase == routeconf.PhaseBefore {
+		if match.Failure != "" {
 			lines = append(lines, head+" answers "+match.Failure+", before its handler runs")
 			answered = name
 			continue

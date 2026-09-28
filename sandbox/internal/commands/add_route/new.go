@@ -135,17 +135,6 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Identifiers: []string{"--after"},
 		},
 		{
-			Id:          "phase",
-			Type:        "string",
-			Required:    false,
-			Array:       false,
-			Description: "when the route runs: before (the chain, the default) or after, once the request has been answered and without being able to change the answer",
-			Examples:    []string{"add-route access-log --middleware --phase after"},
-			Default:     "",
-			HasDefault:  false,
-			Identifiers: []string{"--phase"},
-		},
-		{
 			Id:          "response-type",
 			Type:        "string",
 			Required:    false,

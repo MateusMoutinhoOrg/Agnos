@@ -25,4 +25,4 @@ flags:
 help: Lay the chain down again with room between its rungs
 identifiers:
     - rebalance-routes
-long-description: Gives every route a priority of its own, --step apart, in the order the chain runs them now — each phase on its own ladder — so --before and --after have room again. The generated health route keeps its rung.
+long-description: Gives every route a priority of its own, --step apart, in the order the chain runs them now, so --before and --after have room again. The generated health route keeps its rung.

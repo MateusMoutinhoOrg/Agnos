@@ -81,8 +81,6 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		return closed(literalOptions(append(append([]string{}, routeMethods...), routeconf.AnyMethod)))
 	case "before", "after":
 		return closed(dirOptions(sandbox, io, routesDir))
-	case "phase":
-		return closed(literalOptions(routeconf.Phases))
 	case "runtime":
 		return closed(literalOptions(buildRuntimes))
 	case "target":

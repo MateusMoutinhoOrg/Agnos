@@ -1,5 +1,5 @@
 # The route-middleware example: a guard in front of the routes it protects, an
-# access log behind every answer, and the chain they make
+# access log in front of every request, and the chain they make
 #
 # `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
 # The example writes only inside TestDir.
@@ -15,8 +15,9 @@ agnos add-route admin --trigger /admin --trigger-type starts-with --path TestDir
 # and a stub handler that answers nothing, so the chain goes on.
 agnos add-route admin-guard --middleware --trigger /admin --before admin --path TestDir -q
 
-# The after phase: runs once the request has been answered, whatever answered it.
-agnos add-route access-log --middleware --phase after --path TestDir -q
+# A middleware on rung 0, in front of everything: it sees every request and
+# answers none of them.
+agnos add-route access-log --middleware --priority 0 --path TestDir -q
 
 # The same chain, laid down again ten rungs apart.
 agnos list-routes --path TestDir

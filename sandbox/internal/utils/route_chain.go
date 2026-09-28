@@ -14,9 +14,8 @@ type RouteChainEntry struct {
 }
 
 // LoadRouteChain reads every sandbox/internal/routeslist/<name>/route.yaml and
-// returns them in the order the dispatch runs them: the `before` phase by
-// priority, lowest first, then by name — the order the build collector lays
-// Server.Routes down in — and the `after` phase the same way behind it.
+// returns them in the order the dispatch runs them: by priority, lowest first,
+// then by name — the order the build collector lays Server.Routes down in.
 func LoadRouteChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteChainEntry, error) {
 	chain := []RouteChainEntry{}
 
@@ -45,10 +44,6 @@ func LoadRouteChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteChainEntr
 func SortRouteChain(sandbox *api.Sandbox, chain []RouteChainEntry) {
 	sandbox.Deps.Sortdeps.SliceStable(chain, func(i int, j int) bool {
 		left, right := chain[i].Conf, chain[j].Conf
-		left_after, right_after := left.Phase == routeconf.PhaseAfter, right.Phase == routeconf.PhaseAfter
-		if left_after != right_after {
-			return right_after
-		}
 		if left.Priority != right.Priority {
 			return left.Priority < right.Priority
 		}
@@ -87,16 +82,4 @@ func RouteRelativePriority(sandbox *api.Sandbox, io *smartio.SmartIO, before str
 		return 0, false, err
 	}
 	return other.Priority + 1, true, nil
-}
-
-// RoutePhase normalizes a --phase: "" is before.
-func RoutePhase(sandbox *api.Sandbox, raw string) (string, error) {
-	phase := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
-	if phase == "" {
-		return routeconf.PhaseBefore, nil
-	}
-	if !contains(routeconf.Phases, phase) {
-		return "", sandbox.Deps.Std.Errorf("unknown phase %q (use one of %s)", raw, sandbox.Deps.Stringsdeps.Join(routeconf.Phases, ", "))
-	}
-	return phase, nil
 }

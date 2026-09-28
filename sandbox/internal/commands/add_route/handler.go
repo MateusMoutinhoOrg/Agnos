@@ -22,7 +22,6 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
 		HasPriority:  command.GetItem("priority") != nil,
 		Before:       command.GetString("before"),
 		After:        command.GetString("after"),
-		Phase:        command.GetString("phase"),
 		ResponseType: command.GetString("response-type"),
 		Help:         command.GetString("help"),
 		Category:     command.GetString("category"),

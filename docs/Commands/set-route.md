@@ -3,10 +3,10 @@
 Rewrite the route-level keys of a route.yaml
 
 ```bash
-agnos set-route [--method <method>...] [--response-type <response-type>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--priority <priority>] [--before <before>] [--after <after>] [--segments <segments>] [--phase <phase>] [--clear <clear>...] [--example <example>...] [--path <path>] [--quiet] <route>
+agnos set-route [--method <method>...] [--response-type <response-type>] [--help <help>] [--category <category>] [--long-description <long-description>] [--hidden] [--visible] [--priority <priority>] [--before <before>] [--after <after>] [--segments <segments>] [--clear <clear>...] [--example <example>...] [--path <path>] [--quiet] <route>
 ```
 
-Overwrites methods, response-type, priority, segments, phase, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
+Overwrites methods, response-type, priority, segments, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
 
 | Flag | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -21,7 +21,6 @@ Overwrites methods, response-type, priority, segments, phase, help, category, lo
 | `--before` | string |  | move to one rung below the route named, so it runs first (excludes --priority) |
 | `--after` | string |  | move to one rung above the route named, so it runs next (excludes --priority) |
 | `--segments` | int |  | how many segments the request path has to have for the route to run |
-| `--phase` | string |  | when the route runs: before (the chain) or after, once the request has been answered |
 | `--clear` | string, repeatable |  | a key to take off: segments (repeatable) |
 | `--example` | string, repeatable |  | an usage example for the route (repeatable) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) |

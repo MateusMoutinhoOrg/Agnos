@@ -92,7 +92,6 @@ body:
 | `priority` | **Required.** The rung this route runs on when several match one request: lowest first, never negative. `add-route` writes `100`, `10` for a `--middleware` |
 | `response-type` | **Required.** The `Content-Type` set on the response before the handler runs; the handler may set another |
 | `segments` | The segment count the request path has to have, `≥ 1`. Absent: any count |
-| `phase` | `before` (default, omitted): a rung of the chain. `after`: runs once the request has been answered, see [The chain](#the-chain) |
 | `paths` | The slices of the request path it reads. Required and never empty |
 | `parameters` | The values it reads from the query string and the headers |
 | `category`, `help`, `long-description`, `examples`, `hidden` | As in [EntriesYaml](../EntriesYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
@@ -208,7 +207,6 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *E
 the request brought that `route.yaml` declares — the handler is handed no request, so a value it
 needs is a declared path, parameter or body. The generic `RequestHandler` builds `Entries` and
 calls the handler through `Deps.Reflectdeps`, since every route's `Entries` is a type of its own.
-A route of the `after` phase also carries `AnsweredStatus int`.
 
 ## Body keys
 
@@ -254,7 +252,7 @@ middleware in front of the route still refuses a request before a byte of it is 
 ## The chain
 
 `ServerMain` hands every request to one dispatch, which walks `Server.Routes` in `priority`
-order — lowest rung first, by name within one — and runs every route of the `before` phase whose
+order — lowest rung first, by name within one — and runs every route whose
 `IsActionable` says the request is for it: the method is one of `methods` (or they are `ANY`),
 the path has `segments` segments when the route declares a count, and every path and parameter
 trigger matches.
@@ -290,15 +288,6 @@ When no route answers:
 | a `HEAD` nothing declares `HEAD` for | the chain runs again as a `GET`; the body is dropped |
 | a route with explicit `methods` matched the path under another method, and no route with explicit `methods` ran | `405` — an `ANY` route running does not hide it |
 | anything else | `404` |
-
-Once the request is answered — by a route or by a failure — every route of the `after` phase
-the request is for runs, lowest rung first. Its response is frozen (a status, a header or a byte
-written there is logged and dropped), `entries.AnsweredStatus` is the status it went out
-with, and a panic in one is logged. It is where an access log or a metric goes:
-
-```bash
-{{.GeneratorName}} add-route access-log --middleware --phase after
-```
 
 `routeio.WriteJSON`, `routeio.WriteText` and `routeio.Redirect` answer in one call; the
 `Response` also carries `AddHeader` (a second `Set-Cookie`) and `GetHeader`.

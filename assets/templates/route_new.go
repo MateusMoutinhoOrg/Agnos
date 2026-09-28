@@ -25,7 +25,6 @@ func NewRoute(sandbox *api.Sandbox) *api.Route {
 	self.Priority = {{.Priority}}
 	self.ResponseType = {{printf "%q" .ResponseType}}
 	self.Segments = {{.Segments}}
-	self.After = {{.After}}
 	self.Pattern = {{printf "%q" .Pattern}}
 	self.Category = {{printf "%q" .Category}}
 	self.Help = {{printf "%q" .Help}}

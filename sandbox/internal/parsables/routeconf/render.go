@@ -17,9 +17,6 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 	if conf.HasSegments {
 		obj.AddItemToObject("segments", int64(conf.Segments))
 	}
-	if conf.Phase != "" && conf.Phase != PhaseBefore {
-		obj.AddItemToObject("phase", conf.Phase)
-	}
 	obj.AddItemToObject("paths", pathsArray(sandbox, conf.Paths))
 	if len(conf.Parameters) > 0 {
 		obj.AddItemToObject("parameters", parametersArray(sandbox, conf.Parameters))

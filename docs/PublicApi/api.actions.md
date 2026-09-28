@@ -175,7 +175,7 @@ CommandProps carries the command-level keys of entries.yaml that set-command may
 
 ## `AddRouteProps`
 
-AddRouteProps describes one route to scaffold. Trigger is the whole-path value its first path compares against ("" is "/" followed by the name), TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or the aliases starts-with, ends-with, exact, equals and matches; "" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the paths from one url shape instead ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType. Methods are the http methods it answers to ([] is GET — ANY for a Middleware) and ResponseType the Content-Type its responses carry ("" is application/json — text/plain for a Middleware). Priority is the rung it runs on, used only when HasPriority is set; without it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for a Middleware. Before and After name another route to land one rung below or above instead, and exclude Priority. Phase is "before" (the chain, the default) or "after".
+AddRouteProps describes one route to scaffold. Trigger is the whole-path value its first path compares against ("" is "/" followed by the name), TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or the aliases starts-with, ends-with, exact, equals and matches; "" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the paths from one url shape instead ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType. Methods are the http methods it answers to ([] is GET — ANY for a Middleware) and ResponseType the Content-Type its responses carry ("" is application/json — text/plain for a Middleware). Priority is the rung it runs on, used only when HasPriority is set; without it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for a Middleware. Before and After name another route to land one rung below or above instead, and exclude Priority.
 
 | Field | Type |
 | --- | --- |
@@ -192,14 +192,13 @@ AddRouteProps describes one route to scaffold. Trigger is the whole-path value i
 | `HasPriority` | `bool` |
 | `Before` | `string` |
 | `After` | `string` |
-| `Phase` | `string` |
 | `ResponseType` | `string` |
 | `Help` | `string` |
 | `Category` | `string` |
 
 ## `RouteProps`
 
-RouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Methods replace the whole list when any is given; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch. Priority is the rung the route runs on, and HasPriority is what tells a priority declared as zero from one not given at all; Before and After name another route to land one rung below or above instead. Segments is the segment count the request path has to have, read when HasSegments is set. Phase is "before" or "after". Clear takes "segments" off again.
+RouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Methods replace the whole list when any is given; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch. Priority is the rung the route runs on, and HasPriority is what tells a priority declared as zero from one not given at all; Before and After name another route to land one rung below or above instead. Segments is the segment count the request path has to have, read when HasSegments is set. Clear takes "segments" off again.
 
 | Field | Type |
 | --- | --- |
@@ -218,7 +217,6 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 | `After` | `string` |
 | `Segments` | `int` |
 | `HasSegments` | `bool` |
-| `Phase` | `string` |
 | `Examples` | `[]string` |
 | `Clear` | `[]string` |
 
@@ -524,7 +522,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetBodyField` | `func(props RouteBodyFieldEditProps) error` | SetBodyField rewrites one property of a route's body json-schema, at the dotted path props.Name. |
 | `ImportBody` | `func(props RouteBodyImportProps) error` | ImportBody declares a route's body json-schema from an example payload, inferring one property per key the example carries. |
 | `ShowRoute` | `func(path string, route string) ([]string, error)` | ShowRoute renders one route's whole declaration — its paths, its parameters and its body schema — as the lines of a tree, ready to print. |
-| `ListRoutes` | `func(path string) ([]string, error)` | ListRoutes renders every declared route as one line, in the order the dispatch runs them: the chain, then the `after` phase. |
+| `ListRoutes` | `func(path string) ([]string, error)` | ListRoutes renders every declared route as one line, in the order the dispatch runs them. |
 | `ExplainRoute` | `func(props ExplainRouteProps) ([]string, error)` | ExplainRoute runs one request against the declared routes without a server and renders, route by route, whether it runs and why not. |
 | `RenameRoute` | `func(props RenameRouteProps) error` | RenameRoute moves one route package to a new name. |
 | `RebalanceRoutes` | `func(props RebalanceRoutesProps) error` | RebalanceRoutes gives every route a rung of its own, props.Step apart, in the order the chain runs them now. |

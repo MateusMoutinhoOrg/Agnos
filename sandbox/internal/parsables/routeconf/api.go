@@ -118,11 +118,8 @@ type RouteConf struct {
 	ResponseType string
 	// Segments is how many segments the request path has to have for the
 	// route to run; HasSegments is false on a route that takes any count.
-	Segments    int
-	HasSegments bool
-	// Phase is when the route runs: "before" (the default) as a rung of the
-	// chain, or "after", once the chain has answered.
-	Phase           string
+	Segments        int
+	HasSegments     bool
 	Paths           []Path
 	Parameters      []Parameter
 	Category        string

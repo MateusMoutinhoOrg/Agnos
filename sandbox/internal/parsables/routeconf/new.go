@@ -48,22 +48,15 @@ const DefaultPathType = "string"
 // AnyMethod is the one entry of `methods` that matches every http method.
 const AnyMethod = "ANY"
 
-// PhaseBefore is the phase of a route that runs as a rung of the chain — the
-// default — and PhaseAfter the one of a route that runs once it has answered.
-const PhaseBefore = "before"
-const PhaseAfter = "after"
-
-// Phases is every phase a route may declare.
-var Phases = []string{PhaseBefore, PhaseAfter}
-
 // BodyTypes is every body type a route may declare.
 var BodyTypes = []string{"none", "raw", "text", "json", "form"}
 
 // DefaultFormContentType is the content type a `type: form` body requires.
 const DefaultFormContentType = "application/x-www-form-urlencoded"
 
-// legacyKeys are the top-level keys of the declaration routeslist replaced.
-var legacyKeys = []string{"method", "headers", "params"}
+// legacyKeys are the top-level keys a route declaration no longer carries:
+// the ones routeslist replaced, and `phase`, which went with the `after` phase.
+var legacyKeys = []string{"method", "headers", "params", "phase"}
 
 // New parses one route.yaml body into a RouteConf.
 func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
@@ -101,10 +94,6 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 	if segments_item, _ := specs.GetObjectItem("segments"); segments_item != nil && !segments_item.IsNull() {
 		conf.Segments = readInt(specs, "segments")
 		conf.HasSegments = true
-	}
-	conf.Phase = readString(specs, "phase")
-	if conf.Phase == "" {
-		conf.Phase = PhaseBefore
 	}
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")

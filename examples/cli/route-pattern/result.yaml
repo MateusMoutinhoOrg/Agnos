@@ -39,14 +39,14 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/routeslist/files/entries.go
-      sha: d2a0b038c55adba8e0adc38d378b8b79423c816ddaf81b57c115afe5d2f41841
+      sha: 50e4e891ee1f154569a158929ca5e9195ee40691c6559c5a211b0738c90d8c5b
     - file: sandbox/internal/routeslist/files/route.yaml
       sha: a2b973df11fb292b0978cdd3282c4afed1d1b9093ce53f9a9f08a52f38b00e8f
     - file: sandbox/internal/routeslist/get_article/entries.go
-      sha: edd45abae501063c87b13d94e178bdb0aa4d5a90638bd6966e8409b76a6ea85b
+      sha: 9556c8c97a10126c9b71d214e3118ac3315b919ce7f4f0d40e7889c9ab25b28c
     - file: sandbox/internal/routeslist/get_article/route.yaml
       sha: fc4ef0789496d99e639d4630059f0f9b3f67becf92e2c2d9ce000c7f3aeb9a15
     - file: sandbox/internal/routeslist/get_comment/entries.go
-      sha: 48cab81c85a1b4a102b1f7398fcc008acf06490e203326061bc400d03c0b84ff
+      sha: c07a032bc45af06c0597ace69f2a083ba13f1cb3d5590de0c8e06dc9e5102b56
     - file: sandbox/internal/routeslist/get_comment/route.yaml
       sha: 9c0a60886832ce1a5cde2e173d82cbb8bb1acc06991db97765fe1959f41ee338

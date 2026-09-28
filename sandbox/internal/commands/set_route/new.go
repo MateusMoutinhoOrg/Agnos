@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"set-route"}
 	command.Category = "Server System"
 	command.Help = "Rewrite the route-level keys of a route.yaml"
-	command.LongDescription = "Overwrites methods, response-type, priority, segments, phase, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off."
+	command.LongDescription = "Overwrites methods, response-type, priority, segments, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off."
 	command.Examples = []string{"set-route create-user --method POST --example \"curl -X POST localhost:8080/users\""}
 	command.Hidden = false
 
@@ -144,17 +144,6 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 			Default:     "",
 			HasDefault:  false,
 			Identifiers: []string{"--segments"},
-		},
-		{
-			Id:          "phase",
-			Type:        "string",
-			Required:    false,
-			Array:       false,
-			Description: "when the route runs: before (the chain) or after, once the request has been answered",
-			Examples:    []string{"set-route access-log --phase after"},
-			Default:     "",
-			HasDefault:  false,
-			Identifiers: []string{"--phase"},
 		},
 		{
 			Id:          "clear",

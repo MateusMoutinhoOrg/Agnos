@@ -54,7 +54,6 @@ for them).
 {{.GeneratorName}} add-route get-article --pattern '/articles/{article:integer}'
 {{.GeneratorName}} add-route admin --trigger /admin --trigger-type prefix        # /admin, /admin/…, never /administrator
 {{.GeneratorName}} add-route admin-guard --middleware --trigger /admin --before admin
-{{.GeneratorName}} add-route access-log --middleware --phase after
 {{.GeneratorName}} add-parameter authorization --route create-user --font header --required
 {{.GeneratorName}} add-parameter page --route create-user --type integer --default 1
 {{.GeneratorName}} set-body create-user --type json --required

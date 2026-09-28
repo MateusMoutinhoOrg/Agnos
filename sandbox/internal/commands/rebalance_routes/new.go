@@ -19,7 +19,7 @@ func NewCommand(sandbox *api.Sandbox) api.Command {
 	command.Identifiers = []string{"rebalance-routes"}
 	command.Category = "Server System"
 	command.Help = "Lay the chain down again with room between its rungs"
-	command.LongDescription = "Gives every route a priority of its own, --step apart, in the order the chain runs them now — each phase on its own ladder — so --before and --after have room again. The generated health route keeps its rung."
+	command.LongDescription = "Gives every route a priority of its own, --step apart, in the order the chain runs them now, so --before and --after have room again. The generated health route keeps its rung."
 	command.Examples = []string{}
 	command.Hidden = false
 

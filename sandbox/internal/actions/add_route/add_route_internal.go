@@ -109,11 +109,6 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		return err
 	}
 
-	phase, err := utils.RoutePhase(sandbox, props.Phase)
-	if err != nil {
-		return err
-	}
-
 	response_type := sandbox.Deps.Stringsdeps.TrimSpace(props.ResponseType)
 	if response_type == "" {
 		response_type = routeconf.DefaultResponseType
@@ -139,7 +134,6 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 
 	conf.Methods = methods
 	conf.Priority = priority
-	conf.Phase = phase
 	conf.ResponseType = response_type
 	conf.Category = category
 	conf.Help = sandbox.Deps.Stringsdeps.TrimSpace(props.Help)
@@ -155,11 +149,10 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		"Module":     module_conf.Module,
 		"Methods":    sandbox.Deps.Stringsdeps.Join(methods, ", "),
 		"Trigger":    conf.Pattern(),
-		"After":      phase == routeconf.PhaseAfter,
 	}
 
 	template := RouteHandlerTemplate
-	if props.Middleware || phase == routeconf.PhaseAfter {
+	if props.Middleware {
 		template = MiddlewareHandlerTemplate
 	}
 	handler, err := sandbox.Deps.Embeddeps.RenderTemplate(template, vars)

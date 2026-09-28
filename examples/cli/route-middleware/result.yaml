@@ -1,23 +1,19 @@
 cli-output: |
     #    priority  methods  pattern                              route
-    1    99        ANY      /admin/*                             admin-guard
-    2    100       GET      /admin/*                             admin
-    3    100       GET      /health                              health
-
-    after the answer
-    1    10        ANY      /*                                   access-log
+    1    0         ANY      /*                                   access-log
+    2    99        ANY      /admin/*                             admin-guard
+    3    100       GET      /admin/*                             admin
+    4    100       GET      /health                              health
     #    priority  methods  pattern                              route
-    1    10        ANY      /admin/*                             admin-guard
-    2    20        GET      /admin/*                             admin
-    3    100       GET      /health                              health
-
-    after the answer
     1    10        ANY      /*                                   access-log
+    2    20        ANY      /admin/*                             admin-guard
+    3    30        GET      /admin/*                             admin
+    4    100       GET      /health                              health
     ANY /admin/*
       category  Middleware
-      priority  10
+      priority  20
       response  text/plain
-      chain     #1 of 4, before admin
+      chain     #2 of 4, after access-log, before admin
 
     paths
       Route                segments 0..-1  prefix "/admin"
@@ -26,14 +22,14 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/generated/server/server/new.go
-      sha: 22ebec37fdf558f43f2425f4d0d0a4e8d07f40dbab40a59b569ea68f59fdd917
+      sha: 332fe8956561f23e5096a8f29b60ae5dd129c51a673f42cd0cadee88336df4c0
     - file: sandbox/internal/routeslist/access_log/InternalPureHandler.go
-      sha: a6aa0867c93eac00e69c358d7370928b6538237643e09fc2a64ef93a2477d15c
+      sha: 19e95a302c102dc27be15796ca0b2c9f43061002416dca4697a0b09caa52d2af
     - file: sandbox/internal/routeslist/access_log/route.yaml
-      sha: 1e1964054c36e7071a55577864d86f190ab344706e1f4ecf7a835e08487baf69
+      sha: fea4d2499f28d7a5787e933a939f11c7e3eebc8fae08809a99d27058f9e2fc35
     - file: sandbox/internal/routeslist/admin/route.yaml
-      sha: f72d38cf69e65496d79ebf5a3f9a136ebd38c724ca9675fbdffdb4fb66ef5d6a
+      sha: b2f93fa11a115c65fc7a2e659c5ab67ae0535fdac6a7e61ce1b43c17c148e936
     - file: sandbox/internal/routeslist/admin_auth/InternalPureHandler.go
       sha: 5599fc85e2aae009536f6111fdfd40897866f6f084784ccbdf8fbfad493ebc1a
     - file: sandbox/internal/routeslist/admin_auth/route.yaml
-      sha: 04cd505c1928ba9d2515e03669fc7daff7767b214f7f43abf0f70c8cf2ef02e8
+      sha: 89953dc32cfd2d0696109625ef3c982325d56e24bede32a14b81265e420fc6ac

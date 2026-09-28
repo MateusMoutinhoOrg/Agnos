@@ -177,10 +177,9 @@ func RouteEntryId(sandbox *api.Sandbox, raw string) string {
 }
 
 // RouteReservedIds are the Entries fields the generated entries.go spells
-// itself — FullRoute on every route, Body on one declaring a body,
-// AnsweredStatus on one of the `after` phase — so no path or parameter may
-// take them.
-var RouteReservedIds = []string{"FullRoute", "Body", "AnsweredStatus"}
+// itself — FullRoute on every route, Body on one declaring a body — so no
+// path or parameter may take them.
+var RouteReservedIds = []string{"FullRoute", "Body"}
 
 // RouteSegmentIndex reads a --start or --end typed on the command line, "" as
 // the fallback given.

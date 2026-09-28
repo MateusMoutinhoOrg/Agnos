@@ -2,8 +2,8 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: sandbox/internal/routeslist/create_user/entries.go
-      sha: cf08b43efbd958199c889d57c33b25fc90420087ee4634f14a642c9a674fff3f
+      sha: 6127a2f50d862b8a06e36cfe4ab121a95a0c79a572cdd043b87b49281ceec6a3
     - file: sandbox/internal/routeslist/create_user/new.go
-      sha: f00f44f58e5cf2aa5fd64bbb31a722f67331792ed67d86fd2f42e50c82f8cce7
+      sha: d7f097e1f69080fa561717accd13d382b974607281055a7970c7ffe7fb06bccb
     - file: sandbox/internal/routeslist/create_user/route.yaml
       sha: 2651f0925118c7f6730d593f1557c84f08d9c25ad38a0c1e3c1dd2d9d96e91ec

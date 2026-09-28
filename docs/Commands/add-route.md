@@ -3,7 +3,7 @@
 Declare a new http route
 
 ```bash
-agnos add-route [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--method <method>...] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--phase <phase>] [--response-type <response-type>] [--help <help>] [--category <category>] [--path <path>] [--quiet] <name>
+agnos add-route [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--method <method>...] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--response-type <response-type>] [--help <help>] [--category <category>] [--path <path>] [--quiet] <name>
 ```
 
 Writes sandbox/internal/routeslist/<name>/route.yaml and a stub InternalPureHandler.go, then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. The paths come from --pattern, or from one path, Route, reading the whole request path against --trigger. A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
@@ -20,7 +20,6 @@ Writes sandbox/internal/routeslist/<name>/route.yaml and a stub InternalPureHand
 | `--priority` | int |  | the rung this route runs on when several match one request, lowest first; a route that answers nothing hands the request on (defaults to 100, or 10 for a --middleware) |
 | `--before` | string |  | land one rung below the route named, so it runs first (excludes --priority) |
 | `--after` | string |  | land one rung above the route named, so it runs next (excludes --priority) |
-| `--phase` | string |  | when the route runs: before (the chain, the default) or after, once the request has been answered and without being able to change the answer |
 | `--response-type` | string |  | the Content-Type every response of the route carries (defaults to application/json, or text/plain for a --middleware) |
 | `--help` | string |  | one-line description of the route |
 | `--category` | string |  | the heading the route is listed under in docs/Routes (defaults to Routes, or Middleware for a --middleware) |

@@ -4,7 +4,7 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
     - file: sandbox/api/route.go
-      sha: 428cb47131a6b2094e0566477680b50d7a176e6ea481117596d4f0fa1303370c
+      sha: 567bb8f27d8cf9493bf97b66e421d19927528605700d5539f7c7490c37c69bbc
     - file: sandbox/api/server.go
       sha: 01311961e4b7ad4e76ee60b330ae51b2bcaa35ffc5ac1ac1efff23a7bf36a9dc
     - file: sandbox/internal/commands/start_server/entries.yaml
@@ -16,9 +16,9 @@ tree:
     - file: sandbox/internal/routeslist/health/InternalPureHandler.go
       sha: 87e4994cbf1c5706b71a869e5a7577aa9081b007358de1e346ce3b5391cc8e10
     - file: sandbox/internal/routeslist/health/entries.go
-      sha: 6c6227561d1c2f298c2097989a73d97194ed99604f40d344b259ffe1064c5f4f
+      sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
     - file: sandbox/internal/routeslist/health/new.go
-      sha: 6c44e6320a37b3f5c329022b70418fcc2a3dd5a6b02e402f2db2a81ec923610a
+      sha: ea5199dd52cbe48142d50f07cf8941640562e3fbdee7cf553e4654f08efdb6a7
     - file: sandbox/internal/routeslist/health/route.yaml
       sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9
     - file: sandbox/internal/server/errors/handle_bad_request.go

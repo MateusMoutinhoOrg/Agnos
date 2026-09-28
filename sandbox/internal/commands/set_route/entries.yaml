@@ -88,13 +88,6 @@ flags:
         - --segments
       name: segments
       type: int
-    - description: 'when the route runs: before (the chain) or after, once the request has been answered'
-      examples:
-        - set-route access-log --phase after
-      identifiers:
-        - --phase
-      name: phase
-      type: string
     - array: true
       description: 'a key to take off: segments (repeatable)'
       examples:
@@ -128,4 +121,4 @@ flags:
 help: Rewrite the route-level keys of a route.yaml
 identifiers:
     - set-route
-long-description: Overwrites methods, response-type, priority, segments, phase, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
+long-description: Overwrites methods, response-type, priority, segments, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.

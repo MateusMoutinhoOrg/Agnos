@@ -19,4 +19,4 @@ flags:
 help: List every route in the order the chain runs them
 identifiers:
     - list-routes
-long-description: 'Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them: the chain first, lowest priority first, then the routes of the after phase. Writes nothing.'
+long-description: Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them, lowest priority first. Writes nothing.

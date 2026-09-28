@@ -145,8 +145,7 @@ editing only the rendered copy is undone in silence.
   it reads is declared (`Entries`, the body on `Entries.Body`). An `InternalPureHandler` returns
   `error`, never a status; it refuses a request by returning `routeio.Fail`. A path type or a
   `trigger` is part of what the route matches on, so failing one is a non-match, not a `400`.
-  `phase: after` routes run once it is answered, on a frozen response, and read the status on
-  `Entries.AnsweredStatus`.
+  There is one chain and no `after` phase: a `phase` key is an old declaration `verify` names.
 - Nothing in the dispatch writes a response: every failure goes through `routeio.Raise` to one of
   the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and never
   rewrites. `Raise` reaches them through the `Fail` field of `api.Server` because a route package

@@ -19,10 +19,6 @@ const fullRouteId = "FullRoute"
 // bodyId is the id the Entries of a route declaring a body carries it under.
 const bodyId = "Body"
 
-// answeredStatusId is the id the Entries of an `after` route carries the
-// status the request was answered with under.
-const answeredStatusId = "AnsweredStatus"
-
 // datetimePattern is what a `datetime` parameter has to read as: RFC 3339.
 const datetimePattern = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$`
 
@@ -30,7 +26,7 @@ const datetimePattern = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2
 // runs the route's InternalPurehandler with it. The Entries type is the route
 // package's own, so it is built, filled and called through Deps.Reflectdeps:
 // every field is filled by its `id` tag — FullRoute, one per entry of Paths,
-// one per parameter, the body, and the answered status of an `after` route.
+// one per parameter, and the body.
 //
 // The order is the order route.yaml reads in: the path slices, then the
 // parameters, then the body, then the response type. A value that will not
@@ -54,17 +50,12 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 	if ok, err := checkBody(sandbox, route, request); !ok {
 		return err
 	}
-	// A route of the `after` phase runs once the body has been read by the
-	// route that answered, so it is never read again.
-	if route.ReadBody != nil && !route.After {
+	if route.ReadBody != nil {
 		body, err := route.ReadBody(route)
 		if err != nil {
 			return err
 		}
 		values[bodyId] = body
-	}
-	if route.After {
-		values[answeredStatusId] = route.AnsweredStatus
 	}
 
 	for index := 0; index < sandbox.Deps.Reflectdeps.NumField(entries); index++ {
@@ -79,9 +70,7 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 		}
 	}
 
-	// A route of the `after` phase runs on an answered response, whose
-	// headers are gone already.
-	if route.ResponseType != "" && !route.After {
+	if route.ResponseType != "" {
 		response.SetHeader("Content-Type", route.ResponseType)
 	}
 

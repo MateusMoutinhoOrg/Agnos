@@ -2,7 +2,6 @@ package set_route
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -73,16 +72,6 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 		}
 		conf.Segments, conf.HasSegments, changed = props.Segments, true, true
 	}
-	if sandbox.Deps.Stringsdeps.TrimSpace(props.Phase) != "" {
-		phase, err := utils.RoutePhase(sandbox, props.Phase)
-		if err != nil {
-			return err
-		}
-		if phase == routeconf.PhaseAfter && conf.Body.Type != routeconf.BodyNone {
-			return sandbox.Deps.Std.Errorf("route %q reads a body, which nothing reads in the after phase: drop it with set-body --type none first", props.Route)
-		}
-		conf.Phase, changed = phase, true
-	}
 	if props.Hidden {
 		conf.Hidden, changed = true, true
 	}
@@ -93,7 +82,7 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 		conf.Examples, changed = utils.AppendUnique(conf.Examples, props.Examples), true
 	}
 	if !changed {
-		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --response-type, --priority, --before, --after, --segments, --phase, --clear, --help, --category, --long-description, --hidden, --visible or --example)")
+		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --response-type, --priority, --before, --after, --segments, --clear, --help, --category, --long-description, --hidden, --visible or --example)")
 	}
 
 	sandbox.Deps.Std.Log("set-route updating %s \n", utils.RouteConfPath(sandbox, props.Route))

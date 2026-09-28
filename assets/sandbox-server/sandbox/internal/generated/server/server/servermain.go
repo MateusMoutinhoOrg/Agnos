@@ -152,14 +152,12 @@ func isNumber(text string) bool {
 // Nothing here writes a response itself. Every way a request can end without a
 // route answering it — nothing matched, matched under another method, a value
 // that will not bind, a panic — is raised through routeio.Raise and answered by
-// one of the project's own Handle* files. Once it is answered, whatever
-// answered it, the routes of the `after` phase run.
+// one of the project's own Handle* files.
 func dispatch(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response) {
 	tracked, status := routeio.Tracked(response)
 	props := &api.RouteProps{}
 
 	answer(sandbox, request, tracked, status, props)
-	runAfter(sandbox, request, response, status(), props)
 }
 
 // answer runs the chain for one request and, when no route answered it,
@@ -195,7 +193,7 @@ func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps
 	failRequest(sandbox, request, tracked, props, api.StatusNotFound)
 }
 
-// runChain runs every route of the `before` phase the request is for, until
+// runChain runs every route the request is for, until
 // one answers or fails. It reports whether a route declaring its methods ran,
 // and whether a route matched the path under another method. A route on ANY —
 // a middleware, most often — says nothing about which methods the path
@@ -205,10 +203,6 @@ func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverde
 	ran := false
 
 	for _, declared := range sandbox.Server.Routes {
-		if declared.After {
-			continue
-		}
-
 		bound := api.BindRoute(declared)
 		bound.Request = request
 		bound.Response = tracked
@@ -242,45 +236,6 @@ func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverde
 	}
 
 	return ran, method_mismatch
-}
-
-// runAfter runs every route of the `after` phase the request is for, once it
-// has been answered. They read the status it was answered with on
-// Entries.AnsweredStatus and cannot change the answer: their response is
-// frozen, and a panic in one is reported and goes no further.
-func runAfter(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status int, props *api.RouteProps) {
-	frozen := routeio.Frozen(sandbox, response)
-
-	for _, declared := range sandbox.Server.Routes {
-		if !declared.After {
-			continue
-		}
-
-		bound := api.BindRoute(declared)
-		bound.Request = request
-		bound.Response = frozen
-		bound.Props = props
-		bound.AnsweredStatus = status
-
-		if !bound.IsActionable(bound) {
-			continue
-		}
-		runAfterRoute(sandbox, bound)
-	}
-}
-
-// runAfterRoute runs one `after` route, reporting what it returned or panicked
-// with instead of answering it: the request already has its answer.
-func runAfterRoute(sandbox *api.Sandbox, bound *api.Route) {
-	defer func() {
-		if failure := recover(); failure != nil {
-			sandbox.Deps.Std.Error("after route %s panicked: %v\n", bound.Name, failure)
-		}
-	}()
-
-	if err := bound.RequestHandler(bound); err != nil {
-		sandbox.Deps.Std.Log("after route %s: %s \n", bound.Name, err.Error())
-	}
 }
 
 // acceptsAny reports a route declared for every method.
