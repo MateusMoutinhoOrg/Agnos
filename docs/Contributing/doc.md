@@ -34,7 +34,7 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 `handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
 
-`interview` needs nothing for the new command: it generates its questions from the declaration. It is the one feature of agnos written for a beginner rather than for an llm ([Interview](../Interview/doc.md)), and seven of its tables take an entry — only for a command that is one of these:
+`interview` needs nothing for the new command: it generates its questions from the declaration. It is one of the two things agnos writes for a person rather than for an llm — the other is a server project's `docs/Routes/` — ([Interview](../Interview/doc.md)), and seven of its tables take an entry — only for a command that is one of these:
 
 | Teach | When |
 |---|---|

@@ -265,12 +265,15 @@ func routeMethodsMeet(middleware *routeconf.RouteConf, route *routeconf.RouteCon
 }
 
 // routeLiteralSegments is, segment by segment, the one segment a route's
-// request path is known to carry there: what an equal trigger of its paths
-// spells.
+// request path is known to carry there: what an equal or a prefix trigger of
+// its paths spells — a prefix holds on a segment boundary, so its segments
+// are as literal as an equal's. A trigger ignoring case spells none, since
+// the request may carry them in any case.
 func routeLiteralSegments(sandbox *api.Sandbox, route *routeconf.RouteConf) map[int]string {
 	words := map[int]string{}
 	for _, path := range route.Paths {
-		if !path.Trigger.Exists || path.Trigger.Negate || path.Trigger.Type != "equal" {
+		literal := path.Trigger.Type == "equal" || path.Trigger.Type == "prefix"
+		if !path.Trigger.Exists || path.Trigger.Negate || path.Trigger.IgnoreCase || !literal {
 			continue
 		}
 		offset := 0

@@ -1,0 +1,19 @@
+cli-output: ""
+exit-code: 0
+tree:
+    - file: docs/Routes/admin.md
+      sha: 5414584cc378c58bce7016884ba843f2b2c58ff97f65280d89501f2db73f066e
+    - file: docs/Routes/admin_guard.md
+      sha: 0a27356b3344f2ec8d0cd7f6de04d254fdb10c0c47c0caf9b77a9ba9c07a34d3
+    - file: docs/Routes/create_user.md
+      sha: fc0dc14040b3d7b13de08da9083cc220c80a473dd5bfe6784c44ad65515a59af
+    - file: docs/Routes/doc.md
+      sha: dc7e43a084f8095de7cf1c96452dd1471069be9524804335d60f4f9441cc3dd7
+    - file: docs/Routes/get_article.md
+      sha: 8842b5cbd8a13548fb67de75126c81146e93044481bd677013698be8d98edecd
+    - file: docs/Routes/health.md
+      sha: 29b8099ed496b4aced651d839fe7c82641de43d4f9590c8923514655a783d5fd
+    - file: docs/Routes/images.md
+      sha: 43948e0039ab37d226d395323b1680d806dc290a4aaaf3e787975ae645114bcc
+    - file: docs/Routes/props.yaml
+      sha: 242d51317effdda8d579535d8db0e6b5f6836de052ea43f3f3b310dd553e9137

@@ -240,12 +240,15 @@ and machine writing, and token cost is a first-class constraint.
 - **Convention over configuration.** Uniformity is what makes generation possible.
 - **Deterministic and idempotent.** Same input, same bytes out.
 
-**`interview` is the exception, and the only one.** An LLM drives agnos through the plain cli;
-the interactive session is what a *person* uses, and it is written for a beginner who has never
-read a page of this repo — plain words instead of agnos vocabulary, the next step suggested
-first, and no row on a menu that the project in front of them cannot run. Density, token cost and
-"read the declaration" do not apply there. Every rule above still binds its *code*; the exception
-covers only who its screens are written for. `docs/Interview/doc.md` is its page.
+**Two exceptions, and only two, both written for a person.** `interview`: an LLM drives agnos
+through the plain cli; the interactive session is what a *person* uses, and it is written for a
+beginner who has never read a page of this repo — plain words instead of agnos vocabulary, the
+next step suggested first, and no row on a menu that the project in front of them cannot run.
+`docs/Interview/doc.md` is its page. And a server project's `docs/Routes/`: it is read by whoever
+calls the server, so every page speaks plain words and carries `curl` requests that run as they
+are, generated from the `route.yaml` by `CollectRouteDocs` and `assets/templates/route_page.md`.
+Density, token cost and "read the declaration" do not apply to either. Every rule above still
+binds their *code*; the exceptions cover only who their screens and pages are written for.
 
 ## Testing
 

@@ -294,6 +294,12 @@ Never `fmt.Printf`.
 - Docs are short, objective and dense: tables, commands, file paths and rules — no prose, no
   narrative, no tutorials, no motivation sections. One page per topic; no sub-doc unless the
   content is a real list of independent items.
+{{- if .HasServer }}
+- [Routes](../Routes/doc.md) is the exception: it is read by whoever calls the server, a person,
+  so it speaks plain words and every page carries requests that run as they are. It is
+  generated from each `route.yaml`: a `help`, a `description` or an `examples` entry is what
+  changes a page.
+{{- end }}
 - Say a rule once, in this page, and link to it. Links are relative to the file that carries
   them: `../X/doc.md` inside `docs/`, `docs/X/doc.md` in `README.md` and `ReadmeHeader.md`.
 

@@ -55,6 +55,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `remove-lib-example` | delete an example of examples/lib/ | [example.sh](../../examples/cli/remove-lib-example/example.sh) |
 | `remove-page` |  | [example.sh](../../examples/cli/remove-page/example.sh) |
 | `route-chain` |  | [example.sh](../../examples/cli/route-chain/example.sh) |
+| `route-docs` |  | [example.sh](../../examples/cli/route-docs/example.sh) |
 | `route-middleware` |  | [example.sh](../../examples/cli/route-middleware/example.sh) |
 | `route-pattern` |  | [example.sh](../../examples/cli/route-pattern/example.sh) |
 | `server-init` |  | [example.sh](../../examples/cli/server-init/example.sh) |
