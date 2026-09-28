@@ -7,7 +7,7 @@ import (
 )
 
 // entriesArgument is the position of the Entries pointer among the parameters
-// of an InternalPurehandler: func(route, entries, response) error.
+// of an InternalPurehandler: func(props, entries, response) error.
 const entriesArgument = 1
 
 // entriesTag is the struct tag an Entries field names what it is bound to by.
@@ -16,6 +16,13 @@ const entriesTag = "id"
 // fullRouteId is the id every Entries carries the whole request path under.
 const fullRouteId = "FullRoute"
 
+// bodyId is the id the Entries of a route declaring a body carries it under.
+const bodyId = "Body"
+
+// answeredStatusId is the id the Entries of an `after` route carries the
+// status the request was answered with under.
+const answeredStatusId = "AnsweredStatus"
+
 // datetimePattern is what a `datetime` parameter has to read as: RFC 3339.
 const datetimePattern = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$`
 
@@ -23,19 +30,21 @@ const datetimePattern = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2
 // runs the route's InternalPurehandler with it. The Entries type is the route
 // package's own, so it is built, filled and called through Deps.Reflectdeps:
 // every field is filled by its `id` tag — FullRoute, one per entry of Paths,
-// one per parameter.
+// one per parameter, the body, and the answered status of an `after` route.
 //
 // The order is the order route.yaml reads in: the path slices, then the
-// parameters, then the body's own declaration, then the response type. A
-// value that will not bind is raised through routeio.Fail and the handler never
-// runs. What it returns is what the handler returned.
+// parameters, then the body, then the response type. A value that will not
+// bind is raised through routeio.Raise and the handler never runs. The handler
+// is handed the request's shared RouteProps first: what a route earlier in the
+// chain set there is what it reads. A failure it returns — built by
+// routeio.Fail — is raised on this route; any other error is returned as it is.
 func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 	request := routeio.RequestOf(route)
 	response := routeio.ResponseOf(route)
 
 	entries := sandbox.Deps.Reflectdeps.NewIn(route.InternalPurehandler, entriesArgument)
 	if entries == nil || sandbox.Deps.Reflectdeps.NumField(entries) < 0 {
-		return sandbox.Deps.Std.Errorf("route %s: InternalPurehandler is not a func(route *api.Route, entries *Entries, response *serverdeps.Response) error", route.Name)
+		return sandbox.Deps.Std.Errorf("route %s: InternalPurehandler is not a func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error", route.Name)
 	}
 
 	values, ok, err := bindValues(sandbox, route, request)
@@ -44,6 +53,18 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 	}
 	if ok, err := checkBody(sandbox, route, request); !ok {
 		return err
+	}
+	// A route of the `after` phase runs once the body has been read by the
+	// route that answered, so it is never read again.
+	if route.ReadBody != nil && !route.After {
+		body, err := route.ReadBody(route)
+		if err != nil {
+			return err
+		}
+		values[bodyId] = body
+	}
+	if route.After {
+		values[answeredStatusId] = route.AnsweredStatus
 	}
 
 	for index := 0; index < sandbox.Deps.Reflectdeps.NumField(entries); index++ {
@@ -64,8 +85,11 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 		response.SetHeader("Content-Type", route.ResponseType)
 	}
 
-	out := sandbox.Deps.Reflectdeps.Call(route.InternalPurehandler, []any{route, entries, &response})
+	out := sandbox.Deps.Reflectdeps.Call(route.InternalPurehandler, []any{route.Props, entries, &response})
 	if len(out) == 1 && out[0] != nil {
+		if failure, is := out[0].(*api.RouteFailure); is {
+			return routeio.RaiseFailure(sandbox, route, failure)
+		}
 		if handler_error, is := out[0].(error); is {
 			return handler_error
 		}
@@ -77,7 +101,7 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 // the id its Entries field is tagged with — a path in the type it declares,
 // through the same PathValue that matched it. A required parameter the request
 // does not bring, or a value that will not convert, is raised through
-// routeio.Fail: it reports false, with what that failure returned.
+// routeio.Raise: it reports false, with what that failure returned.
 func bindValues(sandbox *api.Sandbox, route *api.Route, request serverdeps.Request) (map[string]any, bool, error) {
 	values := map[string]any{fullRouteId: request.GetPath()}
 
@@ -93,7 +117,7 @@ func bindValues(sandbox *api.Sandbox, route *api.Route, request serverdeps.Reque
 
 		if len(raws) == 0 {
 			if parameter.Required {
-				return nil, false, routeio.Fail(sandbox, route, api.StatusBadRequest, parameter.Key,
+				return nil, false, routeio.Raise(sandbox, route, api.StatusBadRequest, parameter.Key,
 					sandbox.Deps.Std.Sprintf("required parameter '%s' is missing", parameter.Key))
 			}
 			if !parameter.HasDefault {
@@ -104,7 +128,7 @@ func bindValues(sandbox *api.Sandbox, route *api.Route, request serverdeps.Reque
 
 		value, ok := parseValue(sandbox, parameter, raws)
 		if !ok {
-			return nil, false, routeio.Fail(sandbox, route, api.StatusBadRequest, parameter.Key,
+			return nil, false, routeio.Raise(sandbox, route, api.StatusBadRequest, parameter.Key,
 				sandbox.Deps.Std.Sprintf("parameter '%s' %s", parameter.Key, typeMessage(parameter.Type)))
 		}
 		values[parameter.Id] = value
@@ -181,7 +205,7 @@ func checkBody(sandbox *api.Sandbox, route *api.Route, request serverdeps.Reques
 	if route.Body.ContentType != "" {
 		content_type := request.GetHeader("Content-Type")
 		if content_type != "" && !sandbox.Deps.Stringsdeps.HasPrefix(content_type, route.Body.ContentType) {
-			return false, routeio.Fail(sandbox, route, api.StatusUnsupportedMedia, "",
+			return false, routeio.Raise(sandbox, route, api.StatusUnsupportedMedia, "",
 				sandbox.Deps.Std.Sprintf("this route accepts a %s body", route.Body.ContentType))
 		}
 	}
@@ -189,7 +213,7 @@ func checkBody(sandbox *api.Sandbox, route *api.Route, request serverdeps.Reques
 	if raw := request.GetHeader("Content-Length"); raw != "" {
 		declared, err := sandbox.Deps.Stringsdeps.Atoi(raw)
 		if err == nil && declared > route.Body.MaxBytes {
-			return false, routeio.Fail(sandbox, route, api.StatusPayloadTooLarge, "",
+			return false, routeio.Raise(sandbox, route, api.StatusPayloadTooLarge, "",
 				sandbox.Deps.Std.Sprintf("the request body is larger than %s bytes",
 					sandbox.Deps.Stringsdeps.FormatInt(int64(route.Body.MaxBytes), 10)))
 		}

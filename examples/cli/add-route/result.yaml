@@ -2,8 +2,8 @@ cli-output: "add-body-field adding email to sandbox/internal/routeslist/create_u
 exit-code: 0
 tree:
     - file: sandbox/internal/routeslist/create_user/entries.go
-      sha: 7dd20dee890687d3c040870440edd72d7d99fd4721228b8f623e60932ca9098f
+      sha: cf08b43efbd958199c889d57c33b25fc90420087ee4634f14a642c9a674fff3f
     - file: sandbox/internal/routeslist/create_user/new.go
-      sha: 456c930be77ef7869d5a7cc16af9bd1b6113964e6139fbd3741f7afb2ab6e3ef
+      sha: f00f44f58e5cf2aa5fd64bbb31a722f67331792ed67d86fd2f42e50c82f8cce7
     - file: sandbox/internal/routeslist/create_user/route.yaml
       sha: 2651f0925118c7f6730d593f1557c84f08d9c25ad38a0c1e3c1dd2d9d96e91ec

@@ -194,18 +194,21 @@ type Entries struct {
 	Route     string `id:"Route"`     // one per path, in its type
 	Tenant    string `id:"Tenant"`
 	Page      int    `id:"Page"`      // one per parameter, in its type
+	Body      Body   `id:"Body"`      // a route declaring a body: what ReadBody returned
 }
 ```
 
 The hand-written half is one function, which `verify` holds to this signature:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error
+func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error
 ```
 
-`route` is a copy of the declaration, made per request by `api.BindRoute`, so two requests in
-flight never share a value. The generic `RequestHandler` builds `Entries` and calls the handler
-through `Deps.Reflectdeps`, since every route's `Entries` is a type of its own.
+`props` is the request's `api.RouteProps` (see [The chain](#the-chain)); `entries` is everything
+the request brought that `route.yaml` declares — the handler is handed no request, so a value it
+needs is a declared path, parameter or body. The generic `RequestHandler` builds `Entries` and
+calls the handler through `Deps.Reflectdeps`, since every route's `Entries` is a type of its own.
+A route of the `after` phase also carries `AnsweredStatus int`.
 
 ## Body keys
 
@@ -227,7 +230,8 @@ build rather than being ignored.
 ## Generated `ReadBody`
 
 `ReadBody(sandbox *api.Sandbox, route *api.Route)` is generated into the route's own
-`entries.go`, returning what its `body.type` declares:
+`entries.go`, and `new.go` hands it to `Route.ReadBody`: the dispatch calls it before the handler
+runs and binds what it returns onto `Entries.Body`, in what its `body.type` declares:
 
 | `body.type` | Returns |
 |---|---|
@@ -243,8 +247,9 @@ Every variant does, in order: `Request.ReadBody(MaxBodyBytes)` (`413`), the `req
 violation, its field path in the response's `field`). A nested object becomes `Body<Path>`; an
 object inside an array becomes `Body<Path>Item`.
 
-A non-nil error means the request has already been answered, by whichever `Handle*` file of
-`sandbox/internal/server/errors/` the failure belongs to, so the handler only has to return it.
+A failing body has already been answered, by whichever `Handle*` file of
+`sandbox/internal/server/errors/` the failure belongs to, and the handler never runs. A
+middleware in front of the route still refuses a request before a byte of it is read.
 
 ## The chain
 
@@ -260,22 +265,23 @@ route a middleware. `SetHeader` alone answers nothing, which is how a middleware
 whatever answers after it.
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error {
-	token := routeio.RequestOf(route).GetHeader("Authorization")
-	if token == "" {
-		return routeio.Fail(sandbox, route, api.StatusUnauthorized, "authorization", "")
+func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+	if entries.Authorization == "" {
+		return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "")
 	}
-	routeio.SetLocal(route, "user", token) // the routes after it read it
-	return nil                            // nothing answered: the next route runs
+	props.User = entries.Authorization // the routes after it read props.User
+	return nil                         // nothing answered: the next route runs
 }
 ```
 
 ```bash
 {{.GeneratorName}} add-route admin-guard --middleware --trigger /admin --before admin
+{{.GeneratorName}} add-parameter authorization --route admin-guard --font header
 ```
 
-Every route of one request shares `route.Locals`: `routeio.SetLocal(route, key, value)` stores,
-`routeio.GetLocal[T](route, key)` reads what a route earlier in the chain stored.
+Every route of one request is handed the same `props`: the dispatch builds one empty
+`api.RouteProps` per request, and each field is declared by the project in
+`sandbox/api/routeprops.go` — written once by `{{.GeneratorName}} build`, then the project's.
 
 When no route answers:
 
@@ -287,7 +293,7 @@ When no route answers:
 
 Once the request is answered — by a route or by a failure — every route of the `after` phase
 the request is for runs, lowest rung first. Its response is frozen (a status, a header or a byte
-written there is logged and dropped), `routeio.AnsweredStatus(route)` is the status it went out
+written there is logged and dropped), `entries.AnsweredStatus` is the status it went out
 with, and a panic in one is logged. It is where an access log or a metric goes:
 
 ```bash
@@ -295,8 +301,7 @@ with, and a panic in one is logged. It is where an access log or a metric goes:
 ```
 
 `routeio.WriteJSON`, `routeio.WriteText` and `routeio.Redirect` answer in one call; the
-`Response` also carries `AddHeader` (a second `Set-Cookie`) and `GetHeader`, the `Request`
-`GetHeaders`, `GetHost` and `GetCookie`.
+`Response` also carries `AddHeader` (a second `Set-Cookie`) and `GetHeader`.
 
 ## Failures
 
@@ -330,16 +335,17 @@ the wording is the one spelled in that file and changing it there changes what t
 The failures that know something the file could not — which field would not bind, and why —
 carry their own.
 
-Raise a failure with `routeio.Fail`, from anywhere:
+A handler refuses a request by returning `routeio.Fail`, a `*api.RouteFailure`:
 
 ```go
-return routeio.Fail(sandbox, route, api.StatusFailure, "", "not authorized")
+return routeio.Fail(sandbox, api.StatusForbidden, "", "not authorized")
 ```
 
-It reaches the right file through `sandbox.Server.Fail`, which is a field on the api rather than
+`RequestHandler` raises what it returns on the bound route through `routeio.Raise` — the one
+way the server layer itself raises a failure — which reaches the right file through `sandbox.Server.Fail`, which is a field on the api rather than
 a call, because a route package may not import `sandbox/internal/generated/server/server` — that package
 imports every route. `routeio.WriteError` is the writer underneath, and the default body every one of
 them produces is `{"error": "...", "field": "..."}`, logged on `deps.Std.Log` as it is written.
 
-A `Handle*` file answers a failure and never raises one: `routeio.Fail` from inside one comes
+A `Handle*` file answers a failure and never raises one: `routeio.Raise` from inside one comes
 back to it.

@@ -4,9 +4,34 @@ import (
 	"{{.Module}}/sandbox/api"
 )
 
-// Fail is the one way any part of the server layer raises a failure: it records
-// what went wrong on the route and hands it to the project's own handler for
-// that status — HandleBadRequest, HandleTooLarge, HandleWrongContentType,
+// Fail is how an InternalPureHandler refuses a request: it builds the failure
+// and returns it as an error, and the handler returns it in turn. A handler is
+// handed no route to raise it on, so it is RequestHandler — which holds the
+// bound route — that raises what comes back through Raise, reaching the
+// project's own Handle* file for that status:
+//
+//	return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "invalid token")
+//
+// A message left empty is filled by that file's own wording.
+func Fail(sandbox *api.Sandbox, status int, field string, message string) error {
+	return FailWithCause(sandbox, status, field, message, "")
+}
+
+// FailWithCause is Fail carrying what went wrong underneath — an error's text,
+// meant for the log, never for the caller.
+func FailWithCause(sandbox *api.Sandbox, status int, field string, message string, cause string) error {
+	return &api.RouteFailure{
+		Status:  status,
+		Field:   field,
+		Message: message,
+		Cause:   cause,
+	}
+}
+
+// Raise is the one way the server layer itself raises a failure on a bound
+// route — the dispatch, RequestHandler, a generated ReadBody: it records what
+// went wrong on the route and hands it to the project's own handler for that
+// status — HandleBadRequest, HandleTooLarge, HandleWrongContentType,
 // HandleServerError — through sandbox.Server.Fail.
 //
 // It goes through the api rather than calling sandbox/internal/server/errors
@@ -16,29 +41,33 @@ import (
 // sandbox/internal/generated/server/server/new.go.
 //
 // It returns the error the handler returned — the failure's own message when
-// that handler answered it — so an InternalPureHandler ends on one line:
-//
-//	return routeio.Fail(sandbox, route, api.StatusFailure, "", "not authorized")
-func Fail(sandbox *api.Sandbox, route *api.Route, status int, field string, message string) error {
-	return FailWithCause(sandbox, route, status, field, message, "")
+// that handler answered it.
+func Raise(sandbox *api.Sandbox, route *api.Route, status int, field string, message string) error {
+	return RaiseWithCause(sandbox, route, status, field, message, "")
 }
 
-// FailWithCause is Fail carrying what went wrong underneath — an error's text,
-// or the value a handler panicked with. The cause reaches the handler on
+// RaiseWithCause is Raise carrying what went wrong underneath — an error's
+// text, or the value a handler panicked with. The cause reaches the handler on
 // route.Failure and is meant for the log, never for the caller.
-func FailWithCause(sandbox *api.Sandbox, route *api.Route, status int, field string, message string, cause string) error {
-	route.Failure = &api.RouteFailure{
+func RaiseWithCause(sandbox *api.Sandbox, route *api.Route, status int, field string, message string, cause string) error {
+	return RaiseFailure(sandbox, route, &api.RouteFailure{
 		Status:  status,
 		Field:   field,
 		Message: message,
 		Cause:   cause,
-	}
+	})
+}
+
+// RaiseFailure raises one failure already built — what a handler returned
+// through Fail — on the bound route it was returned from.
+func RaiseFailure(sandbox *api.Sandbox, route *api.Route, failure *api.RouteFailure) error {
+	route.Failure = failure
 
 	// A sandbox whose server was never built — a route bound by hand rather
 	// than by the dispatch — has no handler to reach, so the failure is
 	// still reported rather than swallowed.
 	if sandbox.Server.Fail == nil {
-		return sandbox.Deps.Std.Errorf("%s", message)
+		return sandbox.Deps.Std.Errorf("%s", failure.Message)
 	}
 
 	return sandbox.Server.Fail(route)

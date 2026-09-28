@@ -103,7 +103,7 @@ of that name: the dispatch reads it as `help <command>` and prints a screen inst
 
 `sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`, `Bind(deps *deps.Deps)` (an adapter fills
 `deps.Deps` directly), `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`,
-`InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error`
+`InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error`
 for a route (in `InternalPureHandler.go`, beside its generated `new.go` and `entries.go`), and
 `(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error` for each of the
 eight `handle_*.go`. **Every file is an instance of a pattern**: new code copies an
@@ -140,13 +140,16 @@ editing only the rendered copy is undone in silence.
 - **The server is a chain.** Every route matching a request runs, lowest `priority` first, and
   the first one to answer — `SetStatus`, or a `Write`, which sends a `200` — ends it; a handler
   that does neither has declined and the next runs, which is the whole of what a middleware is.
-  `route.Locals` is shared by the whole chain of one request. An `InternalPureHandler` returns
-  `error`, never a status. A path type or a `trigger` is part of what the route matches on, so
-  failing one is a non-match, not a `400`. `phase: after` routes run once it is answered, on a
-  frozen response.
-- Nothing in the dispatch writes a response: every failure goes through `routeio.Fail` to one of
+  One `props *api.RouteProps` per request is shared by the whole chain — the project types it in
+  `sandbox/api/routeprops.go`, which `build` writes once. A handler is handed no request, so what
+  it reads is declared (`Entries`, the body on `Entries.Body`). An `InternalPureHandler` returns
+  `error`, never a status; it refuses a request by returning `routeio.Fail`. A path type or a
+  `trigger` is part of what the route matches on, so failing one is a non-match, not a `400`.
+  `phase: after` routes run once it is answered, on a frozen response, and read the status on
+  `Entries.AnsweredStatus`.
+- Nothing in the dispatch writes a response: every failure goes through `routeio.Raise` to one of
   the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and never
-  rewrites. `Fail` reaches them through the `Fail` field of `api.Server` because a route package
+  rewrites. `Raise` reaches them through the `Fail` field of `api.Server` because a route package
   may not import `sandbox/internal/generated/server/server` — that package imports every route. A failure the dispatch
   raises with nothing to add carries no message, so the wording is the one that file spells;
   that is what makes editing it change what the server says.

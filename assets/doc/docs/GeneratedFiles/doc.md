@@ -72,6 +72,7 @@
 | `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{entries.yaml,handler.go}` | `server-init` | once |
 | `sandbox/internal/server/errors/handle_*.go` | `build` | once. Eight files, one per failure — what this project answers when no route does |
+| `sandbox/api/routeprops.go` | `build` | once. `api.RouteProps`, what one request's chain of routes shares — declare its fields there |
 {{- end }}
 {{- if .HasDatabase }}
 | `sandbox/internal/generated/databaseio/*.go` | `build` | always |

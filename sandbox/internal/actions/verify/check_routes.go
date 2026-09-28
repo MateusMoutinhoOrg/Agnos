@@ -24,9 +24,9 @@ const routeHandlerName = "InternalPureHandler"
 const routeHandlerFile = "InternalPureHandler.go"
 
 // routeHandlerParams is the canonical InternalPureHandler signature the
-// generated new.go closes over: the sandbox, the bound route, the route's own
-// Entries and the response being written.
-var routeHandlerParams = []string{"*api.Sandbox", "*api.Route", "*Entries", "*serverdeps.Response"}
+// generated new.go closes over: the sandbox, the request's shared RouteProps,
+// the route's own Entries and the response being written.
+var routeHandlerParams = []string{"*api.Sandbox", "*api.RouteProps", "*Entries", "*serverdeps.Response"}
 
 // routeMethods is every http method a route may declare beside ANY, which
 // stands alone.

@@ -19,8 +19,9 @@ type Server struct {
 	// sandbox/internal/server/errors/. It is a field rather than a call
 	// because a route package may not import sandbox/internal/generated/server/server
 	// — that package imports every route — so this is how a generated
-	// ReadBody, or any handler, reaches a file the project owns. Raise a failure through
-	// routeio.Fail rather than calling this directly.
+	// ReadBody, or the dispatch, reaches a file the project owns. Raise a
+	// failure through routeio.Raise — or, from a handler, return one built
+	// by routeio.Fail — rather than calling this directly.
 	Fail func(route *Route) error
 }
 

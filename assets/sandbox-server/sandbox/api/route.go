@@ -162,6 +162,10 @@ type RouteBody struct {
 // header that will not bind, a body the schema rejected, a handler that
 // returned an error, a path nothing matched — arrives at one of the project's
 // own Handle* files as this, read off the Failure of the route it is handed.
+//
+// It is an error too: an InternalPureHandler refuses a request by returning
+// one, built by routeio.Fail, and the dispatch answers it through the Handle*
+// file of its Status.
 type RouteFailure struct {
 	// Status is the http status the failure carries: one of the Status*
 	// constants of server.go.
@@ -175,6 +179,12 @@ type RouteFailure struct {
 	// handler panicked with — "" when there is nothing below the message. It
 	// is for the log, not for the caller.
 	Cause string
+}
+
+// Error is the failure's Message, which is what makes a RouteFailure an error
+// a handler can return.
+func (failure *RouteFailure) Error() string {
+	return failure.Message
 }
 
 // Route is one http route of the project, as the sandbox offers it: the whole
@@ -225,8 +235,15 @@ type Route struct {
 	// Body is the request body declaration.
 	Body RouteBody
 
+	// ReadBody reads, validates and converts the request body of one bound
+	// copy — the route package's own generated ReadBody, closed over the
+	// sandbox. RequestHandler calls it before the handler runs and binds
+	// what it returns onto Entries.Body; it is nil on a route whose body is
+	// `none`. A body that fails has been answered already.
+	ReadBody func(bound *Route) (any, error)
+
 	// InternalPurehandler is the route package's own InternalPureHandler,
-	// closed over the sandbox: a func(route *Route, entries *Entries,
+	// closed over the sandbox: a func(props *RouteProps, entries *Entries,
 	// response *serverdeps.Response) error whose Entries is that package's
 	// generated struct. It is held as any because every route's Entries is a
 	// type of its own; RequestHandler builds and fills one through
@@ -240,14 +257,18 @@ type Route struct {
 	Request  any
 	Response any
 
-	// Locals is one request's scratch space, shared by every route of the
-	// chain that runs for it: what a middleware stores there, the routes
-	// after it read. Read and write it through routeio.SetLocal and
-	// routeio.GetLocal.
-	Locals map[string]any
+	// Props is one request's RouteProps, shared by every route of the chain
+	// that runs for it and handed to each InternalPureHandler as its first
+	// argument: what a middleware sets on it, the routes after it read.
+	Props *RouteProps
+
+	// AnsweredStatus is the status the request was answered with, set by the
+	// dispatch before the routes of the `after` phase run and bound onto
+	// their Entries.AnsweredStatus; 0 on every other run.
+	AnsweredStatus int
 
 	// Failure is why this route is being handed to one of the project's
-	// Handle* files, nil on a normal run. It is set by routeio.Fail, which
+	// Handle* files, nil on a normal run. It is set by routeio.Raise, which
 	// is the one way any part of the server layer raises a failure.
 	Failure *RouteFailure
 
@@ -286,7 +307,8 @@ func BindRoute(route *Route) *Route {
 	bound := *route
 	bound.Request = nil
 	bound.Response = nil
-	bound.Locals = nil
+	bound.Props = nil
+	bound.AnsweredStatus = 0
 	bound.Failure = nil
 	return &bound
 }

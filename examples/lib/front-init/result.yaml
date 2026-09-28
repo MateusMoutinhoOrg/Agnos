@@ -10,10 +10,10 @@ tree:
     - file: sandbox/internal/generated/frontio/frontio.go
       sha: 97ee5fbd362161ec3d68f434591f5cdad5bfe8ba350216f6480669ec01199e86
     - file: sandbox/internal/routeslist/frontend/InternalPureHandler.go
-      sha: 69e858e0157dfe0023bdf3a1803034ba0883b8ae4c68f43e1b885561ef6b02fb
+      sha: b54d0bb58749e27538b22373147304f3426c987995f3dc7f527bc1dadfb0ee7c
     - file: sandbox/internal/routeslist/frontend/entries.go
-      sha: 033d1c89c510c37f469a3b16edcf893f21a9da6c8cb2c02e737b1316c7dba463
+      sha: 4301bc0498139b4174a160aa123325333b0b705123565155ad2f26267d203eb0
     - file: sandbox/internal/routeslist/frontend/new.go
-      sha: 7a2cf76460800cbfb01a679320edf2892ae849719460b10325c7a732d5d330d5
+      sha: e1c3099a003150562528dffcd4f048387751e6dd4da7fe8dff05997c3e5cbcd3
     - file: sandbox/internal/routeslist/frontend/route.yaml
       sha: 5668920287a070b50cb1b32992664036a8e74f325e1fdc06aefa0075fb08d3f9

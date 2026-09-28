@@ -145,31 +145,31 @@ func isNumber(text string) bool {
 // byte, which sends a 200. A handler that does neither has declined, so the
 // next route runs — that is the whole of what makes a middleware a
 // middleware. A handler that returns an error without answering ends the
-// chain too, through HandleServerError. Every route of one request shares one
-// Locals, which is how a middleware hands what it learned to the routes after
-// it.
+// chain too, through HandleServerError. Every route of one request is handed
+// one RouteProps, which is how a middleware hands what it learned to the
+// routes after it.
 //
 // Nothing here writes a response itself. Every way a request can end without a
 // route answering it — nothing matched, matched under another method, a value
-// that will not bind, a panic — is raised through routeio.Fail and answered by
+// that will not bind, a panic — is raised through routeio.Raise and answered by
 // one of the project's own Handle* files. Once it is answered, whatever
 // answered it, the routes of the `after` phase run.
 func dispatch(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response) {
 	tracked, status := routeio.Tracked(response)
-	locals := map[string]any{}
+	props := &api.RouteProps{}
 
-	answer(sandbox, request, tracked, status, locals)
-	runAfter(sandbox, request, response, status(), locals)
+	answer(sandbox, request, tracked, status, props)
+	runAfter(sandbox, request, response, status(), props)
 }
 
 // answer runs the chain for one request and, when no route answered it,
 // raises the failure that says why. A HEAD request nothing declares HEAD for
 // is run again as the GET it asks the headers of: net/http drops the body a
 // HEAD answer writes.
-func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, locals map[string]any) {
-	defer recoverRoute(sandbox, request, tracked, status, locals)
+func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, props *api.RouteProps) {
+	defer recoverRoute(sandbox, request, tracked, status, props)
 
-	ran, method_mismatch := runChain(sandbox, request, tracked, status, locals)
+	ran, method_mismatch := runChain(sandbox, request, tracked, status, props)
 	if status() != 0 {
 		return
 	}
@@ -177,7 +177,7 @@ func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps
 	if !ran && request.GetMethod() == "HEAD" {
 		as_get := request
 		as_get.GetMethod = func() string { return "GET" }
-		ran, _ = runChain(sandbox, as_get, tracked, status, locals)
+		ran, _ = runChain(sandbox, as_get, tracked, status, props)
 		if status() != 0 {
 			return
 		}
@@ -188,11 +188,11 @@ func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps
 	// no route ran, since a chain that ran and wrote nothing is the project
 	// declining to answer, not the method being wrong.
 	if !ran && method_mismatch {
-		failRequest(sandbox, request, tracked, locals, api.StatusMethodNotAllowed)
+		failRequest(sandbox, request, tracked, props, api.StatusMethodNotAllowed)
 		return
 	}
 
-	failRequest(sandbox, request, tracked, locals, api.StatusNotFound)
+	failRequest(sandbox, request, tracked, props, api.StatusNotFound)
 }
 
 // runChain runs every route of the `before` phase the request is for, until
@@ -200,7 +200,7 @@ func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps
 // and whether a route matched the path under another method. A route on ANY —
 // a middleware, most often — says nothing about which methods the path
 // takes, so it running does not keep a 405 from being told apart.
-func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, locals map[string]any) (bool, bool) {
+func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, props *api.RouteProps) (bool, bool) {
 	method_mismatch := false
 	ran := false
 
@@ -212,7 +212,7 @@ func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverde
 		bound := api.BindRoute(declared)
 		bound.Request = request
 		bound.Response = tracked
-		bound.Locals = locals
+		bound.Props = props
 
 		if !bound.IsActionable(bound) {
 			if bound.MatchesPath(bound) && !accepts(bound, request.GetMethod()) {
@@ -236,7 +236,7 @@ func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverde
 			return ran, method_mismatch
 		}
 		if err != nil {
-			routeio.FailWithCause(sandbox, bound, api.StatusFailure, "", "", err.Error())
+			routeio.RaiseWithCause(sandbox, bound, api.StatusFailure, "", "", err.Error())
 			return ran, method_mismatch
 		}
 	}
@@ -245,11 +245,10 @@ func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverde
 }
 
 // runAfter runs every route of the `after` phase the request is for, once it
-// has been answered. They read the status it was answered with through
-// routeio.AnsweredStatus and cannot change the answer: their response is
+// has been answered. They read the status it was answered with on
+// Entries.AnsweredStatus and cannot change the answer: their response is
 // frozen, and a panic in one is reported and goes no further.
-func runAfter(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status int, locals map[string]any) {
-	routeio.SetAnsweredStatus(locals, status)
+func runAfter(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status int, props *api.RouteProps) {
 	frozen := routeio.Frozen(sandbox, response)
 
 	for _, declared := range sandbox.Server.Routes {
@@ -260,7 +259,8 @@ func runAfter(sandbox *api.Sandbox, request serverdeps.Request, response serverd
 		bound := api.BindRoute(declared)
 		bound.Request = request
 		bound.Response = frozen
-		bound.Locals = locals
+		bound.Props = props
+		bound.AnsweredStatus = status
 
 		if !bound.IsActionable(bound) {
 			continue
@@ -307,20 +307,20 @@ func accepts(route *api.Route, method string) bool {
 // beyond the status, so the wording is the project's: routeio.FailureOf fills
 // in the one the Handle* file spells, which is what makes editing that file
 // change what the server says.
-func failRequest(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, locals map[string]any, status int) {
+func failRequest(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, props *api.RouteProps, status int) {
 	route := api.NewRoute()
 	route.Request = request
 	route.Response = response
-	route.Locals = locals
+	route.Props = props
 
-	routeio.Fail(sandbox, route, status, "", "")
+	routeio.Raise(sandbox, route, status, "", "")
 }
 
 // recoverRoute turns a panicking handler into one answered request, so a single
 // bad route cannot take the process down with it. A handler that panicked after
 // answering has already answered: the panic is reported and nothing is written
 // over it.
-func recoverRoute(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status func() int, locals map[string]any) {
+func recoverRoute(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status func() int, props *api.RouteProps) {
 	failure := recover()
 	if failure == nil {
 		return
@@ -334,8 +334,8 @@ func recoverRoute(sandbox *api.Sandbox, request serverdeps.Request, response ser
 	route := api.NewRoute()
 	route.Request = request
 	route.Response = response
-	route.Locals = locals
+	route.Props = props
 
-	routeio.FailWithCause(sandbox, route, api.StatusFailure, "", "",
+	routeio.RaiseWithCause(sandbox, route, api.StatusFailure, "", "",
 		sandbox.Deps.Std.Sprintf("%v", failure))
 }

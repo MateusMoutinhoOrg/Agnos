@@ -70,8 +70,15 @@ func NewRoute(sandbox *api.Sandbox) *api.Route {
 		Schema:      {{if .SchemaJson}}BodySchema{{else}}""{{end}},
 	}
 
-	self.InternalPurehandler = func(bound *api.Route, entries *Entries, response *serverdeps.Response) error {
-		return InternalPureHandler(sandbox, bound, entries, response)
+{{- if .HasBody}}
+
+	self.ReadBody = func(bound *api.Route) (any, error) {
+		return ReadBody(sandbox, bound)
+	}
+{{- end}}
+
+	self.InternalPurehandler = func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+		return InternalPureHandler(sandbox, props, entries, response)
 	}
 
 	return self

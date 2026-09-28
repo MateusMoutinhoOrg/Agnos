@@ -137,20 +137,23 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A route is `sandbox/internal/routeslist/<name>/`, holding `route.yaml` (the declaration),
   `new.go` and `entries.go` (generated) and `InternalPureHandler.go` (hand-written) — the
   server layer's mirror of a command package, snake_case for a kebab-case name. **(verify)**
-- Only `InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error`
+- Only `InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error`
   is exported from a route's hand-written half. **(verify)**
 - `new.go` is a 1:1 image of `route.yaml`, built on the generic
   `sandbox/internal/generated/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
-  one field per path, one per parameter, each tagged `id:"<id>"` — plus the `ReadBody` a body
-  calls for. The generic `RequestHandler` fills `Entries` by those tags through
-  `Deps.Reflectdeps`.
+  one field per path, one per parameter, `Body` when a body is declared and `AnsweredStatus` in
+  the `after` phase, each tagged `id:"<id>"` — plus the `ReadBody` a body calls for. The generic
+  `RequestHandler` reads the body before the handler runs and fills `Entries` by those tags
+  through `Deps.Reflectdeps`. A handler is handed no request: what it reads is declared.
 - Setting a status or writing a byte on the response is what answers a request and ends the
   chain — a write sends a `200` ahead of it. A handler that does neither has declined, and the
   next route matching that request runs; a handler that returns a non-nil error without
   answering has failed, and `handle_server_error.go` answers for it. What a handler returns is
   never the status. `SetHeader` alone answers nothing.
-- Every route of one request shares `route.Locals`; a middleware hands what it learned to the
-  routes after it there, through `routeio.SetLocal` / `routeio.GetLocal`.
+- Every route of one request is handed the same `props *api.RouteProps`, built empty per
+  request; a middleware hands what it learned to the routes after it by setting a field of it.
+  `sandbox/api/routeprops.go` declares those fields: `build` writes it **once**, then it is the
+  project's.
 - A route of the `after` phase runs once the request has been answered, on a frozen response:
   it never answers, and it declares no body. **(verify)**
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
@@ -196,10 +199,11 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   it is handed to one of the eight `sandbox/internal/server/errors/handle_*.go` — one per status.
   They are written **once**, by the first `build` that finds the server layer, and no build
   rewrites them: what a project answers when nothing matches is the project's. **(verify)**
-- A failure is raised with `routeio.Fail` — from the dispatch, from a generated `ReadBody` or
-  from a handler — which reaches the right file through the `Fail` field of `api.Server`,
-  because a route package may not import `sandbox/internal/generated/server/server`. A `Handle*` file
-  answers a failure and never raises one.
+- A handler refuses a request by returning `routeio.Fail`, a `*api.RouteFailure`; the dispatch
+  raises it. The server layer raises a failure with `routeio.Raise` — from the dispatch, from a
+  generated `ReadBody`, from what a handler returned — which reaches the right file through the
+  `Fail` field of `api.Server`, because a route package may not import
+  `sandbox/internal/generated/server/server`. A `Handle*` file answers a failure and never raises one.
 - A failure the dispatch raises with nothing to add — nothing matched, method not allowed —
   carries no message, so the wording is the one its `Handle*` file spells. One that knows
   something that file could not — which parameter would not bind, and why — carries its own.

@@ -26,7 +26,7 @@ const spaFallback = false
 // and HandleNotFound answers it. frontio.SafePath is what keeps the caller's
 // path inside assets/frontend; it is generated and rewritten by every build,
 // so the check is never yours to keep.
-func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	relative, content, ok := frontio.Resolve(sandbox, entries.Rest)
 	if !ok && spaFallback && frontio.ExtensionOf(sandbox, entries.Rest) == "" {
 		relative, content, ok = frontio.Resolve(sandbox, "")

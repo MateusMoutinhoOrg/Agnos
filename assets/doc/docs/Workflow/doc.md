@@ -131,25 +131,21 @@ write nothing, and `explain-route` is the first step when a route does not run.
 Then write `InternalPureHandler.go` — the whole hand-written half of a route:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, route *api.Route, entries *Entries, response *serverdeps.Response) error {
-	body, err := ReadBody(sandbox, route)
-	if err != nil {
-		return err
-	}
+func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	response.SetStatus(api.StatusCreated)
-	response.Write(payload(sandbox, create(sandbox, entries.Tenant, body)))
+	response.Write(payload(sandbox, create(sandbox, props.User, entries.Tenant, entries.Body)))
 	return nil
 }
 ```
 
-`entries` arrives bound and converted — one field per path and per parameter, named by its id —
-so a bad request was already answered `400` before the handler ran. The body is the exception —
-it is read only when `ReadBody` asks for it.
+`entries` arrives bound and converted — one field per path and per parameter, named by its id,
+and the body on `Body` — so a bad request was already answered `400` before the handler ran.
 
 Setting a status or writing a byte is what answers the request. Several routes may match one
 request; they run in `priority` order and stop at the first one that answers, so a handler that
 does neither has declined and the next one runs — that is the whole of what a middleware is, and
-`route.Locals` carries what it learned to the routes after it. What no route answers is answered
+`props` — the request's `api.RouteProps`, typed in `sandbox/api/routeprops.go` — carries what it
+learned to the routes after it. A handler refuses a request by returning `routeio.Fail`. What no route answers is answered
 by the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and no build
 rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 [Routes](../Routes/doc.md) documents the route on the next build, and

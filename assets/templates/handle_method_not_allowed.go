@@ -20,7 +20,7 @@ import (
 // declared route raised the failure and bare when none did, so
 // routeio.RequestOf(route) reads the request either way.
 //
-// Answer a failure here; never raise one. routeio.Fail comes back to this file.
+// Answer a failure here; never raise one. routeio.Raise comes back to this file.
 func HandleMethodNotAllowed(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
 	failure := routeio.FailureOf(route, api.StatusMethodNotAllowed, "method not allowed")
 

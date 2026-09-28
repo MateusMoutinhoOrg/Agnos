@@ -26,14 +26,14 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/generated/server/server/new.go
-      sha: 5c69a4227a29f2e0750eeb7407eab84a2edb27dc056f8780f893c0ba6eb50b99
+      sha: 22ebec37fdf558f43f2425f4d0d0a4e8d07f40dbab40a59b569ea68f59fdd917
     - file: sandbox/internal/routeslist/access_log/InternalPureHandler.go
-      sha: 742724a17baf5e7b2f5ce141050cef3feca84efc28ecb23a96f0361f1a320f61
+      sha: a6aa0867c93eac00e69c358d7370928b6538237643e09fc2a64ef93a2477d15c
     - file: sandbox/internal/routeslist/access_log/route.yaml
       sha: 1e1964054c36e7071a55577864d86f190ab344706e1f4ecf7a835e08487baf69
     - file: sandbox/internal/routeslist/admin/route.yaml
       sha: f72d38cf69e65496d79ebf5a3f9a136ebd38c724ca9675fbdffdb4fb66ef5d6a
     - file: sandbox/internal/routeslist/admin_auth/InternalPureHandler.go
-      sha: 4c8457df40a75d0c8449b64ed9f28d5582133922837c9d0aad8ca21e4a8b6124
+      sha: 5599fc85e2aae009536f6111fdfd40897866f6f084784ccbdf8fbfad493ebc1a
     - file: sandbox/internal/routeslist/admin_auth/route.yaml
       sha: 04cd505c1928ba9d2515e03669fc7daff7767b214f7f43abf0f70c8cf2ef02e8

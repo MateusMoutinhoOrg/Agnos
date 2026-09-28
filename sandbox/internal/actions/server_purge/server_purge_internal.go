@@ -51,6 +51,10 @@ func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string)
 		io.RemoveDir(file)
 	}
 
+	// sandbox/api/routeprops.go is the one file the layer writes outside
+	// the directories it owns: every route names it, so it goes with them.
+	io.RemoveDir("sandbox/api/" + utils.RoutePropsFile)
+
 	for _, dir := range serverDirs {
 		if !io.IsDir(dir) {
 			continue

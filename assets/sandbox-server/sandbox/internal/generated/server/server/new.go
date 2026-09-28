@@ -34,7 +34,7 @@ func NewServer(sandbox *api.Sandbox) api.Server {
 	// changing what a 404 looks like is editing handle_not_found.go and
 	// nothing else.
 	//
-	// A Handle* answers a failure; it never raises one. Calling routeio.Fail
+	// A Handle* answers a failure; it never raises one. Calling routeio.Raise
 	// from inside one comes back here and runs it again.
 	server.Fail = func(route *api.Route) error {
 		response := routeio.ResponseOf(route)

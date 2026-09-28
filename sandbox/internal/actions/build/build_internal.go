@@ -301,6 +301,10 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		if err := GenerateErrorHandlers(sandbox, io, module_conf.Module); err != nil {
 			return err
 		}
+		// Written once too: what one request's chain of routes shares.
+		if err := GenerateRouteProps(sandbox, io, module_conf.Module); err != nil {
+			return err
+		}
 	}
 
 	// A database declares three generated files instead of one: its methods

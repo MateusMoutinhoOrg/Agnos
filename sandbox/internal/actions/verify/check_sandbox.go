@@ -140,12 +140,6 @@ func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) 
 	return violations
 }
 
-// constructorExempt are the sandbox/api/ files that declare no field of the
-// sandbox: sandbox.go is the struct itself, and command.go and route.go are the
-// shape of one command and of one route, each owned by the contract whose
-// New<Name> builds the slice of them.
-var constructorExempt = []string{"sandbox.go", "command.go", "route.go"}
-
 // checkSandboxConstructors enforces that the package building a contract builds
 // it under the one name the generated constructor calls: sandbox/api/<x>.go is
 // a field of the Sandbox, so sandbox/internal/<x>/new.go — or the one level
@@ -159,7 +153,7 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []strin
 
 	for _, file := range io.ListFiles("sandbox/api") {
 		name := lastSegment(sandbox, file)
-		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || contains(constructorExempt, name) {
+		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || contains(utils.ConstructorExempt, name) {
 			continue
 		}
 
