@@ -1,5 +1,0 @@
-description: "Every key of a command's entries.yaml and what the generated code does with it"
-name: "EntriesYaml"
-order: 1
-themes:
-  - reference

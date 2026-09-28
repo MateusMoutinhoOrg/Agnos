@@ -48,15 +48,15 @@ func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 }
 
 // writeStartServer scaffolds the start-server command, leaving an existing one
-// alone: like a route's handler.go, it is written once and then the project's.
+// alone: like a route's InternalPureHandler.go, it is written once and then the project's.
 func writeStartServer(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
 	if io.IsDir(startServerDir) {
 		sandbox.Deps.Std.Log("server-init: %s already exists, keeping it \n", startServerDir)
 		return nil
 	}
 
-	if err := utils.RenderTemplateToDest(sandbox, io, "templates/start_server_entries.yaml", vars, startServerDir+"/entries.yaml"); err != nil {
+	if err := utils.RenderTemplateToDest(sandbox, io, "templates/start_server_command.yaml", vars, startServerDir+"/"+utils.CommandConfFile); err != nil {
 		return err
 	}
-	return utils.RenderTemplateToDest(sandbox, io, "templates/start_server_handler.go", vars, startServerDir+"/handler.go")
+	return utils.RenderTemplateToDest(sandbox, io, "templates/start_server_internal_pure_handler.go", vars, startServerDir+"/"+utils.CommandHandlerFile)
 }

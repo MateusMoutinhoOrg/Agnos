@@ -14,7 +14,7 @@ const commandPropsDest = "sandbox/api/" + utils.CommandPropsFile
 // retiredCliFiles are generated files an older build wrote that nothing
 // renders any more: the dispatch before it moved to generated/cli/cli, and the
 // entries.yaml + handler.go the build wrote for help and version before
-// command.yaml. Each one names a symbol the current contract dropped, so a
+// command.yaml, and the EntriesYaml doc CommandYaml replaced. Each one names a symbol the current contract dropped, so a
 // tree still carrying it would not compile; it is removed on every build.
 var retiredCliFiles = []string{
 	utils.GeneratedDir + "/cli/climain.go",
@@ -23,6 +23,9 @@ var retiredCliFiles = []string{
 	"sandbox/internal/commands/help/handler.go",
 	"sandbox/internal/commands/version/entries.yaml",
 	"sandbox/internal/commands/version/handler.go",
+	"docs/EntriesYaml/doc.md",
+	"docs/EntriesYaml/props.yaml",
+	"docs/EntriesYaml/Index.md",
 }
 
 // GenerateCommandProps renders assets/templates/commandprops.go into

@@ -94,7 +94,7 @@ body:
 | `segments` | The segment count the request path has to have, `≥ 1`. Absent: any count |
 | `paths` | The slices of the request path it reads. Required and never empty |
 | `parameters` | The values it reads from the query string and the headers |
-| `category`, `help`, `long-description`, `examples`, `hidden` | As in [EntriesYaml](../EntriesYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
+| `category`, `help`, `long-description`, `examples`, `hidden` | As in [CommandYaml](../CommandYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
 | `body` | The request body, one object rather than a sequence |
 
 `method`, `headers`, `params` and the `identifier` / `name` spelling of `paths` are the older

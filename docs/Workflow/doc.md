@@ -37,35 +37,38 @@ edit. Every key is in [Extensions](../Extensions/doc.md).
 ## Change the command surface
 
 ```bash
-agnos add-command <name> --help "one line" --category "Core"
-agnos add-flag <name> --command <cmd> --type string --description "..." [--default . | --required]
-agnos add-arg  <name> --command <cmd> --type int --min 1 --description "..."
+agnos add-command <name> --help "one line" [--category "Core"] [--pattern 'route add {name}']
+agnos add-command <name> --middleware --help "..."      # runs in front of every command line
+agnos add-arg  <name> --command <cmd> [--type integer] [--required] [--start 1 --end -1]
+agnos add-flag <name> --command <cmd> [--key --out --key -o] [--type integer --min 1] [--enum a --enum b]
 agnos set-command <cmd> --long-description "..." --example "<cmd> --flag v" --identifier <alias>
-agnos remove-flag <name> --command <cmd>
-agnos remove-arg  <name> --command <cmd>
-agnos remove-command <cmd>
+agnos set-arg <name> --command <cmd> ... / set-flag <name> --command <cmd> ...
+agnos remove-arg <name> --command <cmd> / remove-flag <name> --command <cmd> / remove-command <cmd>
+agnos list-commands / show-command <cmd> / explain-command -- <argv…>
 ```
 
-`add-command` writes `sandbox/internal/commands/<name>/entries.yaml` (the declaration) and a
-stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`Cli.Commands`. Every key these editors write is in
-[EntriesYaml](../EntriesYaml/doc.md); never edit `entries.yaml` by hand.
+`add-command` writes `sandbox/internal/commands/<name>/command.yaml` (the declaration) and a
+stub `InternalPureHandler.go` (yours), then generates `new.go` — the `api.Command` that joins
+`Cli.Commands` — and `entries.go`, the `Entries` it is handed. Every key these editors write is
+in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.
 
-Then write `handler.go` — the whole hand-written half of a command:
+Then write `InternalPureHandler.go` — the whole hand-written half of a command:
 
 ```go
-func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
-	if err := something(sandbox, command.GetString("path")); err != nil {
-		sandbox.Deps.Std.Error("%s\n", err.Error())
-		return api.ExitFailure
+func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	result, err := something(sandbox, entries.Name)
+	if err != nil {
+		return cliio.Fail(sandbox, api.ExitFailure, "", err.Error())
 	}
-	sandbox.Deps.Std.Printf("%s\n", result)
-	return api.ExitOk
+	response.Printf("%s\n", result)
+	return nil
 }
 ```
 
-Every value arrives typed, defaulted and range-checked: bad input already exited 2 before the
-handler ran. [Commands](../Commands/doc.md) documents the command on the next build.
+Every value arrives typed, defaulted and checked: bad input was answered with exit 2 before the
+handler ran. Printing through `response` answers the line; a handler that answers nothing hands
+it to the next command of the chain. [Commands](../Commands/doc.md) documents the command on the
+next build.
 
 
 ## Add the server layer

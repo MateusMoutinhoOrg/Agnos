@@ -1,0 +1,32 @@
+priority: 100
+args:
+  - id: Command
+    start: 0
+    end: 0
+    trigger: { type: equal, value: start-server }
+flags:
+  - id: Addr
+    description: the port the server listens on, or a range of ports it takes the first free one of, with or without a host (8080, 4000:5000, 127.0.0.1:4000:5000, :8080)
+    default: "3000:4000"
+  - id: ReadTimeoutMs
+    description: how long a request has to arrive, in milliseconds
+    type: integer
+    default: 10000
+  - id: WriteTimeoutMs
+    description: how long a response has to be written, in milliseconds
+    type: integer
+    default: 10000
+  - id: ShutdownTimeoutMs
+    description: how long the requests in flight have to finish once the server is asked to stop, in milliseconds (0 waits for them)
+    type: integer
+    default: 10000
+category: Server
+help: Starts the http server
+long-description: |
+  Opens the port and serves every route declared under
+  sandbox/internal/routeslist, until the process is stopped. An interrupt
+  (Ctrl+C) or a termination request stops it gracefully: no new request is
+  taken, and the ones in flight get --shutdown-timeout-ms to finish.
+examples:
+  - "start-server"
+  - "start-server --addr 4000:5000"

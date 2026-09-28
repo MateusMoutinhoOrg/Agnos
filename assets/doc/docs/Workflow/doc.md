@@ -39,40 +39,43 @@ edit. Every key is in [Extensions](../Extensions/doc.md).
 ## Change the command surface
 
 ```bash
-{{.GeneratorName}} add-command <name> --help "one line" --category "Core"
-{{.GeneratorName}} add-flag <name> --command <cmd> --type string --description "..." [--default . | --required]
-{{.GeneratorName}} add-arg  <name> --command <cmd> --type int --min 1 --description "..."
+{{.GeneratorName}} add-command <name> --help "one line" [--category "Core"] [--pattern 'route add {name}']
+{{.GeneratorName}} add-command <name> --middleware --help "..."      # runs in front of every command line
+{{.GeneratorName}} add-arg  <name> --command <cmd> [--type integer] [--required] [--start 1 --end -1]
+{{.GeneratorName}} add-flag <name> --command <cmd> [--key --out --key -o] [--type integer --min 1] [--enum a --enum b]
 {{.GeneratorName}} set-command <cmd> --long-description "..." --example "<cmd> --flag v" --identifier <alias>
-{{.GeneratorName}} remove-flag <name> --command <cmd>
-{{.GeneratorName}} remove-arg  <name> --command <cmd>
-{{.GeneratorName}} remove-command <cmd>
+{{.GeneratorName}} set-arg <name> --command <cmd> ... / set-flag <name> --command <cmd> ...
+{{.GeneratorName}} remove-arg <name> --command <cmd> / remove-flag <name> --command <cmd> / remove-command <cmd>
+{{.GeneratorName}} list-commands / show-command <cmd> / explain-command -- <argv…>
 ```
 
-`add-command` writes `sandbox/internal/commands/<name>/entries.yaml` (the declaration) and a
-stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`Cli.Commands`. Every key these editors write is in
-[EntriesYaml](../EntriesYaml/doc.md); never edit `entries.yaml` by hand.
+`add-command` writes `sandbox/internal/commands/<name>/command.yaml` (the declaration) and a
+stub `InternalPureHandler.go` (yours), then generates `new.go` — the `api.Command` that joins
+`Cli.Commands` — and `entries.go`, the `Entries` it is handed. Every key these editors write is
+in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.
 
-Then write `handler.go` — the whole hand-written half of a command:
+Then write `InternalPureHandler.go` — the whole hand-written half of a command:
 
 ```go
-func CommandHandler(sandbox *api.Sandbox, command *api.Command) int {
-	if err := something(sandbox, command.GetString("path")); err != nil {
-		sandbox.Deps.Std.Error("%s\n", err.Error())
-		return api.ExitFailure
+func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	result, err := something(sandbox, entries.Name)
+	if err != nil {
+		return cliio.Fail(sandbox, api.ExitFailure, "", err.Error())
 	}
-	sandbox.Deps.Std.Printf("%s\n", result)
-	return api.ExitOk
+	response.Printf("%s\n", result)
+	return nil
 }
 ```
 
-Every value arrives typed, defaulted and range-checked: bad input already exited 2 before the
-handler ran. [Commands](../Commands/doc.md) documents the command on the next build.
+Every value arrives typed, defaulted and checked: bad input was answered with exit 2 before the
+handler ran. Printing through `response` answers the line; a handler that answers nothing hands
+it to the next command of the chain. [Commands](../Commands/doc.md) documents the command on the
+next build.
 {{- else }}
 ## Add the CLI layer
 
 ```bash
-{{.GeneratorName}} cli-init     # sandbox/internal/generated/cli, cmd/main, the help and version commands, argvdeps + std
+{{.GeneratorName}} cli-init     # sandbox/internal/generated/cli, cmd/main, help, version and help-flag, argvdeps + std + reflectdeps
 ```
 
 From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."` declares a command and
