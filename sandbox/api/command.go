@@ -208,13 +208,13 @@ type Command struct {
 	// Flags are the flags it reads, in declaration order.
 	Flags []CommandFlag
 
-	// InternalPureHandler is the command package's own InternalPureHandler,
+	// InternalPurehandler is the command package's own InternalPureHandler,
 	// closed over the sandbox: a func(props *CommandProps, entries *Entries,
 	// response *CommandResponse) error whose Entries is that package's
 	// generated struct. It is held as any because every command's Entries is
 	// a type of its own; CommandHandler builds and fills one through
 	// Deps.Reflectdeps and calls it.
-	InternalPureHandler any
+	InternalPurehandler any
 
 	// Argv is the command line this copy was bound from.
 	Argv []string
@@ -238,7 +238,7 @@ type Command struct {
 	// a trigger, match it.
 	IsActionable func(bound *Command) bool
 	// CommandHandler binds one bound copy's command line onto a fresh Entries
-	// and runs InternalPureHandler with it. It returns the failure the handler
+	// and runs InternalPurehandler with it. It returns the failure the handler
 	// did not answer itself, nil otherwise; a handler answering nothing hands
 	// the command line to the next command of the chain.
 	CommandHandler func(bound *Command) error

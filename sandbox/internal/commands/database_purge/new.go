@@ -44,7 +44,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 
 	self.Flags = []api.CommandFlag{}
 
-	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

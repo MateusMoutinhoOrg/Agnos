@@ -24,7 +24,7 @@ Inserts one entry into the route's paths and runs build so the route's new.go an
 | `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
 | `--description` | string |  | help text shown for the path | — |
 | `--position` | integer | `-1` | zero-based index to insert the path at (defaults to the end) | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

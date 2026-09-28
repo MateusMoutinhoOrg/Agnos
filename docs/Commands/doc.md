@@ -1,7 +1,7 @@
 # Commands
 
 `agnos <command> [args] [flags]`. `agnos help <command>`, or `agnos <command> --help`,
-prints the same for one command; an empty command line prints the general help and exits 0.
+prints the same for one command; an empty command line prints the general help and exits 2.
 A command declaring a `--help` flag of its own keeps it, and is described through `help` alone.
 
 One page per command, each rendered from that command's `command.yaml`
@@ -149,7 +149,7 @@ Run in front of the commands they match, lowest `priority` first; typed by nobod
 
 | Middleware | Runs before | Priority | Flags it adds |
 | --- | --- | --- | --- |
-| [`help-flag`](help-flag.md) | `*` | 5 | `--help`, `-h` |
+| [`help-flag`](help-flag.md) | `*` | 5 | `--help` |
 | [`project`](project.md) | `*` | 10 | `--path`, `--quiet`, `-q` |
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

@@ -17,7 +17,7 @@ Renders the contract of assets/deplist/<dep> and the adapter that fills it, then
 | `--adapter` | string |  | the adapter to fill the dep's contract with (defaults to the dep's default-adapter) | — |
 | `--as` | string |  | the name the copied contract takes under sandbox/deps/ (remote deps only; defaults to the last segment of the module path) | — |
 | `--remote-available` | string |  | the available of the remote repo the generated shim builds its sandbox from | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

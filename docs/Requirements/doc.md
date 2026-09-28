@@ -36,8 +36,7 @@ An existing Go is replaced, never upgraded in place: delete `/usr/local/go` (or 
 
 ## agnos
 
-A single static binary. Every command that writes a project runs the Go toolchain on it, so the
-Go above must be on `PATH`. Pick the platform's asset:
+A single static binary — no runtime, no dependencies. Pick the platform's asset:
 
 | Platform | Binary |
 | --- | --- |

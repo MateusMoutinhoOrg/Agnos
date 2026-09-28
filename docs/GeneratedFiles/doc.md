@@ -34,17 +34,13 @@
 | `docs/Commands/<command>.md` | `build` | always. One page per visible command; `docs/Commands/doc.md` indexes them |
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
-| `sandbox/internal/generated/cli/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
-| `sandbox/internal/generated/cli/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
-| `sandbox/internal/generated/cli/command/*.go` | `build` | always. The generic base every command is built on: the matcher and the `Entries` binder |
-| `sandbox/internal/generated/cliio/*.go` | `build` | always |
-| `sandbox/internal/commands/{help,version,help_flag}/{command.yaml,InternalPureHandler.go}` | `build` | always |
-| `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command`, a 1:1 image of `command.yaml` |
-| `sandbox/internal/commands/<name>/entries.go` | `build` | always. `Entries`, one field per arg and flag |
-| `sandbox/internal/commands/<name>/command.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command`, their `set-` editors and their inverses — never by hand |
-| `sandbox/internal/commands/<name>/InternalPureHandler.go` | `add-command` | once. A stub; the command's whole hand-written half |
-| `sandbox/internal/cli/errors/handle_*.go` | `build` | once. Five files, one per failure — what this project answers when no command does |
-| `sandbox/api/commandprops.go` | `build` | once. `api.CommandProps`, what one command line's chain of commands shares |
+| `sandbox/internal/generated/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
+| `sandbox/internal/generated/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
+| `sandbox/internal/commands/help/{entries.yaml,handler.go}` | `build` | always |
+| `sandbox/internal/commands/version/{entries.yaml,handler.go}` | `build` | always |
+| `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command` |
+| `sandbox/internal/commands/<name>/entries.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command` — never by hand |
+| `sandbox/internal/commands/<name>/handler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |
 | `examples/cli/<name>/example.sh` | `add-cli-example` | once. A stub that already runs |
 | `examples/lib/<name>/example.go` | `add-lib-example` | once. A stub that already runs |

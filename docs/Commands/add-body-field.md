@@ -32,7 +32,7 @@ Declares one property of the route's body json-schema at a dotted path, creating
 | `--unique-items` | boolean |  | refuse an array holding the same value twice (--array only) | — |
 | `--additional-properties` | boolean |  | accept undeclared keys inside an object property | — |
 | `--no-additional-properties` | boolean |  | refuse undeclared keys inside an object property | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

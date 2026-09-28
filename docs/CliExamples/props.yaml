@@ -3,3 +3,4 @@ name: "CliExamples"
 order: 4
 themes:
   - cli-usage
+  - reference

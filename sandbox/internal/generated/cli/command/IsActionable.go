@@ -56,16 +56,16 @@ func IsActionable(sandbox *api.Sandbox, command *api.Command) bool {
 }
 
 // SplitArgv reads a command line into its segments and the index in argv of
-// each: every token before the first flag — one starting with "-" that is not
-// a number, so `sum -1 3` reads -1 as a segment — then every token after a bare
-// "--", which is consumed with them. Everything between is the flags' to read.
+// each: every token before the first one starting with "-", then every token
+// after a bare "--", which is consumed with them. Everything between is the
+// flags' to read.
 func SplitArgv(sandbox *api.Sandbox, argv []string) ([]string, []int) {
 	segments := []string{}
 	indices := []int{}
 
 	index := 0
 	for ; index < len(argv); index++ {
-		if IsFlagToken(sandbox, argv[index]) {
+		if sandbox.Deps.Stringsdeps.HasPrefix(argv[index], "-") {
 			break
 		}
 		segments = append(segments, argv[index])
@@ -84,26 +84,6 @@ func SplitArgv(sandbox *api.Sandbox, argv []string) ([]string, []int) {
 	}
 
 	return segments, indices
-}
-
-// IsFlagToken reports whether a token of the command line is a flag: it starts
-// with "-" and does not read as a number.
-func IsFlagToken(sandbox *api.Sandbox, token string) bool {
-	if !sandbox.Deps.Stringsdeps.HasPrefix(token, "-") || token == "-" {
-		return false
-	}
-	_, err := sandbox.Deps.Stringsdeps.ParseFloat(token, 64)
-	return err != nil
-}
-
-// AssignedKeys is the --key= prefix of every key of a flag, what the
-// --key=value spelling of it starts with.
-func AssignedKeys(keys []string) []string {
-	assigned := make([]string, 0, len(keys))
-	for _, key := range keys {
-		assigned = append(assigned, key+"=")
-	}
-	return assigned
 }
 
 // FlagsEnd is the index of the bare "--" in argv, len(argv) when there is
@@ -155,19 +135,12 @@ func convertArg(sandbox *api.Sandbox, kind api.ArgType, text string) (any, bool)
 		return value, err == nil
 	case api.NumberArg:
 		value, err := sandbox.Deps.Stringsdeps.ParseFloat(text, 64)
-		return value, err == nil && IsFinite(value)
+		return value, err == nil
 	case api.UuidArg:
 		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(uuidPattern, text)
 		return text, err == nil && matched
 	}
 	return text, true
-}
-
-// IsFinite reports whether a parsed number is one: NaN and ±Inf parse, and
-// are not. Subtracting a number from itself gives 0 for every finite one and
-// NaN for both.
-func IsFinite(value float64) bool {
-	return value-value == 0
 }
 
 // FlagValues is every raw value one flag brings, in order, read off a parser
@@ -186,14 +159,6 @@ func FlagValues(sandbox *api.Sandbox, argv []string, flag api.CommandFlag) []str
 	values := []string{}
 	for occurrence := 0; occurrence < parser.GetOptionsSize(flag.Keys); occurrence++ {
 		value, err := parser.GetStringOption(flag.Keys, occurrence)
-		if err != nil {
-			break
-		}
-		values = append(values, value)
-	}
-	assigned := AssignedKeys(flag.Keys)
-	for occurrence := 0; occurrence < parser.GetKeyValuesSize(assigned); occurrence++ {
-		value, err := parser.GetStringKeyValues(assigned, occurrence)
 		if err != nil {
 			break
 		}

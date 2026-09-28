@@ -16,7 +16,7 @@ Creates docs/<name>/ with a doc.md stub and the props.yaml declaring it, then ru
 | --- | --- | --- | --- | --- |
 | `--theme`, `-t` | string-array |  | a theme id of themes.yaml the doc belongs to (repeatable; first-level docs only) | — |
 | `--description`, `-d` | string, required |  | the one-line summary every index lists the doc with | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

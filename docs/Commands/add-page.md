@@ -15,7 +15,7 @@ Writes assets/frontend/<name>.html, plain html the frontend route serves as soon
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--title` | string |  | the <title> the scaffolded page carries (defaults to the page name) | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

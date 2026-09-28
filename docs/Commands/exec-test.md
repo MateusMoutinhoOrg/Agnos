@@ -12,7 +12,7 @@ Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli
 | --- | --- | --- | --- | --- |
 | `--only` | string |  | run a single example by name, both sides (defaults to every example) | — |
 | `--update` | boolean |  | rewrite every golden result.yaml with what this run produced instead of comparing | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

@@ -66,9 +66,8 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 ```
 
 Every value arrives typed, defaulted and checked: bad input was answered with exit 2 before the
-handler ran. Printing through `response` answers the line with exit 0; a returned error fails it
-with exit 1, even after a print. A command that prints nothing has still run — only a
-`--middleware` that answers nothing hands the line to the next command of the chain. [Commands](../Commands/doc.md) documents the command on the
+handler ran. Printing through `response` answers the line; a handler that answers nothing hands
+it to the next command of the chain. [Commands](../Commands/doc.md) documents the command on the
 next build.
 
 
@@ -76,7 +75,7 @@ next build.
 
 ```bash
 agnos server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
-<name> start-server  # listens on the first free port of 3000..4000
+agnos start-server  # listens on the first free port of 3000..4000
 ```
 
 From there `agnos add-route <name> --pattern '/<path>/{id}'` declares a
@@ -89,7 +88,7 @@ project with no CLI gets one first: a server needs a command that starts it.
 
 ```bash
 agnos front-init      # frontio, the frontend route, assets/frontend/{index,404}.html
-<name> start-server  # serves every file of assets/frontend
+agnos start-server  # serves every file of assets/frontend
 ```
 
 From there any file under `assets/frontend/` is served; `agnos add-page <name>`
@@ -195,7 +194,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 
 | File | Written when |
 | --- | --- |
-| `sandbox/internal/commands/<name>/InternalPureHandler.go` | a command does something |
+| `sandbox/internal/commands/<name>/handler.go` | a command does something |
 | `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |

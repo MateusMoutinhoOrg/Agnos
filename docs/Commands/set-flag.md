@@ -28,7 +28,7 @@ agnos set-flag <Name> --command <command> [--rename <rename>] [--key <key>...] [
 | `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
 | `--description` | string |  | the one-line help text | — |
 | `--clear` | string-array |  | a key to take off: keys, type, required, default, min, max, enum, pattern, trigger, trigger-negate, trigger-ignore-case or description (repeatable) | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

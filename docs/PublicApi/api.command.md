@@ -115,14 +115,14 @@ Command is one command of the project, as the sandbox offers it: the whole of wh
 | `Hidden` | `bool` | Hidden keeps it off the general help screen without disabling it. |
 | `Args` | `[]CommandArg` | Args are the slices of the segments it reads, in declaration order. |
 | `Flags` | `[]CommandFlag` | Flags are the flags it reads, in declaration order. |
-| `InternalPureHandler` | `any` | InternalPureHandler is the command package's own InternalPureHandler, closed over the sandbox: a func(props *CommandProps, entries *Entries, response *CommandResponse) error whose Entries is that package's generated struct. It is held as any because every command's Entries is a type of its own; CommandHandler builds and fills one through Deps.Reflectdeps and calls it. |
+| `InternalPurehandler` | `any` | InternalPurehandler is the command package's own InternalPureHandler, closed over the sandbox: a func(props *CommandProps, entries *Entries, response *CommandResponse) error whose Entries is that package's generated struct. It is held as any because every command's Entries is a type of its own; CommandHandler builds and fills one through Deps.Reflectdeps and calls it. |
 | `Argv` | `[]string` | Argv is the command line this copy was bound from. |
 | `Consumed` | `[]bool` | Consumed tracks, index for index against Argv, the tokens a command of this chain read. It is one slice shared by every copy of one command line, so what a middleware consumed, the strict command after it does not have to. |
 | `Props` | `*CommandProps` | Props is one command line's CommandProps, shared by every command of the chain: what a middleware sets on it, the commands after it read. |
 | `Response` | `*CommandResponse` | Response is the one response of the command line. |
 | `Failure` | `*CommandFailure` | Failure is why this command is being handed to one of the project's Handle* files, nil on a normal run. It is set by cliio.Raise. |
 | `IsActionable` | `func(bound *Command) bool` | IsActionable reports whether one bound copy — its Argv set — is for this command: the segment count, and every arg and every flag declaring a trigger, match it. |
-| `CommandHandler` | `func(bound *Command) error` | CommandHandler binds one bound copy's command line onto a fresh Entries and runs InternalPureHandler with it. It returns the failure the handler did not answer itself, nil otherwise; a handler answering nothing hands the command line to the next command of the chain. |
+| `CommandHandler` | `func(bound *Command) error` | CommandHandler binds one bound copy's command line onto a fresh Entries and runs InternalPurehandler with it. It returns the failure the handler did not answer itself, nil otherwise; a handler answering nothing hands the command line to the next command of the chain. |
 
 | Function | Description |
 | --- | --- |

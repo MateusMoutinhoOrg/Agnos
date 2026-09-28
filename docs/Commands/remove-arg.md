@@ -15,7 +15,7 @@ Drops one arg declaration from sandbox/internal/commands/<command>/command.yaml 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--command`, `-c` | string, required |  | the command (a verb or its package name) that owns the arg | — |
-| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 
