@@ -1,71 +1,184 @@
-# Nova CLI — alinhar o sistema de comandos ao sistema de rotas
+# Nova CLI — o sistema de comandos como espelho do sistema de rotas
 
-Objetivo: o `sandbox-cli` passa a espelhar o `sandbox-server` arquivo por arquivo, verbo por verbo,
-para que as extensões sigam um só padrão. Rotas são a referência; onde a cli difere sem motivo, ela
-muda. Onde a diferença é do domínio (argv ≠ http), o documento diz por quê.
+Objetivo: o `sandbox-cli` passa a funcionar como o `sandbox-server`. Um comando deixa de ser
+**achado por identificador** e passa a **casar por triggers** sobre as posições do argv. A dispatch
+deixa de escolher um comando e passa a rodar uma **cadeia**, com middlewares, prioridade e fase
+`after`. Onde o argv não tem par no http, o documento diz por quê (§8).
 
 ## 1. Diagnóstico — o que difere hoje
 
-### 1.1 Arquivos de uma unidade
-
-| Papel | Rota (`sandbox/internal/routeslist/<name>/`) | Comando (`sandbox/internal/commands/<snake>/`) |
+| Aspecto | Rota | Comando hoje |
 |---|---|---|
-| declaração | `route.yaml` | `entries.yaml` |
-| declaração em Go | `new.go` sobre a base genérica `generated/server/route.NewRoute` | `new.go` sobre `api.NewCommand()` — sem base genérica |
-| valores tipados | `entries.go` → `type Entries struct` com tag `id`, gerado | **não existe**; lê por string: `command.GetString("path")` |
-| lógica escrita à mão | `InternalPureHandler.go` | `handler.go` |
-| assinatura | `InternalPureHandler(sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error` | `CommandHandler(sandbox, command *api.Command) int` |
-| estado compartilhado | `props *api.RouteProps`, tipado pelo projeto em `sandbox/api/routeprops.go` (escrito uma vez) | nenhum |
-| falha | `return routeio.Fail(...)` → `routeio.Raise` → um dos 8 `sandbox/internal/server/errors/handle_*.go` (escritos uma vez, do projeto) | cada handler faz `Std.Error(...)` + `return api.ExitFailure`; mensagens de uso fixas dentro de `climain.go` |
-| pacote io gerado | `generated/routeio/` (Fail, Raise, values, respond…) | nenhum; tudo inline em `climain.go` (430 linhas) |
-| binder | `generated/server/route/RequestHandler.go` (genérico, via `Reflectdeps`) + `IsActionable.go` | `bindFlag` / `bindArg` dentro de `climain.go` |
-| doc por unidade | `docs/Routes/<route>.md` | `docs/Commands/<cmd>.md` ✅ já alinhado |
-| unidade embutida | `health` | `help`, `version` |
-| `verify` | `check_routes.go` (assinatura, nome do arquivo, chaves) | **nenhum `check_commands.go`** |
+| como casa | `paths[]`: fatias `start..end` dos segmentos, cada uma com `trigger` opcional; `parameters[]` com `trigger` | `identifiers: [add-flag]`: igualdade com `argv[0]` |
+| quantos rodam | todas as rotas que casam, `priority` crescente, até uma responder | exatamente um |
+| middleware | `--middleware`: rota que não responde e passa adiante | não existe; `--quiet` e `--help` estão fixos em `climain.go` |
+| fase `after` | roda depois da resposta, lê `Entries.AnsweredStatus` | não existe |
+| estado da cadeia | `props *api.RouteProps` (`sandbox/api/routeprops.go`, escrito uma vez) | nenhum |
+| valores | `entries.go` gerado, `type Entries struct` com tag `id` | `command.GetString("path")` |
+| handler | `InternalPureHandler(sandbox, props, entries, response) error` | `CommandHandler(sandbox, command) int` |
+| falha | `routeio.Fail` → `routeio.Raise` → `sandbox/internal/server/errors/handle_*.go` do projeto | `Std.Error` + `ExitFailure` em cada handler; mensagens de uso fixas na dispatch |
+| nada casou | `handle_not_found.go` do projeto | texto fixo em `climain.go` |
+| `--pattern` | `/get-article/{article:integer}` compila em paths + `segments` | não existe |
+| verbos | add/set/remove em cada seção, `rename-`, `list-`, `show-`, `explain-`, `rebalance-` | add/remove de flag e arg, `set-command` |
+| `verify` | `check_routes.go` | sem `check_commands.go` |
+| flags comuns | — | `--path` e `--quiet` repetidos no `entries.yaml` de todos os ~80 comandos |
 
-**Colisão de nomes:** `entries.yaml` (declaração da cli) e `entries.go` (struct tipado da rota) são
-coisas diferentes com o mesmo radical. Um LLM que leu uma extensão erra a outra.
+## 2. O casamento — argv como caminho
 
-### 1.2 Verbos de edição
+### 2.1 Segmentos
 
-| Operação | Rota | Comando | Falta na cli |
-|---|---|---|---|
-| criar unidade | `add-route` (tudo opcional, defaults) | `add-command` (`--help` e `--category` **obrigatórios**) | defaults |
-| editar unidade | `set-route` com `--clear`, `--method` substitui a lista | `set-command` sem `--clear`, `--identifier` só acrescenta | `--clear`, substituição |
-| remover unidade | `remove-route` | `remove-command` | — |
-| renomear unidade | `rename-route` (move dir + reescreve `package`) | — | `rename-command` |
-| listar | `list-routes` | — (só `help`) | `list-commands` |
-| mostrar declaração | `show-route` (árvore, não escreve, não roda build) | — | `show-command` |
-| simular entrada | `explain-route <method> <path>` | — | `explain-command <argv…>` |
-| adicionar entrada | `add-path`, `add-parameter`, `add-body-field` | `add-flag`, `add-arg` | — |
-| editar entrada | `set-path`, `set-parameter`, `set-body-field` (`--rename`, `--clear`, mesmo construtor do `add-`) | — | `set-flag`, `set-arg` |
-| remover entrada | `remove-path`, `remove-parameter`, `remove-body-field` | `remove-flag`, `remove-arg` | — |
-| importar em lote | `import-body` | — | fora de escopo (ver §6) |
-| ordenação | `rebalance-routes` | — | n/a (argv não é cadeia) |
+O argv vira duas listas antes de qualquer comando ser consultado:
 
-### 1.3 Vocabulário de tipos
-
-| | Rota | Comando |
+| Lista | Conteúdo | Par na rota |
 |---|---|---|
-| inteiro | `integer` | `int` |
-| real | `number` | `float` |
-| lista | `string-array`, `integer-array` (tipo) | `--array` (flag) |
-| validação | `--min/--max`, `--enum`, `--pattern`, `--format`, `trigger` | só `--min/--max` |
+| **segmentos** | os tokens que não começam com `-`, **até o primeiro que começa** | segmentos do caminho |
+| **flags** | o resto, lido depois, por cada comando, pelas suas declarações | query / header / cookie |
 
-## 2. Alvo — a unidade de comando nova
+`agnos add-flag output --command exec` → segmentos `[add-flag, output]`.
 
+Um trigger só enxerga os segmentos iniciais. Isso resolve a ambiguidade `--out file` (valor da flag
+ou posicional?) sem saber qual comando é: quem decide é a declaração de quem casou. Depois do
+casamento, os `args` sem trigger (capturas) leem a lista posicional completa, com os mesmos índices,
+já que os segmentos iniciais são um prefixo dela.
+
+Custo: `agnos --path x build` deixa de casar `build`. O verbo vem sempre primeiro, e isso vira regra.
+
+### 2.2 `args` = `paths`
+
+| Chave | Efeito (idêntico a `paths[]`, salvo onde marcado) |
+|---|---|
+| `id` | campo de `Entries`, nome Go exportado, único entre `args` e `flags` |
+| `start`, `end` | índices inclusivos, `-1` o último |
+| `type` | `string`, `integer`, `number`, `uuid`; um intervalo (`start != end`) liga `[]string` **(difere: a rota junta com `/`)** |
+| `trigger` | `{type, value, negate, ignore-case}`; texto = segmentos juntados por espaço **(difere: sem `/` inicial)** |
+| `required`, `default` | **novo em relação a paths**: um arg sem trigger pode faltar. Faltar um `required` é erro de uso, e não não-casamento |
+| `description`, `examples` | help |
+
+`equal`, `prefix` (por segmento: `route` casa `route add`, nunca `router`), `text-prefix`, `suffix`
+e `regex`, com a mesma semântica e o mesmo código de `api.Trigger`.
+
+### 2.3 `flags` = `parameters`
+
+| Chave | Efeito |
+|---|---|
+| `id` | campo de `Entries` |
+| `key` | nome longo: `key: out` → `--out`. Default: `id` em kebab-case |
+| `aliases` | grafias extras (`-o`) |
+| `fonts` | ordem de leitura: `flag` (default), `env` (`<NAME>_<KEY>` em maiúsculas). É o par de `query`/`header`/`cookie` |
+| `type` | `string`, `integer`, `number`, `boolean`, `string-array`, `integer-array`, os mesmos de `parameters` (o `--array` sai) |
+| `required`, `default`, `min`, `max`, `enum`, `pattern` | `required` faltando ou conversão falha dá erro de uso (o `400` da cli) |
+| `trigger` | a flag precisa casar para o comando rodar; falhar é não-casamento, como na rota |
+
+### 2.4 Aliases de comando
+
+`identifiers: [exec-test, test]` não cabe num `trigger.value` único. Proposta: um tipo de trigger
+novo, `one-of`, com `values: [...]`, **em `api.Trigger`, compartilhado**. A rota ganha o mesmo
+(`/users` ou `/people`). A alternativa sem tipo novo é `regex`, que fica ilegível no help.
+
+## 3. `command.yaml` — mesmo formato de `route.yaml`
+
+```yaml
+priority: 100
+phase: before            # omitido quando before
+strict: true             # §4.3
+segments: 2              # opcional, como na rota
+args:
+  - id: Command
+    start: 0
+    end: 0
+    trigger: { type: equal, value: add-flag }
+  - id: Name
+    start: 1
+    end: 1
+    required: true
+    description: the flag name
+flags:
+  - id: Target
+    key: command
+    aliases: [-c]
+    required: true
+  - id: Type
+    key: type
+    default: string
+    enum: [string, integer, number, boolean, string-array, integer-array]
+category: Cli System
+help: Add a flag to a command's command.yaml
+examples:
+  - add-flag output --command exec
 ```
-sandbox/internal/commands/<snake>/
-  command.yaml              # declaração (era entries.yaml) — espelho de route.yaml
-  new.go                    # gerado: NewCommand sobre generated/cli/command.NewCommand
-  entries.go                # gerado: type Entries struct, um campo por flag/arg, tag `id`
-  InternalPureHandler.go    # à mão (era handler.go)
-```
+
+`add-command` sem `--trigger`/`--pattern` escreve `Command` (`start: 0`, `end: 0`, `equal <name>`).
+**Difere da rota**, cujo default é o caminho inteiro (`start: 0`, `end: -1`): na cli os posicionais
+seguintes são o caso comum.
+
+| Hoje (`entries.yaml`) | Novo (`command.yaml`) |
+|---|---|
+| `identifiers` | `args[0]` com trigger (`one-of` se houver alias) |
+| `name` em flag/arg | `id` + `key` |
+| `identifiers` de uma flag | `key` + `aliases` |
+| `type: int/float` + `array: true` | `integer`/`number`/`*-array` |
+| `--path`, `--quiet` em todo comando | um middleware (§5), declarados uma vez |
+
+O nome do arquivo muda para `command.yaml`: acaba a colisão entre `entries.yaml` (declaração) e
+`entries.go` (struct gerado).
+
+### 3.1 `--pattern`
+
+| Peça | Vira |
+|---|---|
+| literais seguidos (`route add`) | um arg `equal`, nomeado por eles (`RouteAdd`) |
+| `{name}` | um segmento, `Entries.Name string` |
+| `{name:integer\|number\|uuid}` | um segmento tipado; não converter é não-casamento |
+| `{*rest}`, só no fim | `start: i, end: -1`, `Entries.Rest []string` |
+| sem `{*…}` | `segments: n` |
+
+`agnos add-command route-add --pattern 'route add {name}'` dá **subcomandos de graça**, coisa que
+`identifiers` não faz. Como na rota, o yaml nunca guarda o pattern; o `new.go` guarda o `Pattern`
+derivado, que o `help` imprime como linha de uso.
+
+## 4. A cadeia
+
+### 4.1 Execução
+
+Espelho de `servermain.go`:
+
+1. Parte o argv em segmentos e flags (§2.1).
+2. Coleta todo comando cujos `args` com trigger, `segments` e `flags` com trigger casam.
+3. Roda em `priority` crescente. Cada um recebe `Entries` ligado e o `props` compartilhado.
+4. O primeiro que **responde** encerra a cadeia.
+5. Roda os de `phase: after` com o status congelado em `Entries.AnsweredStatus`.
+6. Se ninguém respondeu, vai para `handle_not_found.go`.
+
+### 4.2 Responder
+
+Rota: `SetStatus` ou `Write` (que manda `200`). Cli: um `response *api.CommandResponse`, com
+
+| Método | Efeito | Responde? |
+|---|---|---|
+| `SetStatus(code)` | código de saída | sim |
+| `Printf(...)` | stdout; fixa `ExitOk` se nada foi fixado | sim |
+| `Error(...)` | stderr | não |
+| `Log(...)` | stderr, silenciado por `--quiet` | não |
+
+Um handler que não faz nem `SetStatus` nem `Printf` **recusou**, e o próximo roda: é o que um
+middleware é. O stub de `add-command` termina em `response.SetStatus(api.ExitOk)`. Um comando
+silencioso (`build -q`) precisa dele, como a rota precisa do seu. **Muda a regra de canais do
+CLAUDE.md:** dentro de um handler, stdout sai por `response`, e não por `Deps.Std.Printf`.
+
+### 4.3 `strict`
+
+Rota ignora query desconhecida; cli trata `--pathh` como erro. Solução: `strict: true` (default de
+comando, `false` de middleware). Antes de um comando strict rodar, todo token não consumido por ele
+**nem por um middleware anterior da cadeia** é erro de uso (`handle_unknown_flag` /
+`handle_unexpected_arg`). Por isso flags globais funcionam: o middleware consome `--path`, e o
+comando nunca o declara.
+
+### 4.4 Assinaturas
 
 ```go
-// InternalPureHandler.go — escrito uma vez pelo add-command, depois do projeto
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries) error {
-	sandbox.Deps.Std.Printf("my-feature called\n")
+// InternalPureHandler.go — escrito uma vez por add-command, depois do projeto
+func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	response.Printf("my-feature called\n")
 	return nil
 }
 ```
@@ -73,146 +186,132 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 ```go
 // entries.go — gerado
 type Entries struct {
-	Path  string   `id:"path"`
-	Quiet bool     `id:"quiet"`
-	Name  string   `id:"name"`
-	Tags  []string `id:"tags"`
+	FullCommand []string `id:"FullCommand"` // o argv inteiro, sempre (par de FullRoute)
+	Command     string   `id:"Command"`
+	Name        string   `id:"Name"`
+	Target      string   `id:"Target"`
 }
 ```
 
-Regras, copiadas das rotas:
+- O handler retorna `error` e nunca um código. Recusar é `return cliio.Fail(sandbox, api.ExitFailure, "<id>", "<msg>")`. Some o `if err != nil { Std.Error; return ExitFailure }` repetido em ~80 handlers.
+- `props *api.CommandProps` vem de `sandbox/api/commandprops.go`, que `build` escreve uma vez e o projeto tipa. Um middleware põe ali o que os de trás leem (`props.Path`).
 
-- O handler retorna `error`, nunca um código. `nil` → `ExitOk`. Recusar é `return cliio.Fail(sandbox, api.ExitFailure, "<id>", "<mensagem>")`. Qualquer outro `error` → `handle_failure.go`. Isso elimina o bloco `if err != nil { Std.Error; return ExitFailure }` repetido em ~80 handlers deste repo.
-- `ExitUsage` continua exclusivo da dispatch (regra atual do CLAUDE.md).
-- Campo de `Entries` = nome Go exportado do `id` (`out-file` → `OutFile`), regra de `RouteEntryId`. Nunca `Entries` com campo `Command` ou `Props` (reservados, como `FullRoute`/`Body`).
-- O binder genérico preenche `Entries` pela tag `id` via `Deps.Reflectdeps`, como `RequestHandler.go`.
-- `api.Command.Items` / `GetString` ficam **só** durante a migração (§5) e depois saem.
+## 5. Middlewares
 
-### 2.1 `command.yaml` — mesmo formato de `route.yaml`
+`add-command --middleware` espelha `add-route --middleware`: `args` com trigger `prefix` vazio
+(casa todo argv) salvo `--trigger`, `priority: 10`, `strict: false`, e um stub que não responde.
 
-```yaml
-identifiers: [my-feature]
-category: Commands
-help: Does the thing
-long-description: ""
-hidden: false
-examples:
-  - my-feature ./dir --tag a
-flags:
-  - id: path
-    identifiers: [--path]
-    type: string
-    default: .
-    description: the dir holding the project
-args:
-  - id: name
-    type: string
-    required: true
-```
+O que hoje está fixo e vira declaração:
 
-Mudanças de esquema:
-
-| Hoje | Novo | Motivo |
+| Hoje | Vira | Prioridade |
 |---|---|---|
-| `name:` numa flag/arg | `id:` | igual a `paths[].id` / `parameters[].id` |
-| `type: int` / `float` | `integer` / `number` (aceitar `int`/`float` como alias na entrada, gravar só o canônico) | vocabulário único |
-| — | `enum:`, `pattern:` | mesmas palavras de `add-body-field`; validados na dispatch, `ExitUsage` |
-| arquivo `entries.yaml` | `command.yaml` | acaba a colisão com `entries.go`; `docs/EntriesYaml/` vira `docs/CommandYaml/`, par de `RouteYaml` |
+| `--path` e `--quiet` em ~80 `entries.yaml` | middleware `project` do agnos: declara as duas flags, valida o dir, `props.Path`, silencia `Log` | 10 |
+| `quietId` fixo em `climain.go` | o mesmo middleware (a dispatch não conhece mais nenhuma flag) | — |
+| `asksForHelp` / `runCommandHelp` | middleware gerado `help-flag`: flag `help` boolean com trigger `equal true`; imprime o help do próximo da cadeia; recusa se esse próximo declara `--help` (o caso de `add-command --help "…"`) | 5 |
+| argv vazio → help | `handle_not_found.go`, escrito uma vez, imprime o help geral quando não há segmento | — |
+| `help`, `version` | comandos gerados, como `health` | 100 |
 
-## 3. Camadas geradas — espelho do server
+Usos que o projeto ganha:
 
-| Server | Cli nova | Conteúdo |
+| Middleware | Trigger | Faz |
 |---|---|---|
-| `generated/server/server/servermain.go` | `generated/cli/cli/climain.go` | só dispatch: acha o comando pelo identificador, `--help`, chama o handler genérico |
-| `generated/server/server/new.go` | `generated/cli/cli/new.go` | lista `Cli.Commands`, preenche `Cli.Fail` |
-| `generated/server/route/new.go` | `generated/cli/command/new.go` | base genérica `NewCommand(sandbox)` |
-| `generated/server/route/RequestHandler.go` | `generated/cli/command/CommandHandler.go` | bind argv → `Entries` via Reflectdeps, chama `InternalPureHandler` |
-| `generated/server/route/IsActionable.go` | `generated/cli/command/IsActionable.go` | `answersTo`; lido também por `utils/command_match.go` para `explain-command` |
-| `generated/routeio/` | `generated/cliio/` | `Fail`, `FailWithCause`, `Raise`, `values.go` (parseValue, inRange, defaultValue saem do climain) |
-| `sandbox/internal/server/errors/handle_*.go` (8, escritos uma vez) | `sandbox/internal/cli/errors/handle_*.go` (escritos uma vez) | `handle_unknown_command`, `handle_unknown_flag`, `handle_missing_value`, `handle_bad_value`, `handle_out_of_range`, `handle_unexpected_arg`, `handle_failure` |
-| `sandbox/api/routeprops.go` (escrito uma vez) | `sandbox/api/commandprops.go` (escrito uma vez) | estado do processo que o projeto tipa |
-| `api.RouteFailure` | `api.CommandFailure{ExitCode, Field, Message, Cause}` | |
-| `api.Server.Fail` | `api.Cli.Fail` | mesma razão: comando não importa `generated/cli/cli` |
+| grupo `route` | `prefix route` | carrega a config de rotas uma vez em `props` para `route add`, `route set`… |
+| confirmação | `one-of remove-command remove-route …` | pergunta antes do destrutivo; responde `ExitFailure` se negado |
+| env/auth | todo argv | lê token, recusa com `cliio.Fail` |
+| `after` timing / log | todo argv, `phase: after` | registra duração e `AnsweredStatus` |
+| aviso de versão | `phase: after` | "nova versão disponível" sem tocar no status |
 
-Assinatura dos `handle_*.go` da cli, par de `(sandbox, route, response) error`:
-`(sandbox *api.Sandbox, command *api.Command) int` — o único ponto que devolve código de saída.
+O `help` lista, sob cada comando, as flags dos middlewares da frente dele: percorre a mesma cadeia
+que `explain-command` percorre.
 
-Como no server: nenhuma mensagem de erro fica escrita dentro da dispatch; uma falha sem mensagem
-usa o texto do `handle_*.go` do projeto, e editar esse arquivo muda o que a cli diz.
+## 6. Camadas geradas
 
-## 4. Verbos — o que criar e mudar
-
-### 4.1 Novos
-
-| Comando | Espelho de | Faz |
-|---|---|---|
-| `set-flag <name> --command <c>` | `set-path` / `set-parameter` | `--rename`, todos os campos de `add-flag`, `--identifier` **substitui** a lista, `--clear <key>` (repetível: `default`, `required`, `min`, `max`, `description`, `examples`, `enum`, `pattern`), reconstrói pelo mesmo `utils.NewField` |
-| `set-arg <name> --command <c>` | idem | idem, mais `--position` para mover |
-| `rename-command <command> <name>` | `rename-route` | move o dir, reescreve a cláusula `package` dos `.go` à mão, troca o identificador principal, roda build. Recusa `help`/`version` |
-| `list-commands` | `list-routes` | uma linha por comando: categoria, identificadores, nº de flags/args, nome. Não escreve |
-| `show-command <command>` | `show-route` | árvore do `command.yaml`: linha de uso, flags, args com cada chave. Não escreve, não roda build |
-| `explain-command <argv…>` | `explain-route` | percorre a dispatch sem rodar handler: qual comando casa, cada flag/arg ligado ou por que falha, e o `handle_*` que responderia. Não escreve |
-
-Todo novo verbo: pasta de action com `<name>.go` + `<name>_internal.go`, pasta de comando, página em
-`docs/Commands/`, exemplo em `examples/cli/<name>/`. Utilitários de edição em
-`utils/command_edit.go`, par de `utils/route_edit.go` (`CommandClearSet`, `CommandFieldEdited`,
-`CommandFieldEditEmpty`).
-
-### 4.2 Alterados
-
-| Comando | Mudança |
+| Server | Cli nova |
 |---|---|
-| `add-command` | `--help` e `--category` opcionais (defaults: `""` e `Commands`, como `add-route` usa `Routes`); escreve `command.yaml` + `InternalPureHandler.go`; aceita `--example`, `--long-description`, `--hidden` direto como `add-route` |
-| `set-command` | `--clear <key>`; `--identifier` substitui a lista (hoje acrescenta) como `--method` em `set-route`; `--example` continua acrescentando, como em `set-route` |
-| `add-flag` / `add-arg` | `--type` aceita `integer`/`number`; ganham `--enum` (repetível) e `--pattern` |
-| `remove-command` | texto alinhado ao `remove-route`: "o build só renderiza; código à mão pode referir o que sumiu" |
-| `help` | lê de `Entries`, como qualquer comando |
+| `generated/server/server/servermain.go` | `generated/cli/cli/climain.go`: só a cadeia (§4.1) |
+| `generated/server/server/new.go` | `generated/cli/cli/new.go`: `Cli.Commands`, `Cli.Fail` |
+| `generated/server/route/new.go` | `generated/cli/command/new.go`: base genérica |
+| `generated/server/route/RequestHandler.go` | `generated/cli/command/CommandHandler.go`: argv → `Entries` via Reflectdeps |
+| `generated/server/route/IsActionable.go` | `generated/cli/command/IsActionable.go`, lido por `utils/command_match.go` |
+| `generated/routeio/` | `generated/cliio/` (`Fail`, `Raise`, `values.go`) |
+| `sandbox/internal/server/errors/handle_*.go` | `sandbox/internal/cli/errors/handle_{not_found,bad_usage,unknown_flag,unexpected_arg,failure}.go`, escritos uma vez |
+| `sandbox/api/routeprops.go` | `sandbox/api/commandprops.go`, escrito uma vez |
+| `api.RouteFailure`, `Server.Fail` | `api.CommandFailure`, `Cli.Fail` |
 
-### 4.3 Nomes de props em `sandbox/api/`
+**Compartilhado:** `api.Trigger` e `api.TriggerType` saem de `sandbox-server/.../api/route.go` para
+`assets/sandbox/sandbox/api/trigger.go`, e `MatchTrigger` para `generated/trigger/`, renderizados
+com qualquer uma das duas extensões ligada. `utils.RouteTrigger` e `RouteTriggerType` viram
+`utils.Trigger` e `TriggerType`. Um só código de casamento para as duas.
 
-| Rota | Comando |
-|---|---|
-| `RoutePathProps` / `RoutePathEditProps` | `CommandFieldProps` (era `FieldProps`) / `CommandFieldEditProps` |
-| `RouteParameterEditProps` | — (flag e arg dividem o mesmo props, com `Kind`) |
+## 7. Verbos — espelho um a um
 
-## 5. Migração deste repo (~80 comandos)
-
-O self-hosting exige que cada passo compile e seja idempotente.
-
-| Passo | O que muda | Handlers antigos |
+| Rota | Comando | Flags |
 |---|---|---|
-| 1 | `generated/cliio/`, `values.go` saindo do `climain.go`; `handle_*.go` da cli escritos uma vez; `api.CommandFailure`, `Cli.Fail` | intocados |
-| 2 | `entries.go` gerado para todo comando (aditivo); `Items`/`Get*` continuam | intocados |
-| 3 | `new.go` fecha sobre `InternalPureHandler` quando `verify` achar essa assinatura, senão sobre `CommandHandler` | coexistem |
-| 4 | action oculta única `migrate-commands`: renomeia `entries.yaml`→`command.yaml`, `name:`→`id:`, `int/float`→`integer/number`, `handler.go`→`InternalPureHandler.go`, reescreve `command.GetX("id")`→`entries.Id` e o bloco de erro→`return err` | migrados |
-| 5 | remove o caminho legado (`CommandHandler`, `Items`, `Get*`), remove `migrate-commands`; `check_commands.go` passa a exigir só a forma nova | — |
-| 6 | verbos novos (§4.1) e alterados (§4.2) | — |
-| 7 | `exec-test --update`; bump de versão | — |
+| `add-route` | `add-command` | as mesmas: `--trigger*`, `--pattern`, `--middleware`, `--priority`, `--before`, `--after`, `--phase`, `--help`, `--category` (todas opcionais) |
+| `set-route` | `set-command` | as mesmas + `--strict`/`--loose`, `--clear` |
+| `remove-route` | `remove-command` | — |
+| `rename-route` | `rename-command` | move o dir e reescreve `package` |
+| `rebalance-routes` | `rebalance-commands` | `--step` |
+| `list-routes` | `list-commands` | ordem da cadeia |
+| `show-route` | `show-command` | árvore, não escreve |
+| `explain-route <M> <path>` | `explain-command -- <argv…>` | quem roda, por que cada outro pula, qual `handle_*` responderia |
+| `add-path` / `set-path` / `remove-path` | `add-arg` / `set-arg` / `remove-arg` | as de `add-path` + `--required`, `--default` |
+| `add-parameter` / `set-parameter` / `remove-parameter` | `add-flag` / `set-flag` / `remove-flag` | as de `add-parameter` + `--alias`, `--min`, `--max`, `--enum`, `--pattern` |
+| body, `import-body` | — | §8 |
 
-O passo 3 é a única inferência pela forma de um arquivo e existe só entre os passos 3 e 5.
+Os nomes `arg`/`flag` ficam por serem o vocabulário da cli. As flags de cada par são as mesmas, e
+os `utils/command_{conf,edit,match}.go` espelham `route_{conf,edit,match}.go`.
 
-## 6. O que fica diferente, de propósito
+Sobre a armadilha do CLAUDE.md ("valor igual a uma grafia do próprio `add-flag`"): ela diminui,
+porque `add-flag` perde `--identifier`. Mas continua em `--help`, agora dentro do middleware
+`help-flag`.
 
-| Mecânica da rota | Na cli | Por quê |
+## 8. O que fica diferente, de propósito
+
+| Rota | Cli | Por quê |
 |---|---|---|
-| `priority`, `--before/--after`, `rebalance-routes`, `phase` | não existe | argv casa exatamente um comando; não há cadeia |
-| `trigger` / `--middleware` | não existe | idem; `--quiet` fica na dispatch (é o único "middleware" e é fixo) |
-| `paths` (fatias do caminho) | `args` posicionais | já é o mesmo papel |
-| `fonts` (query/header/cookie) | `identifiers` (`--out`, `-o`) | já é o mesmo papel |
-| `body` + json-schema + `import-body` | não existe | argv não tem corpo; `--enum`/`--pattern` cobrem a validação útil |
-| `response` / `response-type` | `Std.Printf` / `Std.Error` | canais já definidos no CLAUDE.md |
+| `methods` | — | argv não tem método |
+| `body` + json-schema + `import-body` | — | argv não tem corpo; `enum`/`pattern` cobrem a validação útil |
+| `response-type` | — | stdout não tem content-type |
+| default de trigger no caminho inteiro | default em `start: 0, end: 0` | posicionais depois do verbo são o caso comum |
+| intervalo liga texto com `/` | intervalo liga `[]string` | argv já vem separado |
+| query desconhecida ignorada | `strict` | um typo de flag rodando no default é pior que um `404` |
 
-## 7. Arquivos a atualizar
+## 9. Migração deste repo
+
+| Passo | O que muda | Compatível com o antigo |
+|---|---|---|
+| 1 | `api.Trigger` compartilhado; o server passa a importar dele | sim |
+| 2 | `generated/cliio/`, `handle_*.go` da cli, `CommandFailure`, `CommandResponse`, `commandprops.go` | sim |
+| 3 | `command.yaml` lido quando existe, `entries.yaml` quando não; a dispatch vira cadeia; `identifiers` legado compila em `args[0]` `one-of` com `priority: 100`, `strict: true` | sim: um comando por argv, como hoje |
+| 4 | action oculta `migrate-commands`: `entries.yaml`→`command.yaml`, remove `--path`/`--quiet` de cada um, cria o middleware `project`, `handler.go`→`InternalPureHandler.go`, `command.GetX("id")`→`entries.X`/`props.Path`, `Std.Printf`→`response.Printf`, bloco de erro→`return err` | — |
+| 5 | remove o legado (`entries.yaml`, `Items`, `Get*`, `CommandHandler`) e `migrate-commands`; `check_commands.go` exige só a forma nova | — |
+| 6 | verbos novos (§7), `help-flag`, `--pattern`, `one-of` | — |
+| 7 | `exec-test --update`, bump de versão | — |
+
+Os passos 3–5 leem dois formatos, e é a única inferência pela forma de um arquivo. Ela some no 5.
+
+## 10. Arquivos a atualizar
 
 | Arquivo | Mudança |
 |---|---|
-| `assets/sandbox-cli/**` | §3 |
-| `assets/templates/command_*.{go,yaml,md}` | `command.yaml`, `InternalPureHandler.go`, `entries.go` (par de `route_entries.go`), `command_new.go` (par de `route_new.go`), `commandprops.go`, `cli_handle_*.go` |
-| `sandbox/internal/actions/verify/check_commands.go` | novo: assinatura, nome do arquivo, chaves do yaml, ids únicos e exportáveis, tipos canônicos |
-| `sandbox/internal/utils/command_{conf,edit,match}.go` | par de `route_{conf,edit,match}.go` |
-| `assets/doc/docs/EntriesYaml/` → `CommandYaml/` em `assets/doc-cli/docs/` | par de `assets/doc-server/docs/RouteYaml/` |
-| `assets/doc/docs/Rules/doc.md` | regras de handler (`error`, `cliio.Fail`, `handle_*` da cli) |
-| `AgnosConfig/structure.yaml` | `sandbox/internal/cli/errors/`, `generated/cliio/`, `generated/cli/command/` |
-| `docs/Contributing/doc.md` e `CLAUDE.md` (via template) | receita de comando nova, mesmo commit |
-| `docs/Interview/doc.md` + interview | menus de `set-flag`, `rename-command`, `show-command` |
-| `examples/cli/` | um exemplo por verbo novo; `exec-test --update` para os que mudam de forma |
+| `assets/sandbox-cli/**`, `assets/sandbox/sandbox/api/trigger.go` | §6 |
+| `assets/sandbox-server/**` | importar o `Trigger` compartilhado; `one-of` |
+| `assets/templates/command_*` | `command.yaml`, `InternalPureHandler.go`, `command_middleware_handler.go`, `command_entries.go`, `command_new.go`, `commandprops.go`, `cli_handle_*.go` |
+| `sandbox/internal/actions/verify/check_commands.go` | novo, par de `check_routes.go` |
+| `sandbox/internal/utils/command_{conf,edit,match}.go`, `trigger.go` | §7, §6 |
+| `assets/doc/docs/EntriesYaml/` → `assets/doc-cli/docs/CommandYaml/` | par de `RouteYaml`, com seção "The chain" |
+| `assets/doc/docs/Rules/doc.md` | cadeia, `response`, `strict`, canais |
+| `AgnosConfig/structure.yaml` | dirs novos |
+| `docs/Contributing/doc.md`, `CLAUDE.md` | receita nova e canais de saída, no mesmo commit |
+| interview + `docs/Interview/doc.md` | `set-flag`, `rename-command`, middleware |
+| `examples/cli/` | `command-chain`, `command-middleware`, `command-pattern`, par dos `route-*` |
+
+## 11. Decisões em aberto
+
+| # | Questão | Recomendação |
+|---|---|---|
+| 1 | `one-of` em `Trigger` ou `regex` para aliases | `one-of`, compartilhado |
+| 2 | stdout via `response` ou manter `Deps.Std.Printf` e responder só por `SetStatus` | `response`, pela paridade com `Write` |
+| 3 | renomear `add-arg`/`add-flag` para `add-path`/`add-parameter --command` | não, o vocabulário da cli fica |
+| 4 | verbo sempre primeiro (§2.1) | aceitar e virar regra |
