@@ -19,6 +19,7 @@ func AddTableInternal(sandbox *api.Sandbox, io *smartio.SmartIO, database string
 	if err := utils.ValidateDatabaseMember(sandbox, "table", table); err != nil {
 		return err
 	}
+	utils.NoteNormalizedName(sandbox, "table", table)
 
 	name := utils.DatabaseName(sandbox, table)
 	if utils.FindDatabaseTable(sandbox, conf.Tables, name) >= 0 {

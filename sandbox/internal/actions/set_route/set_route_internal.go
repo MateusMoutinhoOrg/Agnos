@@ -31,6 +31,9 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 		conf.Methods, changed = methods, true
 	}
 	if response_type := sandbox.Deps.Stringsdeps.TrimSpace(props.ResponseType); response_type != "" {
+		if err := utils.ValidateMediaType(sandbox, response_type); err != nil {
+			return err
+		}
 		conf.ResponseType, changed = response_type, true
 	}
 	if help := sandbox.Deps.Stringsdeps.TrimSpace(props.Help); help != "" {

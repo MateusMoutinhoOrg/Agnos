@@ -11,8 +11,5 @@ func AddAvailable(sandbox *api.Sandbox, path string, available string) error {
 	if err := AddAvailableInternal(sandbox, io, path, available); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

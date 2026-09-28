@@ -11,6 +11,6 @@ type Entries struct {
 	Command     string   `id:"Command"`
 	ReleaseName string   `id:"ReleaseName"`
 	Draft       bool     `id:"Draft"`
-	Target      string   `id:"Target"`
+	Target      []string `id:"Target"`
 	Publisher   string   `id:"Publisher"`
 }

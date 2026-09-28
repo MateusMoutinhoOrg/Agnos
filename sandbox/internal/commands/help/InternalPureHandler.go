@@ -70,11 +70,17 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 	return nil
 }
 
-// FindCommand is the command one of whose Identifiers is name, nil when none
-// is.
+// FindCommand is the command one of whose Identifiers is name — or, failing
+// that, whose package is (`echo_all`, or `echo-all` for it) — nil when none is.
 func FindCommand(sandbox *api.Sandbox, name string) *api.Command {
 	for _, declared := range sandbox.Cli.Commands {
 		if identifiedBy(declared.Identifiers, name) {
+			return declared
+		}
+	}
+	pkg := sandbox.Deps.Stringsdeps.ReplaceAll(name, "-", "_")
+	for _, declared := range sandbox.Cli.Commands {
+		if declared.Name == pkg {
 			return declared
 		}
 	}

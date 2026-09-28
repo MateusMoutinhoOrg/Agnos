@@ -16,7 +16,7 @@ Rewrites one available.yaml so the named adapter is the one bound for that dep, 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--available` | string |  | the available to change (defaults to standard) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

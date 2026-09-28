@@ -25,9 +25,9 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed,
 
 Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton, `agnos build`
 re-renders every generated file from templates embedded in the binary, and commands like
-`add-command`, `add-flag` and `dep-install` declare the project's whole command surface
+`add-command`, `add-flag` and `add-dep` declare the project's whole command surface
 without a file being edited by hand. Only two things stay hand-written: a command's
-`handler.go`, and any contract-plus-adapter pair of your own.
+`InternalPureHandler.go`, and any contract-plus-adapter pair of your own.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/
@@ -46,6 +46,7 @@ Start with [Quickstart](docs/Quickstart/doc.md); the mechanics are in
 
 ## Installation
 
-`agnos` is a single static binary; Go 1.25+ is only needed to build the projects it
-scaffolds, not to run `agnos` itself. Every platform's block is in
+`agnos` is a single static binary, but every command that writes a project runs the Go
+toolchain on it (`go mod tidy`, `go build`), so Go 1.25+ must be on `PATH`. Every platform's
+block is in
 [CliInstall](docs/CliInstall/doc.md).

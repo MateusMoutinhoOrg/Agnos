@@ -14,8 +14,5 @@ func AddDatabase(sandbox *api.Sandbox, path string, name string, prefix string) 
 	if err := AddDatabaseInternal(sandbox, io, name, prefix); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

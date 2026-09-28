@@ -46,9 +46,15 @@ func ValidateCommandName(sandbox *api.Sandbox, name string) error {
 // so a name that is silently lowercased or re-punctuated ("MyCmd" -> "mycmd")
 // is never a surprise later.
 func NoteNormalizedCommandName(sandbox *api.Sandbox, name string) {
+	NoteNormalizedName(sandbox, "command", name)
+}
+
+// NoteNormalizedName is NoteNormalizedCommandName for any unit named the same
+// way — a route, a database, a table, a field — kind naming which.
+func NoteNormalizedName(sandbox *api.Sandbox, kind string, name string) {
 	identifier := CommandIdentifier(sandbox, name)
 	if identifier != name {
-		sandbox.Deps.Std.Log("note: command name %q normalized to %q \n", name, identifier)
+		sandbox.Deps.Std.Log("note: %s name %q normalized to %q \n", kind, name, identifier)
 	}
 }
 
@@ -267,7 +273,7 @@ func CheckCommandLiteral(sandbox *api.Sandbox, kind string, label string, raw st
 			return sandbox.Deps.Std.Errorf("%s must be an integer, got %q", label, raw)
 		}
 	case "number":
-		if _, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
+		if value, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil || value-value != 0 {
 			return sandbox.Deps.Std.Errorf("%s must be a number, got %q", label, raw)
 		}
 	case "uuid":
@@ -375,8 +381,8 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 		Pattern:     strs.TrimSpace(props.Pattern),
 		Description: strs.TrimSpace(props.Description),
 	}
-	if flag.Id == "" {
-		return flag, sandbox.Deps.Std.Errorf("a flag needs a name")
+	if err := ValidateEntryId(sandbox, "flag", props.Name, flag.Id); err != nil {
+		return flag, err
 	}
 
 	kind, ok := CommandFlagType(sandbox, props.Type, props.Array)
@@ -436,6 +442,11 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 	if len(flag.Enum) > 0 && kind == "boolean" {
 		return flag, sandbox.Deps.Std.Errorf("--enum does not apply to a boolean flag")
 	}
+	// A default outside the enum fails every run of the command, even one that
+	// never passes the flag: the dispatch validates the default like a value.
+	if flag.HasDefault && len(flag.Enum) > 0 && !contains(flag.Enum, flag.Default) {
+		return flag, sandbox.Deps.Std.Errorf("default %q is not one of the --enum values (%s)", flag.Default, strs.Join(flag.Enum, ", "))
+	}
 	if flag.Pattern != "" {
 		if _, err := strs.MatchPattern(flag.Pattern, ""); err != nil {
 			return flag, sandbox.Deps.Std.Errorf("invalid --pattern %q: %s", flag.Pattern, err.Error())
@@ -466,8 +477,8 @@ func NewCommandArg(sandbox *api.Sandbox, props api.ArgProps, next int) (commandc
 		Required:    props.Required,
 		Description: strs.TrimSpace(props.Description),
 	}
-	if arg.Id == "" {
-		return arg, sandbox.Deps.Std.Errorf("an arg needs a name")
+	if err := ValidateEntryId(sandbox, "arg", props.Name, arg.Id); err != nil {
+		return arg, err
 	}
 
 	arg.Start = next

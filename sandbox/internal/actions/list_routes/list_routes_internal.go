@@ -10,6 +10,9 @@ import (
 // rung, the methods, the pattern and the name — the chain a request walks
 // until one route answers.
 func ListRoutesInternal(sandbox *api.Sandbox, io *smartio.SmartIO) ([]string, error) {
+	if err := utils.RequireProject(sandbox, io); err != nil {
+		return nil, err
+	}
 	if !io.IsDir(utils.RoutesDir) {
 		return nil, sandbox.Deps.Std.Errorf("the project has no server layer: run server-init first")
 	}

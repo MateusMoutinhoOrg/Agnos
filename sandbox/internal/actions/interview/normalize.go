@@ -6,11 +6,11 @@ import (
 )
 
 // The two field ids a declared name is read from: the name itself, and the
-// spelling a flag answers to when the person gave one instead of letting the
+// spelling a flag answers to (its --key) when the person gave one instead of letting the
 // name decide it.
 const (
 	nameFieldId       = "name"
-	identifierFieldId = "identifier"
+	identifierFieldId = "key"
 )
 
 // namedUnits is every command that takes a name the person types and writes a

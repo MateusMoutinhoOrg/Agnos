@@ -4,6 +4,6 @@ tree:
     - file: docs/CliExamples/doc.md
       sha: 5465a6a6f1370487402a1c260d53c23b1fd97188679cdeb548e59d5bca542aa1
     - file: docs/CliExamples/props.yaml
-      sha: b419645e7cf90ba5ad94f21d423b6d67bb08b0ea3712ab9bf00239feddbee412
+      sha: ce1d7fa2e637a37fe4d33e0f3bc3e8b85d4eb4445469b0f57b1bf22e81afdd54
     - file: examples/cli/greet/example.sh
       sha: 9989b950cb4e6cb36881bc1ca1ee6aa1f35ff5c3b22ee1803a256717f90c9569

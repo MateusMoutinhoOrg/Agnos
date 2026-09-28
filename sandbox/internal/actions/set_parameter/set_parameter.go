@@ -15,8 +15,5 @@ func SetParameter(sandbox *api.Sandbox, props api.RouteParameterEditProps) error
 	if err := SetParameterInternal(sandbox, io, props); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

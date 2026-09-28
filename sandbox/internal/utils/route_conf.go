@@ -96,6 +96,30 @@ func RouteEntryId(sandbox *api.Sandbox, raw string) string {
 	return id
 }
 
+// ValidateEntryId reports whether id — the Entries field the name raw typed on
+// the command line becomes — is one the generated entries.go can spell: an
+// ASCII letter first, then ASCII letters and digits. It runs before anything is
+// written, so a name the Go compiler would refuse never reaches a declaration.
+func ValidateEntryId(sandbox *api.Sandbox, kind string, raw string, id string) error {
+	if id == "" {
+		return sandbox.Deps.Std.Errorf("a %s needs a name", kind)
+	}
+	first := id[0]
+	if !((first >= 'A' && first <= 'Z') || (first >= 'a' && first <= 'z')) {
+		return sandbox.Deps.Std.Errorf("invalid %s name %q: it must start with an ASCII letter (it becomes the Go field Entries.%s)", kind, raw, id)
+	}
+	for i := 0; i < len(id); i++ {
+		letter := id[i]
+		valid := (letter >= 'A' && letter <= 'Z') ||
+			(letter >= 'a' && letter <= 'z') ||
+			(letter >= '0' && letter <= '9')
+		if !valid {
+			return sandbox.Deps.Std.Errorf("invalid %s name %q: only ASCII letters, digits, dashes, underscores, dots and spaces are allowed (it becomes the Go field Entries.%s)", kind, raw, id)
+		}
+	}
+	return nil
+}
+
 // RouteReservedIds are the Entries fields the generated entries.go spells
 // itself — FullRoute on every route, Body on one declaring a body — so no
 // path or parameter may take them.
@@ -123,8 +147,8 @@ func NewRoutePath(sandbox *api.Sandbox, props api.RoutePathProps) (routeconf.Pat
 		Id:          RouteEntryId(sandbox, props.Id),
 		Description: sandbox.Deps.Stringsdeps.TrimSpace(props.Description),
 	}
-	if path.Id == "" {
-		return path, sandbox.Deps.Std.Errorf("a path needs an id")
+	if err := ValidateEntryId(sandbox, "path", props.Id, path.Id); err != nil {
+		return path, err
 	}
 
 	start, err := RouteSegmentIndex(sandbox, "start", props.Start, 0)
@@ -183,8 +207,8 @@ func NewRouteParameter(sandbox *api.Sandbox, props api.RouteParameterProps) (rou
 		Fonts:       []string{},
 	}
 	parameter.Id = RouteEntryId(sandbox, parameter.Key)
-	if parameter.Id == "" {
-		return parameter, sandbox.Deps.Std.Errorf("a parameter needs a name")
+	if err := ValidateEntryId(sandbox, "parameter", parameter.Key, parameter.Id); err != nil {
+		return parameter, err
 	}
 
 	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(props.Type))
@@ -398,6 +422,59 @@ func RouteMethodList(sandbox *api.Sandbox, raws []string) ([]string, error) {
 		return nil, sandbox.Deps.Std.Errorf("--method ANY already accepts every method: pass it alone")
 	}
 	return methods, nil
+}
+
+// ValidateMediaType reports whether raw is a media type a Content-Type header
+// can carry: a type and a subtype of token characters ("application/json"),
+// optionally followed by parameters ("text/plain; charset=utf-8").
+func ValidateMediaType(sandbox *api.Sandbox, raw string) error {
+	strs := sandbox.Deps.Stringsdeps
+	essence := strs.TrimSpace(strs.Split(raw, ";")[0])
+	parts := strs.Split(essence, "/")
+	if len(parts) != 2 || !isMediaToken(parts[0]) || !isMediaToken(parts[1]) {
+		return sandbox.Deps.Std.Errorf("invalid response type %q: it is sent as the Content-Type header, so it must be a media type such as application/json or text/plain", raw)
+	}
+	return nil
+}
+
+// isMediaToken reports whether word is a non-empty run of the characters a
+// media type's type or subtype may hold.
+func isMediaToken(word string) bool {
+	if word == "" {
+		return false
+	}
+	for i := 0; i < len(word); i++ {
+		letter := word[i]
+		valid := (letter >= 'a' && letter <= 'z') || (letter >= 'A' && letter <= 'Z') ||
+			(letter >= '0' && letter <= '9') || containsByte("!#$&-^_.+", letter)
+		if !valid {
+			return false
+		}
+	}
+	return true
+}
+
+// containsByte reports whether set holds letter.
+func containsByte(set string, letter byte) bool {
+	for i := 0; i < len(set); i++ {
+		if set[i] == letter {
+			return true
+		}
+	}
+	return false
+}
+
+// RequireBodyMethod refuses to declare a body on a route answering only
+// methods that carry none — GET and HEAD — since no request it answers would
+// ever send one. ANY, or any other method beside them, may.
+func RequireBodyMethod(sandbox *api.Sandbox, conf *routeconf.RouteConf, route string) error {
+	for _, method := range conf.Methods {
+		if method != "GET" && method != "HEAD" {
+			return nil
+		}
+	}
+	return sandbox.Deps.Std.Errorf("route %s answers only %s, which carry no body: add a method that does first (set-route %s --method POST)",
+		RouteIdentifier(sandbox, route), sandbox.Deps.Stringsdeps.Join(conf.Methods, ", "), RouteIdentifier(sandbox, route))
 }
 
 // RouteMethods is every http method a route may declare.

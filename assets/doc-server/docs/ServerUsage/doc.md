@@ -2,19 +2,19 @@
 
 The server layer mirrors the cli layer file for file: `sandbox/internal/routeslist/<name>/` is to
 a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yaml` is to it what
-`entries.yaml` is to a command.
+`command.yaml` is to a command.
 
 | Concept | CLI | Server |
 |---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
-| Dispatch | `sandbox/internal/generated/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go` |
-| Declared unit | `commands/<name>/entries.yaml` | `routeslist/<name>/route.yaml` |
-| Generated declaration | `new.go` -> `NewCommand` | `new.go` -> `NewRoute`, `entries.go` -> `Entries` |
-| Generic matcher and binder | the dispatch | `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) |
+| Dispatch | `sandbox/internal/generated/cli/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go` |
+| Declared unit | `commands/<name>/command.yaml` | `routeslist/<name>/route.yaml` |
+| Generated declaration | `new.go` -> `NewCommand`, `entries.go` -> `Entries` | `new.go` -> `NewRoute`, `entries.go` -> `Entries` |
+| Generic matcher and binder | `sandbox/internal/generated/cli/command/` (`IsActionable`, `CommandHandler`) | `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) |
 | Surface on the sandbox | `Cli.Commands` | `Server.Routes` |
-| Built by | `sandbox/internal/generated/cli/new.go` | `sandbox/internal/generated/server/server/new.go` |
-| Hand-written half | `handler.go` -> `CommandHandler` | `InternalPureHandler.go` -> `InternalPureHandler` |
-| Answer to bad input | the dispatch, exit 2 | `sandbox/internal/server/errors/handle_*.go`, yours |
+| Built by | `sandbox/internal/generated/cli/cli/new.go` | `sandbox/internal/generated/server/server/new.go` |
+| Hand-written half | `InternalPureHandler.go` -> `InternalPureHandler` | `InternalPureHandler.go` -> `InternalPureHandler` |
+| Answer to bad input | `sandbox/internal/cli/errors/handle_*.go`, yours | `sandbox/internal/server/errors/handle_*.go`, yours |
 | Install / remove | `cli-init` / `cli-purge` | `server-init` / `server-purge` |
 
 ## Bring it up
@@ -30,7 +30,7 @@ curl localhost:3000/health
 one behind a host (`127.0.0.1:4000:5000`), or a plain `host:port` (`:8080`). The address it landed
 on is printed to stdout — `server listening on :3001` — so a test running several servers reads it
 from there. A project whose `start-server` predates the range keeps its old `:8080` default, since
-`entries.yaml` is the project's: `{{.GeneratorName}} remove-flag addr --command start-server`, then
+its `command.yaml` is the project's: `{{.GeneratorName}} remove-flag addr --command start-server`, then
 `add-flag` it again with `--default 3000:4000`.
 
 `server-init` installs the CLI layer first when the project has none — a server needs a command

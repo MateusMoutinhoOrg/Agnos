@@ -29,13 +29,13 @@ tree:
     - file: sandbox/internal/generated/server/server/new.go
       sha: fdb1d1a603437347629125723e00b85699e1d3323ca477e25b37a13947d5eed0
     - file: sandbox/internal/routeslist/admin/new.go
-      sha: 2fbc6cfad777db146ea87141919c3c17e44cece3887564cd09b0bfa499aa74e0
+      sha: a671d0eb75e4f6dee900354ef8cba344e8741d315eca74d5c943a43b0506a1c1
     - file: sandbox/internal/routeslist/admin/route.yaml
       sha: e108bcccd1bc1c262e795cd881dde62cd00eae87a9916ac8ec3676b72ac96d36
     - file: sandbox/internal/routeslist/hello/route.yaml
       sha: 9b4ff0a368dba6de46c183d9eedcc7787d483031d7ec26905d481e37d12e8eea
     - file: sandbox/internal/routeslist/logger/new.go
-      sha: c62488b9b43a48925229e810fba5b300de95ecad9cd813ec1ad4df053f794475
+      sha: 589a248dff78f44a0237a5b0d9920eda2c6fddfa8777bf7a5db6b7f537be9bc8
     - file: sandbox/internal/routeslist/logger/route.yaml
       sha: 277c50ec407a4793a05089b444281388ad7cbcb44b1507ac8496885fc597ba61
     - file: sandbox/internal/server/errors/handle_method_not_allowed.go

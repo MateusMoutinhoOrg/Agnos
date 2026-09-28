@@ -129,7 +129,7 @@ same rules the dispatch applies to a command line, applied before a handler runs
 | `--path` of `start` | asked: it is the folder being created, with the session's path as its default |
 | `--quiet` | always off, so the build a command runs stays visible |
 | `--module` of `start` | asked as **required** when the target folder has no `go.mod`, optional when it has one |
-| everything else | asked, defaulting to what `entries.yaml` declares |
+| everything else | asked, defaulting to what `command.yaml` declares |
 
 A declaration is written once and read everywhere, so it can only call a field optional; the
 folder being worked on is what decides. `--module` is the one field this applies to today, and
@@ -206,8 +206,8 @@ The confirm screen promises *you could have typed it yourself*. A name typed wit
 spaces or underscores is written down normalized, so the screen says so as well:
 
 ```
-│  $ agnos add-flag --command greet "My Flag Name!"
-│  "My Flag Name!" is written down as the flag --my-flag-name!
+│  $ agnos add-flag "My Flag Name" --command greet
+│  "My Flag Name" is written down as the flag --my-flag-name
 ```
 
 ## Running

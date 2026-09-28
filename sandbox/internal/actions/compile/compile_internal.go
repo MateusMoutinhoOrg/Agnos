@@ -61,6 +61,21 @@ func CompileInternal(sandbox *api.Sandbox, path string, names []string) error {
 	return nil
 }
 
+// Outputs is the project-relative path of the binary each requested target
+// compiles to, in the order the targets are built — what a caller shipping the
+// result of Compile hands on, rather than whatever else release/ holds.
+func Outputs(sandbox *api.Sandbox, requested []string) ([]string, error) {
+	names, err := resolveTargets(sandbox, requested)
+	if err != nil {
+		return nil, err
+	}
+	outputs := []string{}
+	for _, name := range names {
+		outputs = append(outputs, "release/"+targets[name].Output)
+	}
+	return outputs, nil
+}
+
 // resolveTargets turns the raw --target values into the ordered list of target
 // names to build. "all" (in any position) expands to every target; otherwise
 // each value must be a known target name, duplicates are dropped, and the

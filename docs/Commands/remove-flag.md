@@ -15,7 +15,7 @@ Drops one flag declaration (matched by its name, its id or one of its keys) from
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--command`, `-c` | string, required |  | the command (a verb or its package name) that owns the flag | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 
@@ -26,7 +26,7 @@ Drops one flag declaration (matched by its name, its id or one of its keys) from
 
 ```bash
 agnos remove-flag output --command exec
-agnos remove-flag --out --command exec
+agnos remove-flag out --command exec
 ```
 
 Cli System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

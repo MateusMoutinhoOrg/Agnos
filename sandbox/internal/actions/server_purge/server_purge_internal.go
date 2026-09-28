@@ -2,6 +2,7 @@ package server_purge
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	frontPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_purge"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -36,11 +37,25 @@ var serverDirs = []string{
 // group, plus the directories the server layer owns whole, then drops any
 // directory the removal left empty.
 //
-// The cli layer is deliberately left in place: server-init may have installed
+// The front layer goes with it, since it has nothing to be served by without
+// it. The cli layer is deliberately left in place: server-init may have installed
 // it, but a cli, once there, is the project's. The deps the server layer
 // pulled in are left too — other code may use them.
 func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("server-purge started with path %s \n", path)
+
+	// The front layer is served by a route of this one, so it goes first, on
+	// this same open SmartIO: a front left on with no server to serve it is a
+	// declaration verify refuses. Its pages under assets/frontend/ stay.
+	has_front, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxFront)
+	if err != nil {
+		return err
+	}
+	if has_front {
+		if err := frontPurgeAction.FrontPurgeInternal(sandbox, io, path); err != nil {
+			return err
+		}
+	}
 
 	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionSandboxServer)
 	if err != nil {

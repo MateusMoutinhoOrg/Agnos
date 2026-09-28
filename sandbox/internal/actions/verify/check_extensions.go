@@ -11,9 +11,9 @@ import (
 // of what `build` reads to decide what to render, so a key nothing answers to
 // is a mechanic the author believes is on while nothing generates it.
 //
-// It also enforces the one dependency the catalog has: every sandbox-<x>
-// mechanic renders into the sandbox, so none of them can be on while the
-// sandbox itself is off.
+// It also enforces what each mechanic requires (utils.ExtensionRequires):
+// every sandbox-<x> mechanic renders into the sandbox, and the front layer is
+// served by the server layer, so none can be on while what it needs is off.
 func CheckExtensions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
@@ -30,20 +30,15 @@ func CheckExtensions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		}
 	}
 
-	if extensions_conf.IsEnabled(utils.ExtensionSandbox) {
-		return violations
-	}
-
 	for _, spec := range utils.ExtensionCatalog() {
-		if spec.Name == utils.ExtensionSandbox {
+		if !extensions_conf.IsEnabled(spec.Name) {
 			continue
 		}
-		if !sandbox.Deps.Stringsdeps.HasPrefix(spec.Name, utils.ExtensionSandbox+"-") {
-			continue
-		}
-		if extensions_conf.IsEnabled(spec.Name) {
-			violations = append(violations, utils.ExtensionsConfPath(sandbox)+" has "+spec.Name+
-				" on with "+utils.ExtensionSandbox+" off (it renders into the sandbox and has nothing to render into)")
+		for _, required := range utils.ExtensionRequires(spec.Name) {
+			if !extensions_conf.IsEnabled(required) {
+				violations = append(violations, utils.ExtensionsConfPath(sandbox)+" has "+spec.Name+
+					" on with "+required+" off (it has nothing to render into)")
+			}
 		}
 	}
 

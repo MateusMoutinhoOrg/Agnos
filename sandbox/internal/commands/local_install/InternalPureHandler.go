@@ -5,16 +5,33 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	response.Printf("Building project...\n")
+	// The binary is named after the project at --path, never after the cli
+	// running this command: sandbox.Config is agnos's own config, and naming the
+	// output from it installs every project over agnos itself.
+	project_conf, err := utils.LoadProjectConf(sandbox, smartio.New(sandbox, props.Path, sandbox.Config.ProjectName))
+	if err != nil {
+		response.Error("%s\n", err.Error())
+		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+	}
+	if err := utils.ValidateProjectName(sandbox, project_conf.Name); err != nil {
+		response.Error("cannot install: %s\n", err.Error())
+		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+	}
+
+	// Progress goes to Log: a Printf answers the command line with ExitOk, and
+	// a failure after it could no longer change the exit code.
+	response.Log("Building project...\n")
 	if err := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: "go"}); err != nil {
 		response.Error("build failed: %s\n", err.Error())
 		return cliio.Fail(sandbox, api.ExitFailure, "", "")
 	}
 
-	response.Printf("Installing locally...\n")
+	response.Log("Installing locally...\n")
 
 	// Get GOEXE
 	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
@@ -28,7 +45,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 	}
 	goexe := sandbox.Deps.Stringsdeps.TrimSpace(result.Output)
 
-	binName := sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName) + goexe
+	binName := sandbox.Deps.Stringsdeps.ToLower(project_conf.Name) + goexe
 
 	var outPath string
 	if sandbox.Deps.Std.Goos() == "windows" {

@@ -28,11 +28,12 @@ Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change
 
 ```bash
 ./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"
-./release/bootstrap.bin add-flag path --command <name> --default . --description "the dir holding the project (defaults to the current directory)"
-./release/bootstrap.bin add-flag quiet --command <name> --identifier --quiet --identifier -q --type boolean --description "Quiets the cli output"
 ```
 
-`handler.go` calls the action, returns `api.ExitFailure` on error and `Printf`s any result.
+`--path` and `--quiet` come from the `project` middleware: the command declares neither.
+`InternalPureHandler.go` calls the action, returns `cliio.Fail(sandbox, api.ExitFailure, "", err.Error())`
+on error and `Printf`s the result. Progress goes to `response.Log`, never `Printf`: a print
+answers the line with exit 0, but a failure returned after it still exits 1.
 
 `interview` needs nothing for the new command: it generates its questions from the declaration. It is one of the two things agnos writes for a person rather than for an llm — the other is a server project's `docs/Routes/` — ([Interview](../Interview/doc.md)), and seven of its tables take an entry — only for a command that is one of these:
 
@@ -60,7 +61,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Dispatch (generic) | `sandbox/internal/generated/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go`, over the generic `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) | — | — (the methods are generated, not dispatched) |
 | Shared package | — | `sandbox/internal/generated/routeio/` | `sandbox/internal/generated/frontio/` | `sandbox/internal/generated/databaseio/` |
 | Answer to bad input | the dispatch, exit 2 | `server/errors/handle_*.go`, written once by `build` | — (the server's) | — |
-| Declared unit | `commands/<name>/entries.yaml` -> generated `new.go` | `routeslist/<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | none: `assets/frontend/**`, served by `routeslist/frontend/` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
+| Declared unit | `commands/<name>/command.yaml` -> generated `new.go` + `entries.go` | `routeslist/<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | none: `assets/frontend/**`, served by `routeslist/frontend/` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | — | `collect_databases.go`, `collect_database_docs.go` |
 | Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
@@ -81,6 +82,8 @@ A layer is an extension, so adding one is [Add an extension](#add-an-extension) 
 That same import rule is why `routeio.Raise` reaches the project's `handle_*.go` through the `Fail` field of `api.Server` rather than by calling them: `internal/generated/server/server` imports every route package, so nothing under `routeslist/` may import it back, and a function field on the api is how this repo already crosses that line everywhere else. The eight files — and `sandbox/api/routeprops.go`, the `api.RouteProps` every handler is handed first — are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/server/new.go` always has something to call.
 
 A route's `Entries` is a type of its own per route, so the generic `RequestHandler` builds, fills and calls it through `sandbox.Deps.Reflectdeps` — the one catalog dep `server-init` installs for that alone. `api/route.go` holds it as `InternalPurehandler any` for the same reason. `signaldeps` is the other one it installs, for the graceful shutdown `ServerMain` hooks on.
+
+The cli matcher exists twice the same way: the generated `sandbox/internal/generated/cli/command/{IsActionable,CommandHandler}.go` (segments, `--key=value`, a number never a flag) and `sandbox/internal/utils/command_match.go`, which `explain-command` reads a `command.yaml` with. A change to one is made to both in the same commit.
 
 The matcher exists twice: the generated `sandbox/internal/generated/server/route/IsActionable.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
 

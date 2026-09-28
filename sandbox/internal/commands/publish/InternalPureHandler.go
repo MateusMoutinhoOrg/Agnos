@@ -7,6 +7,7 @@ import (
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
@@ -17,43 +18,41 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 
-	releaseName := entries.ReleaseName
+	// The release defaults to the version of the project at --path. A project
+	// that declares none (`version: null`, what `start` writes) has no release
+	// name to offer, so it is a refusal rather than a release called "null".
+	releaseName := sandbox.Deps.Stringsdeps.TrimSpace(entries.ReleaseName)
 	if releaseName == "" {
-		rel := sandbox.Config.ProjectName + "Config/project.yaml"
-		content, err := io.ReadFile(rel)
+		project_conf, err := utils.LoadProjectConf(sandbox, io)
 		if err != nil {
-			response.Error("could not read %s to determine release name: %s\n", rel, err.Error())
+			response.Error("%s\n", err.Error())
 			return cliio.Fail(sandbox, api.ExitFailure, "", "")
 		}
-
-		releaseName = versionOf(sandbox, string(content))
+		releaseName = project_conf.Version
 		if releaseName == "" {
-			response.Error("could not find version in %s and no --release-name provided\n", rel)
+			response.Error("%s declares no version: set one there or pass --release-name\n", utils.ProjectConfPath(sandbox))
 			return cliio.Fail(sandbox, api.ExitFailure, "", "")
 		}
 	}
 
-	response.Printf("Building project...\n")
+	targets := publishTargets(sandbox, entries.Target)
+	outputs, err := compileAction.Outputs(sandbox, targets)
+	if err != nil {
+		response.Error("%s\n", err.Error())
+		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+	}
+
+	// Progress goes to Log: a Printf answers the command line with ExitOk, and
+	// a failure after it could no longer change the exit code.
+	response.Log("Building project...\n")
 	if err := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: "go"}); err != nil {
 		response.Error("build failed: %s\n", err.Error())
 		return cliio.Fail(sandbox, api.ExitFailure, "", "")
 	}
 
-	response.Printf("Compiling targets...\n")
-	// If targets is empty or "all", we pass "all".
-	targets := entries.Target
-	if targets == "" {
-		targets = "all"
-	}
-	if err := compileAction.Compile(sandbox, api.CompileProps{Path: props.Path, Targets: []string{targets}}); err != nil {
+	response.Log("Compiling targets...\n")
+	if err := compileAction.Compile(sandbox, api.CompileProps{Path: props.Path, Targets: targets}); err != nil {
 		response.Error("compile failed: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
-	}
-
-	response.Printf("Gathering compiled binaries...\n")
-	releaseDir := sandbox.Deps.Iodeps.Join(props.Path, "release")
-	if !sandbox.Deps.Iodeps.IsDir(releaseDir) {
-		response.Error("could not read release directory: %s\n", releaseDir)
 		return cliio.Fail(sandbox, api.ExitFailure, "", "")
 	}
 
@@ -64,11 +63,11 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 
 	args = append(args, "--title", sandbox.Deps.Std.Sprintf("Release %s", releaseName))
 
-	// Default notes can be added, or leave to gh defaults
+	// Only the binaries this run compiled are uploaded: release/ may still hold
+	// the outputs of an earlier compile for other targets, stale ones included.
+	args = append(args, outputs...)
 
-	args = append(args, sandbox.Deps.Iodeps.ListFiles(releaseDir)...)
-
-	response.Printf("Creating release %s with gh...\n", releaseName)
+	response.Log("Creating release %s with gh...\n", releaseName)
 	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
 		Dir:     props.Path,
 		Program: "gh",
@@ -89,19 +88,17 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 	return nil
 }
 
-// versionOf reads the `version:` field out of a project.yaml, returning "" when
-// the file declares none. The whole file is scanned line by line rather than
-// parsed: publish runs before the config is otherwise needed, and the one field
-// it wants is a plain `key: value` at the start of a line.
-func versionOf(sandbox *api.Sandbox, content string) string {
-	for _, line := range sandbox.Deps.Stringsdeps.Split(content, "\n") {
-		if !sandbox.Deps.Stringsdeps.HasPrefix(line, "version:") {
-			continue
-		}
-		fields := sandbox.Deps.Stringsdeps.Fields(sandbox.Deps.Stringsdeps.TrimPrefix(line, "version:"))
-		if len(fields) > 0 {
-			return fields[0]
+// publishTargets is the --target list compile is handed, as compile reads
+// its own: every target when none is given.
+func publishTargets(sandbox *api.Sandbox, raws []string) []string {
+	targets := []string{}
+	for _, raw := range raws {
+		if raw = sandbox.Deps.Stringsdeps.TrimSpace(raw); raw != "" {
+			targets = append(targets, raw)
 		}
 	}
-	return ""
+	if len(targets) == 0 {
+		return []string{"all"}
+	}
+	return targets
 }

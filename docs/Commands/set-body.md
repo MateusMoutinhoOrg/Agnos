@@ -20,7 +20,7 @@ Overwrites the body keys of one route.yaml: how the body is read, whether it is 
 | `--max-bytes` | integer | `-1` | the longest body accepted, in bytes; a longer one is answered 413 | — |
 | `--content-type` | string |  | the only content-type accepted; a divergent one is answered 415 | — |
 | `--drop-schema` | boolean |  | delete the declared json-schema, leaving the body unvalidated | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

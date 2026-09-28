@@ -13,8 +13,5 @@ func DisableExtension(sandbox *api.Sandbox, path string, name string) error {
 	if err := DisableExtensionInternal(sandbox, io, name); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
 }

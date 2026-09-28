@@ -19,7 +19,7 @@ Reads one example payload and declares a body property for every key it carries,
 | `--required` | boolean |  | list every key the example carries in its object's required set | — |
 | `--replace` | boolean |  | start the schema over instead of adding to the one declared | — |
 | `--infer-format` | boolean |  | read an email, a uuid, a date-time or a uri back as the format it spells | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

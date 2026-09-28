@@ -14,8 +14,5 @@ func AddTable(sandbox *api.Sandbox, path string, database string, table string) 
 	if err := AddTableInternal(sandbox, io, database, table); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
 }

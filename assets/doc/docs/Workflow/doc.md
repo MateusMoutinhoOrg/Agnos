@@ -68,8 +68,9 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 ```
 
 Every value arrives typed, defaulted and checked: bad input was answered with exit 2 before the
-handler ran. Printing through `response` answers the line; a handler that answers nothing hands
-it to the next command of the chain. [Commands](../Commands/doc.md) documents the command on the
+handler ran. Printing through `response` answers the line with exit 0; a returned error fails it
+with exit 1, even after a print. A command that prints nothing has still run — only a
+`--middleware` that answers nothing hands the line to the next command of the chain. [Commands](../Commands/doc.md) documents the command on the
 next build.
 {{- else }}
 ## Add the CLI layer
@@ -158,7 +159,7 @@ rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 
 ```bash
 {{.GeneratorName}} server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
-{{.Name}} start-server  # listens on the first free port of 3000..4000
+{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server  # listens on the first free port of 3000..4000
 ```
 
 From there `{{.GeneratorName}} add-route <name> --pattern '/<path>/{id}'` declares a
@@ -183,7 +184,7 @@ routes the page's js calls. [FrontUsage](../FrontUsage/doc.md) is the whole reci
 
 ```bash
 {{.GeneratorName}} front-init      # frontio, the frontend route, assets/frontend/{index,404}.html
-{{.Name}} start-server  # serves every file of assets/frontend
+{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server  # serves every file of assets/frontend
 ```
 
 From there any file under `assets/frontend/` is served; `{{.GeneratorName}} add-page <name>`
@@ -323,7 +324,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | File | Written when |
 | --- | --- |
 {{- if .HasCli }}
-| `sandbox/internal/commands/<name>/handler.go` | a command does something |
+| `sandbox/internal/commands/<name>/InternalPureHandler.go` | a command does something |
 {{- end }}
 {{- if .HasServer }}
 | `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | a route answers something |

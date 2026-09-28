@@ -7,7 +7,7 @@ import (
 )
 
 // entriesArgument is the position of the Entries pointer among the parameters
-// of an InternalPurehandler: func(props, entries, response) error.
+// of an InternalPureHandler: func(props, entries, response) error.
 const entriesArgument = 1
 
 // entriesTag is the struct tag an Entries field names what it is bound to by.
@@ -23,7 +23,7 @@ const bodyId = "Body"
 const datetimePattern = `^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}(\.\d+)?(Z|[+-]\d{2}:\d{2})$`
 
 // RequestHandler binds the request of one bound route onto a fresh Entries and
-// runs the route's InternalPurehandler with it. The Entries type is the route
+// runs the route's InternalPureHandler with it. The Entries type is the route
 // package's own, so it is built, filled and called through Deps.Reflectdeps:
 // every field is filled by its `id` tag — FullRoute, one per entry of Paths,
 // one per parameter, and the body.
@@ -38,9 +38,9 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 	request := routeio.RequestOf(route)
 	response := routeio.ResponseOf(route)
 
-	entries := sandbox.Deps.Reflectdeps.NewIn(route.InternalPurehandler, entriesArgument)
+	entries := sandbox.Deps.Reflectdeps.NewIn(route.InternalPureHandler, entriesArgument)
 	if entries == nil || sandbox.Deps.Reflectdeps.NumField(entries) < 0 {
-		return sandbox.Deps.Std.Errorf("route %s: InternalPurehandler is not a func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error", route.Name)
+		return sandbox.Deps.Std.Errorf("route %s: InternalPureHandler is not a func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error", route.Name)
 	}
 
 	values, ok, err := bindValues(sandbox, route, request)
@@ -74,7 +74,7 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 		response.SetHeader("Content-Type", route.ResponseType)
 	}
 
-	out := sandbox.Deps.Reflectdeps.Call(route.InternalPurehandler, []any{route.Props, entries, &response})
+	out := sandbox.Deps.Reflectdeps.Call(route.InternalPureHandler, []any{route.Props, entries, &response})
 	if len(out) == 1 && out[0] != nil {
 		if failure, is := out[0].(*api.RouteFailure); is {
 			return routeio.RaiseFailure(sandbox, route, failure)
@@ -195,7 +195,7 @@ func checkBody(sandbox *api.Sandbox, route *api.Route, request serverdeps.Reques
 		content_type := request.GetHeader("Content-Type")
 		if content_type != "" && !sandbox.Deps.Stringsdeps.HasPrefix(content_type, route.Body.ContentType) {
 			return false, routeio.Raise(sandbox, route, api.StatusUnsupportedMedia, "",
-				sandbox.Deps.Std.Sprintf("this route accepts a %s body", route.Body.ContentType))
+				sandbox.Deps.Std.Sprintf("this route accepts only a body of type %s", route.Body.ContentType))
 		}
 	}
 

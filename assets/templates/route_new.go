@@ -76,7 +76,7 @@ func NewRoute(sandbox *api.Sandbox) *api.Route {
 	}
 {{- end}}
 
-	self.InternalPurehandler = func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+	self.InternalPureHandler = func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

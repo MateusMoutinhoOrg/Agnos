@@ -15,19 +15,27 @@ import (
 // a middleware says something and hands the command line on. Every print goes
 // through sandbox.Deps.Std at the moment it is made, so a middleware silencing
 // Std.Log silences Log here too.
+//
+// The first status set is the one the line exits with. A print only implies
+// ExitOk, so a status set after it — a failure the same command raises once it
+// has printed part of its output — still replaces it: a command that printed
+// and then failed never exits 0.
 func Tracked(sandbox *api.Sandbox) (*api.CommandResponse, func() (int, bool)) {
 	status := 0
 	answered := false
+	explicit := false
 
 	response := &api.CommandResponse{}
 	response.SetStatus = func(code int) {
-		if answered {
+		if explicit {
 			return
 		}
-		status, answered = code, true
+		status, answered, explicit = code, true, true
 	}
 	response.Printf = func(format string, a ...any) (int, error) {
-		response.SetStatus(api.ExitOk)
+		if !answered {
+			status, answered = api.ExitOk, true
+		}
 		return sandbox.Deps.Std.Printf(format, a...)
 	}
 	response.Error = func(format string, a ...any) (int, error) {

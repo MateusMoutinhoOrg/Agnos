@@ -181,6 +181,8 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 	}
 	if conf.ResponseType == "" {
 		violations = append(violations, routeViolation(name, "declares no `response-type`; every route declares the Content-Type it answers with"))
+	} else if err := utils.ValidateMediaType(sandbox, conf.ResponseType); err != nil {
+		violations = append(violations, routeViolation(name, err.Error()))
 	}
 
 	if len(conf.Methods) == 0 {
@@ -218,7 +220,7 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 	claim := func(id string) {
 		if !isExportedId(id) {
 			violations = append(violations, routeViolation(name,
-				"declares the id "+id+", which is not an exported Go name; it names a field of Entries"))
+				"declares the id "+id+", which is not an exported ASCII Go name (an uppercase ASCII letter, then ASCII letters and digits); it names a field of Entries"))
 		}
 		if ids[id] {
 			violations = append(violations, routeViolation(name,

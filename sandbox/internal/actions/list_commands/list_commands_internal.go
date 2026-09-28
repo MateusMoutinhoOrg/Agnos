@@ -10,6 +10,9 @@ import (
 // the rung, whether it is strict or a middleware, the pattern and the name —
 // the chain a command line walks until one command answers.
 func ListCommandsInternal(sandbox *api.Sandbox, io *smartio.SmartIO) ([]string, error) {
+	if err := utils.RequireProject(sandbox, io); err != nil {
+		return nil, err
+	}
 	if !io.IsDir(utils.CommandsDir) {
 		return nil, sandbox.Deps.Std.Errorf("the project has no cli layer: run cli-init first")
 	}

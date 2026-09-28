@@ -19,6 +19,9 @@ func RemoveArgInternal(sandbox *api.Sandbox, io *smartio.SmartIO, command string
 	if index < 0 {
 		return sandbox.Deps.Std.Errorf("command %q has no arg named %q", command, name)
 	}
+	if arg := conf.Args[index]; arg.Start == 0 && arg.Trigger.Exists {
+		return sandbox.Deps.Std.Errorf("arg %q is the verb of command %q — the first segment its trigger matches the command line on: change it with set-arg, or remove the command with remove-command", name, command)
+	}
 	if len(conf.Args) == 1 {
 		return sandbox.Deps.Std.Errorf("arg %q is the only one of command %q: a command reads one segment at least", name, command)
 	}

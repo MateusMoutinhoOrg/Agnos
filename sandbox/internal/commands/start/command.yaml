@@ -7,9 +7,9 @@ args:
         value: start
 category: Core Commands
 examples:
-    - start -p my-project
-    - start -p my-project --path ./my-project-dir
-    - start -p my-project -q
+    - start -p my-project -m github.com/you/my-project
+    - start -p my-project -m github.com/you/my-project --path ./my-project-dir
+    - start -p my-project -m github.com/you/my-project -q
 flags:
     - description: the name of the project
       id: ProjectName

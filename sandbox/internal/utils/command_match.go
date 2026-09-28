@@ -156,7 +156,7 @@ func SplitCommandArgv(sandbox *api.Sandbox, argv []string) ([]string, []int) {
 
 	index := 0
 	for ; index < len(argv); index++ {
-		if sandbox.Deps.Stringsdeps.HasPrefix(argv[index], "-") {
+		if IsCommandFlagToken(sandbox, argv[index]) {
 			break
 		}
 		segments = append(segments, argv[index])
@@ -173,6 +173,16 @@ func SplitCommandArgv(sandbox *api.Sandbox, argv []string) ([]string, []int) {
 		break
 	}
 	return segments, indices
+}
+
+// IsCommandFlagToken is IsFlagToken of the generated IsActionable.go: a token
+// starting with "-" that does not read as a number.
+func IsCommandFlagToken(sandbox *api.Sandbox, token string) bool {
+	if !sandbox.Deps.Stringsdeps.HasPrefix(token, "-") || token == "-" {
+		return false
+	}
+	_, err := sandbox.Deps.Stringsdeps.ParseFloat(token, 64)
+	return err != nil
 }
 
 // commandFlagsEnd is FlagsEnd of the generated IsActionable.go.
@@ -225,6 +235,23 @@ func commandFlagOccurrences(argv []string, flag commandconf.Flag) []int {
 	return found
 }
 
+// commandAssignedOccurrences is where one flag stands in its --key=value
+// spelling, with the value each carries.
+func commandAssignedOccurrences(sandbox *api.Sandbox, argv []string, flag commandconf.Flag) ([]int, []string) {
+	found := []int{}
+	values := []string{}
+	for index, token := range argv[:commandFlagsEnd(argv)] {
+		for _, key := range flag.Keys {
+			if sandbox.Deps.Stringsdeps.HasPrefix(token, key+"=") {
+				found = append(found, index)
+				values = append(values, token[len(key)+1:])
+				break
+			}
+		}
+	}
+	return found, values
+}
+
 // MatchCommandArgv is the generated IsActionable and CommandHandler of one
 // command read against its command.yaml: whether it runs for argv and, when
 // it does, the usage error its values raise. The tokens it reads are marked
@@ -259,7 +286,10 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 		}
 		value := ""
 		occurrences := commandFlagOccurrences(argv, flag)
+		_, assigned := commandAssignedOccurrences(sandbox, argv, flag)
 		switch {
+		case len(occurrences) == 0 && len(assigned) > 0 && flag.Type != "boolean":
+			value = assigned[0]
 		case len(occurrences) == 0:
 			return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("flag %s: not on the line, and it declares %s", flag.Keys[0], DescribeTrigger(sandbox, flag.Trigger))}
 		case flag.Type == "boolean":
@@ -295,7 +325,22 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 	}
 	for _, flag := range conf.Flags {
 		occurrences := commandFlagOccurrences(argv, flag)
-		if len(occurrences) == 0 && flag.Required && match.Failure == "" {
+		assigned_indices, assigned := commandAssignedOccurrences(sandbox, argv, flag)
+		if flag.Type != "boolean" {
+			for position, index := range assigned_indices {
+				consumed[index] = true
+				if assigned[position] == "" {
+					if match.Failure == "" {
+						match.Failure = sandbox.Deps.Std.Sprintf("a usage error: flag '%s' expects a value after the =", flag.Keys[0])
+					}
+					continue
+				}
+				if problem := commandFlagProblem(sandbox, flag, assigned[position]); problem != "" && match.Failure == "" {
+					match.Failure = "a usage error: flag '" + flag.Keys[0] + "': " + problem
+				}
+			}
+		}
+		if len(occurrences) == 0 && (flag.Type == "boolean" || len(assigned_indices) == 0) && flag.Required && match.Failure == "" {
 			match.Failure = sandbox.Deps.Std.Sprintf("a usage error: required flag '%s' not provided", flag.Keys[0])
 		}
 		for _, index := range occurrences {
@@ -305,7 +350,7 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 			}
 			if index+1 >= len(argv) {
 				if match.Failure == "" {
-					match.Failure = sandbox.Deps.Std.Sprintf("a usage error: flag '%s' expects a value", flag.Id)
+					match.Failure = sandbox.Deps.Std.Sprintf("a usage error: flag '%s' expects a value", flag.Keys[0])
 				}
 				continue
 			}
@@ -324,7 +369,7 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 			if consumed[index] {
 				continue
 			}
-			if strs.HasPrefix(token, "-") {
+			if IsCommandFlagToken(sandbox, token) {
 				match.Failure = sandbox.Deps.Std.Sprintf("a usage error: unknown flag %q", token)
 			} else {
 				match.Failure = sandbox.Deps.Std.Sprintf("a usage error: unexpected argument %q", token)

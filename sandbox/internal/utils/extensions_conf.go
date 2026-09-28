@@ -43,13 +43,40 @@ func ExtensionCatalog() []ExtensionSpec {
 		{ExtensionSandbox, true, "the sandbox core: sandbox/new.go, api/sandbox.go, internal/generated/config"},
 		{ExtensionSandboxDeps, false, "the dependency layer: sandbox/deps/, adapters/, availables"},
 		{ExtensionSandboxCli, false, "the cli layer: cmd/main, the dispatch, help and version"},
-		{ExtensionSandboxServer, false, "the http layer: server/, routes/, routeio/"},
+		{ExtensionSandboxServer, false, "the http layer: server/, routeslist/, routeio/"},
 		{ExtensionSandboxFront, false, "the front layer: frontio/ and the route serving assets/frontend/"},
 		{ExtensionSandboxDatabase, false, "the database layer: databaseio/ and the declared databases"},
 		{ExtensionSandboxExample, true, "the examples/ suite and exec-test"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},
 		{ExtensionReadme, true, "README.md, built from themes.yaml and the doc index"},
 	}
+}
+
+// ExtensionRequires is what one mechanic needs on to have anything to render
+// into: every sandbox-<x> renders into the sandbox, the server layer is opened
+// by a command of the cli layer (start-server), and the front layer is served
+// by a route of the server layer.
+func ExtensionRequires(name string) []string {
+	switch name {
+	case ExtensionSandboxServer:
+		return []string{ExtensionSandbox, ExtensionSandboxCli}
+	case ExtensionSandboxFront:
+		return []string{ExtensionSandbox, ExtensionSandboxServer}
+	case ExtensionSandbox, ExtensionDoc, ExtensionReadme:
+		return nil
+	}
+	return []string{ExtensionSandbox}
+}
+
+// ExtensionDependents is every mechanic that requires name.
+func ExtensionDependents(name string) []string {
+	dependents := []string{}
+	for _, spec := range ExtensionCatalog() {
+		if contains(ExtensionRequires(spec.Name), name) {
+			dependents = append(dependents, spec.Name)
+		}
+	}
+	return dependents
 }
 
 // ExtensionNames is ExtensionCatalog reduced to its keys.
@@ -154,6 +181,23 @@ func SetExtension(sandbox *api.Sandbox, io *smartio.SmartIO, name string, enable
 	}
 
 	NormalizeExtensions(conf)
+
+	// A declaration never holds a mechanic on without what it renders into:
+	// turning one off while a dependent is on, or one on while a requirement
+	// is off, is refused, and verify holds every declaration to the same.
+	if enabled {
+		for _, required := range ExtensionRequires(name) {
+			if !conf.IsEnabled(required) {
+				return sandbox.Deps.Std.Errorf("cannot turn %s on: it needs %s, which is off", name, required)
+			}
+		}
+	} else {
+		for _, dependent := range ExtensionDependents(name) {
+			if conf.IsEnabled(dependent) {
+				return sandbox.Deps.Std.Errorf("cannot turn %s off: %s is on and needs it (turn %s off first)", name, dependent, dependent)
+			}
+		}
+	}
 	conf.SetEnabled(name, enabled)
 
 	if err := SaveExtensionsConf(sandbox, io, conf); err != nil {

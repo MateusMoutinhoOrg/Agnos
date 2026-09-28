@@ -15,8 +15,5 @@ func RemoveTableField(sandbox *api.Sandbox, props api.DatabaseFieldProps) error 
 	if err := RemoveTableFieldInternal(sandbox, io, props); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

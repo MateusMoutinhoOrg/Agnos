@@ -16,11 +16,12 @@ flags:
       id: Draft
       type: boolean
     - default: all
-      description: The target to compile for (defaults to all)
+      description: a target to compile and publish (repeatable); one of linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, or all
       id: Target
       keys:
         - --target
         - -t
+      type: string-array
     - default: gh
       description: The publisher to use (defaults to gh)
       id: Publisher
@@ -28,5 +29,5 @@ flags:
         - --publisher
         - -pub
 help: Builds, compiles and publishes a release via gh
-long-description: Runs build, then compile (every target by default), and publishes every file of release/ as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml.
+long-description: Runs build, then compile (every target by default, or each --target given), and publishes the binaries that compile wrote as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml. A project with no version and no --release-name is refused.
 priority: 100

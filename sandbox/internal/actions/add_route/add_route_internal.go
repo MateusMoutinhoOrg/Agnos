@@ -47,7 +47,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
 	}
-	utils.NoteNormalizedCommandName(sandbox, name)
+	utils.NoteNormalizedName(sandbox, "route", name)
 
 	identifier := utils.RouteIdentifier(sandbox, name)
 	pkg := utils.RoutePackage(sandbox, name)
@@ -116,6 +116,9 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 			response_type = middlewareResponseType
 		}
 	}
+	if err := utils.ValidateMediaType(sandbox, response_type); err != nil {
+		return err
+	}
 
 	category := sandbox.Deps.Stringsdeps.TrimSpace(props.Category)
 	if category == "" {
@@ -137,6 +140,10 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	conf.ResponseType = response_type
 	conf.Category = category
 	conf.Help = sandbox.Deps.Stringsdeps.TrimSpace(props.Help)
+
+	if !props.Middleware {
+		warnShadowedRoute(sandbox, io, identifier, conf)
+	}
 
 	dir := utils.RouteDir(sandbox, name)
 	if err := io.WriteFile(dir+"/route.yaml", []byte(conf.Render())); err != nil {
@@ -189,4 +196,46 @@ func addRoutePriority(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		return 0, sandbox.Deps.Std.Errorf("--priority %d is negative: the chain runs from zero upwards", priority)
 	}
 	return priority, nil
+}
+
+// warnShadowedRoute says so when another route already matches exactly the
+// requests conf does — the same paths, segment count and an overlapping
+// method. Both run on every such request, lowest priority first, so whichever
+// answers first shadows the other: legitimate for a middleware, a mistake
+// almost always for two routes, and never something to find out by accident.
+func warnShadowedRoute(sandbox *api.Sandbox, io *smartio.SmartIO, identifier string, conf *routeconf.RouteConf) {
+	signature := routeMatchSignature(sandbox, conf)
+	for _, dir := range io.ListDirs(utils.RoutesDir) {
+		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
+		other_name := parts[len(parts)-1]
+		other, err := utils.LoadRouteConf(sandbox, io, other_name)
+		if err != nil || !methodsOverlap(other.Methods, conf.Methods) {
+			continue
+		}
+		if routeMatchSignature(sandbox, other) == signature {
+			sandbox.Deps.Std.Error("warning: route %s matches exactly the requests %s does (%s): the one on the lower priority answers first and shadows the other\n",
+				identifier, utils.RouteIdentifier(sandbox, other_name), conf.Pattern())
+		}
+	}
+}
+
+// routeMatchSignature is what a route matches on, spelled as one string.
+func routeMatchSignature(sandbox *api.Sandbox, conf *routeconf.RouteConf) string {
+	signature := sandbox.Deps.Std.Sprintf("segments=%v:%d", conf.HasSegments, conf.Segments)
+	for _, path := range conf.Paths {
+		signature += sandbox.Deps.Std.Sprintf("|%d:%d:%s:%+v", path.Start, path.End, path.Type, path.Trigger)
+	}
+	return signature
+}
+
+// methodsOverlap reports whether one method answers both lists.
+func methodsOverlap(first []string, second []string) bool {
+	for _, one := range first {
+		for _, two := range second {
+			if one == two || one == routeconf.AnyMethod || two == routeconf.AnyMethod {
+				return true
+			}
+		}
+	}
+	return false
 }

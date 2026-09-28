@@ -18,6 +18,9 @@ func RebalanceRoutesInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props ap
 	if props.Step < 1 {
 		return sandbox.Deps.Std.Errorf("--step %d is below 1: the rungs have to be apart", props.Step)
 	}
+	if err := utils.RequireProject(sandbox, io); err != nil {
+		return err
+	}
 	if !io.IsDir(utils.RoutesDir) {
 		return sandbox.Deps.Std.Errorf("the project has no server layer: run server-init first")
 	}

@@ -74,6 +74,10 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) 
 {{- if .Body.Required}}
 		return body, routeio.Raise(sandbox, route, api.StatusBadRequest, "",
 			"this route requires a request body")
+{{- else if and .Body.IsObject .SchemaJson}}
+		// An absent object is read as an empty one, so a property the
+		// schema requires is still reported missing.
+		raw = []byte("{}")
 {{- else}}
 		return body, nil
 {{- end}}

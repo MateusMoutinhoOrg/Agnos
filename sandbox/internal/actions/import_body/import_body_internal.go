@@ -23,6 +23,9 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 	if err != nil {
 		return err
 	}
+	if err := utils.RequireBodyMethod(sandbox, conf, props.Route); err != nil {
+		return err
+	}
 
 	document, err := readExample(sandbox, props)
 	if err != nil {

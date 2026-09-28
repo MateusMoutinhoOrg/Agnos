@@ -14,6 +14,9 @@ import (
 // ends on — that command, the usage error it raises before its handler runs,
 // or the not-found every unmatched line ends on.
 func ExplainCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.ExplainCommandProps) ([]string, error) {
+	if err := utils.RequireProject(sandbox, io); err != nil {
+		return nil, err
+	}
 	if !io.IsDir(utils.CommandsDir) {
 		return nil, sandbox.Deps.Std.Errorf("the project has no cli layer: run cli-init first")
 	}
@@ -66,9 +69,36 @@ func ExplainCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api
 	case answered != "":
 		lines = append(lines, "the line ends on "+answered)
 	case len(props.Argv) == 0:
-		lines = append(lines, "no command runs: the empty line prints the general help and exits 2")
+		lines = append(lines, "no command runs: the empty line prints the general help and exits 0")
+	case nearCommand(sandbox, chain, props.Argv) != "":
+		lines = append(lines, "the line starts with the verb of "+nearCommand(sandbox, chain, props.Argv)+
+			" but does not fit its args: handle_bad_usage.go answers it, naming what is wrong, exit 2")
 	default:
 		lines = append(lines, "no command answers: handle_not_found.go answers it, exit 2")
 	}
 	return lines, nil
+}
+
+// nearCommand is the strict command whose verb — the longest of its literal
+// identifiers — the line's segments start with, "" when none: the dispatch
+// answers such a line with a usage error rather than a not-found.
+func nearCommand(sandbox *api.Sandbox, chain []utils.CommandChainEntry, argv []string) string {
+	segments, _ := utils.SplitCommandArgv(sandbox, argv)
+	near := ""
+	longest := 0
+	for _, entry := range chain {
+		if !entry.Conf.Strict {
+			continue
+		}
+		for _, identifier := range entry.Conf.Identifiers() {
+			words := sandbox.Deps.Stringsdeps.Fields(identifier)
+			if len(words) == 0 || len(words) > len(segments) || len(words) <= longest {
+				continue
+			}
+			if sandbox.Deps.Stringsdeps.Join(segments[:len(words)], " ") == identifier {
+				near, longest = utils.CommandIdentifier(sandbox, entry.Name), len(words)
+			}
+		}
+	}
+	return near
 }

@@ -25,7 +25,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Category = "Cli System"
 	self.Help = "Remove a flag from a command's command.yaml"
 	self.LongDescription = "Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it."
-	self.Examples = []string{"remove-flag output --command exec", "remove-flag --out --command exec"}
+	self.Examples = []string{"remove-flag output --command exec", "remove-flag out --command exec"}
 	self.Hidden = false
 
 	self.Args = []api.CommandArg{
@@ -67,7 +67,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

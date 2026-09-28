@@ -106,12 +106,12 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Add
 		}
 	}
 
-	sandbox.Deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
-
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
 		return err
 	}
+
+	sandbox.Deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
 
 	vars := map[string]interface{}{
 		"Identifier":  identifier,

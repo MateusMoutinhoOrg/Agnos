@@ -202,13 +202,13 @@ type Route struct {
 	// `none`. A body that fails has been answered already.
 	ReadBody func(bound *Route) (any, error)
 
-	// InternalPurehandler is the route package's own InternalPureHandler,
+	// InternalPureHandler is the route package's own InternalPureHandler,
 	// closed over the sandbox: a func(props *RouteProps, entries *Entries,
 	// response *serverdeps.Response) error whose Entries is that package's
 	// generated struct. It is held as any because every route's Entries is a
 	// type of its own; RequestHandler builds and fills one through
 	// Deps.Reflectdeps and calls it.
-	InternalPurehandler any
+	InternalPureHandler any
 
 	// Request is the http request this copy was bound from and Response the
 	// one being written. Both are handed over as any: sandbox/api may name no
@@ -235,7 +235,7 @@ type Route struct {
 	// route whatever its method — what tells a 405 from a 404.
 	MatchesPath func(bound *Route) bool
 	// RequestHandler binds one bound copy's request onto a fresh Entries and
-	// runs InternalPurehandler with it. It returns the failure the handler
+	// runs InternalPureHandler with it. It returns the failure the handler
 	// did not answer itself, nil otherwise; what it answered with is the
 	// status it wrote, and a handler writing none hands the request to the
 	// next route of the chain.

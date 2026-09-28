@@ -31,9 +31,14 @@ examples: ["greet bob -t 2"]
 
 ## The command line
 
-A command line is its **segments** — every token before the first one starting with `-`, plus
-every token after a bare `--` — and its **flags**, everything between. `{{.Name}} route add foo
---force -- a b` has the segments `route add foo a b`.
+A command line is its **segments** — every token before the first flag (a token starting with
+`-` that is not a number, so `-1` is a segment), plus every token after a bare `--` — and its
+**flags**, everything between. `{{.Name}} route add foo --force -- a b` has the segments
+`route add foo a b`; a segment after a flag is not read, so args come first. A flag takes its
+value as the next token or after `=` (`--name bob`, `--name=bob`).
+
+A line whose segments start with a command's verb but do not fit its args is a usage error
+naming the arg (exit `2`), never `unknown command`.
 
 ## Arg keys
 

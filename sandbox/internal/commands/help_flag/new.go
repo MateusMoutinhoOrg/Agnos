@@ -45,7 +45,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Flags = []api.CommandFlag{
 		{
 			Id:          "Help",
-			Keys:        []string{"--help"},
+			Keys:        []string{"--help", "-h"},
 			Type:        api.BooleanFlag,
 			Required:    false,
 			Default:     "",
@@ -56,7 +56,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

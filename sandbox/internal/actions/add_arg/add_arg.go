@@ -14,8 +14,5 @@ func AddArg(sandbox *api.Sandbox, props api.ArgProps) error {
 	if err := AddArgInternal(sandbox, io, props); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

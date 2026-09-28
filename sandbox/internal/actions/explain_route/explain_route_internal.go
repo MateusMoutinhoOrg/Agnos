@@ -14,6 +14,9 @@ import (
 // that answers nothing hands it on. The last line is what the request ends on
 // when no route answers — the 405 or the 404 the dispatch raises.
 func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.ExplainRouteProps) ([]string, error) {
+	if err := utils.RequireProject(sandbox, io); err != nil {
+		return nil, err
+	}
 	if !io.IsDir(utils.RoutesDir) {
 		return nil, sandbox.Deps.Std.Errorf("the project has no server layer: run server-init first")
 	}
@@ -32,6 +35,9 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 	ran := false
 	method_mismatch := false
 	answered := ""
+	// before are the routes that ran ahead of the one answering: each one's
+	// handler may answer first, which only its own code knows.
+	before := []string{}
 
 	for _, entry := range chain {
 
@@ -55,15 +61,23 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 			ran = true
 		}
 		if match.Failure != "" {
-			lines = append(lines, head+" answers "+match.Failure+", before its handler runs")
+			line := head + " answers " + match.Failure + ", before its handler runs"
+			if len(before) > 0 {
+				line += " — unless " + sandbox.Deps.Stringsdeps.Join(before, ", ") + " answered first"
+			}
+			lines = append(lines, line)
 			answered = name
 			continue
 		}
 		lines = append(lines, head+" runs")
+		before = append(before, name)
 	}
 
 	lines = append(lines, "")
 	switch {
+	case answered != "" && len(before) > 0:
+		lines = append(lines, "the request ends on the first of "+sandbox.Deps.Stringsdeps.Join(before, ", ")+
+			" whose handler answers — a Write or a SetStatus — and on "+answered+" if none does")
 	case answered != "":
 		lines = append(lines, "the request ends on "+answered)
 	case ran:

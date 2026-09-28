@@ -13,8 +13,5 @@ func ServerPurge(sandbox *api.Sandbox, path string) error {
 	if err := ServerPurgeInternal(sandbox, io, path); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
 }

@@ -78,10 +78,6 @@ func checkDatabaseDeclaration(sandbox *api.Sandbox, name string, conf *databasec
 	if conf.Name == "" {
 		violations = append(violations, databaseViolation(name, utils.DatabaseSpecsFile+" declares no name"))
 	}
-	if len(conf.Tables) == 0 {
-		violations = append(violations, databaseViolation(name, "declares no `tables`; a database needs at least one"))
-	}
-
 	// One Go record is declared per table and per nested collection, so the
 	// two families share one namespace: two of them spelling the same name
 	// would generate the same struct twice.

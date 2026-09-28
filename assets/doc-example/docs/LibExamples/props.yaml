@@ -3,4 +3,3 @@ name: "LibExamples"
 order: 3
 themes:
   - lib-usage
-  - reference

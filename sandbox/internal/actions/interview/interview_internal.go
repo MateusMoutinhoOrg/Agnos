@@ -166,15 +166,23 @@ func commandByVerb(sandbox *api.Sandbox, verb string) (api.Command, bool) {
 // sessionCommand is one declaration as the session asks it: a copy whose
 // Flags carry, after its own, the flags of the middlewares that run in front
 // of it — --path and --quiet among them — since the person types those on the
-// same line.
+// same line. The help-flag middleware's --help is left out: it prints a screen
+// instead of running the command, which is never what the session is for.
 func sessionCommand(sandbox *api.Sandbox, declared *api.Command) api.Command {
 	command := *declared
 	command.Flags = append([]api.CommandFlag{}, declared.Flags...)
 	for _, inherited := range help.InheritedFlags(sandbox, declared) {
+		if inherited.From == helpFlagCommand {
+			continue
+		}
 		command.Flags = append(command.Flags, inherited.Flag)
 	}
 	return command
 }
+
+// helpFlagCommand is the middleware answering `<command> --help`, by the name
+// InheritedFlags reports it under: its package name.
+const helpFlagCommand = "help_flag"
 
 // chooseInCategory offers the commands of one area, and reports false when the
 // person asked to go back to the first menu.

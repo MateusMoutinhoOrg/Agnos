@@ -25,7 +25,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Category = "Core Commands"
 	self.Help = "Initialize a new project in a directory"
 	self.LongDescription = "Scaffolds a new Agnos project in the given directory, creating\nthe required configuration files and folder structure. If no\npath is provided, the current directory is used.\n"
-	self.Examples = []string{"start -p my-project", "start -p my-project --path ./my-project-dir", "start -p my-project -q"}
+	self.Examples = []string{"start -p my-project -m github.com/you/my-project", "start -p my-project -m github.com/you/my-project --path ./my-project-dir", "start -p my-project -m github.com/you/my-project -q"}
 	self.Hidden = false
 
 	self.Args = []api.CommandArg{
@@ -78,7 +78,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

@@ -21,8 +21,15 @@ import (
 // its doc.md and props.yaml, but the build writes one page per command beside
 // them. Removing only the installed two would leave a directory of pages with
 // no props.yaml, which every later build reads as a doc that fails to load.
+//
+// sandbox/internal/cli is one of them too: its errors/ files are written once
+// by the build and then the project's, but every one of them imports the help
+// command and cliio, so leaving them behind hands back a tree that does not
+// compile — and that no cli-init can bring back.
 var cliDirs = []string{
 	utils.GeneratedDir + "/cli",
+	utils.GeneratedDir + "/cliio",
+	"sandbox/internal/cli",
 	"sandbox/internal/commands",
 	"docs/Commands",
 	utils.ConstructorDir("cli"),
@@ -44,6 +51,10 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 	for _, file := range files {
 		io.RemoveDir(file)
 	}
+
+	// sandbox/api/commandprops.go is the one file the layer writes outside
+	// the directories it owns: every command names it, so it goes with them.
+	io.RemoveDir("sandbox/api/" + utils.CommandPropsFile)
 
 	for _, dir := range cliDirs {
 		if !io.IsDir(dir) {

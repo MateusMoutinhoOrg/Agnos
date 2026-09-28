@@ -8,6 +8,14 @@ import (
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	// The runtime is checked before verify walks the whole project: a typo in
+	// it is a usage error, not something to find out at the end.
+	runtime := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(entries.Runtime))
+	if runtime != api.RuntimeGo && runtime != api.RuntimeNone {
+		return cliio.Fail(sandbox, api.ExitFailure, "runtime",
+			sandbox.Deps.Std.Sprintf("unknown runtime %q (use %q or %q)", entries.Runtime, api.RuntimeGo, api.RuntimeNone))
+	}
+
 	if !entries.Unsafe {
 		// The schema gate only: the toolchain runs after the render, on
 		// what was rendered, through the --runtime flag below.
@@ -16,7 +24,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 		}
 	}
 
-	build_error := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: entries.Runtime})
+	build_error := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: runtime})
 
 	if build_error != nil {
 		return cliio.Fail(sandbox, api.ExitFailure, "", build_error.Error())

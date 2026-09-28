@@ -82,21 +82,21 @@ func baseName(sandbox *api.Sandbox, path string) string {
 // formatIfGo returns content in the canonical form of the Go toolchain when
 // dest is a Go file, and content untouched otherwise. Every generated .go file
 // passes through here so a regenerated tree diffs to zero against one a
-// formatting editor has saved. A render that is not parsable Go is written as
-// it came out: the compile step reports it with a real message, which a
-// rendering error here would only hide.
-func formatIfGo(sandbox *api.Sandbox, dest string, content []byte) []byte {
+// formatting editor has saved. A render that is not parsable Go is an error:
+// every generated file is spelled from a template and a declaration, so one the
+// compiler would refuse means the declaration is wrong, and the build stops
+// before writing it — whatever runtime was asked for.
+func formatIfGo(sandbox *api.Sandbox, dest string, content []byte) ([]byte, error) {
 	if !sandbox.Deps.Stringsdeps.HasSuffix(dest, ".go") {
-		return content
+		return content, nil
 	}
 
 	formatted, err := sandbox.Deps.Goimportsdeps.Format(string(content))
 	if err != nil {
-		sandbox.Deps.Std.Log("could not format %s: %s\n", dest, err.Error())
-		return content
+		return nil, sandbox.Deps.Std.Errorf("could not render %s, it is not valid Go: %s", dest, err.Error())
 	}
 
-	return []byte(formatted)
+	return []byte(formatted), nil
 }
 
 // RenderTemplateToDest renders one asset as a Go text/template over vars and
@@ -114,7 +114,11 @@ func RenderTemplateToDest(sandbox *api.Sandbox, io *smartio.SmartIO, template_pa
 		return err
 	}
 
-	err = io.WriteFileOverwrite(dest_path, formatIfGo(sandbox, dest_path, content))
+	formatted, err := formatIfGo(sandbox, dest_path, content)
+	if err != nil {
+		return err
+	}
+	err = io.WriteFileOverwrite(dest_path, formatted)
 	if err != nil {
 		return err
 	}
@@ -158,7 +162,11 @@ func RenderGroupExcept(sandbox *api.Sandbox, io *smartio.SmartIO, group string, 
 			return err
 		}
 
-		err = io.WriteFileOverwrite(file, formatIfGo(sandbox, file, content))
+		formatted, err := formatIfGo(sandbox, file, content)
+		if err != nil {
+			return err
+		}
+		err = io.WriteFileOverwrite(file, formatted)
 		if err != nil {
 			return err
 		}

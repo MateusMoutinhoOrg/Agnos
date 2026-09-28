@@ -15,8 +15,5 @@ func RemoveParameter(sandbox *api.Sandbox, path string, route string, name strin
 	if err := RemoveParameterInternal(sandbox, io, route, name); err != nil {
 		return err
 	}
-	if err := io.Persist(); err != nil {
-		return err
-	}
-	return buildAction.Build(sandbox, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
 }

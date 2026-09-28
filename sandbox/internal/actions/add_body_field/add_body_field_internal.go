@@ -16,6 +16,9 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 	if err != nil {
 		return err
 	}
+	if err := utils.RequireBodyMethod(sandbox, conf, props.Route); err != nil {
+		return err
+	}
 
 	name := utils.RouteFieldName(sandbox, props.Name)
 	if name == "" {

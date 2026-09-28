@@ -24,7 +24,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "publish"
 	self.Category = "Core Commands"
 	self.Help = "Builds, compiles and publishes a release via gh"
-	self.LongDescription = "Runs build, then compile (every target by default), and publishes every file of release/ as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml."
+	self.LongDescription = "Runs build, then compile (every target by default, or each --target given), and publishes the binaries that compile wrote as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml. A project with no version and no --release-name is refused."
 	self.Examples = []string{}
 	self.Hidden = false
 
@@ -68,13 +68,13 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		{
 			Id:          "Target",
 			Keys:        []string{"--target", "-t"},
-			Type:        api.StringFlag,
+			Type:        api.StringArrayFlag,
 			Required:    false,
 			Default:     "all",
 			HasDefault:  true,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "The target to compile for (defaults to all)",
+			Description: "a target to compile and publish (repeatable); one of linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, or all",
 		},
 		{
 			Id:          "Publisher",
@@ -89,7 +89,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

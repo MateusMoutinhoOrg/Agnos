@@ -13,7 +13,7 @@ args:
 category: Cli System
 examples:
     - remove-flag output --command exec
-    - remove-flag --out --command exec
+    - remove-flag out --command exec
 flags:
     - description: the command (a verb or its package name) that owns the flag
       id: Target

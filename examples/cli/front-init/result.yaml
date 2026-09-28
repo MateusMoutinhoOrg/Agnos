@@ -14,6 +14,6 @@ tree:
     - file: sandbox/internal/routeslist/frontend/entries.go
       sha: 6c0fbc57755f3199f5bceea7f482ad8780991e213b980b333d47f5085cd87fd5
     - file: sandbox/internal/routeslist/frontend/new.go
-      sha: fd742687569e1d04559024e4f284420aa61bb4e747b48567f872eba40df272e2
+      sha: 722ddb9666db62dec27d9fbd150cd4f1dcf72f4f5ce6e4c10a64864556a26db4
     - file: sandbox/internal/routeslist/frontend/route.yaml
       sha: 5668920287a070b50cb1b32992664036a8e74f325e1fdc06aefa0075fb08d3f9

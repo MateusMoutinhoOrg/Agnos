@@ -8,7 +8,7 @@ agnos list-extensions [--help] [--path <path>] [--quiet]
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

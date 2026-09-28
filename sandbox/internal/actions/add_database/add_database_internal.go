@@ -20,7 +20,7 @@ func AddDatabaseInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string,
 	if err := utils.ValidateDatabaseName(sandbox, name); err != nil {
 		return err
 	}
-	utils.NoteNormalizedCommandName(sandbox, name)
+	utils.NoteNormalizedName(sandbox, "database", name)
 
 	conf := databaseconf.NewEmpty(sandbox)
 	conf.Name = utils.DatabaseIdentifier(sandbox, name)

@@ -26,7 +26,7 @@ Declares one value a route reads and runs build so the route's new.go and entrie
 | `--description` | string |  | help text shown for the parameter | — |
 | `--example` | string-array |  | an usage example for the parameter (repeatable) | — |
 | `--position` | integer | `-1` | zero-based index to insert the parameter at (defaults to the end) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

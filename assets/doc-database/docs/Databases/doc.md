@@ -1,7 +1,7 @@
 # Databases
 
 A **database** is `sandbox/internal/databases/<db>/`, declared by `specs.yaml` and generated
-whole from it — the same relation `commands/<x>/entries.yaml` and `routes/<x>/route.yaml` have
+whole from it — the same relation `commands/<x>/command.yaml` and `routeslist/<x>/route.yaml` have
 with the `new.go` they render.
 {{ if .DatabaseDocs }}
 | Database | Package | Keys under |

@@ -13,7 +13,7 @@ args:
 category: Cli System
 examples:
     - add-arg file --type string --required --description "the file to process" --command exec
-    - add-arg count --type int --min 1 --position 0 --command exec
+    - add-arg count --type integer --default 1 --position 0 --command exec
 flags:
     - description: the command (a verb or its package name) that receives the arg
       id: Target

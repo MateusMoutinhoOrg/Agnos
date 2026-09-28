@@ -34,7 +34,7 @@ Rewrites one property of the route's body json-schema in place and runs build. T
 | `--additional-properties` | boolean |  | accept undeclared keys inside an object property | — |
 | `--no-additional-properties` | boolean |  | refuse undeclared keys inside an object property | — |
 | `--clear` | string-array |  | a keyword to take off again: required, array, min, max, format, pattern, enum, const, nullable and the rest (repeatable) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

@@ -1,7 +1,8 @@
 # CliInstall
 
-`{{.Name}}` is a single static binary: no runtime, no dependencies. Pick your platform,
-paste the block, done. Go {{.GoFloor}}+ is needed only to build it from source.
+{{ if .HasAssets }}`{{.Name}}` is a single static binary, but every command that writes a project runs the Go
+toolchain on it, so Go {{.GoFloor}}+ must be on `PATH`. Pick your platform, paste the block, done.{{ else }}`{{.Name}}` is a single static binary: no runtime, no dependencies. Pick your platform,
+paste the block, done. Go {{.GoFloor}}+ is needed only to build it from source.{{ end }}
 
 **macOS (Apple Silicon)**
 

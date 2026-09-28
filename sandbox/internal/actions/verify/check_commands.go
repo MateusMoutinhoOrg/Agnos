@@ -156,7 +156,7 @@ func checkCommandDeclaration(sandbox *api.Sandbox, name string, conf *commandcon
 	ids := map[string]string{}
 	claim := func(id string, what string) {
 		if !isExportedId(id) {
-			violations = append(violations, commandViolation(name, "declares the "+what+" "+id+", which is not an exported Go name; it names a field of Entries"))
+			violations = append(violations, commandViolation(name, "declares the "+what+" "+id+", which is not an exported ASCII Go name (an uppercase ASCII letter, then ASCII letters and digits); it names a field of Entries"))
 		}
 		if contains(utils.CommandReservedIds, id) {
 			violations = append(violations, commandViolation(name, "declares the "+what+" "+id+", which Entries already carries"))

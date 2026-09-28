@@ -25,7 +25,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Category = "Cli System"
 	self.Help = "Add an arg to a command's command.yaml"
 	self.LongDescription = "Inserts one arg — the segments --start to --end of the command line — into sandbox/internal/commands/<command>/command.yaml (at --position, else at the end) and runs build. An arg given no --start reads the first segment no arg reads yet; with --trigger it is part of what the command matches on."
-	self.Examples = []string{"add-arg file --type string --required --description \"the file to process\" --command exec", "add-arg count --type int --min 1 --position 0 --command exec"}
+	self.Examples = []string{"add-arg file --type string --required --description \"the file to process\" --command exec", "add-arg count --type integer --default 1 --position 0 --command exec"}
 	self.Hidden = false
 
 	self.Args = []api.CommandArg{
@@ -188,7 +188,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 
