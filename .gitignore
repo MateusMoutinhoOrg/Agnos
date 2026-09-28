@@ -11,6 +11,7 @@ TestDir
 AssertDir
 local_test/
 release/
+bugs
 user_test.sh
 local_install.sh
 local_test.sh
