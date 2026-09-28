@@ -82,86 +82,6 @@ func SaveRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf 
 	return io.WriteFileOverwrite(RouteConfPath(sandbox, name), []byte(conf.Render()))
 }
 
-// RouteTriggerAliases maps the spellings a trigger type may be typed in onto
-// the one route.yaml carries; the canonical names map onto themselves.
-var RouteTriggerAliases = map[string]string{
-	"starts-with": "prefix",
-	"ends-with":   "suffix",
-	"exact":       "equal",
-	"equals":      "equal",
-	"matches":     "regex",
-}
-
-// RouteTriggerType normalizes a trigger type typed on the command line: an
-// alias becomes the type it stands for, and anything that is neither is
-// refused with the list of both.
-func RouteTriggerType(sandbox *api.Sandbox, raw string) (string, error) {
-	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
-	if canonical, is := RouteTriggerAliases[kind]; is {
-		kind = canonical
-	}
-	if !contains(routeconf.TriggerTypes, kind) {
-		return "", sandbox.Deps.Std.Errorf("unknown trigger type %q (use one of %s, or starts-with, ends-with, exact, matches)",
-			raw, sandbox.Deps.Stringsdeps.Join(routeconf.TriggerTypes, ", "))
-	}
-	return kind, nil
-}
-
-// RouteTriggerProps is one trigger as it is typed on the command line: the
-// value, how it is compared ("" is equal), and the two switches on it. OnPath
-// reports a trigger compared against a path slice, which reads with the
-// leading slash every slice carries — "users" and "/users" are the same
-// request.
-type RouteTriggerProps struct {
-	Type       string
-	Value      string
-	Negate     bool
-	IgnoreCase bool
-	OnPath     bool
-}
-
-// RouteTrigger normalizes a trigger typed on the command line: its type
-// defaults to equal and takes the aliases of RouteTriggerAliases, and every
-// type but suffix and regex compared against a path slice gets its leading
-// slash. A regex is taken verbatim, and has to compile.
-func RouteTrigger(sandbox *api.Sandbox, props RouteTriggerProps) (routeconf.Trigger, error) {
-	value := sandbox.Deps.Stringsdeps.TrimSpace(props.Value)
-	raw_kind := sandbox.Deps.Stringsdeps.TrimSpace(props.Type)
-
-	if value == "" {
-		if raw_kind != "" {
-			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-type %q needs a --trigger to compare against", raw_kind)
-		}
-		if props.Negate || props.IgnoreCase {
-			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-negate and --trigger-ignore-case need a --trigger to apply to")
-		}
-		return routeconf.Trigger{}, nil
-	}
-	if raw_kind == "" {
-		raw_kind = "equal"
-	}
-	kind, err := RouteTriggerType(sandbox, raw_kind)
-	if err != nil {
-		return routeconf.Trigger{}, err
-	}
-
-	if kind == "regex" {
-		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(value, ""); err != nil {
-			return routeconf.Trigger{}, sandbox.Deps.Std.Errorf("invalid regex trigger %q: %s", value, err.Error())
-		}
-	} else if props.OnPath && kind != "suffix" {
-		value = "/" + sandbox.Deps.Stringsdeps.TrimLeft(value, "/")
-	}
-
-	return routeconf.Trigger{
-		Exists:     true,
-		Type:       kind,
-		Value:      value,
-		Negate:     props.Negate,
-		IgnoreCase: props.IgnoreCase,
-	}, nil
-}
-
 // RouteEntryId turns a path id or a parameter key typed on the command line
 // into the exported Go name its Entries field carries: "user-id" -> "UserId",
 // "item" -> "Item".
@@ -235,7 +155,7 @@ func NewRoutePath(sandbox *api.Sandbox, props api.RoutePathProps) (routeconf.Pat
 	}
 	path.Type = kind
 
-	trigger, err := RouteTrigger(sandbox, RouteTriggerProps{
+	trigger, err := NewTrigger(sandbox, TriggerProps{
 		Type:       props.TriggerType,
 		Value:      props.Trigger,
 		Negate:     props.TriggerNegate,
@@ -303,7 +223,7 @@ func NewRouteParameter(sandbox *api.Sandbox, props api.RouteParameterProps) (rou
 		parameter.Default, parameter.HasDefault = value, true
 	}
 
-	trigger, err := RouteTrigger(sandbox, RouteTriggerProps{
+	trigger, err := NewTrigger(sandbox, TriggerProps{
 		Type:       props.TriggerType,
 		Value:      props.Trigger,
 		Negate:     props.TriggerNegate,

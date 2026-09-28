@@ -55,6 +55,10 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 		io.RemoveDir(dir)
 	}
 
+	if err := utils.RemoveTriggerUnlessUsed(sandbox, io, utils.ExtensionSandboxServer); err != nil {
+		return err
+	}
+
 	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {
 			io.RemoveDir(dir)

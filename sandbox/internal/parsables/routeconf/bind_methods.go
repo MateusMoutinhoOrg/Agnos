@@ -22,7 +22,7 @@ func BindMethods(sandbox *api.Sandbox, conf *RouteConf) {
 //	equal   its value's segments                /get-article
 //	prefix  its value's segments, then /*       /admin/*
 //	capture {Id}, {Id:type}, or {*Id} to the end  /get-article/{article:integer}
-//	other   text-prefix Value*, suffix *Value, regex ~(Value)
+//	other   text-prefix Value*, suffix *Value, regex ~(Value), one-of (a|b)
 //
 // A slot nothing reaches reads as *, and a negated trigger is appended as
 // !(…) rather than drawn, since it names what the path is not. A route with no
@@ -51,7 +51,7 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 
 	for _, path := range conf.Paths {
 		if path.Trigger.Exists && path.Trigger.Negate {
-			negated += " !(" + path.Trigger.Value + ")"
+			negated += " !(" + triggerText(sandbox, path.Trigger) + ")"
 			continue
 		}
 
@@ -89,6 +89,8 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 			placeTail(path.Start, "*"+path.Trigger.Value)
 		case "regex":
 			placeTail(path.Start, "~("+path.Trigger.Value+")")
+		case "one-of":
+			place(path.Start, "("+triggerText(sandbox, path.Trigger)+")")
 		}
 	}
 
@@ -114,4 +116,17 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 
 	pattern := "/" + sandbox.Deps.Stringsdeps.Join(pieces, "/")
 	return pattern + negated
+}
+
+// triggerText is what a trigger compares against, as a pattern draws it: its
+// value, or a one-of's values joined by "|", each without its leading "/".
+func triggerText(sandbox *api.Sandbox, trigger Trigger) string {
+	if trigger.Type != "one-of" {
+		return trigger.Value
+	}
+	values := []string{}
+	for _, value := range trigger.Values {
+		values = append(values, sandbox.Deps.Stringsdeps.TrimLeft(value, "/"))
+	}
+	return sandbox.Deps.Stringsdeps.Join(values, "|")
 }

@@ -3,6 +3,7 @@ package routeconf
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
 )
 
 // Render serializes a RouteConf back to the route.yaml shape. Keys come out in
@@ -65,7 +66,7 @@ func pathsArray(sandbox *api.Sandbox, paths []Path) *serializibles.SerializibleO
 			entry.AddItemToObject("type", path.Type)
 		}
 		if path.Trigger.Exists {
-			entry.AddItemToObject("trigger", triggerObject(sandbox, path.Trigger))
+			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, path.Trigger))
 		}
 		arr.AddItemToArray(entry)
 	}
@@ -97,25 +98,11 @@ func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializible
 			entry.AddItemToObject("default", parameter.Default)
 		}
 		if parameter.Trigger.Exists {
-			entry.AddItemToObject("trigger", triggerObject(sandbox, parameter.Trigger))
+			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, parameter.Trigger))
 		}
 		arr.AddItemToArray(entry)
 	}
 	return arr
-}
-
-// triggerObject renders one `trigger`.
-func triggerObject(sandbox *api.Sandbox, trigger Trigger) *serializibles.SerializibleObject {
-	entry := sandbox.Deps.Serializables.CreateObject()
-	entry.AddItemToObject("type", trigger.Type)
-	entry.AddItemToObject("value", trigger.Value)
-	if trigger.Negate {
-		entry.AddItemToObject("negate", true)
-	}
-	if trigger.IgnoreCase {
-		entry.AddItemToObject("ignore-case", true)
-	}
-	return entry
 }
 
 // bodyObject renders the `body` declaration, the json-schema tree included.

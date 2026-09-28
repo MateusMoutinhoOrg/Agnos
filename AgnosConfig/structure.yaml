@@ -54,6 +54,10 @@ sandbox:
           order: 5
           gen: true
           description: Config struct, the project's own name and version
+        trigger.go:
+          order: 6
+          gen: true
+          description: Trigger/TriggerType, the condition a route and a command match on
     constructors:
       order: 3
       dir: true
@@ -97,6 +101,10 @@ sandbox:
               order: 3
               gen: true
               description: CliMain, the one dispatch, read off Cli.Commands
+            trigger/MatchTrigger.go:
+              order: 4
+              gen: true
+              description: MatchTrigger, shared by the route and the command matchers
         commands/<name>:
           order: 4
           dir: true

@@ -1,42 +1,5 @@
 package api
 
-// TriggerType is how a Trigger compares the text it is handed.
-type TriggerType int
-
-const (
-	// EqualTrigger matches a text that is exactly the trigger's Value.
-	EqualTrigger TriggerType = iota
-	// PrefixTrigger matches a text that is the Value or continues it with a
-	// new segment: "/admin" matches "/admin" and "/admin/users", never
-	// "/administrator". A Value of "/" matches every path.
-	PrefixTrigger
-	// TextPrefixTrigger matches a text that begins with the Value, whatever
-	// follows it: "/admin" matches "/administrator" too.
-	TextPrefixTrigger
-	// SuffixTrigger matches a text that ends with the Value.
-	SuffixTrigger
-	// RegexTrigger matches a text the Value, a regular expression, matches.
-	RegexTrigger
-)
-
-// Trigger is the condition a path slice or a parameter value has to meet for
-// a route to run at all — the parsed form of one `trigger:` of route.yaml.
-// Failing it is a non-match, never a 400: the request is for some other route.
-type Trigger struct {
-	// Exist tells a declared trigger from none at all; an entry with none
-	// matches whatever the request brought.
-	Exist bool
-	// Type is how Value is compared.
-	Type TriggerType
-	// Value is what the text is compared against.
-	Value string
-	// Negate inverts the comparison: the trigger holds when the text does
-	// not match.
-	Negate bool
-	// IgnoreCase compares without regard to case.
-	IgnoreCase bool
-}
-
 // PathType is what one segment a Path reads has to convert to. A segment
 // that will not is a non-match: the url is for some other route.
 type PathType int

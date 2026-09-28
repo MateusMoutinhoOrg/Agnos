@@ -30,9 +30,10 @@ const RoutePropsFile = "routeprops.go"
 // ConstructorExempt are the sandbox/api/ files that declare no field of the
 // sandbox: sandbox.go is the struct itself, command.go and route.go are the
 // shape of one command and of one route, each owned by the contract whose
-// New<Name> builds the slice of them, and routeprops.go is what a route's
-// handler is handed per request.
-var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", RoutePropsFile}
+// New<Name> builds the slice of them, trigger.go is the condition both of
+// them match on, and routeprops.go is what a route's handler is handed per
+// request.
+var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile}
 
 // ConstructorDir is the project-relative directory of one constructor package.
 func ConstructorDir(name string) string {

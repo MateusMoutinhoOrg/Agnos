@@ -4,7 +4,7 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
     - file: sandbox/api/route.go
-      sha: 567bb8f27d8cf9493bf97b66e421d19927528605700d5539f7c7490c37c69bbc
+      sha: a9bb30001019f9ddef14b297c33d0a47321601d5eb898e7030c1b437e6bc790f
     - file: sandbox/api/server.go
       sha: 01311961e4b7ad4e76ee60b330ae51b2bcaa35ffc5ac1ac1efff23a7bf36a9dc
     - file: sandbox/internal/commands/start_server/entries.yaml

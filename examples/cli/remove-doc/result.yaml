@@ -33,8 +33,10 @@ tree:
       sha: eb537fe2f2ef376f6ab53cd51ad6f9bd7cc8c5a8ab0e7b3e2b6094e1849b62a3
     - file: docs/PublicApi/api.sandbox.md
       sha: a0ad2e1ecda7eb70e8c87b51842022420cd4149be60c2490b801830844d7ba81
+    - file: docs/PublicApi/api.trigger.md
+      sha: c54f5d01cd7bb040654f176e18b5700fe90e9c7411682d102faa1c9ca00e3834
     - file: docs/PublicApi/doc.md
-      sha: 14920bac278a97e676563b44ecc1a3eccb843c23538cdd5c726331fd08e2b734
+      sha: 1fad9b470f80ec1301f18dacdcfdb1b858bd7e4ca34c5cc54c5ffa9ef0302382
     - file: docs/PublicApi/props.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md

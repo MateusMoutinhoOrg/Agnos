@@ -49,8 +49,10 @@ tree:
       sha: eb537fe2f2ef376f6ab53cd51ad6f9bd7cc8c5a8ab0e7b3e2b6094e1849b62a3
     - file: docs/PublicApi/api.sandbox.md
       sha: ba10ccf86144278fc69178c350af6965e831e44cc775f1e963526604f3c709a3
+    - file: docs/PublicApi/api.trigger.md
+      sha: c54f5d01cd7bb040654f176e18b5700fe90e9c7411682d102faa1c9ca00e3834
     - file: docs/PublicApi/doc.md
-      sha: 14920bac278a97e676563b44ecc1a3eccb843c23538cdd5c726331fd08e2b734
+      sha: 1fad9b470f80ec1301f18dacdcfdb1b858bd7e4ca34c5cc54c5ffa9ef0302382
     - file: docs/PublicApi/props.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md
@@ -75,6 +77,8 @@ tree:
       sha: 88b8f0afa0218d082aaeb582993fb1279c533562f0ee0b0c72a034a5f1c2219a
     - file: sandbox/api/sandbox.go
       sha: 7ee634ba18ddf71244bba1900cd34f9fe71d9420ed07caa0771701c8ca3494b8
+    - file: sandbox/api/trigger.go
+      sha: b42520d1df2d1e6de1301fd9a68a8e78b629301d785f6ebef4097cd5df806750
     - file: sandbox/constructors/config/constructor.go
       sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
     - file: sandbox/internal/generated/config/new.go

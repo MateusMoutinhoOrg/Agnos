@@ -29,6 +29,7 @@ sandbox/                            closed: imports nothing outside sandbox/, no
     cli.go                          (gen) Cli struct + exit consts
     command.go                      (gen) Command/CommandFlag/CommandArg + NewCommand
     config.go                       (gen) Config struct, the project's own name and version
+    trigger.go                      (gen) Trigger/TriggerType, the condition a route and a command match on
   constructors/                     one <x>/constructor.go per field of the Sandbox; written once, then yours
     <x>/constructor.go              Constructor(sandbox): sandbox.<X> = <x>.New<X>(sandbox)
   deps/                             contracts; each <x>/ imports nothing at all
@@ -39,6 +40,7 @@ sandbox/                            closed: imports nothing outside sandbox/, no
       config/new.go                 (gen) NewConfig(sandbox) api.Config: ProjectName, Version
       cli/new.go                    (gen) NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain
       cli/climain.go                (gen) CliMain, the one dispatch, read off Cli.Commands
+      trigger/MatchTrigger.go       (gen) MatchTrigger, shared by the route and the command matchers
     commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)
     actions/new.go                  NewActions(sandbox) api.Actions: one assignment per action
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)

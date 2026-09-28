@@ -17,3 +17,5 @@ tree:
       sha: 7e9ff865e2bb0e38400b846c8c6cf1fe7f35dc52f38bbb6d6b7fd3214a65a2fb
     - file: sandbox/deps/remote/sandbox.go
       sha: fc82d66ab10a6698abeb10ff7d489f9c3c33b481c59c0b60ef4107e20977237f
+    - file: sandbox/deps/remote/trigger.go
+      sha: fc676637a63bd250d44ffb1acfa845eddeefc70c08ae8f82fe0c79e4ed0fe477

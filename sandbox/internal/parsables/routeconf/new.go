@@ -3,6 +3,7 @@ package routeconf
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
 )
 
 // DefaultMethod is the http method `add-route` declares when it is given none.
@@ -30,7 +31,7 @@ const LastSegment = -1
 
 // TriggerTypes is every way a trigger compares a value, in the order docs
 // list them.
-var TriggerTypes = []string{"equal", "prefix", "text-prefix", "suffix", "regex"}
+var TriggerTypes = triggerconf.TriggerTypes
 
 // ParameterTypes is every type a parameter may declare.
 var ParameterTypes = []string{"string", "integer", "number", "boolean", "datetime", "string-array", "integer-array"}
@@ -162,7 +163,7 @@ func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]
 			Start:       0,
 			End:         LastSegment,
 			Type:        readString(entry, "type"),
-			Trigger:     readTrigger(entry),
+			Trigger:     triggerconf.New(sandbox, entry),
 			Description: readString(entry, "description"),
 		}
 		if path.Id == "" {
@@ -211,7 +212,7 @@ func readParameters(sandbox *api.Sandbox, item *serializibles.SerializibleObject
 			Type:        normalizeType(readString(entry, "type")),
 			Fonts:       readStringArray(entry, "fonts"),
 			Required:    readBool(entry, "required"),
-			Trigger:     readTrigger(entry),
+			Trigger:     triggerconf.New(sandbox, entry),
 			Description: readString(entry, "description"),
 			Examples:    readStringArray(entry, "examples"),
 		}
@@ -229,22 +230,6 @@ func readParameters(sandbox *api.Sandbox, item *serializibles.SerializibleObject
 	}
 
 	return parameters, nil
-}
-
-// readTrigger parses the `trigger` object of a path or a parameter; an entry
-// with none comes back with Exists false.
-func readTrigger(entry *serializibles.SerializibleObject) Trigger {
-	item, _ := entry.GetObjectItem("trigger")
-	if item == nil || !item.IsObject() {
-		return Trigger{}
-	}
-	return Trigger{
-		Exists:     true,
-		Type:       readString(item, "type"),
-		Value:      readString(item, "value"),
-		Negate:     readBool(item, "negate"),
-		IgnoreCase: readBool(item, "ignore-case"),
-	}
 }
 
 // readBody parses the `body` object, filling in the defaults a declaration

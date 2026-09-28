@@ -1,5 +1,5 @@
 {{- define "trigger" -}}
-api.Trigger{Exist: {{.Exist}}, Type: {{.Type}}, Value: {{printf "%q" .Value}}, Negate: {{.Negate}}, IgnoreCase: {{.IgnoreCase}}}
+api.Trigger{Exist: {{.Exist}}, Type: {{.Type}}, Value: {{printf "%q" .Value}}{{if .Values}}, Values: []string{ {{range .Values}}{{printf "%q" .}}, {{end}} }{{end}}, Negate: {{.Negate}}, IgnoreCase: {{.IgnoreCase}}}
 {{- end -}}
 package {{.Name}}
 

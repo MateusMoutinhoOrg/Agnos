@@ -292,6 +292,13 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 	}
 
+	// What the cli and the server layers both match on.
+	if hasCli || hasServer {
+		if err := GenerateTrigger(sandbox, io, module_conf.Module); err != nil {
+			return err
+		}
+	}
+
 	if hasServer {
 		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {
 			return err

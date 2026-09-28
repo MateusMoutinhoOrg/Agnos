@@ -5,6 +5,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -270,25 +271,42 @@ func checkRouteDeclaration(sandbox *api.Sandbox, name string, conf *routeconf.Ro
 	return violations
 }
 
-// checkRouteTrigger enforces what a trigger may declare: a known type, a
-// value, and — for a regex — one that compiles.
+// checkRouteTrigger enforces what a trigger may declare on a route; see
+// triggerProblem.
 func checkRouteTrigger(sandbox *api.Sandbox, name string, label string, trigger routeconf.Trigger) []string {
-	if !trigger.Exists {
-		return nil
-	}
-	if !contains(routeconf.TriggerTypes, trigger.Type) {
-		return []string{routeViolation(name, "declares the "+label+" with the unknown trigger type "+trigger.Type+
-			" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.TriggerTypes, ", ")+")")}
-	}
-	if trigger.Value == "" {
-		return []string{routeViolation(name, "declares the "+label+" with a trigger and no `value`")}
-	}
-	if trigger.Type == "regex" {
-		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(trigger.Value, ""); err != nil {
-			return []string{routeViolation(name, "declares the "+label+" with a regex that does not compile: "+err.Error())}
-		}
+	if problem := triggerProblem(sandbox, trigger, false); problem != "" {
+		return []string{routeViolation(name, "declares the "+label+" with "+problem)}
 	}
 	return nil
+}
+
+// triggerProblem is what is wrong with one declared trigger, "" when nothing
+// is: a known type, a value — the `values` of a one-of — and, for a regex, one
+// that compiles. A prefix with no value matches everything, which is what a
+// command middleware declares, so emptyPrefix lets it through.
+func triggerProblem(sandbox *api.Sandbox, trigger triggerconf.Trigger, emptyPrefix bool) string {
+	if !trigger.Exists {
+		return ""
+	}
+	if !contains(triggerconf.TriggerTypes, trigger.Type) {
+		return "the unknown trigger type " + trigger.Type +
+			" (use " + sandbox.Deps.Stringsdeps.Join(triggerconf.TriggerTypes, ", ") + ")"
+	}
+	if trigger.Type == triggerconf.OneOf {
+		if len(trigger.Values) == 0 {
+			return "a one-of trigger and no `values`"
+		}
+		return ""
+	}
+	if trigger.Value == "" && !(emptyPrefix && trigger.Type == "prefix") {
+		return "a trigger and no `value`"
+	}
+	if trigger.Type == triggerconf.Regex {
+		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(trigger.Value, ""); err != nil {
+			return "a regex that does not compile: " + err.Error()
+		}
+	}
+	return ""
 }
 
 // isExportedId reports whether id reads as an exported Go name: an upper-case

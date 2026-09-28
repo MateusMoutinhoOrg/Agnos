@@ -53,8 +53,8 @@ func MatchRouteRequest(sandbox *api.Sandbox, conf *routeconf.RouteConf, request 
 		if !routePathConverts(sandbox, path, text) {
 			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("path %s: %q is not a valid %s", path.Id, sandbox.Deps.Stringsdeps.TrimPrefix(text, "/"), path.Type)}
 		}
-		if path.Trigger.Exists && !MatchRouteTrigger(sandbox, path.Trigger, text, true) {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("path %s: %q fails %s", path.Id, text, describeTrigger(sandbox, path.Trigger))}
+		if path.Trigger.Exists && !MatchTrigger(sandbox, path.Trigger, text, true) {
+			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("path %s: %q fails %s", path.Id, text, DescribeTrigger(sandbox, path.Trigger))}
 		}
 	}
 
@@ -70,8 +70,8 @@ func MatchRouteRequest(sandbox *api.Sandbox, conf *routeconf.RouteConf, request 
 		if len(values) == 0 {
 			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("parameter %s: absent, and it declares a trigger", parameter.Id)}
 		}
-		if !MatchRouteTrigger(sandbox, parameter.Trigger, values[0], false) {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("parameter %s: %q fails %s", parameter.Id, values[0], describeTrigger(sandbox, parameter.Trigger))}
+		if !MatchTrigger(sandbox, parameter.Trigger, values[0], false) {
+			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("parameter %s: %q fails %s", parameter.Id, values[0], DescribeTrigger(sandbox, parameter.Trigger))}
 		}
 	}
 
@@ -91,49 +91,6 @@ func MatchRouteRequest(sandbox *api.Sandbox, conf *routeconf.RouteConf, request 
 		}
 	}
 	return match
-}
-
-// MatchRouteTrigger is MatchTrigger of the generated IsActionable.go.
-func MatchRouteTrigger(sandbox *api.Sandbox, trigger routeconf.Trigger, text string, segmented bool) bool {
-	value := trigger.Value
-	if trigger.IgnoreCase && trigger.Type != "regex" {
-		value = sandbox.Deps.Stringsdeps.ToLower(value)
-		text = sandbox.Deps.Stringsdeps.ToLower(text)
-	}
-
-	matched := text == value
-	switch trigger.Type {
-	case "prefix":
-		if !segmented {
-			matched = sandbox.Deps.Stringsdeps.HasPrefix(text, value)
-			break
-		}
-		value = sandbox.Deps.Stringsdeps.TrimSuffix(value, "/")
-		matched = value == "" || text == value || sandbox.Deps.Stringsdeps.HasPrefix(text, value+"/")
-	case "text-prefix":
-		matched = sandbox.Deps.Stringsdeps.HasPrefix(text, value)
-	case "suffix":
-		matched = sandbox.Deps.Stringsdeps.HasSuffix(text, value)
-	case "regex":
-		if trigger.IgnoreCase {
-			value = "(?i)" + value
-		}
-		ok, err := sandbox.Deps.Stringsdeps.MatchPattern(value, text)
-		matched = err == nil && ok
-	}
-	return matched != trigger.Negate
-}
-
-// describeTrigger words one trigger the way explain-route prints it.
-func describeTrigger(sandbox *api.Sandbox, trigger routeconf.Trigger) string {
-	text := sandbox.Deps.Std.Sprintf("%s %q", trigger.Type, trigger.Value)
-	if trigger.IgnoreCase {
-		text += " ignoring case"
-	}
-	if trigger.Negate {
-		text = "not " + text
-	}
-	return text
 }
 
 // routePathSlice is PathSlice of the generated IsActionable.go.

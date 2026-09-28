@@ -1,16 +1,11 @@
 package routeconf
 
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+
 // Trigger is the condition a path slice or a parameter value has to meet for
-// the route to join the run list: the text compared, and how. Exists is false
-// on an entry that declares none — a plain capture, or a parameter that is
-// bound and never matched on.
-type Trigger struct {
-	Exists     bool
-	Type       string // "equal" | "prefix" | "text-prefix" | "suffix" | "regex"
-	Value      string
-	Negate     bool
-	IgnoreCase bool
-}
+// the route to join the run list. It is the one trigger every declaration
+// shares, so a command.yaml and a route.yaml read it the same way.
+type Trigger = triggerconf.Trigger
 
 // Path is one entry of a route's `paths`: the slice of request segments from
 // Start to End, both inclusive, End -1 standing for the last segment. The slice

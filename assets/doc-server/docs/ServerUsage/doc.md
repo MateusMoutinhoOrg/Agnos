@@ -83,7 +83,7 @@ the result goes through the same constructor the `add-` side calls.
 
 `add-path` reads a slice of the request path, `--start` to `--end` (`-1` the last segment), into
 `Entries.<Id>`, converted to its `--type` (`string`, `integer`, `number`, `uuid`); with
-`--trigger` (and `--trigger-type equal|prefix|text-prefix|suffix|regex`, `--trigger-negate`,
+`--trigger` (and `--trigger-type equal|prefix|text-prefix|suffix|regex|one-of`, `--trigger-negate`,
 `--trigger-ignore-case`) the route only runs when the slice matches. `add-parameter` reads one value from the `--font`s given, in order;
 its `--trigger` is a condition on the **value**, and the route runs only when it holds
 ([RouteYaml](../RouteYaml/doc.md#parameter-keys)).

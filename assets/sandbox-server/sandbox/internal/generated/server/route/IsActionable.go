@@ -4,6 +4,7 @@ import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/internal/generated/routeio"
+	"{{.Module}}/sandbox/internal/generated/trigger"
 )
 
 // IsActionable reports whether one bound route — its Request set — is for the
@@ -26,7 +27,7 @@ func IsActionable(sandbox *api.Sandbox, route *api.Route) bool {
 			continue
 		}
 		values := ParameterValues(sandbox, request, parameter)
-		if len(values) == 0 || !MatchTrigger(sandbox, parameter.Trigger, values[0], false) {
+		if len(values) == 0 || !trigger.MatchTrigger(sandbox, parameter.Trigger, values[0], false) {
 			return false
 		}
 	}
@@ -53,7 +54,7 @@ func MatchesPath(sandbox *api.Sandbox, route *api.Route) bool {
 		if _, ok := PathValue(sandbox, path, text); !ok {
 			return false
 		}
-		if path.Trigger.Exist && !MatchTrigger(sandbox, path.Trigger, text, true) {
+		if path.Trigger.Exist && !trigger.MatchTrigger(sandbox, path.Trigger, text, true) {
 			return false
 		}
 	}
@@ -122,46 +123,6 @@ func PathSlice(sandbox *api.Sandbox, segments []string, path api.Path) (string, 
 	}
 
 	return "/" + sandbox.Deps.Stringsdeps.Join(segments[path.Start:end+1], "/"), true
-}
-
-// MatchTrigger reports whether one text meets a trigger: the comparison its
-// Type names, run without regard to case when it declares IgnoreCase, and
-// inverted when it declares Negate. Segmented is true for a path slice, the
-// one text a prefix reads segment by segment.
-func MatchTrigger(sandbox *api.Sandbox, trigger api.Trigger, text string, segmented bool) bool {
-	return compareTrigger(sandbox, trigger, text, segmented) != trigger.Negate
-}
-
-// compareTrigger is the comparison of MatchTrigger before Negate. On a path
-// slice a prefix holds on a segment boundary alone — "/admin" is "/admin" or
-// "/admin/…", never "/administrator" — which is what tells it from a
-// text-prefix. A parameter value has no segments, so there the two are one.
-func compareTrigger(sandbox *api.Sandbox, trigger api.Trigger, text string, segmented bool) bool {
-	value := trigger.Value
-	if trigger.IgnoreCase && trigger.Type != api.RegexTrigger {
-		value = sandbox.Deps.Stringsdeps.ToLower(value)
-		text = sandbox.Deps.Stringsdeps.ToLower(text)
-	}
-
-	switch trigger.Type {
-	case api.PrefixTrigger:
-		if !segmented {
-			return sandbox.Deps.Stringsdeps.HasPrefix(text, value)
-		}
-		value = sandbox.Deps.Stringsdeps.TrimSuffix(value, "/")
-		return value == "" || text == value || sandbox.Deps.Stringsdeps.HasPrefix(text, value+"/")
-	case api.TextPrefixTrigger:
-		return sandbox.Deps.Stringsdeps.HasPrefix(text, value)
-	case api.SuffixTrigger:
-		return sandbox.Deps.Stringsdeps.HasSuffix(text, value)
-	case api.RegexTrigger:
-		if trigger.IgnoreCase {
-			value = "(?i)" + value
-		}
-		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(value, text)
-		return err == nil && matched
-	}
-	return text == value
 }
 
 // ParameterValues is the raw values one parameter brings, from the first of

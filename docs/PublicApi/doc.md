@@ -28,6 +28,7 @@ struct of function fields, filled by a binder.
 | [`sandbox/api/cli.go`](api.cli.md) | `ExitOk`, `ExitFailure`, `ExitUsage`, `Cli` |
 | [`sandbox/api/command.go`](api.command.md) | `CommandArg`, `CommandFlag`, `Command`, `NewCommand`, `BindCommand` |
 | [`sandbox/api/config.go`](api.config.md) | `Config` |
+| [`sandbox/api/trigger.go`](api.trigger.md) | `EqualTrigger`, `PrefixTrigger`, `TextPrefixTrigger`, `SuffixTrigger`, `RegexTrigger`, `OneOfTrigger`, `TriggerType`, `Trigger` |
 
 ## Dependency contracts
 

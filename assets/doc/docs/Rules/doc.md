@@ -170,7 +170,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A route declares at least one path. A path's `start` is never negative and its `end` is `-1`
   or not before `start`; its `type` is `string`, `integer`, `number` or `uuid`, and anything but
   `string` reads one segment (`start == end`); a `trigger` has a known type (`equal`, `prefix`,
-  `text-prefix`, `suffix`, `regex`), a value, and — for a regex — one that compiles. **(verify)**
+  `text-prefix`, `suffix`, `regex`, `one-of`), a value — `values` for a `one-of` — and — for a
+  regex — one that compiles. **(verify)**
 - On a path a `prefix` holds on a segment boundary — `/admin` is `/admin` or `/admin/…`, never
   `/administrator`; `text-prefix` is the plain one. On a parameter value the two are the same.
 - Every `id` of `paths` and `parameters` is an exported Go name, unique across both and never

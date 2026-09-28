@@ -146,6 +146,8 @@ func triggerConst(kind string) string {
 		return "api.SuffixTrigger"
 	case "regex":
 		return "api.RegexTrigger"
+	case "one-of":
+		return "api.OneOfTrigger"
 	}
 	return "api.EqualTrigger"
 }
@@ -156,6 +158,7 @@ func triggerData(trigger routeconf.Trigger) map[string]any {
 		"Exist":      trigger.Exists,
 		"Type":       triggerConst(trigger.Type),
 		"Value":      trigger.Value,
+		"Values":     trigger.Values,
 		"Negate":     trigger.Negate,
 		"IgnoreCase": trigger.IgnoreCase,
 	}

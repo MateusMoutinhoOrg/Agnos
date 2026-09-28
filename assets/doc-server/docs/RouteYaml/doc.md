@@ -112,7 +112,7 @@ segment at all, reads as `/` for a path of `start: 0, end: -1`.
 | `start` | Index of the first segment. Default `0` |
 | `end` | Index of the last segment, `-1` the last one. Default `-1` |
 | `type` | `string` (default, omitted), `integer` (`int`), `number` (`float64`), `uuid` (`string`). Anything but `string` needs `start == end`; a segment that does not convert is a **non-match**, never a `400` |
-| `trigger` | `{type, value, negate, ignore-case}`: the slice has to match it for the route to run at all |
+| `trigger` | `{type, value, negate, ignore-case}` (`values` for `one-of`): the slice has to match it for the route to run at all |
 | `description` | One-line help text |
 
 A request with no such slice — fewer segments than `start` — is not for the route. Every path
@@ -127,10 +127,11 @@ leading slash (`"/a/b.png"`). Triggers always compare the slice with its leading
 | `text-prefix` | begins with `value`, whatever follows | begins with `value` |
 | `suffix` | ends with `value` | same |
 | `regex` | `value`, a regular expression, matches | same |
+| `one-of` | is exactly one of `values` | same |
 
 `negate: true` inverts the result; `ignore-case: true` compares without regard to case. The
-command line also takes `starts-with`, `ends-with`, `exact`/`equals` and `matches`, and writes the
-canonical name. Two paths over the same slice are an AND — "`/admin` but not `/admin/login`":
+command line also takes `starts-with`, `ends-with`, `exact`/`equals`, `matches` and `any-of`, and
+writes the canonical name; a `one-of` is typed as one comma-separated `--trigger` (`a,b`). Two paths over the same slice are an AND — "`/admin` but not `/admin/login`":
 
 ```yaml
 paths:

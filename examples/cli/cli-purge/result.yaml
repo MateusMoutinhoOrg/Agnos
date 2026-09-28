@@ -35,6 +35,8 @@ tree:
       sha: eb537fe2f2ef376f6ab53cd51ad6f9bd7cc8c5a8ab0e7b3e2b6094e1849b62a3
     - file: docs/PublicApi/api.sandbox.md
       sha: 262a9987c57ee5f0453f57fbaf96059e2e65b66fb60e6608b9cfbbec42986868
+    - file: docs/PublicApi/api.trigger.md
+      sha: c54f5d01cd7bb040654f176e18b5700fe90e9c7411682d102faa1c9ca00e3834
     - file: docs/PublicApi/deps.argvdeps.md
       sha: 98d4251a907e71c921fb2d9434d3c3a873c8093f4a9fb3a5c560bf9757f53d11
     - file: docs/PublicApi/deps.std.md
@@ -42,7 +44,7 @@ tree:
     - file: docs/PublicApi/deps.stringsdeps.md
       sha: 087743126a96d90496db5692eb2ead0c0b02404d4d0a528c196d8713c3463451
     - file: docs/PublicApi/doc.md
-      sha: c9ce480ee28df9fe00cd0c29911683b51b9b18c35c4b50b4dc7cfec72a5f1345
+      sha: 14a96ce33a36e34ddde5a15d05ac59c42da0f3698db0d6c42be35bb7935568db
     - file: docs/PublicApi/props.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md
