@@ -24,9 +24,10 @@ struct of function fields, filled by a binder.
 | Page | Declares |
 | --- | --- |
 | [`sandbox/api/sandbox.go`](api.sandbox.md) | `Sandbox` |
-| [`sandbox/api/actions.go`](api.actions.md) | `RuntimeGo`, `RuntimeNone`, `DefaultRoutePriority`, `DefaultMiddlewarePriority`, `BuildProps`, `CompileProps`, `StartProps`, `ExecTestProps`, `AddDepProps`, `SetDepProps`, `RemoveDepProps`, `AddAdapterProps`, `SetAdapterProps`, `ExtensionInfo`, `DepInfo`, `AdapterInfo`, `FieldProps`, `CommandProps`, `AddRouteProps`, `RouteProps`, `RenameRouteProps`, `RebalanceRoutesProps`, `ExplainRouteProps`, `DatabaseFieldProps`, `DatabaseFieldEditProps`, `RoutePathProps`, `RoutePathEditProps`, `RouteParameterProps`, `RouteParameterEditProps`, `RouteBodyProps`, `RouteBodyFieldProps`, `RouteBodyFieldEditProps`, `RouteBodyImportProps`, `PageProps`, `DocProps`, `Actions` |
+| [`sandbox/api/actions.go`](api.actions.md) | `RuntimeGo`, `RuntimeNone`, `DefaultRoutePriority`, `DefaultMiddlewarePriority`, `BuildProps`, `CompileProps`, `StartProps`, `ExecTestProps`, `AddDepProps`, `SetDepProps`, `RemoveDepProps`, `AddAdapterProps`, `SetAdapterProps`, `ExtensionInfo`, `DepInfo`, `AdapterInfo`, `FlagProps`, `ArgProps`, `SetCommandProps`, `AddRouteProps`, `RouteProps`, `RenameRouteProps`, `RebalanceRoutesProps`, `ExplainRouteProps`, `DatabaseFieldProps`, `DatabaseFieldEditProps`, `RoutePathProps`, `RoutePathEditProps`, `RouteParameterProps`, `RouteParameterEditProps`, `RouteBodyProps`, `RouteBodyFieldProps`, `RouteBodyFieldEditProps`, `RouteBodyImportProps`, `PageProps`, `DocProps`, `Actions` |
 | [`sandbox/api/cli.go`](api.cli.md) | `ExitOk`, `ExitFailure`, `ExitUsage`, `Cli` |
-| [`sandbox/api/command.go`](api.command.md) | `CommandArg`, `CommandFlag`, `Command`, `NewCommand`, `BindCommand` |
+| [`sandbox/api/command.go`](api.command.md) | `StringArg`, `IntegerArg`, `NumberArg`, `UuidArg`, `StringFlag`, `IntegerFlag`, `NumberFlag`, `BooleanFlag`, `StringArrayFlag`, `IntegerArrayFlag`, `HandlerFailure`, `NotFoundFailure`, `BadUsageFailure`, `UnknownFlagFailure`, `UnexpectedArgFailure`, `ArgType`, `CommandArg`, `FlagType`, `CommandFlag`, `CommandResponse`, `CommandFailureKind`, `CommandFailure`, `Command`, `Error`, `NewCommand`, `BindCommand` |
+| [`sandbox/api/commandprops.go`](api.commandprops.md) | `CommandProps` |
 | [`sandbox/api/config.go`](api.config.md) | `Config` |
 | [`sandbox/api/trigger.go`](api.trigger.md) | `EqualTrigger`, `PrefixTrigger`, `TextPrefixTrigger`, `SuffixTrigger`, `RegexTrigger`, `OneOfTrigger`, `TriggerType`, `Trigger` |
 
@@ -43,6 +44,7 @@ field is that package's `Sandbox` struct, filled by `adapters/libs/<name>.Bind(&
 | [`deps.Hashdeps`](deps.hashdeps.md) | `Sandbox` |
 | [`deps.Interviewer`](deps.interviewer.md) | `AlternativeOption`, `Sandbox` |
 | [`deps.Iodeps`](deps.iodeps.md) | `Sandbox` |
+| [`deps.Reflectdeps`](deps.reflectdeps.md) | `Sandbox` |
 | [`deps.Rundeps`](deps.rundeps.md) | `Sandbox`, `RunProps`, `Result` |
 | [`deps.Serializables`](deps.serializables.md) | `SerializibleObject`, `Sandbox` |
 | [`deps.Serverdeps`](deps.serverdeps.md) | `Sandbox`, `ServerProps`, `Server`, `Request`, `Response` |

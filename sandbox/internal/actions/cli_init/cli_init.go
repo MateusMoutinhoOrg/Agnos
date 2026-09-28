@@ -7,10 +7,15 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-// CliInit installs the std, argv and strings deps the CLI layer depends on and renders
-// the "cli" asset group into the project, then runs build as a follow-up step.
+// cliDeps are the contracts the cli layer calls into: the three output
+// channels, the argv parser, text conversion, and the reflection that fills a
+// command's Entries.
+var cliDeps = []string{"std", "argvdeps", "stringsdeps", "reflectdeps"}
+
+// CliInit installs the deps the cli layer depends on and renders the "cli"
+// asset group into the project, then runs build as a follow-up step.
 func CliInit(sandbox *api.Sandbox, path string) error {
-	for _, dep := range []string{"std", "argvdeps", "stringsdeps"} {
+	for _, dep := range cliDeps {
 		if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: dep}); err != nil {
 			return err
 		}

@@ -1,0 +1,22 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-parameter
+    - description: the key of the parameter to drop
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Server System
+examples:
+    - remove-parameter page --route list-users
+flags:
+    - description: the route (identifier or package name) that declares the parameter
+      id: Route
+      required: true
+help: Delete one entry of a route's parameters
+long-description: 'Drops one entry of the route''s parameters, the exact inverse of add-parameter. The build renders only: dropping a parameter may leave hand-written code reading an Entries field that is gone.'
+priority: 100

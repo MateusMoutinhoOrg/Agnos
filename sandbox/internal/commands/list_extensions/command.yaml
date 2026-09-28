@@ -1,0 +1,10 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: list-extensions
+category: Extensions
+help: Lists the generation mechanics and which are on
+priority: 100

@@ -7,6 +7,7 @@ import (
 	hashdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/hashdeps"
 	interviewer "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/interviewer"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/iodeps"
+	reflectdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/reflectdeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serializables"
 	serverdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serverdeps"
@@ -25,6 +26,7 @@ func New() deps.Deps {
 	hashdeps.Bind(&deps)
 	interviewer.Bind(&deps)
 	iodeps.Bind(&deps)
+	reflectdeps.Bind(&deps)
 	rundeps.Bind(&deps)
 	serializables.Bind(&deps)
 	serverdeps.Bind(&deps)

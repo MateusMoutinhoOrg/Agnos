@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-available
+    - description: the available to remove
+      end: 1
+      id: Available
+      required: true
+      start: 1
+category: Deps System
+examples:
+    - remove-available lambda
+help: Deletes one available
+long-description: 'Removes adapters/availables/<name>/ whole. The standard available is refused: cmd/main/main.go imports it.'
+priority: 100

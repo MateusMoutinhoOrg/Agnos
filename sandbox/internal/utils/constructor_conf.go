@@ -27,13 +27,18 @@ const GeneratedDir = "sandbox/internal/generated"
 // project's from then on, like a route's InternalPureHandler.go.
 const RoutePropsFile = "routeprops.go"
 
+// CommandPropsFile is the sandbox/api/ file declaring api.CommandProps, the
+// struct one command line's chain of commands shares. The build writes it once
+// and it is the project's from then on.
+const CommandPropsFile = "commandprops.go"
+
 // ConstructorExempt are the sandbox/api/ files that declare no field of the
 // sandbox: sandbox.go is the struct itself, command.go and route.go are the
 // shape of one command and of one route, each owned by the contract whose
 // New<Name> builds the slice of them, trigger.go is the condition both of
-// them match on, and routeprops.go is what a route's handler is handed per
-// request.
-var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile}
+// them match on, and routeprops.go and commandprops.go are what a route's and
+// a command's handler are handed per run.
+var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile}
 
 // ConstructorDir is the project-relative directory of one constructor package.
 func ConstructorDir(name string) string {

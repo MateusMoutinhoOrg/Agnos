@@ -1,0 +1,22 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-path
+    - description: the id of the path to drop (its Entries field)
+      end: 1
+      id: Id
+      required: true
+      start: 1
+category: Server System
+examples:
+    - remove-path tenant --route create-user
+flags:
+    - description: the route (identifier or package name) that declares the path
+      id: Route
+      required: true
+help: Delete one entry of a route's paths
+long-description: 'Drops one entry of the route''s paths, the exact inverse of add-path, refusing the last one. The build renders only: dropping a path may leave hand-written code reading an Entries field that is gone.'
+priority: 100

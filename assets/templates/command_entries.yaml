@@ -1,3 +1,0 @@
-identifiers: ["{{.Identifier}}"]
-category: {{printf "%q" .Category}}
-help: {{printf "%q" .Help}}

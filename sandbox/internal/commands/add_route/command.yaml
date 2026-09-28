@@ -1,0 +1,56 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-route
+    - description: the route name (becomes the directory sandbox/internal/routeslist/<name> and its Go package)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Server System
+examples:
+    - add-route create-user --trigger /users --method POST --help "Create a user" --category Users
+    - add-route get-article --pattern '/articles/{article:integer}'
+    - add-route admin-guard --middleware --trigger /admin
+flags:
+    - description: what the whole request path is compared against; an equal, prefix or text-prefix trigger is normalized to start with / (defaults to /<name>, or / for a --middleware)
+      id: Trigger
+    - description: 'how the trigger is compared: equal, prefix (the value or anything under it, segment by segment), text-prefix, suffix or regex — or starts-with, ends-with, exact, matches (defaults to equal, or prefix for a --middleware)'
+      id: TriggerType
+    - description: 'invert the trigger: the route runs for every path that does not match it'
+      id: TriggerNegate
+      type: boolean
+    - description: compare the trigger without regard to case
+      id: TriggerIgnoreCase
+      type: boolean
+    - description: 'the url shape the route answers, compiled into its paths: literal segments, {name}, {name:integer|number|uuid} and a last {*rest}; without {*rest} the segment count is fixed (excludes --trigger and --trigger-type)'
+      id: Pattern
+    - description: 'an http method the route answers: GET, POST, PUT, PATCH, DELETE, HEAD, OPTIONS, or ANY for every one (repeatable; defaults to GET, or ANY for a --middleware)'
+      id: Method
+      keys:
+        - --method
+        - -m
+      type: string-array
+    - description: 'declare a middleware: ANY method, a prefix trigger on / unless --trigger says otherwise, priority 10, and a stub handler that hands the request on'
+      id: Middleware
+      type: boolean
+    - default: "-1"
+      description: the rung this route runs on when several match one request, lowest first; a route that answers nothing hands the request on (defaults to 100, or 10 for a --middleware)
+      id: Priority
+      type: integer
+    - description: land one rung below the route named, so it runs first (excludes --priority)
+      id: Before
+    - description: land one rung above the route named, so it runs next (excludes --priority)
+      id: After
+    - description: the Content-Type every response of the route carries (defaults to application/json, or text/plain for a --middleware)
+      id: ResponseType
+    - description: one-line description of the route
+      id: Help
+    - description: the heading the route is listed under in docs/Routes (defaults to Routes, or Middleware for a --middleware)
+      id: Category
+help: Declare a new http route
+long-description: Writes sandbox/internal/routeslist/<name>/route.yaml and a stub InternalPureHandler.go, then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. The paths come from --pattern, or from one path, Route, reading the whole request path against --trigger. A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
+priority: 100

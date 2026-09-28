@@ -6,10 +6,13 @@ import (
 
 func NewEmpty(sandbox *api.Sandbox) *CommandConf {
 	conf := &CommandConf{
-		Identifiers: []string{},
+		Priority:    DefaultPriority,
+		HasPriority: true,
+		Strict:      true,
+		Args:        []Arg{},
+		Flags:       []Flag{},
 		Examples:    []string{},
-		Flags:       []Field{},
-		Args:        []Field{},
+		Legacy:      []string{},
 	}
 	BindMethods(sandbox, conf)
 	return conf

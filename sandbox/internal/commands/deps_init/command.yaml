@@ -1,0 +1,16 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: deps-init
+category: Deps System
+examples:
+    - deps-init
+    - deps-init --path ./my-project
+help: Initializes the dependency-injection subsystem for the project
+long-description: |-
+    Creates the sandbox/deps and adapters directories and calls build.
+    Run this once before using add-dep.
+priority: 100

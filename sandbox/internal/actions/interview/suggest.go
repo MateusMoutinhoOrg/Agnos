@@ -399,18 +399,18 @@ func commandFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map
 		return []interviewer.AlternativeOption{}
 	}
 
-	fields := conf.Args
-	if flags {
-		fields = conf.Flags
-	}
-
 	options := []interviewer.AlternativeOption{}
-	for _, field := range fields {
-		label := field.Key
-		if len(field.Identifiers) > 0 {
-			label = field.Identifiers[0]
+	if flags {
+		for _, flag := range conf.Flags {
+			options = append(options, interviewer.AlternativeOption{Id: flag.Id, Msg: labelled(sandbox, flag.Keys[0], flag.Description)})
 		}
-		options = append(options, interviewer.AlternativeOption{Id: field.Key, Msg: labelled(sandbox, label, field.Description)})
+		return options
+	}
+	for _, arg := range conf.Args {
+		if arg.Trigger.Exists {
+			continue
+		}
+		options = append(options, interviewer.AlternativeOption{Id: arg.Id, Msg: labelled(sandbox, arg.Id, arg.Description)})
 	}
 	return options
 }
@@ -637,8 +637,8 @@ func declaredCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []declaredComma
 		declared := declaredCommand{Identifier: utils.CommandIdentifier(sandbox, name)}
 
 		if conf, err := utils.LoadCommandConf(sandbox, io, name); err == nil {
-			if len(conf.Identifiers) > 0 {
-				declared.Identifier = conf.Identifiers[0]
+			if identifiers := conf.Identifiers(); len(identifiers) > 0 {
+				declared.Identifier = identifiers[0]
 			}
 			declared.Category = conf.Category
 			declared.Help = conf.Help

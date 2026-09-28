@@ -1,0 +1,29 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-flag
+    - description: the flag name (or one of its identifiers, e.g. --out)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - remove-flag output --command exec
+    - remove-flag --out --command exec
+flags:
+    - description: the command (identifier or package name) that owns the flag
+      id: Target
+      keys:
+        - --command
+        - -c
+      required: true
+help: Remove a flag from a command's entries.yaml
+long-description: |-
+    Drops one flag declaration (matched by its name or by one of its identifiers)
+    from sandbox/internal/commands/<command>/entries.yaml and runs build so the
+    command's new.go forgets it.
+priority: 100

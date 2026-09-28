@@ -1,0 +1,27 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-table-field
+    - description: the field to delete, by the name it is declared under
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Database System
+examples:
+    - remove-table-field redirects --database app-database --table url
+flags:
+    - description: the database (identifier or package name) the field is declared on
+      id: Database
+      required: true
+    - description: the table the field is declared on
+      id: Table
+      required: true
+    - description: the nested database field the field sits inside, instead of the table itself
+      id: Parent
+help: Delete one declared field from a table
+long-description: 'Drops one field from a table of the database''s specs.yaml and runs build without compiling: the methods that field generated go with it, and hand-written code may still be calling one.'
+priority: 100

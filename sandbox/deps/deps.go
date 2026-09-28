@@ -7,6 +7,7 @@ import (
 	hashdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/hashdeps"
 	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
+	reflectdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/reflectdeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
 	serverdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serverdeps"
@@ -26,6 +27,7 @@ type Deps struct {
 	Hashdeps      hashdeps.Sandbox
 	Interviewer   interviewer.Sandbox
 	Iodeps        iodeps.Sandbox
+	Reflectdeps   reflectdeps.Sandbox
 	Rundeps       rundeps.Sandbox
 	Serializables serializables.Sandbox
 	Serverdeps    serverdeps.Sandbox

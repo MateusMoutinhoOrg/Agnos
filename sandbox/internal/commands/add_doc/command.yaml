@@ -1,0 +1,37 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-doc
+    - description: the doc directory under docs/, nested with / for a sub-doc (e.g. PublicApi/api.AddDoc)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Documentation
+examples:
+    - add-doc HandleReports --theme development --description "How a report is written and regenerated"
+    - add-doc PublicApi/api.AddDoc --description "The AddDoc action of the sandbox api"
+flags:
+    - description: a theme id of themes.yaml the doc belongs to (repeatable; first-level docs only)
+      id: Theme
+      keys:
+        - --theme
+        - -t
+      type: string-array
+    - description: the one-line summary every index lists the doc with
+      id: Description
+      keys:
+        - --description
+        - -d
+      required: true
+help: Scaffold a new doc directory under docs/
+long-description: |-
+    Creates docs/<name>/ with a doc.md stub and the props.yaml declaring it,
+    then runs build so README.md's index and the parent's Index.md list it.
+    A first-level doc needs at least one --theme of themes.yaml; a nested name
+    (docs/<Parent>/<Name>) creates a sub-doc, which takes no theme. Refuses to
+    overwrite an existing doc.
+priority: 100

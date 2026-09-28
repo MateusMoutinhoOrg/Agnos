@@ -1,0 +1,38 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: set-body
+    - description: the route to edit (identifier or package name)
+      end: 1
+      id: Route
+      required: true
+      start: 1
+category: Server System
+examples:
+    - set-body create-user --type json --required --max-bytes 2097152
+    - set-body upload-avatar --type raw --content-type application/octet-stream
+    - set-body ping --type none
+flags:
+    - description: 'how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded, read into a map[string][]string)'
+      id: Type
+    - description: answer 400 when the body is absent or empty
+      id: Required
+      type: boolean
+    - description: accept an absent body again
+      id: Optional
+      type: boolean
+    - default: "-1"
+      description: the longest body accepted, in bytes; a longer one is answered 413
+      id: MaxBytes
+      type: integer
+    - description: the only content-type accepted; a divergent one is answered 415
+      id: ContentType
+    - description: delete the declared json-schema, leaving the body unvalidated
+      id: DropSchema
+      type: boolean
+help: Rewrite the body keys of a route.yaml
+long-description: 'Overwrites the body keys of one route.yaml: how the body is read, whether it is required, the longest one accepted and the content-type the dispatch demands. Empty options leave the current value alone. Declaring a json-schema is add-body-field''s job; --drop-schema deletes the one already declared.'
+priority: 100

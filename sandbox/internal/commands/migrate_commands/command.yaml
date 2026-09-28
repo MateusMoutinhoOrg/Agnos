@@ -1,0 +1,11 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: migrate-commands
+category: Cli System
+help: Rewrite every command from entries.yaml + handler.go into command.yaml + InternalPureHandler.go
+hidden: true
+priority: 100

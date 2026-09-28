@@ -6,10 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// GenerateCommandNew renders assets/templates/new.go once per command into
-// sandbox/internal/commands/<name>/new.go — the api.Command that package
-// declares, derived from its entries.yaml, which sandbox/internal/generated/cli/new.go
-// collects into Cli.Commands.
+// GenerateCommandNew renders assets/templates/command_new.go and
+// command_entries.go once per command into sandbox/internal/commands/<name>/:
+// new.go, the api.Command that package declares, derived from its
+// command.yaml, which sandbox/internal/generated/cli/cli/new.go collects into
+// Cli.Commands; and entries.go, the Entries its InternalPureHandler is handed.
 func GenerateCommandNew(sandbox *api.Sandbox, io *smartio.SmartIO, commands []map[string]any, module string) error {
 	for _, command := range commands {
 		name, _ := command["Name"].(string)
@@ -20,8 +21,11 @@ func GenerateCommandNew(sandbox *api.Sandbox, io *smartio.SmartIO, commands []ma
 		for key, value := range command {
 			vars[key] = value
 		}
-		dest := "sandbox/internal/commands/" + name + "/new.go"
-		if err := utils.RenderTemplateToDest(sandbox, io, "templates/new.go", vars, dest); err != nil {
+		dir := "sandbox/internal/commands/" + name
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_new.go", vars, dir+"/new.go"); err != nil {
+			return err
+		}
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_entries.go", vars, dir+"/entries.go"); err != nil {
 			return err
 		}
 	}

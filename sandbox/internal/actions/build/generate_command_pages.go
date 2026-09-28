@@ -10,7 +10,7 @@ import (
 const commandPagesDir = utils.DocsDir + "/Commands"
 
 // GenerateCommandPages renders assets/templates/command_page.md once per
-// visible command into docs/Commands/<identifier>.md, the page docs/Commands'
+// visible command — and once per middleware — into docs/Commands/<identifier>.md, the page docs/Commands'
 // own doc.md links to. A page is an asset of that doc directory, not a sub-doc:
 // CollectDocTree walks directories, so a plain .md beside doc.md is ignored by
 // the index and by `verify`, exactly as the generated Index.md is.
@@ -20,26 +20,36 @@ const commandPagesDir = utils.DocsDir + "/Commands"
 //
 // A page whose command is gone is removed here, so the directory holds the
 // commands that are declared now and no page nothing links to.
-func GenerateCommandPages(sandbox *api.Sandbox, io *smartio.SmartIO, groups []CommandDocGroup, name string) error {
+func GenerateCommandPages(sandbox *api.Sandbox, io *smartio.SmartIO, docs CommandDocs, name string) error {
 	written := map[string]bool{}
 
-	for _, group := range groups {
+	render := func(category string, command CommandDoc) error {
+		file, err := commandPageFile(sandbox, command.Page)
+		if err != nil {
+			return err
+		}
+		vars := map[string]any{
+			"Name":     name,
+			"Category": category,
+			"Command":  command,
+		}
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_page.md", vars, file); err != nil {
+			return err
+		}
+		written[file] = true
+		return nil
+	}
+
+	for _, group := range docs.Groups {
 		for _, command := range group.Commands {
-			file, err := commandPageFile(sandbox, command.Identifier)
-			if err != nil {
+			if err := render(group.Category, command); err != nil {
 				return err
 			}
-
-			vars := map[string]any{
-				"Name":     name,
-				"Category": group.Category,
-				"Command":  command,
-			}
-
-			if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_page.md", vars, file); err != nil {
-				return err
-			}
-			written[file] = true
+		}
+	}
+	for _, middleware := range docs.Middlewares {
+		if err := render("Middlewares", middleware); err != nil {
+			return err
 		}
 	}
 
@@ -50,8 +60,8 @@ func GenerateCommandPages(sandbox *api.Sandbox, io *smartio.SmartIO, groups []Co
 // commandPageFile is the page a command is written to. An identifier that
 // spells one of the two reserved names of a doc directory is a hard error
 // rather than a page silently overwriting the index it is linked from.
-func commandPageFile(sandbox *api.Sandbox, identifier string) (string, error) {
-	file := identifier + docPageExt
+func commandPageFile(sandbox *api.Sandbox, file string) (string, error) {
+	identifier := sandbox.Deps.Stringsdeps.TrimSuffix(file, docPageExt)
 
 	if file == utils.DocFile || file == utils.DocIndexFile {
 		return "", sandbox.Deps.Std.Errorf(

@@ -1,0 +1,28 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-arg
+    - description: the arg name
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - remove-arg file --command exec
+flags:
+    - description: the command (identifier or package name) that owns the arg
+      id: Target
+      keys:
+        - --command
+        - -c
+      required: true
+help: Remove a positional arg from a command's entries.yaml
+long-description: |-
+    Drops one positional arg declaration from
+    sandbox/internal/commands/<command>/entries.yaml and runs build so the
+    command's new.go forgets it. Later args shift up.
+priority: 100

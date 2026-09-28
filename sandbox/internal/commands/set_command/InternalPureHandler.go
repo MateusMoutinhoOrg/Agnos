@@ -1,0 +1,26 @@
+package set_command
+
+import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
+)
+
+func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	set_error := setCommandAction.SetCommand(sandbox, api.SetCommandProps{
+		Path:            props.Path,
+		Command:         entries.Name,
+		Help:            entries.Help,
+		Category:        entries.Category,
+		LongDescription: entries.LongDescription,
+		Hidden:          entries.Hidden,
+		Visible:         entries.Visible,
+		Identifiers:     entries.Identifier,
+		Examples:        entries.Example,
+	})
+	if set_error != nil {
+		return cliio.Fail(sandbox, api.ExitFailure, "", set_error.Error())
+	}
+	response.SetStatus(api.ExitOk)
+	return nil
+}

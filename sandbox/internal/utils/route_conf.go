@@ -430,3 +430,49 @@ func RouteCheckLiteral(sandbox *api.Sandbox, kind string, label string, raw stri
 func RouteParseBound(sandbox *api.Sandbox, kind string, label string, raw string) (float64, error) {
 	return parseBound(sandbox, kind, label, raw)
 }
+
+// FieldType maps the type spellings accepted on the command line onto the
+// canonical entries.yaml set; "" defaults to string.
+func FieldType(sandbox *api.Sandbox, raw string) (string, bool) {
+	switch sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) {
+	case "", "string", "str":
+		return "string", true
+	case "bool", "boolean":
+		return "boolean", true
+	case "int", "integer":
+		return "int", true
+	case "float", "double", "number":
+		return "float", true
+	default:
+		return "", false
+	}
+}
+
+func checkLiteral(sandbox *api.Sandbox, kind string, label string, raw string) error {
+	switch kind {
+	case "boolean":
+		if raw != "true" && raw != "false" {
+			return sandbox.Deps.Std.Errorf("%s for a boolean must be true or false, got %q", label, raw)
+		}
+	case "int":
+		if _, err := sandbox.Deps.Stringsdeps.ParseInt(raw, 10, 64); err != nil {
+			return sandbox.Deps.Std.Errorf("%s must be an int, got %q", label, raw)
+		}
+	case "float":
+		if _, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil {
+			return sandbox.Deps.Std.Errorf("%s must be a float, got %q", label, raw)
+		}
+	}
+	return nil
+}
+
+func parseBound(sandbox *api.Sandbox, kind string, label string, raw string) (float64, error) {
+	if kind != "int" && kind != "float" {
+		return 0, sandbox.Deps.Std.Errorf("%s only applies to int/float fields", label)
+	}
+	if err := checkLiteral(sandbox, kind, label, raw); err != nil {
+		return 0, err
+	}
+	value, _ := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64)
+	return value, nil
+}

@@ -1,0 +1,22 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-adapter
+    - description: the adapter to install from assets/adapterlist
+      end: 1
+      id: Adapter
+      required: true
+      start: 1
+category: Deps System
+examples:
+    - add-adapter reflectsort
+    - add-adapter reflectsort --available lambda
+flags:
+    - description: the available that should switch to this adapter (installs only when absent)
+      id: Available
+help: Installs one further adapter for a contract the project already has
+long-description: 'Renders assets/adapterlist/<adapter> into the project and writes its declaration to adapters/libs/<adapter>/adapter.yaml. The contract it fills has to be installed already. Installing changes no selection: an available binds one adapter per field, so --available names the one that switches to it.'
+priority: 100

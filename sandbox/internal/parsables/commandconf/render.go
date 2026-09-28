@@ -3,13 +3,30 @@ package commandconf
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
 )
 
-// Render serializes a CommandConf back to the entries.yaml shape.
+// Render serializes a CommandConf back to the command.yaml shape, leaving out
+// every key that holds its default: `strict` when true, an arg's `type` when
+// string, a flag's `keys` when it declared none.
 func Render(sandbox *api.Sandbox, conf *CommandConf) string {
 	obj := sandbox.Deps.Serializables.CreateObject()
 
-	obj.AddItemToObject("identifiers", stringArray(sandbox, conf.Identifiers))
+	if conf.HasPriority {
+		obj.AddItemToObject("priority", conf.Priority)
+	}
+	if conf.HasSegments {
+		obj.AddItemToObject("segments", conf.Segments)
+	}
+	if !conf.Strict {
+		obj.AddItemToObject("strict", false)
+	}
+	if len(conf.Args) > 0 {
+		obj.AddItemToObject("args", argsArray(sandbox, conf.Args))
+	}
+	if len(conf.Flags) > 0 {
+		obj.AddItemToObject("flags", flagsArray(sandbox, conf.Flags))
+	}
 	obj.AddItemToObject("category", conf.Category)
 	obj.AddItemToObject("help", conf.Help)
 	if conf.LongDescription != "" {
@@ -21,46 +38,73 @@ func Render(sandbox *api.Sandbox, conf *CommandConf) string {
 	if conf.Hidden {
 		obj.AddItemToObject("hidden", true)
 	}
-	if len(conf.Flags) > 0 {
-		obj.AddItemToObject("flags", fieldsArray(sandbox, conf.Flags))
-	}
-	if len(conf.Args) > 0 {
-		obj.AddItemToObject("args", fieldsArray(sandbox, conf.Args))
-	}
 
 	return sandbox.Deps.Serializables.SerializeToYaml(obj)
 }
 
-// fieldsArray renders flags/args in the canonical ordered sequence shape.
-func fieldsArray(sandbox *api.Sandbox, fields []Field) *serializibles.SerializibleObject {
+// argsArray renders the `args` sequence, in declaration order.
+func argsArray(sandbox *api.Sandbox, args []Arg) *serializibles.SerializibleObject {
 	arr := sandbox.Deps.Serializables.CreateArray()
-	for _, field := range fields {
+	for _, arg := range args {
 		entry := sandbox.Deps.Serializables.CreateObject()
-		entry.AddItemToObject("name", field.Key)
-		if len(field.Identifiers) > 0 {
-			entry.AddItemToObject("identifiers", stringArray(sandbox, field.Identifiers))
+		entry.AddItemToObject("id", arg.Id)
+		entry.AddItemToObject("start", arg.Start)
+		entry.AddItemToObject("end", arg.End)
+		if arg.Type != "" && arg.Type != DefaultArgType {
+			entry.AddItemToObject("type", arg.Type)
 		}
-		if field.Description != "" {
-			entry.AddItemToObject("description", field.Description)
+		if arg.Trigger.Exists {
+			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, arg.Trigger))
 		}
-		if len(field.Examples) > 0 {
-			entry.AddItemToObject("examples", stringArray(sandbox, field.Examples))
-		}
-		entry.AddItemToObject("type", field.Type)
-		if field.HasDefault {
-			entry.AddItemToObject("default", field.Default)
-		}
-		if field.Required {
+		if arg.Required {
 			entry.AddItemToObject("required", true)
 		}
-		if field.Array {
-			entry.AddItemToObject("array", true)
+		if arg.HasDefault {
+			entry.AddItemToObject("default", arg.Default)
 		}
-		if field.HasMin {
-			entry.AddItemToObject("min", field.Min)
+		if arg.Description != "" {
+			entry.AddItemToObject("description", arg.Description)
 		}
-		if field.HasMax {
-			entry.AddItemToObject("max", field.Max)
+		arr.AddItemToArray(entry)
+	}
+	return arr
+}
+
+// flagsArray renders the `flags` sequence, in declaration order.
+func flagsArray(sandbox *api.Sandbox, flags []Flag) *serializibles.SerializibleObject {
+	arr := sandbox.Deps.Serializables.CreateArray()
+	for _, flag := range flags {
+		entry := sandbox.Deps.Serializables.CreateObject()
+		entry.AddItemToObject("id", flag.Id)
+		if flag.HasKeys {
+			entry.AddItemToObject("keys", stringArray(sandbox, flag.Keys))
+		}
+		if flag.Type != "" && flag.Type != DefaultFlagType {
+			entry.AddItemToObject("type", flag.Type)
+		}
+		if flag.Required {
+			entry.AddItemToObject("required", true)
+		}
+		if flag.HasDefault {
+			entry.AddItemToObject("default", flag.Default)
+		}
+		if flag.HasMin {
+			entry.AddItemToObject("min", flag.Min)
+		}
+		if flag.HasMax {
+			entry.AddItemToObject("max", flag.Max)
+		}
+		if len(flag.Enum) > 0 {
+			entry.AddItemToObject("enum", stringArray(sandbox, flag.Enum))
+		}
+		if flag.Pattern != "" {
+			entry.AddItemToObject("pattern", flag.Pattern)
+		}
+		if flag.Trigger.Exists {
+			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, flag.Trigger))
+		}
+		if flag.Description != "" {
+			entry.AddItemToObject("description", flag.Description)
 		}
 		arr.AddItemToArray(entry)
 	}

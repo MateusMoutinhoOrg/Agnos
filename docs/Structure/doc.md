@@ -38,10 +38,12 @@ sandbox/                            closed: imports nothing outside sandbox/, no
   internal/                         the logic; unreachable from outside the sandbox
     generated/                      (gen) every package the build rewrites whole; never edited by hand
       config/new.go                 (gen) NewConfig(sandbox) api.Config: ProjectName, Version
-      cli/new.go                    (gen) NewCli(sandbox) api.Cli: Cli.Commands + Cli.CliMain
-      cli/climain.go                (gen) CliMain, the one dispatch, read off Cli.Commands
+      cli/cli/new.go                (gen) NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.CliMain
+      cli/cli/climain.go            (gen) CliMain, the one dispatch, runs the chain read off Cli.Commands
       trigger/MatchTrigger.go       (gen) MatchTrigger, shared by the route and the command matchers
-    commands/<name>/                entries.yaml (decl), new.go (gen), handler.go (hand)
+      cli/command/                  (gen) NewCommand, IsActionable, CommandHandler — how every command matches and binds a command line
+      cliio/                        (gen) Fail/Raise/FailureOf and the tracked CommandResponse
+    commands/<name>/                command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand)
     actions/new.go                  NewActions(sandbox) api.Actions: one assignment per action
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
     actions/build/collect_*.go      collectors: list one dir, title-case names

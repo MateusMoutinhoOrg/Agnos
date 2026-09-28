@@ -1,0 +1,23 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-dep
+    - description: the dep to remove from the project
+      end: 1
+      id: Dep
+      required: true
+      start: 1
+category: Deps System
+examples:
+    - remove-dep embeddeps
+    - remove-dep embeddeps --path ./my-project
+flags:
+    - description: also remove every adapter that fills the dep (without it, a dep with adapters installed is refused)
+      id: WithAdapters
+      type: boolean
+help: Uninstalls one dep from the project
+long-description: Removes every adapter whose declaration names the dep, its require and its enrollment in every available, then the contract itself, then calls build.
+priority: 100

@@ -1,0 +1,13 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: list-adapters
+category: Deps System
+examples:
+    - list-adapters
+help: Lists the adapters of the catalog and of the project
+long-description: 'One row per adapter: the name, the dep it fills, whether it is installed, the availables binding it, and what backs it.'
+priority: 100

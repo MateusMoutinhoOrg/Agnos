@@ -1,0 +1,17 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: verify
+category: Core Commands
+examples:
+    - verify
+flags:
+    - default: go
+      description: 'the toolchain the project is handed to after the schema check: go (tidy + compile) or none'
+      id: Runtime
+help: Checks the project keeps the sandbox/adapter schema
+long-description: 'Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, deps, internal and new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps imports nothing external, every sandbox/api file has the sandbox/internal/<x>/new.go that builds it, and adapters/ holds only availables and libs. `agnos build` runs this as a gate unless --unsafe is passed.'
+priority: 100

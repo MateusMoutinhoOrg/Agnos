@@ -1,0 +1,67 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-body-field
+    - description: the dotted path of the property (address.city); the objects it passes through are created as needed
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Server System
+examples:
+    - add-body-field email --route create-user --format email --max 254 --required
+    - add-body-field address.city --route create-user --required
+    - add-body-field role --route create-user --enum admin --enum member
+    - add-body-field tags --route create-user --array --unique-items --max-items 10
+flags:
+    - description: the route (identifier or package name) that receives the property
+      id: Route
+      required: true
+    - default: string
+      description: 'the value type: string, boolean, int, float or object (defaults to string)'
+      id: Type
+    - description: list the property in its parent object's required set
+      id: Required
+      type: boolean
+    - description: declare an array of the type instead of a single value
+      id: Array
+      type: boolean
+    - description: minimum for a number, minLength for a string
+      id: Min
+    - description: maximum for a number, maxLength for a string
+      id: Max
+    - description: exclusiveMinimum for a number property
+      id: ExclusiveMin
+    - description: exclusiveMaximum for a number property
+      id: ExclusiveMax
+    - description: 'json-schema format for a string property: email, uuid, date-time or uri'
+      id: Format
+    - description: regular expression a string property must match
+      id: Pattern
+    - description: an accepted value of the property (repeatable; declares the enum set)
+      id: Enum
+      type: string-array
+    - description: the single value the property must carry
+      id: Const
+    - description: accept null as well as the declared type
+      id: Nullable
+      type: boolean
+    - description: shortest accepted array (--array only)
+      id: MinItems
+    - description: longest accepted array (--array only)
+      id: MaxItems
+    - description: refuse an array holding the same value twice (--array only)
+      id: UniqueItems
+      type: boolean
+    - description: accept undeclared keys inside an object property
+      id: AdditionalProperties
+      type: boolean
+    - description: refuse undeclared keys inside an object property
+      id: NoAdditionalProperties
+      type: boolean
+help: Declare a property of a route's body json-schema
+long-description: Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.
+priority: 100

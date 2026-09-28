@@ -1,0 +1,36 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: start
+category: Core Commands
+examples:
+    - start -p my-project
+    - start -p my-project --path ./my-project-dir
+    - start -p my-project -q
+flags:
+    - description: the name of the project
+      id: ProjectName
+      keys:
+        - --project-name
+        - -p
+      required: true
+    - description: Forces the creation of the project, overwriting existing files
+      id: Force
+      keys:
+        - --force
+        - -f
+      type: boolean
+    - description: the go module path written into go.mod (required when the target dir has no go.mod yet)
+      id: Module
+      keys:
+        - --module
+        - -m
+help: Initialize a new project in a directory
+long-description: |
+    Scaffolds a new Agnos project in the given directory, creating
+    the required configuration files and folder structure. If no
+    path is provided, the current directory is used.
+priority: 100

@@ -1,39 +1,78 @@
 package commandconf
 
-// Field is one flag or one positional argument declared in a command's
-// entries.yaml. Flags carry Identifiers ("--path", "-p"); positional args
-// leave Identifiers empty and are matched by order, Key naming the generated
-// struct field.
-type Field struct {
-	Key         string
-	Identifiers []string
-	Description string
-	Examples    []string
-	Type        string // "string" | "boolean" | "int" | "float"
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+
+// Trigger is the condition an arg's segments or a flag's value has to meet for
+// the command to run — the one trigger a route.yaml declares too.
+type Trigger = triggerconf.Trigger
+
+// Arg is one entry of a command's `args`: the segments of the command line from
+// Start to End, both inclusive, End -1 standing for the last one. One segment
+// is bound to Entries.<Id> in its Type; a range as a []string. A segment is a
+// leading word of the command line — every token before the first one starting
+// with "-" — or any token after a bare "--".
+type Arg struct {
+	Id          string
+	Start       int
+	End         int
+	Type        string // "string" | "integer" | "number" | "uuid"
+	Required    bool
 	Default     string
 	HasDefault  bool
+	Description string
+	Trigger     Trigger
+}
+
+// Flag is one entry of a command's `flags`: the value following one of Keys on
+// the command line, converted to Type and bound to Entries.<Id>.
+type Flag struct {
+	Id string
+	// Keys are the spellings a user types ("--command", "-c"); HasKeys is
+	// false on a flag declaring none, which answers to --<id in kebab-case>.
+	Keys        []string
+	HasKeys     bool
+	Type        string // "string" | "integer" | "number" | "boolean" | "string-array" | "integer-array"
 	Required    bool
-	Array       bool
+	Default     string
+	HasDefault  bool
 	Min         float64
 	HasMin      bool
 	Max         float64
 	HasMax      bool
+	Enum        []string
+	Pattern     string
+	Description string
+	Trigger     Trigger
 }
 
-// CommandConf is the parsed form of sandbox/internal/commands/<name>/entries.yaml
-// — the declarative description of one command the user writes by hand and
-// `agnos build` turns into the api.Command of that command's generated
-// new.go, which the dispatch in sandbox/internal/generated/cli/climain.go reads a
-// command line against.
+// CommandConf is the parsed form of sandbox/internal/commands/<name>/command.yaml
+// — the declaration of one command, which `agnos build` turns into the
+// api.Command of that command's generated new.go and the Entries of its
+// generated entries.go.
 type CommandConf struct {
-	Identifiers     []string
+	// Priority is the rung the command runs on; HasPriority is false on a
+	// declaration missing it, which verify reports.
+	Priority    int
+	HasPriority bool
+	// Segments is how many segments the command line has to have; HasSegments
+	// is false on a command that takes any count.
+	Segments    int
+	HasSegments bool
+	// Strict reports that every token of the command line has to be read by
+	// the command or one run before it; a middleware declares false.
+	Strict          bool
+	Args            []Arg
+	Flags           []Flag
 	Category        string
 	Help            string
 	LongDescription string
 	Examples        []string
 	Hidden          bool
-	Flags           []Field
-	Args            []Field
+	// Legacy holds the keys of the declaration entries.yaml was, which verify
+	// names as an old declaration.
+	Legacy []string
 
-	Render func() string
+	Render      func() string
+	Pattern     func() string
+	Identifiers func() []string
 }

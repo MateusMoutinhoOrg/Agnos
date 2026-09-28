@@ -1,0 +1,21 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: rename-route
+    - description: the route to rename (identifier or package name)
+      end: 1
+      id: Route
+      required: true
+      start: 1
+    - description: the name it takes on
+      end: 2
+      id: Name
+      required: true
+      start: 2
+category: Server System
+help: Rename one route
+long-description: 'Moves sandbox/internal/routeslist/<route>/ to sandbox/internal/routeslist/<name>/, rewriting the package clause of every hand-written Go file, and runs build so new.go, entries.go and the server''s route list follow it. A page is refused: remove-page and add-page own its html.'
+priority: 100

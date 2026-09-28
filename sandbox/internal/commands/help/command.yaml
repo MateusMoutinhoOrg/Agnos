@@ -1,0 +1,23 @@
+# Written once by `agnos build`, then the project's.
+# `help` is a command like any other (command.yaml + a generated new.go and
+# entries.go + InternalPureHandler.go); the only difference is that
+# agnos writes all of them, instead of the user writing two.
+priority: 100
+args:
+  - id: Command
+    start: 0
+    end: 0
+    trigger: { type: equal, value: help }
+  - id: Name
+    start: 1
+    end: -1
+    description: The command to describe; omit it to list every command
+category: Info
+help: Display help for a command
+long-description: |
+  When called without arguments, lists every available command
+  grouped by category. When called with a command name, shows
+  detailed usage, arguments, flags, and examples for that command.
+examples:
+  - "help"
+  - "help start"

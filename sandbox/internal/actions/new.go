@@ -152,16 +152,16 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.RemoveCommand = func(path string, name string) error {
 		return removeCommandAction.RemoveCommand(sandbox, path, name)
 	}
-	actions.SetCommand = func(props api.CommandProps) error {
+	actions.SetCommand = func(props api.SetCommandProps) error {
 		return setCommandAction.SetCommand(sandbox, props)
 	}
-	actions.AddFlag = func(props api.FieldProps) error {
+	actions.AddFlag = func(props api.FlagProps) error {
 		return addFlagAction.AddFlag(sandbox, props)
 	}
 	actions.RemoveFlag = func(path string, command string, name string) error {
 		return removeFlagAction.RemoveFlag(sandbox, path, command, name)
 	}
-	actions.AddArg = func(props api.FieldProps) error {
+	actions.AddArg = func(props api.ArgProps) error {
 		return addArgAction.AddArg(sandbox, props)
 	}
 	actions.RemoveArg = func(path string, command string, name string) error {

@@ -120,7 +120,11 @@ func isPredeclared(name string) bool {
 // a qualified name (`time.Time`), which is what an import looks like from
 // inside a type expression.
 func isQualified(tokens []token, index int) bool {
-	return index > 0 && tokens[index-1].Text == "."
+	if index == 0 || tokens[index-1].Text != "." {
+		return false
+	}
+	// The last dot of a variadic `...T` is no qualifier: T is the element.
+	return !(index >= 3 && tokens[index-2].Text == "." && tokens[index-3].Text == ".")
 }
 
 // References reports whether expr names any type this package declares. An

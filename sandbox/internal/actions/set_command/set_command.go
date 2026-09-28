@@ -9,7 +9,7 @@ import (
 // SetCommand rewrites the command-level keys of
 // sandbox/internal/commands/<command>/entries.yaml (help, category,
 // long-description, hidden, identifiers, examples), then runs build.
-func SetCommand(sandbox *api.Sandbox, props api.CommandProps) error {
+func SetCommand(sandbox *api.Sandbox, props api.SetCommandProps) error {
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := SetCommandInternal(sandbox, io, props); err != nil {
 		return err

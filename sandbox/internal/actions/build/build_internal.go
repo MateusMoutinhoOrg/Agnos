@@ -94,15 +94,16 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		return err
 	}
 
-	// The help command's entries.yaml is generated, so it is written before
+	// The help command's command.yaml is generated, so it is written before
 	// the commands are collected — from there on help is just another entry
 	// in the set.
 	if hasCli {
 		helpVars := map[string]interface{}{
-			"Module":      module_conf.Module,
-			"ProjectName": projectNameConst(sandbox, project_conf.Name),
+			"Module":        module_conf.Module,
+			"ProjectName":   projectNameConst(sandbox, project_conf.Name),
+			"GeneratorName": generatorName(sandbox),
 		}
-		if err := GenerateHelpEntriesYaml(sandbox, io, helpVars); err != nil {
+		if err := GenerateHelpCommandYaml(sandbox, io, helpVars); err != nil {
 			return err
 		}
 	}
@@ -258,6 +259,15 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 
 	if hasCli {
 		if err := GenerateCommandNew(sandbox, io, commands, module_conf.Module); err != nil {
+			return err
+		}
+		// Written once and never again: the five files that say what this
+		// project answers when no command does.
+		if err := GenerateCliErrorHandlers(sandbox, io, module_conf.Module); err != nil {
+			return err
+		}
+		// Written once too: what one command line's chain of commands shares.
+		if err := GenerateCommandProps(sandbox, io, module_conf.Module); err != nil {
 			return err
 		}
 	}

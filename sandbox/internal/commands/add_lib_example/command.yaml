@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-lib-example
+    - description: the name of the new example (it becomes one directory under examples/lib/)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Examples
+examples:
+    - add-lib-example start
+help: Scaffold a new example under examples/lib/
+long-description: Creates examples/lib/<name>/ with an example.go stub (package main) that already runs and exits 0, then runs build so the example listing of the docs names it. The golden result.yaml is written by the first exec-test, never by hand. Refuses an existing name.
+priority: 100

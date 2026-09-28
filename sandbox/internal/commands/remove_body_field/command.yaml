@@ -1,0 +1,22 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-body-field
+    - description: the dotted path of the property to drop
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Server System
+examples:
+    - remove-body-field address.city --route create-user
+flags:
+    - description: the route (identifier or package name) the property is declared on
+      id: Route
+      required: true
+help: Delete one property from a route's body json-schema
+long-description: 'Drops one property of the body json-schema, named by the same dotted path add-body-field declared it with, and unlists it from its parent''s required set. The build renders only: dropping a property may leave hand-written code referring to what is gone.'
+priority: 100

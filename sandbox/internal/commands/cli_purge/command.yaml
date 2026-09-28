@@ -1,0 +1,15 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: cli-purge
+category: Cli System
+examples:
+    - cli-purge
+    - cli-purge --path ./my-project
+help: Removes the CLI layer from the project
+long-description: |
+    Removes every file the "cli" asset group installs and calls build.
+priority: 100

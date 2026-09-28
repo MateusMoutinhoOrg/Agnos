@@ -3,18 +3,24 @@
 Initialize a new project in a directory
 
 ```bash
-agnos start [--path <path>] --project-name <project-name> [--quiet] [--force] [--module <module>]
+agnos start --project-name <project-name> [--force] [--module <module>] [--help] [--path <path>] [--quiet]
 ```
 
 Scaffolds a new Agnos project in the given directory, creating the required configuration files and folder structure. If no path is provided, the current directory is used.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--project-name`, `-p` | string, required |  | the name of the project |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
-| `--force`, `-f` | boolean |  | Forces the creation of the project, overwriting existing files |
-| `--module`, `-m` | string |  | the go module path written into go.mod (required when the target dir has no go.mod yet) |
+| Flag | Type | Default | Description | From |
+| --- | --- | --- | --- | --- |
+| `--project-name`, `-p` | string, required |  | the name of the project | — |
+| `--force`, `-f` | boolean |  | Forces the creation of the project, overwriting existing files | — |
+| `--module`, `-m` | string |  | the go module path written into go.mod (required when the target dir has no go.mod yet) | — |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+
+| Runs in front of it | When |
+| --- | --- |
+| [`help-flag`](help-flag.md) | always |
+| [`project`](project.md) | always |
 
 ```bash
 agnos start -p my-project
@@ -22,4 +28,4 @@ agnos start -p my-project --path ./my-project-dir
 agnos start -p my-project -q
 ```
 
-Core Commands · [every command](doc.md) · [EntriesYaml](../EntriesYaml/doc.md)
+Core Commands · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

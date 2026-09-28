@@ -1,0 +1,5 @@
+dep: reflectdeps
+help: Run-time reflection over reflect
+module: ""
+name: reflectdeps
+origin: catalog

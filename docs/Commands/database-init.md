@@ -3,19 +3,25 @@
 Add the database layer to the project
 
 ```bash
-agnos database-init [--path <path>] [--quiet]
+agnos database-init [--help] [--path <path>] [--quiet]
 ```
 
 Installs the store the database layer is built over as a remote dep under sandbox/deps/database, renders sandbox/internal/generated/databaseio and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so 'agnos add-database' is the step that follows.
 
-| Flag | Type | Default | Description |
-| --- | --- | --- | --- |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output |
+| Flag | Type | Default | Description | From |
+| --- | --- | --- | --- | --- |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+
+| Runs in front of it | When |
+| --- | --- |
+| [`help-flag`](help-flag.md) | always |
+| [`project`](project.md) | always |
 
 ```bash
 agnos database-init
 agnos database-init --path ./my-project
 ```
 
-Database System · [every command](doc.md) · [EntriesYaml](../EntriesYaml/doc.md)
+Database System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

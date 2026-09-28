@@ -3,11 +3,43 @@ package commandconf
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
 )
 
-// New parses one entries.yaml body into a CommandConf.
-func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
+// DefaultPriority is the rung `add-command` declares a command on, and
+// DefaultMiddlewarePriority the one of a --middleware: low enough to run in
+// front of every command, high enough to leave room below it.
+const DefaultPriority = 100
+const DefaultMiddlewarePriority = 10
 
+// LastSegment is the End of an arg that runs through the last segment of the
+// command line, whatever its length.
+const LastSegment = -1
+
+// ArgTypes is every type an arg may declare. Anything but a string is one
+// segment long, and a segment that will not convert is a non-match.
+var ArgTypes = []string{"string", "integer", "number", "uuid"}
+
+// DefaultArgType is the type of an arg that declares none.
+const DefaultArgType = "string"
+
+// FlagTypes is every type a flag may declare.
+var FlagTypes = []string{"string", "integer", "number", "boolean", "string-array", "integer-array"}
+
+// DefaultFlagType is the type of a flag that declares none.
+const DefaultFlagType = "string"
+
+// TriggerTypes is every way a trigger compares a value.
+var TriggerTypes = triggerconf.TriggerTypes
+
+// legacyKeys are the keys an entries.yaml declared that command.yaml does not
+// carry: `identifiers` on the command, `name`, `identifiers` and `array` on a
+// field. A declaration still holding one is an old one.
+var legacyKeys = []string{"identifiers"}
+var legacyFieldKeys = []string{"name", "identifiers", "array", "examples"}
+
+// New parses one command.yaml body into a CommandConf.
+func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
 	if content == "" {
 		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
 	}
@@ -16,176 +48,165 @@ func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
 	if parse_error != nil {
 		return nil, parse_error
 	}
-
 	if !specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("entries.yaml is not an object")
+		return nil, sandbox.Deps.Std.Errorf("command.yaml is not an object")
 	}
 
-	conf := &CommandConf{
-		Identifiers: []string{},
-		Examples:    []string{},
-		Flags:       []Field{},
-		Args:        []Field{},
-	}
+	conf := NewEmpty(sandbox)
+	conf.HasPriority = false
+	conf.Priority = 0
 
-	conf.Identifiers = readStringArray(specs, "identifiers")
+	if item, _ := specs.GetObjectItem("priority"); item != nil && !item.IsNull() {
+		conf.Priority = readInt(specs, "priority")
+		conf.HasPriority = true
+	}
+	if item, _ := specs.GetObjectItem("segments"); item != nil && !item.IsNull() {
+		conf.Segments = readInt(specs, "segments")
+		conf.HasSegments = true
+	}
+	if item, _ := specs.GetObjectItem("strict"); item != nil && !item.IsNull() {
+		conf.Strict = readBool(specs, "strict")
+	}
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
 	conf.Help = readString(specs, "help")
 	conf.LongDescription = readString(specs, "long-description")
 	conf.Hidden = readBool(specs, "hidden")
 
-	flags_item, _ := specs.GetObjectItem("flags")
-	if flags_item != nil {
-		fields, err := readFieldCollection(sandbox, flags_item)
+	for _, key := range legacyKeys {
+		if item, _ := specs.GetObjectItem(key); item != nil && !item.IsNull() {
+			conf.Legacy = append(conf.Legacy, key)
+		}
+	}
+
+	if item, _ := specs.GetObjectItem("args"); item != nil && item.IsArray() {
+		args, legacy, err := readArgs(sandbox, item)
 		if err != nil {
 			return nil, err
 		}
-		conf.Flags = fields
+		conf.Args = args
+		conf.Legacy = append(conf.Legacy, legacy...)
 	}
-
-	args_item, _ := specs.GetObjectItem("args")
-	if args_item != nil {
-		fields, err := readFieldCollection(sandbox, args_item)
+	if item, _ := specs.GetObjectItem("flags"); item != nil && item.IsArray() {
+		flags, legacy, err := readFlags(sandbox, item)
 		if err != nil {
 			return nil, err
 		}
-		conf.Args = fields
+		conf.Flags = flags
+		conf.Legacy = append(conf.Legacy, legacy...)
 	}
 
-	BindMethods(sandbox, conf)
 	return conf, nil
 }
 
-// readFieldCollection parses a flags/args declaration into an ordered slice of
-// Field. Two shapes are accepted:
-//
-//   - a YAML sequence (canonical) — each entry an object carrying an explicit
-//     `name` (or, for flags, deriving one from the first long `--identifier`).
-//     Sequences are ordered, so positional args bind by written position.
-//   - a YAML mapping (legacy) — the key names the field. Mappings are
-//     unordered, so the keys are sorted for a deterministic result; declare
-//     positional args as a sequence when order matters.
-func readFieldCollection(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Field, error) {
-	if item.IsArray() {
-		return readFieldsFromArray(sandbox, item)
-	}
-	if item.IsObject() {
-		return readFieldsFromObject(sandbox, item)
-	}
-	return []Field{}, nil
-}
-
-func readFieldsFromArray(sandbox *api.Sandbox, arr *serializibles.SerializibleObject) ([]Field, error) {
-	size, err := arr.GetArraySize()
+// readArgs parses the `args` sequence, in declaration order.
+func readArgs(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Arg, []string, error) {
+	size, err := item.GetArraySize()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-
-	fields := make([]Field, 0, size)
+	args := make([]Arg, 0, size)
+	legacy := []string{}
 	for i := 0; i < size; i++ {
-		entry := arr.GetArrayItem(i)
+		entry := item.GetArrayItem(i)
 		if entry == nil || !entry.IsObject() {
 			continue
 		}
-
-		field := readFieldEntry(sandbox, entry)
-		field.Key = fieldKey(sandbox, entry, field.Identifiers)
-		if field.Key == "" {
-			return nil, sandbox.Deps.Std.Errorf("flags/args entry #%d needs a name (or a -- identifier)", i)
+		arg := Arg{
+			Id:          readString(entry, "id"),
+			Start:       readInt(entry, "start"),
+			End:         readInt(entry, "end"),
+			Type:        readString(entry, "type"),
+			Required:    readBool(entry, "required"),
+			Description: readString(entry, "description"),
+			Trigger:     triggerconf.New(sandbox, entry),
 		}
-		fields = append(fields, field)
+		if arg.Type == "" {
+			arg.Type = DefaultArgType
+		}
+		if default_item, _ := entry.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
+			arg.HasDefault = true
+			arg.Default = anyToString(sandbox, default_item)
+		}
+		legacy = append(legacy, legacyOf(entry, "args")...)
+		args = append(args, arg)
 	}
-
-	return fields, nil
+	return args, legacy, nil
 }
 
-func readFieldsFromObject(sandbox *api.Sandbox, obj *serializibles.SerializibleObject) ([]Field, error) {
-	keys, err := obj.GetKeys()
+// readFlags parses the `flags` sequence, in declaration order.
+func readFlags(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Flag, []string, error) {
+	size, err := item.GetArraySize()
 	if err != nil {
-		return nil, err
+		return nil, nil, err
 	}
-	sandbox.Deps.Sortdeps.Strings(keys)
-
-	fields := make([]Field, 0, len(keys))
-	for _, key := range keys {
-		item, _ := obj.GetObjectItem(key)
-		if item == nil || !item.IsObject() {
+	flags := make([]Flag, 0, size)
+	legacy := []string{}
+	for i := 0; i < size; i++ {
+		entry := item.GetArrayItem(i)
+		if entry == nil || !entry.IsObject() {
 			continue
 		}
-		field := readFieldEntry(sandbox, item)
-		field.Key = key
-		fields = append(fields, field)
+		flag := Flag{
+			Id:          readString(entry, "id"),
+			Type:        readString(entry, "type"),
+			Required:    readBool(entry, "required"),
+			Enum:        readStringArray(entry, "enum"),
+			Pattern:     readString(entry, "pattern"),
+			Description: readString(entry, "description"),
+			Trigger:     triggerconf.New(sandbox, entry),
+		}
+		if keys_item, _ := entry.GetObjectItem("keys"); keys_item != nil && keys_item.IsArray() {
+			flag.Keys = readStringArray(entry, "keys")
+			flag.HasKeys = true
+		} else {
+			flag.Keys = []string{DefaultKey(sandbox, flag.Id)}
+		}
+		if flag.Type == "" {
+			flag.Type = DefaultFlagType
+		}
+		if default_item, _ := entry.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
+			flag.HasDefault = true
+			flag.Default = anyToString(sandbox, default_item)
+		}
+		if min_item, _ := entry.GetObjectItem("min"); min_item != nil && !min_item.IsNull() {
+			flag.Min, flag.HasMin = readNumber(min_item)
+		}
+		if max_item, _ := entry.GetObjectItem("max"); max_item != nil && !max_item.IsNull() {
+			flag.Max, flag.HasMax = readNumber(max_item)
+		}
+		legacy = append(legacy, legacyOf(entry, "flags")...)
+		flags = append(flags, flag)
 	}
-
-	return fields, nil
+	return flags, legacy, nil
 }
 
-// readFieldEntry parses the attributes common to both shapes; the caller
-// assigns Key.
-func readFieldEntry(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Field {
-	field := Field{
-		Identifiers: readStringArray(item, "identifiers"),
-		Examples:    readStringArray(item, "examples"),
-		Description: readString(item, "description"),
-		Type:        normalizeType(readString(item, "type")),
-		Required:    readBool(item, "required"),
-		Array:       readBool(item, "array"),
-	}
-
-	if min_item, _ := item.GetObjectItem("min"); min_item != nil && !min_item.IsNull() {
-		field.Min, field.HasMin = readNumber(min_item)
-	}
-	if max_item, _ := item.GetObjectItem("max"); max_item != nil && !max_item.IsNull() {
-		field.Max, field.HasMax = readNumber(max_item)
-	}
-
-	if default_item, _ := item.GetObjectItem("default"); default_item != nil && !default_item.IsNull() {
-		field.HasDefault = true
-		field.Default = anyToString(sandbox, default_item)
-	}
-
-	// `required` is meaningless for a boolean (absent means false) or for a
-	// field that carries a default (the default covers its absence), so it is
-	// dropped here and never reaches the generated dispatch or help.
-	if field.Type == "boolean" || field.HasDefault {
-		field.Required = false
-	}
-
-	return field
-}
-
-// fieldKey resolves the generated struct field name for a sequence entry:
-// an explicit `name`, else the first long `--identifier` with its dashes
-// stripped, else the first identifier.
-func fieldKey(sandbox *api.Sandbox, entry *serializibles.SerializibleObject, identifiers []string) string {
-	if name := readString(entry, "name"); name != "" {
-		return name
-	}
-	for _, id := range identifiers {
-		if sandbox.Deps.Stringsdeps.HasPrefix(id, "--") {
-			return sandbox.Deps.Stringsdeps.TrimLeft(id, "-")
+// legacyOf is every key of one arg or flag that only an entries.yaml declared.
+func legacyOf(entry *serializibles.SerializibleObject, list string) []string {
+	legacy := []string{}
+	for _, key := range legacyFieldKeys {
+		if item, _ := entry.GetObjectItem(key); item != nil && !item.IsNull() {
+			legacy = append(legacy, list+"[]."+key)
 		}
 	}
-	for _, id := range identifiers {
-		return sandbox.Deps.Stringsdeps.TrimLeft(id, "-")
-	}
-	return ""
+	return legacy
 }
 
-// normalizeType maps the type spellings accepted in entries.yaml onto the
-// canonical set used everywhere else.
-func normalizeType(raw string) string {
-	switch raw {
-	case "bool", "boolean":
-		return "boolean"
-	case "int", "integer":
-		return "int"
-	case "float", "double", "number":
-		return "float"
-	default:
-		return "string"
+// DefaultKey is the spelling a flag declaring no `keys` answers to: its id in
+// kebab-case after "--" — Target is --target, OutFile is --out-file.
+func DefaultKey(sandbox *api.Sandbox, id string) string {
+	key := ""
+	for index, letter := range id {
+		if letter >= 'A' && letter <= 'Z' {
+			if index > 0 {
+				key += "-"
+			}
+			key += string(letter + ('a' - 'A'))
+			continue
+		}
+		key += string(letter)
 	}
+	return "--" + key
 }
 
 func readString(obj *serializibles.SerializibleObject, key string) string {
@@ -198,6 +219,18 @@ func readString(obj *serializibles.SerializibleObject, key string) string {
 		return ""
 	}
 	return value
+}
+
+func readInt(obj *serializibles.SerializibleObject, key string) int {
+	item, _ := obj.GetObjectItem(key)
+	if item == nil || item.IsNull() {
+		return 0
+	}
+	value, ok := readNumber(item)
+	if !ok {
+		return 0
+	}
+	return int(value)
 }
 
 func readBool(obj *serializibles.SerializibleObject, key string) bool {
@@ -256,8 +289,8 @@ func readStringArray(obj *serializibles.SerializibleObject, key string) []string
 	return out
 }
 
-// anyToString renders a scalar yaml value as the string that will be baked
-// into the generated Go literal source.
+// anyToString renders a scalar yaml value as the text a default is spelled
+// with in the generated Go literal.
 func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) string {
 	if item.IsString() {
 		value, _ := item.GetString()

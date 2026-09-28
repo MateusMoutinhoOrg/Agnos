@@ -1,0 +1,15 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: enable-extension
+    - description: the extension to turn on
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Extensions
+help: Turn one generation mechanic on
+priority: 100

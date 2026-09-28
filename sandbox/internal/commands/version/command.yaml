@@ -1,0 +1,12 @@
+priority: 100
+args:
+  - id: Command
+    start: 0
+    end: 0
+    trigger: { type: equal, value: version }
+category: Info
+help: Print the installed version
+long-description: |
+  Prints the current version of the installed binary and exits.
+examples:
+  - "version"

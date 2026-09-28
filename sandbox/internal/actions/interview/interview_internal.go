@@ -3,6 +3,7 @@ package interview
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -155,11 +156,24 @@ func stepVerb(sandbox *api.Sandbox, chosen string) (string, bool) {
 // typed as.
 func commandByVerb(sandbox *api.Sandbox, verb string) (api.Command, bool) {
 	for _, command := range sandbox.Cli.Commands {
-		if verbOf(command) == verb {
-			return command, true
+		if verbOf(*command) == verb {
+			return sessionCommand(sandbox, command), true
 		}
 	}
 	return api.Command{}, false
+}
+
+// sessionCommand is one declaration as the session asks it: a copy whose
+// Flags carry, after its own, the flags of the middlewares that run in front
+// of it — --path and --quiet among them — since the person types those on the
+// same line.
+func sessionCommand(sandbox *api.Sandbox, declared *api.Command) api.Command {
+	command := *declared
+	command.Flags = append([]api.CommandFlag{}, declared.Flags...)
+	for _, inherited := range help.InheritedFlags(sandbox, declared) {
+		command.Flags = append(command.Flags, inherited.Flag)
+	}
+	return command
 }
 
 // chooseInCategory offers the commands of one area, and reports false when the
@@ -210,7 +224,8 @@ func categoryRows(sandbox *api.Sandbox, state projectState) []interviewer.Altern
 	offered := map[string]bool{}
 	declared := []string{}
 
-	for _, command := range sandbox.Cli.Commands {
+	for _, entry := range sandbox.Cli.Commands {
+		command := *entry
 		category := categoryOf(command)
 		if !offerable(state, command) || offered[category] {
 			continue
@@ -250,9 +265,9 @@ func categoryRow(sandbox *api.Sandbox, category string) interviewer.AlternativeO
 // order.
 func commandsIn(sandbox *api.Sandbox, state projectState, category string) []api.Command {
 	commands := []api.Command{}
-	for _, command := range sandbox.Cli.Commands {
-		if offerable(state, command) && categoryOf(command) == category {
-			commands = append(commands, command)
+	for _, declared := range sandbox.Cli.Commands {
+		if offerable(state, *declared) && categoryOf(*declared) == category {
+			commands = append(commands, sessionCommand(sandbox, declared))
 		}
 	}
 	return commands
@@ -263,7 +278,7 @@ func commandsIn(sandbox *api.Sandbox, state projectState, category string) []api
 // does not offer itself, and the rest is what the project at --path can
 // actually run — the gate in state.go.
 func offerable(state projectState, command api.Command) bool {
-	if command.Hidden || len(command.Identifiers) == 0 || verbOf(command) == selfVerb {
+	if command.Hidden || !command.Strict || len(command.Identifiers) == 0 || verbOf(command) == selfVerb {
 		return false
 	}
 	return applies(state, verbOf(command), categoryOf(command))
@@ -457,27 +472,22 @@ func findField(command api.Command, id string) (Field, bool) {
 	return Field{}, false
 }
 
-// runCommand binds the answers onto a copy of the declaration and hands it to
-// the command's own handler — the same call the cli dispatch makes, with the
-// values coming from questions instead of from a command line. The handler
-// runs its own action, which persists and builds; the interview writes
+// runCommand spells the answers as the command line that produces them and
+// hands it to the cli dispatch — the same run a person typing that line gets,
+// with the values coming from questions instead of from a keyboard. The
+// command runs its own action, which persists and builds; the interview writes
 // nothing itself.
 //
 // A command that fails is reported and its exit code handed back, so the
 // caller can offer the answers again instead of losing them: a wrong answer to
 // one question is no reason to lose the rest of a session.
 func runCommand(sandbox *api.Sandbox, command api.Command, values map[string][]any) int {
-	bound := api.BindCommand(&command)
-	for id, list := range values {
-		bound.Items[id] = list
-	}
-
-	if bound.Handler == nil {
+	if sandbox.Cli.CliMain == nil {
 		printOutcome(sandbox, command, api.ExitFailure)
 		return api.ExitFailure
 	}
 
-	exit := bound.Handler(bound)
+	exit := sandbox.Cli.CliMain(commandArgv(sandbox, command, values))
 	printOutcome(sandbox, command, exit)
 	return exit
 }

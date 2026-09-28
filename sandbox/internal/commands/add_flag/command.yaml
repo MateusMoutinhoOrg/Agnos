@@ -1,0 +1,73 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-flag
+    - description: the flag name (the id the handler reads it back by, e.g. command.GetString("out-file"))
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - add-flag output --identifier --out --identifier -o --type string --required --command exec
+    - add-flag verbose --type boolean --description "print every step" --command exec
+    - add-flag retries --type int --min 0 --max 5 --default 1 --command exec
+flags:
+    - description: a cli identifier for the flag, e.g. --out or -o (repeatable; defaults to --<name>)
+      id: Identifier
+      keys:
+        - --identifier
+        - -i
+      type: string-array
+    - description: the command (identifier or package name) that receives the field
+      id: Target
+      keys:
+        - --command
+        - -c
+      required: true
+    - default: string
+      description: 'the value type: string, boolean, int or float (defaults to string)'
+      id: Type
+      keys:
+        - --type
+        - -t
+    - description: help text shown for the field
+      id: Description
+      keys:
+        - --description
+        - -d
+    - description: an usage example for the field (repeatable)
+      id: Example
+      keys:
+        - --example
+        - -e
+      type: string-array
+    - description: the literal assigned when the field is absent (cannot be combined with --required)
+      id: Default
+    - description: fail with a usage error when the field is not provided (not for booleans or fields with --default)
+      id: Required
+      keys:
+        - --required
+        - -r
+      type: boolean
+    - description: collect every occurrence into a []T field instead of a single value
+      id: Array
+      type: boolean
+    - description: smallest accepted value (int/float only)
+      id: Min
+    - description: largest accepted value (int/float only)
+      id: Max
+    - default: "-1"
+      description: zero-based index to insert the field at (defaults to the end)
+      id: Position
+      type: integer
+help: Add a flag to a command's entries.yaml
+long-description: |-
+    Appends one flag declaration to sandbox/internal/commands/<command>/entries.yaml
+    and runs build so the command's new.go declares it. Without --identifier the
+    flag answers to --<name>. Refuses a name or identifier the command already
+    uses.
+priority: 100

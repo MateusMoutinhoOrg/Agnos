@@ -1,0 +1,32 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: publish
+category: Core Commands
+flags:
+    - description: The name of the release
+      id: ReleaseName
+      keys:
+        - --release-name
+        - -rn
+    - description: Create a draft release
+      id: Draft
+      type: boolean
+    - default: all
+      description: The target to compile for (defaults to all)
+      id: Target
+      keys:
+        - --target
+        - -t
+    - default: gh
+      description: The publisher to use (defaults to gh)
+      id: Publisher
+      keys:
+        - --publisher
+        - -pub
+help: Builds, compiles and publishes a release via gh
+long-description: Runs build, then compile (every target by default), and publishes every file of release/ as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml.
+priority: 100

@@ -1,0 +1,68 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: set-body-field
+    - description: the dotted path of the property to edit (address.city)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Server System
+examples:
+    - set-body-field age --route create-user --type int --min 0 --max 130
+flags:
+    - description: the route (identifier or package name) the property is declared on
+      id: Route
+      required: true
+    - description: the key the property answers to from now on (it stays in the object it is declared in)
+      id: Rename
+    - description: 'the value type: string, boolean, int, float or object'
+      id: Type
+    - description: list the property in its parent object's required set
+      id: Required
+      type: boolean
+    - description: declare an array of the type instead of a single value
+      id: Array
+      type: boolean
+    - description: minimum for a number, minLength for a string
+      id: Min
+    - description: maximum for a number, maxLength for a string
+      id: Max
+    - description: exclusiveMinimum for a number property
+      id: ExclusiveMin
+    - description: exclusiveMaximum for a number property
+      id: ExclusiveMax
+    - description: 'json-schema format for a string property: email, uuid, date-time or uri'
+      id: Format
+    - description: regular expression a string property must match
+      id: Pattern
+    - description: an accepted value of the property (repeatable; replaces the enum set)
+      id: Enum
+      type: string-array
+    - description: the single value the property must carry
+      id: Const
+    - description: accept null as well as the declared type
+      id: Nullable
+      type: boolean
+    - description: shortest accepted array (an array property only)
+      id: MinItems
+    - description: longest accepted array (an array property only)
+      id: MaxItems
+    - description: refuse an array holding the same value twice (an array property only)
+      id: UniqueItems
+      type: boolean
+    - description: accept undeclared keys inside an object property
+      id: AdditionalProperties
+      type: boolean
+    - description: refuse undeclared keys inside an object property
+      id: NoAdditionalProperties
+      type: boolean
+    - description: 'a keyword to take off again: required, array, min, max, format, pattern, enum, const, nullable and the rest (repeatable)'
+      id: Clear
+      type: string-array
+help: Rewrite one property of a route's body json-schema
+long-description: Rewrites one property of the route's body json-schema in place and runs build. The keywords already declared are read back, the ones given are written over them, and the whole is built again by the constructor add-body-field uses — so the property a forgotten --max is added to is the property that was there. --clear takes a keyword off again, and a --type the old keywords cannot survive drops them, naming each one it dropped. A property that is not declared yet is add-body-field's.
+priority: 100

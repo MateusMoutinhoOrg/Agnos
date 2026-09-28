@@ -1,0 +1,29 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-command
+    - description: the name of the new command (e.g. my-feature)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - add-command my-feature
+    - add-command my-feature --path ./my-project
+flags:
+    - description: one-line help text for the new command
+      id: Help
+      required: true
+    - description: the category the new command is grouped under in help output
+      id: Category
+      required: true
+help: Scaffold a new command package in the project
+long-description: |-
+    Creates sandbox/internal/commands/<name>/ with a hand-written entries.yaml
+    and a stub handler.go, then runs build so new.go and the dispatch pick it up.
+    Refuses to overwrite an existing command.
+priority: 100

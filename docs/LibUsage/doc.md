@@ -77,6 +77,7 @@ The contracts available to patch:
 | `deps.Hashdeps` | `sandbox/deps/hashdeps` |
 | `deps.Interviewer` | `sandbox/deps/interviewer` |
 | `deps.Iodeps` | `sandbox/deps/iodeps` |
+| `deps.Reflectdeps` | `sandbox/deps/reflectdeps` |
 | `deps.Rundeps` | `sandbox/deps/rundeps` |
 | `deps.Serializables` | `sandbox/deps/serializables` |
 | `deps.Serverdeps` | `sandbox/deps/serverdeps` |
@@ -96,6 +97,7 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 | `adapters/libs/hashdeps` | `hashdeps.Bind(&deps)` |
 | `adapters/libs/interviewer` | `interviewer.Bind(&deps)` |
 | `adapters/libs/iodeps` | `iodeps.Bind(&deps)` |
+| `adapters/libs/reflectdeps` | `reflectdeps.Bind(&deps)` |
 | `adapters/libs/rundeps` | `rundeps.Bind(&deps)` |
 | `adapters/libs/serializables` | `serializables.Bind(&deps)` |
 | `adapters/libs/serverdeps` | `serverdeps.Bind(&deps)` |

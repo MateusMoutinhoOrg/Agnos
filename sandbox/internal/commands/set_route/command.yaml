@@ -1,0 +1,57 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: set-route
+    - description: the route to edit (identifier or package name)
+      end: 1
+      id: Route
+      required: true
+      start: 1
+category: Server System
+examples:
+    - set-route create-user --method POST --example "curl -X POST localhost:8080/users"
+flags:
+    - description: an http method the route answers, or ANY for every one (repeatable; replaces the whole list)
+      id: Method
+      keys:
+        - --method
+        - -m
+      type: string-array
+    - description: the Content-Type every response of the route carries
+      id: ResponseType
+    - description: one-line description of the route
+      id: Help
+    - description: the heading the route is listed under in docs/Routes
+      id: Category
+    - description: the paragraph docs/Routes prints under the route
+      id: LongDescription
+    - description: drop the route from docs/Routes, still dispatched
+      id: Hidden
+      type: boolean
+    - description: list the route again in docs/Routes
+      id: Visible
+      type: boolean
+    - default: "-1"
+      description: 'the rung this route runs on when several match one request: lowest first, and a route that answers nothing hands the request on'
+      id: Priority
+      type: integer
+    - description: move to one rung below the route named, so it runs first (excludes --priority)
+      id: Before
+    - description: move to one rung above the route named, so it runs next (excludes --priority)
+      id: After
+    - default: "-1"
+      description: how many segments the request path has to have for the route to run
+      id: Segments
+      type: integer
+    - description: 'a key to take off: segments (repeatable)'
+      id: Clear
+      type: string-array
+    - description: an usage example for the route (repeatable)
+      id: Example
+      type: string-array
+help: Rewrite the route-level keys of a route.yaml
+long-description: Overwrites methods, response-type, priority, segments, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
+priority: 100

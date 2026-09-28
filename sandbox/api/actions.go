@@ -136,30 +136,68 @@ type AdapterInfo struct {
 	Availables []string
 }
 
-// FieldProps describes one flag or positional arg to add to a command's
-// entries.yaml. Default, Min and Max are the raw literals typed on the
-// command line ("" means unset) so the action can tell "not given" from a
-// zero value; Position is the index to insert at (< 0 appends).
-type FieldProps struct {
-	Path        string
-	Command     string
-	Name        string
-	Identifiers []string
-	Description string
-	Examples    []string
-	Type        string
-	Default     string
-	Required    bool
-	Array       bool
-	Min         string
-	Max         string
-	Position    int
+// FlagProps describes one flag to declare in a command's command.yaml. Name
+// is the flag's name, whose exported Go form is the Entries field it binds to
+// ("out-file" -> OutFile); Keys are the spellings a user types, --<name> when
+// none is given. Type is string, integer, number, boolean, string-array or
+// integer-array, and Array asks for the repeatable form of a scalar Type.
+// Default, Min and Max are the raw literals typed on the command line ("" means
+// unset); Enum is every value accepted, Pattern a regular expression every
+// value matches, and the Trigger* fields what the value has to match for the
+// command to run at all. Position is the index to insert at (< 0 appends).
+type FlagProps struct {
+	Path              string
+	Command           string
+	Name              string
+	Keys              []string
+	Type              string
+	Array             bool
+	Required          bool
+	Default           string
+	Min               string
+	Max               string
+	Enum              []string
+	Pattern           string
+	Trigger           string
+	TriggerType       string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Position          int
 }
 
-// CommandProps carries the command-level keys of entries.yaml that
+// ArgProps describes one arg to declare in a command's command.yaml: the
+// segments Start to End of the command line (End -1 the last one), bound to
+// the Entries field Name becomes. Start defaults, when HasStart is false, to
+// the first segment no arg reads yet, and End to Start — to the last segment
+// when Array is set. Type is string, integer, number or uuid for a
+// one-segment arg; the Trigger* fields are what the segments have to match for
+// the command to run at all. Position is the index to insert at (< 0 appends).
+type ArgProps struct {
+	Path              string
+	Command           string
+	Name              string
+	Start             int
+	HasStart          bool
+	End               int
+	HasEnd            bool
+	Array             bool
+	Type              string
+	Required          bool
+	Default           string
+	Trigger           string
+	TriggerType       string
+	TriggerNegate     bool
+	TriggerIgnoreCase bool
+	Description       string
+	Position          int
+}
+
+// SetCommandProps carries the command-level keys of command.yaml that
 // set-command may rewrite. Empty strings leave the current value alone;
-// Identifiers / Examples are appended (deduplicated).
-type CommandProps struct {
+// Identifiers — further verbs the command answers to — and Examples are
+// appended (deduplicated).
+type SetCommandProps struct {
 	Path            string
 	Command         string
 	Help            string
@@ -624,16 +662,16 @@ type Actions struct {
 
 	// SetCommand rewrites the command-level keys of one command's
 	// entries.yaml.
-	SetCommand func(props CommandProps) error
+	SetCommand func(props SetCommandProps) error
 
 	// AddFlag declares one flag on a command.
-	AddFlag func(props FieldProps) error
+	AddFlag func(props FlagProps) error
 
 	// RemoveFlag deletes one declared flag from a command.
 	RemoveFlag func(path string, command string, name string) error
 
 	// AddArg declares one positional argument on a command.
-	AddArg func(props FieldProps) error
+	AddArg func(props ArgProps) error
 
 	// RemoveArg deletes one declared positional argument from a command.
 	RemoveArg func(path string, command string, name string) error

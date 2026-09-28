@@ -1,0 +1,18 @@
+priority: 5
+strict: false
+args:
+  - id: Command
+    start: 0
+    end: -1
+    trigger: { type: prefix, value: "" }
+flags:
+  - id: Help
+    type: boolean
+    description: Print the help of the command this command line is for
+category: Middleware
+help: Answer `<command> --help` with that command's help
+long-description: |
+  Runs in front of every command line. Without --help it hands the line on.
+  With it, it prints the help of the next strict command the line is for — or
+  the general help when there is none — unless that command declares a
+  --help flag of its own, which then reads it.

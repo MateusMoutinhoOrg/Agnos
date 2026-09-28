@@ -2,13 +2,16 @@ package add_command
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // AddCommandInternal writes the two hand-written files of a new command
-// package. It refuses to overwrite an existing command (via io.WriteFile).
+// package: a command.yaml whose one arg answers to the command's name on
+// segment 0, and the InternalPureHandler.go stub. It refuses to overwrite an
+// existing command (via io.WriteFile).
 func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, help string, category string) error {
 	if sandbox.Deps.Stringsdeps.TrimSpace(help) == "" {
 		return sandbox.Deps.Std.Errorf("add-command requires --help")
@@ -25,8 +28,8 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, 
 	identifier := utils.CommandIdentifier(sandbox, name)
 	pkg := utils.CommandPackage(sandbox, name)
 
-	if pkg == "help" {
-		return sandbox.Deps.Std.Errorf("the help command is generated and cannot be declared")
+	if utils.IsGeneratedCommand(sandbox, name) {
+		return sandbox.Deps.Std.Errorf("the %s command is generated and cannot be declared", identifier)
 	}
 
 	sandbox.Deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
@@ -36,35 +39,41 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string, 
 		return err
 	}
 
+	conf := commandconf.NewEmpty(sandbox)
+	conf.Args = []commandconf.Arg{{
+		Id:      "Command",
+		Start:   0,
+		End:     0,
+		Type:    commandconf.DefaultArgType,
+		Trigger: commandconf.Trigger{Exists: true, Type: "equal", Value: identifier, Values: []string{}},
+	}}
+	conf.Category = sandbox.Deps.Stringsdeps.TrimSpace(category)
+	conf.Help = sandbox.Deps.Stringsdeps.TrimSpace(help)
+
 	vars := map[string]interface{}{
 		"Identifier":  identifier,
 		"Package":     pkg,
 		"Module":      module_conf.Module,
 		"ProjectName": projectName(sandbox, io),
-		"Help":        sandbox.Deps.Stringsdeps.TrimSpace(help),
-		"Category":    sandbox.Deps.Stringsdeps.TrimSpace(category),
+		"Pattern":     conf.Pattern(),
 	}
 
 	dir := utils.CommandDir(sandbox, name)
+	if err := io.WriteFile(dir+"/"+utils.CommandConfFile, []byte(conf.Render())); err != nil {
+		return err
+	}
 
-	entries, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/command_entries.yaml", vars)
+	handler, err := sandbox.Deps.Embeddeps.RenderTemplate(CommandHandlerTemplate, vars)
 	if err != nil {
 		return err
 	}
-	if err := io.WriteFile(dir+"/entries.yaml", entries); err != nil {
-		return err
-	}
-
-	handler, err := sandbox.Deps.Embeddeps.RenderTemplate("templates/command_handler.go", vars)
-	if err != nil {
-		return err
-	}
-	if err := io.WriteFile(dir+"/handler.go", handler); err != nil {
-		return err
-	}
-
-	return nil
+	return io.WriteFile(dir+"/"+utils.CommandHandlerFile, handler)
 }
+
+// CommandHandlerTemplate is the stub InternalPureHandler.go of a command, and
+// MiddlewareHandlerTemplate the one of a middleware, which answers nothing.
+const CommandHandlerTemplate = "templates/command_internal_pure_handler.go"
+const MiddlewareHandlerTemplate = "templates/command_middleware_handler.go"
 
 // projectName title-cases the target project's configured name for use in the
 // scaffold's help text, falling back to the CLI's own ProjectName constant.

@@ -1,0 +1,66 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-arg
+    - description: the arg name (the id the handler reads it back by)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - add-arg file --type string --required --description "the file to process" --command exec
+    - add-arg count --type int --min 1 --position 0 --command exec
+flags:
+    - description: the command (identifier or package name) that receives the field
+      id: Target
+      keys:
+        - --command
+        - -c
+      required: true
+    - default: string
+      description: 'the value type: string, boolean, int or float (defaults to string)'
+      id: Type
+      keys:
+        - --type
+        - -t
+    - description: help text shown for the field
+      id: Description
+      keys:
+        - --description
+        - -d
+    - description: an usage example for the field (repeatable)
+      id: Example
+      keys:
+        - --example
+        - -e
+      type: string-array
+    - description: the literal assigned when the field is absent (cannot be combined with --required)
+      id: Default
+    - description: fail with a usage error when the field is not provided (not for booleans or fields with --default)
+      id: Required
+      keys:
+        - --required
+        - -r
+      type: boolean
+    - description: collect every occurrence into a []T field instead of a single value
+      id: Array
+      type: boolean
+    - description: smallest accepted value (int/float only)
+      id: Min
+    - description: largest accepted value (int/float only)
+      id: Max
+    - default: "-1"
+      description: zero-based index to insert the field at (defaults to the end)
+      id: Position
+      type: integer
+help: Add a positional arg to a command's entries.yaml
+long-description: |-
+    Inserts one positional arg declaration into
+    sandbox/internal/commands/<command>/entries.yaml (at --position, else at the
+    end) and runs build so the command's new.go declares it. Positional args bind
+    by order; an array arg must stay last.
+priority: 100

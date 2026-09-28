@@ -1,20 +1,31 @@
-# `help` — `--help`
+# `help`
 
 Display help for a command
 
 ```bash
-agnos help [<command>]
+agnos help [Name…] [--help] [--path <path>] [--quiet]
 ```
 
 When called without arguments, lists every available command grouped by category. When called with a command name, shows detailed usage, arguments, flags, and examples for that command.
 
-| Argument | Type | Default | Description |
+| Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `command` | string |  | The command to describe; omit it to list every command |
+| `Name` | string, repeatable |  | The command to describe; omit it to list every command |
+
+| Flag | Type | Default | Description | From |
+| --- | --- | --- | --- | --- |
+| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+
+| Runs in front of it | When |
+| --- | --- |
+| [`help-flag`](help-flag.md) | always |
+| [`project`](project.md) | always |
 
 ```bash
 agnos help
 agnos help start
 ```
 
-Info · [every command](doc.md) · [EntriesYaml](../EntriesYaml/doc.md)
+Info · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

@@ -9,7 +9,7 @@ import (
 // AddFlag appends (or inserts) one flag declaration into
 // sandbox/internal/commands/<command>/entries.yaml, then runs build as a
 // follow-up step so the command's new.go picks it up.
-func AddFlag(sandbox *api.Sandbox, props api.FieldProps) error {
+func AddFlag(sandbox *api.Sandbox, props api.FlagProps) error {
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddFlagInternal(sandbox, io, props); err != nil {
 		return err

@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-available
+    - description: the name of the new available (it becomes one directory under adapters/availables/)
+      end: 1
+      id: Available
+      required: true
+      start: 1
+category: Deps System
+examples:
+    - add-available lambda
+help: Declares one further available
+long-description: Creates adapters/availables/<name>/available.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --available.
+priority: 100

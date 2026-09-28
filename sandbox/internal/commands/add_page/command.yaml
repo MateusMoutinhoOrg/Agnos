@@ -1,0 +1,22 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-page
+    - description: the page, as its path under assets/frontend/ without .html (blog/post; index is the one / answers)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Front System
+examples:
+    - add-page about --title About
+    - add-page blog/post
+flags:
+    - description: the <title> the scaffolded page carries (defaults to the page name)
+      id: Title
+help: Scaffold a new html page under assets/frontend/
+long-description: 'Writes assets/frontend/<name>.html, plain html the frontend route serves as soon as it exists: /<name> answers it, and index is the page / answers. A name may carry slashes (blog/post). An existing file is refused. A page is a file and nothing else, so one written by hand or by a bundler is as much a page as one this command scaffolded.'
+priority: 100

@@ -1,0 +1,21 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-database
+    - description: the name of the new database (e.g. app-database)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Database System
+examples:
+    - add-database app-database --prefix app
+flags:
+    - description: the key prefix every record is written under (defaults to the database's own name)
+      id: Prefix
+help: Declare a new database in the project
+long-description: 'Writes sandbox/internal/databases/<name>/specs.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: ''agnos add-table'' declares the first one.'
+priority: 100

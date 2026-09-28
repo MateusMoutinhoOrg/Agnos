@@ -1,0 +1,49 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: set-command
+    - description: the command to update (identifier or package name)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - set-command exec --help "run the thing" --category Core
+    - set-command exec --identifier run --example "exec file.txt"
+    - set-command exec --hidden
+flags:
+    - description: new one-line help text
+      id: Help
+    - description: new category the command is grouped under in help output
+      id: Category
+    - description: new long description shown by help <command>
+      id: LongDescription
+    - description: an extra verb the command answers to (repeatable)
+      id: Identifier
+      keys:
+        - --identifier
+        - -i
+      type: string-array
+    - description: an extra usage example (repeatable)
+      id: Example
+      keys:
+        - --example
+        - -e
+      type: string-array
+    - description: hide the command from help listings
+      id: Hidden
+      type: boolean
+    - description: show the command in help listings again
+      id: Visible
+      type: boolean
+help: Update the command-level keys of a command's entries.yaml
+long-description: |
+    Rewrites help, category, long-description and hidden in
+    sandbox/internal/commands/<name>/entries.yaml, and appends extra
+    identifiers / examples, then runs build so help output is regenerated.
+    Keys not passed are left untouched.
+priority: 100

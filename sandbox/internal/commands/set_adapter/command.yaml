@@ -1,0 +1,27 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: set-adapter
+    - description: the dep whose field is being filled
+      end: 1
+      id: Dep
+      required: true
+      start: 1
+    - description: the installed adapter that should fill it
+      end: 2
+      id: Adapter
+      required: true
+      start: 2
+category: Deps System
+examples:
+    - set-adapter sortdeps reflectsort
+    - set-adapter sortdeps reflectsort --available lambda
+flags:
+    - description: the available to change (defaults to standard)
+      id: Available
+help: Changes which adapter an available binds for one dep
+long-description: Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.
+priority: 100

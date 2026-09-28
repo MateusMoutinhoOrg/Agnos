@@ -1,0 +1,22 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-table
+    - description: the name of the new table (e.g. url)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Database System
+examples:
+    - add-table url --database app-database
+flags:
+    - description: the database (identifier or package name) the table is declared on
+      id: Database
+      required: true
+help: Declare one collection of records on a database
+long-description: 'Appends one table to the database''s specs.yaml and runs build. A table is born with no fields: what it holds is declared one ''agnos add-table-field'' at a time, and every method the table generates is spelled after its name.'
+priority: 100

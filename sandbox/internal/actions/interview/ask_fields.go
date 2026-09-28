@@ -39,7 +39,10 @@ const (
 // Field is one flag or one arg, read the same way. A command declares the two
 // in separate slices with almost the same keys, and every question below cares
 // about the keys they share — so they are normalized into one shape once,
-// rather than asked about twice.
+// rather than asked about twice. Id is the name a person types the value
+// under — a flag's first key without its dashes, an arg's id in kebab-case —
+// which is what every suggestion and rule of the session is keyed by; Start
+// is the segment an arg is typed on.
 type Field struct {
 	Id          string
 	Type        string
@@ -54,33 +57,99 @@ type Field struct {
 	HasMax      bool
 	Identifiers []string
 	IsFlag      bool
+	Start       int
 }
 
 // FieldsOf is every value a command takes, args first and flags after — the
 // order the person reading a help screen meets them in, and the order that
-// puts the subject of the command before the options on it.
+// puts the subject of the command before the options on it. The arg the verb
+// is typed on is no value, and the flags of the middlewares in front of the
+// command are, since the person types them on the same line.
 func FieldsOf(command api.Command) []Field {
 	fields := []Field{}
 
 	for _, arg := range command.Args {
+		if arg.Trigger.Exist {
+			continue
+		}
 		fields = append(fields, Field{
-			Id: arg.Id, Type: arg.Type, Required: arg.Required, Array: arg.Array,
+			Id: kebabOf(arg.Id), Type: argTypeName(arg.Type), Required: arg.Required, Array: arg.End != arg.Start,
 			Description: arg.Description, Default: arg.Default, HasDefault: arg.HasDefault,
-			Min: arg.Min, HasMin: arg.HasMin, Max: arg.Max, HasMax: arg.HasMax,
-			IsFlag: false,
+			IsFlag: false, Start: arg.Start,
 		})
 	}
 
 	for _, flag := range command.Flags {
+		kind, array := flagTypeName(flag.Type)
 		fields = append(fields, Field{
-			Id: flag.Id, Type: flag.Type, Required: flag.Required, Array: flag.Array,
+			Id: keyName(flag.Keys), Type: kind, Required: flag.Required, Array: array,
 			Description: flag.Description, Default: flag.Default, HasDefault: flag.HasDefault,
 			Min: flag.Min, HasMin: flag.HasMin, Max: flag.Max, HasMax: flag.HasMax,
-			Identifiers: flag.Identifiers, IsFlag: true,
+			Identifiers: flag.Keys, IsFlag: true,
 		})
 	}
 
 	return fields
+}
+
+// keyName is the name a flag is asked under: its first long key without the
+// dashes, "--trigger-type" -> "trigger-type".
+func keyName(keys []string) string {
+	for _, key := range keys {
+		if len(key) > 2 && key[:2] == "--" {
+			return key[2:]
+		}
+	}
+	if len(keys) > 0 && len(keys[0]) > 1 {
+		return keys[0][1:]
+	}
+	return ""
+}
+
+// kebabOf is an Entries id as the name an arg is asked under: "RequestPath"
+// -> "request-path".
+func kebabOf(id string) string {
+	name := ""
+	for index, letter := range id {
+		if letter >= 'A' && letter <= 'Z' {
+			if index > 0 {
+				name += "-"
+			}
+			name += string(letter + ('a' - 'A'))
+			continue
+		}
+		name += string(letter)
+	}
+	return name
+}
+
+// argTypeName is an arg type as the session's type names spell it.
+func argTypeName(kind api.ArgType) string {
+	switch kind {
+	case api.IntegerArg:
+		return "int"
+	case api.NumberArg:
+		return "float"
+	}
+	return "string"
+}
+
+// flagTypeName is a flag type as the session's type names spell it, and
+// whether it repeats.
+func flagTypeName(kind api.FlagType) (string, bool) {
+	switch kind {
+	case api.IntegerFlag:
+		return "int", false
+	case api.NumberFlag:
+		return "float", false
+	case api.BooleanFlag:
+		return typeBoolean, false
+	case api.StringArrayFlag:
+		return "string", true
+	case api.IntegerArrayFlag:
+		return "int", true
+	}
+	return "string", false
 }
 
 // AskValues asks one question per declared field and returns what to bind,

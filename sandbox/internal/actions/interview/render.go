@@ -189,63 +189,63 @@ func printOutcome(sandbox *api.Sandbox, command api.Command, exit int) {
 // nothing and only makes the line harder to read. A boolean is the flag's
 // presence, so a false one is left off too.
 func CommandLine(sandbox *api.Sandbox, command api.Command, values map[string][]any) string {
-	line := sandbox.Deps.Std.Sprintf("%s %s", binaryName(sandbox), verbOf(command))
-
-	for _, flag := range command.Flags {
-		for _, value := range values[flag.Id] {
-			if flag.Type == typeBoolean {
-				if truth, ok := value.(bool); ok && truth {
-					line += " " + flagName(flag)
-				}
-				continue
-			}
-
-			text := valueText(sandbox, value)
-			if flag.HasDefault && text == flag.Default {
-				continue
-			}
-			line += sandbox.Deps.Std.Sprintf(" %s %s", flagName(flag), quoted(sandbox, text))
+	words := []string{binaryName(sandbox)}
+	for _, word := range commandArgv(sandbox, command, values) {
+		if word == "" || sandbox.Deps.Stringsdeps.ContainsAny(word, " \t\"'") {
+			word = quoted(sandbox, word)
 		}
+		words = append(words, word)
 	}
-
-	return line + argsText(sandbox, command, values)
+	return sandbox.Deps.Stringsdeps.Join(words, " ")
 }
 
-// argsText spells the positional half of the line. Positionals bind by order,
-// so every arg up to the last one answered is printed — an unanswered one as
-// an empty string, which is what keeps the ones after it in their places.
-func argsText(sandbox *api.Sandbox, command api.Command, values map[string][]any) string {
+// commandArgv is the command line the bound values are typed as: the verb,
+// the args in the order of their segments, then every flag bound to something
+// but its default.
+func commandArgv(sandbox *api.Sandbox, command api.Command, values map[string][]any) []string {
+	argv := sandbox.Deps.Stringsdeps.Fields(verbOf(command))
+
+	fields := FieldsOf(command)
 	last := -1
-	for index, arg := range command.Args {
-		if len(values[arg.Id]) > 0 {
+	for index, field := range fields {
+		if !field.IsFlag && len(values[field.Id]) > 0 {
 			last = index
 		}
 	}
-
-	text := ""
 	for index := 0; index <= last; index++ {
-		arg := command.Args[index]
-		bound := values[arg.Id]
-
+		field := fields[index]
+		if field.IsFlag {
+			continue
+		}
+		bound := values[field.Id]
 		if len(bound) == 0 {
-			text += ` ""`
+			argv = append(argv, "")
 			continue
 		}
 		for _, value := range bound {
-			text += " " + quoted(sandbox, valueText(sandbox, value))
+			argv = append(argv, valueText(sandbox, value))
 		}
 	}
 
-	return text
-}
-
-// flagName is the spelling a flag is written with, the first of its
-// identifiers.
-func flagName(flag api.CommandFlag) string {
-	if len(flag.Identifiers) == 0 {
-		return "--" + flag.Id
+	for _, field := range fields {
+		if !field.IsFlag || len(field.Identifiers) == 0 {
+			continue
+		}
+		for _, value := range values[field.Id] {
+			if field.Type == typeBoolean {
+				if truth, ok := value.(bool); ok && truth {
+					argv = append(argv, field.Identifiers[0])
+				}
+				continue
+			}
+			text := valueText(sandbox, value)
+			if field.HasDefault && text == field.Default {
+				continue
+			}
+			argv = append(argv, field.Identifiers[0], text)
+		}
 	}
-	return flag.Identifiers[0]
+	return argv
 }
 
 // valueText writes one bound value back as the text a command line carries it

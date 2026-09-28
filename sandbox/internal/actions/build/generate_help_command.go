@@ -6,10 +6,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// GenerateHelpEntriesYaml renders assets/templates/help_entries.yaml into
-// sandbox/internal/commands/help/entries.yaml. The help command is declared
-// exactly like every other command; the only difference is that agnos writes
-// its entries.yaml instead of the user.
+// helpCommandYaml is the declaration of the help command.
+const helpCommandYaml = "sandbox/internal/commands/help/command.yaml"
+
+// GenerateHelpCommandYaml renders assets/templates/help_command.yaml into
+// sandbox/internal/commands/help/command.yaml. The help command is declared
+// exactly like every other command; the only difference is that the build
+// writes its command.yaml instead of the user.
 //
 // The file is only ever *created*: once it exists it is left untouched, so a
 // project can edit help's declaration like any other command's.
@@ -17,16 +20,11 @@ import (
 // It must run before CollectCommands, so the declaration is already in the
 // transaction when the collector reads it and help flows through the same
 // new.go / Cli.Commands generation as any other command.
-func GenerateHelpEntriesYaml(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
-	if io.Exist("sandbox/internal/commands/help/entries.yaml") {
+func GenerateHelpCommandYaml(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
+	if io.Exist(helpCommandYaml) {
 		return nil
 	}
 
 	io.CreateDir("sandbox/internal/commands/help")
-	return utils.RenderTemplateToDest(
-		sandbox, io,
-		"templates/help_entries.yaml",
-		vars,
-		"sandbox/internal/commands/help/entries.yaml",
-	)
+	return utils.RenderTemplateToDest(sandbox, io, "templates/help_command.yaml", vars, helpCommandYaml)
 }

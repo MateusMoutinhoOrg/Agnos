@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-page
+    - description: the page to remove
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Front System
+examples:
+    - remove-page about
+help: Remove an html page from assets/frontend/
+long-description: 'Deletes assets/frontend/<name>.html. The name is spelled as add-page spells it: the path under assets/frontend/ without .html.'
+priority: 100

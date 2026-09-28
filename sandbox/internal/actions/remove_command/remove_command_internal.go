@@ -7,15 +7,16 @@ import (
 )
 
 // RemoveCommandInternal deletes every file under
-// sandbox/internal/commands/<name>/ plus the directory itself. The generated
-// help command is refused: it is rendered by build, not declared.
+// sandbox/internal/commands/<name>/ plus the directory itself, name being the
+// command's package name or one of its verbs. The commands the build writes
+// itself are refused: they are rendered, not declared.
 func RemoveCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+	name = utils.ResolveCommandName(sandbox, io, name)
 	if err := utils.ValidateCommandName(sandbox, name); err != nil {
 		return err
 	}
-	pkg := utils.CommandPackage(sandbox, name)
-	if pkg == "help" {
-		return sandbox.Deps.Std.Errorf("the help command is generated and cannot be removed")
+	if utils.IsGeneratedCommand(sandbox, name) {
+		return sandbox.Deps.Std.Errorf("the %s command is generated and cannot be removed", utils.CommandIdentifier(sandbox, name))
 	}
 
 	dir := utils.CommandDir(sandbox, name)

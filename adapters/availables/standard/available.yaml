@@ -5,6 +5,7 @@ adapters:
     - hashdeps
     - interviewer
     - iodeps
+    - reflectdeps
     - rundeps
     - serializables
     - serverdeps

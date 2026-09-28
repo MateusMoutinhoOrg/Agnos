@@ -4,31 +4,54 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// CommandDocField is one flag or one positional argument as docs/Commands
-// prints it: the identifiers a user types, a single label carrying type,
-// arity and bounds, the default, and the declared description.
+// CommandDocField is one flag or one arg as docs/Commands prints it: the
+// spellings a user types, a single label carrying type, arity and bounds, the
+// default, the declared description, and — for a flag a middleware adds — the
+// page of that middleware.
 type CommandDocField struct {
-	Key         string
-	Identifiers string
+	Id          string
+	Keys        string
 	Type        string
 	Default     string
 	Description string
+	From        string
+	FromPage    string
 }
 
-// CommandDoc is one command's section of docs/Commands, rendered from its
-// entries.yaml alone: nothing here is written by hand on the page.
+// CommandDocReach is one command a middleware runs in front of — or, on a
+// command's page, one middleware that runs in front of it: its page, and the
+// condition it runs on ("may run", "only when --x …"), "" when it always does.
+type CommandDocReach struct {
+	Name      string
+	Page      string
+	Condition string
+}
+
+// CommandDoc is one command's page of docs/Commands, rendered from its
+// command.yaml and the middlewares crossed with it: nothing here is written by
+// hand on the page.
 type CommandDoc struct {
 	Name            string
 	Identifier      string
+	Page            string
 	Aliases         string
 	Help            string
 	LongDescription string
 	Usage           string
+	Pattern         string
+	Priority        int
+	Middleware      bool
 	Flags           []CommandDocField
 	Args            []CommandDocField
 	Examples        []string
+	// Middlewares are the middlewares that run in front of the command.
+	Middlewares []CommandDocReach
+	// RunsBefore are, on a middleware's page, the commands it runs in front
+	// of.
+	RunsBefore []CommandDocReach
 }
 
 // CommandDocGroup is one category section of docs/Commands, holding the
@@ -38,6 +61,13 @@ type CommandDocGroup struct {
 	Commands []CommandDoc
 }
 
+// CommandDocs is docs/Commands: the commands grouped by category, and the
+// middlewares apart, since nobody types one.
+type CommandDocs struct {
+	Groups      []CommandDocGroup
+	Middlewares []CommandDoc
+}
+
 // commandsDocDir holds one declared command per sub-directory.
 const commandsDocDir = "sandbox/internal/commands"
 
@@ -45,86 +75,184 @@ const commandsDocDir = "sandbox/internal/commands"
 // matching what the generated help screen prints for it.
 const commandDocOther = "Other"
 
-// CollectCommandDocs renders every sandbox/internal/commands/<name>/entries.yaml
-// into the sections docs/Commands prints, grouped by category in first-seen
-// order — the same grouping the generated help screen uses. Hidden commands
-// are skipped, exactly as they are in help.
+// commandDocMayRun is how a page words a middleware whose trigger cannot be
+// crossed with a command without a command line.
+const commandDocMayRun = "may run — `explain-command` gives the exact answer"
+
+// commandDocEntry is one declared command, read once for every crossing.
+type commandDocEntry struct {
+	Name string
+	Conf *commandconf.CommandConf
+}
+
+// CollectCommandDocs renders every sandbox/internal/commands/<name>/command.yaml
+// into the pages docs/Commands prints: the commands grouped by category in
+// first-seen order — the same grouping the generated help screen uses — and the
+// middlewares on a section of their own. Hidden commands are skipped, exactly
+// as they are in help. Every command is crossed with every middleware whose
+// trigger holds on it, so its page lists the flags they add, and a
+// middleware's page the commands it runs in front of.
 //
 // The declaration is the only source: a command, a flag or an example reaches
 // the page by being declared with `add-command`, `add-flag`, `add-arg` or
 // `set-command`, never by the page being edited.
-func CollectCommandDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]CommandDocGroup, error) {
-	var groups []CommandDocGroup
-	index := map[string]int{}
+func CollectCommandDocs(sandbox *api.Sandbox, io *smartio.SmartIO) (CommandDocs, error) {
+	docs := CommandDocs{}
+	entries := []commandDocEntry{}
 
 	for _, dir := range io.ListDirs(commandsDocDir) {
 		name := lastSegmentOf(sandbox, dir)
 		if name == "" {
 			continue
 		}
-
-		content, err := io.ReadFile(commandsDocDir + "/" + name + "/entries.yaml")
+		content, err := io.ReadFile(commandsDocDir + "/" + name + "/command.yaml")
 		if err != nil {
 			continue
 		}
-
 		conf, err := commandconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("commands/%s/entries.yaml: %w", name, err)
+			return docs, sandbox.Deps.Std.Errorf("commands/%s/command.yaml: %w", name, err)
 		}
-
 		if conf.Hidden {
 			continue
 		}
+		entries = append(entries, commandDocEntry{Name: name, Conf: conf})
+	}
 
-		category := conf.Category
+	index := map[string]int{}
+	for _, entry := range entries {
+		doc := commandDoc(sandbox, entry, entries)
+		if doc.Middleware {
+			docs.Middlewares = append(docs.Middlewares, doc)
+			continue
+		}
+
+		category := entry.Conf.Category
 		if category == "" {
 			category = commandDocOther
 		}
-
 		position, seen := index[category]
 		if !seen {
-			position = len(groups)
+			position = len(docs.Groups)
 			index[category] = position
-			groups = append(groups, CommandDocGroup{Category: category})
+			docs.Groups = append(docs.Groups, CommandDocGroup{Category: category})
 		}
-
-		groups[position].Commands = append(groups[position].Commands, commandDoc(sandbox, name, conf))
+		docs.Groups[position].Commands = append(docs.Groups[position].Commands, doc)
 	}
 
-	return groups, nil
+	return docs, nil
 }
 
-// commandDoc turns one parsed declaration into its page section.
-func commandDoc(sandbox *api.Sandbox, name string, conf *commandconf.CommandConf) CommandDoc {
-	identifier := name
-	if len(conf.Identifiers) > 0 {
-		identifier = conf.Identifiers[0]
+// commandDoc turns one parsed declaration into its page, crossed with every
+// other command of the project.
+func commandDoc(sandbox *api.Sandbox, entry commandDocEntry, entries []commandDocEntry) CommandDoc {
+	conf := entry.Conf
+	identifiers := conf.Identifiers()
+	identifier := utils.CommandIdentifier(sandbox, entry.Name)
+	if len(identifiers) > 0 && conf.Strict {
+		identifier = identifiers[0]
 	}
 
 	doc := CommandDoc{
-		Name:            name,
+		Name:            entry.Name,
 		Identifier:      identifier,
-		Aliases:         identifierList(sandbox, aliasesOf(conf.Identifiers)),
+		Page:            commandDocPage(sandbox, entry),
+		Aliases:         identifierList(sandbox, aliasesOf(identifiers)),
 		Help:            docCell(sandbox, conf.Help),
 		LongDescription: docText(sandbox, conf.LongDescription),
+		Pattern:         conf.Pattern(),
+		Priority:        conf.Priority,
+		Middleware:      !conf.Strict,
 		Examples:        conf.Examples,
 	}
 
-	for _, flag := range conf.Flags {
-		doc.Flags = append(doc.Flags, commandDocField(sandbox, flag))
-	}
 	for _, arg := range conf.Args {
-		doc.Args = append(doc.Args, commandDocField(sandbox, arg))
+		if arg.Trigger.Exists {
+			continue
+		}
+		doc.Args = append(doc.Args, CommandDocField{
+			Id:          arg.Id,
+			Type:        argTypeLabel(arg),
+			Default:     defaultCell(arg.Default, arg.HasDefault),
+			Description: docCell(sandbox, arg.Description),
+		})
+	}
+	for _, flag := range conf.Flags {
+		doc.Flags = append(doc.Flags, commandDocFlag(sandbox, flag, nil))
 	}
 
-	doc.Usage = commandUsage(sandbox, identifier, conf)
+	inherited := []commandconf.Flag{}
+	for _, other := range entries {
+		if other.Name == entry.Name {
+			continue
+		}
+		if doc.Middleware {
+			if other.Conf.Strict {
+				if reach, condition := utils.MiddlewareReach(sandbox, conf, other.Conf); reach != utils.NoReach {
+					doc.RunsBefore = append(doc.RunsBefore, CommandDocReach{
+						Name:      commandDocTitle(sandbox, other),
+						Page:      commandDocPage(sandbox, other),
+						Condition: reachCondition(reach, condition),
+					})
+				}
+			}
+			continue
+		}
 
+		reach, condition := utils.MiddlewareReach(sandbox, other.Conf, conf)
+		if reach == utils.NoReach {
+			continue
+		}
+		doc.Middlewares = append(doc.Middlewares, CommandDocReach{
+			Name:      commandDocTitle(sandbox, other),
+			Page:      commandDocPage(sandbox, other),
+			Condition: reachCondition(reach, condition),
+		})
+		for _, flag := range other.Conf.Flags {
+			if utils.CommandKeyTaken(conf, flag.Keys) != "" {
+				continue
+			}
+			field := commandDocFlag(sandbox, flag, &other)
+			field.FromPage = commandDocPage(sandbox, other)
+			doc.Flags = append(doc.Flags, field)
+			inherited = append(inherited, flag)
+		}
+	}
+
+	doc.Usage = commandUsage(sandbox, conf, inherited)
 	return doc
 }
 
-// aliasesOf is every identifier of a command but the first — the verb the
-// page titles the section with.
+// commandDocTitle is how a page names another command: its verb, or the
+// package name of a middleware, which has none.
+func commandDocTitle(sandbox *api.Sandbox, entry commandDocEntry) string {
+	identifiers := entry.Conf.Identifiers()
+	if len(identifiers) > 0 && entry.Conf.Strict {
+		return identifiers[0]
+	}
+	return utils.CommandIdentifier(sandbox, entry.Name)
+}
+
+// commandDocPage is the file one command's page is written to, relative to
+// docs/Commands.
+func commandDocPage(sandbox *api.Sandbox, entry commandDocEntry) string {
+	return sandbox.Deps.Stringsdeps.ReplaceAll(commandDocTitle(sandbox, entry), " ", "-") + ".md"
+}
+
+// reachCondition is the cell a crossing is worded with: "" when the
+// middleware always runs.
+func reachCondition(reach utils.Reach, condition string) string {
+	switch {
+	case reach == utils.MayRun && condition != "":
+		return commandDocMayRun + "; " + condition
+	case reach == utils.MayRun:
+		return commandDocMayRun
+	}
+	return condition
+}
+
+// aliasesOf is every verb of a command but the first — the one the page
+// titles the section with.
 func aliasesOf(identifiers []string) []string {
 	if len(identifiers) < 2 {
 		return nil
@@ -132,107 +260,104 @@ func aliasesOf(identifiers []string) []string {
 	return identifiers[1:]
 }
 
-// commandDocField renders one flag or positional as its table row.
-func commandDocField(sandbox *api.Sandbox, field commandconf.Field) CommandDocField {
-	value := ""
-	if field.HasDefault {
-		value = "`" + field.Default + "`"
+// commandDocFlag renders one flag as its table row; from is the middleware
+// declaring it, nil for one of the command's own.
+func commandDocFlag(sandbox *api.Sandbox, flag commandconf.Flag, from *commandDocEntry) CommandDocField {
+	field := CommandDocField{
+		Id:          flag.Id,
+		Keys:        identifierList(sandbox, flag.Keys),
+		Type:        flagTypeLabel(sandbox, flag),
+		Default:     defaultCell(flag.Default, flag.HasDefault),
+		Description: docCell(sandbox, flag.Description),
 	}
-
-	return CommandDocField{
-		Key:         field.Key,
-		Identifiers: identifierList(sandbox, field.Identifiers),
-		Type:        fieldTypeLabel(sandbox, field),
-		Default:     value,
-		Description: docCell(sandbox, field.Description),
+	if from != nil {
+		field.From = commandDocTitle(sandbox, *from)
 	}
+	return field
 }
 
-// fieldTypeLabel is the one cell carrying everything the type of a field
-// implies: its kind, whether it repeats, whether it must be given, and the
-// bounds a numeric field declares.
-func fieldTypeLabel(sandbox *api.Sandbox, field commandconf.Field) string {
-	label := field.Type
-	if label == "" {
-		label = "string"
+// defaultCell is a declared default as a table cell.
+func defaultCell(value string, has bool) string {
+	if !has {
+		return ""
 	}
-	if field.Array {
+	return "`" + value + "`"
+}
+
+// argTypeLabel is the cell carrying an arg's type: a range reads as a list.
+func argTypeLabel(arg commandconf.Arg) string {
+	label := arg.Type
+	if label == "" {
+		label = commandconf.DefaultArgType
+	}
+	if arg.End != arg.Start {
 		label += ", repeatable"
 	}
-	if field.Required {
+	if arg.Required {
 		label += ", required"
-	}
-	if bounds := fieldBounds(sandbox, field); bounds != "" {
-		label += ", " + bounds
 	}
 	return label
 }
 
-// fieldBounds spells the min/max a numeric field declares, "" when it
-// declares neither.
-func fieldBounds(sandbox *api.Sandbox, field commandconf.Field) string {
-	switch {
-	case field.HasMin && field.HasMax:
-		return numberLabel(sandbox, field, field.Min, true) + ".." + numberLabel(sandbox, field, field.Max, true)
-	case field.HasMin:
-		return ">= " + numberLabel(sandbox, field, field.Min, true)
-	case field.HasMax:
-		return "<= " + numberLabel(sandbox, field, field.Max, true)
+// flagTypeLabel is the one cell carrying everything the type of a flag
+// implies: its kind, whether it must be given, its bounds and its enum.
+func flagTypeLabel(sandbox *api.Sandbox, flag commandconf.Flag) string {
+	label := flag.Type
+	if label == "" {
+		label = commandconf.DefaultFlagType
 	}
-	return ""
+	if flag.Required {
+		label += ", required"
+	}
+	switch {
+	case flag.HasMin && flag.HasMax:
+		label += ", " + numberLabel(sandbox, flag.Type, flag.Min, true) + ".." + numberLabel(sandbox, flag.Type, flag.Max, true)
+	case flag.HasMin:
+		label += ", >= " + numberLabel(sandbox, flag.Type, flag.Min, true)
+	case flag.HasMax:
+		label += ", <= " + numberLabel(sandbox, flag.Type, flag.Max, true)
+	}
+	if len(flag.Enum) > 0 {
+		label += ", one of " + sandbox.Deps.Stringsdeps.Join(flag.Enum, "/")
+	}
+	return label
 }
 
-// commandUsage builds the one usage line of a command: its verb, every flag
-// in declaration order (bracketed when optional) and every positional after
-// them.
-func commandUsage(sandbox *api.Sandbox, identifier string, conf *commandconf.CommandConf) string {
-	parts := []string{identifier}
-
-	for _, flag := range conf.Flags {
-		token := flagToken(flag)
+// commandUsage builds the one usage line of a command: its pattern, then every
+// flag it declares in declaration order and every flag a middleware in front
+// of it adds, each bracketed when optional.
+func commandUsage(sandbox *api.Sandbox, conf *commandconf.CommandConf, inherited []commandconf.Flag) string {
+	parts := []string{conf.Pattern()}
+	for _, flag := range append(append([]commandconf.Flag{}, conf.Flags...), inherited...) {
+		token := flagToken(sandbox, flag)
 		if !flag.Required {
 			token = "[" + token + "]"
 		}
 		parts = append(parts, token)
 	}
-
-	for _, arg := range conf.Args {
-		token := "<" + arg.Key + ">"
-		if arg.Array {
-			token += "..."
-		}
-		if !arg.Required {
-			token = "[" + token + "]"
-		}
-		parts = append(parts, token)
-	}
-
 	return sandbox.Deps.Stringsdeps.Join(parts, " ")
 }
 
-// flagToken is one flag as the usage line spells it: its first identifier,
-// plus a value placeholder for everything that is not a boolean switch.
-func flagToken(flag commandconf.Field) string {
-	identifier := "--" + flag.Key
-	if len(flag.Identifiers) > 0 {
-		identifier = flag.Identifiers[0]
-	}
+// flagToken is one flag as the usage line spells it: its first key, plus a
+// value placeholder for everything that is not a boolean switch.
+func flagToken(sandbox *api.Sandbox, flag commandconf.Flag) string {
+	key := flag.Keys[0]
 	if flag.Type == "boolean" {
-		return identifier
+		return key
 	}
-	token := identifier + " <" + flag.Key + ">"
-	if flag.Array {
+	token := key + " <" + sandbox.Deps.Stringsdeps.TrimPrefix(commandconf.DefaultKey(sandbox, flag.Id), "--") + ">"
+	if flag.Type == "string-array" || flag.Type == "integer-array" {
 		token += "..."
 	}
 	return token
 }
 
-// identifierList renders identifiers as the inline code list a table cell
-// carries, "" when there are none (a positional argument).
-func identifierList(sandbox *api.Sandbox, identifiers []string) string {
-	quoted := make([]string, 0, len(identifiers))
-	for _, identifier := range identifiers {
-		quoted = append(quoted, "`"+identifier+"`")
+// identifierList renders spellings as the inline code list a table cell carries, ""
+// when there are none.
+func identifierList(sandbox *api.Sandbox, keys []string) string {
+	quoted := make([]string, 0, len(keys))
+	for _, key := range keys {
+		quoted = append(quoted, "`"+key+"`")
 	}
 	return sandbox.Deps.Stringsdeps.Join(quoted, ", ")
 }

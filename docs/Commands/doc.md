@@ -1,13 +1,14 @@
 # Commands
 
-`agnos <command> [flags] [args]`. `agnos help <command>`, or `agnos <command> --help`,
+`agnos <command> [args] [flags]`. `agnos help <command>`, or `agnos <command> --help`,
 prints the same for one command; an empty command line prints the general help and exits 2.
 A command declaring a `--help` flag of its own keeps it, and is described through `help` alone.
 
-One page per command, each rendered from that command's `entries.yaml`
-([EntriesYaml](../EntriesYaml/doc.md)) on each build — open the one you need rather than this
-whole page. Hidden commands are not listed. Flags may appear anywhere on the command line;
-positionals bind in order after them. A `repeatable` field is given once per value.
+One page per command, each rendered from that command's `command.yaml`
+([CommandYaml](../CommandYaml/doc.md)) on each build — open the one you need rather than this
+whole page. Hidden commands are not listed. The args are the leading words of the command line;
+the flags follow them, in any order. A `repeatable` flag is given once per value. A command's page
+lists the flags of the middlewares in front of it too.
 
 ## Deps System
 
@@ -134,5 +135,14 @@ positionals bind in order after them. A `repeatable` field is given once per val
 | [`help`](help.md) | Display help for a command |
 | [`interview`](interview.md) | Guided mode: answer questions instead of typing commands |
 | [`version`](version.md) | Print the installed version |
+
+## Middlewares
+
+Run in front of the commands they match, lowest `priority` first; typed by nobody.
+
+| Middleware | Runs before | Priority | Flags it adds |
+| --- | --- | --- | --- |
+| [`help-flag`](help-flag.md) | `*` | 5 | `--help` |
+| [`project`](project.md) | `*` | 10 | `--path`, `--quiet`, `-q` |
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).
