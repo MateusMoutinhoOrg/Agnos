@@ -25,7 +25,7 @@ Rewrites one entry of the route's paths in place and runs build. It is add-path 
 | `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case (take it off with --clear trigger-ignore-case) | — |
 | `--description` | string |  | the new help text | — |
 | `--clear` | string-array |  | a key to take off: trigger, trigger-negate, trigger-ignore-case, type or description (repeatable) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

@@ -29,7 +29,7 @@ Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml
 | `--trigger-type` | string |  | how the trigger is compared: equal, prefix, text-prefix, suffix, regex or one-of (defaults to equal) | — |
 | `--trigger-negate` | boolean |  | invert the trigger: the command runs when the value does not match it | — |
 | `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

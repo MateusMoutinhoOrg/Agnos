@@ -23,7 +23,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "set-body-field <Name>"
 	self.Category = "Server System"
-	self.Help = "Rewrite one property of a route's body json-schema"
+	self.Help = "Rewrite one property of a route's body json- or form-schema"
 	self.LongDescription = "Rewrites one property of the route's body json-schema in place and runs build. The keywords already declared are read back, the ones given are written over them, and the whole is built again by the constructor add-body-field uses — so the property a forgotten --max is added to is the property that was there. --clear takes a keyword off again, and a --type the old keywords cannot survive drops them, naming each one it dropped. A property that is not declared yet is add-body-field's."
 	self.Examples = []string{"set-body-field age --route create-user --type int --min 0 --max 130"}
 	self.Hidden = false
@@ -276,7 +276,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

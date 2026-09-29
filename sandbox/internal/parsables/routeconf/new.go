@@ -55,6 +55,13 @@ var BodyTypes = []string{"none", "raw", "text", "json", "form"}
 // DefaultFormContentType is the content type a `type: form` body requires.
 const DefaultFormContentType = "application/x-www-form-urlencoded"
 
+// JsonSchemaKey is the key a json body declares its schema under.
+const JsonSchemaKey = "json-schema"
+
+// FormSchemaKey is the key a form body declares its schema under: the same
+// subset as JsonSchemaKey, held flat by FormSchemaViolations.
+const FormSchemaKey = "form-schema"
+
 // legacyKeys are the top-level keys a route declaration no longer carries:
 // the ones routeslist replaced, and `phase`, which went with the `after` phase.
 var legacyKeys = []string{"method", "headers", "params", "phase"}
@@ -255,9 +262,12 @@ func readBody(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Body
 		body.ContentType = DefaultFormContentType
 	}
 
-	if schema_item, _ := item.GetObjectItem("json-schema"); schema_item != nil && schema_item.IsObject() {
-		body.Schema = readSchema(sandbox, schema_item)
-		body.HasSchema = true
+	for _, key := range []string{JsonSchemaKey, FormSchemaKey} {
+		if schema_item, _ := item.GetObjectItem(key); schema_item != nil && schema_item.IsObject() {
+			body.Schema = readSchema(sandbox, schema_item)
+			body.HasSchema = true
+			body.SchemaKeys = append(body.SchemaKeys, key)
+		}
 	}
 
 	return body

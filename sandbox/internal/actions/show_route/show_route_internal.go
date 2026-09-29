@@ -174,7 +174,7 @@ func withNotes(sandbox *api.Sandbox, text string, notes []string) string {
 }
 
 // bodyLines is the request body: the envelope the dispatch settles before a
-// handler runs, and the json-schema ReadBody holds the document to.
+// handler runs, and the json- or form-schema ReadBody holds the document to.
 func bodyLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if conf.Body.Type == routeconf.BodyNone {
 		return []string{"", "body      none"}

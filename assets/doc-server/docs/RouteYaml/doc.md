@@ -23,8 +23,8 @@ and drop comments.
 | route-level keys | `set-route` (`--before` / `--after` place it one rung from another route) |
 | `paths` | `add-path` / `set-path` / `remove-path` |
 | `parameters` | `add-parameter` / `set-parameter` / `remove-parameter` |
-| `body` | `set-body` |
-| `body.json-schema` | `add-body-field` / `set-body-field` / `remove-body-field` / `import-body` |
+| `body` | `set-body` (`--type json` ↔ `--type form` carries a flat schema along) |
+| `body.json-schema`, `body.form-schema` | `add-body-field` / `set-body-field` / `remove-body-field` / `import-body` |
 
 `{{.GeneratorName}} show-route <route>` prints the whole of it as a tree, with its place in the
 chain. Three more readers write nothing: `list-routes` (every route in run order),
@@ -218,6 +218,7 @@ calls the handler through `Deps.Reflectdeps`, since every route's `Entries` is a
 | `max-bytes` | A longer body is `413`. Default `1048576` |
 | `content-type` | A divergent one is `415`. Default `application/json` for `json`, `application/x-www-form-urlencoded` for `form` |
 | `json-schema` | A subset of JSON Schema, only with `type: json` |
+| `form-schema` | The same subset held flat, only with `type: form` — see [Form schema](#form-schema) |
 
 Supported schema keywords: `type` (`object`/`array`/`string`/`integer`/`number`/`boolean`/
 `null`), `properties`, `required`, `additionalProperties`, `items`, `enum`, `const`, `minimum`,
@@ -225,6 +226,38 @@ Supported schema keywords: `type` (`object`/`array`/`string`/`integer`/`number`/
 `minItems`, `maxItems`, `uniqueItems`, `format` (`email`, `uuid`, `date-time`, `uri`),
 `nullable`. Anything else (`$ref`, `oneOf`, `allOf`, `anyOf`, `patternProperties`) fails the
 build rather than being ignored.
+
+## Form schema
+
+A `form` body is what an html `<form method="POST">` sends — no script needed. Its `form-schema`
+reads a `key=value` list, so it is flat: the root is `type: object`, each property a `string`,
+`integer`, `number` or `boolean`, or an `array` of one (the key repeated: `tag=a&tag=b`). No
+nested object, no `nullable`, no dotted path; `verify` and every editor refuse one.
+
+```yaml
+body:
+  type: form
+  required: true
+  form-schema:
+    type: object
+    required: [password, username]
+    properties:
+      username: { type: string, maxLength: 254 }
+      password: { type: string, minLength: 8 }
+      remember: { type: boolean }
+```
+
+| Form value | Reads as |
+|---|---|
+| `integer`, `number` | parsed; text that will not parse is `400` `must be of type …` |
+| `boolean` | `true`/`1`/`on` (a checked checkbox), `false`/`0`/`off` |
+| `array` | every occurrence of the key; any other type its first one |
+| empty (`username=`) | absent: a blank input fails `required` |
+| undeclared key | text, so `additionalProperties: false` refuses it |
+
+`multipart/form-data` (an `enctype` for file uploads) is not read: the form keeps the default
+`application/x-www-form-urlencoded`. `set-body <route> --type form` turns a json body with a flat
+`json-schema` into this one, and `Entries.Body` keeps its fields.
 
 ## Generated `ReadBody`
 
@@ -237,13 +270,15 @@ runs and binds what it returns onto `Entries.Body`, in what its `body.type` decl
 | `none` | none is generated |
 | `raw` | `([]byte, error)` |
 | `text` | `(string, error)` |
-| `form` | `(map[string][]string, error)`; a body that does not parse is `400` |
+| `form` without a `form-schema` | `(map[string][]string, error)`; a body that does not parse is `400` |
+| `form` with one | `(Body, error)` |
 | `json` with an object `json-schema` | `(Body, error)` |
 | `json` without one | `(*serializables.SerializibleObject, error)` |
 
 Every variant does, in order: `Request.ReadBody(MaxBodyBytes)` (`413`), the `required` check
-(`400`) and — for `json` — `routeio.ValidateSchema` against `BodySchema` (`400` on the first
-violation, its field path in the response's `field`). A nested object becomes `Body<Path>`; an
+(`400`) and — for `json` — `routeio.ValidateSchema` against `BodySchema`, or — for a `form` with a
+schema — `routeio.ValidateForm` (`400` on the first violation, its field path in the response's
+`field`). A nested object becomes `Body<Path>`; an
 object inside an array becomes `Body<Path>Item`.
 
 A failing body has already been answered, by whichever `Handle*` file of

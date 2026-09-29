@@ -118,8 +118,9 @@ and `entries.go` — the `Entries` the handler is handed.
 One editor per place the declaration holds something, so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
-it passes through; `set-body` covers the envelope around the schema — how the body is read,
-whether it is required, its size limit and its content-type.
+it passes through — into the `json-schema` of a json body, or the flat `form-schema` of a form
+one; `set-body` covers the envelope around the schema — how the body is read, whether it is
+required, its size limit and its content-type.
 
 Each `add-` has a `set-` beside it, so a key that was forgotten is added to the declaration
 that is there instead of removing it and declaring it again: the keys given are written over

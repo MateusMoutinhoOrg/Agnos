@@ -9,7 +9,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 - **Generate over hand-write.** A file that can be rendered from a template, a collector or a
   declaration must be. Hand-written code is contracts, adapters, `sandbox/internal/` and
-  `handler.go` only; a new hand-written file needs a reason why generation cannot cover it.
+  `InternalPureHandler.go` only; a new hand-written file needs a reason why generation cannot
+  cover it.
 - **Every file is an instance of a pattern.** New code copies an existing sibling exactly:
   same filenames, same function names, same ordering. If no pattern fits, define and document
   the pattern first — `verify` and the collectors read shape by convention, so a one-off
@@ -103,7 +104,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always
   use that spelling; an added contract never renames an existing one.
 - An adapter's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<adapter>/<adapter>.go`.
-- A command handler is always `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`.
+- A command handler is always `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
 - A dep is named after the contract it installs; an adapter after what backs it (`sortdeps`,
@@ -112,33 +113,36 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 ## Handlers
 
-- A command is `sandbox/internal/commands/<name>/`, holding `entries.yaml` (the declaration),
-  `new.go` (generated) and `handler.go` (hand-written), snake_case for a kebab-case name.
-- Only `CommandHandler(sandbox *api.Sandbox, command *api.Command) int` is exported. Every flag
-  and arg of `entries.yaml` is read off `command` by id (`command.GetString("path")`), already
-  typed, defaulted and range-checked.
+- A command is `sandbox/internal/commands/<name>/`, holding `command.yaml` (the declaration),
+  `new.go` and `entries.go` (generated) and `InternalPureHandler.go` (hand-written), snake_case
+  for a kebab-case name. A `handler.go` is an old declaration. **(verify)**
+- Only `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`
+  is exported. Every flag and arg of `command.yaml` is a field of `Entries` (`entries.Name`),
+  already typed, defaulted and range-checked.
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
   through `sandbox.Deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
-- Return `api.ExitOk` or `api.ExitFailure`, never `api.ExitUsage`: the dispatch rejects bad
-  input before the handler runs.
+- `response.Printf` (stdout) answers the command line with `api.ExitOk`; `response.Error` and
+  `response.Log` (stderr) answer nothing. Refuse a command line by returning `cliio.Fail` — a
+  returned error fails it even after a print. A strict command that returns `nil` without
+  printing has run and exits `0`; only a middleware declines.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.
-- A command's `entries.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
+- A command's `command.yaml` is written by `add-flag` / `add-arg` / `set-command`, never by
   hand: they re-render it with keys in alphabetical order and drop comments.
 - `Cli.Commands` is the whole command surface, one `api.Command` per declared command, built by
-  `sandbox/internal/generated/cli/new.go` from each package's generated `NewCommand`. The dispatch and
+  `sandbox/internal/generated/cli/cli/new.go` from each package's generated `NewCommand`. The dispatch and
   both help screens read it; nothing about the command set is generated per command anywhere
   else. Each run binds to its own copy of the declaration, made by `api.BindCommand`, so what
   the slice holds is never written to.
 
 ## Output channels
 
-| Channel | Stream | Carries | `--quiet` |
+| Channel | Stream | Carries | Silenced |
 |---|---|---|---|
-| `deps.Std.Printf` | stdout | The result (listings, version, help) | kept |
-| `deps.Std.Log` | stderr | Progress | silenced |
-| `deps.Std.Error` | stderr | Usage errors and failures | kept |
+| `deps.Std.Printf` | stdout | The result (listings, version, help) | never |
+| `deps.Std.Log` | stderr | Progress | by a middleware that turns it off — `--quiet` here |
+| `deps.Std.Error` | stderr | Usage errors and failures | never |
 
-Never `fmt.Printf`.
+Never `fmt.Printf`. 
 
 ## Exit codes
 
@@ -161,7 +165,7 @@ Never `fmt.Printf`.
   family, and only its literal head has to exist. Drop the entry when the path goes. **(verify)**
 - A generated page is changed at its source, never on the page:
   [PublicApi](../PublicApi/doc.md) from the doc comments of `sandbox/api/` and `sandbox/deps/`,
-  [Commands](../Commands/doc.md) from each `entries.yaml`,
+  [Commands](../Commands/doc.md) from each `command.yaml`,
   [Structure](../Structure/doc.md) from
   `AgnosConfig/structure.yaml`, `README.md` from
   `AgnosConfig/docs/ReadmeHeader.md` and every `props.yaml`.

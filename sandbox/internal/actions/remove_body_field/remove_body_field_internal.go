@@ -17,7 +17,7 @@ func RemoveBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route st
 		return err
 	}
 	if conf.Body.Schema == nil {
-		return sandbox.Deps.Std.Errorf("route %q declares no body json-schema", route)
+		return sandbox.Deps.Std.Errorf("route %q declares no body schema", route)
 	}
 
 	key := utils.RouteFieldName(sandbox, name)

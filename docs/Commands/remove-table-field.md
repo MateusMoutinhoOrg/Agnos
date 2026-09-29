@@ -17,7 +17,7 @@ Drops one field from a table of the database's specs.yaml and runs build without
 | `--database` | string, required |  | the database (identifier or package name) the field is declared on | — |
 | `--table` | string, required |  | the table the field is declared on | — |
 | `--parent` | string |  | the nested database field the field sits inside, instead of the table itself | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

@@ -66,12 +66,18 @@ func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 	})
 }
 
-// checkRouteSchema refuses a json-schema that reaches outside the declared
+// checkRouteSchema refuses a schema that reaches outside the declared
 // subset. Silently dropping $ref or oneOf would generate a validator that
 // accepts what the declaration means to reject.
+//
+// A form-schema has to be flat too: a nested object would generate a struct
+// no `key=value` pair can fill.
 func checkRouteSchema(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) error {
 	for _, key := range schemaUnknownKeys(conf.Body.Schema) {
-		return sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: json-schema key %q is outside the supported subset", name, key)
+		return sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: schema key %q is outside the supported subset", name, key)
+	}
+	if conf.Body.Type == "form" {
+		return utils.CheckFormSchema(sandbox, name, conf.Body.Schema)
 	}
 	return nil
 }
@@ -281,14 +287,14 @@ func bodyData(sandbox *api.Sandbox, conf *routeconf.RouteConf) map[string]any {
 		"IsText":       body.Type == "text",
 		"IsJson":       body.Type == "json",
 		"IsForm":       body.Type == "form",
-		"IsObject":     body.HasSchema && body.Schema != nil && body.Schema.Type == "object",
+		"IsObject":     bodyIsObject(body),
 		"GoType":       bodyGoType(body),
 	}
 }
 
 // bodyGoType is what the generated ReadBody hands back: the bytes themselves,
-// the text, the struct the schema describes, or — for a json body with no
-// schema — the parsed document.
+// the text, the struct the schema describes, or — with no schema — the parsed
+// document of a json body and the raw pairs of a form one.
 func bodyGoType(body routeconf.Body) string {
 	switch body.Type {
 	case "raw":
@@ -296,9 +302,12 @@ func bodyGoType(body routeconf.Body) string {
 	case "text":
 		return "string"
 	case "form":
+		if bodyIsObject(body) {
+			return "Body"
+		}
 		return "map[string][]string"
 	case "json":
-		if body.HasSchema && body.Schema != nil && body.Schema.Type == "object" {
+		if bodyIsObject(body) {
 			return "Body"
 		}
 		return "*serializables.SerializibleObject"
@@ -306,15 +315,23 @@ func bodyGoType(body routeconf.Body) string {
 	return ""
 }
 
-// bodyStructs flattens the declared json-schema into the Go structs the
+// bodyIsObject tells a json or form body whose schema is an object: the one
+// ReadBody binds onto the generated Body struct.
+func bodyIsObject(body routeconf.Body) bool {
+	if body.Type != "json" && body.Type != "form" {
+		return false
+	}
+	return body.HasSchema && body.Schema != nil && body.Schema.Type == "object"
+}
+
+// bodyStructs flattens the declared json- or form-schema into the Go structs the
 // generated entries.go declares: Body for the root object, Body<Path> for a
 // nested object and Body<Path>Item for the object an array holds.
 func bodyStructs(sandbox *api.Sandbox, conf *routeconf.RouteConf) []map[string]any {
-	body := conf.Body
-	if body.Type != "json" || !body.HasSchema || body.Schema == nil || body.Schema.Type != "object" {
+	if !bodyIsObject(conf.Body) {
 		return nil
 	}
-	return appendBodyStruct(sandbox, nil, "Body", body.Schema)
+	return appendBodyStruct(sandbox, nil, "Body", conf.Body.Schema)
 }
 
 // appendBodyStruct emits one struct for schema and, depth first, one for every

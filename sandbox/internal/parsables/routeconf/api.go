@@ -83,10 +83,12 @@ type Schema struct {
 	Unknown                 []string
 }
 
-// Body describes a route's request body. It is the one part of a request the
-// dispatch does not read: the generated ReadBody applies Required, MaxBytes and
-// Schema on demand, so a handler can refuse a request before a byte of the body
-// is read.
+// Body describes a route's request body. The generated ReadBody applies
+// Required, MaxBytes and Schema before the handler runs; a middleware in front
+// of the route may still refuse a request before a byte of the body is read.
+// Schema is declared under `json-schema` on a json body and under
+// `form-schema` on a form one — SchemaKeyOf names which — and SchemaKeys
+// records every key it was read under, so verify reports the wrong one.
 type Body struct {
 	Type        string // "none" | "raw" | "text" | "json" | "form"
 	Required    bool
@@ -94,6 +96,7 @@ type Body struct {
 	ContentType string
 	Schema      *Schema
 	HasSchema   bool
+	SchemaKeys  []string
 }
 
 // RouteConf is the parsed form of sandbox/internal/routeslist/<name>/route.yaml —

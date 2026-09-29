@@ -20,7 +20,7 @@ Appends one field to a table of the database's specs.yaml and runs build. What t
 | `--type` | string | `string` | the field type: key, string, int, float, link or database | — |
 | `--required` | boolean |  | an insert must carry this field | — |
 | `--target` | string |  | the table a link points at (only with --type link) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

@@ -13,7 +13,7 @@ Scaffolds a new Agnos project in the given directory, creating the required conf
 | `--project-name`, `-p` | string, required |  | the name of the project | — |
 | `--force`, `-f` | boolean |  | Forces the creation of the project, overwriting existing files | — |
 | `--module`, `-m` | string |  | the go module path written into go.mod (required when the target dir has no go.mod yet) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

@@ -37,6 +37,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `disable-extension` |  | [example.sh](../../examples/cli/disable-extension/example.sh) |
 | `enable-extension` |  | [example.sh](../../examples/cli/enable-extension/example.sh) |
 | `explain-route` |  | [example.sh](../../examples/cli/explain-route/example.sh) |
+| `form-body` |  | [example.sh](../../examples/cli/form-body/example.sh) |
 | `front-init` |  | [example.sh](../../examples/cli/front-init/example.sh) |
 | `front-purge` |  | [example.sh](../../examples/cli/front-purge/example.sh) |
 | `import-body` | read a whole body json-schema off one example payload | [example.sh](../../examples/cli/import-body/example.sh) |

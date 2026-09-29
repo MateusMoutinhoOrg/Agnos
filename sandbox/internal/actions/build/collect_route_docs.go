@@ -692,7 +692,11 @@ func routeDocCurl(sandbox *api.Sandbox, conf *routeconf.RouteConf, inherited []r
 			}
 			lines = append(lines, "-d "+routeDocShellQuote(sandbox, sample))
 		case "form":
-			lines = append(lines, "-d "+routeDocShellQuote(sandbox, "name=value"))
+			sample := "name=value"
+			if body.HasSchema {
+				sample = routeDocFormSample(sandbox, body.Schema, complete)
+			}
+			lines = append(lines, "-d "+routeDocShellQuote(sandbox, sample))
 		case "text":
 			lines = append(lines, "-d "+routeDocShellQuote(sandbox, "some text"))
 		default:
@@ -776,7 +780,46 @@ func routeDocBody(sandbox *api.Sandbox, body routeconf.Body) *RouteDocBody {
 		doc.Sample = routeDocJsonText(sandbox, routeDocJsonSample(sandbox, body.Schema, true), "", true)
 		doc.SampleLang = "json"
 	}
+	if body.Type == "form" && body.HasSchema {
+		doc.Fields = routeDocBodyFields(sandbox, body.Schema, "", nil)
+		doc.Sample = routeDocFormSample(sandbox, body.Schema, true)
+		doc.SampleLang = "text"
+	}
 	return doc
+}
+
+// routeDocFormSample is a form body the schema accepts, as `key=value` pairs
+// joined by `&`: every property when complete, the required ones otherwise,
+// and an array's key repeated as many times as it needs items.
+func routeDocFormSample(sandbox *api.Sandbox, schema *routeconf.Schema, complete bool) string {
+	pairs := []string{}
+	for _, property := range schema.Properties {
+		if !complete && !routeDocContains(schema.Required, property.Name) {
+			continue
+		}
+		leaf, times := property.Schema, 1
+		if leaf.Type == "array" && leaf.Items != nil {
+			if leaf.MinItems > times {
+				times = leaf.MinItems
+			}
+			leaf = leaf.Items
+		}
+		value := routeDocUrlEscape(sandbox, routeDocFormLeaf(sandbox, leaf))
+		for index := 0; index < times; index++ {
+			pairs = append(pairs, routeDocUrlEscape(sandbox, property.Name)+"="+value)
+		}
+	}
+	return sandbox.Deps.Stringsdeps.Join(pairs, "&")
+}
+
+// routeDocFormLeaf is routeDocJsonLeaf as a form field spells it: the same
+// sample, without the quotes json puts around text.
+func routeDocFormLeaf(sandbox *api.Sandbox, schema *routeconf.Schema) string {
+	value := routeDocJsonLeaf(sandbox, schema)
+	if len(value) >= 2 && value[0] == '"' && value[len(value)-1] == '"' {
+		return value[1 : len(value)-1]
+	}
+	return value
 }
 
 // routeDocSize is a byte count as a person reads it: 1048576 -> "1 MB".

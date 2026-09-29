@@ -15,7 +15,7 @@ Writes sandbox/internal/databases/<name>/specs.yaml and runs build, which genera
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--prefix` | string |  | the key prefix every record is written under (defaults to the database's own name) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

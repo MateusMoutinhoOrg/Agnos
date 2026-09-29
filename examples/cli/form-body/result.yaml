@@ -1,0 +1,31 @@
+cli-output: |
+    route "login" declares a form body, whose form-schema is flat: property address is of type object, which a form field cannot carry
+    exit status 1
+    refused: address.city nests
+    route "login" declares a form body, whose form-schema is flat: property nickname is nullable: an empty form field already reads as absent
+    exit status 1
+    refused: nickname is nullable
+    POST /login
+      Sign in from a form
+      category  Auth
+      priority  100
+      response  application/json
+      chain     #2 of 2, after health
+
+    paths
+      Route                segments 0..-1  equal "/login"
+
+    body      form, required, application/x-www-form-urlencoded, at most 1048576 bytes
+      age                  integer  min 0
+      password             string  required, min-length 8
+      remember             boolean
+      tag                  []string  max-items 3
+      username             string  required, max-length 254
+exit-code: 0
+tree:
+    - file: docs/Routes/login.md
+      sha: 373ad0e378fdd508e58d019d8b64d0136e33754c0a6d2a2c6b12e431bd40f1ea
+    - file: sandbox/internal/routeslist/login/entries.go
+      sha: fa52d67ec75e5b37e9f7e4b45c841cfc087460c773adf476636e87ea01a7d614
+    - file: sandbox/internal/routeslist/login/route.yaml
+      sha: 502ab5033d91a71d2f562d1fe6e835674b843bbda256ddc63f7bc92689069585

@@ -3,7 +3,8 @@
 The front layer serves every file of `assets/frontend/`, embedded in the binary, over http.
 A **page** is a file of that tree and nothing else: no route, no declaration, no template
 syntax. Hand-written html and the `dist/` of any bundler (Vite, React, Svelte, Astro...) are
-served the same way. Dynamic data comes from api routes the page's js calls.
+served the same way. Dynamic data comes from api routes the page's js calls, or that a
+`<form>` posts to.
 
 ## Bring it up
 
@@ -33,6 +34,23 @@ A path that names no file is answered `404` with `404.html`, the formatted page 
 writes — restyle it by editing it. Delete it and such a path is declined instead, so the chain
 goes on and `handle_not_found.go` answers the `404`. Every file is sent with the `Content-Type` of its extension (`frontio.ContentTypeOf`,
 unknown ones as `application/octet-stream`) and `Cache-Control: no-cache`.
+
+## A form
+
+A plain `<form method="POST" action="/login">` reaches a route whose body is `type: form`, with
+no script: the browser sends `application/x-www-form-urlencoded` and navigates to what the route
+answers. Each input's `name` is a property of the route's `form-schema`
+([RouteYaml](../RouteYaml/doc.md#form-schema)), bound onto `Entries.Body` already typed.
+
+```bash
+{{.GeneratorName}} add-route login --method POST --trigger /login
+{{.GeneratorName}} set-body login --type form --required
+{{.GeneratorName}} add-body-field username --route login --required
+{{.GeneratorName}} add-body-field password --route login --required
+```
+
+A request that fails the schema is answered by `handle_bad_request.go` before the handler runs.
+Leave `enctype` alone: `multipart/form-data` is not read.
 
 ## A bundler's build
 

@@ -190,8 +190,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - No two routes declare the same method and path pattern *on the same rung*.
   Sharing a pattern across rungs is what a middleware in front of a route is; sharing a rung as
   well would leave the order between them undeclared. **(verify)**
-- A `json-schema` is declared on a `type: json` body alone, and only with the keywords of the
-  subset — `$ref`, `oneOf`, `allOf`, `anyOf` and `patternProperties` fail the build. **(verify)**
+- A `json-schema` is declared on a `type: json` body alone and a `form-schema` on a `type: form`
+  one alone, each only with the keywords of the subset — `$ref`, `oneOf`, `allOf`, `anyOf` and
+  `patternProperties` fail the build. A `form-schema` is flat: scalar properties or arrays of
+  them, never an object or `nullable`. **(verify)**
 - `Server.Routes` is the whole http surface, one `*api.Route` per declared route, built by
   `sandbox/internal/generated/server/server/new.go` from each package's generated `NewRoute`. The dispatch
   reads it and nothing about the route set is generated per route anywhere else; each request

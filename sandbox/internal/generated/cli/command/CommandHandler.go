@@ -7,7 +7,7 @@ import (
 )
 
 // entriesArgument is the position of the Entries pointer among the parameters
-// of an InternalPurehandler: func(props, entries, response) error.
+// of an InternalPureHandler: func(props, entries, response) error.
 const entriesArgument = 1
 
 // entriesTag is the struct tag an Entries field names what it is bound to by.
@@ -17,7 +17,7 @@ const entriesTag = "id"
 const fullCommandId = "FullCommand"
 
 // CommandHandler binds the command line of one bound command onto a fresh
-// Entries and runs the command's InternalPurehandler with it. The Entries type
+// Entries and runs the command's InternalPureHandler with it. The Entries type
 // is the command package's own, so it is built, filled and called through
 // Deps.Reflectdeps: every field is filled by its `id` tag — FullCommand, one
 // per arg, one per flag.
@@ -31,9 +31,9 @@ const fullCommandId = "FullCommand"
 // returns — built by cliio.Fail — is raised on this command; any other error
 // is returned as it is.
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) error {
-	entries := sandbox.Deps.Reflectdeps.NewIn(command.InternalPurehandler, entriesArgument)
+	entries := sandbox.Deps.Reflectdeps.NewIn(command.InternalPureHandler, entriesArgument)
 	if entries == nil || sandbox.Deps.Reflectdeps.NumField(entries) < 0 {
-		return sandbox.Deps.Std.Errorf("command %s: InternalPurehandler is not a func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error", command.Name)
+		return sandbox.Deps.Std.Errorf("command %s: InternalPureHandler is not a func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error", command.Name)
 	}
 
 	values := map[string]any{fullCommandId: command.Argv}
@@ -86,7 +86,7 @@ func CommandHandler(sandbox *api.Sandbox, command *api.Command) error {
 		}
 	}
 
-	out := sandbox.Deps.Reflectdeps.Call(command.InternalPurehandler, []any{command.Props, entries, command.Response})
+	out := sandbox.Deps.Reflectdeps.Call(command.InternalPureHandler, []any{command.Props, entries, command.Response})
 	if len(out) == 1 && out[0] != nil {
 		if failure, is := out[0].(*api.CommandFailure); is {
 			return cliio.RaiseFailure(sandbox, command, failure)
@@ -153,7 +153,17 @@ func bindFlag(sandbox *api.Sandbox, command *api.Command, parser argvdeps.Parser
 		raw, err := parser.GetStringOption(flag.Keys, occurrence)
 		if err != nil {
 			return nil, false, cliio.Raise(sandbox, command, api.BadUsageFailure, api.ExitUsage, flag.Id,
-				sandbox.Deps.Std.Sprintf("flag '%s': expected a value after %s", flag.Id, flag.Keys[0]))
+				sandbox.Deps.Std.Sprintf("flag '%s': expected a value after it", flag.Keys[0]))
+		}
+		raws = append(raws, raw)
+	}
+	// The --key=value spelling of the same flag.
+	assigned := AssignedKeys(flag.Keys)
+	for occurrence := 0; occurrence < parser.GetKeyValuesSize(assigned); occurrence++ {
+		raw, err := parser.GetStringKeyValues(assigned, occurrence)
+		if err != nil {
+			return nil, false, cliio.Raise(sandbox, command, api.BadUsageFailure, api.ExitUsage, flag.Id,
+				sandbox.Deps.Std.Sprintf("flag '%s': expected a value after the =", flag.Keys[0]))
 		}
 		raws = append(raws, raw)
 	}
@@ -230,7 +240,7 @@ func flagValue(sandbox *api.Sandbox, flag api.CommandFlag, raw string) (any, str
 		value, number = parsed, float64(parsed)
 	case api.NumberFlag:
 		parsed, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64)
-		if err != nil {
+		if err != nil || !IsFinite(parsed) {
 			return nil, sandbox.Deps.Std.Sprintf("%q is not a valid number", raw)
 		}
 		value, number = parsed, parsed
@@ -256,7 +266,7 @@ func checkConsumed(sandbox *api.Sandbox, command *api.Command) (bool, error) {
 		if command.Consumed[index] {
 			continue
 		}
-		if sandbox.Deps.Stringsdeps.HasPrefix(token, "-") {
+		if IsFlagToken(sandbox, token) {
 			return false, cliio.Raise(sandbox, command, api.UnknownFlagFailure, api.ExitUsage, token,
 				sandbox.Deps.Std.Sprintf("unknown flag %q", token))
 		}

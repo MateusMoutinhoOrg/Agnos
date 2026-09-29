@@ -555,11 +555,12 @@ type RouteParameterEditProps struct {
 }
 
 // RouteBodyProps describes the body envelope of one route — everything about
-// the request body but the json-schema, which is grown property by property
-// with AddBodyField. Type is "none", "raw", "text" or "json"; Required and
-// Optional are the two sides of one switch, as are the empty strings and
-// MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared
-// json-schema.
+// the request body but its schema (the json-schema of a json body, the
+// form-schema of a form one), which is grown property by property with
+// AddBodyField. Type is "none", "raw", "text", "json" or "form"; turning json
+// into form and back carries a flat schema along. Required and Optional are
+// the two sides of one switch, as are the empty strings and MaxBytes < 0 that
+// mean "leave as is". DropSchema deletes the declared schema.
 type RouteBodyProps struct {
 	Path        string
 	Route       string
@@ -571,7 +572,8 @@ type RouteBodyProps struct {
 	DropSchema  bool
 }
 
-// RouteBodyFieldProps describes one property of a route's body json-schema.
+// RouteBodyFieldProps describes one property of a route's body schema — its
+// json-schema, or the flat form-schema of a form body.
 // Name is the dotted path it sits at ("address.city"), and every other field
 // is one keyword of the supported subset: the raw literals typed on the
 // command line, where "" means unset. Type is "string", "boolean", "int",
@@ -864,19 +866,19 @@ type Actions struct {
 	// SetBody rewrites the body keys of one route's route.yaml.
 	SetBody func(props RouteBodyProps) error
 
-	// AddBodyField declares one property of a route's body json-schema, at
+	// AddBodyField declares one property of a route's body schema (json- or
+	// form-schema, by the body's type), at
 	// the dotted path props.Name.
 	AddBodyField func(props RouteBodyFieldProps) error
 
-	// RemoveBodyField deletes one property from a route's body
-	// json-schema.
+	// RemoveBodyField deletes one property from a route's body schema.
 	RemoveBodyField func(path string, route string, name string) error
 
-	// SetBodyField rewrites one property of a route's body json-schema, at
+	// SetBodyField rewrites one property of a route's body schema, at
 	// the dotted path props.Name.
 	SetBodyField func(props RouteBodyFieldEditProps) error
 
-	// ImportBody declares a route's body json-schema from an example
+	// ImportBody declares a route's body schema from an example
 	// payload, inferring one property per key the example carries.
 	ImportBody func(props RouteBodyImportProps) error
 

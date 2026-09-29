@@ -1,7 +1,7 @@
 # Commands
 
 `agnos <command> [args] [flags]`. `agnos help <command>`, or `agnos <command> --help`,
-prints the same for one command; an empty command line prints the general help and exits 2.
+prints the same for one command; an empty command line prints the general help and exits 0.
 A command declaring a `--help` flag of its own keeps it, and is described through `help` alone.
 
 One page per command, each rendered from that command's `command.yaml`
@@ -52,15 +52,15 @@ lists the flags of the middlewares in front of it too.
 
 | Command | Does |
 | --- | --- |
-| [`add-body-field`](add-body-field.md) | Declare a property of a route's body json-schema |
+| [`add-body-field`](add-body-field.md) | Declare a property of a route's body json- or form-schema |
 | [`add-parameter`](add-parameter.md) | Declare one value a route reads from the query string or the headers |
 | [`add-path`](add-path.md) | Add one slice of the request path to a route |
 | [`add-route`](add-route.md) | Declare a new http route |
 | [`explain-route`](explain-route.md) | Show which routes one request reaches, without a server |
-| [`import-body`](import-body.md) | Infer a route's body json-schema from an example payload |
+| [`import-body`](import-body.md) | Infer a route's body json- or form-schema from an example payload |
 | [`list-routes`](list-routes.md) | List every route in the order the chain runs them |
 | [`rebalance-routes`](rebalance-routes.md) | Lay the chain down again with room between its rungs |
-| [`remove-body-field`](remove-body-field.md) | Delete one property from a route's body json-schema |
+| [`remove-body-field`](remove-body-field.md) | Delete one property of a route's body json- or form-schema |
 | [`remove-parameter`](remove-parameter.md) | Delete one entry of a route's parameters |
 | [`remove-path`](remove-path.md) | Delete one entry of a route's paths |
 | [`remove-route`](remove-route.md) | Delete one declared route |
@@ -68,7 +68,7 @@ lists the flags of the middlewares in front of it too.
 | [`server-init`](server-init.md) | Add the http server layer to the project |
 | [`server-purge`](server-purge.md) | Remove the http server layer and every route in it |
 | [`set-body`](set-body.md) | Rewrite the body keys of a route.yaml |
-| [`set-body-field`](set-body-field.md) | Rewrite one property of a route's body json-schema |
+| [`set-body-field`](set-body-field.md) | Rewrite one property of a route's body json- or form-schema |
 | [`set-parameter`](set-parameter.md) | Rewrite one entry of a route's parameters |
 | [`set-path`](set-path.md) | Rewrite one entry of a route's paths |
 | [`set-route`](set-route.md) | Rewrite the route-level keys of a route.yaml |
@@ -149,7 +149,7 @@ Run in front of the commands they match, lowest `priority` first; typed by nobod
 
 | Middleware | Runs before | Priority | Flags it adds |
 | --- | --- | --- | --- |
-| [`help-flag`](help-flag.md) | `*` | 5 | `--help` |
+| [`help-flag`](help-flag.md) | `*` | 5 | `--help`, `-h` |
 | [`project`](project.md) | `*` | 10 | `--path`, `--quiet`, `-q` |
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

@@ -23,7 +23,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "import-body <Route>"
 	self.Category = "Server System"
-	self.Help = "Infer a route's body json-schema from an example payload"
+	self.Help = "Infer a route's body json- or form-schema from an example payload"
 	self.LongDescription = "Reads one example payload and declares a body property for every key it carries, which is add-body-field run once per key. A route that declared no body becomes a json one here. The inference is a starting point: a type per key, the objects and lists around them, and — with --infer-format — the four formats a string may spell. A property already declared is never written over; --replace starts the schema over instead. Every bound after that is set-body-field's."
 	self.Examples = []string{"import-body create-user --file payload.json --required --infer-format"}
 	self.Hidden = false
@@ -111,7 +111,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

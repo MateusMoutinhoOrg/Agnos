@@ -23,7 +23,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "remove-body-field <Name>"
 	self.Category = "Server System"
-	self.Help = "Delete one property from a route's body json-schema"
+	self.Help = "Delete one property of a route's body json- or form-schema"
 	self.LongDescription = "Drops one property of the body json-schema, named by the same dotted path add-body-field declared it with, and unlists it from its parent's required set. The build renders only: dropping a property may leave hand-written code referring to what is gone."
 	self.Examples = []string{"remove-body-field address.city --route create-user"}
 	self.Hidden = false
@@ -67,7 +67,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

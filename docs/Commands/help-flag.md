@@ -9,7 +9,7 @@ Runs in front of every command line. Without --help it hands the line on. With i
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--help` | boolean |  | Print the help of the command this command line is for | — |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | — |
 
 | Runs in front of | When |
 | --- | --- |

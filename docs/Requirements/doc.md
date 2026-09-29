@@ -5,14 +5,14 @@ Two tools, nothing else. Every recipe of [Workflow](../Workflow/doc.md) assumes 
 | Tool | Version | Needed for |
 | --- | --- | --- |
 | Go | 1.25+ | compiling this project; `agnos build` ends in a `go mod tidy` and a compile |
-| agnos | v0.11.0+ | every generated file — the tree cannot be maintained by hand |
+| agnos | v0.11.1+ | every generated file — the tree cannot be maintained by hand |
 
-This tree was rendered by `agnos v0.11.0`, so that is the floor: an older
+This tree was rendered by `agnos v0.11.1`, so that is the floor: an older
 binary rewrites it to its own older shape.
 
 ```bash
 go version      # go1.25.0 or newer
-agnos version  # v0.11.0 or newer
+agnos version  # v0.11.1 or newer
 ```
 
 ## Go 1.25+
@@ -36,7 +36,8 @@ An existing Go is replaced, never upgraded in place: delete `/usr/local/go` (or 
 
 ## agnos
 
-A single static binary — no runtime, no dependencies. Pick the platform's asset:
+A single static binary. Every command that writes a project runs the Go toolchain on it, so the
+Go above must be on `PATH`. Pick the platform's asset:
 
 | Platform | Binary |
 | --- | --- |

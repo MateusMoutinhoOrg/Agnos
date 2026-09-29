@@ -327,20 +327,34 @@ func isExportedId(id string) bool {
 	return true
 }
 
-// checkRouteSchemaKeys reports a json-schema declared on a body that carries
-// none, and every keyword outside the supported subset, whatever depth it sits
-// at.
+// checkRouteSchemaKeys reports a schema declared on a body that carries none,
+// or under the key of the other type (`json-schema` on a form body), a form
+// schema that is not flat, and every keyword outside the supported subset,
+// whatever depth it sits at.
 func checkRouteSchemaKeys(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) []string {
 	var violations []string
 
-	if conf.Body.HasSchema && conf.Body.Type != "json" {
-		violations = append(violations, routeViolation(name,
-			"declares a json-schema on a "+conf.Body.Type+" body; only `type: json` carries one"))
+	expected := routeconf.SchemaKeyOf(conf.Body.Type)
+	for _, key := range conf.Body.SchemaKeys {
+		switch {
+		case expected == "":
+			violations = append(violations, routeViolation(name,
+				"declares a "+key+" on a "+conf.Body.Type+" body; only `type: json` (json-schema) and `type: form` (form-schema) carry one"))
+		case key != expected:
+			violations = append(violations, routeViolation(name,
+				"declares a "+key+" on a "+conf.Body.Type+" body, which carries its schema under "+expected))
+		}
+	}
+
+	if conf.Body.Type == "form" {
+		for _, violation := range utils.FormSchemaViolations(conf.Body.Schema) {
+			violations = append(violations, routeViolation(name, "declares a form-schema that is not flat: "+violation))
+		}
 	}
 
 	for _, key := range schemaUnknown(conf.Body.Schema) {
 		violations = append(violations, routeViolation(name,
-			"declares the json-schema key "+key+", which is outside the supported subset ("+
+			"declares the schema key "+key+", which is outside the supported subset ("+
 				sandbox.Deps.Stringsdeps.Join(schemaKeys, ", ")+")"))
 	}
 

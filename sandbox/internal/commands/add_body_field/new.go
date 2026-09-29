@@ -23,8 +23,8 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Strict = true
 	self.Pattern = "add-body-field <Name>"
 	self.Category = "Server System"
-	self.Help = "Declare a property of a route's body json-schema"
-	self.LongDescription = "Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path."
+	self.Help = "Declare a property of a route's body json- or form-schema"
+	self.LongDescription = "Declares one property of the route's body schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up: the json-schema of a json body, the form-schema of a form one, which stays flat (no object, no nullable). A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path."
 	self.Examples = []string{"add-body-field email --route create-user --format email --max 254 --required", "add-body-field address.city --route create-user --required", "add-body-field role --route create-user --enum admin --enum member", "add-body-field tags --route create-user --array --unique-items --max-items 10"}
 	self.Hidden = false
 
@@ -254,7 +254,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

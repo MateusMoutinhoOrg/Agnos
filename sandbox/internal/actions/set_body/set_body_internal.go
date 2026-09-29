@@ -9,8 +9,9 @@ import (
 
 // SetBodyInternal parses the target route's route.yaml, overwrites every body
 // key the caller supplied (an empty string and a negative --max-bytes are
-// "leave as is") and writes the file back. The json-schema is grown property
-// by property by add-body-field; here it is only deleted.
+// "leave as is") and writes the file back. The schema is grown property by
+// property by add-body-field; here it is only deleted, or carried from a json
+// body to a form one and back.
 func SetBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteBodyProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
@@ -62,13 +63,22 @@ func SetBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteB
 // setType rewrites how the body is read, carrying the content-type along: a
 // json or a form body demands its own, and a route that takes no body demands
 // none, so the dispatch stops answering 415 for a request it no longer reads.
+//
+// The schema follows a json body turned form and back — it is the same subset
+// under another key — as long as it is flat enough for a form to carry; any
+// other type carries none, and --drop-schema has to say so.
 func setType(sandbox *api.Sandbox, conf *routeconf.RouteConf, props api.RouteBodyProps, raw string) error {
 	kind, err := utils.RouteBodyType(sandbox, raw)
 	if err != nil {
 		return err
 	}
-	if kind != "json" && conf.Body.HasSchema {
-		return sandbox.Deps.Std.Errorf("route %q declares a json-schema, which only a json body carries: pass --drop-schema to delete it", props.Route)
+	if conf.Body.HasSchema && routeconf.SchemaKeyOf(kind) == "" {
+		return sandbox.Deps.Std.Errorf("route %q declares a body schema, which only a json or a form body carries: pass --drop-schema to delete it", props.Route)
+	}
+	if conf.Body.HasSchema && kind == "form" {
+		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {
+			return sandbox.Deps.Std.Errorf("%s (pass --drop-schema to start the form over)", err.Error())
+		}
 	}
 
 	if sandbox.Deps.Stringsdeps.TrimSpace(props.ContentType) == "" {

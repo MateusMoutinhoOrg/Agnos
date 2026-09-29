@@ -3,7 +3,7 @@ package {{.Name}}
 
 import (
 	"{{.Module}}/sandbox/api"
-{{- if .Body.IsJson}}
+{{- if or .Body.IsJson .Body.IsObject}}
 	serializables "{{.Module}}/sandbox/deps/serializables"
 {{- end}}
 	"{{.Module}}/sandbox/internal/generated/routeio"
@@ -30,7 +30,7 @@ type Entries struct {
 }
 {{- range .BodyStructs}}
 
-// {{.Name}} is one object of this route's declared json-schema, as the
+// {{.Name}} is one object of this route's declared {{if $.Body.IsForm}}form{{else}}json{{end}}-schema, as the
 // generated ReadBody hands it over.
 type {{.Name}} struct {
 {{- range .Fields}}
@@ -46,8 +46,8 @@ const MaxBodyBytes = {{.Body.MaxBytes}}
 {{- end}}
 {{- if .SchemaJson}}
 
-// BodySchema is this route's declared json-schema in canonical form — the text
-// routeio.ValidateSchema checks a request body against.
+// BodySchema is this route's declared {{if .Body.IsForm}}form{{else}}json{{end}}-schema in canonical form — the text
+// routeio.{{if .Body.IsForm}}ValidateForm{{else}}ValidateSchema{{end}} checks a request body against.
 const BodySchema = {{printf "%q" .SchemaJson}}
 {{- end}}
 {{- if .HasBody}}
@@ -74,6 +74,9 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) 
 {{- if .Body.Required}}
 		return body, routeio.Raise(sandbox, route, api.StatusBadRequest, "",
 			"this route requires a request body")
+{{- else if and .Body.IsObject .Body.IsForm}}
+		// An absent form is read as an empty one, so a property the
+		// schema requires is still reported missing.
 {{- else if and .Body.IsObject .SchemaJson}}
 		// An absent object is read as an empty one, so a property the
 		// schema requires is still reported missing.
@@ -95,7 +98,17 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) 
 		return body, routeio.RaiseWithCause(sandbox, route, api.StatusBadRequest, "",
 			"the request body is not a valid form", err.Error())
 	}
+{{- if .Body.IsObject}}
+
+	parsed, field, message, ok := routeio.ValidateForm(sandbox, BodySchema, form)
+	if !ok {
+		return body, routeio.Raise(sandbox, route, api.StatusBadRequest, field, message)
+	}
+
+	body = bindBody(parsed)
+{{- else}}
 	body = form
+{{- end}}
 {{- else}}
 
 	parsed, field, message, ok := routeio.ValidateSchema(sandbox, {{if .SchemaJson}}BodySchema{{else}}""{{end}}, raw)

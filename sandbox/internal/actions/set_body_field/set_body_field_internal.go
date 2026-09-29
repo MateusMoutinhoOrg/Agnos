@@ -32,7 +32,7 @@ func SetBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		return sandbox.Deps.Std.Errorf("set-body-field: nothing to change (pass --rename, --type, --required, --array, one of the schema keywords, or --clear)")
 	}
 	if conf.Body.Schema == nil {
-		return sandbox.Deps.Std.Errorf("route %q declares no body json-schema: add-body-field declares the first property", props.Route)
+		return sandbox.Deps.Std.Errorf("route %q declares no body schema: add-body-field declares the first property", props.Route)
 	}
 
 	parts := utils.SplitSchemaPath(sandbox, name)
@@ -70,6 +70,11 @@ func SetBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 	if edit.Required {
 		parent.Required = utils.AppendUnique(parent.Required, []string{renamed})
 		sandbox.Deps.Sortdeps.Strings(parent.Required)
+	}
+	if conf.Body.Type == "form" {
+		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {
+			return err
+		}
 	}
 
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)

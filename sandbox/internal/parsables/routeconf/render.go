@@ -105,7 +105,9 @@ func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializible
 	return arr
 }
 
-// bodyObject renders the `body` declaration, the json-schema tree included.
+// bodyObject renders the `body` declaration, the schema tree included under
+// the key its type carries it by — so an editor that turns a json body into a
+// form one moves the schema along.
 func bodyObject(sandbox *api.Sandbox, body Body) *serializibles.SerializibleObject {
 	entry := sandbox.Deps.Serializables.CreateObject()
 	entry.AddItemToObject("type", body.Type)
@@ -117,7 +119,7 @@ func bodyObject(sandbox *api.Sandbox, body Body) *serializibles.SerializibleObje
 		entry.AddItemToObject("content-type", body.ContentType)
 	}
 	if body.HasSchema && body.Schema != nil {
-		entry.AddItemToObject("json-schema", schemaObject(sandbox, body.Schema))
+		entry.AddItemToObject(schemaKeyOfBody(body), schemaObject(sandbox, body.Schema))
 	}
 	return entry
 }
@@ -209,4 +211,30 @@ func stringArray(sandbox *api.Sandbox, values []string) *serializibles.Serializi
 		arr.AddItemToArray(value)
 	}
 	return arr
+}
+
+// SchemaKeyOf is the key a body of body_type declares its schema under:
+// JsonSchemaKey for json, FormSchemaKey for form, "" for a type that carries
+// none.
+func SchemaKeyOf(body_type string) string {
+	switch body_type {
+	case "json":
+		return JsonSchemaKey
+	case "form":
+		return FormSchemaKey
+	}
+	return ""
+}
+
+// schemaKeyOfBody is the key Render writes body's schema under: the one its
+// type carries, else the one it was read under, so a schema verify is about
+// to report is never dropped on the way.
+func schemaKeyOfBody(body Body) string {
+	if key := SchemaKeyOf(body.Type); key != "" {
+		return key
+	}
+	if len(body.SchemaKeys) > 0 {
+		return body.SchemaKeys[0]
+	}
+	return JsonSchemaKey
 }

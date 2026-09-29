@@ -8,9 +8,11 @@ import (
 )
 
 // AddBodyFieldInternal parses the target route's route.yaml, declares one
-// property of the body's json-schema at the dotted path props.Name and writes
-// the file back. A route that declared no body becomes a json one here:
-// declaring a property is what says it takes a body at all.
+// property of the body's schema at the dotted path props.Name and writes the
+// file back: the json-schema of a json body, the form-schema of a form one. A
+// route that declared no body becomes a json one here: declaring a property is
+// what says it takes a body at all. A form body is flat, so a property that
+// would nest is refused rather than written.
 func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteBodyFieldProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
@@ -29,8 +31,8 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		conf.Body.Type = "json"
 		conf.Body.ContentType = routeconf.DefaultJsonContentType
 	}
-	if conf.Body.Type != "json" {
-		return sandbox.Deps.Std.Errorf("route %q declares a %q body, which carries no json-schema", props.Route, conf.Body.Type)
+	if routeconf.SchemaKeyOf(conf.Body.Type) == "" {
+		return sandbox.Deps.Std.Errorf("route %q declares a %q body, which carries no schema (`set-body --type json` or `--type form` first)", props.Route, conf.Body.Type)
 	}
 	if conf.Body.Schema == nil {
 		conf.Body.Schema = &routeconf.Schema{Type: "object"}
@@ -59,6 +61,11 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 	if props.Required {
 		parent.Required = utils.AppendUnique(parent.Required, []string{leaf})
 		sandbox.Deps.Sortdeps.Strings(parent.Required)
+	}
+	if conf.Body.Type == "form" {
+		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {
+			return err
+		}
 	}
 
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)

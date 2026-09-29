@@ -24,8 +24,8 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "set-body <Route>"
 	self.Category = "Server System"
 	self.Help = "Rewrite the body keys of a route.yaml"
-	self.LongDescription = "Overwrites the body keys of one route.yaml: how the body is read, whether it is required, the longest one accepted and the content-type the dispatch demands. Empty options leave the current value alone. Declaring a json-schema is add-body-field's job; --drop-schema deletes the one already declared."
-	self.Examples = []string{"set-body create-user --type json --required --max-bytes 2097152", "set-body upload-avatar --type raw --content-type application/octet-stream", "set-body ping --type none"}
+	self.LongDescription = "Overwrites the body keys of one route.yaml: how the body is read, whether it is required, the longest one accepted and the content-type the dispatch demands. Empty options leave the current value alone. Declaring a schema is add-body-field's job; turning a json body into a form one (or back) carries its schema along when it is flat, and --drop-schema deletes the one already declared."
+	self.Examples = []string{"set-body create-user --type json --required --max-bytes 2097152", "set-body upload-avatar --type raw --content-type application/octet-stream", "set-body ping --type none", "set-body login --type form"}
 	self.Hidden = false
 
 	self.Args = []api.CommandArg{
@@ -63,7 +63,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded, read into a map[string][]string)",
+			Description: "how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded: a map[string][]string, or the Body struct its form-schema describes)",
 		},
 		{
 			Id:          "Required",
@@ -118,11 +118,11 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Exist: false, Type: api.EqualTrigger, Value: "", Negate: false, IgnoreCase: false},
-			Description: "delete the declared json-schema, leaving the body unvalidated",
+			Description: "delete the declared json- or form-schema, leaving the body unvalidated",
 		},
 	}
 
-	self.InternalPurehandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	self.InternalPureHandler = func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

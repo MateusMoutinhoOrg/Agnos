@@ -1,7 +1,7 @@
 # CliInstall
 
-`agnos` is a single static binary: no runtime, no dependencies. Pick your platform,
-paste the block, done. Go 1.25+ is needed only to build it from source.
+`agnos` is a single static binary, but every command that writes a project runs the Go
+toolchain on it, so Go 1.25+ must be on `PATH`. Pick your platform, paste the block, done.
 
 **macOS (Apple Silicon)**
 

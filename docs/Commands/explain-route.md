@@ -17,7 +17,7 @@ Walks the chain the way the generated dispatch does and prints, route by route, 
 | --- | --- | --- | --- | --- |
 | `--header` | string-array |  | a header the request carries, as key=value (repeatable) | — |
 | `--cookie` | string-array |  | a cookie the request carries, as key=value (repeatable) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

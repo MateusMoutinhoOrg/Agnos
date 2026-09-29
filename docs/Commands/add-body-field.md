@@ -1,12 +1,12 @@
 # `add-body-field`
 
-Declare a property of a route's body json-schema
+Declare a property of a route's body json- or form-schema
 
 ```bash
 agnos add-body-field <Name> --route <route> [--type <type>] [--required] [--array] [--min <min>] [--max <max>] [--exclusive-min <exclusive-min>] [--exclusive-max <exclusive-max>] [--format <format>] [--pattern <pattern>] [--enum <enum>...] [--const <const>] [--nullable] [--min-items <min-items>] [--max-items <max-items>] [--unique-items] [--additional-properties] [--no-additional-properties] [--help] [--path <path>] [--quiet]
 ```
 
-Declares one property of the route's body json-schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up. A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.
+Declares one property of the route's body schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up: the json-schema of a json body, the form-schema of a form one, which stays flat (no object, no nullable). A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -32,7 +32,7 @@ Declares one property of the route's body json-schema at a dotted path, creating
 | `--unique-items` | boolean |  | refuse an array holding the same value twice (--array only) | — |
 | `--additional-properties` | boolean |  | accept undeclared keys inside an object property | — |
 | `--no-additional-properties` | boolean |  | refuse undeclared keys inside an object property | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

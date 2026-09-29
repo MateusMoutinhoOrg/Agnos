@@ -7,6 +7,7 @@ args:
     trigger: { type: prefix, value: "" }
 flags:
   - id: Help
+    keys: [--help, -h]
     type: boolean
     description: Print the help of the command this command line is for
 category: Middleware

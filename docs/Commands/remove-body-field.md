@@ -1,6 +1,6 @@
 # `remove-body-field`
 
-Delete one property from a route's body json-schema
+Delete one property of a route's body json- or form-schema
 
 ```bash
 agnos remove-body-field <Name> --route <route> [--help] [--path <path>] [--quiet]
@@ -15,7 +15,7 @@ Drops one property of the body json-schema, named by the same dotted path add-bo
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
 | `--route` | string, required |  | the route (identifier or package name) the property is declared on | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

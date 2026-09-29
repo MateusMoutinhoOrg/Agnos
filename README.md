@@ -108,8 +108,6 @@ Lookup tables - schemas, file formats, generated file listings
 | [Extensions](docs/Extensions/doc.md) | The generation mechanics this project turns on, and what each one writes |
 | [DepList](docs/DepList/doc.md) | Every dep `agnos add-dep` can add, the adapters that fill it, and what backs each one |
 | [GeneratedFiles](docs/GeneratedFiles/doc.md) | Every file agnos writes into this project and whether build overwrites it |
-| [LibExamples](docs/LibExamples/doc.md) | Index of every runnable example of agnos as a Go module |
-| [CliExamples](docs/CliExamples/doc.md) | Index of every runnable example of the agnos cli |
 
 ## License
 

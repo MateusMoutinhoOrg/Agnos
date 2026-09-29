@@ -10,7 +10,8 @@ import (
 // ImportBodyInternal parses the target route's route.yaml, reads one example
 // payload and declares a body property for every key that example carries,
 // then writes the file back. A route that declared no body becomes a json one
-// here, exactly as one property declared by hand would make it.
+// here, exactly as one property declared by hand would make it; a form body
+// takes the example into its form-schema, which a nested key cannot enter.
 //
 // It is add-body-field run once per key, which is what the interview could not
 // offer: a payload of ten keys is ten questionnaires by hand and one pasted
@@ -36,8 +37,8 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 		conf.Body.Type = "json"
 		conf.Body.ContentType = routeconf.DefaultJsonContentType
 	}
-	if conf.Body.Type != "json" {
-		return sandbox.Deps.Std.Errorf("route %q declares a %q body, which carries no json-schema", props.Route, conf.Body.Type)
+	if routeconf.SchemaKeyOf(conf.Body.Type) == "" {
+		return sandbox.Deps.Std.Errorf("route %q declares a %q body, which carries no schema (`set-body --type json` or `--type form` first)", props.Route, conf.Body.Type)
 	}
 	if conf.Body.Schema == nil || props.Replace {
 		conf.Body.Schema = &routeconf.Schema{Type: "object"}
@@ -63,6 +64,11 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 	}
 	if len(added) == 0 {
 		return sandbox.Deps.Std.Errorf("the example declares no property this route does not already have (--replace starts the schema over)")
+	}
+	if conf.Body.Type == "form" {
+		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {
+			return err
+		}
 	}
 
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)

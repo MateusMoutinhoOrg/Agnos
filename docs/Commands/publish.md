@@ -14,7 +14,7 @@ Runs build, then compile (every target by default, or each --target given), and 
 | `--draft` | boolean |  | Create a draft release | — |
 | `--target`, `-t` | string-array | `all` | a target to compile and publish (repeatable); one of linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, or all | — |
 | `--publisher`, `-pub` | string | `gh` | The publisher to use (defaults to gh) | — |
-| `--help` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

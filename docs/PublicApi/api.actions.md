@@ -498,7 +498,7 @@ RouteParameterEditProps describes the change set-parameter applies to one entry 
 
 ## `RouteBodyProps`
 
-RouteBodyProps describes the body envelope of one route — everything about the request body but the json-schema, which is grown property by property with AddBodyField. Type is "none", "raw", "text" or "json"; Required and Optional are the two sides of one switch, as are the empty strings and MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared json-schema.
+RouteBodyProps describes the body envelope of one route — everything about the request body but its schema (the json-schema of a json body, the form-schema of a form one), which is grown property by property with AddBodyField. Type is "none", "raw", "text", "json" or "form"; turning json into form and back carries a flat schema along. Required and Optional are the two sides of one switch, as are the empty strings and MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared schema.
 
 | Field | Type |
 | --- | --- |
@@ -513,7 +513,7 @@ RouteBodyProps describes the body envelope of one route — everything about the
 
 ## `RouteBodyFieldProps`
 
-RouteBodyFieldProps describes one property of a route's body json-schema. Name is the dotted path it sits at ("address.city"), and every other field is one keyword of the supported subset: the raw literals typed on the command line, where "" means unset. Type is "string", "boolean", "int", "float" or "object", and Array wraps the whole of it in an array schema. AdditionalProperties and NoAdditionalProperties are the two sides of one switch.
+RouteBodyFieldProps describes one property of a route's body schema — its json-schema, or the flat form-schema of a form body. Name is the dotted path it sits at ("address.city"), and every other field is one keyword of the supported subset: the raw literals typed on the command line, where "" means unset. Type is "string", "boolean", "int", "float" or "object", and Array wraps the whole of it in an array schema. AdditionalProperties and NoAdditionalProperties are the two sides of one switch.
 
 | Field | Type |
 | --- | --- |
@@ -655,10 +655,10 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetParameter` | `func(props RouteParameterEditProps) error` | SetParameter rewrites one entry of a route's `parameters`, named by its key. |
 | `RemoveParameter` | `func(path string, route string, name string) error` | RemoveParameter deletes one entry of a route's `parameters`, named by its key. |
 | `SetBody` | `func(props RouteBodyProps) error` | SetBody rewrites the body keys of one route's route.yaml. |
-| `AddBodyField` | `func(props RouteBodyFieldProps) error` | AddBodyField declares one property of a route's body json-schema, at the dotted path props.Name. |
-| `RemoveBodyField` | `func(path string, route string, name string) error` | RemoveBodyField deletes one property from a route's body json-schema. |
-| `SetBodyField` | `func(props RouteBodyFieldEditProps) error` | SetBodyField rewrites one property of a route's body json-schema, at the dotted path props.Name. |
-| `ImportBody` | `func(props RouteBodyImportProps) error` | ImportBody declares a route's body json-schema from an example payload, inferring one property per key the example carries. |
+| `AddBodyField` | `func(props RouteBodyFieldProps) error` | AddBodyField declares one property of a route's body schema (json- or form-schema, by the body's type), at the dotted path props.Name. |
+| `RemoveBodyField` | `func(path string, route string, name string) error` | RemoveBodyField deletes one property from a route's body schema. |
+| `SetBodyField` | `func(props RouteBodyFieldEditProps) error` | SetBodyField rewrites one property of a route's body schema, at the dotted path props.Name. |
+| `ImportBody` | `func(props RouteBodyImportProps) error` | ImportBody declares a route's body schema from an example payload, inferring one property per key the example carries. |
 | `ShowRoute` | `func(path string, route string) ([]string, error)` | ShowRoute renders one route's whole declaration — its paths, its parameters and its body schema — as the lines of a tree, ready to print. |
 | `ListRoutes` | `func(path string) ([]string, error)` | ListRoutes renders every declared route as one line, in the order the dispatch runs them. |
 | `ExplainRoute` | `func(props ExplainRouteProps) ([]string, error)` | ExplainRoute runs one request against the declared routes without a server and renders, route by route, whether it runs and why not. |

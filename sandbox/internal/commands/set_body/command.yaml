@@ -15,8 +15,9 @@ examples:
     - set-body create-user --type json --required --max-bytes 2097152
     - set-body upload-avatar --type raw --content-type application/octet-stream
     - set-body ping --type none
+    - set-body login --type form
 flags:
-    - description: 'how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded, read into a map[string][]string)'
+    - description: 'how the body is read: none, raw, text, json or form (application/x-www-form-urlencoded: a map[string][]string, or the Body struct its form-schema describes)'
       id: Type
     - description: answer 400 when the body is absent or empty
       id: Required
@@ -30,9 +31,9 @@ flags:
       type: integer
     - description: the only content-type accepted; a divergent one is answered 415
       id: ContentType
-    - description: delete the declared json-schema, leaving the body unvalidated
+    - description: delete the declared json- or form-schema, leaving the body unvalidated
       id: DropSchema
       type: boolean
 help: Rewrite the body keys of a route.yaml
-long-description: 'Overwrites the body keys of one route.yaml: how the body is read, whether it is required, the longest one accepted and the content-type the dispatch demands. Empty options leave the current value alone. Declaring a json-schema is add-body-field''s job; --drop-schema deletes the one already declared.'
+long-description: 'Overwrites the body keys of one route.yaml: how the body is read, whether it is required, the longest one accepted and the content-type the dispatch demands. Empty options leave the current value alone. Declaring a schema is add-body-field''s job; turning a json body into a form one (or back) carries its schema along when it is flat, and --drop-schema deletes the one already declared.'
 priority: 100

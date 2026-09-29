@@ -441,3 +441,59 @@ func SchemaDemands(parent *routeconf.Schema, name string) bool {
 	}
 	return false
 }
+
+// FormSchemaViolations is every way schema reaches past what a form body can
+// carry: a form is one flat list of `key=value` pairs, so the root is an
+// object whose every property is a string, integer, number or boolean, or an
+// array of one of those (the key repeated). Nothing nests and nothing is null.
+// Each violation reads as a sentence about the property it names.
+func FormSchemaViolations(schema *routeconf.Schema) []string {
+	if schema == nil {
+		return nil
+	}
+	if schema.Type != "object" {
+		return []string{"the root must be `type: object`"}
+	}
+	var violations []string
+	if schema.Nullable {
+		violations = append(violations, "the root cannot be nullable")
+	}
+	for _, property := range schema.Properties {
+		child := property.Schema
+		switch {
+		case child == nil:
+		case child.Type == "array":
+			if child.Items == nil || !formScalar(child.Items.Type) {
+				violations = append(violations, "property "+property.Name+" is an array of something other than string, integer, number or boolean")
+			}
+			if child.Items != nil && child.Items.Nullable {
+				violations = append(violations, "property "+property.Name+" holds nullable items")
+			}
+		case !formScalar(child.Type):
+			violations = append(violations, "property "+property.Name+" is of type "+child.Type+", which a form field cannot carry")
+		}
+		if child != nil && child.Nullable {
+			violations = append(violations, "property "+property.Name+" is nullable: an empty form field already reads as absent")
+		}
+	}
+	return violations
+}
+
+// CheckFormSchema is FormSchemaViolations as the one error an editor refuses
+// with, naming the route; nil when the schema is flat.
+func CheckFormSchema(sandbox *api.Sandbox, route string, schema *routeconf.Schema) error {
+	violations := FormSchemaViolations(schema)
+	if len(violations) == 0 {
+		return nil
+	}
+	return sandbox.Deps.Std.Errorf("route %q declares a form body, whose form-schema is flat: %s", route, sandbox.Deps.Stringsdeps.Join(violations, "; "))
+}
+
+// formScalar tells a json-schema type one form field can be converted to.
+func formScalar(kind string) bool {
+	switch kind {
+	case "string", "integer", "number", "boolean", "":
+		return true
+	}
+	return false
+}
