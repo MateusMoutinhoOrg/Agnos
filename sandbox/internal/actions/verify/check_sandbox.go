@@ -27,6 +27,34 @@ func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []st
 	violations = append(violations, checkSandboxDeps(sandbox, io, module)...)
 	violations = append(violations, checkSandboxConstructors(sandbox, io)...)
 	violations = append(violations, checkSandboxConstructorPackages(sandbox, io)...)
+	violations = append(violations, checkSandboxUserApi(sandbox, io)...)
+
+	return violations
+}
+
+// userApiFiles pairs each generated sandbox/api/ file with the one start
+// writes for the part of it the project types itself, and the struct that
+// one declares and the first embeds.
+var userApiFiles = [][3]string{
+	{"sandbox.go", utils.UserSandboxFile, "UserSandbox"},
+	{"config.go", utils.UserConfigFile, "UserConfig"},
+}
+
+// checkSandboxUserApi enforces that the file start writes once is there
+// whenever the generated file embedding it is: api.Sandbox embeds
+// api.UserSandbox and api.Config embeds api.UserConfig, and no build writes
+// either — a project started before they existed would otherwise fail to
+// compile on a name it never declared.
+func checkSandboxUserApi(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+	var violations []string
+
+	for _, pair := range userApiFiles {
+		if !io.IsFile("sandbox/api/"+pair[0]) || io.IsFile("sandbox/api/"+pair[1]) {
+			continue
+		}
+		violations = append(violations, "sandbox/api/"+pair[1]+" is missing; sandbox/api/"+pair[0]+
+			" embeds the api."+pair[2]+" it declares and only start writes it — write it by hand, `type "+pair[2]+" struct{}` will do")
+	}
 
 	return violations
 }

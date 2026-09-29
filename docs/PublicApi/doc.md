@@ -30,6 +30,8 @@ struct of function fields, filled by a binder.
 | [`sandbox/api/commandprops.go`](api.commandprops.md) | `CommandProps` |
 | [`sandbox/api/config.go`](api.config.md) | `Config` |
 | [`sandbox/api/trigger.go`](api.trigger.md) | `EqualTrigger`, `PrefixTrigger`, `TextPrefixTrigger`, `SuffixTrigger`, `RegexTrigger`, `OneOfTrigger`, `TriggerType`, `Trigger` |
+| [`sandbox/api/userconfig.go`](api.userconfig.md) | `UserConfig` |
+| [`sandbox/api/usersandbox.go`](api.usersandbox.md) | `UserSandbox` |
 
 ## Dependency contracts
 

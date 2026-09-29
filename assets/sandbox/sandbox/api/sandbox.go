@@ -9,7 +9,11 @@ import (
 // sandbox/internal/. sandbox.New returns it, and nothing callable lives outside
 // of it.
 type Sandbox struct {
-{{- if .HasDeps}}
+	// UserSandbox is the part of the Sandbox the project declares itself, in
+	// sandbox/api/usersandbox.go: embedded, so each of its fields is read as
+	// sandbox.<Field> like any contract.
+	UserSandbox
+{{if .HasDeps}}
 	// Deps is every capability the sandbox reaches the outside world
 	// through. It rides on the api so that a function handed the Sandbox
 	// holds the whole of what it needs, and can call another field of the

@@ -32,13 +32,24 @@ const RoutePropsFile = "routeprops.go"
 // and it is the project's from then on.
 const CommandPropsFile = "commandprops.go"
 
+// UserSandboxFile is the sandbox/api/ file declaring api.UserSandbox, the
+// part of the Sandbox the project types itself. start writes it once and no
+// build rewrites it; api.Sandbox embeds it.
+const UserSandboxFile = "usersandbox.go"
+
+// UserConfigFile is the sandbox/api/ file declaring api.UserConfig, the part
+// of the Config the project types itself. start writes it once and no build
+// rewrites it; api.Config embeds it.
+const UserConfigFile = "userconfig.go"
+
 // ConstructorExempt are the sandbox/api/ files that declare no field of the
 // sandbox: sandbox.go is the struct itself, command.go and route.go are the
 // shape of one command and of one route, each owned by the contract whose
 // New<Name> builds the slice of them, trigger.go is the condition both of
-// them match on, and routeprops.go and commandprops.go are what a route's and
-// a command's handler are handed per run.
-var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile}
+// them match on, routeprops.go and commandprops.go are what a route's and a
+// command's handler are handed per run, and usersandbox.go and userconfig.go
+// are embedded in the Sandbox and the Config rather than fields of their own.
+var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile, UserSandboxFile, UserConfigFile}
 
 // ConstructorDir is the project-relative directory of one constructor package.
 func ConstructorDir(name string) string {

@@ -28,11 +28,12 @@ func StartInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.StartPro
 	project_conf.Name = props.ProjectName
 
 	vars := map[string]interface{}{
-		"Name":      project_conf.Name,
-		"Version":   project_conf.Version,
-		"ConfigDir": sandbox.Config.ProjectName + "Config",
-		"GoRelease": utils.GoRelease,
-		"GoFloor":   utils.GoFloor,
+		"Name":          project_conf.Name,
+		"Version":       project_conf.Version,
+		"GeneratorName": sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName),
+		"ConfigDir":     sandbox.Config.ProjectName + "Config",
+		"GoRelease":     utils.GoRelease,
+		"GoFloor":       utils.GoFloor,
 	}
 
 	if err := utils.RenderGroup(sandbox, io, "start", vars); err != nil {

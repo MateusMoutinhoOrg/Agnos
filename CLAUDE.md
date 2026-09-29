@@ -174,6 +174,9 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
   routeio, frontio, databaseio, server/route, server/server) and nothing hand-written; a package
   mixing both — a command, a route, a database — stays under `internal/`. **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and nothing
   else standing for the outside world: holding the api is holding everything.
+  `api.Sandbox` embeds `api.UserSandbox` and `api.Config` embeds `api.UserConfig`
+  (`api/usersandbox.go`, `api/userconfig.go`): written once by `start`, never by `build` —
+  the project's own public fields. `apishape` admits an embedded field only for such a struct.
 - **`adapters/`** — the only place OS-bound and third-party code lives.
 - **`assets/`** — every generated file's template, one group per extension; `assets/<group>/<path>`
   renders to `<path>`. `utils.AssetGroups()` is the list.

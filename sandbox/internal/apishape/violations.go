@@ -17,7 +17,8 @@ import (
 // generator writes it a converter, field by field. What is left cannot be
 // written at all: a type from another package (already barred by "api imports
 // nothing"), a type parameter, a channel, an anonymous struct or interface, or
-// an embedded field.
+// an embedded field of anything but a struct the package declares — the one
+// embedding whose implicit name is the same in both copies.
 //
 // The check is not opt-in and has no flag. What varies between repos is the
 // shape of the api, and a shape is verified, not declared; an installable
@@ -53,8 +54,10 @@ func typeViolations(sandbox *api.Sandbox, shape *Api, file string, entry goimpor
 				continue
 			}
 			if field.Name == "" {
-				violations = append(violations, violation(file, where,
-					"embeds "+field.Type+"; an embedded field has no name to convert through, so give it one"))
+				if !IsStruct(shape, field.Type) {
+					violations = append(violations, violation(file, where,
+						"embeds "+field.Type+"; only a struct this package declares may be embedded, since its type is the name the field is converted through"))
+				}
 				continue
 			}
 			violations = append(violations, exprViolations(sandbox, shape, file, where+" field "+field.Name, field.Type)...)

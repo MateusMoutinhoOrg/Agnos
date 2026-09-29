@@ -153,7 +153,7 @@ func structBody(plan *planner, name string, direction string, destination string
 		if IsDepsWiring(name, field.Name) {
 			continue
 		}
-		body += "\t\t" + field.Name + ": " + convert(plan, field.Type, direction, "v."+field.Name) + ",\n"
+		body += "\t\t" + FieldName(field) + ": " + convert(plan, field.Type, direction, "v."+FieldName(field)) + ",\n"
 	}
 	return body + "\t}"
 }

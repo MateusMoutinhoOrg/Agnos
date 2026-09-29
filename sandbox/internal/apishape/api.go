@@ -70,3 +70,13 @@ const DepsField = "Deps"
 func IsDepsWiring(typeName string, fieldName string) bool {
 	return typeName == SandboxType && fieldName == DepsField
 }
+
+// FieldName is the name a struct field is read and written by: its own, or
+// for an embedded field — which Violations admits only for a struct of the
+// package — the name of the type it embeds.
+func FieldName(field goimportsdeps.Field) string {
+	if field.Name == "" {
+		return field.Type
+	}
+	return field.Name
+}

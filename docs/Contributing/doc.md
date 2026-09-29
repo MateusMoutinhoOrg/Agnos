@@ -164,5 +164,6 @@ Some files are written once and never rewritten, each by a different mechanic â€
 | `sandbox/internal/server/errors/handle_*.go` | `build`, `generate_error_handlers.go` | `io.IsFile(dest)` |
 | `sandbox/internal/commands/start_server/*` | `server-init` | `io.IsDir(dir)` |
 | `routeslist/<name>/{route.yaml,InternalPureHandler.go}` | `add-route` | `io.WriteFile`, which refuses an existing path |
+| `sandbox/api/{usersandbox,userconfig}.go` | `start`, the `start` asset group | `build` never renders that group; `verify` names either one missing |
 
-A write-once file may **not** live in an asset group: `utils.RenderGroupExcept` writes every file of a group with `WriteFileOverwrite` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.
+A write-once file may **not** live in an asset group other than `start`: `utils.RenderGroupExcept` writes every file of a group with `WriteFileOverwrite` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.

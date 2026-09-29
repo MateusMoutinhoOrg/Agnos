@@ -14,8 +14,10 @@
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
 | `sandbox/new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
-| `sandbox/api/sandbox.go` | `build` | always. One field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
-| `sandbox/api/config.go` | `build` | always. The `Config` contract: `ProjectName`, `Version` |
+| `sandbox/api/sandbox.go` | `build` | always. `UserSandbox` embedded, one field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
+| `sandbox/api/config.go` | `build` | always. The `Config` contract: `UserConfig` embedded, `ProjectName`, `Version` |
+| `sandbox/api/usersandbox.go` | `start` | once. `api.UserSandbox`, embedded in `api.Sandbox` — declare the project's own fields of the sandbox there |
+| `sandbox/api/userconfig.go` | `start` | once. `api.UserConfig`, embedded in `api.Config` — declare the project's own config fields there |
 | `sandbox/internal/generated/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
 | `docs/{Requirements,Workflow,Rules,Extensions,Structure,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/**/Index.md` | `build` | always, for every doc that has sub-docs |

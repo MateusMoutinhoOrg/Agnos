@@ -73,6 +73,13 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `sandbox/constructors/<x>/constructor.go` is written **once**, by the first `build` that
   finds the contract, and no build rewrites it: how a field of the `Sandbox` is built — wrapped,
   decorated, swapped for another implementation — is the project's, not the generator's.
+- `sandbox/api/usersandbox.go` and `sandbox/api/userconfig.go` are written **once**, by `start`,
+  and no build rewrites them: `api.Sandbox` embeds `api.UserSandbox` and `api.Config` embeds
+  `api.UserConfig`, so what the project declares there is read as `sandbox.<Field>` and
+  `sandbox.Config.<Field>`. Neither is a field of its own, so neither gets a constructor: a
+  `UserSandbox` field is filled by a package of the project's under `sandbox/constructors/`, a
+  `UserConfig` one in `sandbox/constructors/config/constructor.go`. Each must be there while the
+  file embedding it is. **(verify)**
 - Every file of `sandbox/api/` and `sandbox/deps/` parses, and every exported type, func, const
   and var in them carries a doc comment — [PublicApi](../PublicApi/doc.md) is generated from
   those comments. **(verify)**
@@ -89,7 +96,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Every type of `sandbox/api/` is convertible: its underlying type is identical
   in a copy of the package made elsewhere, or it is a struct the generator can
   write a converter for. No generics, no `chan`, no anonymous struct or
-  interface, no embedded field, and no identifier that is neither predeclared
+  interface, no embedded field but a struct the package declares, and no identifier that is neither predeclared
   nor declared in the package. `Sandbox.Deps` is the one field exempt, because
   it is the one field that does not cross: a consumer installs the api of a
   repo, never its wiring, so the copy drops it. This is what makes every agnos
