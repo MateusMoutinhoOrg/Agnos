@@ -4,10 +4,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// CollectCommands reads every sandbox/internal/commands/<name>/command.yaml and
-// returns one data map per command, in run order — lowest `priority` first,
+// CollectCommands reads every command.yaml under sandbox/internal/commands — a
+// directory holding one is a command, at any depth — and returns one data map per command, in run order — lowest `priority` first,
 // then by name — for the generated new.go and entries.go of each command and
 // the {{range .Commands}} loop of sandbox/internal/generated/cli/cli/new.go.
 // What the map holds is the declaration itself: the dispatch and the help
@@ -17,23 +18,23 @@ import (
 func CollectCommands(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 	var commands []map[string]any
 
-	for _, dir := range io.ListDirs("sandbox/internal/commands") {
-		name := lastSegmentOf(sandbox, dir)
-		if name == "" {
-			continue
-		}
+	units := utils.CommandDirs(sandbox, io)
+	if err := utils.CheckUniqueUnitNames(sandbox, "command", units); err != nil {
+		return nil, err
+	}
 
-		content, err := io.ReadFile("sandbox/internal/commands/" + name + "/command.yaml")
+	for _, unit := range units {
+		content, err := io.ReadFile(unit.Dir + "/" + utils.CommandConfFile)
 		if err != nil {
 			continue
 		}
 
 		conf, err := commandconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("commands/%s/command.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.CommandConfFile, err)
 		}
 
-		commands = append(commands, commandData(sandbox, name, conf))
+		commands = append(commands, commandData(sandbox, unit, conf))
 	}
 
 	sortCommands(sandbox, commands)
@@ -54,7 +55,10 @@ func sortCommands(sandbox *api.Sandbox, commands []map[string]any) {
 	})
 }
 
-func commandData(sandbox *api.Sandbox, name string, conf *commandconf.CommandConf) map[string]any {
+// commandData is one command as the generated new.go and entries.go read it.
+// Dir is the project-relative directory the command sits in, which the
+// generated cli imports it from.
+func commandData(sandbox *api.Sandbox, unit utils.UnitDir, conf *commandconf.CommandConf) map[string]any {
 	args := make([]map[string]any, 0, len(conf.Args))
 	for _, arg := range conf.Args {
 		args = append(args, argData(sandbox, arg))
@@ -70,7 +74,8 @@ func commandData(sandbox *api.Sandbox, name string, conf *commandconf.CommandCon
 	}
 
 	return map[string]any{
-		"Name":            name,
+		"Name":            unit.Name,
+		"Dir":             unit.Dir,
 		"Identifiers":     conf.Identifiers(),
 		"Priority":        conf.Priority,
 		"Segments":        segments,

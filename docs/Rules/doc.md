@@ -120,9 +120,13 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 
 ## Handlers
 
-- A command is `sandbox/internal/commands/<name>/`, holding `command.yaml` (the declaration),
-  `new.go` and `entries.go` (generated) and `InternalPureHandler.go` (hand-written), snake_case
-  for a kebab-case name. A `handler.go` is an old declaration. **(verify)**
+- A command is a directory under `sandbox/internal/commands/`, at any depth, holding
+  `command.yaml` (the declaration), `new.go` and `entries.go` (generated) and
+  `InternalPureHandler.go` (hand-written), snake_case for a kebab-case name. The `command.yaml` is
+  what makes it one: a directory without it is a folder grouping commands
+  (`add-command <name> --dir <folder>`, `rename-command <name> <name> --dir <folder>`). A name is
+  unique across every folder, and a directory holding the go files without a `command.yaml` is
+  a violation. A `handler.go` is an old declaration. **(verify)**
 - Only `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`
   is exported. Every flag and arg of `command.yaml` is a field of `Entries` (`entries.Name`),
   already typed, defaulted and range-checked.

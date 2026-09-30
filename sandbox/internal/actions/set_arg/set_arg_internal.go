@@ -35,7 +35,7 @@ func SetArgInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.ArgEdit
 		return sandbox.Deps.Std.Errorf("command %q already has an arg or a flag named %s", props.Command, edited.Id)
 	}
 
-	sandbox.Deps.Std.Log("set-arg updating %s of %s \n", current.Id, utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, props.Command)))
+	sandbox.Deps.Std.Log("set-arg updating %s of %s \n", current.Id, utils.CommandConfPath(sandbox, io, props.Command))
 
 	conf.Args[index] = edited
 	return utils.SaveCommandConf(sandbox, io, props.Command, conf)

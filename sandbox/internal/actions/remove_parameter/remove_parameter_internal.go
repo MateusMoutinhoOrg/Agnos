@@ -20,7 +20,7 @@ func RemoveParameterInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route st
 		return sandbox.Deps.Std.Errorf("route %q declares no parameter named %q", route, name)
 	}
 
-	sandbox.Deps.Std.Log("remove-parameter removing %s from %s \n", conf.Parameters[index].Key, utils.RouteConfPath(sandbox, route))
+	sandbox.Deps.Std.Log("remove-parameter removing %s from %s \n", conf.Parameters[index].Key, utils.RouteConfPath(sandbox, io, route))
 
 	conf.Parameters = utils.RemoveRouteParameter(conf.Parameters, index)
 	return utils.SaveRouteConf(sandbox, io, route, conf)

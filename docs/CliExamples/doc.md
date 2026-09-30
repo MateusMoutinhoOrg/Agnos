@@ -66,5 +66,6 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `set-route-field` | edit fields a route already declares, instead of re-declaring them | [example.sh](../../examples/cli/set-route-field/example.sh) |
 | `show-route` | print a route declaration as a tree | [example.sh](../../examples/cli/show-route/example.sh) |
 | `start` | scaffold a new project | [example.sh](../../examples/cli/start/example.sh) |
+| `unit-folders` |  | [example.sh](../../examples/cli/unit-folders/example.sh) |
 | `verify` | check a project against the schema, writing nothing | [example.sh](../../examples/cli/verify/example.sh) |
 

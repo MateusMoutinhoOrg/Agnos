@@ -43,7 +43,7 @@ sandbox/                            closed: imports nothing outside sandbox/, no
       trigger/MatchTrigger.go       (gen) MatchTrigger, shared by the route and the command matchers
       cli/command/                  (gen) NewCommand, IsActionable, CommandHandler — how every command matches and binds a command line
       cliio/                        (gen) Fail/Raise/FailureOf and the tracked CommandResponse
-    commands/<name>/                command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand)
+    commands/<name>/                command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand); any depth, under a folder per category (core/, cli/, server/, …) — the command.yaml is what makes a dir a command
     actions/new.go                  NewActions(sandbox) api.Actions: one assignment per action
     actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
     actions/build/collect_*.go      collectors: list one dir, title-case names

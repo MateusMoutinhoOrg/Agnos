@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-route
+    - description: the route to delete (identifier or package name)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Server System
+examples:
+    - remove-route create-user
+help: Delete one declared route
+long-description: 'Removes the route''s directory whole, in whatever folder of sandbox/internal/routeslist it sits, and every folder that leaves empty, then re-renders the dispatch. A directory holding another route is refused. The build renders only: dropping a route may leave hand-written code referring to what is gone.'
+priority: 100

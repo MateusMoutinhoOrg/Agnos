@@ -232,7 +232,7 @@ FlagEditProps describes the change set-flag applies to one flag a command declar
 
 ## `AddCommandProps`
 
-AddCommandProps describes one command to scaffold. Name is its package and the verb its first arg answers to on segment 0; Trigger is another value that arg compares against ("" is the name, or every command line for a Middleware), TriggerType how ("" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the args from one command-line shape instead ("route add {name} {*rest}") and excludes Trigger and TriggerType. A Middleware is not strict, runs on DefaultMiddlewarePriority and answers nothing. Priority is the rung it runs on, used only when HasPriority is set; Before and After name another command to land one rung below or above instead, and exclude Priority.
+AddCommandProps describes one command to scaffold. Name is its package and the verb its first arg answers to on segment 0; Trigger is another value that arg compares against ("" is the name, or every command line for a Middleware), TriggerType how ("" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the args from one command-line shape instead ("route add {name} {*rest}") and excludes Trigger and TriggerType. A Middleware is not strict, runs on DefaultMiddlewarePriority and answers nothing. Priority is the rung it runs on, used only when HasPriority is set; Before and After name another command to land one rung below or above instead, and exclude Priority. Dir is the folder under sandbox/internal/commands the command lands in ("" is the top; "admin" puts it in commands/admin/<name>): its command.yaml is what makes it a command, whatever folder holds it.
 
 | Field | Type |
 | --- | --- |
@@ -250,16 +250,19 @@ AddCommandProps describes one command to scaffold. Name is its package and the v
 | `After` | `string` |
 | `Help` | `string` |
 | `Category` | `string` |
+| `Dir` | `string` |
 
 ## `RenameCommandProps`
 
-RenameCommandProps describes one command to rename: Command as it is declared now, Name the name it takes on.
+RenameCommandProps describes one command to rename: Command as it is declared now, Name the name it takes on. Dir, when HasDir is set, is the folder under sandbox/internal/commands it moves to ("" is the top); without it the command stays in the folder it sits in. Name may be its current one when only the folder changes.
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Command` | `string` |
 | `Name` | `string` |
+| `Dir` | `string` |
+| `HasDir` | `bool` |
 
 ## `RebalanceCommandsProps`
 
@@ -306,7 +309,7 @@ SetCommandProps carries the command-level keys of command.yaml that set-command 
 
 ## `AddRouteProps`
 
-AddRouteProps describes one route to scaffold. Trigger is the whole-path value its first path compares against ("" is "/" followed by the name), TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or the aliases starts-with, ends-with, exact, equals and matches; "" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the paths from one url shape instead ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType. Methods are the http methods it answers to ([] is GET — ANY for a Middleware) and ResponseType the Content-Type its responses carry ("" is application/json — text/plain for a Middleware). Priority is the rung it runs on, used only when HasPriority is set; without it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for a Middleware. Before and After name another route to land one rung below or above instead, and exclude Priority.
+AddRouteProps describes one route to scaffold. Trigger is the whole-path value its first path compares against ("" is "/" followed by the name), TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or the aliases starts-with, ends-with, exact, equals and matches; "" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the paths from one url shape instead ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType. Methods are the http methods it answers to ([] is GET — ANY for a Middleware) and ResponseType the Content-Type its responses carry ("" is application/json — text/plain for a Middleware). Priority is the rung it runs on, used only when HasPriority is set; without it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for a Middleware. Before and After name another route to land one rung below or above instead, and exclude Priority. Dir is the folder under sandbox/internal/routeslist the route lands in ("" is the top; "admin" puts it in routeslist/admin/<name>): its route.yaml is what makes it a route, whatever folder holds it.
 
 | Field | Type |
 | --- | --- |
@@ -326,6 +329,7 @@ AddRouteProps describes one route to scaffold. Trigger is the whole-path value i
 | `ResponseType` | `string` |
 | `Help` | `string` |
 | `Category` | `string` |
+| `Dir` | `string` |
 
 ## `RouteProps`
 
@@ -353,13 +357,15 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 
 ## `RenameRouteProps`
 
-RenameRouteProps describes one route to rename: Route as it is declared now, Name the name it takes on.
+RenameRouteProps describes one route to rename: Route as it is declared now, Name the name it takes on. Dir, when HasDir is set, is the folder under sandbox/internal/routeslist it moves to ("" is the top); without it the route stays in the folder it sits in. Name may be its current one when only the folder changes.
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Route` | `string` |
 | `Name` | `string` |
+| `Dir` | `string` |
+| `HasDir` | `bool` |
 
 ## `RebalanceRoutesProps`
 

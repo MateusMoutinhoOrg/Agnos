@@ -3,10 +3,10 @@
 Scaffold a new command package in the project
 
 ```bash
-agnos add-command <Name> --help <help> [--category <category>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--path <path>] [--quiet]
+agnos add-command <Name> --help <help> [--category <category>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--dir <dir>] [--path <path>] [--quiet]
 ```
 
-Creates sandbox/internal/commands/<name>/ with a hand-written command.yaml and a stub InternalPureHandler.go, then runs build so new.go, entries.go and the dispatch pick it up. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses to overwrite an existing command.
+Creates <name>/ under sandbox/internal/commands — or under the folder --dir names there, e.g. commands/admin/<name> — with a hand-written command.yaml and a stub InternalPureHandler.go, then runs build so new.go, entries.go and the dispatch pick it up. A directory is a command by holding a command.yaml, at any depth; a name is unique across every folder. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses a name another command already carries.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -25,6 +25,7 @@ Creates sandbox/internal/commands/<name>/ with a hand-written command.yaml and a
 | `--priority` | integer | `-1` | the rung this command runs on when several match one command line, lowest first (defaults to 100, or 10 for a --middleware) | — |
 | `--before` | string |  | land one rung below the command named, so it runs first (excludes --priority) | — |
 | `--after` | string |  | land one rung above the command named, so it runs next (excludes --priority) | — |
+| `--dir` | string |  | the folder under sandbox/internal/commands the command lands in, e.g. admin puts it in commands/admin/<name> (defaults to the top); a directory holding a command.yaml is a command, whatever folder holds it | — |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

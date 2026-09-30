@@ -1,0 +1,19 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: remove-command
+    - description: the command to delete (a verb or its package name)
+      end: 1
+      id: Name
+      required: true
+      start: 1
+category: Cli System
+examples:
+    - remove-command my-feature
+    - remove-command my-feature --path ./my-project
+help: Delete a command package from the project
+long-description: Deletes the command's directory, in whatever folder of sandbox/internal/commands it sits (command.yaml, new.go, entries.go, InternalPureHandler.go and anything else in it), and every folder that leaves empty, then runs build so the dispatch stops running it. A directory holding another command is refused, and so are help, version and help-flag, which are generated.
+priority: 100

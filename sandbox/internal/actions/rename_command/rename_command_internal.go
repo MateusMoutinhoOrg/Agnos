@@ -12,10 +12,11 @@ import (
 // again.
 var generatedCommandFiles = []string{"new.go", "entries.go"}
 
-// RenameCommandInternal moves every hand-written file of
-// sandbox/internal/commands/<command>/ to sandbox/internal/commands/<name>/,
+// RenameCommandInternal moves every hand-written file of the command's
+// directory to <folder>/<name>/ — its own folder, or the one --dir names —
 // rewriting the package clause of each Go file, and removes the old
-// directory. A verb the command answered to because it was its name — the
+// directory and every folder it leaves empty. Name may be the current one
+// when only the folder changes. A verb the command answered to because it was its name — the
 // equal trigger `add-command` wrote — becomes the new name; any other trigger
 // is left as it is.
 //
@@ -34,17 +35,34 @@ func RenameCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.
 
 	old_pkg := utils.CommandPackage(sandbox, command)
 	new_pkg := utils.CommandPackage(sandbox, props.Name)
-	old_dir := utils.CommandDir(sandbox, command)
-	new_dir := utils.CommandDir(sandbox, props.Name)
+	old_dir, found := utils.FindUnitDir(sandbox, io, utils.CommandsDir, utils.CommandConfFile, old_pkg)
+	if !found {
+		return sandbox.Deps.Std.Errorf("command %q not found in %s", utils.CommandIdentifier(sandbox, props.Command), utils.CommandsDir)
+	}
 
-	if !io.IsDir(old_dir) {
-		return sandbox.Deps.Std.Errorf("command %q not found in %s", utils.CommandIdentifier(sandbox, props.Command), old_dir)
+	group := utils.UnitGroupOf(sandbox, utils.CommandsDir, old_dir)
+	if props.HasDir {
+		moved, err := utils.UnitGroup(sandbox, props.Dir)
+		if err != nil {
+			return err
+		}
+		group = moved
 	}
-	if old_pkg == new_pkg {
-		return sandbox.Deps.Std.Errorf("command %q is already named %q", utils.CommandIdentifier(sandbox, command), utils.CommandIdentifier(sandbox, props.Name))
+	new_dir := utils.UnitDirIn(utils.CommandsDir, group, new_pkg)
+
+	if old_dir == new_dir {
+		return sandbox.Deps.Std.Errorf("command %q is already named %q in %s", utils.CommandIdentifier(sandbox, command), utils.CommandIdentifier(sandbox, props.Name), old_dir)
 	}
-	if io.IsDir(new_dir) {
-		return sandbox.Deps.Std.Errorf("command %q already exists in %s", utils.CommandIdentifier(sandbox, props.Name), new_dir)
+	if old_pkg != new_pkg {
+		if existing, taken := utils.FindUnitDir(sandbox, io, utils.CommandsDir, utils.CommandConfFile, new_pkg); taken {
+			return sandbox.Deps.Std.Errorf("command %q already exists in %s", utils.CommandIdentifier(sandbox, props.Name), existing)
+		}
+	}
+	if io.IsDir(new_dir) || sandbox.Deps.Stringsdeps.HasPrefix(new_dir, old_dir+"/") {
+		return sandbox.Deps.Std.Errorf("%s is taken: pick another --dir", new_dir)
+	}
+	if utils.HoldsOtherUnit(sandbox, io, old_dir, utils.CommandConfFile) {
+		return sandbox.Deps.Std.Errorf("command %q holds another command under %s: move that one first", utils.CommandIdentifier(sandbox, command), old_dir)
 	}
 
 	conf, err := utils.LoadCommandConf(sandbox, io, command)
@@ -79,6 +97,7 @@ func RenameCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.
 		io.RemoveDir(file)
 	}
 	io.RemoveDir(old_dir)
+	utils.PruneEmptyGroups(sandbox, io, utils.CommandsDir, old_dir)
 	return nil
 }
 

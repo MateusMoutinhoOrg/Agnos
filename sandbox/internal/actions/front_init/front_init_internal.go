@@ -59,7 +59,7 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 // saying so. The path check it relies on lives in the generated frontio, so a
 // fix to it reaches the project on the next build whatever this file holds.
 func writeFrontendRoute(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
-	dir := utils.RouteDir(sandbox, utils.FrontendRouteName)
+	dir := utils.RouteDir(sandbox, io, utils.FrontendRouteName)
 
 	if io.IsDir(dir) {
 		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", dir)

@@ -55,7 +55,7 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		return err
 	}
 
-	sandbox.Deps.Std.Log("add-body-field adding %s to %s \n", name, utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("add-body-field adding %s to %s \n", name, utils.RouteConfPath(sandbox, io, props.Route))
 
 	utils.InsertSchemaProperty(parent, leaf, schema)
 	if props.Required {

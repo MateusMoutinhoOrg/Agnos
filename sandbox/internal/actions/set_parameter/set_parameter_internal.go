@@ -32,7 +32,7 @@ func SetParameterInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		return sandbox.Deps.Std.Errorf("route %q already has an Entries field named %q", props.Route, parameter.Id)
 	}
 
-	sandbox.Deps.Std.Log("set-parameter rewriting %s of %s \n", current.Key, utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("set-parameter rewriting %s of %s \n", current.Key, utils.RouteConfPath(sandbox, io, props.Route))
 
 	conf.Parameters[index] = parameter
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)

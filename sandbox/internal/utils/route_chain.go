@@ -7,33 +7,29 @@ import (
 )
 
 // RouteChainEntry is one declared route as the chain lays it down: its package
-// name and its parsed declaration.
+// name, the directory it sits in and its parsed declaration.
 type RouteChainEntry struct {
 	Name string
+	Dir  string
 	Conf *routeconf.RouteConf
 }
 
-// LoadRouteChain reads every sandbox/internal/routeslist/<name>/route.yaml and
+// LoadRouteChain reads every route.yaml under sandbox/internal/routeslist and
 // returns them in the order the dispatch runs them: by priority, lowest first,
 // then by name — the order the build collector lays Server.Routes down in.
 func LoadRouteChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteChainEntry, error) {
 	chain := []RouteChainEntry{}
 
-	for _, dir := range io.ListDirs(RoutesDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
-		name := parts[len(parts)-1]
-		if name == "" {
-			continue
-		}
-		content, err := io.ReadFile(RoutesDir + "/" + name + "/route.yaml")
+	for _, unit := range RouteDirs(sandbox, io) {
+		content, err := io.ReadFile(unit.Dir + "/" + RouteConfFile)
 		if err != nil {
 			continue
 		}
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, RouteConfFile, err)
 		}
-		chain = append(chain, RouteChainEntry{Name: name, Conf: conf})
+		chain = append(chain, RouteChainEntry{Name: unit.Name, Dir: unit.Dir, Conf: conf})
 	}
 
 	SortRouteChain(sandbox, chain)

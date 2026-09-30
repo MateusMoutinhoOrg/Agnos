@@ -42,7 +42,7 @@ func SetFlagInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.FlagEd
 		return sandbox.Deps.Std.Errorf("key %q is already used by another flag of %q", taken, props.Command)
 	}
 
-	sandbox.Deps.Std.Log("set-flag updating %s of %s \n", current.Id, utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, props.Command)))
+	sandbox.Deps.Std.Log("set-flag updating %s of %s \n", current.Id, utils.CommandConfPath(sandbox, io, props.Command))
 
 	conf.Flags[index] = edited
 	return utils.SaveCommandConf(sandbox, io, props.Command, conf)

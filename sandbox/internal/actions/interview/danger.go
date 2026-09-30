@@ -91,7 +91,7 @@ func unitOptions(sandbox *api.Sandbox, io *smartio.SmartIO, unit string) []inter
 	case "command":
 		return commandOptions(sandbox, io)
 	case "route":
-		return dirOptions(sandbox, io, routesDir)
+		return routeOptions(sandbox, io)
 	case "dep":
 		return dirOptions(sandbox, io, utils.ContractsDir)
 	case "database":

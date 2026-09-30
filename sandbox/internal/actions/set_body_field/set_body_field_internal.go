@@ -60,7 +60,7 @@ func SetBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		}
 	}
 
-	sandbox.Deps.Std.Log("set-body-field updating %s in %s \n", name, utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("set-body-field updating %s in %s \n", name, utils.RouteConfPath(sandbox, io, props.Route))
 	for _, keyword := range edit.Dropped {
 		sandbox.Deps.Std.Log("set-body-field dropping %s: the new type carries none \n", keyword)
 	}

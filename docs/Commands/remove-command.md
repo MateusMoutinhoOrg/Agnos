@@ -6,7 +6,7 @@ Delete a command package from the project
 agnos remove-command <Name> [--help] [--path <path>] [--quiet]
 ```
 
-Deletes sandbox/internal/commands/<name>/ (command.yaml, new.go, entries.go, InternalPureHandler.go and anything else in it), then runs build so the dispatch stops running it. help, version and help-flag are generated and refused.
+Deletes the command's directory, in whatever folder of sandbox/internal/commands it sits (command.yaml, new.go, entries.go, InternalPureHandler.go and anything else in it), and every folder that leaves empty, then runs build so the dispatch stops running it. A directory holding another command is refused, and so are help, version and help-flag, which are generated.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

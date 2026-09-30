@@ -7,11 +7,12 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// routesDir holds one declared route per sub-directory, the server layer's
-// mirror of sandbox/internal/commands.
+// routesDir is the tree the routes are declared in, the server layer's mirror
+// of sandbox/internal/commands.
 const routesDir = utils.RoutesDir
 
-// CollectRoutes reads every sandbox/internal/routeslist/<name>/route.yaml and
+// CollectRoutes reads every route.yaml under sandbox/internal/routeslist — a
+// directory holding one is a route, at any depth — and
 // returns one data map per route, for the generated new.go and entries.go of
 // that route and the {{range .Routes}} loop of
 // sandbox/internal/generated/server/server/new.go. It is the server layer's
@@ -23,27 +24,27 @@ const routesDir = utils.RoutesDir
 func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
 	var routes []map[string]any
 
-	for _, dir := range io.ListDirs(routesDir) {
-		name := lastSegmentOf(sandbox, dir)
-		if name == "" {
-			continue
-		}
+	units := utils.RouteDirs(sandbox, io)
+	if err := utils.CheckUniqueUnitNames(sandbox, "route", units); err != nil {
+		return nil, err
+	}
 
-		content, err := io.ReadFile(routesDir + "/" + name + "/route.yaml")
+	for _, unit := range units {
+		content, err := io.ReadFile(unit.Dir + "/" + utils.RouteConfFile)
 		if err != nil {
 			continue
 		}
 
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
 		}
 
-		if err := checkRouteSchema(sandbox, name, conf); err != nil {
+		if err := checkRouteSchema(sandbox, unit.Dir, conf); err != nil {
 			return nil, err
 		}
 
-		routes = append(routes, routeData(sandbox, name, conf))
+		routes = append(routes, routeData(sandbox, unit, conf))
 	}
 
 	sortRoutes(sandbox, routes)
@@ -72,12 +73,12 @@ func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 //
 // A form-schema has to be flat too: a nested object would generate a struct
 // no `key=value` pair can fill.
-func checkRouteSchema(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) error {
+func checkRouteSchema(sandbox *api.Sandbox, dir string, conf *routeconf.RouteConf) error {
 	for _, key := range schemaUnknownKeys(conf.Body.Schema) {
-		return sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: schema key %q is outside the supported subset", name, key)
+		return sandbox.Deps.Std.Errorf("%s/route.yaml: schema key %q is outside the supported subset", dir, key)
 	}
 	if conf.Body.Type == "form" {
-		return utils.CheckFormSchema(sandbox, name, conf.Body.Schema)
+		return utils.CheckFormSchema(sandbox, utils.LastSegment(sandbox, dir), conf.Body.Schema)
 	}
 	return nil
 }
@@ -96,8 +97,10 @@ func schemaUnknownKeys(schema *routeconf.Schema) []string {
 	return unknown
 }
 
-// routeData is one route as the generated new.go and entries.go read it.
-func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map[string]any {
+// routeData is one route as the generated new.go and entries.go read it. Dir
+// is the project-relative directory the route sits in, which the generated
+// server imports it from.
+func routeData(sandbox *api.Sandbox, unit utils.UnitDir, conf *routeconf.RouteConf) map[string]any {
 	paths := make([]map[string]any, 0, len(conf.Paths))
 	for _, path := range conf.Paths {
 		paths = append(paths, pathData(path))
@@ -108,7 +111,8 @@ func routeData(sandbox *api.Sandbox, name string, conf *routeconf.RouteConf) map
 	}
 
 	return map[string]any{
-		"Name":            name,
+		"Name":            unit.Name,
+		"Dir":             unit.Dir,
 		"Methods":         conf.Methods,
 		"Priority":        conf.Priority,
 		"ResponseType":    conf.ResponseType,

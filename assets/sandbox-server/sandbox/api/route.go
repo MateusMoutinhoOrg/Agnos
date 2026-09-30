@@ -152,8 +152,9 @@ func (failure *RouteFailure) Error() string {
 
 // Route is one http route of the project, as the sandbox offers it: the whole
 // of what its route.yaml declares, plus the handler behind it. Server.Routes
-// holds one per sandbox/internal/routeslist/<name>/, each built by that
-// package's generated NewRoute, in run order — lowest Priority first.
+// holds one per directory under sandbox/internal/routeslist holding a
+// route.yaml, at any depth, each built by that package's generated NewRoute,
+// in run order — lowest Priority first.
 //
 // What Server.Routes holds is the declaration alone: nothing is ever bound
 // onto it. The dispatch copies it with BindRoute, puts the request and the

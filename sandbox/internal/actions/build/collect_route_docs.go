@@ -130,7 +130,7 @@ type routeDocInherited struct {
 	always    bool
 }
 
-// CollectRouteDocs renders every sandbox/internal/routeslist/<name>/route.yaml into
+// CollectRouteDocs renders every route.yaml under sandbox/internal/routeslist into
 // the pages docs/Routes prints, grouped by category in first-seen order — the
 // server layer's CollectCommandDocs. Hidden routes are skipped. Every route is
 // crossed with every route on a lower rung whose triggers may hold on it, and
@@ -145,22 +145,17 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGrou
 	index := map[string]int{}
 
 	entries := []routeDocEntry{}
-	for _, dir := range io.ListDirs(routesDir) {
-		name := lastSegmentOf(sandbox, dir)
-		if name == "" {
-			continue
-		}
-
-		content, err := io.ReadFile(routesDir + "/" + name + "/route.yaml")
+	for _, unit := range utils.RouteDirs(sandbox, io) {
+		content, err := io.ReadFile(unit.Dir + "/" + utils.RouteConfFile)
 		if err != nil {
 			continue
 		}
 
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", name, err)
+			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
 		}
-		entries = append(entries, routeDocEntry{name: name, conf: conf})
+		entries = append(entries, routeDocEntry{name: unit.Name, conf: conf})
 	}
 
 	for _, current := range entries {

@@ -53,7 +53,7 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 		return sandbox.Deps.Std.Errorf("an example payload is a json object: a body schema's root is the object its keys are declared in")
 	}
 
-	sandbox.Deps.Std.Log("import-body reading %s from the example \n", utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("import-body reading %s from the example \n", utils.RouteConfPath(sandbox, io, props.Route))
 
 	added, skipped := mergeSchema(sandbox, conf.Body.Schema, inferred, "")
 	for _, name := range added {

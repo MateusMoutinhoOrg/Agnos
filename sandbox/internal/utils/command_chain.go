@@ -6,35 +6,31 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
-// CommandChainEntry is one declared command of the chain: its package name
-// and its parsed declaration.
+// CommandChainEntry is one declared command of the chain: its package name,
+// the directory it sits in and its parsed declaration.
 type CommandChainEntry struct {
 	Name string
+	Dir  string
 	Conf *commandconf.CommandConf
 }
 
-// LoadCommandChain reads every sandbox/internal/commands/<name>/command.yaml
+// LoadCommandChain reads every command.yaml under sandbox/internal/commands
 // and returns them in the order the dispatch runs them: by priority, lowest
 // first, then by name — the order the build collector lays Cli.Commands down
 // in.
 func LoadCommandChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]CommandChainEntry, error) {
 	chain := []CommandChainEntry{}
 
-	for _, dir := range io.ListDirs(CommandsDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
-		name := parts[len(parts)-1]
-		if name == "" {
-			continue
-		}
-		content, err := io.ReadFile(CommandsDir + "/" + name + "/" + CommandConfFile)
+	for _, unit := range CommandDirs(sandbox, io) {
+		content, err := io.ReadFile(unit.Dir + "/" + CommandConfFile)
 		if err != nil {
 			continue
 		}
 		conf, err := commandconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("commands/%s/%s: %w", name, CommandConfFile, err)
+			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, CommandConfFile, err)
 		}
-		chain = append(chain, CommandChainEntry{Name: name, Conf: conf})
+		chain = append(chain, CommandChainEntry{Name: unit.Name, Dir: unit.Dir, Conf: conf})
 	}
 
 	SortCommandChain(sandbox, chain)

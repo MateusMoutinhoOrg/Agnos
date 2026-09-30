@@ -31,7 +31,7 @@ func AddFlagInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.FlagPr
 		return err
 	}
 
-	sandbox.Deps.Std.Log("add-flag adding %s to %s \n", flag.Id, utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, props.Command)))
+	sandbox.Deps.Std.Log("add-flag adding %s to %s \n", flag.Id, utils.CommandConfPath(sandbox, io, props.Command))
 
 	conf.Flags = utils.InsertCommandFlag(conf.Flags, flag, position)
 	return utils.SaveCommandConf(sandbox, io, props.Command, conf)

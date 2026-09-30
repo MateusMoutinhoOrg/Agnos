@@ -6,9 +6,10 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// RemoveRouteInternal deletes every file under
-// sandbox/internal/routeslist/<name>/ plus the directory itself. The generated
-// health route is refused: it is rendered by build, not declared.
+// RemoveRouteInternal deletes every file of the route's directory — in whatever
+// folder it sits — plus the directory itself, and every folder the removal
+// leaves empty. One holding another route below it is refused, and so is the
+// generated health route: it is rendered by build, not declared.
 func RemoveRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
 	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
@@ -18,9 +19,13 @@ func RemoveRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string)
 		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be removed")
 	}
 
-	dir := utils.RouteDir(sandbox, name)
+	dir := utils.RouteDir(sandbox, io, name)
 	if !io.IsDir(dir) {
 		return sandbox.Deps.Std.Errorf("route %q not found", utils.RouteIdentifier(sandbox, name))
+	}
+
+	if utils.HoldsOtherUnit(sandbox, io, dir, utils.RouteConfFile) {
+		return sandbox.Deps.Std.Errorf("route %q holds another route under %s: move or remove that one first", utils.RouteIdentifier(sandbox, name), dir)
 	}
 
 	sandbox.Deps.Std.Log("remove-route removing %s \n", dir)
@@ -29,5 +34,6 @@ func RemoveRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string)
 		io.RemoveDir(file)
 	}
 	io.RemoveDir(dir)
+	utils.PruneEmptyGroups(sandbox, io, utils.RoutesDir, dir)
 	return nil
 }

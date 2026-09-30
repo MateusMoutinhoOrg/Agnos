@@ -118,7 +118,7 @@ sandbox:
         commands/<name>:
           order: 4
           dir: true
-          description: command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand)
+          description: command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand); any depth, under a folder per category (core/, cli/, server/, …) — the command.yaml is what makes a dir a command
         actions/new.go:
           order: 5
           description: "NewActions(sandbox) api.Actions: one assignment per action"

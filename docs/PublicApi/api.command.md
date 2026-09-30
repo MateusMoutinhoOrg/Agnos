@@ -98,7 +98,7 @@ CommandFailure is one way a command line did not get answered: which Handle* fil
 
 ## `Command`
 
-Command is one command of the project, as the sandbox offers it: the whole of what its command.yaml declares, plus the handler behind it. Cli.Commands holds one per sandbox/internal/commands/<name>/, each built by that package's generated NewCommand, in run order — lowest Priority first. What Cli.Commands holds is the declaration alone: nothing is ever bound onto it. The dispatch copies it with BindCommand, puts the command line and the response on the copy, and hands the copy to IsActionable and CommandHandler.
+Command is one command of the project, as the sandbox offers it: the whole of what its command.yaml declares, plus the handler behind it. Cli.Commands holds one per directory under sandbox/internal/commands holding a command.yaml, at any depth, each built by that package's generated NewCommand, in run order — lowest Priority first. What Cli.Commands holds is the declaration alone: nothing is ever bound onto it. The dispatch copies it with BindCommand, puts the command line and the response on the copy, and hands the copy to IsActionable and CommandHandler.
 
 | Field | Type | Description |
 | --- | --- | --- |

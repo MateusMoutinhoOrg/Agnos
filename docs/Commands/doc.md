@@ -10,23 +10,6 @@ whole page. Hidden commands are not listed. The args are the leading words of th
 the flags follow them, in any order. A `repeatable` flag is given once per value. A command's page
 lists the flags of the middlewares in front of it too.
 
-## Deps System
-
-| Command | Does |
-| --- | --- |
-| [`add-adapter`](add-adapter.md) | Installs one further adapter for a contract the project already has |
-| [`add-available`](add-available.md) | Declares one further available |
-| [`add-dep`](add-dep.md) | Installs one dep of the embedded catalog into the project |
-| [`deps-init`](deps-init.md) | Initializes the dependency-injection subsystem for the project |
-| [`deps-purge`](deps-purge.md) | Removes the dependency-injection subsystem from the project |
-| [`list-adapters`](list-adapters.md) | Lists the adapters of the catalog and of the project |
-| [`list-deps`](list-deps.md) | Lists the deps the embedded catalog can install |
-| [`remove-adapter`](remove-adapter.md) | Uninstalls one adapter, leaving the contract it filled |
-| [`remove-available`](remove-available.md) | Deletes one available |
-| [`remove-dep`](remove-dep.md) | Uninstalls one dep from the project |
-| [`set-adapter`](set-adapter.md) | Changes which adapter an available binds for one dep |
-| [`set-dep`](set-dep.md) | Moves one remote dep to another version of its module |
-
 ## Cli System
 
 | Command | Does |
@@ -47,6 +30,92 @@ lists the flags of the middlewares in front of it too.
 | [`set-command`](set-command.md) | Update the command-level keys of a command's command.yaml |
 | [`set-flag`](set-flag.md) | Rewrite one flag of a command's command.yaml |
 | [`show-command`](show-command.md) | Print one command's declaration as a tree: args, flags and the middlewares in front of it |
+
+## Core Commands
+
+| Command | Does |
+| --- | --- |
+| [`build`](build.md) | Build the project in a directory |
+| [`compile`](compile.md) | Cross-compile the project's binaries into release/ |
+| [`local-install`](local-install.md) | Builds the project and installs it locally |
+| [`publish`](publish.md) | Builds, compiles and publishes a release via gh |
+| [`start`](start.md) | Initialize a new project in a directory |
+| [`verify`](verify.md) | Checks the project keeps the sandbox/adapter schema |
+
+## Info
+
+| Command | Does |
+| --- | --- |
+| [`interview`](interview.md) | Guided mode: answer questions instead of typing commands |
+| [`help`](help.md) | Display help for a command |
+| [`version`](version.md) | Print the installed version |
+
+## Database System
+
+| Command | Does |
+| --- | --- |
+| [`add-database`](add-database.md) | Declare a new database in the project |
+| [`add-table`](add-table.md) | Declare one collection of records on a database |
+| [`add-table-field`](add-table-field.md) | Declare one field on a table of a database |
+| [`database-init`](database-init.md) | Add the database layer to the project |
+| [`database-purge`](database-purge.md) | Remove the database layer and every declared database |
+| [`remove-database`](remove-database.md) | Delete one database package whole |
+| [`remove-table`](remove-table.md) | Delete one collection from a database |
+| [`remove-table-field`](remove-table-field.md) | Delete one declared field from a table |
+| [`set-table-field`](set-table-field.md) | Rewrite one declared field of a table |
+| [`show-database`](show-database.md) | Print one database's whole declaration as a tree |
+
+## Deps System
+
+| Command | Does |
+| --- | --- |
+| [`add-adapter`](add-adapter.md) | Installs one further adapter for a contract the project already has |
+| [`add-available`](add-available.md) | Declares one further available |
+| [`add-dep`](add-dep.md) | Installs one dep of the embedded catalog into the project |
+| [`deps-init`](deps-init.md) | Initializes the dependency-injection subsystem for the project |
+| [`deps-purge`](deps-purge.md) | Removes the dependency-injection subsystem from the project |
+| [`list-adapters`](list-adapters.md) | Lists the adapters of the catalog and of the project |
+| [`list-deps`](list-deps.md) | Lists the deps the embedded catalog can install |
+| [`remove-adapter`](remove-adapter.md) | Uninstalls one adapter, leaving the contract it filled |
+| [`remove-available`](remove-available.md) | Deletes one available |
+| [`remove-dep`](remove-dep.md) | Uninstalls one dep from the project |
+| [`set-adapter`](set-adapter.md) | Changes which adapter an available binds for one dep |
+| [`set-dep`](set-dep.md) | Moves one remote dep to another version of its module |
+
+## Documentation
+
+| Command | Does |
+| --- | --- |
+| [`add-doc`](add-doc.md) | Scaffold a new doc directory under docs/ |
+| [`remove-doc`](remove-doc.md) | Delete a doc directory from docs/ |
+
+## Examples
+
+| Command | Does |
+| --- | --- |
+| [`add-cli-example`](add-cli-example.md) | Scaffold a new example under examples/cli/ |
+| [`add-lib-example`](add-lib-example.md) | Scaffold a new example under examples/lib/ |
+| [`exec-test`](exec-test.md) | Run the project's examples and check them against their goldens |
+| [`remove-cli-example`](remove-cli-example.md) | Delete an example from examples/cli/ |
+| [`remove-lib-example`](remove-lib-example.md) | Delete an example from examples/lib/ |
+| [`update-test`](update-test.md) | Rewrite one example's golden with what it produces now |
+
+## Extensions
+
+| Command | Does |
+| --- | --- |
+| [`disable-extension`](disable-extension.md) | Turn one generation mechanic off |
+| [`enable-extension`](enable-extension.md) | Turn one generation mechanic on |
+| [`list-extensions`](list-extensions.md) | Lists the generation mechanics and which are on |
+
+## Front System
+
+| Command | Does |
+| --- | --- |
+| [`add-page`](add-page.md) | Scaffold a new html page under assets/frontend/ |
+| [`front-init`](front-init.md) | Add the html front layer to the project |
+| [`front-purge`](front-purge.md) | Remove the html front layer from the project |
+| [`remove-page`](remove-page.md) | Remove an html page from assets/frontend/ |
 
 ## Server System
 
@@ -73,75 +142,6 @@ lists the flags of the middlewares in front of it too.
 | [`set-path`](set-path.md) | Rewrite one entry of a route's paths |
 | [`set-route`](set-route.md) | Rewrite the route-level keys of a route.yaml |
 | [`show-route`](show-route.md) | Print one route's whole declaration as a tree |
-
-## Examples
-
-| Command | Does |
-| --- | --- |
-| [`add-cli-example`](add-cli-example.md) | Scaffold a new example under examples/cli/ |
-| [`add-lib-example`](add-lib-example.md) | Scaffold a new example under examples/lib/ |
-| [`exec-test`](exec-test.md) | Run the project's examples and check them against their goldens |
-| [`remove-cli-example`](remove-cli-example.md) | Delete an example from examples/cli/ |
-| [`remove-lib-example`](remove-lib-example.md) | Delete an example from examples/lib/ |
-| [`update-test`](update-test.md) | Rewrite one example's golden with what it produces now |
-
-## Database System
-
-| Command | Does |
-| --- | --- |
-| [`add-database`](add-database.md) | Declare a new database in the project |
-| [`add-table`](add-table.md) | Declare one collection of records on a database |
-| [`add-table-field`](add-table-field.md) | Declare one field on a table of a database |
-| [`database-init`](database-init.md) | Add the database layer to the project |
-| [`database-purge`](database-purge.md) | Remove the database layer and every declared database |
-| [`remove-database`](remove-database.md) | Delete one database package whole |
-| [`remove-table`](remove-table.md) | Delete one collection from a database |
-| [`remove-table-field`](remove-table-field.md) | Delete one declared field from a table |
-| [`set-table-field`](set-table-field.md) | Rewrite one declared field of a table |
-| [`show-database`](show-database.md) | Print one database's whole declaration as a tree |
-
-## Documentation
-
-| Command | Does |
-| --- | --- |
-| [`add-doc`](add-doc.md) | Scaffold a new doc directory under docs/ |
-| [`remove-doc`](remove-doc.md) | Delete a doc directory from docs/ |
-
-## Front System
-
-| Command | Does |
-| --- | --- |
-| [`add-page`](add-page.md) | Scaffold a new html page under assets/frontend/ |
-| [`front-init`](front-init.md) | Add the html front layer to the project |
-| [`front-purge`](front-purge.md) | Remove the html front layer from the project |
-| [`remove-page`](remove-page.md) | Remove an html page from assets/frontend/ |
-
-## Core Commands
-
-| Command | Does |
-| --- | --- |
-| [`build`](build.md) | Build the project in a directory |
-| [`compile`](compile.md) | Cross-compile the project's binaries into release/ |
-| [`local-install`](local-install.md) | Builds the project and installs it locally |
-| [`publish`](publish.md) | Builds, compiles and publishes a release via gh |
-| [`start`](start.md) | Initialize a new project in a directory |
-| [`verify`](verify.md) | Checks the project keeps the sandbox/adapter schema |
-
-## Extensions
-
-| Command | Does |
-| --- | --- |
-| [`disable-extension`](disable-extension.md) | Turn one generation mechanic off |
-| [`enable-extension`](enable-extension.md) | Turn one generation mechanic on |
-| [`list-extensions`](list-extensions.md) | Lists the generation mechanics and which are on |
-
-## Info
-
-| Command | Does |
-| --- | --- |
-| [`help`](help.md) | Display help for a command |
-| [`interview`](interview.md) | Guided mode: answer questions instead of typing commands |
-| [`version`](version.md) | Print the installed version |
 
 ## Middlewares
 

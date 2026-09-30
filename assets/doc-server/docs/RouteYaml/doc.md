@@ -1,6 +1,7 @@
 # RouteYaml
 
-`sandbox/internal/routeslist/<name>/route.yaml` declares one http route. `{{.GeneratorName}} build`
+`sandbox/internal/routeslist/[<folder>/]<name>/route.yaml` declares one http route — the file is
+what makes its directory a route, at any depth. `{{.GeneratorName}} build`
 generates two files beside it: `new.go`, the `api.Route` that lands in `Server.Routes` — a 1:1
 image of the yaml, built on the generic base of `sandbox/internal/generated/server/route` — and
 `entries.go`, the `Entries` struct the route's `InternalPureHandler` is handed, plus the

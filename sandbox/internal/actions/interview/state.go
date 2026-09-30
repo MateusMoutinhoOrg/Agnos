@@ -135,7 +135,7 @@ func readState(sandbox *api.Sandbox, io *smartio.SmartIO) projectState {
 	}
 
 	state.Commands = ownUnits(commandOptions(sandbox, io))
-	state.Routes = ownUnits(dirOptions(sandbox, io, routesDir))
+	state.Routes = ownUnits(routeOptions(sandbox, io))
 	state.Pages = ownUnits(pageOptions(sandbox, io))
 	state.Databases = ownUnits(dirOptions(sandbox, io, utils.DatabasesDir))
 

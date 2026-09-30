@@ -28,7 +28,7 @@ func AddArgInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.ArgProp
 		return err
 	}
 
-	sandbox.Deps.Std.Log("add-arg adding %s to %s \n", arg.Id, utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, props.Command)))
+	sandbox.Deps.Std.Log("add-arg adding %s to %s \n", arg.Id, utils.CommandConfPath(sandbox, io, props.Command))
 
 	conf.Args = utils.InsertCommandArg(conf.Args, arg, position)
 	return utils.SaveCommandConf(sandbox, io, props.Command, conf)

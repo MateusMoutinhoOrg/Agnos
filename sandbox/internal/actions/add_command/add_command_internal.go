@@ -17,7 +17,8 @@ const defaultMiddlewareCategory = "Middleware"
 // package: a command.yaml and the InternalPureHandler.go stub. Its args are
 // one arg answering to the command's name on segment 0 — every command line,
 // for a --middleware — or another --trigger, or what a --pattern compiles to.
-// It refuses to overwrite an existing command (via io.WriteFile).
+// It lands in the folder props.Dir names under sandbox/internal/commands, and
+// refuses a name another command already carries, in whatever folder.
 func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddCommandProps) error {
 	strs := sandbox.Deps.Stringsdeps
 	help := strs.TrimSpace(props.Help)
@@ -37,6 +38,15 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Add
 	if utils.IsGeneratedCommand(sandbox, name) {
 		return sandbox.Deps.Std.Errorf("the %s command is generated and cannot be declared", identifier)
 	}
+
+	group, err := utils.UnitGroup(sandbox, props.Dir)
+	if err != nil {
+		return err
+	}
+	if existing, found := utils.FindUnitDir(sandbox, io, utils.CommandsDir, utils.CommandConfFile, pkg); found {
+		return sandbox.Deps.Std.Errorf("command %q already exists in %s: a command name is unique across every folder", identifier, existing)
+	}
+	dir := utils.UnitDirIn(utils.CommandsDir, group, pkg)
 
 	conf := commandconf.NewEmpty(sandbox)
 	conf.Help = help
@@ -111,7 +121,7 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Add
 		return err
 	}
 
-	sandbox.Deps.Std.Log("add-command creating sandbox/internal/commands/%s \n", pkg)
+	sandbox.Deps.Std.Log("add-command creating %s \n", dir)
 
 	vars := map[string]interface{}{
 		"Identifier":  identifier,
@@ -121,7 +131,6 @@ func AddCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Add
 		"Pattern":     conf.Pattern(),
 	}
 
-	dir := utils.CommandDir(sandbox, name)
 	if err := io.WriteFile(dir+"/"+utils.CommandConfFile, []byte(conf.Render())); err != nil {
 		return err
 	}

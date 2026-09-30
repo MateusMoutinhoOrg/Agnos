@@ -6,7 +6,7 @@ Print one route's whole declaration as a tree
 agnos show-route <Route> [--help] [--path <path>] [--quiet]
 ```
 
-Reads sandbox/internal/routeslist/<route>/route.yaml and prints it as a tree: the request line the route answers, then every place the declaration holds something — its paths, its parameters and the json-schema of its body, property by property with the keywords declared on each. It is the one command of the route surface that writes nothing and runs no build.
+Reads the route's route.yaml, in whatever folder of sandbox/internal/routeslist it sits, and prints it as a tree: the request line the route answers, then every place the declaration holds something — its paths, its parameters and the json-schema of its body, property by property with the keywords declared on each. It is the one command of the route surface that writes nothing and runs no build.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

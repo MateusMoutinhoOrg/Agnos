@@ -10,10 +10,11 @@ import (
 // a rename leaves them behind for the follow-up build to write again.
 var generatedRouteFiles = []string{"new.go", "entries.go"}
 
-// RenameRouteInternal moves every hand-written file of
-// sandbox/internal/routeslist/<route>/ to sandbox/internal/routeslist/<name>/,
-// rewriting the package clause of each Go file, and removes the old
-// directory. The route.yaml moves as it is: nothing in it names the package.
+// RenameRouteInternal moves every hand-written file of the route's directory
+// to <folder>/<name>/ — its own folder, or the one --dir names — rewriting the
+// package clause of each Go file, and removes the old directory and every
+// folder it leaves empty. Name may be the current one when only the folder
+// changes. The route.yaml moves as it is: nothing in it names the package.
 //
 // The generated health route is refused.
 func RenameRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RenameRouteProps) error {
@@ -26,20 +27,38 @@ func RenameRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Re
 
 	old_pkg := utils.RoutePackage(sandbox, props.Route)
 	new_pkg := utils.RoutePackage(sandbox, props.Name)
-	old_dir := utils.RouteDir(sandbox, props.Route)
-	new_dir := utils.RouteDir(sandbox, props.Name)
 
 	if old_pkg == "health" || new_pkg == "health" {
 		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be renamed")
 	}
-	if !io.IsDir(old_dir) {
-		return sandbox.Deps.Std.Errorf("route %q not found in %s", utils.RouteIdentifier(sandbox, props.Route), old_dir)
+	old_dir, found := utils.FindUnitDir(sandbox, io, utils.RoutesDir, utils.RouteConfFile, old_pkg)
+	if !found {
+		return sandbox.Deps.Std.Errorf("route %q not found in %s", utils.RouteIdentifier(sandbox, props.Route), utils.RoutesDir)
 	}
-	if old_pkg == new_pkg {
-		return sandbox.Deps.Std.Errorf("route %q is already named %q", utils.RouteIdentifier(sandbox, props.Route), utils.RouteIdentifier(sandbox, props.Name))
+
+	group := utils.UnitGroupOf(sandbox, utils.RoutesDir, old_dir)
+	if props.HasDir {
+		moved, err := utils.UnitGroup(sandbox, props.Dir)
+		if err != nil {
+			return err
+		}
+		group = moved
 	}
-	if io.IsDir(new_dir) {
-		return sandbox.Deps.Std.Errorf("route %q already exists in %s", utils.RouteIdentifier(sandbox, props.Name), new_dir)
+	new_dir := utils.UnitDirIn(utils.RoutesDir, group, new_pkg)
+
+	if old_dir == new_dir {
+		return sandbox.Deps.Std.Errorf("route %q is already named %q in %s", utils.RouteIdentifier(sandbox, props.Route), utils.RouteIdentifier(sandbox, props.Name), old_dir)
+	}
+	if old_pkg != new_pkg {
+		if existing, taken := utils.FindUnitDir(sandbox, io, utils.RoutesDir, utils.RouteConfFile, new_pkg); taken {
+			return sandbox.Deps.Std.Errorf("route %q already exists in %s", utils.RouteIdentifier(sandbox, props.Name), existing)
+		}
+	}
+	if io.IsDir(new_dir) || sandbox.Deps.Stringsdeps.HasPrefix(new_dir, old_dir+"/") {
+		return sandbox.Deps.Std.Errorf("%s is taken: pick another --dir", new_dir)
+	}
+	if utils.HoldsOtherUnit(sandbox, io, old_dir, utils.RouteConfFile) {
+		return sandbox.Deps.Std.Errorf("route %q holds another route under %s: move that one first", utils.RouteIdentifier(sandbox, props.Route), old_dir)
 	}
 
 	sandbox.Deps.Std.Log("rename-route moving %s to %s \n", old_dir, new_dir)
@@ -65,6 +84,7 @@ func RenameRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Re
 		io.RemoveDir(file)
 	}
 	io.RemoveDir(old_dir)
+	utils.PruneEmptyGroups(sandbox, io, utils.RoutesDir, old_dir)
 	return nil
 }
 

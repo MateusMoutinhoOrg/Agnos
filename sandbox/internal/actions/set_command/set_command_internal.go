@@ -97,7 +97,7 @@ func SetCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Set
 		return sandbox.Deps.Std.Errorf("set-command: nothing to change (pass --help, --category, --long-description, --priority, --before, --after, --segments, --strict, --loose, --clear, --hidden, --visible, --identifier or --example)")
 	}
 
-	sandbox.Deps.Std.Log("set-command updating %s \n", utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, props.Command)))
+	sandbox.Deps.Std.Log("set-command updating %s \n", utils.CommandConfPath(sandbox, io, props.Command))
 
 	return utils.SaveCommandConf(sandbox, io, props.Command, conf)
 }

@@ -13,8 +13,9 @@ import (
 // and no handler.go next to it. The server layer is generated from end to end,
 // so purging it means dropping these directories entirely.
 //
-// sandbox/internal/commands/start_server goes with them: it is the entry point
-// server-init writes, and it would not compile without the layer it starts.
+// The start_server command goes with them, from whatever folder of
+// sandbox/internal/commands it sits in: it is the entry point server-init
+// writes, and it would not compile without the layer it starts.
 // sandbox/constructors/server goes with them for the same reason: it fills
 // Sandbox.Server by naming the package being removed.
 //
@@ -27,7 +28,6 @@ var serverDirs = []string{
 	utils.RoutesDir,
 	utils.GeneratedDir + "/server",
 	utils.GeneratedDir + "/routeio",
-	"sandbox/internal/commands/start_server",
 	"docs/Routes",
 	utils.ConstructorDir("server"),
 }
@@ -70,7 +70,7 @@ func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string)
 	// the directories it owns: every route names it, so it goes with them.
 	io.RemoveDir("sandbox/api/" + utils.RoutePropsFile)
 
-	for _, dir := range serverDirs {
+	for _, dir := range append(serverDirs, utils.CommandDir(sandbox, io, "start_server")) {
 		if !io.IsDir(dir) {
 			continue
 		}

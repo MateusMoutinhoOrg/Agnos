@@ -68,8 +68,6 @@ type CommandDocs struct {
 	Middlewares []CommandDoc
 }
 
-// commandsDocDir holds one declared command per sub-directory.
-const commandsDocDir = "sandbox/internal/commands"
 
 // commandDocOther is the category a command with no declared one falls into,
 // matching what the generated help screen prints for it.
@@ -85,7 +83,7 @@ type commandDocEntry struct {
 	Conf *commandconf.CommandConf
 }
 
-// CollectCommandDocs renders every sandbox/internal/commands/<name>/command.yaml
+// CollectCommandDocs renders every command.yaml under sandbox/internal/commands
 // into the pages docs/Commands prints: the commands grouped by category in
 // first-seen order — the same grouping the generated help screen uses — and the
 // middlewares on a section of their own. Hidden commands are skipped, exactly
@@ -100,23 +98,19 @@ func CollectCommandDocs(sandbox *api.Sandbox, io *smartio.SmartIO) (CommandDocs,
 	docs := CommandDocs{}
 	entries := []commandDocEntry{}
 
-	for _, dir := range io.ListDirs(commandsDocDir) {
-		name := lastSegmentOf(sandbox, dir)
-		if name == "" {
-			continue
-		}
-		content, err := io.ReadFile(commandsDocDir + "/" + name + "/command.yaml")
+	for _, unit := range utils.CommandDirs(sandbox, io) {
+		content, err := io.ReadFile(unit.Dir + "/" + utils.CommandConfFile)
 		if err != nil {
 			continue
 		}
 		conf, err := commandconf.New(sandbox, string(content))
 		if err != nil {
-			return docs, sandbox.Deps.Std.Errorf("commands/%s/command.yaml: %w", name, err)
+			return docs, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.CommandConfFile, err)
 		}
 		if conf.Hidden {
 			continue
 		}
-		entries = append(entries, commandDocEntry{Name: name, Conf: conf})
+		entries = append(entries, commandDocEntry{Name: unit.Name, Conf: conf})
 	}
 
 	index := map[string]int{}

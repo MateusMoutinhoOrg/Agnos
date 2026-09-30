@@ -88,7 +88,7 @@ func SetRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Route
 		return sandbox.Deps.Std.Errorf("set-route: nothing to change (pass --method, --response-type, --priority, --before, --after, --segments, --clear, --help, --category, --long-description, --hidden, --visible or --example)")
 	}
 
-	sandbox.Deps.Std.Log("set-route updating %s \n", utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("set-route updating %s \n", utils.RouteConfPath(sandbox, io, props.Route))
 
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)
 }

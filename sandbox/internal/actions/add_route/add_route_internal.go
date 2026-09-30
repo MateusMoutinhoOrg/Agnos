@@ -29,8 +29,9 @@ const defaultMiddlewareCategory = "Middleware"
 // refusal written by hand would carry.
 const middlewareResponseType = "text/plain"
 
-// AddRouteInternal writes the two hand-written files of a new route package.
-// It refuses to overwrite an existing route (via io.WriteFile).
+// AddRouteInternal writes the two hand-written files of a new route package,
+// in the folder props.Dir names under sandbox/internal/routeslist. It refuses
+// a name another route already carries, in whatever folder.
 //
 // The paths come from one of two places. --pattern compiles a url shape into
 // one path per literal run and per capture, fixing the segment count unless
@@ -55,6 +56,15 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	if pkg == "health" {
 		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be declared")
 	}
+
+	group, err := utils.UnitGroup(sandbox, props.Dir)
+	if err != nil {
+		return err
+	}
+	if existing, found := utils.FindUnitDir(sandbox, io, utils.RoutesDir, utils.RouteConfFile, pkg); found {
+		return sandbox.Deps.Std.Errorf("route %q already exists in %s: a route name is unique across every folder", identifier, existing)
+	}
+	dir := utils.UnitDirIn(utils.RoutesDir, group, pkg)
 
 	conf := routeconf.NewEmpty(sandbox)
 
@@ -128,7 +138,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		}
 	}
 
-	sandbox.Deps.Std.Log("add-route creating %s \n", utils.RouteDir(sandbox, name))
+	sandbox.Deps.Std.Log("add-route creating %s \n", dir)
 
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
@@ -145,8 +155,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		warnShadowedRoute(sandbox, io, identifier, conf)
 	}
 
-	dir := utils.RouteDir(sandbox, name)
-	if err := io.WriteFile(dir+"/route.yaml", []byte(conf.Render())); err != nil {
+	if err := io.WriteFile(dir+"/"+utils.RouteConfFile, []byte(conf.Render())); err != nil {
 		return err
 	}
 
@@ -205,9 +214,8 @@ func addRoutePriority(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 // almost always for two routes, and never something to find out by accident.
 func warnShadowedRoute(sandbox *api.Sandbox, io *smartio.SmartIO, identifier string, conf *routeconf.RouteConf) {
 	signature := routeMatchSignature(sandbox, conf)
-	for _, dir := range io.ListDirs(utils.RoutesDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
-		other_name := parts[len(parts)-1]
+	for _, unit := range utils.RouteDirs(sandbox, io) {
+		other_name := unit.Name
 		other, err := utils.LoadRouteConf(sandbox, io, other_name)
 		if err != nil || !methodsOverlap(other.Methods, conf.Methods) {
 			continue

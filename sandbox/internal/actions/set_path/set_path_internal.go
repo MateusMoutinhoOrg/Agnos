@@ -31,7 +31,7 @@ func SetPathInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteP
 		return sandbox.Deps.Std.Errorf("route %q already has an Entries field named %q", props.Route, path.Id)
 	}
 
-	sandbox.Deps.Std.Log("set-path rewriting %s of %s \n", current.Id, utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("set-path rewriting %s of %s \n", current.Id, utils.RouteConfPath(sandbox, io, props.Route))
 
 	conf.Paths[index] = path
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)

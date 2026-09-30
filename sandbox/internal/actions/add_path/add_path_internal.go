@@ -29,7 +29,7 @@ func AddPathInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteP
 		return sandbox.Deps.Std.Errorf("route %q already has an Entries field named %q", props.Route, path.Id)
 	}
 
-	sandbox.Deps.Std.Log("add-path adding %s to %s \n", path.Id, utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("add-path adding %s to %s \n", path.Id, utils.RouteConfPath(sandbox, io, props.Route))
 
 	conf.Paths = utils.InsertRoutePath(conf.Paths, path, position)
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)

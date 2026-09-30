@@ -35,7 +35,7 @@ func RemoveBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route st
 		return sandbox.Deps.Std.Errorf("route %q declares no body property named %q", route, key)
 	}
 
-	sandbox.Deps.Std.Log("remove-body-field removing %s from %s \n", key, utils.RouteConfPath(sandbox, route))
+	sandbox.Deps.Std.Log("remove-body-field removing %s from %s \n", key, utils.RouteConfPath(sandbox, io, route))
 
 	return utils.SaveRouteConf(sandbox, io, route, conf)
 }

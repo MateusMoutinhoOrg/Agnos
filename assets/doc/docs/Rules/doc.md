@@ -122,9 +122,13 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 {{ if .HasCli }}
 ## Handlers
 
-- A command is `sandbox/internal/commands/<name>/`, holding `command.yaml` (the declaration),
-  `new.go` and `entries.go` (generated) and `InternalPureHandler.go` (hand-written), snake_case
-  for a kebab-case name. A `handler.go` is an old declaration. **(verify)**
+- A command is a directory under `sandbox/internal/commands/`, at any depth, holding
+  `command.yaml` (the declaration), `new.go` and `entries.go` (generated) and
+  `InternalPureHandler.go` (hand-written), snake_case for a kebab-case name. The `command.yaml` is
+  what makes it one: a directory without it is a folder grouping commands
+  (`add-command <name> --dir <folder>`, `rename-command <name> <name> --dir <folder>`). A name is
+  unique across every folder, and a directory holding the go files without a `command.yaml` is
+  a violation. A `handler.go` is an old declaration. **(verify)**
 - Only `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`
   is exported. Every flag and arg of `command.yaml` is a field of `Entries` (`entries.Name`),
   already typed, defaulted and range-checked.
@@ -145,9 +149,12 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 {{ end }}{{ if .HasServer }}
 ## Routes
 
-- A route is `sandbox/internal/routeslist/<name>/`, holding `route.yaml` (the declaration),
-  `new.go` and `entries.go` (generated) and `InternalPureHandler.go` (hand-written) — the
-  server layer's mirror of a command package, snake_case for a kebab-case name. **(verify)**
+- A route is a directory under `sandbox/internal/routeslist/`, at any depth, holding `route.yaml`
+  (the declaration), `new.go` and `entries.go` (generated) and `InternalPureHandler.go`
+  (hand-written) — the server layer's mirror of a command package, snake_case for a kebab-case
+  name. The `route.yaml` is what makes it one: a directory without it is a folder grouping routes
+  (`add-route <name> --dir <folder>`, `rename-route <name> <name> --dir <folder>`). A name is
+  unique across every folder. **(verify)**
 - Only `InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error`
   is exported from a route's hand-written half. **(verify)**
 - `new.go` is a 1:1 image of `route.yaml`, built on the generic

@@ -47,7 +47,7 @@ agnos remove-arg <name> --command <cmd> / remove-flag <name> --command <cmd> / r
 agnos list-commands / show-command <cmd> / explain-command -- <argv…>
 ```
 
-`add-command` writes `sandbox/internal/commands/<name>/command.yaml` (the declaration) and a
+`add-command` writes `sandbox/internal/commands/[<--dir>/]<name>/command.yaml` (the declaration) and a
 stub `InternalPureHandler.go` (yours), then generates `new.go` — the `api.Command` that joins
 `Cli.Commands` — and `entries.go`, the `Entries` it is handed. Every key these editors write is
 in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.

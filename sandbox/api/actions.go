@@ -254,7 +254,9 @@ type FlagEditProps struct {
 //
 // Priority is the rung it runs on, used only when HasPriority is set; Before
 // and After name another command to land one rung below or above instead,
-// and exclude Priority.
+// and exclude Priority. Dir is the folder under sandbox/internal/commands the
+// command lands in ("" is the top; "admin" puts it in commands/admin/<name>):
+// its command.yaml is what makes it a command, whatever folder holds it.
 type AddCommandProps struct {
 	Path              string
 	Name              string
@@ -270,14 +272,20 @@ type AddCommandProps struct {
 	After             string
 	Help              string
 	Category          string
+	Dir               string
 }
 
 // RenameCommandProps describes one command to rename: Command as it is
-// declared now, Name the name it takes on.
+// declared now, Name the name it takes on. Dir, when HasDir is set, is the
+// folder under sandbox/internal/commands it moves to ("" is the top); without
+// it the command stays in the folder it sits in. Name may be its current one
+// when only the folder changes.
 type RenameCommandProps struct {
 	Path    string
 	Command string
 	Name    string
+	Dir     string
+	HasDir  bool
 }
 
 // RebalanceCommandsProps describes one rebalance of the cli chain: every
@@ -339,7 +347,10 @@ type SetCommandProps struct {
 // Priority is the rung it runs on, used only when HasPriority is set; without
 // it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for
 // a Middleware. Before and After name another route to land one rung below or
-// above instead, and exclude Priority.
+// above instead, and exclude Priority. Dir is the folder under
+// sandbox/internal/routeslist the route lands in ("" is the top; "admin" puts
+// it in routeslist/admin/<name>): its route.yaml is what makes it a route,
+// whatever folder holds it.
 type AddRouteProps struct {
 	Path              string
 	Name              string
@@ -357,6 +368,7 @@ type AddRouteProps struct {
 	ResponseType      string
 	Help              string
 	Category          string
+	Dir               string
 }
 
 // DefaultRoutePriority is the rung a route lands on when it names none —
@@ -397,11 +409,16 @@ type RouteProps struct {
 }
 
 // RenameRouteProps describes one route to rename: Route as it is declared
-// now, Name the name it takes on.
+// now, Name the name it takes on. Dir, when HasDir is set, is the folder under
+// sandbox/internal/routeslist it moves to ("" is the top); without it the
+// route stays in the folder it sits in. Name may be its current one when only
+// the folder changes.
 type RenameRouteProps struct {
-	Path  string
-	Route string
-	Name  string
+	Path   string
+	Route  string
+	Name   string
+	Dir    string
+	HasDir bool
 }
 
 // RebalanceRoutesProps describes one rebalance of the chain: every route is

@@ -11,9 +11,9 @@ import (
 // it installs, so removing those one by one would leave the generated
 // neighbours behind — the frontend route's new.go and entries.go with no
 // route.yaml and no InternalPureHandler.go next to them.
+// The route is looked up by name, since it may have been moved to a folder.
 var frontDirs = []string{
 	utils.GeneratedDir + "/frontio",
-	utils.RoutesDir + "/" + utils.FrontendRouteName,
 }
 
 // FrontPurgeInternal removes from the target project every file that the
@@ -41,7 +41,7 @@ func FrontPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 		io.RemoveDir(file)
 	}
 
-	for _, dir := range frontDirs {
+	for _, dir := range append(frontDirs, utils.RouteDir(sandbox, io, utils.FrontendRouteName)) {
 		if !io.IsDir(dir) {
 			continue
 		}

@@ -22,7 +22,7 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/generated/server/server/new.go
-      sha: 332fe8956561f23e5096a8f29b60ae5dd129c51a673f42cd0cadee88336df4c0
+      sha: a9dee4102fd3b27fdc3f53ad1b37aa306a7fe2692f6081bfa2fa553cbe4e7201
     - file: sandbox/internal/routeslist/access_log/InternalPureHandler.go
       sha: 19e95a302c102dc27be15796ca0b2c9f43061002416dca4697a0b09caa52d2af
     - file: sandbox/internal/routeslist/access_log/route.yaml

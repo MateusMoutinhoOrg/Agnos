@@ -186,7 +186,8 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 
 **Two layers per feature**: an **action** (`sandbox/internal/actions/<name>/`) with `<name>.go`
 (opens SmartIO, persists, runs the follow-up `build`) plus `<name>_internal.go` (pure logic on an
-already-open SmartIO), and a **command** (`sandbox/internal/commands/<name>/`) with
+already-open SmartIO), and a **command** (`sandbox/internal/commands/<folder>/<name>/`, the folder
+its category: `core/`, `cli/`, `server/`, …) with
 `entries.yaml`, a generated `new.go` and a hand-written `handler.go`. Both directories are
 snake_case for a kebab-case command (`add-command` -> `add_command/`). Only `handler.go` and
 contract/adapter pairs are hand-written; everything else is generated.

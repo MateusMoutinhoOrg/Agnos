@@ -35,7 +35,7 @@ func ValidateCommandName(sandbox *api.Sandbox, name string) error {
 			letter == '-'
 		if !valid {
 			return sandbox.Deps.Std.Errorf(
-				"invalid command name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/commands/%s and a Go package name)",
+				"invalid command name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory %s of sandbox/internal/commands and a Go package name)",
 				name, CommandPackage(sandbox, name))
 		}
 	}
@@ -64,24 +64,38 @@ func CommandPackage(sandbox *api.Sandbox, name string) string {
 	return sandbox.Deps.Stringsdeps.ReplaceAll(CommandIdentifier(sandbox, name), "-", "_")
 }
 
-// CommandDir is the project-relative directory holding a command package.
-func CommandDir(sandbox *api.Sandbox, name string) string {
-	return "sandbox/internal/commands/" + CommandPackage(sandbox, name)
-}
-
-// CommandsDir holds one command package per sub-directory.
+// CommandsDir is the tree the commands are declared in: every directory at
+// any depth holding a command.yaml is a command, and every other one a folder
+// grouping them.
 const CommandsDir = "sandbox/internal/commands"
 
 // CommandConfFile is the declaration of one command, beside its generated
-// new.go and entries.go and its hand-written InternalPureHandler.go.
+// new.go and entries.go and its hand-written InternalPureHandler.go, and what
+// makes its directory a command.
 const CommandConfFile = "command.yaml"
 
 // CommandHandlerFile is the one hand-written file of a command.
 const CommandHandlerFile = "InternalPureHandler.go"
 
+// CommandDirs is every command declared under CommandsDir, at any depth.
+func CommandDirs(sandbox *api.Sandbox, io *smartio.SmartIO) []UnitDir {
+	return FindUnitDirs(sandbox, io, CommandsDir, CommandConfFile)
+}
+
+// CommandDir is the project-relative directory holding the command named —
+// by its package name or one of its verbs — in whatever folder it sits; one
+// no command.yaml declares yet lands at the top of CommandsDir.
+func CommandDir(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+	pkg := CommandPackage(sandbox, ResolveCommandName(sandbox, io, name))
+	if dir, found := FindUnitDir(sandbox, io, CommandsDir, CommandConfFile, pkg); found {
+		return dir
+	}
+	return CommandsDir + "/" + pkg
+}
+
 // CommandConfPath is the project-relative path of a command's command.yaml.
-func CommandConfPath(sandbox *api.Sandbox, name string) string {
-	return CommandDir(sandbox, name) + "/" + CommandConfFile
+func CommandConfPath(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+	return CommandDir(sandbox, io, name) + "/" + CommandConfFile
 }
 
 // ResolveCommandName is the package name of the command a user named: its
@@ -89,13 +103,15 @@ func CommandConfPath(sandbox *api.Sandbox, name string) string {
 // returned as given when nothing answers to it, so the caller's own "not
 // found" names what was typed.
 func ResolveCommandName(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
-	if io.IsFile(CommandConfPath(sandbox, name)) {
-		return name
+	units := CommandDirs(sandbox, io)
+	pkg := CommandPackage(sandbox, name)
+	for _, unit := range units {
+		if unit.Name == pkg {
+			return name
+		}
 	}
-	for _, dir := range io.ListDirs(CommandsDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
-		pkg := parts[len(parts)-1]
-		content, err := io.ReadFile(CommandsDir + "/" + pkg + "/" + CommandConfFile)
+	for _, unit := range units {
+		content, err := io.ReadFile(unit.Dir + "/" + CommandConfFile)
 		if err != nil {
 			continue
 		}
@@ -105,35 +121,37 @@ func ResolveCommandName(sandbox *api.Sandbox, io *smartio.SmartIO, name string) 
 		}
 		for _, identifier := range conf.Identifiers() {
 			if identifier == sandbox.Deps.Stringsdeps.TrimSpace(name) {
-				return pkg
+				return unit.Name
 			}
 		}
 	}
 	return name
 }
 
-// LoadCommandConf reads and parses sandbox/internal/commands/<name>/command.yaml,
-// name being the command's package name or one of its verbs.
+// LoadCommandConf reads and parses the command.yaml of the command named —
+// by its package name or one of its verbs — wherever under
+// sandbox/internal/commands it sits.
 func LoadCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*commandconf.CommandConf, error) {
 	name = ResolveCommandName(sandbox, io, name)
 	if err := ValidateCommandName(sandbox, name); err != nil {
 		return nil, err
 	}
-	content, err := io.ReadFile(CommandConfPath(sandbox, name))
+	path := CommandConfPath(sandbox, io, name)
+	content, err := io.ReadFile(path)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("command %q not found in %s", CommandIdentifier(sandbox, name), CommandDir(sandbox, name))
+		return nil, sandbox.Deps.Std.Errorf("command %q not found in %s", CommandIdentifier(sandbox, name), CommandsDir)
 	}
 	conf, err := commandconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("commands/%s/%s: %w", CommandPackage(sandbox, name), CommandConfFile, err)
+		return nil, sandbox.Deps.Std.Errorf("%s: %w", path, err)
 	}
 	return conf, nil
 }
 
-// SaveCommandConf renders conf back over sandbox/internal/commands/<name>/command.yaml.
+// SaveCommandConf renders conf back over the command.yaml of the command
+// named.
 func SaveCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *commandconf.CommandConf) error {
-	name = ResolveCommandName(sandbox, io, name)
-	return io.WriteFileOverwrite(CommandConfPath(sandbox, name), []byte(conf.Render()))
+	return io.WriteFileOverwrite(CommandConfPath(sandbox, io, name), []byte(conf.Render()))
 }
 
 // CommandReservedIds are the Entries fields the generated entries.go spells

@@ -34,7 +34,7 @@ func ValidateRouteName(sandbox *api.Sandbox, name string) error {
 			letter == '-'
 		if !valid {
 			return sandbox.Deps.Std.Errorf(
-				"invalid route name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory sandbox/internal/routeslist/%s and a Go package name)",
+				"invalid route name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory %s of sandbox/internal/routeslist and a Go package name)",
 				name, RoutePackage(sandbox, name))
 		}
 	}
@@ -47,39 +47,57 @@ func RoutePackage(sandbox *api.Sandbox, name string) string {
 	return sandbox.Deps.Stringsdeps.ReplaceAll(RouteIdentifier(sandbox, name), "-", "_")
 }
 
-// RoutesDir holds one declared route per sub-directory, the server layer's
-// mirror of sandbox/internal/commands.
+// RoutesDir is the tree the routes are declared in, the server layer's mirror
+// of sandbox/internal/commands: every directory at any depth holding a
+// route.yaml is a route, and every other one a folder grouping them.
 const RoutesDir = "sandbox/internal/routeslist"
 
-// RouteDir is the project-relative directory holding a route package.
-func RouteDir(sandbox *api.Sandbox, name string) string {
-	return RoutesDir + "/" + RoutePackage(sandbox, name)
+// RouteConfFile is the declaration of one route, and what makes its
+// directory a route.
+const RouteConfFile = "route.yaml"
+
+// RouteDirs is every route declared under RoutesDir, at any depth.
+func RouteDirs(sandbox *api.Sandbox, io *smartio.SmartIO) []UnitDir {
+	return FindUnitDirs(sandbox, io, RoutesDir, RouteConfFile)
+}
+
+// RouteDir is the project-relative directory holding the route named, in
+// whatever folder it sits; one no route.yaml declares yet lands at the top of
+// RoutesDir.
+func RouteDir(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+	pkg := RoutePackage(sandbox, name)
+	if dir, found := FindUnitDir(sandbox, io, RoutesDir, RouteConfFile, pkg); found {
+		return dir
+	}
+	return RoutesDir + "/" + pkg
 }
 
 // RouteConfPath is the project-relative path of a route's route.yaml.
-func RouteConfPath(sandbox *api.Sandbox, name string) string {
-	return RouteDir(sandbox, name) + "/route.yaml"
+func RouteConfPath(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+	return RouteDir(sandbox, io, name) + "/" + RouteConfFile
 }
 
-// LoadRouteConf reads and parses sandbox/internal/routeslist/<name>/route.yaml.
+// LoadRouteConf reads and parses the route.yaml of the route named, wherever
+// under sandbox/internal/routeslist it sits.
 func LoadRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*routeconf.RouteConf, error) {
 	if err := ValidateRouteName(sandbox, name); err != nil {
 		return nil, err
 	}
-	content, err := io.ReadFile(RouteConfPath(sandbox, name))
+	path := RouteConfPath(sandbox, io, name)
+	content, err := io.ReadFile(path)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("route %q not found in %s", RouteIdentifier(sandbox, name), RouteDir(sandbox, name))
+		return nil, sandbox.Deps.Std.Errorf("route %q not found in %s", RouteIdentifier(sandbox, name), RoutesDir)
 	}
 	conf, err := routeconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("routeslist/%s/route.yaml: %w", RoutePackage(sandbox, name), err)
+		return nil, sandbox.Deps.Std.Errorf("%s: %w", path, err)
 	}
 	return conf, nil
 }
 
-// SaveRouteConf renders conf back over sandbox/internal/routeslist/<name>/route.yaml.
+// SaveRouteConf renders conf back over the route.yaml of the route named.
 func SaveRouteConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *routeconf.RouteConf) error {
-	return io.WriteFileOverwrite(RouteConfPath(sandbox, name), []byte(conf.Render()))
+	return io.WriteFileOverwrite(RouteConfPath(sandbox, io, name), []byte(conf.Render()))
 }
 
 // RouteEntryId turns a path id or a parameter key typed on the command line

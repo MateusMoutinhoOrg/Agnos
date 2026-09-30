@@ -27,8 +27,14 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `./release/bootstrap
 Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Database System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
 
 ```bash
-./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands"
+./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands" --dir core
 ```
+
+`--dir` is the folder of `sandbox/internal/commands/` its category lives in: `core`, `cli`,
+`server`, `front`, `database`, `deps`, `examples`, `extensions`, `docs`. Only `help`, `version`,
+`help_flag` (generated at a fixed path) and the `project` middleware sit at the top. A directory
+is a command by holding a `command.yaml`, so the folder costs nothing to read; move one with
+`rename-command <name> <name> --dir <folder>`.
 
 `--path` and `--quiet` come from the `project` middleware: the command declares neither.
 `InternalPureHandler.go` calls the action, returns `cliio.Fail(sandbox, api.ExitFailure, "", err.Error())`
@@ -61,7 +67,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Dispatch (generic) | `sandbox/internal/generated/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go`, over the generic `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) | — | — (the methods are generated, not dispatched) |
 | Shared package | — | `sandbox/internal/generated/routeio/` | `sandbox/internal/generated/frontio/` | `sandbox/internal/generated/databaseio/` |
 | Answer to bad input | the dispatch, exit 2 | `server/errors/handle_*.go`, written once by `build` | — (the server's) | — |
-| Declared unit | `commands/<name>/command.yaml` -> generated `new.go` + `entries.go` | `routeslist/<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | none: `assets/frontend/**`, served by `routeslist/frontend/` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
+| Declared unit | `commands/[<folder>/]<name>/command.yaml` -> generated `new.go` + `entries.go` | `routeslist/[<folder>/]<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | none: `assets/frontend/**`, served by `routeslist/frontend/` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | — | `collect_databases.go`, `collect_database_docs.go` |
 | Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |

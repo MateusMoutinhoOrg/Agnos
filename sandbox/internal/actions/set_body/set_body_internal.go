@@ -55,7 +55,7 @@ func SetBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteB
 		return sandbox.Deps.Std.Errorf("a `none` body cannot be required: it is never read")
 	}
 
-	sandbox.Deps.Std.Log("set-body updating %s \n", utils.RouteConfPath(sandbox, props.Route))
+	sandbox.Deps.Std.Log("set-body updating %s \n", utils.RouteConfPath(sandbox, io, props.Route))
 
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)
 }

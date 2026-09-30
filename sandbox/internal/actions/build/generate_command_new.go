@@ -7,7 +7,8 @@ import (
 )
 
 // GenerateCommandNew renders assets/templates/command_new.go and
-// command_entries.go once per command into sandbox/internal/commands/<name>/:
+// command_entries.go once per command into the directory it sits in under
+// sandbox/internal/commands:
 // new.go, the api.Command that package declares, derived from its
 // command.yaml, which sandbox/internal/generated/cli/cli/new.go collects into
 // Cli.Commands; and entries.go, the Entries its InternalPureHandler is handed.
@@ -21,7 +22,7 @@ func GenerateCommandNew(sandbox *api.Sandbox, io *smartio.SmartIO, commands []ma
 		for key, value := range command {
 			vars[key] = value
 		}
-		dir := "sandbox/internal/commands/" + name
+		dir, _ := command["Dir"].(string)
 		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_new.go", vars, dir+"/new.go"); err != nil {
 			return err
 		}

@@ -3,10 +3,10 @@
 Declare a new http route
 
 ```bash
-agnos add-route <Name> [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--method <method>...] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--response-type <response-type>] [--help <help>] [--category <category>] [--path <path>] [--quiet]
+agnos add-route <Name> [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--method <method>...] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--response-type <response-type>] [--help <help>] [--category <category>] [--dir <dir>] [--path <path>] [--quiet]
 ```
 
-Writes sandbox/internal/routeslist/<name>/route.yaml and a stub InternalPureHandler.go, then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. The paths come from --pattern, or from one path, Route, reading the whole request path against --trigger. A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
+Writes <name>/route.yaml and a stub InternalPureHandler.go under sandbox/internal/routeslist — or under the folder --dir names there, e.g. routeslist/admin/<name> — then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. A directory is a route by holding a route.yaml, at any depth; a name is unique across every folder. The paths come from --pattern, or from one path, Route, reading the whole request path against --trigger. A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -27,6 +27,7 @@ Writes sandbox/internal/routeslist/<name>/route.yaml and a stub InternalPureHand
 | `--response-type` | string |  | the Content-Type every response of the route carries (defaults to application/json, or text/plain for a --middleware) | — |
 | `--help` | string |  | one-line description of the route | — |
 | `--category` | string |  | the heading the route is listed under in docs/Routes (defaults to Routes, or Middleware for a --middleware) | — |
+| `--dir` | string |  | the folder under sandbox/internal/routeslist the route lands in, e.g. admin puts it in routeslist/admin/<name> (defaults to the top); a directory holding a route.yaml is a route, whatever folder holds it | — |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
 

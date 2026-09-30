@@ -26,7 +26,7 @@ func RemoveArgInternal(sandbox *api.Sandbox, io *smartio.SmartIO, command string
 		return sandbox.Deps.Std.Errorf("arg %q is the only one of command %q: a command reads one segment at least", name, command)
 	}
 
-	sandbox.Deps.Std.Log("remove-arg removing %s from %s \n", conf.Args[index].Id, utils.CommandConfPath(sandbox, utils.ResolveCommandName(sandbox, io, command)))
+	sandbox.Deps.Std.Log("remove-arg removing %s from %s \n", conf.Args[index].Id, utils.CommandConfPath(sandbox, io, command))
 
 	conf.Args = utils.RemoveCommandArg(conf.Args, index)
 	return utils.SaveCommandConf(sandbox, io, command, conf)

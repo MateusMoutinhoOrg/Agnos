@@ -67,7 +67,7 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		}
 		return closed(commandOptions(sandbox, io))
 	case "route":
-		return closed(dirOptions(sandbox, io, routesDir))
+		return closed(routeOptions(sandbox, io))
 	case "database":
 		return closed(dirOptions(sandbox, io, utils.DatabasesDir))
 	case "table":
@@ -80,7 +80,7 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		}
 		return closed(literalOptions(append(append([]string{}, routeMethods...), routeconf.AnyMethod)))
 	case "before", "after":
-		return closed(dirOptions(sandbox, io, routesDir))
+		return closed(routeOptions(sandbox, io))
 	case "runtime":
 		return closed(literalOptions(buildRuntimes))
 	case "target":
@@ -251,7 +251,7 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answ
 	case "remove-command", "set-command":
 		return closed(commandOptions(sandbox, io))
 	case "remove-route":
-		return closed(dirOptions(sandbox, io, routesDir))
+		return closed(routeOptions(sandbox, io))
 	case "remove-page":
 		return closed(pageOptions(sandbox, io))
 	case "remove-doc":
@@ -569,13 +569,7 @@ func routeCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interview
 		return []interviewer.AlternativeOption{}
 	}
 
-	names := []string{}
-	for _, path := range io.ListDirs(routesDir) {
-		if name := utils.LastSegment(sandbox, path); name != "" {
-			names = append(names, name)
-		}
-	}
-	sandbox.Deps.Sortdeps.Strings(names)
+	names := unitNames(sandbox, utils.RouteDirs(sandbox, io))
 
 	categories := []string{}
 	for _, name := range names {
@@ -615,8 +609,8 @@ type declaredCommand struct {
 	Help       string
 }
 
-// declaredCommands reads every sandbox/internal/commands/<name>/entries.yaml of
-// the project being worked on. A directory whose declaration will not parse is
+// declaredCommands reads every command.yaml under sandbox/internal/commands of
+// the project being worked on, in whatever folder. A directory whose declaration will not parse is
 // still offered under its own name: the interview is how a person fixes such a
 // command, so hiding it would hide the way out.
 func declaredCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []declaredCommand {
@@ -624,13 +618,7 @@ func declaredCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []declaredComma
 		return []declaredCommand{}
 	}
 
-	names := []string{}
-	for _, path := range io.ListDirs(commandsDir) {
-		if name := utils.LastSegment(sandbox, path); name != "" {
-			names = append(names, name)
-		}
-	}
-	sandbox.Deps.Sortdeps.Strings(names)
+	names := unitNames(sandbox, utils.CommandDirs(sandbox, io))
 
 	commands := []declaredCommand{}
 	for _, name := range names {
@@ -749,6 +737,23 @@ func dirOptions(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []intervi
 
 	sandbox.Deps.Sortdeps.Strings(names)
 	return literalOptions(names)
+}
+
+// routeOptions is one row per declared route, by name and in order, in
+// whatever folder of sandbox/internal/routeslist it sits: a folder grouping
+// routes is not one.
+func routeOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+	return literalOptions(unitNames(sandbox, utils.RouteDirs(sandbox, io)))
+}
+
+// unitNames is the names of units, sorted.
+func unitNames(sandbox *api.Sandbox, units []utils.UnitDir) []string {
+	names := []string{}
+	for _, unit := range units {
+		names = append(names, unit.Name)
+	}
+	sandbox.Deps.Sortdeps.Strings(names)
+	return names
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────

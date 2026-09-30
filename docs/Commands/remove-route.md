@@ -6,7 +6,7 @@ Delete one declared route
 agnos remove-route <Name> [--help] [--path <path>] [--quiet]
 ```
 
-Removes sandbox/internal/routeslist/<name>/ whole and re-renders the dispatch. The build renders only: dropping a route may leave hand-written code referring to what is gone.
+Removes the route's directory whole, in whatever folder of sandbox/internal/routeslist it sits, and every folder that leaves empty, then re-renders the dispatch. A directory holding another route is refused. The build renders only: dropping a route may leave hand-written code referring to what is gone.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

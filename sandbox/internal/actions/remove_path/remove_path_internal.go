@@ -23,7 +23,7 @@ func RemovePathInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string,
 		return sandbox.Deps.Std.Errorf("%q is the last path of route %q: a route declares one at least", conf.Paths[index].Id, route)
 	}
 
-	sandbox.Deps.Std.Log("remove-path removing %s from %s \n", conf.Paths[index].Id, utils.RouteConfPath(sandbox, route))
+	sandbox.Deps.Std.Log("remove-path removing %s from %s \n", conf.Paths[index].Id, utils.RouteConfPath(sandbox, io, route))
 
 	conf.Paths = utils.RemoveRoutePath(conf.Paths, index)
 	return utils.SaveRouteConf(sandbox, io, route, conf)
