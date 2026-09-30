@@ -4,12 +4,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	// The binary is named after the project at --path, never after the cli
 	// running this command: sandbox.Config is agnos's own config, and naming the
 	// output from it installs every project over agnos itself.

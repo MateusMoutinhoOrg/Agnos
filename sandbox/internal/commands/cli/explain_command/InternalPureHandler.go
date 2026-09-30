@@ -3,10 +3,11 @@ package explain_command
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	explainCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_command"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	lines, explain_error := explainCommandAction.ExplainCommand(sandbox, api.ExplainCommandProps{
 		Path: props.Path,
 		Argv: entries.Argv,

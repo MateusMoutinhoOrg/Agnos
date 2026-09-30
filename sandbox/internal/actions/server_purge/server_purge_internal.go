@@ -23,9 +23,13 @@ import (
 // props.yaml, but the build writes one page per route beside them. Removing
 // only the installed two would leave a directory of pages with no props.yaml,
 // which every later build reads as a doc that fails to load.
+//
+// sandbox/internal/routeprops is one of them: every route names it, so it goes
+// with them.
 var serverDirs = []string{
 	"sandbox/internal/server",
 	utils.RoutesDir,
+	utils.RoutePropsDir,
 	utils.GeneratedDir + "/server",
 	utils.GeneratedDir + "/routeio",
 	"docs/Routes",
@@ -66,8 +70,8 @@ func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string)
 		io.RemoveDir(file)
 	}
 
-	// sandbox/api/routeprops.go is the one file the layer writes outside
-	// the directories it owns: every route names it, so it goes with them.
+	// sandbox/api/routeprops.go is where an older build declared
+	// RouteProps; a tree no build has moved it out of yet still carries it.
 	io.RemoveDir("sandbox/api/" + utils.RoutePropsFile)
 
 	for _, dir := range append(serverDirs, utils.CommandDir(sandbox, io, "start_server")) {

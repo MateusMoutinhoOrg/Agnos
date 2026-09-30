@@ -4,6 +4,7 @@ import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/internal/generated/routeio"
+	"{{.Module}}/sandbox/internal/routeprops"
 )
 
 // ServerMain opens the port through sandbox.Deps.Serverdeps — which routes
@@ -155,7 +156,7 @@ func isNumber(text string) bool {
 // one of the project's own Handle* files.
 func dispatch(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response) {
 	tracked, status := routeio.Tracked(response)
-	props := &api.RouteProps{}
+	props := &routeprops.RouteProps{}
 
 	answer(sandbox, request, tracked, status, props)
 }
@@ -164,7 +165,7 @@ func dispatch(sandbox *api.Sandbox, request serverdeps.Request, response serverd
 // raises the failure that says why. A HEAD request nothing declares HEAD for
 // is run again as the GET it asks the headers of: net/http drops the body a
 // HEAD answer writes.
-func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, props *api.RouteProps) {
+func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, props *routeprops.RouteProps) {
 	defer recoverRoute(sandbox, request, tracked, status, props)
 
 	ran, method_mismatch := runChain(sandbox, request, tracked, status, props)
@@ -198,7 +199,7 @@ func answer(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps
 // and whether a route matched the path under another method. A route on ANY —
 // a middleware, most often — says nothing about which methods the path
 // takes, so it running does not keep a 405 from being told apart.
-func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, props *api.RouteProps) (bool, bool) {
+func runChain(sandbox *api.Sandbox, request serverdeps.Request, tracked serverdeps.Response, status func() int, props *routeprops.RouteProps) (bool, bool) {
 	method_mismatch := false
 	ran := false
 
@@ -262,7 +263,7 @@ func accepts(route *api.Route, method string) bool {
 // beyond the status, so the wording is the project's: routeio.FailureOf fills
 // in the one the Handle* file spells, which is what makes editing that file
 // change what the server says.
-func failRequest(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, props *api.RouteProps, status int) {
+func failRequest(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, props *routeprops.RouteProps, status int) {
 	route := api.NewRoute()
 	route.Request = request
 	route.Response = response
@@ -275,7 +276,7 @@ func failRequest(sandbox *api.Sandbox, request serverdeps.Request, response serv
 // bad route cannot take the process down with it. A handler that panicked after
 // answering has already answered: the panic is reported and nothing is written
 // over it.
-func recoverRoute(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status func() int, props *api.RouteProps) {
+func recoverRoute(sandbox *api.Sandbox, request serverdeps.Request, response serverdeps.Response, status func() int, props *routeprops.RouteProps) {
 	failure := recover()
 	if failure == nil {
 		return

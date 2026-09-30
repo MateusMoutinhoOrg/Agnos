@@ -3,10 +3,11 @@ package set_route
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	setRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_route"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	// --priority and --segments declare no default, so a value typed as 0
 	// is told apart from none by whether anything was bound at all.
 	set_error := setRouteAction.SetRoute(sandbox, api.RouteProps{

@@ -3,10 +3,11 @@ package set_parameter
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	setParameterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_parameter"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	err := setParameterAction.SetParameter(sandbox, api.RouteParameterEditProps{
 		Path:              props.Path,
 		Route:             entries.Route,

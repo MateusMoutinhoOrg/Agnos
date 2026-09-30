@@ -7,6 +7,7 @@ import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/internal/generated/server/route"
+	"{{.Module}}/sandbox/internal/routeprops"
 )
 
 // NewRoute builds this route's declaration — a 1:1 image of its route.yaml —
@@ -76,7 +77,7 @@ func NewRoute(sandbox *api.Sandbox) *api.Route {
 	}
 {{- end}}
 
-	self.InternalPureHandler = func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+	self.InternalPureHandler = func(props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 		return InternalPureHandler(sandbox, props, entries, response)
 	}
 

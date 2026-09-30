@@ -111,7 +111,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always
   use that spelling; an added contract never renames an existing one.
 - An adapter's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<adapter>/<adapter>.go`.
-- A command handler is always `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`.
+- A command handler is always `InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
 - A dep is named after the contract it installs; an adapter after what backs it (`sortdeps`,
@@ -127,7 +127,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   (`add-command <name> --dir <folder>`, `rename-command <name> <name> --dir <folder>`). A name is
   unique across every folder, and a directory holding the go files without a `command.yaml` is
   a violation. A `handler.go` is an old declaration. **(verify)**
-- Only `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`
+- Only `InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error`
   is exported. Every flag and arg of `command.yaml` is a field of `Entries` (`entries.Name`),
   already typed, defaulted and range-checked.
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes

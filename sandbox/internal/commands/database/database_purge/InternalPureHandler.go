@@ -3,10 +3,11 @@ package database_purge
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	databasePurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/database_purge"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	purge_error := databasePurgeAction.DatabasePurge(sandbox, props.Path)
 
 	if purge_error != nil {

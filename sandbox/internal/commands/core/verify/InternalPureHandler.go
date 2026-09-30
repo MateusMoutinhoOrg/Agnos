@@ -4,10 +4,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	verify_error := verifyAction.Verify(sandbox, props.Path)
 
 	// The schema check says the tree has the right shape; the runtime says

@@ -3,10 +3,11 @@ package rename_route
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	renameRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_route"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	rename_error := renameRouteAction.RenameRoute(sandbox, api.RenameRouteProps{
 		Path:  props.Path,
 		Route: entries.Route,

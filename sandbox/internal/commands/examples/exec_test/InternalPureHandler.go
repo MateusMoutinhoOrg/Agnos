@@ -3,10 +3,11 @@ package exec_test
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	exec_error := execTestsAction.ExecTest(sandbox, api.ExecTestProps{
 		Path:   props.Path,
 		Only:   entries.Only,

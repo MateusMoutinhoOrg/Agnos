@@ -3,6 +3,7 @@ package {{.Package}}
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
+	"{{.Module}}/sandbox/internal/routeprops"
 )
 
 // InternalPureHandler runs in front of every {{.Methods}} {{.Trigger}} on a
@@ -16,9 +17,9 @@ import (
 //	return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "invalid token")
 //
 // Hand what you learned to the routes after it through props, the request's
-// api.RouteProps — declare the field in sandbox/api/routeprops.go:
+// routeprops.RouteProps — declare the field in sandbox/internal/routeprops/routeprops.go:
 //
 //	props.User = user
-func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	return nil
 }

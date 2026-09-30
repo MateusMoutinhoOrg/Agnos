@@ -6,10 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// commandPropsDest is where api.CommandProps is declared: beside the
-// contracts, since every command package names it and none of them may import
-// another.
-const commandPropsDest = "sandbox/api/" + utils.CommandPropsFile
+// commandPropsDest is where commandprops.CommandProps is declared: a package
+// of its own under sandbox/internal, since every command package names it,
+// none of them may import another, and its fields may name any type of the
+// project.
+const commandPropsDest = utils.CommandPropsDir + "/" + utils.CommandPropsFile
 
 // retiredCliFiles are generated files an older build wrote that nothing
 // renders any more: the dispatch before it moved to generated/cli/cli, and the
@@ -29,7 +30,7 @@ var retiredCliFiles = []string{
 }
 
 // GenerateCommandProps renders assets/templates/commandprops.go into
-// sandbox/api/commandprops.go — the api.CommandProps one command line's chain
+// sandbox/internal/commandprops/commandprops.go — the CommandProps one command line's chain
 // of commands shares, handed to every InternalPureHandler as its first
 // argument.
 //
@@ -43,7 +44,9 @@ func GenerateCommandProps(sandbox *api.Sandbox, io *smartio.SmartIO, module stri
 		}
 	}
 
-	if io.IsFile(commandPropsDest) {
+	// Read rather than IsFile: a struct MigrateLegacyProps moved here this
+	// build is still pending, and IsFile only sees the disk.
+	if _, err := io.ReadFile(commandPropsDest); err == nil {
 		return nil
 	}
 

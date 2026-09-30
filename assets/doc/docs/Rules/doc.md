@@ -113,7 +113,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - A `Deps` field is the title-cased `sandbox/deps/<dir>` (`iodeps` -> `deps.Iodeps`). Always
   use that spelling; an added contract never renames an existing one.
 - An adapter's binder is always `Bind(deps *deps.Deps)` in `adapters/libs/<adapter>/<adapter>.go`.
-- A command handler is always `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`.
+- A command handler is always `InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error`.
 - A package's first file is named after the package (`sandbox/deps/iodeps/iodeps.go`,
   `adapters/libs/iodeps/iodeps.go`); a second file is named after what it holds.
 - A dep is named after the contract it installs; an adapter after what backs it (`sortdeps`,
@@ -129,7 +129,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   (`add-command <name> --dir <folder>`, `rename-command <name> <name> --dir <folder>`). A name is
   unique across every folder, and a directory holding the go files without a `command.yaml` is
   a violation. A `handler.go` is an old declaration. **(verify)**
-- Only `InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error`
+- Only `InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error`
   is exported. Every flag and arg of `command.yaml` is a field of `Entries` (`entries.Name`),
   already typed, defaulted and range-checked.
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
@@ -155,7 +155,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   name. The `route.yaml` is what makes it one: a directory without it is a folder grouping routes
   (`add-route <name> --dir <folder>`, `rename-route <name> <name> --dir <folder>`). A name is
   unique across every folder. **(verify)**
-- Only `InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error`
+- Only `InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error`
   is exported from a route's hand-written half. **(verify)**
 - `new.go` is a 1:1 image of `route.yaml`, built on the generic
   `sandbox/internal/generated/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
@@ -168,10 +168,13 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   next route matching that request runs; a handler that returns a non-nil error without
   answering has failed, and `handle_server_error.go` answers for it. What a handler returns is
   never the status. `SetHeader` alone answers nothing.
-- Every route of one request is handed the same `props *api.RouteProps`, built empty per
+- Every route of one request is handed the same `props *routeprops.RouteProps`, built empty per
   request; a middleware hands what it learned to the routes after it by setting a field of it.
-  `sandbox/api/routeprops.go` declares those fields: `build` writes it **once**, then it is the
-  project's.
+  `sandbox/internal/routeprops/routeprops.go` declares those fields: `build` writes it **once**,
+  then it is the project's. It sits under `sandbox/internal`, never `sandbox/api`, so a field may
+  name any type of the project — a database record — as long as that package imports no route;
+  `api.Route.Props` holds it as `any`. `build` moves an old `sandbox/api/routeprops.go` there; the
+  same holds for `commandprops.CommandProps` in `sandbox/internal/commandprops/`.
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
   `add-path` / `set-path` / `remove-path`, `add-parameter` / `set-parameter` /
   `remove-parameter`, `set-body` and `add-body-field` / `set-body-field` / `remove-body-field` /

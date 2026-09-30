@@ -3,10 +3,11 @@ package list_extensions
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	listExtensionsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_extensions"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	extensions, list_error := listExtensionsAction.ListExtensions(sandbox, props.Path)
 
 	if list_error != nil {

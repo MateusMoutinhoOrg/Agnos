@@ -82,7 +82,7 @@ middleware is. `response.Error` and `response.Log` answer nothing. Nothing answe
 `handle_not_found.go`: the general help on an empty line, `unknown command` otherwise.
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	if entries.Name == "" {
 		return cliio.Fail(sandbox, api.ExitFailure, "Name", "nobody to greet")
 	}
@@ -92,5 +92,5 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries 
 ```
 
 Every command of one line is handed the same `props`, typed by the project in
-`sandbox/api/commandprops.go` — written once by `{{.GeneratorName}} build`, then the project's.
+`sandbox/internal/commandprops/commandprops.go` — written once by `{{.GeneratorName}} build`, then the project's.
 `help-flag` (priority 5) answers `<command> --help` unless that command declares `--help` itself.

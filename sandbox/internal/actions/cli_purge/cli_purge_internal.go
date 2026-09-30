@@ -26,11 +26,15 @@ import (
 // by the build and then the project's, but every one of them imports the help
 // command and cliio, so leaving them behind hands back a tree that does not
 // compile — and that no cli-init can bring back.
+//
+// sandbox/internal/commandprops is one of them: every command names it, so it
+// goes with them.
 var cliDirs = []string{
 	utils.GeneratedDir + "/cli",
 	utils.GeneratedDir + "/cliio",
 	"sandbox/internal/cli",
 	"sandbox/internal/commands",
+	utils.CommandPropsDir,
 	"docs/Commands",
 	utils.ConstructorDir("cli"),
 }
@@ -52,8 +56,8 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 		io.RemoveDir(file)
 	}
 
-	// sandbox/api/commandprops.go is the one file the layer writes outside
-	// the directories it owns: every command names it, so it goes with them.
+	// sandbox/api/commandprops.go is where an older build declared
+	// CommandProps; a tree no build has moved it out of yet still carries it.
 	io.RemoveDir("sandbox/api/" + utils.CommandPropsFile)
 
 	for _, dir := range cliDirs {

@@ -2,6 +2,7 @@ package {{.Package}}
 
 import (
 	"{{.Module}}/sandbox/api"
+	"{{.Module}}/sandbox/internal/commandprops"
 )
 
 // InternalPureHandler answers `{{.Pattern}}`. Every value the command
@@ -13,7 +14,7 @@ import (
 // answered through the project's own handle_failure.go:
 //
 //	return cliio.Fail(sandbox, api.ExitFailure, "", "nothing to do")
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	response.Printf("{{.Identifier}} called\n")
 	return nil
 }

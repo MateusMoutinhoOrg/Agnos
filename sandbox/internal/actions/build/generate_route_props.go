@@ -6,9 +6,10 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// routePropsDest is where api.RouteProps is declared: beside the contracts,
-// since every route package names it and none of them may import another.
-const routePropsDest = "sandbox/api/" + utils.RoutePropsFile
+// routePropsDest is where routeprops.RouteProps is declared: a package of its
+// own under sandbox/internal, since every route package names it, none of them
+// may import another, and its fields may name any type of the project.
+const routePropsDest = utils.RoutePropsDir + "/" + utils.RoutePropsFile
 
 // retiredServerFiles are generated files an older build wrote that nothing
 // renders any more. Each one names a symbol the current contract dropped, so a
@@ -18,7 +19,7 @@ var retiredServerFiles = []string{
 }
 
 // GenerateRouteProps renders assets/templates/routeprops.go into
-// sandbox/api/routeprops.go — the api.RouteProps one request's chain of routes
+// sandbox/internal/routeprops/routeprops.go — the RouteProps one request's chain of routes
 // shares, handed to every InternalPureHandler as its first argument.
 //
 // It is written **once**, like the Handle* files: what a request carries from
@@ -33,7 +34,9 @@ func GenerateRouteProps(sandbox *api.Sandbox, io *smartio.SmartIO, module string
 		}
 	}
 
-	if io.IsFile(routePropsDest) {
+	// Read rather than IsFile: a struct MigrateLegacyProps moved here this
+	// build is still pending, and IsFile only sees the disk.
+	if _, err := io.ReadFile(routePropsDest); err == nil {
 		return nil
 	}
 

@@ -103,7 +103,7 @@ of that name: the dispatch reads it as `help <command>` and prints a screen inst
 
 `sandbox.Deps.Iodeps` from `sandbox/deps/iodeps`, `Bind(deps *deps.Deps)` (an adapter fills
 `deps.Deps` directly), `CommandHandler(sandbox *api.Sandbox, command *api.Command) int`,
-`InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error`
+`InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error`
 for a route (in `InternalPureHandler.go`, beside its generated `new.go` and `entries.go`), and
 `(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error` for each of the
 eight `handle_*.go`. **Every file is an instance of a pattern**: new code copies an
@@ -140,8 +140,10 @@ editing only the rendered copy is undone in silence.
 - **The server is a chain.** Every route matching a request runs, lowest `priority` first, and
   the first one to answer — `SetStatus`, or a `Write`, which sends a `200` — ends it; a handler
   that does neither has declined and the next runs, which is the whole of what a middleware is.
-  One `props *api.RouteProps` per request is shared by the whole chain — the project types it in
-  `sandbox/api/routeprops.go`, which `build` writes once. A handler is handed no request, so what
+  One `props *routeprops.RouteProps` per request is shared by the whole chain — the project types it in
+  `sandbox/internal/routeprops/routeprops.go`, which `build` writes once; it is not in `sandbox/api`
+  so a field may name a project type (a database record), and `api.Route.Props` holds it as `any`.
+  `commandprops.CommandProps` is the cli's mirror. A handler is handed no request, so what
   it reads is declared (`Entries`, the body on `Entries.Body`). An `InternalPureHandler` returns
   `error`, never a status; it refuses a request by returning `routeio.Fail`. A path type or a
   `trigger` is part of what the route matches on, so failing one is a non-match, not a `400`.

@@ -210,8 +210,8 @@ type Command struct {
 	Flags []CommandFlag
 
 	// InternalPureHandler is the command package's own InternalPureHandler,
-	// closed over the sandbox: a func(props *CommandProps, entries *Entries,
-	// response *CommandResponse) error whose Entries is that package's
+	// closed over the sandbox: a func(props *commandprops.CommandProps,
+	// entries *Entries, response *CommandResponse) error whose Entries is that package's
 	// generated struct. It is held as any because every command's Entries is
 	// a type of its own; CommandHandler builds and fills one through
 	// Deps.Reflectdeps and calls it.
@@ -224,9 +224,12 @@ type Command struct {
 	// line, so what a middleware consumed, the strict command after it does
 	// not have to.
 	Consumed []bool
-	// Props is one command line's CommandProps, shared by every command of
-	// the chain: what a middleware sets on it, the commands after it read.
-	Props *CommandProps
+	// Props is one command line's *commandprops.CommandProps, shared by every
+	// command of the chain: what a middleware sets on it, the commands after
+	// it read. It is held as any because the project types it under
+	// sandbox/internal, which sandbox/api may not name; a Handle* file reads
+	// it back with command.Props.(*commandprops.CommandProps).
+	Props any
 	// Response is the one response of the command line.
 	Response *CommandResponse
 

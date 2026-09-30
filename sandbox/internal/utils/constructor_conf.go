@@ -22,14 +22,27 @@ const ConstructorFile = "constructor.go"
 // route, a database) stay beside it under sandbox/internal/.
 const GeneratedDir = "sandbox/internal/generated"
 
-// RoutePropsFile is the sandbox/api/ file declaring api.RouteProps, the struct
-// one request's chain of routes shares. The build writes it once and it is the
-// project's from then on, like a route's InternalPureHandler.go.
+// RoutePropsDir is the package declaring routeprops.RouteProps, the struct one
+// request's chain of routes shares. It sits under sandbox/internal, not in
+// sandbox/api, so its fields may name any type of the project — a record of
+// one of its databases, say — which sandbox/api, imported by all of them,
+// never could.
+const RoutePropsDir = "sandbox/internal/routeprops"
+
+// RoutePropsFile is the file of RoutePropsDir declaring RouteProps. The build
+// writes it once and it is the project's from then on, like a route's
+// InternalPureHandler.go. It is also the name it had in sandbox/api/, the old
+// home the build moves it out of.
 const RoutePropsFile = "routeprops.go"
 
-// CommandPropsFile is the sandbox/api/ file declaring api.CommandProps, the
-// struct one command line's chain of commands shares. The build writes it once
-// and it is the project's from then on.
+// CommandPropsDir is the package declaring commandprops.CommandProps, the
+// struct one command line's chain of commands shares — under sandbox/internal
+// for the reason RoutePropsDir is.
+const CommandPropsDir = "sandbox/internal/commandprops"
+
+// CommandPropsFile is the file of CommandPropsDir declaring CommandProps. The
+// build writes it once and it is the project's from then on. It is also the
+// name it had in sandbox/api/, the old home the build moves it out of.
 const CommandPropsFile = "commandprops.go"
 
 // UserSandboxFile is the sandbox/api/ file declaring api.UserSandbox, the
@@ -46,9 +59,11 @@ const UserConfigFile = "userconfig.go"
 // sandbox: sandbox.go is the struct itself, command.go and route.go are the
 // shape of one command and of one route, each owned by the contract whose
 // New<Name> builds the slice of them, trigger.go is the condition both of
-// them match on, routeprops.go and commandprops.go are what a route's and a
-// command's handler are handed per run, and usersandbox.go and userconfig.go
-// are embedded in the Sandbox and the Config rather than fields of their own.
+// them match on, routeprops.go and commandprops.go are the old home of what a
+// route's and a command's handler are handed per run — a tree the build has
+// not moved them out of yet, or whose layer is off — and usersandbox.go and
+// userconfig.go are embedded in the Sandbox and the Config rather than fields
+// of their own.
 var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile, UserSandboxFile, UserConfigFile}
 
 // ConstructorDir is the project-relative directory of one constructor package.

@@ -2,6 +2,7 @@ package help
 
 import (
 	"{{.Module}}/sandbox/api"
+	"{{.Module}}/sandbox/internal/commandprops"
 )
 
 // help is a command like any other — command.yaml, generated new.go and
@@ -49,7 +50,7 @@ const (
 
 // InternalPureHandler backs `help`: with no argument it prints the general help
 // screen, with a command name it prints that command's detailed help.
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	name := sandbox.Deps.Stringsdeps.Join(entries.Name, " ")
 	if name == "" {
 		PrintGeneralHelp(sandbox, response)

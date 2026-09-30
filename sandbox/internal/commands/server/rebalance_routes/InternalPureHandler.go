@@ -3,10 +3,11 @@ package rebalance_routes
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	rebalanceRoutesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rebalance_routes"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	rebalance_error := rebalanceRoutesAction.RebalanceRoutes(sandbox, api.RebalanceRoutesProps{
 		Path: props.Path,
 		Step: entries.Step,

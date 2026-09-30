@@ -202,10 +202,10 @@ type Entries struct {
 The hand-written half is one function, which `verify` holds to this signature:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error
+func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error
 ```
 
-`props` is the request's `api.RouteProps` (see [The chain](#the-chain)); `entries` is everything
+`props` is the request's `routeprops.RouteProps` (see [The chain](#the-chain)); `entries` is everything
 the request brought that `route.yaml` declares — the handler is handed no request, so a value it
 needs is a declared path, parameter or body. The generic `RequestHandler` builds `Entries` and
 calls the handler through `Deps.Reflectdeps`, since every route's `Entries` is a type of its own.
@@ -300,7 +300,7 @@ route a middleware. `SetHeader` alone answers nothing, which is how a middleware
 whatever answers after it.
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if entries.Authorization == "" {
 		return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "")
 	}
@@ -315,8 +315,8 @@ func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *E
 ```
 
 Every route of one request is handed the same `props`: the dispatch builds one empty
-`api.RouteProps` per request, and each field is declared by the project in
-`sandbox/api/routeprops.go` — written once by `{{.GeneratorName}} build`, then the project's.
+`routeprops.RouteProps` per request, and each field is declared by the project in
+`sandbox/internal/routeprops/routeprops.go` — written once by `{{.GeneratorName}} build`, then the project's.
 
 When no route answers:
 

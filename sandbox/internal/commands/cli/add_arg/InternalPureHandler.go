@@ -3,10 +3,11 @@ package add_arg
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_arg"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	add_error := addArgAction.AddArg(sandbox, api.ArgProps{
 		Path:              props.Path,
 		Command:           entries.Target,

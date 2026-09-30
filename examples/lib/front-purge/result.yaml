@@ -10,10 +10,10 @@ tree:
     - file: assets/frontend/index.html
       sha: 732abc93f6ea971bd74abce29385273fe101c5105ad2e60b8268ba24ee2fbd23
     - file: sandbox/internal/routeslist/health/InternalPureHandler.go
-      sha: 87e4994cbf1c5706b71a869e5a7577aa9081b007358de1e346ce3b5391cc8e10
+      sha: 936fe65beb7ce899cc706de76fc0ed296adc933a386c89c5f2cd261c9623c41d
     - file: sandbox/internal/routeslist/health/entries.go
       sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
     - file: sandbox/internal/routeslist/health/new.go
-      sha: 382e7c28cc5895c95bbcfd6eff188d1d85cd2f17ca531587e42fcb2a0036f1ba
+      sha: f6beb9f24b8f00ca2dad63902460aad0c96307bd8439df3d65bd898aa5cb3544
     - file: sandbox/internal/routeslist/health/route.yaml
       sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9

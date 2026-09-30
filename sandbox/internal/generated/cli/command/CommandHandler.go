@@ -33,7 +33,7 @@ const fullCommandId = "FullCommand"
 func CommandHandler(sandbox *api.Sandbox, command *api.Command) error {
 	entries := sandbox.Deps.Reflectdeps.NewIn(command.InternalPureHandler, entriesArgument)
 	if entries == nil || sandbox.Deps.Reflectdeps.NumField(entries) < 0 {
-		return sandbox.Deps.Std.Errorf("command %s: InternalPureHandler is not a func(props *api.CommandProps, entries *Entries, response *api.CommandResponse) error", command.Name)
+		return sandbox.Deps.Std.Errorf("command %s: InternalPureHandler is not a func(props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error", command.Name)
 	}
 
 	values := map[string]any{fullCommandId: command.Argv}

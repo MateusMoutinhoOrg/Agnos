@@ -3,10 +3,11 @@ package set_body
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	setBodyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_body"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	set_error := setBodyAction.SetBody(sandbox, api.RouteBodyProps{
 		Path:        props.Path,
 		Route:       entries.Route,

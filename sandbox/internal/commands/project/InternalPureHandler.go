@@ -2,6 +2,7 @@ package project
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
 // InternalPureHandler runs in front of every command: it hands the project
@@ -9,7 +10,7 @@ import (
 // channel for the rest of the process — results (Printf) and errors (Error)
 // still go out, only the "… started with path …" notices stop. It answers
 // nothing, so the command after it runs.
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	props.Path = entries.Path
 	if entries.Quiet {
 		sandbox.Deps.Std.Log = func(format string, a ...any) (int, error) {

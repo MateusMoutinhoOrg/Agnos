@@ -68,6 +68,12 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		io.CreateDir("sandbox/internal")
 	}
 
+	// A props struct an older build wrote into sandbox/api/ is moved to its
+	// own package first: from here on nothing reads it as a contract.
+	if err := MigrateLegacyProps(sandbox, io, hasCli, hasServer); err != nil {
+		return err
+	}
+
 	// The contracts of sandbox/api/ and the packages that build them. The
 	// first is one field of the Sandbox each; the second is the call list
 	// sandbox/new.go is rendered from, and it is wider than the first — a

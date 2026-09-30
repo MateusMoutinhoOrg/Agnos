@@ -3,10 +3,11 @@ package list_adapters
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	listAdaptersAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_adapters"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	adapters, list_error := listAdaptersAction.ListAdapters(sandbox, props.Path)
 
 	if list_error != nil {

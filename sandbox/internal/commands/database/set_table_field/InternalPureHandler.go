@@ -3,10 +3,11 @@ package set_table_field
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	setTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_table_field"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	set_error := setTableFieldAction.SetTableField(sandbox, api.DatabaseFieldEditProps{
 		Path:     props.Path,
 		Database: entries.Database,

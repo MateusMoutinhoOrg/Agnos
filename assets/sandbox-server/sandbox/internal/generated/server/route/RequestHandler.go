@@ -40,7 +40,7 @@ func RequestHandler(sandbox *api.Sandbox, route *api.Route) error {
 
 	entries := sandbox.Deps.Reflectdeps.NewIn(route.InternalPureHandler, entriesArgument)
 	if entries == nil || sandbox.Deps.Reflectdeps.NumField(entries) < 0 {
-		return sandbox.Deps.Std.Errorf("route %s: InternalPureHandler is not a func(props *api.RouteProps, entries *Entries, response *serverdeps.Response) error", route.Name)
+		return sandbox.Deps.Std.Errorf("route %s: InternalPureHandler is not a func(props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error", route.Name)
 	}
 
 	values, ok, err := bindValues(sandbox, route, request)

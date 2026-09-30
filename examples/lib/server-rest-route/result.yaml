@@ -4,6 +4,6 @@ tree:
     - file: sandbox/internal/routeslist/static/entries.go
       sha: 00aaeca47ba67fc57b34c49f62dc11248fceb42dbe445723f5ae45e6863fc8a7
     - file: sandbox/internal/routeslist/static/new.go
-      sha: 3b707c0d35eab58e1ce633fcf2714e9fe436eba81ee0968ba3ff64a3e6c60326
+      sha: dfa1517d261a6099f9a325ae7087104500f45b375b977dbde59905664b314a70
     - file: sandbox/internal/routeslist/static/route.yaml
       sha: a8a38e3960bae1c25318b6c427e5da728263ed9716a202727a42da8c89038f3d

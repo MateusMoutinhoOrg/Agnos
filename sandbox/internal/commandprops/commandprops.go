@@ -1,4 +1,4 @@
-package api
+package commandprops
 
 // CommandProps is what one command line carries from the commands that run on
 // it to the ones after them: the dispatch builds one, empty, per command line,

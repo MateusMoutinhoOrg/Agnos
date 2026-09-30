@@ -2,6 +2,7 @@ package cli
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cli/command"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
@@ -32,7 +33,7 @@ import (
 // project.
 func CliMain(sandbox *api.Sandbox, args []string) int {
 	response, status := cliio.Tracked(sandbox)
-	props := &api.CommandProps{}
+	props := &commandprops.CommandProps{}
 	consumed := make([]bool, len(args))
 
 	answer(sandbox, args, consumed, props, response, status)
@@ -46,7 +47,7 @@ func CliMain(sandbox *api.Sandbox, args []string) int {
 
 // answer runs the chain for one command line and, when no command answered
 // it, raises the failure that says so.
-func answer(sandbox *api.Sandbox, args []string, consumed []bool, props *api.CommandProps, response *api.CommandResponse, status func() (int, bool)) {
+func answer(sandbox *api.Sandbox, args []string, consumed []bool, props *commandprops.CommandProps, response *api.CommandResponse, status func() (int, bool)) {
 	defer recoverCommand(sandbox, args, consumed, props, response, status)
 
 	for _, declared := range sandbox.Cli.Commands {
@@ -187,7 +188,7 @@ func argTypeName(kind api.ArgType) string {
 // It carries no message on purpose: the wording is the project's, filled in by
 // the Handle* file through cliio.FailureOf, which is what makes editing that
 // file change what the cli says.
-func failLine(sandbox *api.Sandbox, args []string, consumed []bool, props *api.CommandProps, response *api.CommandResponse, kind api.CommandFailureKind, code int, cause string) {
+func failLine(sandbox *api.Sandbox, args []string, consumed []bool, props *commandprops.CommandProps, response *api.CommandResponse, kind api.CommandFailureKind, code int, cause string) {
 	command := api.NewCommand()
 	command.Argv = args
 	command.Consumed = consumed
@@ -201,7 +202,7 @@ func failLine(sandbox *api.Sandbox, args []string, consumed []bool, props *api.C
 // the panic is reported once, through HandleFailure, rather than as a stack
 // trace. A handler that panicked after printing has still failed: the status
 // HandleFailure sets replaces the ExitOk its print implied.
-func recoverCommand(sandbox *api.Sandbox, args []string, consumed []bool, props *api.CommandProps, response *api.CommandResponse, status func() (int, bool)) {
+func recoverCommand(sandbox *api.Sandbox, args []string, consumed []bool, props *commandprops.CommandProps, response *api.CommandResponse, status func() (int, bool)) {
 	failure := recover()
 	if failure == nil {
 		return

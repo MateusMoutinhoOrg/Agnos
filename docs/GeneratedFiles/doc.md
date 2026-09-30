@@ -46,7 +46,7 @@
 | `sandbox/internal/commands/<name>/command.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/commands/<name>/InternalPureHandler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 | `sandbox/internal/cli/errors/handle_*.go` | `build` | once. Five files, one per failure — what this project answers when no command does |
-| `sandbox/api/commandprops.go` | `build` | once. `api.CommandProps`, what one command line's chain of commands shares |
+| `sandbox/internal/commandprops/commandprops.go` | `build` | once. `commandprops.CommandProps`, what one command line's chain of commands shares |
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |
 | `examples/cli/<name>/example.sh` | `add-cli-example` | once. A stub that already runs |
 | `examples/lib/<name>/example.go` | `add-lib-example` | once. A stub that already runs |

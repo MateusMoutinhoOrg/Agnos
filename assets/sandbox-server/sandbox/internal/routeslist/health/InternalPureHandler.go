@@ -3,12 +3,13 @@ package health
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
+	"{{.Module}}/sandbox/internal/routeprops"
 )
 
 // InternalPureHandler answers the built-in health route with a fixed JSON
 // object. It is the server layer's `version` command: a route agnos writes
 // itself, so a freshly initialized server already answers something.
-func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	body := sandbox.Deps.Serializables.CreateObject()
 	body.AddItemToObject("status", "ok")
 

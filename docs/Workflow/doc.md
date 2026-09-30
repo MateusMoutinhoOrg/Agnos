@@ -55,7 +55,7 @@ in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.
 Then write `InternalPureHandler.go` — the whole hand-written half of a command:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	result, err := something(sandbox, entries.Name)
 	if err != nil {
 		return cliio.Fail(sandbox, api.ExitFailure, "", err.Error())

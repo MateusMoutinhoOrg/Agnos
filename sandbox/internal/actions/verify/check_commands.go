@@ -20,7 +20,11 @@ var legacyCommandFiles = []string{"entries.yaml", "handler.go"}
 // generated new.go closes over: the sandbox, the command line's shared
 // CommandProps, the command's own Entries and the response it answers
 // through.
-var commandHandlerParams = []string{"*api.Sandbox", "*api.CommandProps", "*Entries", "*api.CommandResponse"}
+var commandHandlerParams = []string{"*api.Sandbox", "*commandprops.CommandProps", "*Entries", "*api.CommandResponse"}
+
+// legacyCommandPropsParam is the props parameter a handler took while
+// CommandProps was declared in sandbox/api.
+const legacyCommandPropsParam = "*api.CommandProps"
 
 // CheckCommands enforces the shape the cli layer's generators read by
 // convention, the way CheckRoutes does for the server's: the four files of a
@@ -111,7 +115,8 @@ func checkCommandFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []
 		}
 		return append(violations, commandViolation(dir,
 			utils.CommandHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error"))
+				routeHandlerName+"(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error"+
+				legacyPropsHint(function, legacyCommandPropsParam, utils.CommandPropsDir)))
 	}
 	return append(violations, commandViolation(dir, utils.CommandHandlerFile+" exports no "+routeHandlerName))
 }

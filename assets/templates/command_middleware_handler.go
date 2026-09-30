@@ -2,6 +2,7 @@ package {{.Package}}
 
 import (
 	"{{.Module}}/sandbox/api"
+	"{{.Module}}/sandbox/internal/commandprops"
 )
 
 // InternalPureHandler runs in front of every command line matching
@@ -15,9 +16,10 @@ import (
 //	return cliio.Fail(sandbox, api.ExitFailure, "profile", "unknown profile")
 //
 // Hand what you learned to the commands after it through props, the command
-// line's api.CommandProps — declare the field in sandbox/api/commandprops.go:
+// line's commandprops.CommandProps — declare the field in
+// sandbox/internal/commandprops/commandprops.go:
 //
 //	props.Profile = entries.Profile
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	return nil
 }

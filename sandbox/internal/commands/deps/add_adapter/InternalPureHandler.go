@@ -3,10 +3,11 @@ package add_adapter
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	install_error := addAdapterAction.AddAdapter(sandbox, api.AddAdapterProps{
 		Path:      props.Path,
 		Adapter:   entries.Adapter,

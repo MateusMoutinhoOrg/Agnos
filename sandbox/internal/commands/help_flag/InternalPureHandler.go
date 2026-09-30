@@ -2,6 +2,7 @@ package help_flag
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
 )
 
@@ -15,7 +16,7 @@ const helpKey = "--help"
 // it — and a bare `--help` with the general help. Without --help, or in front
 // of a command that declares --help itself and is given a value for it, it
 // hands the line on.
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	if !entries.Help {
 		return nil
 	}

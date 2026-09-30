@@ -204,8 +204,8 @@ type Route struct {
 	ReadBody func(bound *Route) (any, error)
 
 	// InternalPureHandler is the route package's own InternalPureHandler,
-	// closed over the sandbox: a func(props *RouteProps, entries *Entries,
-	// response *serverdeps.Response) error whose Entries is that package's
+	// closed over the sandbox: a func(props *routeprops.RouteProps, entries
+	// *Entries, response *serverdeps.Response) error whose Entries is that package's
 	// generated struct. It is held as any because every route's Entries is a
 	// type of its own; RequestHandler builds and fills one through
 	// Deps.Reflectdeps and calls it.
@@ -218,10 +218,13 @@ type Route struct {
 	Request  any
 	Response any
 
-	// Props is one request's RouteProps, shared by every route of the chain
-	// that runs for it and handed to each InternalPureHandler as its first
-	// argument: what a middleware sets on it, the routes after it read.
-	Props *RouteProps
+	// Props is one request's *routeprops.RouteProps, shared by every route
+	// of the chain that runs for it and handed to each InternalPureHandler as
+	// its first argument: what a middleware sets on it, the routes after it
+	// read. It is held as any because the project types it under
+	// sandbox/internal, which sandbox/api may not name; a Handle* file reads
+	// it back with route.Props.(*routeprops.RouteProps).
+	Props any
 
 	// Failure is why this route is being handed to one of the project's
 	// Handle* files, nil on a normal run. It is set by routeio.Raise, which

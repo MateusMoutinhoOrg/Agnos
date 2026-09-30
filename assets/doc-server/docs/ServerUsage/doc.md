@@ -109,7 +109,7 @@ route whether it runs or why it is skipped. The three write nothing and run no b
 ## Write the handler
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if props.User == "" { // set by a middleware in front
 		return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "not authorized")
 	}
@@ -127,7 +127,7 @@ a field of `Entries`, named by its id ([RouteYaml](../RouteYaml/doc.md#entries-a
 **Setting a status or writing a byte is what answers the request.** A handler that does neither
 has declined, and the next route matching this request runs — that is the whole of what a
 middleware is; what it learned travels to the routes after it on `props`, the request's
-`api.RouteProps`, whose fields the project declares in `sandbox/api/routeprops.go`. Returning
+`routeprops.RouteProps`, whose fields the project declares in `sandbox/internal/routeprops/routeprops.go`. Returning
 `routeio.Fail` refuses the request through the `Handle*` file of its status; any other error
 means "I could not answer this", and hands it to `handle_server_error.go`; returning `nil` means "done" or "not mine", which the
 answer tells apart.

@@ -27,7 +27,11 @@ const routeHandlerFile = "InternalPureHandler.go"
 // routeHandlerParams is the canonical InternalPureHandler signature the
 // generated new.go closes over: the sandbox, the request's shared RouteProps,
 // the route's own Entries and the response being written.
-var routeHandlerParams = []string{"*api.Sandbox", "*api.RouteProps", "*Entries", "*serverdeps.Response"}
+var routeHandlerParams = []string{"*api.Sandbox", "*routeprops.RouteProps", "*Entries", "*serverdeps.Response"}
+
+// legacyRoutePropsParam is the props parameter a handler took while
+// RouteProps was declared in sandbox/api.
+const legacyRoutePropsParam = "*api.RouteProps"
 
 // routeMethods is every http method a route may declare beside ANY, which
 // stands alone.
@@ -136,7 +140,8 @@ func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []st
 		}
 		return append(violations, routeViolation(dir,
 			routeHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, props *api.RouteProps, entries *Entries, response *serverdeps.Response) error"))
+				routeHandlerName+"(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error"+
+				legacyPropsHint(function, legacyRoutePropsParam, utils.RoutePropsDir)))
 	}
 
 	return append(violations, routeViolation(dir, routeHandlerFile+" exports no "+routeHandlerName))
@@ -156,6 +161,16 @@ func isRouteHandler(function goimportsdeps.Function) bool {
 		}
 	}
 	return len(function.Results) == 1 && function.Results[0].Type == "error"
+}
+
+// legacyPropsHint is what a handler still taking its props from sandbox/api is
+// told on top of the signature: where the struct lives now. "" for any other
+// mismatch.
+func legacyPropsHint(function goimportsdeps.Function, legacy string, dir string) string {
+	if len(function.Params) < 2 || function.Params[1].Type != legacy {
+		return ""
+	}
+	return " (the props struct moved out of sandbox/api to " + dir + ": take it from there and import that package)"
 }
 
 // checkRouteDeclaration enforces the rules that survive parsing: the required

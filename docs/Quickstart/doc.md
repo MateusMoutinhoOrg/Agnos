@@ -22,9 +22,10 @@ package greet
 
 import (
 	"github.com/you/my-tool/sandbox/api"
+	"github.com/you/my-tool/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	response.Log("greeting %s\n", entries.Name)         // stderr
 	for i := 0; i < entries.Times; i++ {
 		response.Printf("hello, %s\n", entries.Name)   // stdout, the result

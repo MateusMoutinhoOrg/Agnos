@@ -3,10 +3,11 @@ package show_database
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	showDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_database"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	lines, show_error := showDatabaseAction.ShowDatabase(sandbox, props.Path, entries.Database)
 
 	if show_error != nil {

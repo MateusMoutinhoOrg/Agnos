@@ -5,12 +5,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *api.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	if entries.Publisher != "gh" {
 		response.Error("Unsupported publisher %q. The only available publisher is \"gh\".\n", entries.Publisher)
 		return cliio.Fail(sandbox, api.ExitFailure, "", "")
