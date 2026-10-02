@@ -6,8 +6,8 @@ import (
 )
 
 // EmbeddedStruct is one struct a generated aggregate embeds: api.Config embeds
-// every struct of sandbox/api/userconfig*.go, api.Sandbox every one of
-// sandbox/api/usersandbox*.go, and RouteProps and CommandProps every one their
+// every struct of sandbox/api/*config.go, api.Sandbox every one of
+// sandbox/api/*sandbox.go, and RouteProps and CommandProps every one their
 // own package declares beside them. Each part is a file of its own, so a
 // mechanic adds what it needs by adding a file — never by editing one the
 // project already wrote in.
@@ -103,12 +103,19 @@ func EmbeddedCollisions(sandbox *api.Sandbox, aggregate string, structs []Embedd
 	return collisions
 }
 
-// HasFilePrefix returns an accept func for CollectEmbeddedStructs taking the
-// files whose base name starts with prefix: userconfig.go and
-// userconfig_backoffice.go for "userconfig".
-func HasFilePrefix(sandbox *api.Sandbox, prefix string) func(name string) bool {
+// SandboxParts is the accept func for CollectEmbeddedStructs taking the files
+// api.Sandbox embeds: usersandbox.go, clisandbox.go, serversandbox.go.
+func SandboxParts(sandbox *api.Sandbox) func(name string) bool {
 	return func(name string) bool {
-		return sandbox.Deps.Stringsdeps.HasPrefix(name, prefix)
+		return IsSandboxPart(sandbox, name)
+	}
+}
+
+// ConfigParts is the accept func for CollectEmbeddedStructs taking the files
+// api.Config embeds: userconfig.go, backofficeconfig.go.
+func ConfigParts(sandbox *api.Sandbox) func(name string) bool {
+	return func(name string) bool {
+		return IsConfigPart(sandbox, name)
 	}
 }
 

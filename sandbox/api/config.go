@@ -8,7 +8,7 @@ package api
 type Config struct {
 	// UserConfig is a part of the Config, declared in sandbox/api/userconfig.go.
 	// Embedded, so each of its fields is read as sandbox.Config.<Field>.
-	// Every struct of a sandbox/api/userconfig*.go file is one, so a
+	// Every struct of a sandbox/api/<x>config.go file is one, so a
 	// mechanic adds its own part beside the project's rather than editing it.
 	UserConfig
 

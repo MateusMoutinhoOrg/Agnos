@@ -1,4 +1,4 @@
-cli-output: "add-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+cli-output: "verify found 1 violation(s):\n  - sandbox/api/greeter.go is a contract no part of api.Sandbox declares a field for; add `Greeter Greeter` to UserSandbox in sandbox/api/usersandbox.go\nexit status 1\nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: adapters/availables/standard/available.yaml
@@ -8,15 +8,15 @@ tree:
     - file: adapters/libs/remote/adapter.yaml
       sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
     - file: adapters/libs/remote/remote.go
-      sha: aee0049436863d95023a47163b12e451853f3f02371ec951420093e2b78025a3
+      sha: c50157bd03581900c6d71c2fbf9febf68ca4b10474d46dceea23bfe35c0d005a
     - file: sandbox/deps/deps.go
       sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
     - file: sandbox/deps/remote/config.go
-      sha: 4018c9ac382fbd0fdb7fe81c29ff1f454147684ef97ce67e7c3cbe84b3b42366
+      sha: 6af6b5441ff1431051b1dd76aa55fe368bbea332f56a507ecafab24e47788355
     - file: sandbox/deps/remote/greeter.go
       sha: 5fe9fe69498c87176ea5bc32e9ec47f22d0a90a064f4251fad77128e080aacae
     - file: sandbox/deps/remote/sandbox.go
-      sha: c37a63b3c13b41fd60de282622ebac2d8a8f0e2702d4e54f2741ed091cf7efdf
+      sha: ef4d458e65ca6c11f9da0bbe52c4133b86b3025e2e9d343d9c3e499ae0fd93cd
     - file: sandbox/deps/remote/trigger.go
       sha: fc676637a63bd250d44ffb1acfa845eddeefc70c08ae8f82fe0c79e4ed0fe477
     - file: sandbox/deps/remote/userconfig.go

@@ -46,7 +46,7 @@ func main() {
 		".gitignore",
 		"AgnosConfig/extensions.yaml",
 		"sandbox/api/config.go",
-		"sandbox/api/userconfig_backoffice.go",
+		"sandbox/api/backofficeconfig.go",
 	} {
 		copyFile("TestDir/"+file, "AssertDir/"+file)
 	}

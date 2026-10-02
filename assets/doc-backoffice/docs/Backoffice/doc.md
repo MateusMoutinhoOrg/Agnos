@@ -22,7 +22,7 @@ project's name upper-cased, every other character `_`, then `_SECRET`.
 
 `backoffice-server` is a cli middleware (priority `50`) in front of `start-server`: it reads the
 secret and both flags onto `sandbox.Config` (`api.BackofficeConfig`,
-`sandbox/api/userconfig_backoffice.go`). `start-server`'s own files are untouched.
+`sandbox/api/backofficeconfig.go`). `start-server`'s own files are untouched.
 
 ## Where it lives
 

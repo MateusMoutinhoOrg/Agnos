@@ -27,7 +27,7 @@ for file in \
 	.gitignore \
 	AgnosConfig/extensions.yaml \
 	sandbox/api/config.go \
-	sandbox/api/userconfig_backoffice.go; do
+	sandbox/api/backofficeconfig.go; do
 	mkdir -p AssertDir/$(dirname $file)
 	cp TestDir/$file AssertDir/$file
 done

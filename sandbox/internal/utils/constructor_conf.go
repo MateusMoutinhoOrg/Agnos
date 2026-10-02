@@ -56,37 +56,49 @@ const UserSandboxFile = "usersandbox.go"
 // rewrites it; api.Config embeds it.
 const UserConfigFile = "userconfig.go"
 
-// UserSandboxPrefix starts the name of every sandbox/api/ file whose structs
-// api.Sandbox embeds: usersandbox.go, and one more per mechanic that adds a
-// part of its own (usersandbox_<x>.go), so none edits a file of the project.
-const UserSandboxPrefix = "usersandbox"
+// SandboxPartSuffix ends the name of every sandbox/api/ file whose structs
+// api.Sandbox embeds: usersandbox.go, the project's, and one more per mechanic
+// that adds a part of its own (clisandbox.go, serversandbox.go), so none edits
+// a file of another. sandbox.go, the aggregate itself, is not one.
+const SandboxPartSuffix = "sandbox.go"
 
-// UserConfigPrefix is UserSandboxPrefix for api.Config: userconfig.go, and
-// userconfig_<x>.go per mechanic — userconfig_backoffice.go, say.
-const UserConfigPrefix = "userconfig"
+// ConfigPartSuffix is SandboxPartSuffix for api.Config: userconfig.go, and
+// <x>config.go per mechanic — backofficeconfig.go, say. config.go, the
+// aggregate itself, is not one.
+const ConfigPartSuffix = "config.go"
 
 // ConstructorExempt are the sandbox/api/ files that declare no field of the
 // sandbox: sandbox.go is the struct itself, command.go and route.go are the
 // shape of one command and of one route, each owned by the contract whose
 // New<Name> builds the slice of them, trigger.go is the condition both of
-// them match on, routeprops.go and commandprops.go are the old home of what a
-// route's and a command's handler are handed per run — a tree the build has
-// not moved them out of yet, or whose layer is off — and usersandbox.go and
-// userconfig.go are embedded in the Sandbox and the Config rather than fields
-// of their own.
-var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile, UserSandboxFile, UserConfigFile}
+// them match on, and routeprops.go and commandprops.go are the old home of
+// what a route's and a command's handler are handed per run — a tree the
+// build has not moved them out of yet, or whose layer is off.
+var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile}
 
 // IsConstructorExempt reports a sandbox/api/ file that declares no field of
 // the sandbox: one of ConstructorExempt, or a part api.Sandbox or api.Config
-// embeds (UserSandboxPrefix, UserConfigPrefix).
+// embeds (IsSandboxPart, IsConfigPart).
 func IsConstructorExempt(sandbox *api.Sandbox, name string) bool {
 	for _, exempt := range ConstructorExempt {
 		if exempt == name {
 			return true
 		}
 	}
-	return sandbox.Deps.Stringsdeps.HasPrefix(name, UserSandboxPrefix) ||
-		sandbox.Deps.Stringsdeps.HasPrefix(name, UserConfigPrefix)
+	return IsSandboxPart(sandbox, name) || IsConfigPart(sandbox, name)
+}
+
+// IsSandboxPart reports a sandbox/api/ file whose structs api.Sandbox embeds:
+// its name ends with SandboxPartSuffix and is not sandbox.go itself.
+func IsSandboxPart(sandbox *api.Sandbox, name string) bool {
+	return name != SandboxPartSuffix && sandbox.Deps.Stringsdeps.HasSuffix(name, SandboxPartSuffix)
+}
+
+// IsConfigPart reports a sandbox/api/ file whose structs api.Config embeds:
+// its name ends with ConfigPartSuffix and is not config.go itself, which is the
+// Config contract and a field of the Sandbox.
+func IsConfigPart(sandbox *api.Sandbox, name string) bool {
+	return name != ConfigPartSuffix && sandbox.Deps.Stringsdeps.HasSuffix(name, ConfigPartSuffix)
 }
 
 // ConstructorDir is the project-relative directory of one constructor package.

@@ -180,8 +180,13 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   `project.go`, its struct renamed `Project`; the same holds for `commandprops.CommandProps` in
   `sandbox/internal/commandprops/`.
 - `api.Config` and `api.Sandbox` are generated the same way: each embeds every struct of
-  `sandbox/api/userconfig*.go` / `sandbox/api/usersandbox*.go`. `userconfig.go` and
-  `usersandbox.go` are the project's; a mechanic adds `userconfig_<x>.go` beside them.
+  `sandbox/api/<x>config.go` / `sandbox/api/<x>sandbox.go`. `userconfig.go` and
+  `usersandbox.go` are the project's; each mechanic writes its own part beside them
+  (`clisandbox.go`, `serversandbox.go`, `backofficeconfig.go`), never edits another's. The
+  `Sandbox` declares only `Deps` and `Config` itself: a contract's field is declared by the part
+  of whoever owns it, so a contract the project writes is a field of `UserSandbox`. **(verify)**
+  `build` renames an old `usersandbox_<x>.go` / `userconfig_<x>.go` to `<x>sandbox.go` /
+  `<x>config.go`.
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
   `add-path` / `set-path` / `remove-path`, `add-parameter` / `set-parameter` /
   `remove-parameter`, `set-body` and `add-body-field` / `set-body-field` / `remove-body-field` /
@@ -263,7 +268,7 @@ How a path is resolved, and a bundler's build, is in [FrontUsage](../FrontUsage/
   `backoffice-init` keeps each one already there. `backoffice-purge` removes them all.
 - The backoffice edits nothing the project wrote. What it hands a route is
   `sandbox/internal/routeprops/backoffice.go`, what it reads at startup
-  `sandbox/api/userconfig_backoffice.go`, both embedded by the generated aggregates, and the
+  `sandbox/api/backofficeconfig.go`, both embedded by the generated aggregates, and the
   secret is read by the `backoffice-server` middleware in front of `start-server`.
 - The session secret is the `{{.SecretEnv}}` environment variable, at least 32 characters, never
   a flag or a file; without it `start-server` refuses to start.

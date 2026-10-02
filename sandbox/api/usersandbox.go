@@ -17,4 +17,7 @@ package api
 // Written once by `agnos start` and then yours: no build rewrites
 // this file.
 type UserSandbox struct {
+	// Actions is every action agnos runs — the work behind each command,
+	// built by the Constructor of sandbox/constructors/actions.
+	Actions Actions
 }

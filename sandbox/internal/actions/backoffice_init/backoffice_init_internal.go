@@ -42,7 +42,7 @@ const gitignoreFile = ".gitignore"
 // backoffice-init keeps each one already there, so an edit to a page or a
 // handler is never undone. Nothing the project wrote is edited either — the
 // backoffice's part of RouteProps and of api.Config are files of their own
-// (routeprops/backoffice.go, api/userconfig_backoffice.go) the generated
+// (routeprops/backoffice.go, api/backofficeconfig.go) the generated
 // aggregates embed, and its reading of the secret is a middleware in front of
 // start-server rather than a change to start-server's handler.
 func BackofficeInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {

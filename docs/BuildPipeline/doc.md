@@ -11,7 +11,8 @@
 
 | Collector | Lists | Var | Feeds |
 |---|---|---|---|
-| `CollectConstructors` | `sandbox/api/*` minus `sandbox.go`, `command.go`, `route.go` | `Constructors` (`Name`, `Package`, `HasNew`) | `sandbox/api/sandbox.go`, `sandbox/new.go` |
+| `CollectConstructors` | `sandbox/api/*` minus `utils.ConstructorExempt` and every `<x>sandbox.go` / `<x>config.go` | `Constructors` (`Name`, `Package`, `HasNew`) | `sandbox/constructors/`, `sandbox/new.go` |
+| `CollectEmbeddedStructs` | `sandbox/api/<x>sandbox.go`, `<x>config.go` — after `GenerateApiParts` renders the enabled groups' parts, so a first build sees them | `SandboxStructs`, `ConfigStructs` | `sandbox/api/{sandbox,config}.go` |
 | `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
 | `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `docs/LibUsage/doc.md` |
 | `CollectAvailables` | `adapters/availables/<x>/available.yaml` | `Availables` (`Name`, `Adapters`) | `GenerateAvailableNews` -> `adapters/availables/<x>/new.go` |
@@ -41,10 +42,10 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 
 | Group | Renders when | Holds |
 |---|---|---|
-| `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go` (embedding every struct of `api/usersandbox*.go` / `api/userconfig*.go`), `internal/generated/config/new.go` |
+| `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go` (embedding every struct of `api/<x>sandbox.go` / `api/<x>config.go`; native: `Deps`, `Config`), `internal/generated/config/new.go` |
 | `sandbox-deps` | `sandbox-deps` | `sandbox/deps/deps.go` |
-| `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command}.go`, `internal/generated/cli/`, `help`, `version` |
-| `sandbox-server` | `sandbox-server` | `api/{server,route}.go`, `internal/{server,routes/health,routeio}` |
+| `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command,clisandbox}.go`, `internal/generated/cli/`, `help`, `version` |
+| `sandbox-server` | `sandbox-server` | `api/{server,route,serversandbox}.go`, `internal/{server,routes/health,routeio}` |
 | `sandbox-front` | `sandbox-front` | `internal/generated/frontio/` |
 | `sandbox-database` | `sandbox-database` | `internal/generated/databaseio/` |
 | `doc` | `doc` | `docs/{Adapters,DepList,EntriesYaml,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |

@@ -2,23 +2,25 @@ cli-output: "add-dep started with path TestDir dep std \nbuild started with path
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 51c82bf0780ae2972c615bef393f706dfa03e5a676765eceaa0998b9b2176db7
+      sha: ca3a887769c4e6f1983dda8057adcfc18ce29870829914c551453fb91f44bf63
     - file: sandbox/api/route.go
-      sha: a9bb30001019f9ddef14b297c33d0a47321601d5eb898e7030c1b437e6bc790f
+      sha: 1127a84fcc43ad8253e9f99f7d53dc11d9c4b1ab96be51115bec7358951a3011
     - file: sandbox/api/server.go
       sha: 01311961e4b7ad4e76ee60b330ae51b2bcaa35ffc5ac1ac1efff23a7bf36a9dc
-    - file: sandbox/internal/commands/start_server/entries.yaml
-      sha: 0dbc8a9c41944e2116a1295ac9b84cface1e656ef314ecbfe0e53d8e7b42f87a
-    - file: sandbox/internal/commands/start_server/handler.go
-      sha: 30ad4e5d6059be34487c619411833c6277227d9ae2a2a05e27c9c708adc3800f
+    - file: sandbox/internal/commands/start_server/InternalPureHandler.go
+      sha: e9777a4639373f2d926a5a3379086d67932af53dda1a79e0a80fe2817a1aca37
+    - file: sandbox/internal/commands/start_server/command.yaml
+      sha: f510b98004dfbf9ce75a4bd66c40a4fd0d5a93126a3884868fb9bbeae2963644
+    - file: sandbox/internal/commands/start_server/entries.go
+      sha: 51390be8027c876695a43fa7108ec8fd050d1032a8e565bb69ce963a16fa9947
     - file: sandbox/internal/commands/start_server/new.go
-      sha: ac009770762a583fa2d15de330b02ff768536d4036e6a67fc8622b62533079b2
+      sha: f665048827be442a896dfad87db20c7af1857b636e75a71c6eb9345676e43d2e
     - file: sandbox/internal/routeslist/health/InternalPureHandler.go
-      sha: 87e4994cbf1c5706b71a869e5a7577aa9081b007358de1e346ce3b5391cc8e10
+      sha: 936fe65beb7ce899cc706de76fc0ed296adc933a386c89c5f2cd261c9623c41d
     - file: sandbox/internal/routeslist/health/entries.go
       sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
     - file: sandbox/internal/routeslist/health/new.go
-      sha: ea5199dd52cbe48142d50f07cf8941640562e3fbdee7cf553e4654f08efdb6a7
+      sha: f6beb9f24b8f00ca2dad63902460aad0c96307bd8439df3d65bd898aa5cb3544
     - file: sandbox/internal/routeslist/health/route.yaml
       sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9
     - file: sandbox/internal/server/errors/handle_bad_request.go

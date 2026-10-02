@@ -74,6 +74,12 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	if err := MigrateLegacyProps(sandbox, io, hasCli, hasServer); err != nil {
 		return err
 	}
+	// So is a part of api.Sandbox or api.Config named under the old prefix
+	// (userconfig_backoffice.go): the aggregates embed by suffix now.
+	moved_parts, err := MigrateLegacyApiParts(sandbox, io)
+	if err != nil {
+		return err
+	}
 
 	// The contracts of sandbox/api/ and the packages that build them. The
 	// first is one field of the Sandbox each; the second is the call list
@@ -216,15 +222,27 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	// The parts api.Config and api.Sandbox embed: every struct of a
-	// sandbox/api/userconfig*.go and usersandbox*.go file, so a mechanic adds
-	// a part beside the project's own instead of editing it. The two start
-	// writes are named too: start builds before it persists, and the listing
-	// reads disk.
-	config_structs, err := utils.CollectEmbeddedStructs(sandbox, io, "sandbox/api", utils.HasFilePrefix(sandbox, utils.UserConfigPrefix), []string{"sandbox/api/" + utils.UserConfigFile})
+	// sandbox/api/*config.go and *sandbox.go file, so each mechanic adds a part
+	// of its own instead of editing another's. The parts the enabled groups
+	// write are rendered first, and named along with the two start writes and
+	// the parts migrated above: start builds before it persists, and the
+	// listing reads disk.
+	api_parts := append([]string{"sandbox/api/" + utils.UserConfigFile, "sandbox/api/" + utils.UserSandboxFile}, moved_parts...)
+	if hasSandbox {
+		group_parts, err := GenerateApiParts(sandbox, io, utils.RenderableGroups(extensions_conf), map[string]interface{}{
+			"Module":        module_conf.Module,
+			"GeneratorName": generatorName(sandbox),
+		})
+		if err != nil {
+			return err
+		}
+		api_parts = append(api_parts, group_parts...)
+	}
+	config_structs, err := utils.CollectEmbeddedStructs(sandbox, io, "sandbox/api", utils.ConfigParts(sandbox), api_parts)
 	if err != nil {
 		return err
 	}
-	sandbox_structs, err := utils.CollectEmbeddedStructs(sandbox, io, "sandbox/api", utils.HasFilePrefix(sandbox, utils.UserSandboxPrefix), []string{"sandbox/api/" + utils.UserSandboxFile})
+	sandbox_structs, err := utils.CollectEmbeddedStructs(sandbox, io, "sandbox/api", utils.SandboxParts(sandbox), api_parts)
 	if err != nil {
 		return err
 	}

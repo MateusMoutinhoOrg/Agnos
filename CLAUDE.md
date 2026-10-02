@@ -145,8 +145,10 @@ editing only the rendered copy is undone in silence.
   `project.go` (the project's, written once) plus one file per mechanic (`backoffice.go`). It is
   not in `sandbox/api` so a field may name a project type (a database record), and
   `api.Route.Props` holds it as `any`. `api.Config`/`api.Sandbox` embed every struct of
-  `sandbox/api/userconfig*.go`/`usersandbox*.go` the same way: a mechanic adds a part, never
-  edits the project's.
+  `sandbox/api/<x>config.go`/`<x>sandbox.go` the same way: a mechanic adds a part
+  (`clisandbox.go`, `serversandbox.go`, `backofficeconfig.go`), never edits the project's.
+  `api.Sandbox` declares only `Deps` and `Config` itself; a contract the project writes is a
+  field of its `UserSandbox` (agnos's `Actions`), which `verify` demands.
   `commandprops.CommandProps` is the cli's mirror. A handler is handed no request, so what
   it reads is declared (`Entries`, the body on `Entries.Body`). An `InternalPureHandler` returns
   `error`, never a status; it refuses a request by returning `routeio.Fail`. A path type or a

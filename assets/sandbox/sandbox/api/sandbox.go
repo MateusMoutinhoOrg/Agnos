@@ -4,15 +4,15 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 {{end}}
-// Sandbox is the whole library: one field per contract declared in
-// sandbox/api/, each built by the New<Contract> of its own package under
-// sandbox/internal/. sandbox.New returns it, and nothing callable lives outside
-// of it.
+// Sandbox is the whole library: every part declared in a
+// sandbox/api/<x>sandbox.go file, embedded, plus the two fields every project
+// has. sandbox.New returns it, and nothing callable lives outside of it.
 type Sandbox struct {
 {{- range .SandboxStructs }}
 	// {{ .Name }} is a part of the Sandbox, declared in {{ .File }}.
 	// Embedded, so each of its fields is read as sandbox.<Field> like any
-	// contract. Every struct of a sandbox/api/usersandbox*.go file is one.
+	// contract. Every struct of a sandbox/api/<x>sandbox.go file is one: each
+	// mechanic writes its own, the project writes usersandbox.go.
 	{{ .Name }}
 {{ end }}{{if .HasDeps}}
 	// Deps is every capability the sandbox reaches the outside world
@@ -23,8 +23,8 @@ type Sandbox struct {
 	// a consumer: an installed copy of this contract carries the api, never
 	// the wiring behind it.
 	Deps *deps.Deps
-{{- end}}
-{{- range .Constructors }}
-	{{ .Name }} {{ .Name }}
-{{- end }}
+{{end}}
+	// Config is what the project knows about itself, built from
+	// <ProjectName>Config/project.yaml (see sandbox/api/config.go).
+	Config Config
 }

@@ -2,22 +2,36 @@ cli-output: "remove-command removing sandbox/internal/commands/greet \nbuild sta
 exit-code: 0
 tree:
     - file: docs/Commands/doc.md
-      sha: eb9b88dc470b4495b2ed7493d0bd8df47e3d4f5d1b1eb8f3939acf0631f6c3bf
+      sha: 7764fb33d0fa0faee012735ea5335e8dd880551b86ef0b8ce0d8d1d8f9bfb7a8
+    - file: docs/Commands/help-flag.md
+      sha: bcb76532568ea04e273e4d345ba18328c19c5bd01634d12ad9c0a0702ee227bd
     - file: docs/Commands/help.md
-      sha: e18d835c2e1bf014718cb11f7ae962bce71764596e7841f8eed27a75244c59af
+      sha: a5c35d7aac3b3ab4f692f3867fdc2906b1d843614c42c92751c9f036cecf1dbd
     - file: docs/Commands/props.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
     - file: docs/Commands/version.md
-      sha: 4e4bb1a3c9f878233b796e03c65503388abdcd38ca6613b6b51bed8ac26e6ce3
-    - file: sandbox/internal/commands/help/entries.yaml
-      sha: 7ca5e07ad3cbeb8a97555ae83b15f36a1a5ad0177100a7187a1e1eeea530ae73
-    - file: sandbox/internal/commands/help/handler.go
-      sha: 0615e6bf3f730c6bbd48da6017147bd6f28c75ea041c71ba6a7dabed320ac782
+      sha: dc2bb6deeaa61f717dc01d8c7185200bb51e92f0febd0c8009872be5df5a9193
+    - file: sandbox/internal/commands/help/InternalPureHandler.go
+      sha: 18a853786fedb56e56184afc30851dafa36c19c5cf2bc8b35f80d8102c743491
+    - file: sandbox/internal/commands/help/command.yaml
+      sha: aff4bd54b86585eba4f76f13f1eebdec404d22c3fe0d81b178243af025fc0b87
+    - file: sandbox/internal/commands/help/entries.go
+      sha: 197ccebdadcfd649bf66e5f0332e563a4db05baabc7d494c3f0c1e124dbb5707
     - file: sandbox/internal/commands/help/new.go
-      sha: 636e15de00f0b65e623d7d1ffc1ac3a850344810ed0c7d064c9903f5f29c49f7
-    - file: sandbox/internal/commands/version/entries.yaml
-      sha: 79d993e7132a86d8a54c44d726973e1bf21c005ba1bf82f8d81482e2e24be3b5
-    - file: sandbox/internal/commands/version/handler.go
-      sha: 88e8d3ecbeaa0403266670b06259a0132f46d0bdeda81cfabcb5ac010d031571
+      sha: 92887b497e0736d26cf6bd3c1431b0a24944d7f43a91442251822cbc15f8fd11
+    - file: sandbox/internal/commands/help_flag/InternalPureHandler.go
+      sha: 95c3463414f795198120d0bc8b371deb9ec589157e2c9cc09cc5376f12aadf2b
+    - file: sandbox/internal/commands/help_flag/command.yaml
+      sha: e29b2c5cc712a98e237141eabe9ff975ac96743abd09eececbd5bad73ddba2e6
+    - file: sandbox/internal/commands/help_flag/entries.go
+      sha: 9168de79566c3b653a3b52a4bbf60ec6b9becc990d3d6b3ab7ae3bfd53a0ba53
+    - file: sandbox/internal/commands/help_flag/new.go
+      sha: b050f19a2746766abf5dda2af43953140da50c991474926b09d7cf0c7993d27e
+    - file: sandbox/internal/commands/version/InternalPureHandler.go
+      sha: d73b7d53603b4c7d268be0f7099ee172d52a132d40fee05ea2de63b0c07bc03b
+    - file: sandbox/internal/commands/version/command.yaml
+      sha: 9cea48b7a03dd13f11957f589657feb24cbb6a9275f14d269b8ef3b701566740
+    - file: sandbox/internal/commands/version/entries.go
+      sha: 19392ff9ea44d28426243ebca8915313410880e90b1f1a0a4f4399a62acabb6f
     - file: sandbox/internal/commands/version/new.go
-      sha: ac44939862e0ee773d1a8bf7fd6c8070accfae89f2ac14e11cfd915798f08054
+      sha: 140bd3f38f13e8612737b66c6717819a550706d7711a45cd4615018bef35743f

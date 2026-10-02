@@ -106,9 +106,10 @@ command whole, by name; `utils.BackofficeDirs` whole; any other file alone.
 
 It edits no file the project wrote. What it needs from one goes in a file of its own that a
 generated aggregate embeds: `routeprops/backoffice.go` (`RouteProps`),
-`api/userconfig_backoffice.go` (`api.Config`), and a cli middleware (`backoffice-server`) in
+`api/backofficeconfig.go` (`api.Config`), and a cli middleware (`backoffice-server`) in
 front of `start-server` instead of an edit to its handler. A mechanic that needs a field of
-`RouteProps`, `CommandProps`, `api.Config` or `api.Sandbox` copies this: one new file, one struct.
+`RouteProps`, `CommandProps`, `api.Config` or `api.Sandbox` copies this: one new file, one struct —
+`sandbox/api/<x>config.go` / `<x>sandbox.go` for the last two (`clisandbox.go` holds `Cli`).
 `front-purge` and `database-purge` run `BackofficePurgeInternal` first when it is on.
 
 ## Add an extension

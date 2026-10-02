@@ -4,7 +4,7 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: 3f021705d81306281f30550baf2430abcc3d5e7bdc2b53cc8e9295532446ee54
     - file: sandbox/api/config.go
-      sha: a066b4111dd8c7ab14959ba04201583d3d27bcaee096f63b51fff507a46f6654
+      sha: 5c8386fc72d0f041ac36527add8894c70489269e671858a20285e7d8fe4c581c
     - file: sandbox/internal/commands/help/InternalPureHandler.go
       sha: 18a853786fedb56e56184afc30851dafa36c19c5cf2bc8b35f80d8102c743491
     - file: sandbox/internal/commands/help/command.yaml

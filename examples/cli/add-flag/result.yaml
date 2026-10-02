@@ -1,9 +1,11 @@
-cli-output: "add-flag adding name to sandbox/internal/commands/greet/entries.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "add-flag adding Name to sandbox/internal/commands/greet/command.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/commands/greet/entries.yaml
-      sha: b9aab781efdddc79eb695cfa5e804669f69618a0d80d28f09e2e7d3729aece06
-    - file: sandbox/internal/commands/greet/handler.go
-      sha: b65d5636e16aceb058b357657c83779be3fc7a7011fa779a60328f3929d0c27a
+    - file: sandbox/internal/commands/greet/InternalPureHandler.go
+      sha: a58febba6a2ff9c27ec7773740e748035524360e7270694b8173e7cdea511615
+    - file: sandbox/internal/commands/greet/command.yaml
+      sha: 2f3f2bd5d8c02adb2cdbf21ebbfaf7fd67e77059b43c17cc43966513b14809e4
+    - file: sandbox/internal/commands/greet/entries.go
+      sha: e44632f5eb32f13f92914e75f7fb16ced3d9b3b0113015bee3db1e97118447f2
     - file: sandbox/internal/commands/greet/new.go
-      sha: b59c3ba9d13506c3e14c4b044ede4daa2a8c57a56a6ee039bef0454bcf773982
+      sha: e57fd5eb20c93635cc98fe15a145ac6dd22cc495c19fa8a398d234cf54163859

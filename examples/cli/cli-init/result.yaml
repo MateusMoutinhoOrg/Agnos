@@ -1,29 +1,47 @@
-cli-output: "add-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "add-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep reflectdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 5451fc69efba90a15ff72c1000b280322b59a395dd5499e746b0c9fa54aebd22
+      sha: 2632b90786a34bd9dfbdfc0c112255d1cdb004a3fb03eaa12c7b2bff14563fe0
     - file: cmd/main/main.go
       sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
     - file: sandbox/constructors/cli/constructor.go
-      sha: 5f8aad8a9b82a7b79f9ea0e62219d06c173438701521c687c14029a9ff4efd7c
+      sha: f125a4f2fdc5141e494dd5494c32b395dd515669519d78a4114598e259ba0dc1
     - file: sandbox/constructors/config/constructor.go
       sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
-    - file: sandbox/internal/commands/help/entries.yaml
-      sha: 7ca5e07ad3cbeb8a97555ae83b15f36a1a5ad0177100a7187a1e1eeea530ae73
-    - file: sandbox/internal/commands/help/handler.go
-      sha: 0615e6bf3f730c6bbd48da6017147bd6f28c75ea041c71ba6a7dabed320ac782
+    - file: sandbox/internal/commands/help/InternalPureHandler.go
+      sha: 18a853786fedb56e56184afc30851dafa36c19c5cf2bc8b35f80d8102c743491
+    - file: sandbox/internal/commands/help/command.yaml
+      sha: aff4bd54b86585eba4f76f13f1eebdec404d22c3fe0d81b178243af025fc0b87
+    - file: sandbox/internal/commands/help/entries.go
+      sha: 197ccebdadcfd649bf66e5f0332e563a4db05baabc7d494c3f0c1e124dbb5707
     - file: sandbox/internal/commands/help/new.go
-      sha: 636e15de00f0b65e623d7d1ffc1ac3a850344810ed0c7d064c9903f5f29c49f7
-    - file: sandbox/internal/commands/version/entries.yaml
-      sha: 79d993e7132a86d8a54c44d726973e1bf21c005ba1bf82f8d81482e2e24be3b5
-    - file: sandbox/internal/commands/version/handler.go
-      sha: 88e8d3ecbeaa0403266670b06259a0132f46d0bdeda81cfabcb5ac010d031571
+      sha: 92887b497e0736d26cf6bd3c1431b0a24944d7f43a91442251822cbc15f8fd11
+    - file: sandbox/internal/commands/help_flag/InternalPureHandler.go
+      sha: 95c3463414f795198120d0bc8b371deb9ec589157e2c9cc09cc5376f12aadf2b
+    - file: sandbox/internal/commands/help_flag/command.yaml
+      sha: e29b2c5cc712a98e237141eabe9ff975ac96743abd09eececbd5bad73ddba2e6
+    - file: sandbox/internal/commands/help_flag/entries.go
+      sha: 9168de79566c3b653a3b52a4bbf60ec6b9becc990d3d6b3ab7ae3bfd53a0ba53
+    - file: sandbox/internal/commands/help_flag/new.go
+      sha: b050f19a2746766abf5dda2af43953140da50c991474926b09d7cf0c7993d27e
+    - file: sandbox/internal/commands/version/InternalPureHandler.go
+      sha: d73b7d53603b4c7d268be0f7099ee172d52a132d40fee05ea2de63b0c07bc03b
+    - file: sandbox/internal/commands/version/command.yaml
+      sha: 9cea48b7a03dd13f11957f589657feb24cbb6a9275f14d269b8ef3b701566740
+    - file: sandbox/internal/commands/version/entries.go
+      sha: 19392ff9ea44d28426243ebca8915313410880e90b1f1a0a4f4399a62acabb6f
     - file: sandbox/internal/commands/version/new.go
-      sha: ac44939862e0ee773d1a8bf7fd6c8070accfae89f2ac14e11cfd915798f08054
-    - file: sandbox/internal/generated/cli/climain.go
-      sha: 33fe23c781d823c1c5f7309055a6d3f4e6cae1b004c1c3c4e1cd340ba757f7ff
-    - file: sandbox/internal/generated/cli/new.go
-      sha: 70c4b960ff513933bc881bad643f18abeedfe5c3626fa3306183cbaf665b8ef7
+      sha: 140bd3f38f13e8612737b66c6717819a550706d7711a45cd4615018bef35743f
+    - file: sandbox/internal/generated/cli/cli/climain.go
+      sha: c37b20e2c0dfad830fa038a70d8712ad2a6801ace75962a0a7ea865a20b55a03
+    - file: sandbox/internal/generated/cli/cli/new.go
+      sha: 50f9d63a7ea1dbc5f185d8bc2bbacb5b14af677ce59b31c3346f26de0de0a366
+    - file: sandbox/internal/generated/cli/command/CommandHandler.go
+      sha: fd1b2c1e64753122bce90794c79e0de4cc06d0d058c57a5d430124c2f1f1ba29
+    - file: sandbox/internal/generated/cli/command/IsActionable.go
+      sha: 560a94422c3125ac696fba37c50d160a97c95c2bb25d9ac6a4d688683f8f754e
+    - file: sandbox/internal/generated/cli/command/new.go
+      sha: aa001338df11492eac2d5438ff44445604ffc88fc4dbdcac99de207f42ed72ce
     - file: sandbox/new.go
       sha: f6087a30367cb642f01f7dc51e823627ddb9f474c8b2002fca644ce37d51ce44

@@ -2,13 +2,17 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 72054191ab76af84f942bca8c0ff029703b92836426c92b5a06369e4496a94da
+      sha: 24a0819bdafde70ead75eb4b85eac20f6669ee15255e407da930099e0ccbb433
     - file: sandbox/api/config.go
-      sha: 88b8f0afa0218d082aaeb582993fb1279c533562f0ee0b0c72a034a5f1c2219a
+      sha: 5c8386fc72d0f041ac36527add8894c70489269e671858a20285e7d8fe4c581c
     - file: sandbox/api/sandbox.go
-      sha: 7ee634ba18ddf71244bba1900cd34f9fe71d9420ed07caa0771701c8ca3494b8
+      sha: f0e2337c4397a2c96a828fafeaa346ccea6b327e7646123472ff3e2f905a8dbc
     - file: sandbox/api/trigger.go
       sha: b42520d1df2d1e6de1301fd9a68a8e78b629301d785f6ebef4097cd5df806750
+    - file: sandbox/api/userconfig.go
+      sha: 11b6ab1add4a4f80aeb135ab6a82e6ec33836769d1d713977015a5e90aa84a08
+    - file: sandbox/api/usersandbox.go
+      sha: d67f597f001ab92965218a9e7335679a0120f122e001391cf58489da529d24a4
     - file: sandbox/constructors/config/constructor.go
       sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
     - file: sandbox/internal/generated/config/new.go

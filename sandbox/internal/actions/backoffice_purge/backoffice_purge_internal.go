@@ -6,6 +6,10 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
+// legacyBackofficeConfig is where backoffice-init wrote api.Config's part
+// before the parts of sandbox/api/ were read by suffix.
+const legacyBackofficeConfig = "sandbox/api/userconfig_backoffice.go"
+
 // BackofficePurgeInternal removes from the target project every file
 // backoffice-init wrote, plus what the build generated beside them, then drops
 // any directory the removal left empty and turns the mechanic off.
@@ -52,6 +56,12 @@ func BackofficePurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path str
 		default:
 			removed = append(removed, file)
 		}
+	}
+
+	// The name an older backoffice-init wrote api.Config's part under: a build
+	// would rename it to the current one, so it goes too.
+	if io.IsFile(legacyBackofficeConfig) {
+		removed = append(removed, legacyBackofficeConfig)
 	}
 
 	for _, file := range append(removed, doc_files...) {
