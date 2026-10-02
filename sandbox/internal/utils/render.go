@@ -185,3 +185,65 @@ func containsPath(paths []string, path string) bool {
 	}
 	return false
 }
+
+// RenderTemplateTree writes every file under assets/<tree> to the path it holds
+// inside the tree, once: a file already in the project is kept as it is, since
+// a write-once file is the project's from the moment it exists and a second
+// init must never undo an edit to it. It returns the paths it wrote.
+//
+// Every file is rendered over vars like any template, except those under
+// <tree>/<raw>: those are the project's own runtime templates (the backoffice's
+// html pages are text/template sources themselves), copied byte for byte.
+func RenderTemplateTree(sandbox *api.Sandbox, io *smartio.SmartIO, tree string, raw string, vars interface{}) ([]string, error) {
+	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively(tree)
+	if err != nil {
+		return nil, err
+	}
+
+	var written []string
+	for _, file := range files {
+		if _, err := io.ReadFile(file); err == nil {
+			sandbox.Deps.Std.Log("%s already exists, keeping it \n", file)
+			continue
+		}
+
+		src, err := sandbox.Deps.Embeddeps.ReadFile(tree + "/" + file)
+		if err != nil {
+			return nil, err
+		}
+
+		content := src
+		if !sandbox.Deps.Stringsdeps.HasPrefix(file, raw+"/") {
+			content, err = renderTemplate(sandbox, io, baseName(sandbox, file), src, vars)
+			if err != nil {
+				return nil, err
+			}
+			content, err = formatIfGo(sandbox, file, content)
+			if err != nil {
+				return nil, err
+			}
+		}
+
+		if err := io.WriteFileOverwrite(file, content); err != nil {
+			return nil, err
+		}
+		written = append(written, file)
+	}
+
+	return written, nil
+}
+
+// SecretEnvName is the environment variable a project named name reads its
+// secret from: the name upper-cased, every byte but a letter or a digit turned
+// into "_", then "_SECRET" — MEUSITE_SECRET for meusite. The backoffice's
+// SecretEnv spells the same rule at runtime from api.Config.ProjectName; this
+// is the copy the docs render from.
+func SecretEnvName(sandbox *api.Sandbox, name string) string {
+	upper := []byte(sandbox.Deps.Stringsdeps.ToUpper(name))
+	for i, char := range upper {
+		if !(char >= 'A' && char <= 'Z') && !(char >= '0' && char <= '9') {
+			upper[i] = '_'
+		}
+	}
+	return string(upper) + "_SECRET"
+}

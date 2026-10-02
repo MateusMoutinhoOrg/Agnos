@@ -45,6 +45,7 @@ var areas = []area{
 	{"Server System", "the http routes your program answers", utils.ExtensionSandboxServer},
 	{"Front System", "a website your server serves: any html, css or js you put in assets/frontend", utils.ExtensionSandboxFront},
 	{"Database System", "the records your program stores and reads back", utils.ExtensionSandboxDatabase},
+	{"Backoffice System", "an admin area: a sign-in page, the people allowed in, and their API keys", utils.ExtensionSandboxBackoffice},
 	{"Deps System", "the libraries your program is allowed to use", utils.ExtensionSandboxDeps},
 	{"Documentation", "the docs/ tree of this project", utils.ExtensionDoc},
 	{"Examples", "the examples that guard this project", utils.ExtensionSandboxExample},
@@ -76,11 +77,12 @@ func areaHelp(category string) string {
 // that is off can still be reached: the init is offered as a step, which is
 // the only place it is ever offered.
 var extensionInit = map[string]string{
-	utils.ExtensionSandboxCli:      "cli-init",
-	utils.ExtensionSandboxServer:   "server-init",
-	utils.ExtensionSandboxFront:    "front-init",
-	utils.ExtensionSandboxDeps:     "deps-init",
-	utils.ExtensionSandboxDatabase: "database-init",
+	utils.ExtensionSandboxCli:        "cli-init",
+	utils.ExtensionSandboxServer:     "server-init",
+	utils.ExtensionSandboxFront:      "front-init",
+	utils.ExtensionSandboxDeps:       "deps-init",
+	utils.ExtensionSandboxDatabase:   "database-init",
+	utils.ExtensionSandboxBackoffice: "backoffice-init",
 }
 
 // scaffoldedUnits are the units an init writes for itself: help and version
@@ -134,20 +136,21 @@ func readState(sandbox *api.Sandbox, io *smartio.SmartIO) projectState {
 		}
 	}
 
-	state.Commands = ownUnits(commandOptions(sandbox, io))
-	state.Routes = ownUnits(routeOptions(sandbox, io))
-	state.Pages = ownUnits(pageOptions(sandbox, io))
-	state.Databases = ownUnits(dirOptions(sandbox, io, utils.DatabasesDir))
+	backoffice := utils.BackofficeUnits(sandbox)
+	state.Commands = ownUnits(commandOptions(sandbox, io), backoffice)
+	state.Routes = ownUnits(routeOptions(sandbox, io), backoffice)
+	state.Pages = ownUnits(pageOptions(sandbox, io), backoffice)
+	state.Databases = ownUnits(dirOptions(sandbox, io, utils.DatabasesDir), backoffice)
 
 	return state
 }
 
 // ownUnits is how many units of a layer the project declared itself, which is
-// every one its init did not scaffold.
-func ownUnits(declared []interviewer.AlternativeOption) int {
+// every one its init did not scaffold — backoffice-init's among them.
+func ownUnits(declared []interviewer.AlternativeOption, backoffice map[string]bool) int {
 	count := 0
 	for _, one := range declared {
-		if !scaffoldedUnits[one.Id] {
+		if !scaffoldedUnits[one.Id] && !backoffice[one.Id] {
 			count++
 		}
 	}
@@ -203,6 +206,8 @@ func nextSteps(state projectState) []step {
 		extensionInit[utils.ExtensionSandboxFront], "Give it html pages, served by that server")
 	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxDatabase), false,
 		extensionInit[utils.ExtensionSandboxDatabase], "Give it somewhere to store records — tables it reads and writes")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxBackoffice), false,
+		extensionInit[utils.ExtensionSandboxBackoffice], "Give it an admin area — a sign-in page, the people allowed in, and their API keys")
 	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxDeps), false,
 		extensionInit[utils.ExtensionSandboxDeps], "Give it the dependency layer — deps, adapters, availables")
 

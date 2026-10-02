@@ -37,7 +37,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   A missing declaration is a hard error, not a default. **(verify)**
 - Only the keys of the catalog may appear, and no `sandbox-<x>` mechanic is on while `sandbox`
   is off. **(verify)**
-- `false` means *stop generating*, never *delete*: agnos leaves what the mechanic already
+- `false` means *stop generating*, never *delete*: `{{.GeneratorName}}` leaves what the mechanic already
   wrote exactly as it is, for the project to keep or edit by hand. Removing those files is
   what an `<x>-purge` does — and it is the same command that writes the `false`.
 - The declaration is written by `{{.GeneratorName}} enable-extension` / `disable-extension` and
@@ -170,11 +170,18 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   never the status. `SetHeader` alone answers nothing.
 - Every route of one request is handed the same `props *routeprops.RouteProps`, built empty per
   request; a middleware hands what it learned to the routes after it by setting a field of it.
-  `sandbox/internal/routeprops/routeprops.go` declares those fields: `build` writes it **once**,
-  then it is the project's. It sits under `sandbox/internal`, never `sandbox/api`, so a field may
-  name any type of the project — a database record — as long as that package imports no route;
-  `api.Route.Props` holds it as `any`. `build` moves an old `sandbox/api/routeprops.go` there; the
-  same holds for `commandprops.CommandProps` in `sandbox/internal/commandprops/`.
+  `routeprops.go` is generated: it embeds every exported struct of every other file of
+  `sandbox/internal/routeprops/` — `project.go`, written once and the project's, plus one file per
+  mechanic that hands something on (`backoffice.go`). A field is declared in one of those parts,
+  never in `routeprops.go`; two parts may not declare the same field (`verify`). It sits under
+  `sandbox/internal`, never `sandbox/api`, so a field may name any type of the project — a
+  database record — as long as that package imports no route; `api.Route.Props` holds it as
+  `any`. `build` moves a hand-written `routeprops.go` (or an old `sandbox/api/routeprops.go`) to
+  `project.go`, its struct renamed `Project`; the same holds for `commandprops.CommandProps` in
+  `sandbox/internal/commandprops/`.
+- `api.Config` and `api.Sandbox` are generated the same way: each embeds every struct of
+  `sandbox/api/userconfig*.go` / `sandbox/api/usersandbox*.go`. `userconfig.go` and
+  `usersandbox.go` are the project's; a mechanic adds `userconfig_<x>.go` beside them.
 - A route's `route.yaml` is written by `add-route` and rewritten by `set-route`,
   `add-path` / `set-path` / `remove-path`, `add-parameter` / `set-parameter` /
   `remove-parameter`, `set-body` and `add-body-field` / `set-body-field` / `remove-body-field` /
@@ -249,6 +256,21 @@ Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
   decline, so the `404` falls to `handle_not_found.go`.
 
 How a path is resolved, and a bundler's build, is in [FrontUsage](../FrontUsage/doc.md).
+{{ end }}{{ if .HasBackoffice }}
+## Backoffice
+
+- Every file `backoffice-init` wrote is the project's: no build rewrites it, and a second
+  `backoffice-init` keeps each one already there. `backoffice-purge` removes them all.
+- The backoffice edits nothing the project wrote. What it hands a route is
+  `sandbox/internal/routeprops/backoffice.go`, what it reads at startup
+  `sandbox/api/userconfig_backoffice.go`, both embedded by the generated aggregates, and the
+  secret is read by the `backoffice-server` middleware in front of `start-server`.
+- The session secret is the `{{.SecretEnv}}` environment variable, at least 32 characters, never
+  a flag or a file; without it `start-server` refuses to start.
+- Its records live in `backofficedb`, a database of its own; the project's databases are never
+  touched. `./backofficedb` is gitignored and survives a purge.
+
+Routes, roles and the API are in [Backoffice](../Backoffice/doc.md).
 {{ end }}{{ if .HasDatabase }}
 ## Databases
 

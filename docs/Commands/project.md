@@ -14,6 +14,8 @@ Runs in front of every command line and answers none of them. It reads --path in
 
 | Runs in front of | When |
 | --- | --- |
+| [`backoffice-init`](backoffice-init.md) | always |
+| [`backoffice-purge`](backoffice-purge.md) | always |
 | [`add-arg`](add-arg.md) | always |
 | [`add-command`](add-command.md) | always |
 | [`add-flag`](add-flag.md) | always |

@@ -19,11 +19,14 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `add-cli-example` | create an example under examples/cli/ | [example.go](../../examples/lib/add-cli-example/example.go) |
 | `add-command` | declare a new command | [example.go](../../examples/lib/add-command/example.go) |
 | `add-dep` |  | [example.go](../../examples/lib/add-dep/example.go) |
+| `add-dep-jwtdeps` |  | [example.go](../../examples/lib/add-dep-jwtdeps/example.go) |
 | `add-doc` | create a doc directory under docs/ | [example.go](../../examples/lib/add-doc/example.go) |
 | `add-flag` | declare one flag on a command | [example.go](../../examples/lib/add-flag/example.go) |
 | `add-lib-example` | create an example under examples/lib/ | [example.go](../../examples/lib/add-lib-example/example.go) |
 | `add-page` |  | [example.go](../../examples/lib/add-page/example.go) |
 | `add-remote-dep` |  | [example.go](../../examples/lib/add-remote-dep/example.go) |
+| `backoffice-init` |  | [example.go](../../examples/lib/backoffice-init/example.go) |
+| `backoffice-purge` |  | [example.go](../../examples/lib/backoffice-purge/example.go) |
 | `build` | regenerate every generated file of a project | [example.go](../../examples/lib/build/example.go) |
 | `cli-init` | add the cli layer to a project that has none | [example.go](../../examples/lib/cli-init/example.go) |
 | `cli-purge` | remove the cli layer and every command in it | [example.go](../../examples/lib/cli-purge/example.go) |

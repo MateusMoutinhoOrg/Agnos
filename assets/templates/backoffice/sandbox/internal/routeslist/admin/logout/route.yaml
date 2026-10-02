@@ -1,0 +1,14 @@
+category: Backoffice
+help: Ends the current session
+methods:
+    - POST
+paths:
+    - end: 1
+      id: AdminLogout
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/logout
+priority: 100
+response-type: text/html
+segments: 2

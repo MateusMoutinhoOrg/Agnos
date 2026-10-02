@@ -1,0 +1,21 @@
+category: Backoffice API Tokens
+help: Lists your API tokens, or every user's for a root
+methods:
+    - GET
+parameters:
+    - description: the outcome code of the last revoke
+      fonts:
+        - query
+      id: Notice
+      key: notice
+      type: string
+paths:
+    - end: 1
+      id: AdminListBackofficeApiTokens
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/list-backoffice-api-tokens
+priority: 100
+response-type: text/html
+segments: 2

@@ -1,0 +1,14 @@
+category: Middleware
+help: Lets only root users reach /api/admin/root
+long-description: Runs after api-authentication. A root user goes through; any other backoffice user is answered 403 in JSON.
+methods:
+    - ANY
+paths:
+    - end: -1
+      id: Route
+      start: 0
+      trigger:
+        type: prefix
+        value: /api/admin/root
+priority: 11
+response-type: application/json

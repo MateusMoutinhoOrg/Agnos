@@ -26,8 +26,10 @@ const removePrefix = "remove-"
 // release out of this machine and cannot be taken back, rename-route moves a
 // route's hand-written files, rebalance-routes rewrites the priority of every
 // route, and front-purge drops the frontend route — a purge like the others,
-// but one that takes no page with it, so it has no unit to count.
+// but one that takes no page with it, so it has no unit to count. So does
+// backoffice-purge: what it takes is one area, not units the person declared.
 var destructiveVerbs = map[string]bool{
+	"backoffice-purge":  true,
 	"disable-extension": true,
 	"front-purge":       true,
 	"publish":           true,

@@ -1,0 +1,39 @@
+body:
+    content-type: application/x-www-form-urlencoded
+    form-schema:
+        properties:
+            email:
+                type: string
+            password:
+                type: string
+            role:
+                type: integer
+            username:
+                type: string
+        required:
+            - email
+            - role
+            - username
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: form
+category: Backoffice Users
+help: Edits a backoffice user; a blank password keeps the current one
+long-description: A new password ends every session of the user and revokes every API token of theirs; when a root changes their own password, the session they sent it from stays open.
+methods:
+    - POST
+paths:
+    - end: 2
+      id: AdminRootEditBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/edit-backoffice-user
+    - end: 3
+      id: Id
+      start: 3
+      type: integer
+priority: 100
+response-type: text/html
+segments: 4

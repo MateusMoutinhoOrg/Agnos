@@ -12,11 +12,11 @@ tree:
     - file: sandbox/deps/deps.go
       sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
     - file: sandbox/deps/remote/config.go
-      sha: 5d6a391be2ded68aab0837f87b354373628cdce2a558511df584af2634a916df
+      sha: 4018c9ac382fbd0fdb7fe81c29ff1f454147684ef97ce67e7c3cbe84b3b42366
     - file: sandbox/deps/remote/greeter.go
       sha: 5fe9fe69498c87176ea5bc32e9ec47f22d0a90a064f4251fad77128e080aacae
     - file: sandbox/deps/remote/sandbox.go
-      sha: 051b8cabfb1c77ed9e6df0d1153389a6fec197b88ca6cfd6dcfb4381d4d5e4d8
+      sha: c37a63b3c13b41fd60de282622ebac2d8a8f0e2702d4e54f2741ed091cf7efdf
     - file: sandbox/deps/remote/trigger.go
       sha: fc676637a63bd250d44ffb1acfa845eddeefc70c08ae8f82fe0c79e4ed0fe477
     - file: sandbox/deps/remote/userconfig.go

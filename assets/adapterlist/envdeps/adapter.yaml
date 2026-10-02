@@ -1,0 +1,5 @@
+dep: envdeps
+help: Environment variables over os
+module: ""
+name: envdeps
+origin: catalog

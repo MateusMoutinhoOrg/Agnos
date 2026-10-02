@@ -1,0 +1,5 @@
+dep: ratelimitdeps
+help: In-memory fixed-window rate limiter over sync and time
+module: ""
+name: ratelimitdeps
+origin: catalog

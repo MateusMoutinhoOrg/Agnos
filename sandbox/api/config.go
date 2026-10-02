@@ -6,9 +6,10 @@ package api
 // caller may replace it — a test that runs the cli under another name, say —
 // and every reader of it follows.
 type Config struct {
-	// UserConfig is the part of the Config the project declares itself, in
-	// sandbox/api/userconfig.go: embedded, so each of its fields is read as
-	// sandbox.Config.<Field>.
+	// UserConfig is a part of the Config, declared in sandbox/api/userconfig.go.
+	// Embedded, so each of its fields is read as sandbox.Config.<Field>.
+	// Every struct of a sandbox/api/userconfig*.go file is one, so a
+	// mechanic adds its own part beside the project's rather than editing it.
 	UserConfig
 
 	// ProjectName is the project's name, title-cased. It prefixes the

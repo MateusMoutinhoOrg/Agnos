@@ -1,0 +1,28 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            id:
+                type: integer
+        required:
+            - id
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: json
+category: Backoffice Users API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/remove-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":2}'''
+help: Removes a backoffice user and every session of it
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootRemoveBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/remove-backoffice-user
+priority: 100
+response-type: application/json
+segments: 4

@@ -2,6 +2,7 @@ package database_purge
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	backofficePurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/backoffice_purge"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -34,6 +35,19 @@ var databaseDirs = []string{
 // it away.
 func DatabasePurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
 	sandbox.Deps.Std.Log("database-purge started with path %s \n", path)
+
+	// The backoffice stands on this layer, so it goes first, on this same open
+	// SmartIO: a backoffice left on without it is a declaration verify
+	// refuses. Its store on disk stays.
+	has_backoffice, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxBackoffice)
+	if err != nil {
+		return err
+	}
+	if has_backoffice {
+		if err := backofficePurgeAction.BackofficePurgeInternal(sandbox, io, path); err != nil {
+			return err
+		}
+	}
 
 	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionSandboxDatabase)
 	if err != nil {

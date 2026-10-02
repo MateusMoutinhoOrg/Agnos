@@ -1,0 +1,501 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Users</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --primary-soft: rgba(79, 70, 229, 0.15);
+      --accent: #EC4899;
+      --bg-dark: #111827;
+      --surface: rgba(31, 41, 55, 0.7);
+      --text: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --border: rgba(255, 255, 255, 0.1);
+      --ok: #34D399;
+      --danger: #F87171;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      min-height: 100vh;
+      position: relative;
+      overflow-x: hidden;
+    }
+
+    a { color: inherit; }
+
+    .blob {
+      position: fixed;
+      filter: blur(80px);
+      z-index: 0;
+      opacity: 0.4;
+      pointer-events: none;
+    }
+    .blob-1 {
+      top: -15%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(79,70,229,0.4) 0%, rgba(17,24,39,0) 70%);
+    }
+    .blob-2 {
+      bottom: -15%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, rgba(17,24,39,0) 70%);
+    }
+
+    .topbar {
+      position: relative;
+      z-index: 1;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 1rem;
+      padding: 1.25rem 2rem;
+      border-bottom: 1px solid var(--border);
+      background: rgba(17, 24, 39, 0.6);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
+    }
+    .topbar .left {
+      display: flex;
+      align-items: center;
+      gap: 2rem;
+    }
+    .brand {
+      font-weight: 700;
+      font-size: 1.1rem;
+      letter-spacing: 0.02em;
+    }
+    .brand span { color: var(--primary); }
+    .nav {
+      display: flex;
+      gap: 0.25rem;
+    }
+    .nav a {
+      text-decoration: none;
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      font-weight: 500;
+      padding: 0.4rem 0.75rem;
+      border-radius: 8px;
+      transition: all 0.2s ease;
+    }
+    .nav a:hover { color: var(--text); background: rgba(255, 255, 255, 0.05); }
+    .nav a.active { color: var(--text); background: var(--primary-soft); }
+
+    .who {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      font-size: 0.9rem;
+      color: var(--text-muted);
+    }
+    .avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      display: grid;
+      place-items: center;
+      font-weight: 700;
+      color: white;
+      background: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+      text-transform: uppercase;
+      flex-shrink: 0;
+    }
+    .logout button {
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.45rem 0.9rem;
+      border-radius: 10px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    .logout button:hover {
+      border-color: var(--accent);
+      background: rgba(236, 72, 153, 0.12);
+    }
+
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1040px;
+      margin: 0 auto;
+      padding: 3rem 1.5rem;
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    main.narrow { max-width: 560px; }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #F9FAFB 0%, #D1D5DB 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .card {
+      background: var(--surface);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 1.75rem;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.4);
+    }
+
+    .muted {
+      color: var(--text-muted);
+      font-size: 0.9rem;
+      line-height: 1.5;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.4rem;
+      background: transparent;
+      color: var(--text);
+      border: 1px solid var(--border);
+      padding: 0.65rem 1.1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      font-weight: 600;
+      font-family: inherit;
+      text-decoration: none;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      white-space: nowrap;
+    }
+    .btn:hover { border-color: rgba(255, 255, 255, 0.25); background: rgba(255, 255, 255, 0.05); }
+    .btn-primary {
+      border: none;
+      color: white;
+      background: linear-gradient(135deg, var(--primary) 0%, #6366F1 100%);
+      box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+    }
+    .btn-primary:hover {
+      background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+      transform: translateY(-1px);
+    }
+    .btn-danger { color: #FCA5A5; border-color: rgba(239, 68, 68, 0.4); }
+    .btn-danger:hover { background: rgba(239, 68, 68, 0.12); border-color: var(--danger); }
+    .btn-small { padding: 0.4rem 0.8rem; font-size: 0.8rem; border-radius: 10px; }
+    .btn.disabled { opacity: 0.35; pointer-events: none; }
+
+    .alert, .notice {
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+    .alert, .notice-error {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+    }
+    .notice-ok {
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.4);
+      color: #A7F3D0;
+    }
+
+    label {
+      display: block;
+      font-size: 0.85rem;
+      font-weight: 500;
+      margin-bottom: 0.45rem;
+      color: #D1D5DB;
+    }
+    input, select {
+      width: 100%;
+      background-color: rgba(17, 24, 39, 0.6);
+      border: 1px solid #374151;
+      color: var(--text);
+      padding: 0.7rem 0.9rem;
+      border-radius: 12px;
+      font-size: 0.95rem;
+      font-family: inherit;
+      transition: all 0.2s ease;
+      outline: none;
+    }
+    input:focus, select:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+      background-color: rgba(17, 24, 39, 0.8);
+    }
+    input::placeholder { color: #6B7280; }
+    select option { background: #1F2937; }
+
+    .badge {
+      display: inline-block;
+      padding: 0.2rem 0.7rem;
+      border-radius: 999px;
+      font-size: 0.8rem;
+      font-weight: 600;
+      background: rgba(156, 163, 175, 0.12);
+      color: #D1D5DB;
+      border: 1px solid rgba(156, 163, 175, 0.3);
+    }
+    .badge-root {
+      background: var(--primary-soft);
+      color: #A5B4FC;
+      border-color: rgba(79, 70, 229, 0.4);
+    }
+
+    .head {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: 1rem;
+      margin-bottom: 2rem;
+    }
+
+    .filters {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: flex-end;
+      gap: 1rem;
+      padding: 1.25rem 1.5rem;
+      margin-bottom: 1.25rem;
+    }
+    .filters .field { min-width: 140px; }
+    .filters .grow { flex: 1 1 240px; }
+    .filters .actions { display: flex; gap: 0.5rem; }
+
+    .table-card { padding: 0.5rem 0; overflow: hidden; }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.92rem;
+    }
+    th {
+      text-align: left;
+      font-size: 0.75rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.08em;
+      color: var(--text-muted);
+      padding: 0.9rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+    }
+    td {
+      padding: 0.9rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      vertical-align: middle;
+      word-break: break-word;
+    }
+    tbody tr:last-child td { border-bottom: none; }
+    tbody tr:hover td { background: rgba(255, 255, 255, 0.02); }
+    .right { text-align: right; }
+    .id { color: var(--text-muted); font-variant-numeric: tabular-nums; }
+    .row-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 0.5rem;
+    }
+    .tag {
+      display: inline-block;
+      margin-left: 0.4rem;
+      padding: 0.1rem 0.5rem;
+      border-radius: 999px;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #A7F3D0;
+      background: rgba(52, 211, 153, 0.12);
+      border: 1px solid rgba(52, 211, 153, 0.35);
+      vertical-align: middle;
+    }
+    .empty {
+      padding: 2.5rem 1.5rem;
+      text-align: center;
+      color: var(--text-muted);
+    }
+
+    .pager {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin-top: 1.25rem;
+    }
+    .pager .pages {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+    }
+
+    @media (max-width: 640px) {
+      .head { flex-direction: column; align-items: stretch; }
+      .filters .actions { width: 100%; }
+      .filters .actions .btn { flex: 1; }
+      .filters .field { flex: 1 1 100%; }
+      thead { display: none; }
+      table, tbody, tr, td { display: block; width: 100%; }
+      tr { padding: 0.75rem 1.25rem; border-bottom: 1px solid var(--border); }
+      tbody tr:last-child { border-bottom: none; }
+      td {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 1rem;
+        padding: 0.35rem 0;
+        border-bottom: none;
+        text-align: right;
+      }
+      td::before {
+        content: attr(data-label);
+        color: var(--text-muted);
+        font-size: 0.8rem;
+        text-align: left;
+      }
+      .row-actions { justify-content: space-between; }
+      .pager { flex-direction: column; align-items: stretch; text-align: center; }
+      .pager .pages { justify-content: space-between; }
+    }
+
+    @media (max-width: 640px) {
+      .topbar { padding: 1rem; }
+      .topbar .left { gap: 0.75rem; }
+      .brand { display: none; }
+      .who .name { display: none; }
+      main { padding: 2rem 1rem; }
+      h1 { font-size: 1.6rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+
+  <header class="topbar">
+    <div class="left">
+      <div class="brand">Back<span>office</span></div>
+      <nav class="nav">
+        <a href="/admin/home">Home</a>
+        <a href="/admin/list-backoffice-users" class="active">Users</a>
+        <a href="/admin/list-backoffice-api-tokens">API tokens</a>
+      </nav>
+    </div>
+    <div class="who">
+      <span class="name">{{html .Viewer.Username}}</span>
+      <div class="avatar">{{html .Viewer.Initial}}</div>
+      <form class="logout" action="/admin/logout" method="POST">
+        <button type="submit">Log out</button>
+      </form>
+    </div>
+  </header>
+
+  <main>
+    <section class="head">
+      <div>
+        <h1>Users</h1>
+        <p class="muted">Everyone who can sign in to the backoffice.</p>
+      </div>
+      {{if .Viewer.IsRoot}}<a class="btn btn-primary" href="/admin/root/add-backoffice-user">+ Add user</a>{{end}}
+    </section>
+
+    {{if .Notice.Text}}<div class="notice notice-{{.Notice.Kind}}" role="status">{{html .Notice.Text}}</div>{{end}}
+
+    <form class="card filters" action="/admin/list-backoffice-users" method="GET">
+      <div class="field grow">
+        <label for="search">Search</label>
+        <input type="search" id="search" name="search" value="{{html .Search}}" placeholder="Username or email">
+      </div>
+      <div class="field">
+        <label for="role">Role</label>
+        <select id="role" name="role">
+          <option value="">All roles</option>
+          <option value="root"{{if eq .Role "root"}} selected{{end}}>root</option>
+          <option value="viewer"{{if eq .Role "viewer"}} selected{{end}}>viewer</option>
+        </select>
+      </div>
+      <div class="field">
+        <label for="limit">Per page</label>
+        <select id="limit" name="limit">
+          {{range .Limits}}<option value="{{.Value}}"{{if .Selected}} selected{{end}}>{{.Value}}</option>{{end}}
+        </select>
+      </div>
+      <div class="actions">
+        <button type="submit" class="btn btn-primary">Filter</button>
+        <a class="btn" href="/admin/list-backoffice-users">Clear</a>
+      </div>
+    </form>
+
+    <div class="card table-card">
+      {{if .Users}}
+      <table>
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Username</th>
+            <th>Email</th>
+            <th>Role</th>
+            {{if .Viewer.IsRoot}}<th class="right">Actions</th>{{end}}
+          </tr>
+        </thead>
+        <tbody>
+          {{range .Users}}
+          <tr>
+            <td class="id" data-label="ID">#{{.Id}}</td>
+            <td data-label="Username"><span>{{html .Username}}{{if .IsSelf}}<span class="tag">you</span>{{end}}</span></td>
+            <td data-label="Email">{{html .Email}}</td>
+            <td data-label="Role"><span class="badge{{if .IsRoot}} badge-root{{end}}">{{html .Role}}</span></td>
+            {{if $.Viewer.IsRoot}}
+            <td data-label="Actions">
+              <div class="row-actions">
+                <a class="btn btn-small" href="/admin/root/edit-backoffice-user/{{.Id}}">Edit</a>
+                {{if not .IsSelf}}
+                <form action="/admin/root/remove-backoffice-user/{{.Id}}" method="POST" data-confirm="Remove the user {{html .Username}}? This cannot be undone.">
+                  <button type="submit" class="btn btn-small btn-danger">Remove</button>
+                </form>
+                {{end}}
+              </div>
+            </td>
+            {{end}}
+          </tr>
+          {{end}}
+        </tbody>
+      </table>
+      {{else}}
+      <p class="empty">No users match these filters.</p>
+      {{end}}
+    </div>
+
+    <nav class="pager" aria-label="Pages">
+      <span class="muted">{{if .Total}}Showing {{.From}}&ndash;{{.To}} of {{.Total}}{{else}}No results{{end}}</span>
+      <div class="pages">
+        {{if .HasPrev}}<a class="btn btn-small" href="/admin/list-backoffice-users?search={{urlquery .Search}}&amp;role={{urlquery .Role}}&amp;limit={{.Limit}}&amp;page={{.PrevPage}}">&larr; Prev</a>{{else}}<span class="btn btn-small disabled">&larr; Prev</span>{{end}}
+        <span class="muted">Page {{.Page}} of {{.Pages}}</span>
+        {{if .HasNext}}<a class="btn btn-small" href="/admin/list-backoffice-users?search={{urlquery .Search}}&amp;role={{urlquery .Role}}&amp;limit={{.Limit}}&amp;page={{.NextPage}}">Next &rarr;</a>{{else}}<span class="btn btn-small disabled">Next &rarr;</span>{{end}}
+      </div>
+    </nav>
+  </main>
+  <script src="/admin/backoffice.js" defer></script>
+</body>
+</html>

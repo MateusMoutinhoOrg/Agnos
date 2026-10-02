@@ -682,6 +682,8 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `ShowDatabase` | `func(path string, database string) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
 | `FrontInit` | `func(path string) error` | FrontInit adds the front layer (sandbox/internal/generated/frontio, the route serving every file of assets/frontend and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
 | `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer and the frontend route, leaving assets/frontend/ untouched. |
+| `BackofficeInit` | `func(path string) error` | BackofficeInit adds the admin backoffice to a project: login, backoffice users, API tokens and the /api/admin JSON api, over a database of its own. It installs the server, front and database layers first when any is missing, and the catalog deps it calls into. Every file it writes is the project's from then on. |
+| `BackofficePurge` | `func(path string) error` | BackofficePurge removes everything BackofficeInit wrote, leaving the layers it stood on, the deps it installed and the store on disk. |
 | `AddPage` | `func(props PageProps) error` | AddPage scaffolds a new html page, assets/frontend/<name>.html, which the frontend route serves as soon as it exists. |
 | `RemovePage` | `func(path string, name string) error` | RemovePage deletes one page, assets/frontend/<name>.html. |
 | `AddDoc` | `func(props DocProps) error` | AddDoc creates one doc directory under docs/, with its props.yaml and a doc.md to fill in. |

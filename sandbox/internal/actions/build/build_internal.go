@@ -60,6 +60,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	hasFront := extensions_conf.IsEnabled(utils.ExtensionSandboxFront)
 	hasDatabase := extensions_conf.IsEnabled(utils.ExtensionSandboxDatabase)
 	hasExample := extensions_conf.IsEnabled(utils.ExtensionSandboxExample)
+	hasBackoffice := extensions_conf.IsEnabled(utils.ExtensionSandboxBackoffice)
 	hasDoc := extensions_conf.IsEnabled(utils.ExtensionDoc)
 	hasReadme := extensions_conf.IsEnabled(utils.ExtensionReadme)
 
@@ -214,6 +215,20 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 	}
 
+	// The parts api.Config and api.Sandbox embed: every struct of a
+	// sandbox/api/userconfig*.go and usersandbox*.go file, so a mechanic adds
+	// a part beside the project's own instead of editing it. The two start
+	// writes are named too: start builds before it persists, and the listing
+	// reads disk.
+	config_structs, err := utils.CollectEmbeddedStructs(sandbox, io, "sandbox/api", utils.HasFilePrefix(sandbox, utils.UserConfigPrefix), []string{"sandbox/api/" + utils.UserConfigFile})
+	if err != nil {
+		return err
+	}
+	sandbox_structs, err := utils.CollectEmbeddedStructs(sandbox, io, "sandbox/api", utils.HasFilePrefix(sandbox, utils.UserSandboxPrefix), []string{"sandbox/api/" + utils.UserSandboxFile})
+	if err != nil {
+		return err
+	}
+
 	vars := map[string]interface{}{
 		"Module":              module_conf.Module,
 		"Name":                project_conf.Name,
@@ -232,10 +247,14 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"HasFront":            hasFront,
 		"HasDatabase":         hasDatabase,
 		"HasExample":          hasExample,
+		"HasBackoffice":       hasBackoffice,
+		"SecretEnv":           utils.SecretEnvName(sandbox, project_conf.Name),
 		"HasDoc":              hasDoc,
 		"HasReadme":           hasReadme,
 		"HasAssets":           hasAssets,
 		"Constructors":        constructors,
+		"ConfigStructs":       config_structs,
+		"SandboxStructs":      sandbox_structs,
 		"ConstructorPackages": CollectConstructorPackages(sandbox, io, constructors),
 		"DepsLibs":            CollectDepsLibs(sandbox, io),
 		"AdapterLibs":         CollectAdapterLibs(sandbox, io),

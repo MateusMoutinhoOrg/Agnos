@@ -1,0 +1,26 @@
+category: Middleware
+help: Works out the client ip every route after it reads, from the connection or the reverse proxy in front
+methods:
+    - ANY
+parameters:
+    - description: the ip of the connection, set by the server and never by the client
+      fonts:
+        - header
+      id: XClientIp
+      key: x-client-ip
+      type: string
+    - description: the client chain a reverse proxy appended to, read only with --allow-x-forwarded-for
+      fonts:
+        - header
+      id: XForwardedFor
+      key: x-forwarded-for
+      type: string
+paths:
+    - end: -1
+      id: Route
+      start: 0
+      trigger:
+        type: prefix
+        value: /
+priority: 7
+response-type: text/plain

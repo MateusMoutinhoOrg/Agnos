@@ -181,7 +181,7 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []strin
 
 	for _, file := range io.ListFiles("sandbox/api") {
 		name := lastSegment(sandbox, file)
-		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || contains(utils.ConstructorExempt, name) {
+		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
 			continue
 		}
 

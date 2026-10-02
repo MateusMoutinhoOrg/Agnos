@@ -1,0 +1,5 @@
+dep: passworddeps
+help: Salted PBKDF2-HMAC-SHA256 password hashes over crypto/pbkdf2
+module: ""
+name: passworddeps
+origin: catalog

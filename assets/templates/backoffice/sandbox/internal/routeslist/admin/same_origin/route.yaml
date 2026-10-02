@@ -1,0 +1,26 @@
+category: Middleware
+help: Refuses a request to /admin another site's page sent
+methods:
+    - ANY
+parameters:
+    - description: the origin of the page that sent the request, sent by the browser
+      fonts:
+        - header
+      id: Origin
+      key: origin
+      type: string
+    - description: the host the request was sent to
+      fonts:
+        - header
+      id: Host
+      key: host
+      type: string
+paths:
+    - end: -1
+      id: Route
+      start: 0
+      trigger:
+        type: prefix
+        value: /admin
+priority: 9
+response-type: application/json

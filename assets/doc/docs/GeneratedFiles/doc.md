@@ -17,8 +17,8 @@
 {{- if .HasSandbox }}
 | `sandbox/new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
-| `sandbox/api/sandbox.go` | `build` | always. `UserSandbox` embedded, one field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
-| `sandbox/api/config.go` | `build` | always. The `Config` contract: `UserConfig` embedded, `ProjectName`, `Version` |
+| `sandbox/api/sandbox.go` | `build` | always. Every struct of `sandbox/api/usersandbox*.go` embedded, one field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
+| `sandbox/api/config.go` | `build` | always. The `Config` contract: every struct of `sandbox/api/userconfig*.go` embedded, `ProjectName`, `Version` |
 | `sandbox/api/usersandbox.go` | `start` | once. `api.UserSandbox`, embedded in `api.Sandbox` — declare the project's own fields of the sandbox there |
 | `sandbox/api/userconfig.go` | `start` | once. `api.UserConfig`, embedded in `api.Config` — declare the project's own config fields there |
 | `sandbox/internal/generated/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
@@ -61,7 +61,8 @@
 | `sandbox/internal/commands/<name>/command.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/commands/<name>/InternalPureHandler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 | `sandbox/internal/cli/errors/handle_*.go` | `build` | once. Five files, one per failure — what this project answers when no command does |
-| `sandbox/internal/commandprops/commandprops.go` | `build` | once. `commandprops.CommandProps`, what one command line's chain of commands shares |
+| `sandbox/internal/commandprops/commandprops.go` | `build` | always. `commandprops.CommandProps`, what one command line's chain of commands shares: every struct of the package embedded |
+| `sandbox/internal/commandprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `CommandProps` |
 {{- end }}
 {{- if .HasServer }}
 | `sandbox/api/{server.go,route.go}` | `build` | always |
@@ -78,7 +79,8 @@
 | `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/start_server/{command.yaml,InternalPureHandler.go}` | `server-init` | once |
 | `sandbox/internal/server/errors/handle_*.go` | `build` | once. Eight files, one per failure — what this project answers when no route does |
-| `sandbox/internal/routeprops/routeprops.go` | `build` | once. `routeprops.RouteProps`, what one request's chain of routes shares — declare its fields there |
+| `sandbox/internal/routeprops/routeprops.go` | `build` | always. `routeprops.RouteProps`, what one request's chain of routes shares: every struct of the package embedded |
+| `sandbox/internal/routeprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `RouteProps` — declare them there |
 {{- end }}
 {{- if .HasDatabase }}
 | `sandbox/internal/generated/databaseio/*.go` | `build` | always |
@@ -87,6 +89,14 @@
 | `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
 | `sandbox/internal/databases/<db>/specs.yaml` | `add-database` | once, then rewritten by `add-table` / `add-table-field` / `set-table-field` and their inverses — never by hand |
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
+{{- end }}
+{{- if .HasBackoffice }}
+| `docs/Backoffice/` | `build` | always. Both `doc.md` and `props.yaml` |
+| `sandbox/internal/server/backoffice/**`, `sandbox/internal/databases/backofficedb/{specs.yaml,methods_custom.go}` | `backoffice-init` | once. Then the project's; `backoffice-purge` removes them |
+| the backoffice's `route.yaml` + `InternalPureHandler.go` under `sandbox/internal/routeslist/{admin,api/admin,client_ip,security_headers}` | `backoffice-init` | once. Then edited like any route |
+| `sandbox/internal/commands/backoffice/{add_backoffice_user,backoffice_server}/{command.yaml,InternalPureHandler.go}` | `backoffice-init` | once. Then edited like any command |
+| `sandbox/internal/routeprops/backoffice.go`, `sandbox/api/userconfig_backoffice.go` | `backoffice-init` | once. The backoffice's part of `RouteProps` and of `api.Config` |
+| `assets/backoffice/*.html`, `assets/frontend/admin/backoffice.js` | `backoffice-init` | once. Copied verbatim: the pages are the project's runtime templates |
 {{- end }}
 {{- if .HasFront }}
 | `sandbox/internal/generated/frontio/frontio.go` | `build` | always. `Resolve`, `SafePath`, `ContentTypeOf` |

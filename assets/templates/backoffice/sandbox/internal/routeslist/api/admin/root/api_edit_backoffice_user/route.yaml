@@ -1,0 +1,43 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            email:
+                type: string
+            id:
+                type: integer
+            password:
+                type: string
+            role:
+                enum:
+                    - root
+                    - viewer
+                type: string
+            username:
+                type: string
+        required:
+            - email
+            - id
+            - role
+            - username
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: json
+category: Backoffice Users API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/edit-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":2,"username":"ana","email":"ana@example.com","role":"root"}'''
+help: Edits a backoffice user; a missing or blank password keeps the current one
+long-description: A new password ends every session of the user and revokes every API token of theirs, the token this request carries included when a root changes their own password.
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootEditBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/edit-backoffice-user
+priority: 100
+response-type: application/json
+segments: 4

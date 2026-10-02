@@ -1,0 +1,26 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: add-backoffice-user
+category: Backoffice
+examples:
+    - add-backoffice-user --username admin --email admin@example.com --role root
+flags:
+    - description: the username for the backoffice user
+      id: Username
+      required: true
+    - description: the email for the backoffice user
+      id: Email
+      required: true
+    - default: viewer
+      description: 'the role of the backoffice user: root manages every user, viewer only reads'
+      enum:
+        - root
+        - viewer
+      id: Role
+help: Creates a backoffice user with a generated password, printed once
+long-description: 'Adds a backoffice user under the same rules as the add form: the username and the email unique across both, regardless of case, and a valid email. The password is generated and printed once, so it never travels on the command line; change it on the edit page. --role defaults to viewer: give the first user --role root.'
+priority: 100

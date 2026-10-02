@@ -1,0 +1,13 @@
+args:
+    - end: 0
+      id: Command
+      start: 0
+      trigger:
+        type: equal
+        value: backoffice-purge
+category: Backoffice System
+examples:
+    - backoffice-purge
+help: Remove the admin backoffice from the project
+long-description: 'Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./backofficedb store holding the users: removing data is left to you.'
+priority: 100

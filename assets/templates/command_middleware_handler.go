@@ -17,7 +17,7 @@ import (
 //
 // Hand what you learned to the commands after it through props, the command
 // line's commandprops.CommandProps — declare the field in
-// sandbox/internal/commandprops/commandprops.go:
+// sandbox/internal/commandprops/project.go:
 //
 //	props.Profile = entries.Profile
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {

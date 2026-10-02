@@ -213,7 +213,7 @@ assets:
     doc-<x>:
       order: 10
       dir: true
-      description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-example, doc-example-cli)"
+      description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)"
     deplist/<dep>:
       order: 11
       dir: true
@@ -226,6 +226,10 @@ assets:
       order: 13
       dir: true
       description: single-file scaffolds (new.go, command_*, route_*, page_*, database_*, frontend_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+    templates/backoffice:
+      order: 14
+      dir: true
+      description: the tree backoffice-init writes once, at the path each file holds in it; assets/ under it is copied verbatim
 cmd/main/main.go:
   order: 5
   gen: true

@@ -3,6 +3,8 @@ package cli
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/cli/errors"
+	backoffice_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/backoffice/backoffice_init"
+	backoffice_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/backoffice/backoffice_purge"
 	add_arg "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli/add_arg"
 	add_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli/add_command"
 	add_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli/add_flag"
@@ -119,6 +121,8 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		add_route.NewCommand(sandbox),
 		add_table.NewCommand(sandbox),
 		add_table_field.NewCommand(sandbox),
+		backoffice_init.NewCommand(sandbox),
+		backoffice_purge.NewCommand(sandbox),
 		build.NewCommand(sandbox),
 		cli_init.NewCommand(sandbox),
 		cli_purge.NewCommand(sandbox),

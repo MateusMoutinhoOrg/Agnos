@@ -1,0 +1,14 @@
+category: Backoffice Users
+help: Shows the form that adds a backoffice user
+methods:
+    - GET
+paths:
+    - end: 2
+      id: AdminRootAddBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/add-backoffice-user
+priority: 100
+response-type: text/html
+segments: 3

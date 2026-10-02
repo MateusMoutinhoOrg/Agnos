@@ -1,0 +1,4 @@
+default-adapter: jwtdeps
+field: Jwtdeps
+help: Sign and check HS256 JSON Web Tokens
+name: jwtdeps

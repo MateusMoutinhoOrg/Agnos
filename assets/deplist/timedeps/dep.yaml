@@ -1,0 +1,4 @@
+default-adapter: timedeps
+field: Timedeps
+help: UTC dates to and from Unix seconds
+name: timedeps

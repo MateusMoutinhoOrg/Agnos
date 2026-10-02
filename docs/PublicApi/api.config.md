@@ -6,7 +6,7 @@ Config is what the project knows about itself: the values of <ProjectName>Config
 
 | Field | Type | Description |
 | --- | --- | --- |
-| `UserConfig` | `UserConfig` | UserConfig is the part of the Config the project declares itself, in sandbox/api/userconfig.go: embedded, so each of its fields is read as sandbox.Config.<Field>. |
+| `UserConfig` | `UserConfig` | UserConfig is a part of the Config, declared in sandbox/api/userconfig.go. Embedded, so each of its fields is read as sandbox.Config.<Field>. Every struct of a sandbox/api/userconfig*.go file is one, so a mechanic adds its own part beside the project's rather than editing it. |
 | `ProjectName` | `string` | ProjectName is the project's name, title-cased. It prefixes the <ProjectName>Config/ directory that holds every declaration, and lower-cased it is the name the cli answers to. |
 | `Version` | `string` | Version is the release the project is at, the `version` key of <ProjectName>Config/project.yaml. |
 

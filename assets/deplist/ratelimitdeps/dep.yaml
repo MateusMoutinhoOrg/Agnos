@@ -1,0 +1,4 @@
+default-adapter: ratelimitdeps
+field: Ratelimitdeps
+help: In-memory fixed-window counters, safe across concurrent requests
+name: ratelimitdeps

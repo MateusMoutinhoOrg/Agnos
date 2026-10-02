@@ -6,9 +6,10 @@ cli-output: |
     sandbox-front      off  the front layer: frontio/ and the route serving assets/frontend/
     sandbox-database   off  the database layer: databaseio/ and the declared databases
     sandbox-example    on   the examples/ suite and exec-test
+    sandbox-backoffice off  the admin backoffice: login, users, API tokens and the /api/admin JSON api
     doc                on   the docs/ tree and its Index.md files
     readme             on   README.md, built from themes.yaml and the doc index
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 72054191ab76af84f942bca8c0ff029703b92836426c92b5a06369e4496a94da
+      sha: 24a0819bdafde70ead75eb4b85eac20f6669ee15255e407da930099e0ccbb433

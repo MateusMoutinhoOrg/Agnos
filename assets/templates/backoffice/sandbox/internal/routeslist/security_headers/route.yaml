@@ -1,0 +1,13 @@
+category: Middleware
+help: Sends the security headers on every /admin and /api/admin response
+methods:
+    - ANY
+paths:
+    - end: -1
+      id: Route
+      start: 0
+      trigger:
+        type: regex
+        value: ^/(api/)?admin(/|$)
+priority: 8
+response-type: text/plain

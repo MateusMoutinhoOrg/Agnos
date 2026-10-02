@@ -93,10 +93,12 @@ is marked `★`; the rest are offers.
 | `server-init` | `sandbox-server` is off | |
 | `front-init` | the server is on and `sandbox-front` is off | |
 | `database-init` | `sandbox-database` is off | |
+| `backoffice-init` | `sandbox-backoffice` is off | |
 | `deps-init` | `sandbox-deps` is off | |
 
 `help`, `version`, `health`, `frontend` and `index` are what an init scaffolds, so they never count as
-units the project declared itself.
+units the project declared itself; neither does any route, command or database `backoffice-init`
+wrote (`utils.BackofficeUnits`).
 
 **Areas** — one row per category of the command surface, offered only while the mechanic that
 owns it is on.
@@ -107,6 +109,7 @@ owns it is on.
 | `Server System` | `sandbox-server` |
 | `Front System` | `sandbox-front` |
 | `Database System` | `sandbox-database` |
+| `Backoffice System` | `sandbox-backoffice` |
 | `Deps System` | `sandbox-deps` |
 | `Examples` | `sandbox-example` |
 | `Documentation` | `doc` |

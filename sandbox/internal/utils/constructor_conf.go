@@ -1,6 +1,7 @@
 package utils
 
 import (
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
 
@@ -30,9 +31,9 @@ const GeneratedDir = "sandbox/internal/generated"
 const RoutePropsDir = "sandbox/internal/routeprops"
 
 // RoutePropsFile is the file of RoutePropsDir declaring RouteProps. The build
-// writes it once and it is the project's from then on, like a route's
-// InternalPureHandler.go. It is also the name it had in sandbox/api/, the old
-// home the build moves it out of.
+// rewrites it every time, as the embedding of every other file's struct — the
+// project's own project.go among them. It is also the name it had in
+// sandbox/api/, the old home the build moves it out of.
 const RoutePropsFile = "routeprops.go"
 
 // CommandPropsDir is the package declaring commandprops.CommandProps, the
@@ -41,7 +42,7 @@ const RoutePropsFile = "routeprops.go"
 const CommandPropsDir = "sandbox/internal/commandprops"
 
 // CommandPropsFile is the file of CommandPropsDir declaring CommandProps. The
-// build writes it once and it is the project's from then on. It is also the
+// build rewrites it every time, the way it does RoutePropsFile. It is also the
 // name it had in sandbox/api/, the old home the build moves it out of.
 const CommandPropsFile = "commandprops.go"
 
@@ -55,6 +56,15 @@ const UserSandboxFile = "usersandbox.go"
 // rewrites it; api.Config embeds it.
 const UserConfigFile = "userconfig.go"
 
+// UserSandboxPrefix starts the name of every sandbox/api/ file whose structs
+// api.Sandbox embeds: usersandbox.go, and one more per mechanic that adds a
+// part of its own (usersandbox_<x>.go), so none edits a file of the project.
+const UserSandboxPrefix = "usersandbox"
+
+// UserConfigPrefix is UserSandboxPrefix for api.Config: userconfig.go, and
+// userconfig_<x>.go per mechanic — userconfig_backoffice.go, say.
+const UserConfigPrefix = "userconfig"
+
 // ConstructorExempt are the sandbox/api/ files that declare no field of the
 // sandbox: sandbox.go is the struct itself, command.go and route.go are the
 // shape of one command and of one route, each owned by the contract whose
@@ -65,6 +75,19 @@ const UserConfigFile = "userconfig.go"
 // userconfig.go are embedded in the Sandbox and the Config rather than fields
 // of their own.
 var ConstructorExempt = []string{"sandbox.go", "command.go", "route.go", "trigger.go", RoutePropsFile, CommandPropsFile, UserSandboxFile, UserConfigFile}
+
+// IsConstructorExempt reports a sandbox/api/ file that declares no field of
+// the sandbox: one of ConstructorExempt, or a part api.Sandbox or api.Config
+// embeds (UserSandboxPrefix, UserConfigPrefix).
+func IsConstructorExempt(sandbox *api.Sandbox, name string) bool {
+	for _, exempt := range ConstructorExempt {
+		if exempt == name {
+			return true
+		}
+	}
+	return sandbox.Deps.Stringsdeps.HasPrefix(name, UserSandboxPrefix) ||
+		sandbox.Deps.Stringsdeps.HasPrefix(name, UserConfigPrefix)
+}
 
 // ConstructorDir is the project-relative directory of one constructor package.
 func ConstructorDir(name string) string {

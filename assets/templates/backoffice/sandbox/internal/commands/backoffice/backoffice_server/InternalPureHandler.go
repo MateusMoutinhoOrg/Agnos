@@ -1,0 +1,33 @@
+package backoffice_server
+
+import (
+	"{{.Module}}/sandbox/api"
+	"{{.Module}}/sandbox/internal/commandprops"
+	"{{.Module}}/sandbox/internal/generated/cliio"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficeguard"
+)
+
+// InternalPureHandler runs in front of `start-server` and answers nothing, so
+// start-server runs after it. It reads the secret that signs the backoffice
+// sessions from the environment — never from the command line — and the two
+// flags the backoffice adds to start-server, onto sandbox.Config, where every
+// route reads them. Without a secret the server does not start.
+//
+// It is a middleware rather than an edit to start-server's own handler, so
+// that file stays the project's and backoffice-purge has nothing to undo in it.
+func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+	secret, err := backofficeauth.ReadSecret(sandbox)
+	if err != nil {
+		return cliio.Fail(sandbox, api.ExitFailure, "", err.Error())
+	}
+
+	sandbox.Config.Secret = secret
+	sandbox.Config.AllowXForwardedFor = entries.AllowXForwardedFor
+	sandbox.Config.InsecureHttp = entries.InsecureHttp
+
+	if entries.AllowXForwardedFor && backofficeguard.ListensEverywhere(sandbox, entries.Addr) {
+		sandbox.Deps.Std.Error("warning: X-Forwarded-For is trusted but the server listens on every interface: bind it to the address only the proxy reaches (--addr 127.0.0.1:3000) or firewall the port, or anyone reaching it can forge their ip\n")
+	}
+	return nil
+}

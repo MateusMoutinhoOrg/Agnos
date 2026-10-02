@@ -1,0 +1,14 @@
+category: Backoffice
+help: Shows the backoffice home page to the signed-in user
+methods:
+    - GET
+paths:
+    - end: 1
+      id: AdminHome
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/home
+priority: 100
+response-type: text/html
+segments: 2

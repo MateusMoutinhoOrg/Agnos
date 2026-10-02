@@ -1,0 +1,28 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            id:
+                type: integer
+        required:
+            - id
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: json
+category: Backoffice Users API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/get-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":2}'''
+help: Answers one backoffice user by id
+methods:
+    - POST
+paths:
+    - end: 2
+      id: ApiAdminGetBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/get-backoffice-user
+priority: 100
+response-type: application/json
+segments: 3

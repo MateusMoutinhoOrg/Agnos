@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Admin Login</title>
+  <style>
+    :root {
+      --primary: #4F46E5;
+      --primary-hover: #4338CA;
+      --bg-dark: #111827;
+      --surface: #1F2937;
+      --text: #F9FAFB;
+      --text-muted: #9CA3AF;
+      --border: #374151;
+      --input-bg: #374151;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background-color: var(--bg-dark);
+      color: var(--text);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      overflow: hidden;
+      position: relative;
+    }
+
+    /* Ambient background blobs */
+    .blob {
+      position: absolute;
+      filter: blur(80px);
+      z-index: 0;
+      opacity: 0.5;
+    }
+    .blob-1 {
+      top: -10%;
+      left: -10%;
+      width: 500px;
+      height: 500px;
+      background: radial-gradient(circle, rgba(79,70,229,0.4) 0%, rgba(17,24,39,0) 70%);
+      animation: float 10s ease-in-out infinite alternate;
+    }
+    .blob-2 {
+      bottom: -10%;
+      right: -10%;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(236,72,153,0.3) 0%, rgba(17,24,39,0) 70%);
+      animation: float 12s ease-in-out infinite alternate-reverse;
+    }
+
+    @keyframes float {
+      0% { transform: translate(0, 0); }
+      100% { transform: translate(30px, -50px); }
+    }
+
+    .login-container {
+      background: rgba(31, 41, 55, 0.7);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 24px;
+      padding: 3rem;
+      width: 100%;
+      max-width: 420px;
+      z-index: 1;
+      box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .login-header {
+      text-align: center;
+      margin-bottom: 2.5rem;
+    }
+
+    .login-header h1 {
+      font-size: 2rem;
+      font-weight: 700;
+      margin-bottom: 0.5rem;
+      background: linear-gradient(135deg, #F9FAFB 0%, #D1D5DB 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .login-header p {
+      color: var(--text-muted);
+      font-size: 0.95rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.5rem;
+      position: relative;
+    }
+
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      margin-bottom: 0.5rem;
+      color: #D1D5DB;
+    }
+
+    .form-control {
+      width: 100%;
+      background-color: rgba(17, 24, 39, 0.6);
+      border: 1px solid var(--border);
+      color: var(--text);
+      padding: 0.875rem 1rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      transition: all 0.3s ease;
+      outline: none;
+    }
+
+    .form-control:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 0 4px rgba(79, 70, 229, 0.15);
+      background-color: rgba(17, 24, 39, 0.8);
+    }
+
+    .form-control::placeholder {
+      color: #6B7280;
+    }
+
+    .btn-submit {
+      width: 100%;
+      background: linear-gradient(135deg, var(--primary) 0%, #6366F1 100%);
+      color: white;
+      border: none;
+      padding: 0.875rem;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      margin-top: 1rem;
+      box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+    }
+
+    .btn-submit:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(79, 70, 229, 0.23);
+      background: linear-gradient(135deg, var(--primary-hover) 0%, var(--primary) 100%);
+    }
+
+    .btn-submit:active {
+      transform: translateY(0);
+    }
+
+    .alert {
+      background: rgba(239, 68, 68, 0.12);
+      border: 1px solid rgba(239, 68, 68, 0.4);
+      color: #FCA5A5;
+      padding: 0.75rem 1rem;
+      border-radius: 12px;
+      font-size: 0.9rem;
+      margin-bottom: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="blob blob-1"></div>
+  <div class="blob blob-2"></div>
+  
+  <div class="login-container">
+    <div class="login-header">
+      <h1>Welcome Back</h1>
+      <p>Sign in to your admin account</p>
+    </div>
+    
+    {{if .Error}}<div class="alert" role="alert">{{html .Error}}</div>{{end}}
+
+    <form id="loginForm" action="/admin/login" method="POST">
+      <div class="form-group">
+        <label for="username" class="form-label">Email or Username</label>
+        <input type="text" id="username" name="username" class="form-control" value="{{html .Username}}" placeholder="Enter your email or username" required autocomplete="username">
+      </div>
+      
+      <div class="form-group">
+        <label for="password" class="form-label">Password</label>
+        <input type="password" id="password" name="password" class="form-control" placeholder="••••••••" required autocomplete="current-password">
+      </div>
+      
+      <button type="submit" class="btn-submit">Sign In</button>
+    </form>
+  </div>
+
+</body>
+</html>

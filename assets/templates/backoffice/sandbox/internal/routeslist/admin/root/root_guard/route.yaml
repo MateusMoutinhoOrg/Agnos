@@ -1,0 +1,13 @@
+category: Middleware
+help: Lets only root users reach /admin/root
+methods:
+    - ANY
+paths:
+    - end: -1
+      id: Route
+      start: 0
+      trigger:
+        type: prefix
+        value: /admin/root
+priority: 11
+response-type: text/html

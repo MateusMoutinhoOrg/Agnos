@@ -1,6 +1,7 @@
 doc: true
 readme: true
 sandbox: true
+sandbox-backoffice: false
 sandbox-cli: true
 sandbox-database: false
 sandbox-deps: true

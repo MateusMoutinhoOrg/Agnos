@@ -1,0 +1,4 @@
+default-adapter: randdeps
+field: Randdeps
+help: Cryptographically secure random bytes, lower-case hex
+name: randdeps

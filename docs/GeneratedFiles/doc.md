@@ -14,8 +14,8 @@
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
 | `sandbox/new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
-| `sandbox/api/sandbox.go` | `build` | always. `UserSandbox` embedded, one field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
-| `sandbox/api/config.go` | `build` | always. The `Config` contract: `UserConfig` embedded, `ProjectName`, `Version` |
+| `sandbox/api/sandbox.go` | `build` | always. Every struct of `sandbox/api/usersandbox*.go` embedded, one field per other file of `sandbox/api/`, plus `Deps` while the project carries the deps layer |
+| `sandbox/api/config.go` | `build` | always. The `Config` contract: every struct of `sandbox/api/userconfig*.go` embedded, `ProjectName`, `Version` |
 | `sandbox/api/usersandbox.go` | `start` | once. `api.UserSandbox`, embedded in `api.Sandbox` — declare the project's own fields of the sandbox there |
 | `sandbox/api/userconfig.go` | `start` | once. `api.UserConfig`, embedded in `api.Config` — declare the project's own config fields there |
 | `sandbox/internal/generated/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
@@ -46,7 +46,8 @@
 | `sandbox/internal/commands/<name>/command.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/commands/<name>/InternalPureHandler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 | `sandbox/internal/cli/errors/handle_*.go` | `build` | once. Five files, one per failure — what this project answers when no command does |
-| `sandbox/internal/commandprops/commandprops.go` | `build` | once. `commandprops.CommandProps`, what one command line's chain of commands shares |
+| `sandbox/internal/commandprops/commandprops.go` | `build` | always. `commandprops.CommandProps`, what one command line's chain of commands shares: every struct of the package embedded |
+| `sandbox/internal/commandprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `CommandProps` |
 | `docs/<Name>/{props.yaml,doc.md}` | `add-doc` | once |
 | `examples/cli/<name>/example.sh` | `add-cli-example` | once. A stub that already runs |
 | `examples/lib/<name>/example.go` | `add-lib-example` | once. A stub that already runs |

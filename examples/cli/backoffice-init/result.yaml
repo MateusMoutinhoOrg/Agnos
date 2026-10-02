@@ -1,0 +1,47 @@
+cli-output: "add-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep sortdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serializables \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serverdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep reflectdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep signaldeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir module github.com/MateusMoutinhoOrg/Keep as database \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nbackoffice-init started with path TestDir \nserver-init started with path TestDir \ncli-init started with path TestDir \nfront-init started with path TestDir \ncreating assets/frontend/index.html, answered on / \ncreating assets/frontend/404.html, answered on every path that names no file \ndatabase-init started with path TestDir \nadd-dep started with path TestDir dep embeddeps \nadd-dep started with path TestDir dep envdeps \nadd-dep started with path TestDir dep hashdeps \nadd-dep started with path TestDir dep jwtdeps \nadd-dep started with path TestDir dep passworddeps \nadd-dep started with path TestDir dep randdeps \nadd-dep started with path TestDir dep ratelimitdeps \nadd-dep started with path TestDir dep serializables \nadd-dep started with path TestDir dep serverdeps \nadd-dep started with path TestDir dep sortdeps \nadd-dep started with path TestDir dep std \nadd-dep started with path TestDir dep stringsdeps \nadd-dep started with path TestDir dep timedeps \nbackoffice-init: start the server with TEST_SECRET set to a random secret of at least 32 characters (openssl rand -hex 32), then add the first user with `Test add-backoffice-user --role root`\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+exit-code: 0
+tree:
+    - file: .gitignore
+      sha: a310d047900c58831fd7757a76a41ccfd04943c3912e74852c3fae7f1997b887
+    - file: AgnosConfig/extensions.yaml
+      sha: 9ac77cddbd2ebcad04f049ea9b4f3a93f1f050d28c8c00979b75a58c35389fdc
+    - file: docs/Backoffice/doc.md
+      sha: 69223b3b4b22e81f46a6e1cac3b1cba5d86f48c9a5e018e600c7fc1b09e71a53
+    - file: docs/Backoffice/props.yaml
+      sha: c8c38250ca432b712583efccd6276e9edad1a7eed19e418f4828705bb69271d9
+    - file: sandbox/api/config.go
+      sha: 95797f6f81a176f5cbaeb215a0239d8107a59d42ec94c754a7465b81c7e9ce56
+    - file: sandbox/api/userconfig_backoffice.go
+      sha: 44dccb63735ad8244c71e64135a9372e93ef463952e94d4ec24ad2a2695d919d
+    - file: sandbox/internal/commands/backoffice/add_backoffice_user/InternalPureHandler.go
+      sha: e58dbdedd53435783acec3887f4ae0d6e83059ec92add92953307056652d3dd1
+    - file: sandbox/internal/commands/backoffice/add_backoffice_user/command.yaml
+      sha: e426811600f0bdea33f1aceb479efbf0b496d25dda5844b19a8a1d94dee10b89
+    - file: sandbox/internal/commands/backoffice/add_backoffice_user/entries.go
+      sha: 83008c98d505becd3ad508dc765d723658b4d09dc71cf2196a7beaff02c38e32
+    - file: sandbox/internal/commands/backoffice/add_backoffice_user/new.go
+      sha: 5aca9884df3462ffee6997dc3dc530d856debfd2335a271a8a5f5808159ffbd5
+    - file: sandbox/internal/commands/backoffice/backoffice_server/InternalPureHandler.go
+      sha: 5689ac3dfae8ac467aaf7ad2a1de9a6ae4e640dbdf608d1d32127316a194bb65
+    - file: sandbox/internal/commands/backoffice/backoffice_server/command.yaml
+      sha: 7f281652abf93aa5ef1d4dccb6a3173295899db4dc09251a6c440e96e4b671a0
+    - file: sandbox/internal/commands/backoffice/backoffice_server/entries.go
+      sha: 7f8f58313f5ae93978d8df271aef2b7db43819a00bd63e083e686ef4d4061d20
+    - file: sandbox/internal/commands/backoffice/backoffice_server/new.go
+      sha: 7839d358b1c62b689fe271371ed00556a5d013982f658f38c1ac2b71ab09db07
+    - file: sandbox/internal/databases/backofficedb/api.go
+      sha: e2681c19bbbb24de089a7b91dc2337493e81e1f2b10a480b7ce142071ec413d2
+    - file: sandbox/internal/databases/backofficedb/methods.go
+      sha: b52ded0032e1a53a6fbabe6fe40bdf925c5b39f4797df7c300e849406527bee8
+    - file: sandbox/internal/databases/backofficedb/methods_custom.go
+      sha: 3914faff0733b8d56ec002d5166e7ec9ed406a42c958fae409f1ba588028de62
+    - file: sandbox/internal/databases/backofficedb/new.go
+      sha: 106f0ed575748d2957074724162178259bb2dba0ad88a9aec54d6df1efe7d9c2
+    - file: sandbox/internal/databases/backofficedb/specs.yaml
+      sha: 8ec97543a2f830955faaa05d52571b0764230264f5a7b493c7f32ac4ac2ff566
+    - file: sandbox/internal/routeprops/backoffice.go
+      sha: 6f08fcbd1911bf7a7621c9e000f99db12b2bcdfb8e8d51a4b9dfe44f12c3a725
+    - file: sandbox/internal/routeprops/routeprops.go
+      sha: 6f805c2c6c818f06afa97c66eb707c5d65dff0c9d7cd16707c7dc7cc532f77eb
+    - file: sandbox/internal/server/backoffice/backofficeauth/backofficeauth.go
+      sha: 22ebd7f63e6bfd620dfc82fff836295a8ad1d24ca63261698833c22e5a1fa25f

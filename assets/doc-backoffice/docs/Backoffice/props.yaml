@@ -1,0 +1,5 @@
+description: "The admin backoffice of {{.Name}}: secret, users, roles, sessions, API tokens and the /api/admin JSON api"
+name: "Backoffice"
+order: 3
+themes:
+  - server-usage

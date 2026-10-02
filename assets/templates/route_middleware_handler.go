@@ -17,7 +17,7 @@ import (
 //	return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "invalid token")
 //
 // Hand what you learned to the routes after it through props, the request's
-// routeprops.RouteProps — declare the field in sandbox/internal/routeprops/routeprops.go:
+// routeprops.RouteProps — declare the field in sandbox/internal/routeprops/project.go:
 //
 //	props.User = user
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {

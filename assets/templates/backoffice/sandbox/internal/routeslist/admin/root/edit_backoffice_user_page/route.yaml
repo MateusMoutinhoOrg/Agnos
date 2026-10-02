@@ -1,0 +1,18 @@
+category: Backoffice Users
+help: Shows the form that edits a backoffice user
+methods:
+    - GET
+paths:
+    - end: 2
+      id: AdminRootEditBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/edit-backoffice-user
+    - end: 3
+      id: Id
+      start: 3
+      type: integer
+priority: 100
+response-type: text/html
+segments: 4

@@ -1,0 +1,19 @@
+# The add-dep-jwtdeps example: install a catalog dep whose adapter needs a
+# third-party module
+#
+# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
+# The example writes only inside TestDir.
+
+agnos start --path TestDir --project-name Test --module Test -q
+agnos deps-init --path TestDir -q
+
+agnos add-dep jwtdeps --path TestDir
+
+# What result.yaml records: the paths this example asserts, copied out of
+# TestDir. The adapter's adapter.yaml names github.com/golang-jwt/jwt/v5, and
+# go.mod requires it. The lib side copies the same set.
+mkdir -p AssertDir/sandbox/deps
+cp -R TestDir/sandbox/deps/. AssertDir/sandbox/deps/
+mkdir -p AssertDir/adapters
+cp -R TestDir/adapters/. AssertDir/adapters/
+cp TestDir/go.mod AssertDir/go.mod

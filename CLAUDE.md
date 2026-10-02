@@ -31,8 +31,8 @@ of them. In doubt, `docs/Workflow/doc.md`.
 A rule is added or changed in `assets/doc/docs/Rules/doc.md`, never in the rendered copy.
 `docs/{Requirements,Workflow,Rules,Extensions,Structure,EntriesYaml,DepList,GeneratedFiles,LibUsage,PublicApi}/`
 render from `assets/doc/docs/` into **every** agnos project, this one included; the cli, server,
-front, database and example docs render from `assets/doc-cli/`, `assets/doc-server/`,
-`assets/doc-front/`, `assets/doc-database/`, `assets/doc-example{,-cli}/`. Editing one means editing that template, and it has to read
+front, database, backoffice and example docs render from `assets/doc-cli/`, `assets/doc-server/`,
+`assets/doc-front/`, `assets/doc-database/`, `assets/doc-backoffice/`, `assets/doc-example{,-cli}/`. Editing one means editing that template, and it has to read
 correctly in a scaffolded project, not only here.
 
 ## Traps
@@ -140,9 +140,13 @@ editing only the rendered copy is undone in silence.
 - **The server is a chain.** Every route matching a request runs, lowest `priority` first, and
   the first one to answer — `SetStatus`, or a `Write`, which sends a `200` — ends it; a handler
   that does neither has declined and the next runs, which is the whole of what a middleware is.
-  One `props *routeprops.RouteProps` per request is shared by the whole chain — the project types it in
-  `sandbox/internal/routeprops/routeprops.go`, which `build` writes once; it is not in `sandbox/api`
-  so a field may name a project type (a database record), and `api.Route.Props` holds it as `any`.
+  One `props *routeprops.RouteProps` per request is shared by the whole chain. `routeprops.go` is
+  generated: it embeds every struct of the other files of `sandbox/internal/routeprops/` —
+  `project.go` (the project's, written once) plus one file per mechanic (`backoffice.go`). It is
+  not in `sandbox/api` so a field may name a project type (a database record), and
+  `api.Route.Props` holds it as `any`. `api.Config`/`api.Sandbox` embed every struct of
+  `sandbox/api/userconfig*.go`/`usersandbox*.go` the same way: a mechanic adds a part, never
+  edits the project's.
   `commandprops.CommandProps` is the cli's mirror. A handler is handed no request, so what
   it reads is declared (`Entries`, the body on `Entries.Body`). An `InternalPureHandler` returns
   `error`, never a status; it refuses a request by returning `routeio.Fail`. A path type or a
@@ -212,9 +216,10 @@ escape no build reads. There is no field in `api.Sandbox` and no package in
 field is reached through `List<T>` and its filtrage.
 
 **Extensions** are declared in `AgnosConfig/extensions.yaml` and nowhere else — `build` never
-infers a mechanic from a directory being present. Nine keys: `sandbox`, `sandbox-deps`,
-`sandbox-cli`, `sandbox-server`, `sandbox-front`, `sandbox-database`, `sandbox-example`, `doc`,
-`readme`. `false`
+infers a mechanic from a directory being present. Ten keys: `sandbox`, `sandbox-deps`,
+`sandbox-cli`, `sandbox-server`, `sandbox-front`, `sandbox-database`, `sandbox-backoffice`,
+`sandbox-example`, `doc`, `readme`. `sandbox-backoffice` generates nothing: `backoffice-init`
+writes `assets/templates/backoffice/**` once and the key gates its doc. `false`
 means **stop generating**, never **delete**: what the mechanic wrote stays and becomes the
 project's, and removing it is what `<x>-purge` does.
 

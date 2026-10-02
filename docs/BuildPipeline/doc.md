@@ -41,7 +41,7 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 
 | Group | Renders when | Holds |
 |---|---|---|
-| `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go`, `internal/generated/config/new.go` |
+| `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go` (embedding every struct of `api/usersandbox*.go` / `api/userconfig*.go`), `internal/generated/config/new.go` |
 | `sandbox-deps` | `sandbox-deps` | `sandbox/deps/deps.go` |
 | `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command}.go`, `internal/generated/cli/`, `help`, `version` |
 | `sandbox-server` | `sandbox-server` | `api/{server,route}.go`, `internal/{server,routes/health,routeio}` |
@@ -52,6 +52,7 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `doc-server` | `doc` + `sandbox-server` | `docs/{RouteYaml,Routes,ServerUsage}` |
 | `doc-front` | `doc` + `sandbox-front` | `docs/FrontUsage` |
 | `doc-database` | `doc` + `sandbox-database` | `docs/Databases` |
+| `doc-backoffice` | `doc` + `sandbox-backoffice` | `docs/Backoffice`. The backoffice has no code group: `backoffice-init` writes `assets/templates/backoffice/**` once |
 | `doc-example` | `doc` + `sandbox-example` | `docs/LibExamples` |
 | `doc-example-cli` | `doc` + `sandbox-example` + `sandbox-cli` | `docs/CliExamples` |
 | `readme` | `readme` | `README.md` |

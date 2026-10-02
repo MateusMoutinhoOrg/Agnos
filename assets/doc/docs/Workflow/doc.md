@@ -149,7 +149,7 @@ and the body on `Body` — so a bad request was already answered `400` before th
 Setting a status or writing a byte is what answers the request. Several routes may match one
 request; they run in `priority` order and stop at the first one that answers, so a handler that
 does neither has declined and the next one runs — that is the whole of what a middleware is, and
-`props` — the request's `routeprops.RouteProps`, typed in `sandbox/internal/routeprops/routeprops.go` — carries what it
+`props` — the request's `routeprops.RouteProps`, typed in `sandbox/internal/routeprops/project.go` — carries what it
 learned to the routes after it. A handler refuses a request by returning `routeio.Fail`. What no route answers is answered
 by the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and no build
 rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
@@ -231,6 +231,28 @@ and rewritten by no build. [Databases](../Databases/doc.md) is the whole recipe.
 
 From there `add-table-field` declares what a table holds and every method it generates is
 written for you. `{{.GeneratorName}} database-purge` removes the layer again.
+{{- end }}
+{{ if .HasBackoffice }}
+## Run the backoffice
+
+```bash
+export {{.SecretEnv}}=$(openssl rand -hex 32)
+{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} add-backoffice-user --username admin --email admin@example.com --role root
+{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server --insecure-http   # then /admin/login
+```
+
+Every page, route and package of it is the project's, written once: change it by hand.
+[Backoffice](../Backoffice/doc.md) is the whole map.
+{{- else }}
+## Add the backoffice
+
+```bash
+{{.GeneratorName}} backoffice-init   # /admin pages, /api/admin, users, API tokens, backofficedb
+```
+
+It installs the server, front and database layers it is missing, and writes every file once.
+`start-server` then needs the `{{.SecretEnv}}` environment variable. `{{.GeneratorName}} backoffice-purge`
+removes it again.
 {{- end }}
 ## Add reusable logic
 
@@ -332,6 +354,9 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 {{- end }}
 {{- if .HasFront }}
 | `assets/frontend/**` | the site looks like something |
+{{- end }}
+{{- if .HasBackoffice }}
+| `sandbox/internal/server/backoffice/**`, `assets/backoffice/*.html` | the backoffice behaves or looks otherwise |
 {{- end }}
 | `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |

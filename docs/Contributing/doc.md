@@ -24,14 +24,14 @@ Release: bump `version` in `AgnosConfig/project.yaml`, then `./release/bootstrap
 
 ## Add a command to agnos
 
-Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Database System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
+Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Database System, Backoffice System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
 
 ```bash
 ./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands" --dir core
 ```
 
 `--dir` is the folder of `sandbox/internal/commands/` its category lives in: `core`, `cli`,
-`server`, `front`, `database`, `deps`, `examples`, `extensions`, `docs`. Only `help`, `version`,
+`server`, `front`, `database`, `backoffice`, `deps`, `examples`, `extensions`, `docs`. Only `help`, `version`,
 `help_flag` (generated at a fixed path) and the `project` middleware sit at the top. A directory
 is a command by holding a `command.yaml`, so the folder costs nothing to read; move one with
 `rename-command <name> <name> --dir <folder>`.
@@ -93,6 +93,24 @@ The cli matcher exists twice the same way: the generated `sandbox/internal/gener
 
 The matcher exists twice: the generated `sandbox/internal/generated/server/route/IsActionable.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
 
+## The backoffice: a mechanic that generates nothing
+
+`sandbox-backoffice` is an extension with no code group: `backoffice-init` writes
+`assets/templates/backoffice/**` into the project once, through `utils.RenderTemplateTree`
+(a file already there is kept), and every file is the project's from then on. The key gates
+`doc-backoffice` and `HasBackoffice` alone. Under the tree, `assets/` is copied verbatim — the
+pages are the project's runtime `text/template` sources — and every other file is rendered over
+`Module`, `Name`, `GeneratorName`, `SecretEnv`, so a literal `{{` in a ported Go file is
+escaped (`{{"{{"}}`). `backoffice-purge` reads the same tree to know what to remove: a route or a
+command whole, by name; `utils.BackofficeDirs` whole; any other file alone.
+
+It edits no file the project wrote. What it needs from one goes in a file of its own that a
+generated aggregate embeds: `routeprops/backoffice.go` (`RouteProps`),
+`api/userconfig_backoffice.go` (`api.Config`), and a cli middleware (`backoffice-server`) in
+front of `start-server` instead of an edit to its handler. A mechanic that needs a field of
+`RouteProps`, `CommandProps`, `api.Config` or `api.Sandbox` copies this: one new file, one struct.
+`front-purge` and `database-purge` run `BackofficePurgeInternal` first when it is on.
+
 ## Add an extension
 
 An extension is one generation mechanic and it is declared in three places:
@@ -120,7 +138,7 @@ Whatever you put in `sandbox/api/` has to stay convertible — `verify` runs `ch
 The catalog is two catalogs: `assets/deplist/<dep>/` holds the contract, `assets/adapterlist/<adapter>/` holds one implementation of it, so a dep can gain a second adapter without moving.
 
 1. Mirror the contract under `assets/deplist/<dep>/sandbox/deps/<dep>/`, replacing this module path with `{{.Module}}`, and write `assets/deplist/<dep>/dep.yaml` (`name`, `field`, `help`, `default-adapter`).
-2. Mirror the adapter under `assets/adapterlist/<adapter>/adapters/libs/<adapter>/`, same substitution, and write `assets/adapterlist/<adapter>/adapter.yaml` (`name`, `dep`, `help`, `module` — `""` when it needs nothing beyond the stdlib — and `origin: catalog`).
+2. Mirror the adapter under `assets/adapterlist/<adapter>/adapters/libs/<adapter>/`, same substitution, and write `assets/adapterlist/<adapter>/adapter.yaml` (`name`, `dep`, `help`, `module` — `""` when it needs nothing beyond the stdlib, `<path>@<version>` for a third-party module `add-dep` then requires in the project's `go.mod`, as `jwtdeps` does — and `origin: catalog`). After a third-party one, `go mod tidy -diff` must stay empty here: the template's `{{.Module}}` imports keep it out of this repo's module graph.
 3. Bootstrap, test with `add-dep`/`remove-dep` on a scratch project. Add a row to [DepList](../DepList/doc.md).
 
 Neither `dep.yaml` nor `adapter.yaml` is part of the mirror: the first is installed nowhere, and the second is installed to `adapters/libs/<adapter>/adapter.yaml`, which is what tells the tree later which dep that adapter fills.
@@ -171,5 +189,7 @@ Some files are written once and never rewritten, each by a different mechanic �
 | `sandbox/internal/commands/start_server/*` | `server-init` | `io.IsDir(dir)` |
 | `routeslist/<name>/{route.yaml,InternalPureHandler.go}` | `add-route` | `io.WriteFile`, which refuses an existing path |
 | `sandbox/api/{usersandbox,userconfig}.go` | `start`, the `start` asset group | `build` never renders that group; `verify` names either one missing |
+| `sandbox/internal/{routeprops,commandprops}/project.go` | `build`, `generate_props_aggregate.go` | only while the package holds no other part; the aggregate beside it is rewritten every build |
+| `assets/templates/backoffice/**` | `backoffice-init`, `utils.RenderTemplateTree` | `io.ReadFile(dest)` per file |
 
 A write-once file may **not** live in an asset group other than `start`: `utils.RenderGroupExcept` writes every file of a group with `WriteFileOverwrite` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.

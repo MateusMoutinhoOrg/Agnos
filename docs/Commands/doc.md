@@ -10,6 +10,13 @@ whole page. Hidden commands are not listed. The args are the leading words of th
 the flags follow them, in any order. A `repeatable` flag is given once per value. A command's page
 lists the flags of the middlewares in front of it too.
 
+## Backoffice System
+
+| Command | Does |
+| --- | --- |
+| [`backoffice-init`](backoffice-init.md) | Add the admin backoffice to the project |
+| [`backoffice-purge`](backoffice-purge.md) | Remove the admin backoffice from the project |
+
 ## Cli System
 
 | Command | Does |

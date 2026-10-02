@@ -316,7 +316,8 @@ func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, ent
 
 Every route of one request is handed the same `props`: the dispatch builds one empty
 `routeprops.RouteProps` per request, and each field is declared by the project in
-`sandbox/internal/routeprops/routeprops.go` — written once by `{{.GeneratorName}} build`, then the project's.
+`sandbox/internal/routeprops/project.go` — written once by `{{.GeneratorName}} build`, then the project's.
+`routeprops.go` beside it is generated: it embeds every struct of the package.
 
 When no route answers:
 

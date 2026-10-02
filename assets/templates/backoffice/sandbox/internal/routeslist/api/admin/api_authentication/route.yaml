@@ -1,0 +1,21 @@
+category: Middleware
+help: Requires a valid API token on every /api/admin route
+long-description: 'Every /api/admin route needs an API token, sent as Authorization: Bearer <token>. Tokens are created and revoked on the backoffice page /admin/list-backoffice-api-tokens; the api never issues one. A token may expire on a date or never, and may be limited to a list of client ips. A missing, unknown, revoked or expired token, or one used from an ip it does not allow, is answered 401 in JSON. After 20 invalid tokens from one client ip in 15 minutes, every token it sends is answered 429 with Retry-After, unchecked, until the 15 minutes pass.'
+methods:
+    - ANY
+parameters:
+    - description: an API token created on /admin/list-backoffice-api-tokens, as Bearer <token>
+      fonts:
+        - header
+      id: Authorization
+      key: authorization
+      type: string
+paths:
+    - end: -1
+      id: Route
+      start: 0
+      trigger:
+        type: prefix
+        value: /api/admin
+priority: 10
+response-type: application/json

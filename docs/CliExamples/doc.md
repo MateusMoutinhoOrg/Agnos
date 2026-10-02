@@ -20,6 +20,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `add-cli-example` | create an example under examples/cli/ | [example.sh](../../examples/cli/add-cli-example/example.sh) |
 | `add-command` | declare a new command | [example.sh](../../examples/cli/add-command/example.sh) |
 | `add-dep` |  | [example.sh](../../examples/cli/add-dep/example.sh) |
+| `add-dep-jwtdeps` |  | [example.sh](../../examples/cli/add-dep-jwtdeps/example.sh) |
 | `add-doc` | create a doc directory under docs/ | [example.sh](../../examples/cli/add-doc/example.sh) |
 | `add-flag` | declare one flag on a command | [example.sh](../../examples/cli/add-flag/example.sh) |
 | `add-lib-example` | create an example under examples/lib/ | [example.sh](../../examples/cli/add-lib-example/example.sh) |
@@ -27,6 +28,8 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `add-path-range` |  | [example.sh](../../examples/cli/add-path-range/example.sh) |
 | `add-remote-dep` |  | [example.sh](../../examples/cli/add-remote-dep/example.sh) |
 | `add-route` |  | [example.sh](../../examples/cli/add-route/example.sh) |
+| `backoffice-init` |  | [example.sh](../../examples/cli/backoffice-init/example.sh) |
+| `backoffice-purge` |  | [example.sh](../../examples/cli/backoffice-purge/example.sh) |
 | `build` | regenerate every generated file of a project | [example.sh](../../examples/cli/build/example.sh) |
 | `cli-init` | add the cli layer to a project that has none | [example.sh](../../examples/cli/cli-init/example.sh) |
 | `cli-purge` | remove the cli layer and every command in it | [example.sh](../../examples/cli/cli-purge/example.sh) |

@@ -37,7 +37,7 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   A missing declaration is a hard error, not a default. **(verify)**
 - Only the keys of the catalog may appear, and no `sandbox-<x>` mechanic is on while `sandbox`
   is off. **(verify)**
-- `false` means *stop generating*, never *delete*: agnos leaves what the mechanic already
+- `false` means *stop generating*, never *delete*: `agnos` leaves what the mechanic already
   wrote exactly as it is, for the project to keep or edit by hand. Removing those files is
   what an `<x>-purge` does — and it is the same command that writes the `false`.
 - The declaration is written by `agnos enable-extension` / `disable-extension` and

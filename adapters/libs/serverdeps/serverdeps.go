@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/http"
 	"net/url"
+	"strings"
 	"time"
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
@@ -99,6 +100,15 @@ func newRequest(request *http.Request) serverdeps.Request {
 			return request.URL.Path
 		},
 		GetHeader: func(key string) string {
+			// net/http moves Host off the header map onto request.Host.
+			switch http.CanonicalHeaderKey(key) {
+			case "Host":
+				return request.Host
+			case ClientIpHeader:
+				return clientIp(request)
+			case ForwardedForHeader:
+				return strings.Join(request.Header.Values(ForwardedForHeader), ", ")
+			}
 			return request.Header.Get(key)
 		},
 		GetHeaders: func() map[string][]string {
@@ -106,10 +116,14 @@ func newRequest(request *http.Request) serverdeps.Request {
 			for key, values := range request.Header {
 				headers[key] = append([]string{}, values...)
 			}
+			headers[ClientIpHeader] = []string{clientIp(request)}
 			return headers
 		},
 		GetHost: func() string {
 			return request.Host
+		},
+		GetClientIp: func() string {
+			return clientIp(request)
 		},
 		GetCookie: func(name string) string {
 			cookie, err := request.Cookie(name)
@@ -140,6 +154,33 @@ func newRequest(request *http.Request) serverdeps.Request {
 			return request.RemoteAddr
 		},
 	}
+}
+
+// ClientIpHeader is the header GetHeader answers the client's ip under. It is
+// never read off the request: what a client sends under that name is dropped,
+// so a route may declare it as a header parameter and trust what it binds.
+const ClientIpHeader = "X-Client-Ip"
+
+// ForwardedForHeader is the header a reverse proxy appends the ip it was
+// reached from to. GetHeader answers every line of it joined by commas, the
+// way one line spells several entries, so a line the client sent ahead of
+// the proxy's cannot hide the entry the proxy appended.
+const ForwardedForHeader = "X-Forwarded-For"
+
+// clientIp is the ip of the connection the request came on, port dropped, in
+// one spelling whatever way it arrived. X-Forwarded-For is never read here:
+// anyone may send it, and only the project knows whether a proxy it trusts
+// stands in front of the server, so trusting it is the sandbox's decision.
+func clientIp(request *http.Request) string {
+	host, _, err := net.SplitHostPort(request.RemoteAddr)
+	if err != nil {
+		host = request.RemoteAddr
+	}
+	peer := net.ParseIP(host)
+	if peer == nil {
+		return host
+	}
+	return peer.String()
 }
 
 // readBody drains the request body, refusing one longer than limit. A limit

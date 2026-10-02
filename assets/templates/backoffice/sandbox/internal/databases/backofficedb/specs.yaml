@@ -1,0 +1,45 @@
+name: backofficedb
+prefix: backofficedb
+tables:
+    - fields:
+        - name: username
+          required: true
+          type: string
+        - name: email
+          required: true
+          type: string
+        - name: passwordhash
+          required: true
+          type: string
+        - name: role
+          type: int
+        - fields:
+            - name: expiresat
+              required: true
+              type: int
+          name: sessions
+          type: database
+      name: backofficeuser
+    - fields:
+        - name: tokensha
+          required: true
+          type: key
+        - name: name
+          required: true
+          type: string
+        - name: prefix
+          required: true
+          type: string
+        - name: ownerid
+          type: int
+        - name: createdat
+          type: int
+        - name: expiresat
+          type: int
+        - name: ips
+          type: string
+        - name: lastusedat
+          type: int
+        - name: lastusedip
+          type: string
+      name: apitoken

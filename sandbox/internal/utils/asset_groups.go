@@ -41,6 +41,7 @@ func AssetGroups() []AssetGroup {
 		{"doc-server", []string{ExtensionDoc, ExtensionSandboxServer}, false},
 		{"doc-front", []string{ExtensionDoc, ExtensionSandboxFront}, false},
 		{"doc-database", []string{ExtensionDoc, ExtensionSandboxDatabase}, false},
+		{"doc-backoffice", []string{ExtensionDoc, ExtensionSandboxBackoffice}, false},
 		{"doc-example", []string{ExtensionDoc, ExtensionSandboxExample}, false},
 		{"doc-example-cli", []string{ExtensionDoc, ExtensionSandboxExample, ExtensionSandboxCli}, false},
 		{ExtensionReadme, []string{ExtensionReadme}, false},

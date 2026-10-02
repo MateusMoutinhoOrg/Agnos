@@ -9,9 +9,9 @@ import (
 // sandbox/internal/. sandbox.New returns it, and nothing callable lives outside
 // of it.
 type Sandbox struct {
-	// UserSandbox is the part of the Sandbox the project declares itself, in
-	// sandbox/api/usersandbox.go: embedded, so each of its fields is read as
-	// sandbox.<Field> like any contract.
+	// UserSandbox is a part of the Sandbox, declared in sandbox/api/usersandbox.go.
+	// Embedded, so each of its fields is read as sandbox.<Field> like any
+	// contract. Every struct of a sandbox/api/usersandbox*.go file is one.
 	UserSandbox
 
 	// Deps is every capability the sandbox reaches the outside world

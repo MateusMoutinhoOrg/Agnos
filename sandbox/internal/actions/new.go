@@ -19,6 +19,8 @@ import (
 	addRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_route"
 	addTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_table"
 	addTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_table_field"
+	backofficeInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/backoffice_init"
+	backofficePurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/backoffice_purge"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	cliPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_purge"
@@ -293,6 +295,12 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.FrontPurge = func(path string) error {
 		return frontPurgeAction.FrontPurge(sandbox, path)
+	}
+	actions.BackofficeInit = func(path string) error {
+		return backofficeInitAction.BackofficeInit(sandbox, path)
+	}
+	actions.BackofficePurge = func(path string) error {
+		return backofficePurgeAction.BackofficePurge(sandbox, path)
 	}
 	actions.AddPage = func(props api.PageProps) error {
 		return addPageAction.AddPage(sandbox, props)

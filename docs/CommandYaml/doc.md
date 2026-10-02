@@ -92,5 +92,6 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 ```
 
 Every command of one line is handed the same `props`, typed by the project in
-`sandbox/internal/commandprops/commandprops.go` — written once by `agnos build`, then the project's.
+`sandbox/internal/commandprops/project.go` — written once by `agnos build`, then the project's.
+`commandprops.go` beside it is generated: it embeds every struct of the package.
 `help-flag` (priority 5) answers `<command> --help` unless that command declares `--help` itself.

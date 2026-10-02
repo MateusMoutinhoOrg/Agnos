@@ -1,0 +1,4 @@
+default-adapter: passworddeps
+field: Passworddeps
+help: Salted, slow password hashes and their constant-time check
+name: passworddeps

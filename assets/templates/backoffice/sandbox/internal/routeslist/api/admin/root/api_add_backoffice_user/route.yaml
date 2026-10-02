@@ -1,0 +1,40 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            email:
+                type: string
+            password:
+                type: string
+            role:
+                enum:
+                    - root
+                    - viewer
+                type: string
+            username:
+                type: string
+        required:
+            - email
+            - password
+            - role
+            - username
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: json
+category: Backoffice Users API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/add-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"username":"ana","email":"ana@example.com","password":"secret123","role":"viewer"}'''
+help: Adds a backoffice user
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootAddBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/add-backoffice-user
+priority: 100
+response-type: application/json
+segments: 4

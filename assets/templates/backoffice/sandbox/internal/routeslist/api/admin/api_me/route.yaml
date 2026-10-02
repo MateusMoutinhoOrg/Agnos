@@ -1,0 +1,16 @@
+category: Backoffice API
+examples:
+    - 'curl localhost:3000/api/admin/me -H "Authorization: Bearer $TOKEN"'
+help: Answers the backoffice user of the Bearer token
+methods:
+    - GET
+paths:
+    - end: 2
+      id: ApiAdminMe
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/me
+priority: 100
+response-type: application/json
+segments: 3

@@ -1,0 +1,5 @@
+dep: jwtdeps
+help: HS256 JSON Web Tokens over github.com/golang-jwt/jwt/v5
+module: github.com/golang-jwt/jwt/v5@v5.3.1
+name: jwtdeps
+origin: catalog

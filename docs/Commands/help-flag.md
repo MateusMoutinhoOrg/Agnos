@@ -13,6 +13,8 @@ Runs in front of every command line. Without --help it hands the line on. With i
 
 | Runs in front of | When |
 | --- | --- |
+| [`backoffice-init`](backoffice-init.md) | always |
+| [`backoffice-purge`](backoffice-purge.md) | always |
 | [`add-arg`](add-arg.md) | always |
 | [`add-command`](add-command.md) | always |
 | [`add-flag`](add-flag.md) | always |

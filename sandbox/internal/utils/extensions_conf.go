@@ -15,15 +15,16 @@ const ExtensionsConfFile = "extensions.yaml"
 // sandbox-<mechanic>; doc and readme stand on their own because neither needs
 // the sandbox to be generated.
 const (
-	ExtensionSandbox         = "sandbox"
-	ExtensionSandboxDeps     = "sandbox-deps"
-	ExtensionSandboxCli      = "sandbox-cli"
-	ExtensionSandboxServer   = "sandbox-server"
-	ExtensionSandboxFront    = "sandbox-front"
-	ExtensionSandboxDatabase = "sandbox-database"
-	ExtensionSandboxExample  = "sandbox-example"
-	ExtensionDoc             = "doc"
-	ExtensionReadme          = "readme"
+	ExtensionSandbox           = "sandbox"
+	ExtensionSandboxDeps       = "sandbox-deps"
+	ExtensionSandboxCli        = "sandbox-cli"
+	ExtensionSandboxServer     = "sandbox-server"
+	ExtensionSandboxFront      = "sandbox-front"
+	ExtensionSandboxDatabase   = "sandbox-database"
+	ExtensionSandboxExample    = "sandbox-example"
+	ExtensionSandboxBackoffice = "sandbox-backoffice"
+	ExtensionDoc               = "doc"
+	ExtensionReadme            = "readme"
 )
 
 // ExtensionSpec is one mechanic of the catalog: its key, what a fresh project
@@ -47,6 +48,7 @@ func ExtensionCatalog() []ExtensionSpec {
 		{ExtensionSandboxFront, false, "the front layer: frontio/ and the route serving assets/frontend/"},
 		{ExtensionSandboxDatabase, false, "the database layer: databaseio/ and the declared databases"},
 		{ExtensionSandboxExample, true, "the examples/ suite and exec-test"},
+		{ExtensionSandboxBackoffice, false, "the admin backoffice: login, users, API tokens and the /api/admin JSON api"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},
 		{ExtensionReadme, true, "README.md, built from themes.yaml and the doc index"},
 	}
@@ -62,6 +64,8 @@ func ExtensionRequires(name string) []string {
 		return []string{ExtensionSandbox, ExtensionSandboxCli}
 	case ExtensionSandboxFront:
 		return []string{ExtensionSandbox, ExtensionSandboxServer}
+	case ExtensionSandboxBackoffice:
+		return []string{ExtensionSandbox, ExtensionSandboxServer, ExtensionSandboxFront, ExtensionSandboxDatabase}
 	case ExtensionSandbox, ExtensionDoc, ExtensionReadme:
 		return nil
 	}

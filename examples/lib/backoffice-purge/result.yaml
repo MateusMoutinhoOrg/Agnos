@@ -1,0 +1,59 @@
+cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep sortdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serializables \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serverdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep reflectdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep signaldeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir module github.com/MateusMoutinhoOrg/Keep as database \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nbackoffice-init started with path TestDir \nserver-init started with path TestDir \ncli-init started with path TestDir \nfront-init started with path TestDir \ncreating assets/frontend/index.html, answered on / \ncreating assets/frontend/404.html, answered on every path that names no file \ndatabase-init started with path TestDir \nadd-dep started with path TestDir dep embeddeps \nadd-dep started with path TestDir dep envdeps \nadd-dep started with path TestDir dep hashdeps \nadd-dep started with path TestDir dep jwtdeps \nadd-dep started with path TestDir dep passworddeps \nadd-dep started with path TestDir dep randdeps \nadd-dep started with path TestDir dep ratelimitdeps \nadd-dep started with path TestDir dep serializables \nadd-dep started with path TestDir dep serverdeps \nadd-dep started with path TestDir dep sortdeps \nadd-dep started with path TestDir dep std \nadd-dep started with path TestDir dep stringsdeps \nadd-dep started with path TestDir dep timedeps \nbackoffice-init: start the server with TEST_SECRET set to a random secret of at least 32 characters (openssl rand -hex 32), then add the first user with `Test add-backoffice-user --role root`\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \nbackoffice-purge started with path TestDir \nbackoffice-purge kept ./backofficedb, the store holding the users: remove it by hand if you mean to\nbuild started with path TestDir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 3f021705d81306281f30550baf2430abcc3d5e7bdc2b53cc8e9295532446ee54
+    - file: sandbox/api/config.go
+      sha: a066b4111dd8c7ab14959ba04201583d3d27bcaee096f63b51fff507a46f6654
+    - file: sandbox/internal/commands/help/InternalPureHandler.go
+      sha: 18a853786fedb56e56184afc30851dafa36c19c5cf2bc8b35f80d8102c743491
+    - file: sandbox/internal/commands/help/command.yaml
+      sha: aff4bd54b86585eba4f76f13f1eebdec404d22c3fe0d81b178243af025fc0b87
+    - file: sandbox/internal/commands/help/entries.go
+      sha: 197ccebdadcfd649bf66e5f0332e563a4db05baabc7d494c3f0c1e124dbb5707
+    - file: sandbox/internal/commands/help/new.go
+      sha: 92887b497e0736d26cf6bd3c1431b0a24944d7f43a91442251822cbc15f8fd11
+    - file: sandbox/internal/commands/help_flag/InternalPureHandler.go
+      sha: 95c3463414f795198120d0bc8b371deb9ec589157e2c9cc09cc5376f12aadf2b
+    - file: sandbox/internal/commands/help_flag/command.yaml
+      sha: e29b2c5cc712a98e237141eabe9ff975ac96743abd09eececbd5bad73ddba2e6
+    - file: sandbox/internal/commands/help_flag/entries.go
+      sha: 9168de79566c3b653a3b52a4bbf60ec6b9becc990d3d6b3ab7ae3bfd53a0ba53
+    - file: sandbox/internal/commands/help_flag/new.go
+      sha: b050f19a2746766abf5dda2af43953140da50c991474926b09d7cf0c7993d27e
+    - file: sandbox/internal/commands/start_server/InternalPureHandler.go
+      sha: e9777a4639373f2d926a5a3379086d67932af53dda1a79e0a80fe2817a1aca37
+    - file: sandbox/internal/commands/start_server/command.yaml
+      sha: f510b98004dfbf9ce75a4bd66c40a4fd0d5a93126a3884868fb9bbeae2963644
+    - file: sandbox/internal/commands/start_server/entries.go
+      sha: 51390be8027c876695a43fa7108ec8fd050d1032a8e565bb69ce963a16fa9947
+    - file: sandbox/internal/commands/start_server/new.go
+      sha: f665048827be442a896dfad87db20c7af1857b636e75a71c6eb9345676e43d2e
+    - file: sandbox/internal/commands/version/InternalPureHandler.go
+      sha: d73b7d53603b4c7d268be0f7099ee172d52a132d40fee05ea2de63b0c07bc03b
+    - file: sandbox/internal/commands/version/command.yaml
+      sha: 9cea48b7a03dd13f11957f589657feb24cbb6a9275f14d269b8ef3b701566740
+    - file: sandbox/internal/commands/version/entries.go
+      sha: 19392ff9ea44d28426243ebca8915313410880e90b1f1a0a4f4399a62acabb6f
+    - file: sandbox/internal/commands/version/new.go
+      sha: 140bd3f38f13e8612737b66c6717819a550706d7711a45cd4615018bef35743f
+    - file: sandbox/internal/routeprops/project.go
+      sha: 4b166b0973356e4ce4ca0a7e753d1e1cb028b78e02fb0837bf576f3c176fbccf
+    - file: sandbox/internal/routeprops/routeprops.go
+      sha: 8ecd6fd56a102bfe28365d35501a3891a69b9084149df8cbd2d18086db748eb5
+    - file: sandbox/internal/routeslist/frontend/InternalPureHandler.go
+      sha: 32d858c9d36c6a4ed152218c82722ee414beae492569b80c400587b438abf2a3
+    - file: sandbox/internal/routeslist/frontend/entries.go
+      sha: 6c0fbc57755f3199f5bceea7f482ad8780991e213b980b333d47f5085cd87fd5
+    - file: sandbox/internal/routeslist/frontend/new.go
+      sha: 165e8cc8ab4918ff3b69aed1a40a225aca4b373ab7c33c14a484356131220585
+    - file: sandbox/internal/routeslist/frontend/route.yaml
+      sha: 5668920287a070b50cb1b32992664036a8e74f325e1fdc06aefa0075fb08d3f9
+    - file: sandbox/internal/routeslist/health/InternalPureHandler.go
+      sha: 936fe65beb7ce899cc706de76fc0ed296adc933a386c89c5f2cd261c9623c41d
+    - file: sandbox/internal/routeslist/health/entries.go
+      sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
+    - file: sandbox/internal/routeslist/health/new.go
+      sha: f6beb9f24b8f00ca2dad63902460aad0c96307bd8439df3d65bd898aa5cb3544
+    - file: sandbox/internal/routeslist/health/route.yaml
+      sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9

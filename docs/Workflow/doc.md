@@ -107,6 +107,16 @@ agnos add-table url --database app-database
 
 From there `add-table-field` declares what a table holds and every method it generates is
 written for you. `agnos database-purge` removes the layer again.
+
+## Add the backoffice
+
+```bash
+agnos backoffice-init   # /admin pages, /api/admin, users, API tokens, backofficedb
+```
+
+It installs the server, front and database layers it is missing, and writes every file once.
+`start-server` then needs the `AGNOS_SECRET` environment variable. `agnos backoffice-purge`
+removes it again.
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No

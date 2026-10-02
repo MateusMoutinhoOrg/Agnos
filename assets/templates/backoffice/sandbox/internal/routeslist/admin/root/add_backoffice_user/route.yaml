@@ -1,0 +1,35 @@
+body:
+    content-type: application/x-www-form-urlencoded
+    form-schema:
+        properties:
+            email:
+                type: string
+            password:
+                type: string
+            role:
+                type: integer
+            username:
+                type: string
+        required:
+            - email
+            - password
+            - role
+            - username
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: form
+category: Backoffice Users
+help: Adds a backoffice user
+methods:
+    - POST
+paths:
+    - end: 2
+      id: AdminRootAddBackofficeUser
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/add-backoffice-user
+priority: 100
+response-type: text/html
+segments: 3

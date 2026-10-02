@@ -2,7 +2,7 @@ cli-output: "started with path TestDir \nbuild started with path TestDir \nsucce
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 8745e680fab635300a9727bce27432054ce0d2e403270937afc8717dbb96794c
+      sha: c1f35691e4a29b97254d6b6d5b8dcee18df284cd92782018a732973647f4dc87
     - file: assets/frontend/404.html
       sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
     - file: assets/frontend/index.html

@@ -6,12 +6,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// commandPropsDest is where commandprops.CommandProps is declared: a package
-// of its own under sandbox/internal, since every command package names it,
-// none of them may import another, and its fields may name any type of the
-// project.
-const commandPropsDest = utils.CommandPropsDir + "/" + utils.CommandPropsFile
-
 // retiredCliFiles are generated files an older build wrote that nothing
 // renders any more: the dispatch before it moved to generated/cli/cli, and the
 // entries.yaml + handler.go the build wrote for help and version before
@@ -29,14 +23,11 @@ var retiredCliFiles = []string{
 	"docs/EntriesYaml/Index.md",
 }
 
-// GenerateCommandProps renders assets/templates/commandprops.go into
-// sandbox/internal/commandprops/commandprops.go — the CommandProps one command line's chain
-// of commands shares, handed to every InternalPureHandler as its first
-// argument.
-//
-// It is written **once**, like the Handle* files: what a command line carries
-// from a middleware to the command after it is the project's to type, so a
-// struct already on disk is left as it is.
+// GenerateCommandProps rewrites sandbox/internal/commandprops/commandprops.go
+// — the CommandProps one command line's chain of commands shares, handed to
+// every InternalPureHandler as its first argument — as the embedding of every
+// part the package declares beside it, the way GenerateRouteProps does for
+// the server layer.
 func GenerateCommandProps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) error {
 	for _, retired := range retiredCliFiles {
 		if io.IsFile(retired) {
@@ -44,15 +35,11 @@ func GenerateCommandProps(sandbox *api.Sandbox, io *smartio.SmartIO, module stri
 		}
 	}
 
-	// Read rather than IsFile: a struct MigrateLegacyProps moved here this
-	// build is still pending, and IsFile only sees the disk.
-	if _, err := io.ReadFile(commandPropsDest); err == nil {
-		return nil
-	}
-
-	vars := map[string]any{
-		"Module":        module,
-		"GeneratorName": generatorName(sandbox),
-	}
-	return utils.RenderTemplateToDest(sandbox, io, "templates/commandprops.go", vars, commandPropsDest)
+	return generatePropsAggregate(sandbox, io, propsAggregate{
+		Dir:             utils.CommandPropsDir,
+		File:            utils.CommandPropsFile,
+		Type:            "CommandProps",
+		Template:        "templates/commandprops.go",
+		ProjectTemplate: "templates/commandprops_project.go",
+	}, module)
 }

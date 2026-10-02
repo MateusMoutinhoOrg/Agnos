@@ -968,6 +968,17 @@ type Actions struct {
 	// assets/frontend/ untouched.
 	FrontPurge func(path string) error
 
+	// BackofficeInit adds the admin backoffice to a project: login, backoffice
+	// users, API tokens and the /api/admin JSON api, over a database of its
+	// own. It installs the server, front and database layers first when any is
+	// missing, and the catalog deps it calls into. Every file it writes is the
+	// project's from then on.
+	BackofficeInit func(path string) error
+
+	// BackofficePurge removes everything BackofficeInit wrote, leaving the
+	// layers it stood on, the deps it installed and the store on disk.
+	BackofficePurge func(path string) error
+
 	// AddPage scaffolds a new html page, assets/frontend/<name>.html, which
 	// the frontend route serves as soon as it exists.
 	AddPage func(props PageProps) error

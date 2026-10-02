@@ -1,0 +1,34 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            limit:
+                type: integer
+            page:
+                type: integer
+            role:
+                enum:
+                    - root
+                    - viewer
+                type: string
+            search:
+                type: string
+        type: object
+    max-bytes: 1048576
+    type: json
+category: Backoffice Users API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/list-backoffice-users -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"search":"ana","role":"viewer","page":1,"limit":20}'''
+help: Lists backoffice users, filtered and paginated
+methods:
+    - POST
+paths:
+    - end: 2
+      id: ApiAdminListBackofficeUsers
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/list-backoffice-users
+priority: 100
+response-type: application/json
+segments: 3

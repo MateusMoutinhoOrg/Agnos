@@ -44,7 +44,7 @@ func CollectConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []Constructo
 		parts := sandbox.Deps.Stringsdeps.Split(file, "/")
 		name := parts[len(parts)-1]
 
-		if isConstructorExempt(name) || !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
+		if utils.IsConstructorExempt(sandbox, name) || !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
 			continue
 		}
 
@@ -64,15 +64,4 @@ func CollectConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []Constructo
 	}
 
 	return constructors
-}
-
-// isConstructorExempt reports a sandbox/api/ file that declares no field of the
-// sandbox, one of utils.ConstructorExempt.
-func isConstructorExempt(name string) bool {
-	for _, exempt := range utils.ConstructorExempt {
-		if exempt == name {
-			return true
-		}
-	}
-	return false
 }

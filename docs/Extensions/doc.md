@@ -9,6 +9,7 @@ directories the project happens to carry.
 doc: true
 readme: true
 sandbox: true
+sandbox-backoffice: false
 sandbox-cli: true
 sandbox-database: false
 sandbox-deps: true
@@ -26,6 +27,7 @@ sandbox-server: false
 | `sandbox-front` | `sandbox/internal/generated/frontio` and the `frontend` route serving `assets/frontend/`; `add-page` and `remove-page` |
 | `sandbox-database` | `sandbox/internal/{databaseio,databases}`; `add-database`, `add-table`, `add-table-field` and the rest |
 | `sandbox-example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `exec-test`, `update-test` |
+| `sandbox-backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backofficedb`, `add-backoffice-user`), and the key turns on its doc. Needs `sandbox-server`, `sandbox-front` and `sandbox-database` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |
 | `readme` | `README.md`, built from `AgnosConfig/docs/ReadmeHeader.md` and the doc index |
 
@@ -51,7 +53,8 @@ agnos cli-purge                        # removes the files and writes sandbox-cl
 ```
 
 A mechanic that needs another one gets it: `server-init` runs `cli-init` first when the
-project has no cli, and `front-init` runs `server-init`.
+project has no cli, `front-init` runs `server-init`, and `backoffice-init` runs whichever of
+`server-init`, `front-init` and `database-init` the project is missing.
 
 Never edit `extensions.yaml` by hand — the commands above re-render it with the keys in
 alphabetical order. A key the catalog gained since this project was scaffolded is filled in

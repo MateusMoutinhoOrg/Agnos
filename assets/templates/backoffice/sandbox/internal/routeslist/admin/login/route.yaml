@@ -1,0 +1,30 @@
+body:
+    content-type: application/x-www-form-urlencoded
+    form-schema:
+        properties:
+            password:
+                type: string
+            username:
+                type: string
+        required:
+            - password
+            - username
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: form
+category: Backoffice
+help: Signs a backoffice user in and sets the session cookie
+long-description: The username field takes a username or an email. A match sets the session cookie and redirects to /admin/home; anything else answers the login page under a 401. After 20 failed sign-ins from one client ip, or 10 on one login, in 15 minutes, every attempt is answered the login page under a 429 with Retry-After, its password unchecked, until the 15 minutes pass.
+methods:
+    - POST
+paths:
+    - end: 1
+      id: AdminLogin
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/login
+priority: 100
+response-type: text/html
+segments: 2
