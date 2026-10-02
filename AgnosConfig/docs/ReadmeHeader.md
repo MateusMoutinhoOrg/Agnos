@@ -14,8 +14,8 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed,
 > [!WARNING]
 > **Under Development (Status: Alpha)**
 >
-> - **Expected Beta:** end of September
-> - **Expected Stable:** November
+> - **Expected Beta:** end of October
+> - **Expected Stable:** end of 2026
 >
 > Its patterns, commands and generated output change frequently and without notice. Using it is **not recommended** unless you are an experienced developer or team comfortable reading the source, tracking breaking changes, and fixing generated code by hand.
 
