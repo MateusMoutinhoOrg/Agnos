@@ -9,7 +9,8 @@ package api
 // then on; `{{.GeneratorName}} backoffice-purge` removes it.
 type BackofficeConfig struct {
 	// Secret signs the backoffice session tokens. It is read from the
-	// <NAME>_SECRET environment variable, never from the command line.
+	// <NAME>_SECRET environment variable, never from the command line, or
+	// generated for the run when that variable is unset.
 	Secret string
 
 	// AllowXForwardedFor trusts the last entry of X-Forwarded-For as the

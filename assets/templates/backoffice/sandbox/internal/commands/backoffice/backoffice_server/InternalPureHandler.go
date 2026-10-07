@@ -11,14 +11,19 @@ import (
 // start-server runs after it. It reads the secret that signs the backoffice
 // sessions from the environment — never from the command line — and the two
 // flags the backoffice adds to start-server, onto sandbox.Config, where every
-// route reads them. Without a secret the server does not start.
+// route reads them. With no secret set it generates one for the run and warns
+// that sessions end at the next restart; with one too short the server does
+// not start.
 //
 // It is a middleware rather than an edit to start-server's own handler, so
 // that file stays the project's and backoffice-purge has nothing to undo in it.
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	secret, err := backofficeauth.ReadSecret(sandbox)
+	secret, generated, err := backofficeauth.ReadSecret(sandbox)
 	if err != nil {
 		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
+	}
+	if generated {
+		sandbox.Deps.Std.Error("warning: %s is not set, so a random secret was generated for this run: every backoffice session ends when the server restarts, and no other instance accepts them; set it to a random secret of at least %d characters (openssl rand -hex 32) to keep them\n", backofficeauth.SecretEnv(sandbox), backofficeauth.MinSecretLength)
 	}
 
 	sandbox.Config.Secret = secret

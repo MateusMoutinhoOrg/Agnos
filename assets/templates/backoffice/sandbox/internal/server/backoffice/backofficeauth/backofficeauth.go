@@ -13,8 +13,8 @@ const CookieName = "admin_token"
 // SessionSeconds is how long a session token is valid after login.
 const SessionSeconds = 30 * 60
 
-// SecretEnv is the environment variable start-server reads the secret that
-// signs session tokens from: the project's name upper-cased, every character
+// SecretEnv is the environment variable that may hold the secret that signs
+// session tokens: the project's name upper-cased, every character
 // but a letter or a digit turned into "_", then "_SECRET" — MEUSITE_SECRET for
 // a project named meusite. It follows the name the project is built under, so
 // renaming the project renames the variable. It is never a flag — every user
@@ -32,6 +32,10 @@ func SecretEnv(sandbox *api.Sandbox) string {
 
 // MinSecretLength is the fewest characters the secret may have.
 const MinSecretLength = 32
+
+// GeneratedSecretBytes is how many random bytes the secret ReadSecret
+// generates carries, in hex — twice MinSecretLength.
+const GeneratedSecretBytes = 32
 
 // Role is what the role column of a backofficeuser stands for.
 type Role int64
@@ -85,15 +89,22 @@ func nowSeconds(sandbox *api.Sandbox) int64 {
 }
 
 // ReadSecret is the secret that signs session tokens, read from the SecretEnv
-// environment variable. It refuses one that is unset or shorter than
-// MinSecretLength, saying how to set it.
-func ReadSecret(sandbox *api.Sandbox) (string, error) {
+// environment variable. Unset or empty, it is GeneratedSecretBytes random
+// bytes generated for this run alone, and the bool is true: it lives only in
+// memory, so every session ends when the server restarts. A value shorter
+// than MinSecretLength is refused, saying how to set it, rather than replaced,
+// so a mistyped secret never turns into a generated one in silence.
+func ReadSecret(sandbox *api.Sandbox) (string, bool, error) {
 	env := SecretEnv(sandbox)
 	secret := sandbox.Deps.Envdeps.Getenv(env)
-	if len(secret) < MinSecretLength {
-		return "", sandbox.Deps.Std.Errorf("set the %s environment variable to a random secret of at least %d characters (openssl rand -hex 32); it signs the backoffice sessions", env, MinSecretLength)
+	if secret == "" {
+		generated, err := sandbox.Deps.Randdeps.Hex(GeneratedSecretBytes)
+		return generated, true, err
 	}
-	return secret, nil
+	if len(secret) < MinSecretLength {
+		return "", false, sandbox.Deps.Std.Errorf("the %s environment variable holds fewer than %d characters: set it to a random secret (openssl rand -hex 32), or unset it to have one generated for each run; it signs the backoffice sessions", env, MinSecretLength)
+	}
+	return secret, false, nil
 }
 
 // HashPassword is how a backoffice password is stored: a salted, deliberately

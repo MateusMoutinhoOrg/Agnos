@@ -236,7 +236,7 @@ written for you. `{{.GeneratorName}} database-purge` removes the layer again.
 ## Run the backoffice
 
 ```bash
-export {{.SecretEnv}}=$(openssl rand -hex 32)
+export {{.SecretEnv}}=$(openssl rand -hex 32)   # optional: unset, one is generated per run
 {{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} add-backoffice-user --username admin --email admin@example.com --role root
 {{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server --insecure-http   # then /admin/login
 ```
@@ -251,8 +251,8 @@ Every page, route and package of it is the project's, written once: change it by
 ```
 
 It installs the server, front and database layers it is missing, and writes every file once.
-`start-server` then needs the `{{.SecretEnv}}` environment variable. `{{.GeneratorName}} backoffice-purge`
-removes it again.
+`start-server` then reads the session secret from `{{.SecretEnv}}`, or generates one per run when
+it is unset. `{{.GeneratorName}} backoffice-purge` removes it again.
 {{- end }}
 ## Add reusable logic
 

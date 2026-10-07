@@ -289,7 +289,8 @@ How a path is resolved, and a bundler's build, is in [FrontUsage](../FrontUsage/
   `sandbox/api/backofficeconfig.go`, both embedded by the generated aggregates, and the
   secret is read by the `backoffice-server` middleware in front of `start-server`.
 - The session secret is the `{{.SecretEnv}}` environment variable, at least 32 characters, never
-  a flag or a file; without it `start-server` refuses to start.
+  a flag or a file; shorter, `start-server` refuses to start. Unset, `start-server` generates one
+  for the run and warns: every session ends at a restart.
 - Its records live in `backofficedb`, a database of its own; the project's databases are never
   touched. `./backofficedb` is gitignored and survives a purge.
 

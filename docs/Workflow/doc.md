@@ -115,8 +115,8 @@ agnos backoffice-init   # /admin pages, /api/admin, users, API tokens, backoffic
 ```
 
 It installs the server, front and database layers it is missing, and writes every file once.
-`start-server` then needs the `AGNOS_SECRET` environment variable. `agnos backoffice-purge`
-removes it again.
+`start-server` then reads the session secret from `AGNOS_SECRET`, or generates one per run when
+it is unset. `agnos backoffice-purge` removes it again.
 ## Add reusable logic
 
 `sandbox/internal/<pkg>/`, one directory per concern, imported by whatever needs it. No

@@ -7,13 +7,15 @@ wrote every file of it once; each one is the project's from then on.
 ## Run it
 
 ```bash
-export {{.SecretEnv}}=$(openssl rand -hex 32)          # signs the sessions; >= 32 chars, never a flag or a file
+export {{.SecretEnv}}=$(openssl rand -hex 32)          # optional: signs the sessions; >= 32 chars, never a flag or a file
 {{.Name}} add-backoffice-user --username admin --email admin@example.com --role root   # prints the password once
 {{.Name}} start-server --insecure-http                 # local plain http; drop the flag behind https
 ```
 
-Open `/admin/login`. Without `{{.SecretEnv}}` the server does not start. The name is the
-project's name upper-cased, every other character `_`, then `_SECRET`.
+Open `/admin/login`. Without `{{.SecretEnv}}`, `start-server` generates a secret for the run and
+warns: it lives only in memory, so every session ends at a restart and no other instance accepts
+them. Shorter than 32 characters, the server does not start. The name is the project's name
+upper-cased, every other character `_`, then `_SECRET`.
 
 | `start-server` flag | Read by | Effect |
 |---|---|---|

@@ -85,7 +85,7 @@ func BackofficeInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path stri
 		return err
 	}
 
-	sandbox.Deps.Std.Log("backoffice-init: start the server with %s set to a random secret of at least 32 characters (openssl rand -hex 32), then add the first user with `%s add-backoffice-user --role root`\n", vars["SecretEnv"], project_conf.Name)
+	sandbox.Deps.Std.Log("backoffice-init: add the first user with `%s add-backoffice-user --role root`, then start the server; set %s to a random secret of at least 32 characters (openssl rand -hex 32) so sessions survive a restart, or one is generated for each run\n", project_conf.Name, vars["SecretEnv"])
 
 	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxBackoffice, true)
 }
