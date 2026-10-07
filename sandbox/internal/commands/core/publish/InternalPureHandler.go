@@ -6,7 +6,6 @@ import (
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	compileAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/compile"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -14,7 +13,7 @@ import (
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	if entries.Publisher != "gh" {
 		response.Error("Unsupported publisher %q. The only available publisher is \"gh\".\n", entries.Publisher)
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
@@ -27,12 +26,12 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 		project_conf, err := utils.LoadProjectConf(sandbox, io)
 		if err != nil {
 			response.Error("%s\n", err.Error())
-			return cliio.Fail(sandbox, api.ExitFailure, "", "")
+			return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 		}
 		releaseName = project_conf.Version
 		if releaseName == "" {
 			response.Error("%s declares no version: set one there or pass --release-name\n", utils.ProjectConfPath(sandbox))
-			return cliio.Fail(sandbox, api.ExitFailure, "", "")
+			return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 		}
 	}
 
@@ -40,7 +39,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	outputs, err := compileAction.Outputs(sandbox, targets)
 	if err != nil {
 		response.Error("%s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	// Progress goes to Log: a Printf answers the command line with ExitOk, and
@@ -48,13 +47,13 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	response.Log("Building project...\n")
 	if err := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: "go"}); err != nil {
 		response.Error("build failed: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	response.Log("Compiling targets...\n")
 	if err := compileAction.Compile(sandbox, api.CompileProps{Path: props.Path, Targets: targets}); err != nil {
 		response.Error("compile failed: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	args := []string{"release", "create", releaseName}
@@ -77,11 +76,11 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 
 	if err != nil {
 		response.Error("gh execution failed: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 	if result.ExitCode != 0 {
 		response.Error("gh release create failed: %s\n", result.Output)
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	response.Printf("Release %s created and published successfully!\n", releaseName)

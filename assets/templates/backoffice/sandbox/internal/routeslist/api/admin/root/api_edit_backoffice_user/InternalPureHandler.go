@@ -3,7 +3,6 @@ package api_edit_backoffice_user
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/generated/routeio"
 	"{{.Module}}/sandbox/internal/routeprops"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeapi"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
@@ -18,13 +17,13 @@ import (
 // carrying the reason, and a user that does not exist a 404.
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if props.User == nil {
-		return routeio.Fail(sandbox, api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
 	id := int64(entries.Body.Id)
 	_, ok := backofficeusers.Find(sandbox, id)
 	if !ok {
-		return routeio.Fail(sandbox, api.StatusNotFound, "id", "that user does not exist")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusNotFound, "id", "that user does not exist")
 	}
 
 	role, err := backofficeapi.Role(sandbox, entries.Body.Role)
@@ -41,12 +40,12 @@ func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, ent
 		return err
 	}
 	if message != "" {
-		return routeio.Fail(sandbox, api.StatusBadRequest, "", message)
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusBadRequest, "", message)
 	}
 
 	user, ok := backofficeusers.Find(sandbox, id)
 	if !ok {
-		return routeio.Fail(sandbox, api.StatusNotFound, "id", "that user does not exist")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusNotFound, "id", "that user does not exist")
 	}
-	return routeio.WriteJSON(sandbox, *response, api.StatusOk, backofficeapi.UserDocument(sandbox, user))
+	return sandbox.Deps.OpinatedAgnosServer.WriteJSON(sandbox.Deps.Serializables, *response, api.StatusOk, backofficeapi.UserDocument(sandbox, user))
 }

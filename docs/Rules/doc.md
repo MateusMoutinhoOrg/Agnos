@@ -22,7 +22,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   Change the declaration it is rendered from, or the template under `assets/`
   when this project carries one for it, then run `build`.
 - `sandbox/internal/generated/` holds every package `build` rewrites whole and nothing else: no
-  file there is ever edited, and no hand-written package is ever put there. A package mixing a
+  file there is ever edited, and no hand-written package is ever put there. It holds the
+  registries and config alone — code that is the same in every project is an `OpinatedAgnos<X>`
+  lib, not a generated package. Importing a package an older build generated there names its
+  replacement. **(verify)** A package mixing a
   generated file with a hand-written one — a command, a route, a database — stays under
   `sandbox/internal/`.
 - Generated `.go` is gofmt'ed as it is written, so a regenerated tree diffs to zero against one
@@ -50,16 +53,27 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   capability from outside (io, text, sorting, hashing, templating) is restated as a contract
   under `sandbox/deps/` and reached as `sandbox.Deps.<Contract>`. **(verify)**
 - `sandbox/` holds only `api`, `constructors`, `deps`, `internal` and `new.go`. **(verify)**
-- `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, and imports that
-  only for `Sandbox.Deps`. **(verify)**
+- `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, for `Sandbox.Deps`, and
+  the `sandbox/deps/OpinatedAgnos<X>` contracts, for the aliases a mechanic's api file is made
+  of. **(verify)**
 - Every function of `sandbox/internal/` takes `sandbox *api.Sandbox` as
   its first parameter and nothing else standing for the outside world: deps is reached as
   `sandbox.Deps.<Contract>`, and the rest of the api as `sandbox.<Field>`. Holding the api is
   what lets one part of it call another, and what makes a field a caller replaced take effect
   everywhere.
 - `sandbox/deps/<x>/` imports nothing at all: a contract is written in Go's builtin types only,
-  and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
-  `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
+  and the adapter converts. The loose `sandbox/deps/*.go` may name `sandbox/deps` packages, to
+  compose `deps.Deps`, and an `OpinatedAgnos<X>/` contract may import other contracts under
+  `sandbox/deps/` and nothing else. **(verify)**
+- A dep states a library's raw capability and never a decision of the project using it — except
+  an **opinated lib**, `OpinatedAgnos<X>`, the one kind of dep that carries an agnos mechanic
+  itself: `OpinatedAgnosCli` (the command types, the dispatch chain, binding, failures, triggers),
+  `OpinatedAgnosServer` (the route types, the request chain, binding, json-schema, writers),
+  `OpinatedAgnosFront` (the file layer of `assets/frontend/`), `OpinatedAgnosDatabase` (the readers
+  every `methods.go` shares). Each mechanic's `-init` installs its lib, and a mechanic is never on
+  without it. **(verify)** The lib holds no dep: what it reaches the outside world through is
+  handed to it — a `MainProps` built by the generated registry, or the one dep a call needs as
+  its first parameter. What stays in the sandbox is what the project declares or edits.
 - Every `sandbox/api/<x>.go` other than `sandbox.go`, `command.go` and `route.go` is a field of
   the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go` —
   or `sandbox/internal/<x>/<x>/new.go`, for a layer split into packages — declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
@@ -99,7 +113,9 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   interface, no embedded field but a struct the package declares, and no identifier that is neither predeclared
   nor declared in the package. `Sandbox.Deps` is the one field exempt, because
   it is the one field that does not cross: a consumer installs the api of a
-  repo, never its wiring, so the copy drops it. This is what makes every agnos
+  repo, never its wiring, so the copy drops it. A mechanic's surface — an alias of an
+  `OpinatedAgnos<X>` type, and a part holding only those — is exempt for the same reason: it is
+  the lib's, and the copy drops it too. This is what makes every agnos
   repo installable as a dep. **(verify)**
 - `cmd/main/` wires an adapter into the sandbox and holds no logic.
 - Every `assets/deplist/<dep>/<path>` and `assets/adapterlist/<adapter>/<path>`, rendered with
@@ -133,7 +149,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
   through `sandbox.Deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
 - `response.Printf` (stdout) answers the command line with `api.ExitOk`; `response.Error` and
-  `response.Log` (stderr) answer nothing. Refuse a command line by returning `cliio.Fail` — a
+  `response.Log` (stderr) answer nothing. Refuse a command line by returning
+  `sandbox.Deps.OpinatedAgnosCli.Fail` — a
   returned error fails it even after a print. A strict command that returns `nil` without
   printing has run and exits `0`; only a middleware declines.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.
@@ -142,7 +159,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `Cli.Commands` is the whole command surface, one `api.Command` per declared command, built by
   `sandbox/internal/generated/cli/cli/new.go` from each package's generated `NewCommand`. The dispatch and
   both help screens read it; nothing about the command set is generated per command anywhere
-  else. Each run binds to its own copy of the declaration, made by `api.BindCommand`, so what
+  else. The dispatch itself is `OpinatedAgnosCli.CliMain`, handed `Cli.Commands` by the
+  registry. Each run binds to its own copy of the declaration, made by `BindCommand`, so what
   the slice holds is never written to.
 
 ## Output channels

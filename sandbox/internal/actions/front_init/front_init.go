@@ -11,9 +11,9 @@ import (
 
 // frontDeps are the contracts the front layer calls into on top of the ones
 // the server layer already installs: the asset tree every file is read out
-// of. Everything else frontio touches — text conversion above all — comes
-// with the server.
-var frontDeps = []string{"embeddeps"}
+// of, and OpinatedAgnosFront — the file layer itself, last because its
+// contract imports the first.
+var frontDeps = []string{"embeddeps", utils.OpinatedAgnosFront}
 
 // FrontInit installs the deps the front layer depends on and turns the front
 // mechanic on, then runs build as a follow-up step, which renders the group.
@@ -31,10 +31,8 @@ func FrontInit(sandbox *api.Sandbox, path string) error {
 		}
 	}
 
-	for _, dep := range frontDeps {
-		if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: dep}); err != nil {
-			return err
-		}
+	if err := InstallDeps(sandbox, path); err != nil {
+		return err
 	}
 
 	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
@@ -42,4 +40,17 @@ func FrontInit(sandbox *api.Sandbox, path string) error {
 		return err
 	}
 	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+}
+
+// InstallDeps installs the contracts the front layer calls into on top of the
+// server's. It is exported for the same reason server-init exports its own: a
+// layer that composes FrontInitInternal into its own transaction — the
+// backoffice does — still has to install this set first.
+func InstallDeps(sandbox *api.Sandbox, path string) error {
+	for _, dep := range frontDeps {
+		if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: dep}); err != nil {
+			return err
+		}
+	}
+	return nil
 }

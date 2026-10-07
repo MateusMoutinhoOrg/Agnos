@@ -67,7 +67,7 @@ func nextCommand(sandbox *api.Sandbox, argv []string) *api.Command {
 		if !declared.Strict {
 			continue
 		}
-		bound := api.BindCommand(declared)
+		bound := sandbox.Deps.OpinatedAgnosCli.BindCommand(declared)
 		bound.Argv = argv
 		if bound.IsActionable(bound) {
 			return declared

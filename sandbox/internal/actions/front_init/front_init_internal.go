@@ -56,8 +56,8 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 // existing one alone: like any route's InternalPureHandler.go it is written
 // once and then the project's — turning spaFallback on is an edit to it — so
 // re-rendering over an edited copy would undo a deliberate change without
-// saying so. The path check it relies on lives in the generated frontio, so a
-// fix to it reaches the project on the next build whatever this file holds.
+// saying so. The path check it relies on lives in the OpinatedAgnosFront lib,
+// so a fix to it reaches the project with the lib whatever this file holds.
 func writeFrontendRoute(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
 	dir := utils.RouteDir(sandbox, io, utils.FrontendRouteName)
 

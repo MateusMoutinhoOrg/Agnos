@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	databaseInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/database_init"
+	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
@@ -25,6 +26,16 @@ func BackofficeInit(sandbox *api.Sandbox, path string) error {
 	}
 	if !has_server {
 		if err := serverInitAction.InstallDeps(sandbox, path); err != nil {
+			return err
+		}
+	}
+
+	has_front, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionSandboxFront)
+	if err != nil {
+		return err
+	}
+	if !has_front {
+		if err := frontInitAction.InstallDeps(sandbox, path); err != nil {
 			return err
 		}
 	}

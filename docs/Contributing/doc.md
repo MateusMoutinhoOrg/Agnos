@@ -37,7 +37,7 @@ is a command by holding a `command.yaml`, so the folder costs nothing to read; m
 `rename-command <name> <name> --dir <folder>`.
 
 `--path` and `--quiet` come from the `project` middleware: the command declares neither.
-`InternalPureHandler.go` calls the action, returns `cliio.Fail(sandbox, api.ExitFailure, "", err.Error())`
+`InternalPureHandler.go` calls the action, returns `sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())`
 on error and `Printf`s the result. Progress goes to `response.Log`, never `Printf`: a print
 answers the line with exit 0, but a failure returned after it still exits 1.
 
@@ -62,16 +62,16 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Concept | CLI | Server | Front | Database |
 |---|---|---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps`) | `sandbox/deps/database/` (a remote dep, not a catalog one) |
-| Surface + constructor | `sandbox/api/cli.go`, `sandbox/api/command.go`, `sandbox/internal/generated/cli/new.go` -> `Cli.Commands` | `sandbox/api/server.go`, `sandbox/api/route.go`, `sandbox/internal/generated/server/server/new.go` -> `Server.Routes` (found by `utils.ConstructorSource`, one level down) | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
+| Surface + constructor | `sandbox/api/{cli,command,trigger}.go` (aliases), `sandbox/internal/generated/cli/cli/new.go` -> `Cli.Commands` | `sandbox/api/{server,route}.go` (aliases), `sandbox/internal/generated/server/server/new.go` -> `Server.Routes` (found by `utils.ConstructorSource`, one level down) | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
 | Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — | — |
-| Dispatch (generic) | `sandbox/internal/generated/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go`, over the generic `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) | — | — (the methods are generated, not dispatched) |
-| Shared package | — | `sandbox/internal/generated/routeio/` | `sandbox/internal/generated/frontio/` | `sandbox/internal/generated/databaseio/` |
+| Opinated lib (the code every project shares) | `OpinatedAgnosCli`: `CliMain` (dispatch, binder, matcher), `Fail`, `FailureOf`, `MatchTrigger` | `OpinatedAgnosServer`: `ServerMain` (dispatch, binder, matcher), `Fail`, `FailureOf`, `WriteError`, `WriteJSON`, the json-schema validators | `OpinatedAgnosFront`: `Resolve`, `SafePath`, `ContentTypeOf` | `OpinatedAgnosDatabase`: the readers and filters every `methods.go` calls |
 | Answer to bad input | the dispatch, exit 2 | `server/errors/handle_*.go`, written once by `build` | — (the server's) | — |
 | Declared unit | `commands/[<folder>/]<name>/command.yaml` -> generated `new.go` + `entries.go` | `routeslist/[<folder>/]<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | none: `assets/frontend/**`, served by `routeslist/frontend/` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
 | Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | — | `collect_databases.go`, `collect_database_docs.go` |
 | Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
-| Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/sandbox-front/`, `assets/doc-front/` | `assets/sandbox-database/`, `assets/doc-database/` |
+| Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/doc-front/` | `assets/doc-database/` |
+| Catalog | `assets/{deplist,adapterlist}/OpinatedAgnosCli/` | `assets/{deplist,adapterlist}/OpinatedAgnosServer/` | `assets/{deplist,adapterlist}/OpinatedAgnosFront/` | `assets/{deplist,adapterlist}/OpinatedAgnosDatabase/` |
 | Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` | `sandbox-database` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` | `database-init` / `database-purge` |
 | Interview gate (`interview/state.go`) | `Cli System` -> `sandbox-cli`, step `cli-init` | `Server System` -> `sandbox-server`, step `server-init` | `Front System` -> `sandbox-front`, step `front-init` | `Database System` -> `sandbox-database`, step `database-init` |
@@ -81,17 +81,45 @@ A layer is an extension, so adding one is [Add an extension](#add-an-extension) 
 
 `<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders the mechanic's code group into the same transaction, and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole — its `sandbox/constructors/<x>/` included, since that package names what is being removed — then writes the key back as `false`.
 
-`sandbox/internal/generated/databaseio/` is the same third package one layer over: a database may not import another one, so the readers every generated `methods.go` shares live beside them. Its one rule is the layer's: nothing converts a stored value without a comma-ok, so a malformed record is an error and never a panic.
+### The opinated libs
 
-`sandbox/internal/generated/routeio/` exists because a route may not import `internal/generated/server/server`: shared route code goes in a third package both may import. It is also where the two readers that put the dep names back on a bound route live — `RequestOf` and `ResponseOf`, because `api.Route` carries the request and the response as `any`: `sandbox/api/` may name no type of `sandbox/deps`. `sandbox/internal/generated/frontio/` is the same shape one layer up.
+Code that is the same in every project is never a generated package: it is an **opinated lib**,
+`OpinatedAgnos<X>` — a catalog dep (`assets/deplist/OpinatedAgnos<X>/` + `assets/adapterlist/OpinatedAgnos<X>/`)
+whose contract carries the mechanic itself, the one exception to "a dep is 0-opinionated". The
+mechanic's `sandbox/api/` files are type aliases of the contract's types (`type Command =
+opinatedagnoscli.Command`), so the project still reads `api.Command`; `checkSandboxApi`,
+`checkSandboxDeps` and `apishape` admit exactly that (`utils.OpinatedPrefix`). What stays in the
+sandbox is what changes per project: the registries `internal/generated/{cli/cli,server/server}/new.go`,
+config, each unit's `new.go`/`entries.go`, and everything the project writes.
 
-That same import rule is why `routeio.Raise` reaches the project's `handle_*.go` through the `Fail` field of `api.Server` rather than by calling them: `internal/generated/server/server` imports every route package, so nothing under `routeslist/` may import it back, and a function field on the api is how this repo already crosses that line everywhere else. The eight files — and `sandbox/internal/routeprops/routeprops.go`, the `routeprops.RouteProps` every handler is handed first — are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/server/new.go` always has something to call.
+To change one: edit `assets/deplist/OpinatedAgnos<X>/` and `assets/adapterlist/OpinatedAgnos<X>/`;
+this repo carries `OpinatedAgnosCli` installed, so re-mirror it into `sandbox/deps/` and `adapters/libs/`
+(`check_deplist`/`check_adapterlist` hold the two equal) — the other three are exercised by the
+examples. Two rules every lib keeps:
 
-A route's `Entries` is a type of its own per route, so the generic `RequestHandler` builds, fills and calls it through `sandbox.Deps.Reflectdeps` — the one catalog dep `server-init` installs for that alone. `api/route.go` holds it as `InternalPurehandler any` for the same reason. `signaldeps` is the other one it installs, for the graceful shutdown `ServerMain` hooks on.
+- **It holds no dep.** The available returns `deps.Deps` by value and the `project` middleware
+  swaps `Std.Log` on `--quiet`, so a pointer captured at `Bind` would be stale. An entry point
+  takes a `MainProps` the generated registry builds per call (`Std` by pointer, the project's
+  `RouteProps`/`CommandProps` as a `NewProps` factory); any other function takes the one dep it
+  needs as its first parameter (`WriteJSON(serializables, …)`, `Resolve(embedded, …)`).
+- **Only the lib raises.** A handler — or a generated `ReadBody` — returns a failure built by
+  `Fail`; the lib's dispatch raises it through the `Fail` field of `api.Cli`/`api.Server`, which
+  the registry fills with the switch over the project's `handle_*.go`.
 
-The cli matcher exists twice the same way: the generated `sandbox/internal/generated/cli/command/{IsActionable,CommandHandler}.go` (segments, `--key=value`, a number never a flag) and `sandbox/internal/utils/command_match.go`, which `explain-command` reads a `command.yaml` with. A change to one is made to both in the same commit.
+The adapter's code is ported, not wrapped: it uses `strings`, `strconv`, `regexp`, `reflect` and
+`fmt` directly, with the semantics of the stringsdeps/reflectdeps/std adapters it replaced, so a
+command line or a request answers byte for byte as before. Each mechanic's `<x>-init` installs its
+lib after the deps its contract imports (`utils.OpinatedLib`); `verify` refuses a mechanic on
+without it, and names any import of a retired `internal/generated/` package with its replacement
+(`utils.RetiredReplacement`).
 
-The matcher exists twice: the generated `sandbox/internal/generated/server/route/IsActionable.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
+The project's `handle_*.go` are reached through the `Fail` field of `api.Server` rather than called by the lib, which cannot name them. The eight files — and `sandbox/internal/routeprops/routeprops.go`, the `routeprops.RouteProps` every handler is handed first — are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/server/new.go` always has something to call.
+
+A route's `Entries` is a type of its own per route, so the lib builds, fills and calls it by reflection; `api.Route` holds it as `InternalPureHandler any` for the same reason. `server-init` installs `signaldeps` for the graceful shutdown `ServerMain` hooks on, handed to it in `MainProps`.
+
+The cli matcher exists twice the same way: the `OpinatedAgnosCli` lib's `is_actionable.go` and `command_handler.go` (segments, `--key=value`, a number never a flag) and `sandbox/internal/utils/command_match.go`, which `explain-command` reads a `command.yaml` with. A change to one is made to both in the same commit; the same goes for the lib's `trigger.go` and `utils/trigger.go`.
+
+The matcher exists twice: the `OpinatedAgnosServer` lib's `is_actionable.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
 
 ## The backoffice: a mechanic that generates nothing
 

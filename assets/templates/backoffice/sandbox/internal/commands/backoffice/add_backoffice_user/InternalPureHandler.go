@@ -3,7 +3,6 @@ package add_backoffice_user
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/internal/commandprops"
-	"{{.Module}}/sandbox/internal/generated/cliio"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
 )
@@ -16,11 +15,11 @@ import (
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	role, ok := backofficeauth.ParseRole(sandbox, entries.Role)
 	if !ok {
-		return cliio.Fail(sandbox, api.ExitFailure, "", "unknown role "+entries.Role)
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "unknown role "+entries.Role)
 	}
 	password, err := backofficeusers.GeneratePassword(sandbox)
 	if err != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", "failed to generate a password: "+err.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "failed to generate a password: "+err.Error())
 	}
 
 	user, message, err := backofficeusers.Add(sandbox, backofficeusers.Fields{
@@ -30,10 +29,10 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 		Role:     int64(role),
 	})
 	if err != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", "failed to add backoffice user: "+err.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "failed to add backoffice user: "+err.Error())
 	}
 	if message != "" {
-		return cliio.Fail(sandbox, api.ExitFailure, "", message)
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", message)
 	}
 
 	response.Printf("backoffice user %s <%s> created with the %s role\n", user.Username, user.Email, backofficeauth.RoleName(sandbox, role))

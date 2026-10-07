@@ -1,0 +1,4 @@
+default-adapter: OpinatedAgnosDatabase
+field: OpinatedAgnosDatabase
+help: The agnos database mechanic itself — the readers and filters every generated methods.go shares
+name: OpinatedAgnosDatabase

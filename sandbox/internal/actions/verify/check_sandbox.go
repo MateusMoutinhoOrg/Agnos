@@ -23,6 +23,7 @@ func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []st
 
 	violations = append(violations, checkSandboxContents(sandbox, io)...)
 	violations = append(violations, checkSandboxImports(sandbox, io, module)...)
+	violations = append(violations, checkRetiredImports(sandbox, io, module)...)
 	violations = append(violations, checkSandboxApi(sandbox, io, module)...)
 	violations = append(violations, checkSandboxDeps(sandbox, io, module)...)
 	violations = append(violations, checkSandboxConstructors(sandbox, io)...)
@@ -112,6 +113,31 @@ func checkSandboxImports(sandbox *api.Sandbox, io *smartio.SmartIO, module strin
 	return violations
 }
 
+// checkRetiredImports names, for a file importing a package of
+// sandbox/internal/generated/ that the OpinatedAgnos libs replaced, what
+// replaced it. The build has already removed the package, so the import is a
+// hand-written file — a Handle*, a handler, a methods_custom.go — written
+// against an older agnos, and the replacement is the whole of its migration.
+func checkRetiredImports(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+	var violations []string
+
+	for _, file := range goFilesUnder(sandbox, io, "sandbox") {
+		for _, imp := range fileImports(sandbox, io, file) {
+			if !isUnder(imp, module+"/"+utils.GeneratedDir) {
+				continue
+			}
+			replacement, retired := utils.RetiredReplacement(imp[len(module)+1:])
+			if !retired {
+				continue
+			}
+			violations = append(violations, file+" imports "+imp+
+				", which the OpinatedAgnos libs replaced; use "+replacement)
+		}
+	}
+
+	return violations
+}
+
 // checkSandboxApi enforces that sandbox/api/* imports nothing but the loose
 // sandbox/deps package — no stdlib, no external module, no other sandbox
 // package. api is pure contract: every type it declares is written in Go's own
@@ -123,20 +149,33 @@ func checkSandboxImports(sandbox *api.Sandbox, io *smartio.SmartIO, module strin
 // along with the api itself. That field is this repo's own wiring rather than
 // part of what it offers, so apishape.DepsField keeps it out of the copy a
 // consumer installs — which is what leaves the contract as portable as it was.
+//
+// An opinated lib's contract (sandbox/deps/OpinatedAgnos<X>) is the other: a
+// mechanic's api file aliases the types the lib declares, so a handler reads
+// api.Command while the lib owns it. apishape keeps those aliases out of a
+// consumer's copy the same way it keeps Deps.
 func checkSandboxApi(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(sandbox, io, "sandbox/api") {
 		for _, imp := range fileImports(sandbox, io, file) {
-			if imp == module+"/sandbox/deps" {
+			if imp == module+"/sandbox/deps" || isOpinatedContract(sandbox, imp, module) {
 				continue
 			}
 			violations = append(violations,
-				file+" imports "+imp+"; sandbox/api/* may import nothing but "+module+"/sandbox/deps")
+				file+" imports "+imp+"; sandbox/api/* may import nothing but "+module+"/sandbox/deps"+
+					" and the opinated libs' "+module+"/sandbox/deps/"+utils.OpinatedPrefix+"<X>")
 		}
 	}
 
 	return violations
+}
+
+// isOpinatedContract reports whether an import names an opinated lib's
+// contract: a direct child of sandbox/deps whose name carries
+// utils.OpinatedPrefix.
+func isOpinatedContract(sandbox *api.Sandbox, imp string, module string) bool {
+	return isDirectChild(sandbox, imp, module+"/sandbox/deps") && utils.IsOpinatedLib(sandbox, lastSegment(sandbox, imp))
 }
 
 // checkSandboxDeps enforces that a contract package under sandbox/deps/<x>/
@@ -147,6 +186,11 @@ func checkSandboxApi(sandbox *api.Sandbox, io *smartio.SmartIO, module string) [
 //
 // The loose files directly in sandbox/deps/ are the one exception. deps.go
 // composes the contracts into deps.Deps, so it names them and nothing else.
+//
+// An opinated lib's contract is the other: it carries a mechanic, and a
+// mechanic is written over raw deps — the server lib names serverdeps.Request,
+// and the cli lib's Trigger — so it may import another contract under
+// sandbox/deps/<x>/, and still nothing else.
 func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
 	var violations []string
 
@@ -160,12 +204,23 @@ func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) 
 					file+" imports "+imp+"; sandbox/deps/*.go may import only sandbox/deps packages")
 				continue
 			}
+			if isInOpinatedContract(sandbox, file) && isUnder(imp, module+"/sandbox/deps") && imp != module+"/sandbox/deps" {
+				continue
+			}
 			violations = append(violations,
-				file+" imports "+imp+"; sandbox/deps/<x>/ may import nothing at all")
+				file+" imports "+imp+"; sandbox/deps/<x>/ may import nothing at all"+
+					" (an opinated lib's contract may import other contracts under sandbox/deps/)")
 		}
 	}
 
 	return violations
+}
+
+// isInOpinatedContract reports whether a file belongs to an opinated lib's
+// contract: sandbox/deps/OpinatedAgnos<X>/.
+func isInOpinatedContract(sandbox *api.Sandbox, file string) bool {
+	parts := sandbox.Deps.Stringsdeps.Split(file, "/")
+	return len(parts) > 3 && utils.IsOpinatedLib(sandbox, parts[2])
 }
 
 // checkSandboxConstructors enforces that the package building a contract builds

@@ -2,10 +2,10 @@ cli-output: "remove-arg removing Who from sandbox/internal/commands/greet/comman
 exit-code: 0
 tree:
     - file: sandbox/internal/commands/greet/InternalPureHandler.go
-      sha: a58febba6a2ff9c27ec7773740e748035524360e7270694b8173e7cdea511615
+      sha: e559891705796277b6df4540f262d760e1d20e26ecd03c6fcd66478c4960f154
     - file: sandbox/internal/commands/greet/command.yaml
       sha: b9d5f3fa613079dfd16cf0828487b52c99432859fb959707e0a6c306dc846ea9
     - file: sandbox/internal/commands/greet/entries.go
       sha: 0f699c28b19dba9ae7d930098b10a8897b88e6e14957efdd7655db415d26801e
     - file: sandbox/internal/commands/greet/new.go
-      sha: abdddaf2b4d43e60ea681c72ec5a3b09371e6d92ebdb22dbd3b5857dd3bd39ef
+      sha: 348bb7d5892870cc5e2a3f6a44c7098f71f41ad328b32c00fde6483aa6f9f407

@@ -4,7 +4,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	setCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_command"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
@@ -29,7 +28,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 		Clear:           entries.Clear,
 	})
 	if set_error != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", set_error.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

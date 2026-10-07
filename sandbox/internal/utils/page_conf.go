@@ -24,8 +24,8 @@ const FrontendRouteName = "frontend"
 const FrontendIndexPage = "index"
 
 // FrontendNotFoundPage is the page front-init scaffolds for a path that names
-// no file: the frontend route answers it with a 404. It is frontio.NotFound
-// spelled as a page name.
+// no file: the frontend route answers it with a 404. It is the
+// OpinatedAgnosFront lib's NotFound spelled as a page name.
 const FrontendNotFoundPage = "404"
 
 // pageExtension is what a page name is written with on disk. The frontend

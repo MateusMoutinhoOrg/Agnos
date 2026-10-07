@@ -402,7 +402,7 @@ func appendBodyStruct(sandbox *api.Sandbox, structs []map[string]any, name strin
 	return structs
 }
 
-// schemaReader is the routeio reader the generated bind function pulls one
+// schemaReader is the OpinatedAgnosServer reader the generated bind function pulls one
 // scalar property with.
 func schemaReader(kind string) string {
 	switch kind {

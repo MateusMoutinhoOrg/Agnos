@@ -3,7 +3,6 @@ package list_backoffice_api_tokens
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/generated/routeio"
 	"{{.Module}}/sandbox/internal/routeprops"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficetokens"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficerender"
@@ -15,7 +14,7 @@ import (
 // each with the control that revokes it.
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if props.User == nil {
-		return routeio.Fail(sandbox, api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
 	listed, err := backofficetokens.List(sandbox, *props.User)

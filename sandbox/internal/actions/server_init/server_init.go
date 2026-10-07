@@ -4,22 +4,21 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
+	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// serverDeps are the contracts the server layer calls into: the socket itself,
-// the three output channels, text conversion, sorting, the JSON codec the
-// error body and the schema validator are written through, the reflection
-// that fills a route's Entries, and the signal a graceful shutdown waits on.
-var serverDeps = []string{"std", "stringsdeps", "sortdeps", "serializables", "serverdeps", "reflectdeps", "signaldeps"}
+// serverDeps are the contracts the server layer calls into: the three output
+// channels, the JSON codec the error body and the schema validator are
+// written through, the socket itself, the signal a graceful shutdown waits on,
+// and OpinatedAgnosServer — the dispatch itself, last because its contract
+// imports the others and OpinatedAgnosCli.
+var serverDeps = []string{"std", "serializables", "serverdeps", "signaldeps", utils.OpinatedAgnosServer}
 
-// cliDep is the one further contract the implicit cli-init needs, installed
-// only when this project has no cli layer yet.
-const cliDep = "argvdeps"
-
-// InstallDeps installs the contracts the server layer calls into, plus the one
-// the implicit cli-init needs when the project has no cli layer yet.
+// InstallDeps installs the contracts the server layer calls into, after the
+// ones the implicit cli-init needs when the project has no cli layer yet — or
+// after the cli lib alone, when a cli layer predating it lacks it.
 //
 // It is exported because a layer that composes ServerInitInternal into its own
 // transaction — front-init does — still has to install this set first: the
@@ -30,10 +29,13 @@ func InstallDeps(sandbox *api.Sandbox, path string) error {
 		return err
 	}
 
-	install := serverDeps
+	install := []string{}
 	if !has_cli {
-		install = append(install, cliDep)
+		install = append(install, cliInitAction.CliDeps...)
+	} else if !smartio.New(sandbox, path, sandbox.Config.ProjectName).IsDir(utils.ContractsDir + "/" + utils.OpinatedAgnosCli) {
+		install = append(install, utils.OpinatedAgnosCli)
 	}
+	install = append(install, serverDeps...)
 
 	for _, dep := range install {
 		if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: dep}); err != nil {

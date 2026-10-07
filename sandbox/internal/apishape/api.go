@@ -29,6 +29,10 @@ type Api struct {
 
 	// ByName indexes Types by declared name.
 	ByName map[string]goimportsdeps.Type
+
+	// Mechanic is every type of the package that is a mechanic's surface
+	// rather than the repo's own contract (see IsMechanic).
+	Mechanic map[string]bool
 }
 
 // ParsedFile is one source and what the Go parser made of it.
@@ -69,6 +73,59 @@ const DepsField = "Deps"
 // field that stays behind when the api is copied into a consumer.
 func IsDepsWiring(typeName string, fieldName string) bool {
 	return typeName == SandboxType && fieldName == DepsField
+}
+
+// OpinatedPrefix starts the last segment of an opinated lib's contract import
+// path: sandbox/deps/OpinatedAgnos<X>, the dep that carries a mechanic.
+const OpinatedPrefix = "OpinatedAgnos"
+
+// IsMechanic reports whether a type of the package is a mechanic's surface: an
+// alias of a type an opinated lib's contract declares — api.Command is
+// opinatedagnoscli.Command — or a struct every field of which is one, the
+// <x>sandbox.go part a mechanic adds. The lib owns those types and a consumer
+// installs a repo's api, never a mechanic of it: like Sandbox.Deps, the copy
+// drops them, the shape rule skips them and no converter is written for them.
+func IsMechanic(shape *Api, name string) bool {
+	return shape.Mechanic[name]
+}
+
+// IsMechanicField reports whether one field of a struct is typed with a
+// mechanic type — CliSandbox embedded in Sandbox — and so stays behind with it.
+func IsMechanicField(shape *Api, field goimportsdeps.Field) bool {
+	return IsMechanic(shape, field.Type)
+}
+
+// IsMechanicFile reports whether one file declares nothing but mechanic
+// surface: every type it declares is one and it declares no function. Its
+// constants alias the lib's too, so the whole file stays behind.
+func IsMechanicFile(shape *Api, file ParsedFile) bool {
+	if len(file.Parsed.Types) == 0 || len(file.Parsed.Functions) > 0 {
+		return false
+	}
+	for _, entry := range file.Parsed.Types {
+		if !IsMechanic(shape, entry.Name) {
+			return false
+		}
+	}
+	return true
+}
+
+// WithoutMechanic is the package a consumer copies: every mechanic file left
+// out, with the types it declared. The fields that name them stay on the
+// struct that declares them, for the copy to strip and the converter to skip.
+func WithoutMechanic(shape *Api) *Api {
+	kept := &Api{Package: shape.Package, ByName: map[string]goimportsdeps.Type{}, Mechanic: shape.Mechanic}
+	for _, file := range shape.Files {
+		if IsMechanicFile(shape, file) {
+			continue
+		}
+		kept.Files = append(kept.Files, file)
+		for _, entry := range file.Parsed.Types {
+			kept.Types = append(kept.Types, entry)
+			kept.ByName[entry.Name] = entry
+		}
+	}
+	return kept
 }
 
 // FieldName is the name a struct field is read and written by: its own, or

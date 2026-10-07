@@ -16,7 +16,7 @@ import (
 // What a middleware in front set on props — the request's
 // routeprops.RouteProps, whose parts sandbox/internal/routeprops/ declares —
 // is there to read. Refuse a request
-// by returning routeio.Fail; nil means "done" or "not mine".
+// by returning Deps.OpinatedAgnosServer.Fail; nil means "done" or "not mine".
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	response.SetStatus(api.StatusOk)
 	response.Write([]byte("{{.Identifier}} called\n"))

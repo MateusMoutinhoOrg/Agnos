@@ -1,0 +1,5 @@
+dep: OpinatedAgnosServer
+help: The agnos server dispatch over strings, strconv, regexp, sort and reflect
+module: ""
+name: OpinatedAgnosServer
+origin: catalog

@@ -4,15 +4,15 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: 4032ae6ab5cfd816215c9ebec07bd6a9748bf4b1c2456c2e9ea1a63c0241d694
     - file: docs/Adapters/doc.md
-      sha: 17220206e45e83d775311c94bd55f75eaea35b2e711469d11927f01d39eade19
+      sha: 578aa34983c8510e0f8fc8dca7a5d7b46dfcef40c0e2151991d3d98682cb0918
     - file: docs/Adapters/props.yaml
       sha: 358d3f1dfa734fbad170a428773afc67c618522e8e295438475bdaec7d76ffb9
     - file: docs/DepList/doc.md
-      sha: 8564a4a892d338e78043fa18b0ba877628f5a45aacce16520e74722a7e300fe9
+      sha: 6dc8df3b5ee6a65e77fcf6f5d3cf4a7e9cafb3b4890a3d52a866c7bc4adec607
     - file: docs/DepList/props.yaml
       sha: 2cc46fc3b38a91764ba6ec7d5e8bb661ee7dac155f5782369459e4cd1dd29468
     - file: docs/Extensions/doc.md
-      sha: a53eeefceec09a07d1fdb401b61355d68570ac6e287ad172a780c5b396761d6f
+      sha: 45199b039e9f0cb2ddf52d729e3b6a85166c728dd9f63b8d7057023c918fccab
     - file: docs/Extensions/props.yaml
       sha: 7de2cd40d2152a82ee767844ab2f1c29b119374cef0f5ef40457c2a84997d0ca
     - file: docs/GeneratedFiles/doc.md
@@ -24,29 +24,27 @@ tree:
     - file: docs/LibExamples/props.yaml
       sha: 8360d95f99ea5cf10bdc90cff522a9ba25c28fc8b25c196745afedfc25d657fd
     - file: docs/LibUsage/doc.md
-      sha: bfd528977f10d7b8e68759d62ff83815b84607b97997b297f8f4f803db6bc258
+      sha: 941819edefa551dae64026ed6a80caaa6e22e7d332e522958947494fdbaf16b8
     - file: docs/LibUsage/props.yaml
       sha: b901bd3853e5a437cb1c734b15b3d3e97ccf99fa6837048c8f646a7ed948872d
     - file: docs/PublicApi/api.config.md
       sha: 69463fd9cf38000627ceb2cc263c3251e66ede2ce121bd4221c974ef1ce9608c
     - file: docs/PublicApi/api.sandbox.md
       sha: f9318550a49c4cca4071d1b8ccdf4deb5f29941dfabbcf18d952371ec080ea87
-    - file: docs/PublicApi/api.trigger.md
-      sha: c54f5d01cd7bb040654f176e18b5700fe90e9c7411682d102faa1c9ca00e3834
     - file: docs/PublicApi/api.userconfig.md
       sha: 3c0b723789afd2a256b881e928923e6705cc75f6a1f0aa46a7b67fb5d5753604
     - file: docs/PublicApi/api.usersandbox.md
       sha: 08ba371832246b481794258b2ecf4f7da6bbff96c2182f4d3e88a17c609fb7e9
+    - file: docs/PublicApi/deps.OpinatedAgnosCli.md
+      sha: 4258824835436981debb2afd74b99fbb354aac552bb192f68c68dcd3455eb901
     - file: docs/PublicApi/deps.argvdeps.md
       sha: 98d4251a907e71c921fb2d9434d3c3a873c8093f4a9fb3a5c560bf9757f53d11
-    - file: docs/PublicApi/deps.reflectdeps.md
-      sha: b73b9c8e21ba62f8522dc438254fbc978ae7c3aa788eb4b4fc7d9170a1b91d72
     - file: docs/PublicApi/deps.std.md
       sha: fb4b030cd65ed07b7cb9f4e7125bd78e6d9b75eb8e7d5532ab2dd36bbcfb0652
     - file: docs/PublicApi/deps.stringsdeps.md
       sha: 087743126a96d90496db5692eb2ead0c0b02404d4d0a528c196d8713c3463451
     - file: docs/PublicApi/doc.md
-      sha: eceb10fba4fc4784d14f01ea17ba9e8d4b5a4940a543fbc3ddfc625e74440163
+      sha: c9002d16f80464346999080c9ad6400afda2fefee088e5021a876dde3a173119
     - file: docs/PublicApi/props.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md
@@ -54,7 +52,7 @@ tree:
     - file: docs/Requirements/props.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: 4db81ea51ab251fda26f9d5057de9a12daa25a5ff3a0d61fa60e35c2bbd40bbe
+      sha: 466a7c9afc5e8996776d808ed4281797948df3f94f3620baec22dcf1a5a3016b
     - file: docs/Rules/props.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md
@@ -62,7 +60,7 @@ tree:
     - file: docs/Structure/props.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 6843f5c6822a2ae99cf1a06c478491ce1cb2458fe5d2e3c1e45ff548dcf7ebc5
+      sha: 30fa1fbaf65a44c71bc882bc3456e36040ad4d29702e4e9ea07a1fa23938fd43
     - file: docs/Workflow/props.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b
     - file: sandbox/internal/generated/config/new.go

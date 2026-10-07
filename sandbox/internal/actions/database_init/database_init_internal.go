@@ -7,9 +7,9 @@ import (
 )
 
 // DatabaseInitInternal turns the database mechanic on in the project's
-// declaration. The group itself — sandbox/internal/generated/databaseio, the code every
-// generated methods.go shares — is rendered by utils.SetExtension into this
-// same transaction, and the databases themselves by the follow-up build.
+// declaration. The code every generated methods.go shares is the
+// OpinatedAgnosDatabase lib, installed with the store, and the databases
+// themselves are rendered by the follow-up build.
 //
 // It scaffolds no database of its own: a database is a declaration, and which
 // tables a project wants is not something an init can guess. "Declare its

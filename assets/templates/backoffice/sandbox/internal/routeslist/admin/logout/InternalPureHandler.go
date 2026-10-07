@@ -3,7 +3,6 @@ package logout
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/generated/routeio"
 	"{{.Module}}/sandbox/internal/routeprops"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 )
@@ -15,7 +14,7 @@ import (
 // other session of the user, on this device or another, stays open.
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if props.User == nil || props.Session == nil {
-		return routeio.Fail(sandbox, api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
 	err := backofficeauth.Logout(sandbox, *props.User, *props.Session)

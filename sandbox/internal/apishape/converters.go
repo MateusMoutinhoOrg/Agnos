@@ -150,7 +150,7 @@ func structBody(plan *planner, name string, direction string, destination string
 
 	body := "\treturn " + destination + "{\n"
 	for _, field := range entry.Fields {
-		if IsDepsWiring(name, field.Name) {
+		if IsDepsWiring(name, field.Name) || IsMechanicField(plan.shape, field) {
 			continue
 		}
 		body += "\t\t" + FieldName(field) + ": " + convert(plan, field.Type, direction, "v."+FieldName(field)) + ",\n"

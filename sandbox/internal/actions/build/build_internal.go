@@ -345,10 +345,11 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 	}
 
-	// What the cli and the server layers both match on.
-	if hasCli || hasServer {
-		if err := GenerateTrigger(sandbox, io, module_conf.Module); err != nil {
-			return err
+	// What an older build wrote under sandbox/internal/generated/ and the
+	// OpinatedAgnos libs replaced, dropped for every mechanic that is on.
+	for _, extension := range []string{utils.ExtensionSandboxCli, utils.ExtensionSandboxServer, utils.ExtensionSandboxFront, utils.ExtensionSandboxDatabase} {
+		if extensions_conf.IsEnabled(extension) {
+			utils.RemoveRetiredGenerated(sandbox, io, extension)
 		}
 	}
 

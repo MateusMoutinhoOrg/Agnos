@@ -58,7 +58,7 @@ Then write `InternalPureHandler.go` — the whole hand-written half of a command
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	result, err := something(sandbox, entries.Name)
 	if err != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", err.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	}
 	response.Printf("%s\n", result)
 	return nil
@@ -88,7 +88,7 @@ project with no CLI gets one first: a server needs a command that starts it.
 ## Add the front layer
 
 ```bash
-agnos front-init      # frontio, the frontend route, assets/frontend/{index,404}.html
+agnos front-init      # the OpinatedAgnosFront lib, the frontend route, assets/frontend/{index,404}.html
 <name> start-server  # serves every file of assets/frontend
 ```
 
@@ -100,7 +100,7 @@ again, leaving `assets/frontend/` alone.
 ## Add the database layer
 
 ```bash
-agnos database-init                     # the store contract, databaseio, the mechanic on
+agnos database-init                     # the store contract, the OpinatedAgnosDatabase lib, the mechanic on
 agnos add-database app-database         # the first database
 agnos add-table url --database app-database
 ```
@@ -215,10 +215,14 @@ Everything else is regenerated over. Two more files are yours: `AgnosConfig/docs
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into
 its License section — put whatever license you want there.
 
-A project built before `sandbox/internal/generated/` existed keeps its old copies: after the
-first `build`, `git rm -r` whichever of `sandbox/internal/{cli,config,routeio,frontio,databaseio}`
-and `sandbox/internal/server/{route,server}` it holds, and point every hand-written import of
-`sandbox/internal/{routeio,frontio,databaseio}` at `sandbox/internal/generated/<same>`.
+A project built before the `OpinatedAgnos<X>` libs keeps hand-written files written against
+the generated packages they replaced. `add-dep` the lib of every mechanic that is on (`verify`
+names the missing ones); the next `build` removes `sandbox/internal/generated/{cliio,trigger,routeio,frontio,databaseio}`,
+`cli/command`, `server/route`, `climain.go` and `servermain.go`; then `verify` names every
+hand-written import of them with its replacement — `cliio.Fail(sandbox, …)` is
+`sandbox.Deps.OpinatedAgnosCli.Fail(…)`, `routeio.RequestOf(route)` is `route.Request`, a `Handle*`
+logs and then calls `OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, …)`, and
+`start-server` calls `sandbox.Server.Serve` rather than `server.ServerMain`.
 
 ## Ship
 

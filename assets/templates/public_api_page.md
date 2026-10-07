@@ -72,7 +72,7 @@
 {{- end }}
 {{- if .Underlying }}
 
-`type {{ .Name }} {{ .Underlying }}`
+`type {{ .Name }} {{ if eq .Kind "alias" }}= {{ end }}{{ .Underlying }}`
 {{- end }}
 {{- end }}
 {{- if .Functions }}

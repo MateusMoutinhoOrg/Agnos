@@ -649,7 +649,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `AddArg` | `func(props ArgProps) error` | AddArg declares one arg — a slice of the segments — on a command. |
 | `SetArg` | `func(props ArgEditProps) error` | SetArg rewrites one declared arg of a command. |
 | `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared arg from a command. |
-| `ServerInit` | `func(path string) error` | ServerInit adds the http server layer (sandbox/internal/server, the routeio package, the health route of sandbox/internal/routeslist and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
+| `ServerInit` | `func(path string) error` | ServerInit adds the http server layer (sandbox/internal/server, the OpinatedAgnosServer lib, the health route of sandbox/internal/routeslist and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
 | `ServerPurge` | `func(path string) error` | ServerPurge removes the server layer and every route declared in it. |
 | `AddRoute` | `func(props AddRouteProps) error` | AddRoute declares a new route: its route.yaml, its generated new.go and entries.go, and an InternalPureHandler.go to fill in. |
 | `RemoveRoute` | `func(path string, name string) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
@@ -670,7 +670,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `ExplainRoute` | `func(props ExplainRouteProps) ([]string, error)` | ExplainRoute runs one request against the declared routes without a server and renders, route by route, whether it runs and why not. |
 | `RenameRoute` | `func(props RenameRouteProps) error` | RenameRoute moves one route package to a new name. |
 | `RebalanceRoutes` | `func(props RebalanceRoutesProps) error` | RebalanceRoutes gives every route a rung of its own, props.Step apart, in the order the chain runs them now. |
-| `DatabaseInit` | `func(path string) error` | DatabaseInit adds the database layer (the store contract, sandbox/internal/generated/databaseio and sandbox/internal/databases) to a project that has none. |
+| `DatabaseInit` | `func(path string) error` | DatabaseInit adds the database layer (the store contract, the OpinatedAgnosDatabase lib and sandbox/internal/databases) to a project that has none. |
 | `DatabasePurge` | `func(path string) error` | DatabasePurge removes the database layer and every database declared in it. |
 | `AddDatabase` | `func(path string, name string, prefix string) error` | AddDatabase declares a new database: its specs.yaml, from which its api.go, new.go and methods.go are generated. |
 | `RemoveDatabase` | `func(path string, name string) error` | RemoveDatabase deletes one database package whole. It refuses one carrying a hand-written methods_custom.go. |
@@ -680,7 +680,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetTableField` | `func(props DatabaseFieldEditProps) error` | SetTableField rewrites one field a table already declares. |
 | `RemoveTableField` | `func(props DatabaseFieldProps) error` | RemoveTableField deletes one declared field from a table. |
 | `ShowDatabase` | `func(path string, database string) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
-| `FrontInit` | `func(path string) error` | FrontInit adds the front layer (sandbox/internal/generated/frontio, the route serving every file of assets/frontend and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
+| `FrontInit` | `func(path string) error` | FrontInit adds the front layer (the OpinatedAgnosFront lib, the route serving every file of assets/frontend and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
 | `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer and the frontend route, leaving assets/frontend/ untouched. |
 | `BackofficeInit` | `func(path string) error` | BackofficeInit adds the admin backoffice to a project: login, backoffice users, API tokens and the /api/admin JSON api, over a database of its own. It installs the server, front and database layers first when any is missing, and the catalog deps it calls into. Every file it writes is the project's from then on. |
 | `BackofficePurge` | `func(path string) error` | BackofficePurge removes everything BackofficeInit wrote, leaving the layers it stood on, the deps it installed and the store on disk. |

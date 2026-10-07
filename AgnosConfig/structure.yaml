@@ -33,7 +33,7 @@ sandbox:
     api:
       order: 2
       dir: true
-      description: contracts only; imports nothing but sandbox/deps, for Sandbox.Deps
+      description: contracts only; imports nothing but sandbox/deps, for Sandbox.Deps, and the OpinatedAgnos<X> contracts it aliases
       children:
         sandbox.go:
           order: 1
@@ -45,11 +45,11 @@ sandbox:
         cli.go:
           order: 3
           gen: true
-          description: Cli struct + exit consts
+          description: Cli + exit consts, aliases of the OpinatedAgnosCli contract
         command.go:
           order: 4
           gen: true
-          description: Command/CommandFlag/CommandArg + NewCommand
+          description: Command/CommandFlag/CommandArg/CommandResponse/CommandFailure, aliases of the OpinatedAgnosCli contract
         config.go:
           order: 5
           gen: true
@@ -57,7 +57,7 @@ sandbox:
         trigger.go:
           order: 6
           gen: true
-          description: Trigger/TriggerType, the condition a route and a command match on
+          description: Trigger/TriggerType, the condition a route and a command match on; aliases of the OpinatedAgnosCli contract
     constructors:
       order: 3
       dir: true
@@ -69,7 +69,7 @@ sandbox:
     deps:
       order: 4
       dir: true
-      description: contracts; each <x>/ imports nothing at all
+      description: contracts; each <x>/ imports nothing at all, an OpinatedAgnos<X>/ nothing but other contracts
       children:
         deps.go:
           order: 1
@@ -78,6 +78,9 @@ sandbox:
         <x>/<x>.go:
           order: 2
           description: type Sandbox struct of func fields
+        OpinatedAgnosCli/opinatedagnoscli.go:
+          order: 3
+          description: "the cli lib: the command declaration types, MainProps, and CliMain, NewCommand, BindCommand, Fail, FailureOf, MatchTrigger"
     internal:
       order: 5
       dir: true
@@ -87,7 +90,7 @@ sandbox:
           order: 1
           dir: true
           gen: true
-          description: every package the build rewrites whole; never edited by hand
+          description: every package the build rewrites whole — the registries and config; never edited by hand
           children:
             config/new.go:
               order: 1
@@ -96,25 +99,7 @@ sandbox:
             cli/cli/new.go:
               order: 2
               gen: true
-              description: "NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.CliMain"
-            cli/cli/climain.go:
-              order: 3
-              gen: true
-              description: CliMain, the one dispatch, runs the chain read off Cli.Commands
-            cli/command:
-              order: 5
-              gen: true
-              dir: true
-              description: NewCommand, IsActionable, CommandHandler — how every command matches and binds a command line
-            cliio:
-              order: 6
-              gen: true
-              dir: true
-              description: Fail/Raise/FailureOf and the tracked CommandResponse
-            trigger/MatchTrigger.go:
-              order: 4
-              gen: true
-              description: MatchTrigger, shared by the route and the command matchers
+              description: "NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.CliMain, which hands the line to Deps.OpinatedAgnosCli.CliMain"
         commands/<name>:
           order: 4
           dir: true
@@ -162,11 +147,15 @@ adapters:
     libs/<adapter>/adapter.yaml:
       order: 2
       description: which dep the adapter fills, which module it pins  (adapterconf)
-    availables/<name>/available.yaml:
+    libs/OpinatedAgnosCli:
       order: 3
+      dir: true
+      description: "the cli lib: the dispatch chain, binder, matcher and trigger every command runs through, over the stdlib"
+    availables/<name>/available.yaml:
+      order: 4
       description: which adapters this available binds, one per Deps field  (availableconf)
     availables/<name>/new.go:
-      order: 4
+      order: 5
       gen: true
       description: New() deps.Deps calling the Bind of every adapter declared; an available with no available.yaml is hand-written and left alone
 assets:
@@ -194,40 +183,32 @@ assets:
       order: 5
       dir: true
       description: rendered when `sandbox-server` is on
-    sandbox-front:
-      order: 6
-      dir: true
-      description: rendered when `sandbox-front` is on
-    sandbox-database:
-      order: 7
-      dir: true
-      description: rendered when `sandbox-database` is on
     readme:
-      order: 8
+      order: 6
       dir: true
       description: rendered when `readme` is on
     doc:
-      order: 9
+      order: 7
       dir: true
       description: rendered when `doc` is on
     doc-<x>:
-      order: 10
+      order: 8
       dir: true
       description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)"
     deplist/<dep>:
-      order: 11
+      order: 9
       dir: true
-      description: one installable contract, dep.yaml beside the target layout it mirrors
+      description: one installable contract, dep.yaml beside the target layout it mirrors; deplist/OpinatedAgnos<X> are the opinated libs, one per mechanic with code (Cli, Server, Front, Database)
     adapterlist/<adapter>:
-      order: 12
+      order: 10
       dir: true
       description: one installable adapter, adapter.yaml beside the target layout it mirrors
     templates:
-      order: 13
+      order: 11
       dir: true
       description: single-file scaffolds (new.go, command_*, route_*, page_*, database_*, frontend_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
     templates/backoffice:
-      order: 14
+      order: 12
       dir: true
       description: the tree backoffice-init writes once, at the path each file holds in it; assets/ under it is copied verbatim
 cmd/main/main.go:

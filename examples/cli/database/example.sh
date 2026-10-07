@@ -3,8 +3,8 @@
 # `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
 # The example writes only inside TestDir.
 #
-# `database-init` installs the store as a remote dep, renders the databaseio
-# package and turns the mechanic on. It scaffolds no database: which tables a
+# `database-init` installs the store as a remote dep and the
+# OpinatedAgnosDatabase lib over it, and turns the mechanic on. It scaffolds no database: which tables a
 # project wants is a declaration, so every table below is declared by hand and
 # api.go, new.go and methods.go are generated from that declaration alone.
 
@@ -37,13 +37,14 @@ agnos add-table-field agent --database app-database --table url --parent visits 
 agnos add-table-field at --database app-database --table url --parent visits --type int --path TestDir -q
 
 # What result.yaml records: the paths this example asserts, copied out of
-# TestDir. The declaration and the three files generated from it, the package
-# they share, the page the build wrote, and the key that says the mechanic is
-# on. The lib side copies the same set.
+# TestDir. The declaration and the three files generated from it, the
+# contract of the OpinatedAgnosDatabase lib they share, the page the build
+# wrote, and the key that says the mechanic is on. The lib side copies the
+# same set.
 mkdir -p AssertDir/sandbox/internal/databases
 cp -R TestDir/sandbox/internal/databases/. AssertDir/sandbox/internal/databases/
-mkdir -p AssertDir/sandbox/internal/generated/databaseio
-cp -R TestDir/sandbox/internal/generated/databaseio/. AssertDir/sandbox/internal/generated/databaseio/
+mkdir -p AssertDir/sandbox/deps/OpinatedAgnosDatabase
+cp -R TestDir/sandbox/deps/OpinatedAgnosDatabase/. AssertDir/sandbox/deps/OpinatedAgnosDatabase/
 mkdir -p AssertDir/docs/Databases
 cp -R TestDir/docs/Databases/. AssertDir/docs/Databases/
 mkdir -p AssertDir/AgnosConfig

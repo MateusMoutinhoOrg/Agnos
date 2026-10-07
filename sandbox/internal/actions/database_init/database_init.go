@@ -5,6 +5,7 @@ import (
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // KeepModule is the agnos repo that stores the records, installed as a remote
@@ -18,9 +19,9 @@ const KeepModule = "github.com/MateusMoutinhoOrg/Keep@v0.0.7"
 const DatabaseDep = "database"
 
 // databaseDeps are the contracts the database layer calls into beyond the
-// store itself: the output channels, and the text conversion the generated
-// filtrage is written through.
-var databaseDeps = []string{"std", "stringsdeps"}
+// store itself: the output channels the generated methods log and fail
+// through.
+var databaseDeps = []string{"std"}
 
 // InstallDeps installs the store and the contracts the generated code calls
 // into. It is exported for the same reason server-init exports its own: the
@@ -34,7 +35,13 @@ func InstallDeps(sandbox *api.Sandbox, path string) error {
 		}
 	}
 
-	return addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: KeepModule, As: DatabaseDep})
+	if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: KeepModule, As: DatabaseDep}); err != nil {
+		return err
+	}
+
+	// The readers and filters every generated methods.go shares: their
+	// contract imports the store's, so they are installed after it.
+	return addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: utils.OpinatedAgnosDatabase})
 }
 
 // DatabaseInit installs the store the database layer is built over and turns

@@ -3,7 +3,6 @@ package errors
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
 // HandleNotFound answers every command line no command of the chain answered —
@@ -15,12 +14,12 @@ import (
 // `agnos build` and never regenerated, so whatever you put here is
 // what your cli says.
 //
-// What went wrong is on `command.Failure`, read through cliio.FailureOf so a
+// What went wrong is on `command.Failure`, read through Deps.OpinatedAgnosCli.FailureOf so a
 // command carrying none still answers something. The command is bound when a
 // declared command raised the failure and bare when none did; command.Argv is
 // the command line either way.
 //
-// Answer a failure here; never raise one. cliio.Raise comes back to this file.
+// Answer a failure here; never raise one: a failure raised from here comes back to this file.
 func HandleNotFound(sandbox *api.Sandbox, command *api.Command, response *api.CommandResponse) error {
 	// An empty command line asks for nothing but the help, so it is
 	// answered like `help`: with the screen and exit 0.
@@ -30,7 +29,7 @@ func HandleNotFound(sandbox *api.Sandbox, command *api.Command, response *api.Co
 		return nil
 	}
 
-	failure := cliio.FailureOf(command, api.ExitUsage, "")
+	failure := sandbox.Deps.OpinatedAgnosCli.FailureOf(command, api.ExitUsage, "")
 	response.SetStatus(failure.Status)
 	if failure.Message != "" {
 		response.Error("%s\n", failure.Message)

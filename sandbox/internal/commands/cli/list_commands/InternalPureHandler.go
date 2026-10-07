@@ -4,13 +4,12 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	listCommandsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/list_commands"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	lines, read_error := listCommandsAction.ListCommands(sandbox, props.Path)
 	if read_error != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", read_error.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", read_error.Error())
 	}
 
 	for _, line := range lines {

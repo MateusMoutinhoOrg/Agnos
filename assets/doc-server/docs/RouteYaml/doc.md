@@ -3,10 +3,10 @@
 `sandbox/internal/routeslist/[<folder>/]<name>/route.yaml` declares one http route — the file is
 what makes its directory a route, at any depth. `{{.GeneratorName}} build`
 generates two files beside it: `new.go`, the `api.Route` that lands in `Server.Routes` — a 1:1
-image of the yaml, built on the generic base of `sandbox/internal/generated/server/route` — and
+image of the yaml, built on `Deps.OpinatedAgnosServer.NewRoute` — and
 `entries.go`, the `Entries` struct the route's `InternalPureHandler` is handed, plus the
-`ReadBody` its body calls for. The dispatch in `sandbox/internal/generated/server/server/servermain.go` is
-generic: it reads every request against those declarations, and nothing about a route is spelled
+`ReadBody` its body calls for. The dispatch is the `OpinatedAgnosServer` lib's `ServerMain`:
+it reads every request against those declarations, and nothing about a route is spelled
 in Go anywhere else.
 
 | File | Owner |
@@ -207,8 +207,8 @@ func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, ent
 
 `props` is the request's `routeprops.RouteProps` (see [The chain](#the-chain)); `entries` is everything
 the request brought that `route.yaml` declares — the handler is handed no request, so a value it
-needs is a declared path, parameter or body. The generic `RequestHandler` builds `Entries` and
-calls the handler through `Deps.Reflectdeps`, since every route's `Entries` is a type of its own.
+needs is a declared path, parameter or body. The `OpinatedAgnosServer` lib builds `Entries` and
+calls the handler by reflection, since every route's `Entries` is a type of its own.
 
 ## Body keys
 
@@ -277,8 +277,8 @@ runs and binds what it returns onto `Entries.Body`, in what its `body.type` decl
 | `json` without one | `(*serializables.SerializibleObject, error)` |
 
 Every variant does, in order: `Request.ReadBody(MaxBodyBytes)` (`413`), the `required` check
-(`400`) and — for `json` — `routeio.ValidateSchema` against `BodySchema`, or — for a `form` with a
-schema — `routeio.ValidateForm` (`400` on the first violation, its field path in the response's
+(`400`) and — for `json` — `OpinatedAgnosServer.ValidateSchema` against `BodySchema`, or — for a `form` with a
+schema — `OpinatedAgnosServer.ValidateForm` (`400` on the first violation, its field path in the response's
 `field`). A nested object becomes `Body<Path>`; an
 object inside an array becomes `Body<Path>Item`.
 
@@ -302,7 +302,7 @@ whatever answers after it.
 ```go
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if entries.Authorization == "" {
-		return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "")
 	}
 	props.User = entries.Authorization // the routes after it read props.User
 	return nil                         // nothing answered: the next route runs
@@ -327,7 +327,7 @@ When no route answers:
 | a route with explicit `methods` matched the path under another method, and no route with explicit `methods` ran | `405` — an `ANY` route running does not hide it |
 | anything else | `404` |
 
-`routeio.WriteJSON`, `routeio.WriteText` and `routeio.Redirect` answer in one call; the
+`OpinatedAgnosServer.WriteJSON` (handed `sandbox.Deps.Serializables`), `WriteText` and `Redirect` answer in one call; the
 `Response` also carries `AddHeader` (a second `Set-Cookie`) and `GetHeader`.
 
 ## Failures
@@ -351,28 +351,30 @@ Each holds one function, writes the response itself and returns what it could no
 
 ```go
 func HandleNotFound(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
-	failure := routeio.FailureOf(route, api.StatusNotFound, "route not found")
-	return routeio.WriteError(sandbox, response, failure.Status, failure.Field, failure.Message)
+	failure := sandbox.Deps.OpinatedAgnosServer.FailureOf(route, api.StatusNotFound, "route not found")
+
+	sandbox.Deps.Std.Log("route error %d %s %s \n", failure.Status, failure.Field, failure.Message)
+	return sandbox.Deps.OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, response, failure.Status, failure.Field, failure.Message)
 }
 ```
 
-`routeio.FailureOf` is what the failure says, falling back to what the file says: the two the
+`FailureOf` is what the failure says, falling back to what the file says: the two the
 dispatch raises with nothing to add — nothing matched, method not allowed — carry no message, so
 the wording is the one spelled in that file and changing it there changes what the server says.
 The failures that know something the file could not — which field would not bind, and why —
 carry their own.
 
-A handler refuses a request by returning `routeio.Fail`, a `*api.RouteFailure`:
+A handler refuses a request by returning `sandbox.Deps.OpinatedAgnosServer.Fail`, a `*api.RouteFailure`:
 
 ```go
-return routeio.Fail(sandbox, api.StatusForbidden, "", "not authorized")
+return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusForbidden, "", "not authorized")
 ```
 
-`RequestHandler` raises what it returns on the bound route through `routeio.Raise` — the one
-way the server layer itself raises a failure — which reaches the right file through `sandbox.Server.Fail`, which is a field on the api rather than
-a call, because a route package may not import `sandbox/internal/generated/server/server` — that package
-imports every route. `routeio.WriteError` is the writer underneath, and the default body every one of
-them produces is `{"error": "...", "field": "..."}`, logged on `deps.Std.Log` as it is written.
+The lib's dispatch raises what it returns on the bound route — it is the one part of the server
+layer that raises — and reaches the right file through `sandbox.Server.Fail`, the switch the
+generated registry fills. `WriteError` is the writer underneath, and the default body every one
+of them produces is `{"error": "...", "field": "..."}`, logged on `deps.Std.Log` by the file
+before it is written.
 
-A `Handle*` file answers a failure and never raises one: `routeio.Raise` from inside one comes
+A `Handle*` file answers a failure and never raises one: a failure raised from inside one comes
 back to it.

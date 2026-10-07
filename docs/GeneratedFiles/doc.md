@@ -35,12 +35,10 @@
 | `docs/{CliInstall,Commands}/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/Commands/<command>.md` | `build` | always. One page per visible command; `docs/Commands/doc.md` indexes them |
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
-| `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
+| `sandbox/api/{cli,command,trigger}.go` | `build` | always. Aliases of the `OpinatedAgnosCli` contract's types |
 | `sandbox/api/clisandbox.go` | `build` | always. `api.CliSandbox`, the part of `api.Sandbox` holding `Cli` |
-| `sandbox/internal/generated/cli/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
-| `sandbox/internal/generated/cli/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
-| `sandbox/internal/generated/cli/command/*.go` | `build` | always. The generic base every command is built on: the matcher and the `Entries` binder |
-| `sandbox/internal/generated/cliio/*.go` | `build` | always |
+| `sandbox/internal/generated/cli/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand`, and `Cli.CliMain`, which hands the line to `OpinatedAgnosCli.CliMain` |
+| `sandbox/deps/OpinatedAgnosCli/`, `adapters/libs/OpinatedAgnosCli/` | `cli-init` | once, like any dep. The dispatch, the binder, the matcher and the failures every command runs through |
 | `sandbox/internal/commands/{help,version,help_flag}/{command.yaml,InternalPureHandler.go}` | `build` | always |
 | `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command`, a 1:1 image of `command.yaml` |
 | `sandbox/internal/commands/<name>/entries.go` | `build` | always. `Entries`, one field per arg and flag |

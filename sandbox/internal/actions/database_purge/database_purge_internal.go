@@ -68,6 +68,8 @@ func DatabasePurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path strin
 		io.RemoveDir(dir)
 	}
 
+	utils.RemoveRetiredGenerated(sandbox, io, utils.ExtensionSandboxDatabase)
+
 	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {
 			io.RemoveDir(dir)

@@ -99,7 +99,7 @@ func checkRemoteCopy(sandbox *api.Sandbox, io *smartio.SmartIO, dep string, dir 
 			continue
 		}
 
-		formatted, err := add_dep.RenderRemoteFile(sandbox, file, dep)
+		formatted, err := add_dep.RenderRemoteFile(sandbox, remote, file, dep)
 		if err != nil {
 			violations = append(violations, target+" could not be compared: "+err.Error())
 			continue

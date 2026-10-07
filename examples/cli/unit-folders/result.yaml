@@ -4,8 +4,8 @@ tree:
     - file: sandbox/internal/commands/ops/cloud/deploy/command.yaml
       sha: 2f595808916160a0485d8cce3f3a5ef5e0f2735b7aba658a2ba6cac33901ef7e
     - file: sandbox/internal/generated/cli/cli/new.go
-      sha: ab8ee63f8a9a17cb457ca6f0e8a347de0a23ee66b80767f79bbe85570652944d
+      sha: 99fd6e01be8d5247a064efb94ed81ca3ef67720aa53bfa35d6976e565cf1faf8
     - file: sandbox/internal/generated/server/server/new.go
-      sha: e02d3c2ec6fbc24114fecdbab57fc9518092326957e2003548f4e136fa9f7464
+      sha: 8cb140f6c861f716f6f3e68e92d434e933ed08d7e3d6676e7df923180a441f2a
     - file: sandbox/internal/routeslist/api/users/route.yaml
       sha: 99a641710d72889a225143a11054dc0972c3244a887b8d4475d55bfc9ed3bc8b

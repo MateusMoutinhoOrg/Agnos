@@ -14,10 +14,10 @@ tree:
     - file: docs/Commands/version.md
       sha: dc2bb6deeaa61f717dc01d8c7185200bb51e92f0febd0c8009872be5df5a9193
     - file: sandbox/internal/commands/greet/InternalPureHandler.go
-      sha: a58febba6a2ff9c27ec7773740e748035524360e7270694b8173e7cdea511615
+      sha: e559891705796277b6df4540f262d760e1d20e26ecd03c6fcd66478c4960f154
     - file: sandbox/internal/commands/greet/command.yaml
       sha: c2877f963d278cbb84c59ef2abf36b62e183c04a1b74f96743ecb6886724d0c4
     - file: sandbox/internal/commands/greet/entries.go
       sha: 0f699c28b19dba9ae7d930098b10a8897b88e6e14957efdd7655db415d26801e
     - file: sandbox/internal/commands/greet/new.go
-      sha: 5019af7cf0435321caabd5326ceb6b941dc2bb32a90f7a76106afcd5f1ed4cac
+      sha: 12231d3b06a18db9bcddd843d25ea6f86c661409d139ec64a07fa5930acaabe0

@@ -9,7 +9,7 @@ served the same way. Dynamic data comes from api routes the page's js calls, or 
 ## Bring it up
 
 ```bash
-{{.GeneratorName}} front-init                    # frontio, the frontend route, assets/frontend/{index,404}.html
+{{.GeneratorName}} front-init                    # the OpinatedAgnosFront lib, the frontend route, assets/frontend/{index,404}.html
 {{.GeneratorName}} add-page about --title About  # assets/frontend/about.html, answered on /about
 {{.GeneratorName}} add-page blog/post            # assets/frontend/blog/post.html, answered on /blog/post
 {{.GeneratorName}} remove-page about             # deletes the html
@@ -32,7 +32,7 @@ before it. It reads, in order, the first one of these that exists:
 
 A path that names no file is answered `404` with `404.html`, the formatted page `front-init`
 writes — restyle it by editing it. Delete it and such a path is declined instead, so the chain
-goes on and `handle_not_found.go` answers the `404`. Every file is sent with the `Content-Type` of its extension (`frontio.ContentTypeOf`,
+goes on and `handle_not_found.go` answers the `404`. Every file is sent with the `Content-Type` of its extension (`OpinatedAgnosFront.ContentTypeOf`,
 unknown ones as `application/octet-stream`) and `Cache-Control: no-cache`.
 
 ## A form
@@ -66,7 +66,7 @@ names no file is then answered with `index.html`. A missing `/app.js` still gets
 
 | Path | Written by | Rewrite |
 |---|---|---|
-| `sandbox/internal/generated/frontio/frontio.go` | `build` | always |
+| `sandbox/deps/OpinatedAgnosFront/`, `adapters/libs/OpinatedAgnosFront/` | `front-init` | once, like any dep |
 | `docs/FrontUsage/` | `build` | always |
 | `sandbox/internal/routeslist/frontend/{route.yaml,InternalPureHandler.go}` | `front-init` | once |
 | `sandbox/internal/routeslist/frontend/{new.go,entries.go}` | `build` | always |
@@ -76,5 +76,6 @@ names no file is then answered with `index.html`. A missing `/app.js` still gets
 
 The frontend route is a route like any other: every editor of its `route.yaml` works on it, and
 `{{.GeneratorName}} remove-route frontend && {{.GeneratorName}} front-init` scaffolds it again.
-`frontio.SafePath` is the only thing between a caller's path and the rest of the embedded asset
-tree; it is generated, so the handler never has to keep a copy of it.
+`OpinatedAgnosFront.SafePath`, which `Resolve` runs first, is the only thing between a caller's
+path and the rest of the embedded asset tree; it lives in the lib, so the handler never has to
+keep a copy of it.

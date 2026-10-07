@@ -17,8 +17,9 @@ const ConstructorsDir = "sandbox/constructors"
 const ConstructorFile = "constructor.go"
 
 // GeneratedDir is the project-relative directory holding every package the
-// build rewrites whole — cli, config, routeio, frontio, databaseio and the
-// server's route and server. Nothing under it is the project's to edit; the
+// build rewrites whole — the cli and server registries and config; the
+// dispatch they hand off to is the OpinatedAgnos libs'. Nothing under it is
+// the project's to edit; the
 // packages that mix a generated file with a hand-written one (a command, a
 // route, a database) stay beside it under sandbox/internal/.
 const GeneratedDir = "sandbox/internal/generated"

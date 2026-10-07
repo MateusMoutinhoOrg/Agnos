@@ -84,7 +84,7 @@ middleware is. `response.Error` and `response.Log` answer nothing. Nothing answe
 ```go
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	if entries.Name == "" {
-		return cliio.Fail(sandbox, api.ExitFailure, "Name", "nobody to greet")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "Name", "nobody to greet")
 	}
 	response.Printf("hello %s\n", entries.Name)
 	return nil

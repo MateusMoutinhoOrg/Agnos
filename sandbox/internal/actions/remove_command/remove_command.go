@@ -7,7 +7,7 @@ import (
 )
 
 // RemoveCommand deletes the whole sandbox/internal/commands/<name>/ package,
-// then runs build so climain.go and help stop dispatching to it.
+// then runs build so the cli registry and help stop dispatching to it.
 func RemoveCommand(sandbox *api.Sandbox, path string, name string) error {
 	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
 	if err := RemoveCommandInternal(sandbox, io, name); err != nil {

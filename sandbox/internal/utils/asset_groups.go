@@ -27,15 +27,16 @@ type AssetGroup struct {
 }
 
 // AssetGroups is every group a build may render, in render order. assets/start
-// is not here: it is written once by `start` and is not a mechanic.
+// is not here: it is written once by `start` and is not a mechanic. Neither
+// are sandbox-front and sandbox-database: their code is the OpinatedAgnosFront
+// and OpinatedAgnosDatabase libs, installed by their -init, so each mechanic
+// renders its pages and nothing else.
 func AssetGroups() []AssetGroup {
 	return []AssetGroup{
 		{ExtensionSandbox, []string{ExtensionSandbox}, true},
 		{ExtensionSandboxDeps, []string{ExtensionSandboxDeps}, true},
 		{ExtensionSandboxCli, []string{ExtensionSandboxCli}, true},
 		{ExtensionSandboxServer, []string{ExtensionSandboxServer}, true},
-		{ExtensionSandboxFront, []string{ExtensionSandboxFront}, true},
-		{ExtensionSandboxDatabase, []string{ExtensionSandboxDatabase}, true},
 		{ExtensionDoc, []string{ExtensionDoc}, false},
 		{"doc-cli", []string{ExtensionDoc, ExtensionSandboxCli}, false},
 		{"doc-server", []string{ExtensionDoc, ExtensionSandboxServer}, false},

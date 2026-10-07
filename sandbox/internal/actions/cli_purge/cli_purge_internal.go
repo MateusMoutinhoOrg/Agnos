@@ -23,15 +23,14 @@ import (
 // no props.yaml, which every later build reads as a doc that fails to load.
 //
 // sandbox/internal/cli is one of them too: its errors/ files are written once
-// by the build and then the project's, but every one of them imports the help
-// command and cliio, so leaving them behind hands back a tree that does not
-// compile — and that no cli-init can bring back.
+// by the build and then the project's, but every one of them names api.Command,
+// whose alias goes with the layer's api files, so leaving them behind hands
+// back a tree that does not compile — and that no cli-init can bring back.
 //
 // sandbox/internal/commandprops is one of them: every command names it, so it
 // goes with them.
 var cliDirs = []string{
 	utils.GeneratedDir + "/cli",
-	utils.GeneratedDir + "/cliio",
 	"sandbox/internal/cli",
 	"sandbox/internal/commands",
 	utils.CommandPropsDir,
@@ -70,9 +69,7 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 		io.RemoveDir(dir)
 	}
 
-	if err := utils.RemoveTriggerUnlessUsed(sandbox, io, utils.ExtensionSandboxServer); err != nil {
-		return err
-	}
+	utils.RemoveRetiredGenerated(sandbox, io, utils.ExtensionSandboxCli)
 
 	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {

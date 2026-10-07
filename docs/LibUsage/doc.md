@@ -71,6 +71,7 @@ The contracts available to patch:
 
 | Field | Contract package |
 | --- | --- |
+| `deps.OpinatedAgnosCli` | `sandbox/deps/OpinatedAgnosCli` |
 | `deps.Argvdeps` | `sandbox/deps/argvdeps` |
 | `deps.Embeddeps` | `sandbox/deps/embeddeps` |
 | `deps.Goimportsdeps` | `sandbox/deps/goimportsdeps` |
@@ -91,6 +92,7 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 
 | Adapter lib | Binder |
 | --- | --- |
+| `adapters/libs/OpinatedAgnosCli` | `OpinatedAgnosCli.Bind(&deps)` |
 | `adapters/libs/argvdeps` | `argvdeps.Bind(&deps)` |
 | `adapters/libs/embeddeps` | `embeddeps.Bind(&deps)` |
 | `adapters/libs/goimportsdeps` | `goimportsdeps.Bind(&deps)` |

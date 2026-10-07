@@ -50,12 +50,10 @@
 {{- if and .HasDoc .HasExample }}
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `props.yaml` |
 {{- end }}
-| `sandbox/api/cli.go`, `sandbox/api/command.go` | `build` | always |
+| `sandbox/api/{cli,command,trigger}.go` | `build` | always. Aliases of the `OpinatedAgnosCli` contract's types |
 | `sandbox/api/clisandbox.go` | `build` | always. `api.CliSandbox`, the part of `api.Sandbox` holding `Cli` |
-| `sandbox/internal/generated/cli/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand` |
-| `sandbox/internal/generated/cli/cli/climain.go` | `build` | always. `CliMain`, the one dispatch every command goes through |
-| `sandbox/internal/generated/cli/command/*.go` | `build` | always. The generic base every command is built on: the matcher and the `Entries` binder |
-| `sandbox/internal/generated/cliio/*.go` | `build` | always |
+| `sandbox/internal/generated/cli/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand`, and `Cli.CliMain`, which hands the line to `OpinatedAgnosCli.CliMain` |
+| `sandbox/deps/OpinatedAgnosCli/`, `adapters/libs/OpinatedAgnosCli/` | `cli-init` | once, like any dep. The dispatch, the binder, the matcher and the failures every command runs through |
 | `sandbox/internal/commands/{help,version,help_flag}/{command.yaml,InternalPureHandler.go}` | `build` | always |
 | `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command`, a 1:1 image of `command.yaml` |
 | `sandbox/internal/commands/<name>/entries.go` | `build` | always. `Entries`, one field per arg and flag |
@@ -66,12 +64,10 @@
 | `sandbox/internal/commandprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `CommandProps` |
 {{- end }}
 {{- if .HasServer }}
-| `sandbox/api/{server.go,route.go}` | `build` | always |
+| `sandbox/api/{server.go,route.go}` | `build` | always. Aliases of the `OpinatedAgnosServer` contract's types |
 | `sandbox/api/serversandbox.go` | `build` | always. `api.ServerSandbox`, the part of `api.Sandbox` holding `Server` |
-| `sandbox/internal/generated/server/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute` |
-| `sandbox/internal/generated/server/server/servermain.go` | `build` | always. `ServerMain` + the one dispatch that runs `Server.Routes` as a chain |
-| `sandbox/internal/generated/server/route/{new.go,IsActionable.go,RequestHandler.go}` | `build` | always. The generic base every route is built on: the matcher and the `Entries` binder |
-| `sandbox/internal/generated/routeio/*.go` | `build` | always |
+| `sandbox/internal/generated/server/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute`, and `Server.Serve`, which hands the server to `OpinatedAgnosServer.ServerMain` |
+| `sandbox/deps/OpinatedAgnosServer/`, `adapters/libs/OpinatedAgnosServer/` | `server-init` | once, like any dep. The request chain, the binder, the json-schema validator and the writers every route runs through |
 | `sandbox/internal/routeslist/health/{route.yaml,InternalPureHandler.go}` | `build` | always |
 | `sandbox/internal/routeslist/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, a 1:1 image of `route.yaml` |
 | `sandbox/internal/routeslist/<name>/entries.go` | `build` | always. `Entries`, and the `ReadBody` a body calls for |
@@ -85,7 +81,7 @@
 | `sandbox/internal/routeprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `RouteProps` — declare them there |
 {{- end }}
 {{- if .HasDatabase }}
-| `sandbox/internal/generated/databaseio/*.go` | `build` | always |
+| `sandbox/deps/OpinatedAgnosDatabase/`, `adapters/libs/OpinatedAgnosDatabase/` | `database-init` | once, like any dep. The readers and filters every `methods.go` shares |
 | `sandbox/internal/databases/<db>/{api.go,new.go,methods.go}` | `build` | always. The records, the `database.Props` and the body of every method, all from `specs.yaml` |
 | `docs/Databases/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
@@ -101,7 +97,7 @@
 | `assets/backoffice/*.html`, `assets/frontend/admin/backoffice.js` | `backoffice-init` | once. Copied verbatim: the pages are the project's runtime templates |
 {{- end }}
 {{- if .HasFront }}
-| `sandbox/internal/generated/frontio/frontio.go` | `build` | always. `Resolve`, `SafePath`, `ContentTypeOf` |
+| `sandbox/deps/OpinatedAgnosFront/`, `adapters/libs/OpinatedAgnosFront/` | `front-init` | once, like any dep. `Resolve`, `SafePath`, `ContentTypeOf` |
 | `docs/FrontUsage/` | `build` | always. Both `doc.md` and `props.yaml` |
 | `sandbox/internal/routeslist/frontend/{route.yaml,InternalPureHandler.go}` | `front-init` | once. `spaFallback` is yours to turn on |
 | `assets/frontend/index.html` | `front-init` | once. Kept if already there |

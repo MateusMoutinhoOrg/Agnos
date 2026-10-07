@@ -6,7 +6,6 @@ import (
 {{- if or .Body.IsJson .Body.IsObject}}
 	serializables "{{.Module}}/sandbox/deps/serializables"
 {{- end}}
-	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 {{- end}}
 
@@ -47,7 +46,7 @@ const MaxBodyBytes = {{.Body.MaxBytes}}
 {{- if .SchemaJson}}
 
 // BodySchema is this route's declared {{if .Body.IsForm}}form{{else}}json{{end}}-schema in canonical form — the text
-// routeio.{{if .Body.IsForm}}ValidateForm{{else}}ValidateSchema{{end}} checks a request body against.
+// Deps.OpinatedAgnosServer.{{if .Body.IsForm}}ValidateForm{{else}}ValidateSchema{{end}} checks a request body against.
 const BodySchema = {{printf "%q" .SchemaJson}}
 {{- end}}
 {{- if .HasBody}}
@@ -58,21 +57,22 @@ const BodySchema = {{printf "%q" .SchemaJson}}
 // Entries.Body; a middleware in front of this route may still refuse a request
 // before a byte of it is read.
 //
-// It returns nil when the body passed. Any other failure has already been
-// answered — by this project's own HandleBadRequest or HandleTooLarge, which
-// routeio.Raise hands it to — and the handler never runs.
+// It returns nil when the body passed. Any other failure comes back built by
+// Deps.OpinatedAgnosServer.Fail, which the lib's dispatch raises — reaching
+// this project's own HandleBadRequest or HandleTooLarge — and the handler never
+// runs.
 func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) {
 	var body {{.Body.GoType}}
 
-	raw, err := routeio.RequestOf(route).ReadBody(MaxBodyBytes)
+	raw, err := route.Request.ReadBody(MaxBodyBytes)
 	if err != nil {
-		return body, routeio.RaiseWithCause(sandbox, route, api.StatusPayloadTooLarge, "",
+		return body, sandbox.Deps.OpinatedAgnosServer.FailWithCause(api.StatusPayloadTooLarge, "",
 			"the request body is larger than {{.Body.MaxBytesText}} bytes", err.Error())
 	}
 
 	if len(raw) == 0 {
 {{- if .Body.Required}}
-		return body, routeio.Raise(sandbox, route, api.StatusBadRequest, "",
+		return body, sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusBadRequest, "",
 			"this route requires a request body")
 {{- else if and .Body.IsObject .Body.IsForm}}
 		// An absent form is read as an empty one, so a property the
@@ -93,31 +93,31 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) 
 	body = string(raw)
 {{- else if .Body.IsForm}}
 
-	form, err := routeio.RequestOf(route).ReadForm(MaxBodyBytes)
+	form, err := route.Request.ReadForm(MaxBodyBytes)
 	if err != nil {
-		return body, routeio.RaiseWithCause(sandbox, route, api.StatusBadRequest, "",
+		return body, sandbox.Deps.OpinatedAgnosServer.FailWithCause(api.StatusBadRequest, "",
 			"the request body is not a valid form", err.Error())
 	}
 {{- if .Body.IsObject}}
 
-	parsed, field, message, ok := routeio.ValidateForm(sandbox, BodySchema, form)
+	parsed, field, message, ok := sandbox.Deps.OpinatedAgnosServer.ValidateForm(sandbox.Deps.Serializables, BodySchema, form)
 	if !ok {
-		return body, routeio.Raise(sandbox, route, api.StatusBadRequest, field, message)
+		return body, sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusBadRequest, field, message)
 	}
 
-	body = bindBody(parsed)
+	body = bindBody(sandbox, parsed)
 {{- else}}
 	body = form
 {{- end}}
 {{- else}}
 
-	parsed, field, message, ok := routeio.ValidateSchema(sandbox, {{if .SchemaJson}}BodySchema{{else}}""{{end}}, raw)
+	parsed, field, message, ok := sandbox.Deps.OpinatedAgnosServer.ValidateSchema(sandbox.Deps.Serializables, {{if .SchemaJson}}BodySchema{{else}}""{{end}}, raw)
 	if !ok {
-		return body, routeio.Raise(sandbox, route, api.StatusBadRequest, field, message)
+		return body, sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusBadRequest, field, message)
 	}
 {{- if .Body.IsObject}}
 
-	body = bindBody(parsed)
+	body = bindBody(sandbox, parsed)
 {{- else}}
 
 	body = parsed
@@ -132,21 +132,21 @@ func ReadBody(sandbox *api.Sandbox, route *api.Route) ({{.Body.GoType}}, error) 
 // bind{{.Name}} converts one already-validated document into {{.Name}}. The
 // schema has been enforced by then, so a property that will not read was
 // optional and comes back as its zero value.
-func bind{{.Name}}(document *serializables.SerializibleObject) {{.Name}} {
+func bind{{.Name}}(sandbox *api.Sandbox, document *serializables.SerializibleObject) {{.Name}} {
 	value := {{.Name}}{}
 {{- range .Fields}}
 {{- if eq .Kind "object"}}
-	value.{{.GoField}} = bind{{.StructName}}(routeio.ReadObject(document, "{{.Key}}"))
+	value.{{.GoField}} = bind{{.StructName}}(sandbox, sandbox.Deps.OpinatedAgnosServer.ReadObject(document, "{{.Key}}"))
 {{- else if eq .Kind "array"}}
-	for _, item := range routeio.ReadItems(document, "{{.Key}}") {
+	for _, item := range sandbox.Deps.OpinatedAgnosServer.ReadItems(document, "{{.Key}}") {
 {{- if eq .ItemKind "object"}}
-		value.{{.GoField}} = append(value.{{.GoField}}, bind{{.StructName}}(item))
+		value.{{.GoField}} = append(value.{{.GoField}}, bind{{.StructName}}(sandbox, item))
 {{- else}}
-		value.{{.GoField}} = append(value.{{.GoField}}, routeio.{{.ItemReader}}(item))
+		value.{{.GoField}} = append(value.{{.GoField}}, sandbox.Deps.OpinatedAgnosServer.{{.ItemReader}}(item))
 {{- end}}
 	}
 {{- else}}
-	value.{{.GoField}} = routeio.{{.Reader}}(document, "{{.Key}}")
+	value.{{.GoField}} = sandbox.Deps.OpinatedAgnosServer.{{.Reader}}(document, "{{.Key}}")
 {{- end}}
 {{- end}}
 	return value

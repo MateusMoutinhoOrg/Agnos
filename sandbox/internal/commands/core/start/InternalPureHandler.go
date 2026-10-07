@@ -4,7 +4,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
@@ -18,7 +17,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 		{
 			response.Error("the module flag (--module) is required when there is no go.mod in the path\n")
 		}
-		return cliio.Fail(sandbox, api.ExitUsage, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitUsage, "", "")
 	}
 
 	start_error := startAction.Start(sandbox, api.StartProps{
@@ -29,7 +28,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	})
 
 	if start_error != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", start_error.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", start_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

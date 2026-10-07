@@ -8,8 +8,8 @@ package serverdeps
 //
 // The contract is deliberately unopinionated: it opens the port, applies the
 // timeouts and hands every request to the one Handler. Routing, method
-// dispatch, path parameters, 404 and 405 are the generated
-// sandbox/internal/generated/server/server/servermain.go's business, never the library's.
+// dispatch, path parameters, 404 and 405 are the OpinatedAgnosServer lib's
+// business, never this library's.
 // Only builtin types cross this boundary — no `time.Time`, no `io.Reader`, no
 // type of the concrete library.
 

@@ -3,27 +3,7 @@ package utils
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 )
-
-// TriggerDir is the generated package holding the MatchTrigger the cli and
-// the server layers share: the build writes it while either one is on, and
-// the purge of the last of them removes it.
-const TriggerDir = GeneratedDir + "/trigger"
-
-// RemoveTriggerUnlessUsed drops TriggerDir once the layer being purged was the
-// last one matching on a trigger — other is the extension of the one left.
-func RemoveTriggerUnlessUsed(sandbox *api.Sandbox, io *smartio.SmartIO, other string) error {
-	used, err := ExtensionEnabled(sandbox, io, other)
-	if err != nil || used || !io.IsDir(TriggerDir) {
-		return err
-	}
-	for _, entry := range io.ListAllRecursively(TriggerDir) {
-		io.RemoveDir(entry)
-	}
-	io.RemoveDir(TriggerDir)
-	return nil
-}
 
 // TriggerAliases maps the spellings a trigger type may be typed in onto the
 // one a declaration carries; the canonical names map onto themselves.
@@ -127,8 +107,8 @@ func NewTrigger(sandbox *api.Sandbox, props TriggerProps) (triggerconf.Trigger, 
 	return trigger, nil
 }
 
-// MatchTrigger is MatchTrigger of the generated
-// sandbox/internal/generated/trigger/MatchTrigger.go, read against a
+// MatchTrigger is the MatchTrigger of the OpinatedAgnosCli lib
+// (assets/adapterlist/OpinatedAgnosCli/.../trigger.go), read against a
 // declaration: a change to one is a change to the other.
 func MatchTrigger(sandbox *api.Sandbox, trigger triggerconf.Trigger, text string, segmented bool) bool {
 	value := trigger.Value
@@ -172,7 +152,7 @@ func MatchTrigger(sandbox *api.Sandbox, trigger triggerconf.Trigger, text string
 	return matched != trigger.Negate
 }
 
-// triggerSeparator is segmentSeparator of the generated MatchTrigger.go: "/"
+// triggerSeparator is segmentSeparator of the OpinatedAgnosCli lib: "/"
 // on a route's path, " " on a command's segments.
 func triggerSeparator(sandbox *api.Sandbox, text string, value string) string {
 	if sandbox.Deps.Stringsdeps.HasPrefix(text, "/") || sandbox.Deps.Stringsdeps.HasPrefix(value, "/") {

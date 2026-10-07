@@ -1,0 +1,4 @@
+default-adapter: OpinatedAgnosCli
+field: OpinatedAgnosCli
+help: The agnos cli mechanic itself — command declarations, the dispatch chain, binding and failures
+name: OpinatedAgnosCli

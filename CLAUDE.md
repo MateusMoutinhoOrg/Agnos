@@ -131,12 +131,12 @@ editing only the rendered copy is undone in silence.
   `add-route` writes `100`, `10` for a `--middleware`. A path reads the segments `start`..`end`
   (inclusive, `-1` the last) into `Entries.<id>` in its `type` (`string`, `integer`, `number`,
   `uuid`); a parameter reads `key` from the first of its `fonts` (`query`, `header`, `cookie`).
-  Every `id` is an exported Go name, unique across both, never `FullRoute` or `Body`. The generic
-  `RequestHandler` fills `Entries` by its `id` tags through `Deps.Reflectdeps`. `--pattern`
+  Every `id` is an exported Go name, unique across both, never `FullRoute` or `Body`. The
+  `OpinatedAgnosServer` lib fills `Entries` by its `id` tags, by reflection. `--pattern`
   compiles to these paths plus `segments`; the yaml never holds the pattern.
 - On a path, `prefix` is segment-wise (`/admin` never matches `/administrator`), `text-prefix` the
-  plain one. `utils/route_match.go` is the generated `IsActionable.go` read against a
-  `route.yaml`, for `explain-route`: a change to one is a change to the other.
+  plain one. `utils/route_match.go` is the `OpinatedAgnosServer` lib's `is_actionable.go` read
+  against a `route.yaml`, for `explain-route`: a change to one is a change to the other.
 - **The server is a chain.** Every route matching a request runs, lowest `priority` first, and
   the first one to answer — `SetStatus`, or a `Write`, which sends a `200` — ends it; a handler
   that does neither has declined and the next runs, which is the whole of what a middleware is.
@@ -151,18 +151,18 @@ editing only the rendered copy is undone in silence.
   field of its `UserSandbox` (agnos's `Actions`), which `verify` demands.
   `commandprops.CommandProps` is the cli's mirror. A handler is handed no request, so what
   it reads is declared (`Entries`, the body on `Entries.Body`). An `InternalPureHandler` returns
-  `error`, never a status; it refuses a request by returning `routeio.Fail`. A path type or a
+  `error`, never a status; it refuses a request by returning
+  `sandbox.Deps.OpinatedAgnosServer.Fail`. A path type or a
   `trigger` is part of what the route matches on, so failing one is a non-match, not a `400`.
   There is one chain and no `after` phase: a `phase` key is an old declaration `verify` names.
-- Nothing in the dispatch writes a response: every failure goes through `routeio.Raise` to one of
-  the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and never
-  rewrites. `Raise` reaches them through the `Fail` field of `api.Server` because a route package
-  may not import `sandbox/internal/generated/server/server` — that package imports every route. A failure the dispatch
-  raises with nothing to add carries no message, so the wording is the one that file spells;
-  that is what makes editing it change what the server says.
+- Nothing in the dispatch writes a response: only the lib's dispatch raises, and every failure
+  reaches one of the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once
+  and never rewrites, through the `Fail` field of `api.Server` the generated registry fills. A
+  failure the dispatch raises with nothing to add carries no message, so the wording is the one
+  that file spells; that is what makes editing it change what the server says.
 - A page is a file of `assets/frontend/` and nothing else — no route, no declaration. The
   `frontend` route `front-init` writes (priority `1000`, after every api route) serves the whole
-  tree through the generated `sandbox/internal/generated/frontio/`, whose `SafePath` keeps a caller's path
+  tree through the `OpinatedAgnosFront` lib, whose `SafePath` keeps a caller's path
   inside it; a path naming no file is answered `404` with the `assets/frontend/404.html`
   `front-init` writes, and declined only when that file is gone.
 - A pattern changed here is mirrored in `docs/Contributing/doc.md` in the same commit, and the
@@ -178,8 +178,8 @@ adapters/  -->  sandbox/  <--  cmd/main/        assets/ (templates, read via Dep
 - **`sandbox/`** — the closed core. It imports only `sandbox/` packages, the stdlib included, so
   text, sorting, hashing and templating come from `sandbox.Deps.<Contract>` too. `api/` holds
   contracts, `deps/` dependency contracts, `internal/` the logic, and `constructors/` is the one
-  open list. `internal/generated/` holds every package `build` rewrites whole (cli, config,
-  routeio, frontio, databaseio, server/route, server/server) and nothing hand-written; a package
+  open list. `internal/generated/` holds every package `build` rewrites whole — the registries
+  `cli/cli` and `server/server`, and `config` — and nothing hand-written; a package
   mixing both — a command, a route, a database — stays under `internal/`. **Every function of `internal/` takes `sandbox *api.Sandbox` first**, and nothing
   else standing for the outside world: holding the api is holding everything.
   `api.Sandbox` embeds `api.UserSandbox` and `api.Config` embeds `api.UserConfig`
@@ -200,9 +200,9 @@ its category: `core/`, `cli/`, `server/`, …) with
 snake_case for a kebab-case command (`add-command` -> `add_command/`). Only `handler.go` and
 contract/adapter pairs are hand-written; everything else is generated.
 
-**`sandbox.Cli.Commands` is the command surface.** `climain.go` is one generic dispatch that
-binds a command line onto a copy of the matched declaration, and a handler reads its values by
-the id its `entries.yaml` declares — `command.GetString("path")`, `command.GetBool("quiet")`.
+**`sandbox.Cli.Commands` is the command surface.** `OpinatedAgnosCli.CliMain` is one dispatch that
+binds a command line onto a copy of the matched declaration, and a handler reads its values off
+the `Entries` its `command.yaml` declares — `entries.Path`, `entries.Quiet`.
 `sandbox.Server.Routes` is the http surface the same way, and the server layer mirrors the cli
 layer file for file. The front layer declares no unit of its own: a page **is** a file of
 `assets/frontend/`, served by one route.
@@ -229,6 +229,16 @@ project's, and removing it is what `<x>-purge` does.
 **adapter** one implementation of it (`adapters/libs/<adapter>/`), and an **available** a
 selection (`adapters/availables/<name>/`). `verify` demands every available fill every field
 exactly once — zero panics on first use, two overwrite in silence.
+
+**The opinated libs** — `OpinatedAgnosCli`, `OpinatedAgnosServer`, `OpinatedAgnosFront`,
+`OpinatedAgnosDatabase` — are the one kind of dep that carries an agnos mechanic rather than a
+library's raw capability: the dispatch, the binders, the matchers, json-schema, the file layer,
+the database readers. Code that is the same in every project lives there, never under
+`internal/generated/`. Each mechanic's `-init` installs its lib; the mechanic's `sandbox/api/`
+files are type aliases of the lib's contract, so `api.Command` still reads the same. A lib holds
+no dep: an entry point takes a `MainProps` the registry builds, any other function the one dep it
+needs first. This repo runs on its own `OpinatedAgnosCli`: change
+`assets/{deplist,adapterlist}/OpinatedAgnosCli/` and re-mirror the installed copy.
 
 **SmartIO** (`sandbox/internal/smartio/`) is a transactional filesystem rooted at `--path`.
 Actions pass project-relative paths only. Writes buffer until `Persist`, but `List*` reads disk —

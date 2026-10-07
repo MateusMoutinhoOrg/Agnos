@@ -3,7 +3,6 @@ package api_authentication
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/generated/routeio"
 	"{{.Module}}/sandbox/internal/routeprops"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficethrottle"
@@ -27,7 +26,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, ent
 	token := backofficeauth.BearerToken(sandbox, entries.Authorization)
 	if token != "" && !backofficethrottle.TokenAllowed(sandbox, props.ClientIp) {
 		response.SetHeader("Retry-After", backofficethrottle.RetryAfter(sandbox))
-		return routeio.Fail(sandbox, api.StatusTooManyRequests, "authorization", "too many invalid tokens from this ip, try again later")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusTooManyRequests, "authorization", "too many invalid tokens from this ip, try again later")
 	}
 	user, apiToken, ok, err := backofficetokens.Resolve(sandbox, token, props.ClientIp)
 	if err != nil {
@@ -44,7 +43,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, ent
 
 	response.SetHeader("WWW-Authenticate", "Bearer")
 	if token == "" {
-		return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "send an API token, created on "+backofficetokens.ListPath+", in the Authorization header, after Bearer")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "send an API token, created on "+backofficetokens.ListPath+", in the Authorization header, after Bearer")
 	}
-	return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "the token is invalid, expired, revoked or not allowed from this ip")
+	return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "the token is invalid, expired, revoked or not allowed from this ip")
 }

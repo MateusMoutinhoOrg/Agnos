@@ -3,7 +3,6 @@ package errors
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/generated/routeio"
 )
 
 // HandleMethodNotAllowed answers a request whose path a route declares,
@@ -15,14 +14,15 @@ import (
 // you put here is what your server says. The default is the same JSON shape
 // every other failure carries, {"error": "...", "field": "..."}.
 //
-// What went wrong is on `route.Failure`, read through routeio.FailureOf so a
+// What went wrong is on `route.Failure`, read through Deps.OpinatedAgnosServer.FailureOf so a
 // route carrying none still answers something. The route itself is bound when a
 // declared route raised the failure and bare when none did, so
-// routeio.RequestOf(route) reads the request either way.
+// route.Request reads the request either way.
 //
-// Answer a failure here; never raise one. routeio.Raise comes back to this file.
+// Answer a failure here; never raise one: a failure raised from here comes back to this file.
 func HandleMethodNotAllowed(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
-	failure := routeio.FailureOf(route, api.StatusMethodNotAllowed, "method not allowed")
+	failure := sandbox.Deps.OpinatedAgnosServer.FailureOf(route, api.StatusMethodNotAllowed, "method not allowed")
 
-	return routeio.WriteError(sandbox, response, failure.Status, failure.Field, failure.Message)
+	sandbox.Deps.Std.Log("route error %d %s %s \n", failure.Status, failure.Field, failure.Message)
+	return sandbox.Deps.OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, response, failure.Status, failure.Field, failure.Message)
 }

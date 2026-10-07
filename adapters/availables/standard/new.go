@@ -1,6 +1,7 @@
 package standard
 
 import (
+	OpinatedAgnosCli "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/OpinatedAgnosCli"
 	argvdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/argvdeps"
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/embeddeps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/goimportsdeps"
@@ -20,6 +21,7 @@ import (
 
 func New() deps.Deps {
 	deps := deps.Deps{}
+	OpinatedAgnosCli.Bind(&deps)
 	argvdeps.Bind(&deps)
 	embeddeps.Bind(&deps)
 	goimportsdeps.Bind(&deps)

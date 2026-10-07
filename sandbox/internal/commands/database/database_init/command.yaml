@@ -10,5 +10,5 @@ examples:
     - database-init
     - database-init --path ./my-project
 help: Add the database layer to the project
-long-description: 'Installs the store the database layer is built over as a remote dep under sandbox/deps/database, renders sandbox/internal/generated/databaseio and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so ''agnos add-database'' is the step that follows.'
+long-description: 'Installs the store the database layer is built over as a remote dep under sandbox/deps/database, the OpinatedAgnosDatabase lib every generated methods.go reads it through, and turns the sandbox-database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so ''agnos add-database'' is the step that follows.'
 priority: 100

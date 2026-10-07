@@ -64,7 +64,7 @@ is copied.
 
 | Half | Is | Becomes, in the consumer |
 |---|---|---|
-| contract | `sandbox/api/`, which imports nothing but `sandbox/deps`, by the rule every agnos repo lives under | `sandbox/deps/<name>/`, the same files with the package clause rewritten and `Sandbox.Deps` dropped |
+| contract | `sandbox/api/`, which imports nothing but `sandbox/deps` and the `OpinatedAgnos<X>` contracts it aliases, by the rule every agnos repo lives under | `sandbox/deps/<name>/`, the same files with the package clause rewritten, `Sandbox.Deps` dropped and every mechanic's surface — the aliases of an `OpinatedAgnos<X>` type, and the parts holding them — left out |
 | wiring | `Sandbox.Deps`, how the repo reaches the outside world | nothing — a consumer installs an api, never the wiring behind it |
 | adapter | `sandbox.New` over one of its own availables | nothing — it runs compiled, out of the remote module |
 
@@ -96,7 +96,7 @@ identical in both copies — and every case follows from it:
 | a struct with a field of a named type of the same package | a generated converter, field by field — the only case that generates code |
 | a `func` field whose parameters or results fall in the case above | a closure, parameters in the reverse direction |
 | a slice, map or pointer of a convertible named type | a generated loop |
-| a type of another package (`time.Time`, `io.Reader`) | impossible: the api imports nothing but `sandbox/deps`, and `Sandbox.Deps` — the one field naming it — never crosses |
+| a type of another package (`time.Time`, `io.Reader`) | impossible: the api imports nothing but `sandbox/deps` and the opinated libs; `Sandbox.Deps` and the aliases of a lib's types never cross |
 | generics, `chan`, an anonymous struct or interface, an embedded field | rejected — outside the generator, not outside Go |
 
 This is not a new rule: it is the discipline `sandbox/deps/` contracts already

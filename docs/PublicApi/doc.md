@@ -27,7 +27,7 @@ struct of function fields, filled by a binder.
 | [`sandbox/api/actions.go`](api.actions.md) | `RuntimeGo`, `RuntimeNone`, `DefaultRoutePriority`, `DefaultMiddlewarePriority`, `BuildProps`, `CompileProps`, `StartProps`, `ExecTestProps`, `AddDepProps`, `SetDepProps`, `RemoveDepProps`, `AddAdapterProps`, `SetAdapterProps`, `ExtensionInfo`, `DepInfo`, `AdapterInfo`, `FlagProps`, `ArgProps`, `ArgEditProps`, `FlagEditProps`, `AddCommandProps`, `RenameCommandProps`, `RebalanceCommandsProps`, `ExplainCommandProps`, `SetCommandProps`, `AddRouteProps`, `RouteProps`, `RenameRouteProps`, `RebalanceRoutesProps`, `ExplainRouteProps`, `DatabaseFieldProps`, `DatabaseFieldEditProps`, `RoutePathProps`, `RoutePathEditProps`, `RouteParameterProps`, `RouteParameterEditProps`, `RouteBodyProps`, `RouteBodyFieldProps`, `RouteBodyFieldEditProps`, `RouteBodyImportProps`, `PageProps`, `DocProps`, `Actions` |
 | [`sandbox/api/cli.go`](api.cli.md) | `ExitOk`, `ExitFailure`, `ExitUsage`, `Cli` |
 | [`sandbox/api/clisandbox.go`](api.clisandbox.md) | `CliSandbox` |
-| [`sandbox/api/command.go`](api.command.md) | `StringArg`, `IntegerArg`, `NumberArg`, `UuidArg`, `StringFlag`, `IntegerFlag`, `NumberFlag`, `BooleanFlag`, `StringArrayFlag`, `IntegerArrayFlag`, `HandlerFailure`, `NotFoundFailure`, `BadUsageFailure`, `UnknownFlagFailure`, `UnexpectedArgFailure`, `ArgType`, `CommandArg`, `FlagType`, `CommandFlag`, `CommandResponse`, `CommandFailureKind`, `CommandFailure`, `Command`, `Error`, `NewCommand`, `BindCommand` |
+| [`sandbox/api/command.go`](api.command.md) | `StringArg`, `IntegerArg`, `NumberArg`, `UuidArg`, `StringFlag`, `IntegerFlag`, `NumberFlag`, `BooleanFlag`, `StringArrayFlag`, `IntegerArrayFlag`, `HandlerFailure`, `NotFoundFailure`, `BadUsageFailure`, `UnknownFlagFailure`, `UnexpectedArgFailure`, `ArgType`, `CommandArg`, `FlagType`, `CommandFlag`, `CommandResponse`, `CommandFailureKind`, `CommandFailure`, `Command` |
 | [`sandbox/api/config.go`](api.config.md) | `Config` |
 | [`sandbox/api/trigger.go`](api.trigger.md) | `EqualTrigger`, `PrefixTrigger`, `TextPrefixTrigger`, `SuffixTrigger`, `RegexTrigger`, `OneOfTrigger`, `TriggerType`, `Trigger` |
 | [`sandbox/api/userconfig.go`](api.userconfig.md) | `UserConfig` |
@@ -40,6 +40,7 @@ field is that package's `Sandbox` struct, filled by `adapters/libs/<name>.Bind(&
 
 | Page | Declares |
 | --- | --- |
+| [`deps.OpinatedAgnosCli`](deps.OpinatedAgnosCli.md) | `EqualTrigger`, `PrefixTrigger`, `TextPrefixTrigger`, `SuffixTrigger`, `RegexTrigger`, `OneOfTrigger`, `StringArg`, `IntegerArg`, `NumberArg`, `UuidArg`, `StringFlag`, `IntegerFlag`, `NumberFlag`, `BooleanFlag`, `StringArrayFlag`, `IntegerArrayFlag`, `HandlerFailure`, `NotFoundFailure`, `BadUsageFailure`, `UnknownFlagFailure`, `UnexpectedArgFailure`, `ExitOk`, `ExitFailure`, `ExitUsage`, `TriggerType`, `Trigger`, `ArgType`, `CommandArg`, `FlagType`, `CommandFlag`, `CommandResponse`, `CommandFailureKind`, `CommandFailure`, `Command`, `Cli`, `MainProps`, `Sandbox`, `Error` |
 | [`deps.Argvdeps`](deps.argvdeps.md) | `Sandbox`, `Parser` |
 | [`deps.Embeddeps`](deps.embeddeps.md) | `Sandbox` |
 | [`deps.Goimportsdeps`](deps.goimportsdeps.md) | `Sandbox`, `File`, `Import`, `Function`, `Param`, `Type`, `Field`, `Value` |

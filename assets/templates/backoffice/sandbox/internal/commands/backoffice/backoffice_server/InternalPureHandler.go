@@ -3,7 +3,6 @@ package backoffice_server
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/internal/commandprops"
-	"{{.Module}}/sandbox/internal/generated/cliio"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeguard"
 )
@@ -19,7 +18,7 @@ import (
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
 	secret, err := backofficeauth.ReadSecret(sandbox)
 	if err != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", err.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	}
 
 	sandbox.Config.Secret = secret

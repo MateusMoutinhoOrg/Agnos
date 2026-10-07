@@ -14,77 +14,73 @@ directory, `gen: true` on a file `build` rewrites, and `order:` to place it amon
 (unordered siblings follow, alphabetically).
 
 ```
-AgnosConfig/                        written once by `start`, read by every `build`
-  project.yaml                      name, version, description  (projectconf)
-  themes.yaml                       doc themes: name, id, description  (themesconf)
-  structure.yaml                    this tree  (structureconf)
-  extensions.yaml                   which mechanics agnos generates  (extensionsconf)
-  paths.yaml                        SmartIO listing rewrites  (pathreplacerconf)
-  docs/ReadmeHeader.md              README body, a template
-sandbox/                            closed: imports nothing outside sandbox/, no OS packages
-  new.go                            (gen) New(deps) *api.Sandbox, one <x>.Constructor(&self) per constructors/ dir
-  api/                              contracts only; imports nothing but sandbox/deps, for Sandbox.Deps
-    sandbox.go                      (gen) Sandbox struct, one field per api/ file
-    actions.go                      Actions struct + props structs + Runtime consts
-    cli.go                          (gen) Cli struct + exit consts
-    command.go                      (gen) Command/CommandFlag/CommandArg + NewCommand
-    config.go                       (gen) Config struct, the project's own name and version
-    trigger.go                      (gen) Trigger/TriggerType, the condition a route and a command match on
-  constructors/                     one <x>/constructor.go per field of the Sandbox; written once, then yours
-    <x>/constructor.go              Constructor(sandbox): sandbox.<X> = <x>.New<X>(sandbox)
-  deps/                             contracts; each <x>/ imports nothing at all
-    deps.go                         (gen) Deps struct, one <Title> <dir>.Sandbox per dir
-    <x>/<x>.go                      type Sandbox struct of func fields
-  internal/                         the logic; unreachable from outside the sandbox
-    generated/                      (gen) every package the build rewrites whole; never edited by hand
-      config/new.go                 (gen) NewConfig(sandbox) api.Config: ProjectName, Version
-      cli/cli/new.go                (gen) NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.CliMain
-      cli/cli/climain.go            (gen) CliMain, the one dispatch, runs the chain read off Cli.Commands
-      trigger/MatchTrigger.go       (gen) MatchTrigger, shared by the route and the command matchers
-      cli/command/                  (gen) NewCommand, IsActionable, CommandHandler — how every command matches and binds a command line
-      cliio/                        (gen) Fail/Raise/FailureOf and the tracked CommandResponse
-    commands/<name>/                command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand); any depth, under a folder per category (core/, cli/, server/, …) — the command.yaml is what makes a dir a command
-    actions/new.go                  NewActions(sandbox) api.Actions: one assignment per action
-    actions/<name>/                 <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
-    actions/build/collect_*.go      collectors: list one dir, title-case names
-    actions/build/generate_*.go     new.go per command, new.go + entries.go per route, help entries.yaml, doc indexes
-    actions/verify/check_*.go       one rule set per file, each returns []string
-    parsables/<name>conf/           api.go, new.go, new_empty.go, bind_methods.go, render.go
-    apishape/                       the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from
-    smartio/                        transactional fs rooted at --path
-    utils/                          RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
-adapters/                           the only place OS-bound and third-party code lives
-  libs/<adapter>/<adapter>.go       one package per adapter, exports Bind(deps *deps.Deps)
-  libs/<adapter>/adapter.yaml       which dep the adapter fills, which module it pins  (adapterconf)
-  availables/<name>/available.yaml  which adapters this available binds, one per Deps field  (availableconf)
-  availables/<name>/new.go          (gen) New() deps.Deps calling the Bind of every adapter declared; an available with no available.yaml is hand-written and left alone
-assets/                             Go text/templates embedded by asset.go; never `go build ./...`
-  start/                            written once, on `start`
-  sandbox/                          rendered when the `sandbox` extension is on; one group per extension from here down
-  sandbox-deps/                     rendered when `sandbox-deps` is on
-  sandbox-cli/                      rendered when `sandbox-cli` is on
-  sandbox-server/                   rendered when `sandbox-server` is on
-  sandbox-front/                    rendered when `sandbox-front` is on
-  sandbox-database/                 rendered when `sandbox-database` is on
-  readme/                           rendered when `readme` is on
-  doc/                              rendered when `doc` is on
-  doc-<x>/                          rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)
-  deplist/<dep>/                    one installable contract, dep.yaml beside the target layout it mirrors
-  adapterlist/<adapter>/            one installable adapter, adapter.yaml beside the target layout it mirrors
-  templates/                        single-file scaffolds (new.go, command_*, route_*, page_*, database_*, frontend_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
-  templates/backoffice/             the tree backoffice-init writes once, at the path each file holds in it; assets/ under it is copied verbatim
-cmd/main/main.go                    (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
-docs/                               one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
-  **/Index.md                       (gen) written for every doc that has sub-docs
-  Commands/<command>.md             (gen) one page per visible command, indexed by docs/Commands/doc.md
-  PublicApi/<contract>.md           (gen) one page per file of sandbox/api and per contract of sandbox/deps, indexed by docs/PublicApi/doc.md
-examples/                           one dir per example; `exec-test` runs each and diffs it against its golden
-  cli/<name>/example.sh             the example, run with `sh` and its own dir as cwd
-  lib/<name>/example.go             the example, run with `go run` and its own dir as cwd
-  <side>/<name>/result.yaml         (gen) golden: cli-output, exit-code, sha256 of every AssertDir file
-  <side>/<name>/TestDir/            the only place an example writes; removed before every run
-  <side>/<name>/AssertDir/          what the example copied out of TestDir to assert; the golden's tree
-release/                            git-ignored binaries, and the exec-test cli alias
+AgnosConfig/                              written once by `start`, read by every `build`
+  project.yaml                            name, version, description  (projectconf)
+  themes.yaml                             doc themes: name, id, description  (themesconf)
+  structure.yaml                          this tree  (structureconf)
+  extensions.yaml                         which mechanics agnos generates  (extensionsconf)
+  paths.yaml                              SmartIO listing rewrites  (pathreplacerconf)
+  docs/ReadmeHeader.md                    README body, a template
+sandbox/                                  closed: imports nothing outside sandbox/, no OS packages
+  new.go                                  (gen) New(deps) *api.Sandbox, one <x>.Constructor(&self) per constructors/ dir
+  api/                                    contracts only; imports nothing but sandbox/deps, for Sandbox.Deps, and the OpinatedAgnos<X> contracts it aliases
+    sandbox.go                            (gen) Sandbox struct, one field per api/ file
+    actions.go                            Actions struct + props structs + Runtime consts
+    cli.go                                (gen) Cli + exit consts, aliases of the OpinatedAgnosCli contract
+    command.go                            (gen) Command/CommandFlag/CommandArg/CommandResponse/CommandFailure, aliases of the OpinatedAgnosCli contract
+    config.go                             (gen) Config struct, the project's own name and version
+    trigger.go                            (gen) Trigger/TriggerType, the condition a route and a command match on; aliases of the OpinatedAgnosCli contract
+  constructors/                           one <x>/constructor.go per field of the Sandbox; written once, then yours
+    <x>/constructor.go                    Constructor(sandbox): sandbox.<X> = <x>.New<X>(sandbox)
+  deps/                                   contracts; each <x>/ imports nothing at all, an OpinatedAgnos<X>/ nothing but other contracts
+    deps.go                               (gen) Deps struct, one <Title> <dir>.Sandbox per dir
+    <x>/<x>.go                            type Sandbox struct of func fields
+    OpinatedAgnosCli/opinatedagnoscli.go  the cli lib: the command declaration types, MainProps, and CliMain, NewCommand, BindCommand, Fail, FailureOf, MatchTrigger
+  internal/                               the logic; unreachable from outside the sandbox
+    generated/                            (gen) every package the build rewrites whole — the registries and config; never edited by hand
+      config/new.go                       (gen) NewConfig(sandbox) api.Config: ProjectName, Version
+      cli/cli/new.go                      (gen) NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.CliMain, which hands the line to Deps.OpinatedAgnosCli.CliMain
+    commands/<name>/                      command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand); any depth, under a folder per category (core/, cli/, server/, …) — the command.yaml is what makes a dir a command
+    actions/new.go                        NewActions(sandbox) api.Actions: one assignment per action
+    actions/<name>/                       <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
+    actions/build/collect_*.go            collectors: list one dir, title-case names
+    actions/build/generate_*.go           new.go per command, new.go + entries.go per route, help entries.yaml, doc indexes
+    actions/verify/check_*.go             one rule set per file, each returns []string
+    parsables/<name>conf/                 api.go, new.go, new_empty.go, bind_methods.go, render.go
+    apishape/                             the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from
+    smartio/                              transactional fs rooted at --path
+    utils/                                RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
+adapters/                                 the only place OS-bound and third-party code lives
+  libs/<adapter>/<adapter>.go             one package per adapter, exports Bind(deps *deps.Deps)
+  libs/<adapter>/adapter.yaml             which dep the adapter fills, which module it pins  (adapterconf)
+  libs/OpinatedAgnosCli/                  the cli lib: the dispatch chain, binder, matcher and trigger every command runs through, over the stdlib
+  availables/<name>/available.yaml        which adapters this available binds, one per Deps field  (availableconf)
+  availables/<name>/new.go                (gen) New() deps.Deps calling the Bind of every adapter declared; an available with no available.yaml is hand-written and left alone
+assets/                                   Go text/templates embedded by asset.go; never `go build ./...`
+  start/                                  written once, on `start`
+  sandbox/                                rendered when the `sandbox` extension is on; one group per extension from here down
+  sandbox-deps/                           rendered when `sandbox-deps` is on
+  sandbox-cli/                            rendered when `sandbox-cli` is on
+  sandbox-server/                         rendered when `sandbox-server` is on
+  readme/                                 rendered when `readme` is on
+  doc/                                    rendered when `doc` is on
+  doc-<x>/                                rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)
+  deplist/<dep>/                          one installable contract, dep.yaml beside the target layout it mirrors; deplist/OpinatedAgnos<X> are the opinated libs, one per mechanic with code (Cli, Server, Front, Database)
+  adapterlist/<adapter>/                  one installable adapter, adapter.yaml beside the target layout it mirrors
+  templates/                              single-file scaffolds (new.go, command_*, route_*, page_*, database_*, frontend_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+  templates/backoffice/                   the tree backoffice-init writes once, at the path each file holds in it; assets/ under it is copied verbatim
+cmd/main/main.go                          (gen) standard.New() -> sandbox.New -> CliMain(os.Args[1:])
+docs/                                     one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
+  **/Index.md                             (gen) written for every doc that has sub-docs
+  Commands/<command>.md                   (gen) one page per visible command, indexed by docs/Commands/doc.md
+  PublicApi/<contract>.md                 (gen) one page per file of sandbox/api and per contract of sandbox/deps, indexed by docs/PublicApi/doc.md
+examples/                                 one dir per example; `exec-test` runs each and diffs it against its golden
+  cli/<name>/example.sh                   the example, run with `sh` and its own dir as cwd
+  lib/<name>/example.go                   the example, run with `go run` and its own dir as cwd
+  <side>/<name>/result.yaml               (gen) golden: cli-output, exit-code, sha256 of every AssertDir file
+  <side>/<name>/TestDir/                  the only place an example writes; removed before every run
+  <side>/<name>/AssertDir/                what the example copied out of TestDir to assert; the golden's tree
+release/                                  git-ignored binaries, and the exec-test cli alias
 ```
 
 Every rule this shape has to hold to — layers, naming, generated files, docs — is in

@@ -5,17 +5,21 @@ import (
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// cliDeps are the contracts the cli layer calls into: the three output
-// channels, the argv parser, text conversion, and the reflection that fills a
-// command's Entries.
-var cliDeps = []string{"std", "argvdeps", "stringsdeps", "reflectdeps"}
+// CliDeps are the contracts the cli layer calls into: the three output
+// channels and the argv parser the dispatch is handed, the text conversion the
+// help command is written through, and OpinatedAgnosCli — the dispatch
+// itself, last because its contract imports the first two. It is exported for
+// the layer that composes CliInitInternal into its own transaction —
+// server-init does — and still has to install this set first.
+var CliDeps = []string{"std", "argvdeps", "stringsdeps", utils.OpinatedAgnosCli}
 
 // CliInit installs the deps the cli layer depends on and renders the "cli"
 // asset group into the project, then runs build as a follow-up step.
 func CliInit(sandbox *api.Sandbox, path string) error {
-	for _, dep := range cliDeps {
+	for _, dep := range CliDeps {
 		if err := addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: dep}); err != nil {
 			return err
 		}

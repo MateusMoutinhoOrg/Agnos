@@ -5,7 +5,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -17,11 +16,11 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	project_conf, err := utils.LoadProjectConf(sandbox, smartio.New(sandbox, props.Path, sandbox.Config.ProjectName))
 	if err != nil {
 		response.Error("%s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 	if err := utils.ValidateProjectName(sandbox, project_conf.Name); err != nil {
 		response.Error("cannot install: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	// Progress goes to Log: a Printf answers the command line with ExitOk, and
@@ -29,7 +28,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	response.Log("Building project...\n")
 	if err := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: "go"}); err != nil {
 		response.Error("build failed: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	response.Log("Installing locally...\n")
@@ -42,7 +41,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	})
 	if err != nil {
 		response.Error("failed to run go env GOEXE: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 	goexe := sandbox.Deps.Stringsdeps.TrimSpace(result.Output)
 
@@ -53,7 +52,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 		home, err := sandbox.Deps.Iodeps.UserHomeDir()
 		if err != nil {
 			response.Error("failed to get user home dir: %s\n", err.Error())
-			return cliio.Fail(sandbox, api.ExitFailure, "", "")
+			return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 		}
 		outPath = sandbox.Deps.Iodeps.Join(home, ".local", "bin", binName)
 	} else {
@@ -70,11 +69,11 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	})
 	if err != nil {
 		response.Error("failed to run go build: %s\n", err.Error())
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 	if result.ExitCode != 0 {
 		response.Error("go build failed: %s\n", result.Output)
-		return cliio.Fail(sandbox, api.ExitFailure, "", "")
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", "")
 	}
 
 	response.Printf("Installed successfully at %s\n", outPath)

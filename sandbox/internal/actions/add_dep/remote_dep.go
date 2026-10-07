@@ -122,7 +122,13 @@ func ReadRemoteApi(sandbox *api.Sandbox, dir string) (*apishape.Api, error) {
 		return nil, sandbox.Deps.Std.Errorf("%s is empty: there is no contract to copy", api_dir)
 	}
 
-	return apishape.New(sandbox, sources)
+	// A mechanic's surface — the api files aliasing an opinated lib — is the
+	// lib's, not the repo's, so it never crosses into a consumer.
+	shape, err := apishape.New(sandbox, sources)
+	if err != nil {
+		return nil, err
+	}
+	return apishape.WithoutMechanic(shape), nil
 }
 
 // CopyRemoteApi writes the remote contract into sandbox/deps/<name>/, one file
@@ -131,7 +137,7 @@ func ReadRemoteApi(sandbox *api.Sandbox, dir string) (*apishape.Api, error) {
 // comments and all.
 func CopyRemoteApi(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.Api, name string) error {
 	for _, file := range remote.Files {
-		formatted, err := RenderRemoteFile(sandbox, file, name)
+		formatted, err := RenderRemoteFile(sandbox, remote, file, name)
 		if err != nil {
 			return sandbox.Deps.Std.Errorf("%s could not be formatted after the package clause was rewritten: %w", file.Name, err)
 		}
@@ -151,11 +157,12 @@ func CopyRemoteApi(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.A
 // about what a copy of that file looks like — a check that rendered the file
 // its own way would report every copy as drifted the moment stripDepsWiring
 // had anything to remove.
-func RenderRemoteFile(sandbox *api.Sandbox, file apishape.ParsedFile, name string) (string, error) {
+func RenderRemoteFile(sandbox *api.Sandbox, remote *apishape.Api, file apishape.ParsedFile, name string) (string, error) {
 	content := sandbox.Deps.Stringsdeps.ReplaceAll(file.Content,
 		"package "+file.Parsed.Package+"\n", "package "+name+"\n")
 
 	content = stripDepsWiring(sandbox, content)
+	content = stripMechanicFields(sandbox, remote, content)
 
 	return sandbox.Deps.Goimportsdeps.Format(content)
 }
@@ -215,6 +222,28 @@ func stripDepsWiring(sandbox *api.Sandbox, content string) string {
 	}
 
 	return dropEmptyImportBlock(sandbox, kept)
+}
+
+// stripMechanicFields removes every field typed with a mechanic's surface —
+// CliSandbox embedded in Sandbox — together with its doc comment: the type it
+// names stayed behind with the mechanic files (apishape.WithoutMechanic), so
+// the copy would otherwise name a type it does not declare. Like the Deps
+// field, each one is its own line of a generated, gofmt'ed struct.
+func stripMechanicFields(sandbox *api.Sandbox, remote *apishape.Api, content string) string {
+	var kept []string
+
+	for _, line := range sandbox.Deps.Stringsdeps.Split(content, "\n") {
+		parts := sandbox.Deps.Stringsdeps.Fields(line)
+		embedded := len(parts) == 1 && apishape.IsMechanic(remote, parts[0])
+		named := len(parts) == 2 && apishape.IsMechanic(remote, parts[1])
+		if embedded || named {
+			kept = dropTrailingComment(sandbox, kept)
+			continue
+		}
+		kept = append(kept, line)
+	}
+
+	return sandbox.Deps.Stringsdeps.Join(kept, "\n")
 }
 
 // isDepsImportLine reports whether one trimmed line imports the loose

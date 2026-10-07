@@ -6,7 +6,7 @@ Remove the html front layer from the project
 agnos front-purge [--help] [--path <path>] [--quiet]
 ```
 
-Removes sandbox/internal/generated/frontio and the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project's content, so front-init puts the route back over it.
+Removes the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project's content, so front-init puts the route back over it. The OpinatedAgnosFront lib stays installed, like every dep.
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |

@@ -12,21 +12,21 @@ tree:
     - file: docs/Commands/version.md
       sha: dc2bb6deeaa61f717dc01d8c7185200bb51e92f0febd0c8009872be5df5a9193
     - file: sandbox/internal/commands/help/InternalPureHandler.go
-      sha: 18a853786fedb56e56184afc30851dafa36c19c5cf2bc8b35f80d8102c743491
+      sha: 4e7d55d8ef29b06b212427d4bcb9ce72a83a553357445259fb09bac9649d0d4f
     - file: sandbox/internal/commands/help/command.yaml
       sha: aff4bd54b86585eba4f76f13f1eebdec404d22c3fe0d81b178243af025fc0b87
     - file: sandbox/internal/commands/help/entries.go
       sha: 197ccebdadcfd649bf66e5f0332e563a4db05baabc7d494c3f0c1e124dbb5707
     - file: sandbox/internal/commands/help/new.go
-      sha: 92887b497e0736d26cf6bd3c1431b0a24944d7f43a91442251822cbc15f8fd11
+      sha: 9d0a0034f8715ea412b2170ff99f8d5f5ef30c9fd08c90f3a1fc25734b1cee1e
     - file: sandbox/internal/commands/help_flag/InternalPureHandler.go
-      sha: 95c3463414f795198120d0bc8b371deb9ec589157e2c9cc09cc5376f12aadf2b
+      sha: 3997ccce64bcbb2a4542e94b21681b8a4a2063d6d8345f488aa0e7462c6e9e9f
     - file: sandbox/internal/commands/help_flag/command.yaml
       sha: e29b2c5cc712a98e237141eabe9ff975ac96743abd09eececbd5bad73ddba2e6
     - file: sandbox/internal/commands/help_flag/entries.go
       sha: 9168de79566c3b653a3b52a4bbf60ec6b9becc990d3d6b3ab7ae3bfd53a0ba53
     - file: sandbox/internal/commands/help_flag/new.go
-      sha: b050f19a2746766abf5dda2af43953140da50c991474926b09d7cf0c7993d27e
+      sha: 453d2debe975680152ec5973a3b3ed10e22d9a8067fc0f43aa2f7690f45fc4fd
     - file: sandbox/internal/commands/version/InternalPureHandler.go
       sha: d73b7d53603b4c7d268be0f7099ee172d52a132d40fee05ea2de63b0c07bc03b
     - file: sandbox/internal/commands/version/command.yaml
@@ -34,4 +34,4 @@ tree:
     - file: sandbox/internal/commands/version/entries.go
       sha: 19392ff9ea44d28426243ebca8915313410880e90b1f1a0a4f4399a62acabb6f
     - file: sandbox/internal/commands/version/new.go
-      sha: 140bd3f38f13e8612737b66c6717819a550706d7711a45cd4615018bef35743f
+      sha: cbf2ca2c0d65be400e5dd4645c2f2369f4750af6128a3feb8f55abd490faecc4

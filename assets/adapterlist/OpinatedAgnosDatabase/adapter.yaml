@@ -1,0 +1,5 @@
+dep: OpinatedAgnosDatabase
+help: The agnos database readers over the database dep
+module: ""
+name: OpinatedAgnosDatabase
+origin: catalog

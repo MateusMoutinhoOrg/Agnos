@@ -4,7 +4,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	explainRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_route"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cliio"
 )
 
 func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
@@ -16,7 +15,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 		Cookies:     entries.Cookie,
 	})
 	if explain_error != nil {
-		return cliio.Fail(sandbox, api.ExitFailure, "", explain_error.Error())
+		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", explain_error.Error())
 	}
 
 	for _, line := range lines {

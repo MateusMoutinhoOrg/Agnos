@@ -42,7 +42,7 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 
 // SchemaJson renders the declared json-schema as canonical JSON: the same
 // tree Render writes into route.yaml, serialized for the generated
-// BodySchema constant routeio.ValidateSchema is run against.
+// BodySchema constant Deps.OpinatedAgnosServer.ValidateSchema is run against.
 func SchemaJson(sandbox *api.Sandbox, conf *RouteConf) string {
 	if !conf.Body.HasSchema || conf.Body.Schema == nil {
 		return ""

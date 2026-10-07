@@ -22,7 +22,10 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   Change the declaration it is rendered from{{ if .HasAssets }}, or the template under `assets/`
   when this project carries one for it{{ end }}, then run `build`.
 - `sandbox/internal/generated/` holds every package `build` rewrites whole and nothing else: no
-  file there is ever edited, and no hand-written package is ever put there. A package mixing a
+  file there is ever edited, and no hand-written package is ever put there. It holds the
+  registries and config alone — code that is the same in every project is an `OpinatedAgnos<X>`
+  lib, not a generated package. Importing a package an older build generated there names its
+  replacement. **(verify)** A package mixing a
   generated file with a hand-written one — a command, a route, a database — stays under
   `sandbox/internal/`.
 - Generated `.go` is gofmt'ed as it is written, so a regenerated tree diffs to zero against one
@@ -50,16 +53,27 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   capability from outside (io, text, sorting, hashing, templating) is restated as a contract
   under `sandbox/deps/` and reached as `sandbox.Deps.<Contract>`. **(verify)**
 - `sandbox/` holds only `api`, `constructors`, `deps`, `internal` and `new.go`. **(verify)**
-- `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, and imports that
-  only for `Sandbox.Deps`. **(verify)**
+- `sandbox/api/*` imports nothing but the loose `sandbox/deps` package, for `Sandbox.Deps`, and
+  the `sandbox/deps/OpinatedAgnos<X>` contracts, for the aliases a mechanic's api file is made
+  of. **(verify)**
 - Every function of `sandbox/internal/` takes `sandbox *api.Sandbox` as
   its first parameter and nothing else standing for the outside world: deps is reached as
   `sandbox.Deps.<Contract>`, and the rest of the api as `sandbox.<Field>`. Holding the api is
   what lets one part of it call another, and what makes a field a caller replaced take effect
   everywhere.
 - `sandbox/deps/<x>/` imports nothing at all: a contract is written in Go's builtin types only,
-  and the adapter converts. The loose `sandbox/deps/*.go` is the one exception — it may name
-  `sandbox/deps` packages, to compose `deps.Deps`. **(verify)**
+  and the adapter converts. The loose `sandbox/deps/*.go` may name `sandbox/deps` packages, to
+  compose `deps.Deps`, and an `OpinatedAgnos<X>/` contract may import other contracts under
+  `sandbox/deps/` and nothing else. **(verify)**
+- A dep states a library's raw capability and never a decision of the project using it — except
+  an **opinated lib**, `OpinatedAgnos<X>`, the one kind of dep that carries an agnos mechanic
+  itself: `OpinatedAgnosCli` (the command types, the dispatch chain, binding, failures, triggers),
+  `OpinatedAgnosServer` (the route types, the request chain, binding, json-schema, writers),
+  `OpinatedAgnosFront` (the file layer of `assets/frontend/`), `OpinatedAgnosDatabase` (the readers
+  every `methods.go` shares). Each mechanic's `-init` installs its lib, and a mechanic is never on
+  without it. **(verify)** The lib holds no dep: what it reaches the outside world through is
+  handed to it — a `MainProps` built by the generated registry, or the one dep a call needs as
+  its first parameter. What stays in the sandbox is what the project declares or edits.
 - Every `sandbox/api/<x>.go` other than `sandbox.go`, `command.go` and `route.go` is a field of
   the `Sandbox`, built by the `New<X>(sandbox) api.<X>` its `sandbox/internal/<x>/new.go` —
   or `sandbox/internal/<x>/<x>/new.go`, for a layer split into packages — declares — the one name `sandbox/constructors/<x>/constructor.go` calls. A contract with no
@@ -99,7 +113,9 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   interface, no embedded field but a struct the package declares, and no identifier that is neither predeclared
   nor declared in the package. `Sandbox.Deps` is the one field exempt, because
   it is the one field that does not cross: a consumer installs the api of a
-  repo, never its wiring, so the copy drops it. This is what makes every agnos
+  repo, never its wiring, so the copy drops it. A mechanic's surface — an alias of an
+  `OpinatedAgnos<X>` type, and a part holding only those — is exempt for the same reason: it is
+  the lib's, and the copy drops it too. This is what makes every agnos
   repo installable as a dep. **(verify)**
 - `cmd/main/` wires an adapter into the sandbox and holds no logic.
 {{- if .HasAssets }}
@@ -135,7 +151,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - Import nothing outside `sandbox/`, the stdlib included. Every effect and every helper goes
   through `sandbox.Deps.<Contract>` — see [PublicApi](../PublicApi/doc.md).
 - `response.Printf` (stdout) answers the command line with `api.ExitOk`; `response.Error` and
-  `response.Log` (stderr) answer nothing. Refuse a command line by returning `cliio.Fail` — a
+  `response.Log` (stderr) answer nothing. Refuse a command line by returning
+  `sandbox.Deps.OpinatedAgnosCli.Fail` — a
   returned error fails it even after a print. A strict command that returns `nil` without
   printing has run and exits `0`; only a middleware declines.
 - Reusable logic goes in `sandbox/internal/<pkg>/`, not in the handler.
@@ -144,7 +161,8 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `Cli.Commands` is the whole command surface, one `api.Command` per declared command, built by
   `sandbox/internal/generated/cli/cli/new.go` from each package's generated `NewCommand`. The dispatch and
   both help screens read it; nothing about the command set is generated per command anywhere
-  else. Each run binds to its own copy of the declaration, made by `api.BindCommand`, so what
+  else. The dispatch itself is `OpinatedAgnosCli.CliMain`, handed `Cli.Commands` by the
+  registry. Each run binds to its own copy of the declaration, made by `BindCommand`, so what
   the slice holds is never written to.
 {{ end }}{{ if .HasServer }}
 ## Routes
@@ -157,12 +175,11 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   unique across every folder. **(verify)**
 - Only `InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error`
   is exported from a route's hand-written half. **(verify)**
-- `new.go` is a 1:1 image of `route.yaml`, built on the generic
-  `sandbox/internal/generated/server/route.NewRoute`; `entries.go` is the `Entries` struct — `FullRoute`,
-  one field per path, one per parameter and `Body` when a body is declared, each tagged
-  `id:"<id>"` — plus the `ReadBody` a body calls for. The generic
-  `RequestHandler` reads the body before the handler runs and fills `Entries` by those tags
-  through `Deps.Reflectdeps`. A handler is handed no request: what it reads is declared.
+- `new.go` is a 1:1 image of `route.yaml`, built on `OpinatedAgnosServer.NewRoute`; `entries.go`
+  is the `Entries` struct — `FullRoute`, one field per path, one per parameter and `Body` when a
+  body is declared, each tagged `id:"<id>"` — plus the `ReadBody` a body calls for. The lib's
+  dispatch reads the body before the handler runs and fills `Entries` by those tags. A handler
+  is handed no request: what it reads is declared.
 - Setting a status or writing a byte on the response is what answers a request and ends the
   chain — a write sends a `200` ahead of it. A handler that does neither has declined, and the
   next route matching that request runs; a handler that returns a non-nil error without
@@ -225,24 +242,25 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
   them, never an object or `nullable`. **(verify)**
 - `Server.Routes` is the whole http surface, one `*api.Route` per declared route, built by
   `sandbox/internal/generated/server/server/new.go` from each package's generated `NewRoute`. The dispatch
-  reads it and nothing about the route set is generated per route anywhere else; each request
-  runs on its copy of the declaration, made by `api.BindRoute`, so nothing bound is ever shared.
+  reads it and nothing about the route set is generated per route anywhere else. The dispatch
+  itself is `OpinatedAgnosServer.ServerMain`, handed `Server.Routes` by the registry through
+  `Server.Serve`; each request runs on its copy of the declaration, made by `BindRoute`, so
+  nothing bound is ever shared.
 - Run order is the collector's, not the directory's: lowest `priority` first, then by name.
 - Nothing in the dispatch writes a response. Every way a request ends without a route answering
   it is handed to one of the eight `sandbox/internal/server/errors/handle_*.go` — one per status.
   They are written **once**, by the first `build` that finds the server layer, and no build
   rewrites them: what a project answers when nothing matches is the project's. **(verify)**
-- A handler refuses a request by returning `routeio.Fail`, a `*api.RouteFailure`; the dispatch
-  raises it. The server layer raises a failure with `routeio.Raise` — from the dispatch, from a
-  generated `ReadBody`, from what a handler returned — which reaches the right file through the
-  `Fail` field of `api.Server`, because a route package may not import
-  `sandbox/internal/generated/server/server`. A `Handle*` file answers a failure and never raises one.
+- A handler — or a generated `ReadBody` — refuses a request by returning
+  `sandbox.Deps.OpinatedAgnosServer.Fail`, a `*api.RouteFailure`; the dispatch raises it. Only
+  the dispatch raises, and it reaches the right file through the `Fail` field of `api.Server`,
+  which the registry fills. A `Handle*` file answers a failure and never raises one.
 - A failure the dispatch raises with nothing to add — nothing matched, method not allowed —
   carries no message, so the wording is the one its `Handle*` file spells. One that knows
   something that file could not — which parameter would not bind, and why — carries its own.
-  `routeio.FailureOf` is the one reading of that rule.
-- A response body for a failure is written by `routeio.WriteError` alone, so every route answers
-  one JSON shape.
+  `OpinatedAgnosServer.FailureOf` is the one reading of that rule.
+- A response body for a failure is written by `OpinatedAgnosServer.WriteError` alone, so every
+  route answers one JSON shape.
 
 Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
 {{ end }}{{ if .HasFront }}
@@ -253,9 +271,9 @@ Every key of a declaration is in [RouteYaml](../RouteYaml/doc.md).
   `add-page` wrote; `add-page` / `remove-page` only write and delete the html.
 - Everything under `assets/frontend/` is the project's content: no build writes there,
   `add-page` refuses an existing file, and `front-purge` leaves the tree whole.
-- The `frontend` route is written once and then the project's. Only
-  `sandbox/internal/generated/frontio/` is rewritten by every build, and `frontio.SafePath` is what keeps
-  a caller's path inside `assets/frontend/`: the handler resolves every path through it.
+- The `frontend` route is written once and then the project's. The file layer is the
+  `OpinatedAgnosFront` lib, and its `SafePath`, which `Resolve` runs first, is what keeps a
+  caller's path inside `assets/frontend/`: the handler resolves every path through it.
 - The `frontend` route runs at priority `1000`, after every api route, and answers a path that
   names no file with `assets/frontend/404.html` under a `404`; only with that file gone does it
   decline, so the `404` falls to `handle_not_found.go`.
@@ -282,9 +300,11 @@ Routes, roles and the API are in [Backoffice](../Backoffice/doc.md).
 - A database is `sandbox/internal/databases/<db>/`, declared by `specs.yaml` and generated
   whole from it. `add-database`, `add-table`, `add-table-field`, their `set-` editors and
   their inverses are its only editors — never by hand. **(verify)**
-- `api.go`, `new.go` and `methods.go` are rewritten by every build. `methods_custom.go` is the
-  one escape: hand-written, in the same package, read and rewritten by nothing. A name it
-  shares with a generated one is a violation. **(verify)**
+- `api.go`, `new.go` and `methods.go` are rewritten by every build; what every `methods.go`
+  shares — resolving a table, reading a stored value, the filtrage filters — is the
+  `OpinatedAgnosDatabase` lib. `methods_custom.go` is the one escape: hand-written, in the same
+  package, read and rewritten by nothing. A name it shares with a generated one is a violation.
+  **(verify)**
 - A database is **not** a surface of `sandbox/api/`: its methods are typed by table, so there
   is no `[]Database` standing where `Cli.Commands` stands. Whoever needs one builds it with
   `<db>.New(sandbox)`, which touches no key — building one is free and creates nothing until

@@ -11,9 +11,9 @@ import (
 // — a status, or a print to stdout — ends the chain here. It is not strict, so
 // the tokens it reads are ones the command after it does not have to declare.
 //
-// Refuse a command line by returning cliio.Fail:
+// Refuse a command line by returning Deps.OpinatedAgnosCli.Fail:
 //
-//	return cliio.Fail(sandbox, api.ExitFailure, "profile", "unknown profile")
+//	return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "profile", "unknown profile")
 //
 // Hand what you learned to the commands after it through props, the command
 // line's commandprops.CommandProps — declare the field in

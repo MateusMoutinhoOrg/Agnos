@@ -211,7 +211,7 @@ func databaseMethodData(method utils.DatabaseMethod) map[string]any {
 	}
 }
 
-// databaseReader is the databaseio reader one declared type is read back
+// databaseReader is the OpinatedAgnosDatabase reader one declared type is read back
 // through.
 func databaseReader(kind string) string {
 	switch utils.DatabaseGoType(kind) {

@@ -10,5 +10,5 @@ examples:
     - server-init
     - server-init --path ./my-project
 help: Add the http server layer to the project
-long-description: 'Installs the deps the server layer needs, renders sandbox/internal/server, the routeio package and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.'
+long-description: 'Installs the deps the server layer needs — the OpinatedAgnosServer lib, its request chain, among them — renders sandbox/internal/server and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.'
 priority: 100

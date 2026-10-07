@@ -22,10 +22,10 @@ sandbox-server: false
 |---|---|
 | `sandbox` | the core: `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/constructors/<x>/constructor.go`, `sandbox/api/config.go`, `sandbox/internal/generated/config/new.go` |
 | `sandbox-deps` | `sandbox/deps/deps.go`, each available's `new.go`; `add-dep` and the rest of the dependency commands |
-| `sandbox-cli` | `cmd/main`, the dispatch, `help`, `version`, `sandbox/api/{cli,command}.go`; `add-command` and the rest |
-| `sandbox-server` | `sandbox/internal/{server,routeslist,routeio}`, `sandbox/api/{server,route}.go`; `add-route` and the rest |
-| `sandbox-front` | `sandbox/internal/generated/frontio` and the `frontend` route serving `assets/frontend/`; `add-page` and `remove-page` |
-| `sandbox-database` | `sandbox/internal/{databaseio,databases}`; `add-database`, `add-table`, `add-table-field` and the rest |
+| `sandbox-cli` | `cmd/main`, `help`, `version`, `sandbox/api/{cli,command,trigger}.go` and the `OpinatedAgnosCli` lib — the dispatch; `add-command` and the rest |
+| `sandbox-server` | `sandbox/internal/{server,routeslist}`, `sandbox/api/{server,route}.go` and the `OpinatedAgnosServer` lib; `add-route` and the rest |
+| `sandbox-front` | the `OpinatedAgnosFront` lib and the `frontend` route serving `assets/frontend/`; `add-page` and `remove-page` |
+| `sandbox-database` | `sandbox/internal/databases` and the `OpinatedAgnosDatabase` lib; `add-database`, `add-table`, `add-table-field` and the rest |
 | `sandbox-example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `exec-test`, `update-test` |
 | `sandbox-backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backofficedb`, `add-backoffice-user`), and the key turns on its doc. Needs `sandbox-server`, `sandbox-front` and `sandbox-database` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |

@@ -27,18 +27,18 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/generated/server/server/new.go
-      sha: 1dd10f251bd55e85aff39e290bfe5a542f03f73e8ff381664c92dff793f89806
+      sha: 893e0dd71dede9e6722580b32901ab4dfb9c2bd33c9fb9bfbde3fab45f5b019e
     - file: sandbox/internal/routeslist/admin/new.go
-      sha: 76f313291d52f73a3619f7852bcf2b103d1b5e0284890e756119d01a6da27c4b
+      sha: a2ab96054fc8c0574c24d614aa1a04f00265a76ee4a6e37ff527776b6ace7b68
     - file: sandbox/internal/routeslist/admin/route.yaml
       sha: e108bcccd1bc1c262e795cd881dde62cd00eae87a9916ac8ec3676b72ac96d36
     - file: sandbox/internal/routeslist/hello/route.yaml
       sha: 9b4ff0a368dba6de46c183d9eedcc7787d483031d7ec26905d481e37d12e8eea
     - file: sandbox/internal/routeslist/logger/new.go
-      sha: b5920508d7565f4da4682ad48421ee2d9d96549441f25a927c6d136e55dedcb0
+      sha: bbb9d256ebd25373e7f83021d77c5c992954767bb706220fd9d782993c0208ec
     - file: sandbox/internal/routeslist/logger/route.yaml
       sha: 277c50ec407a4793a05089b444281388ad7cbcb44b1507ac8496885fc597ba61
     - file: sandbox/internal/server/errors/handle_method_not_allowed.go
-      sha: b308670657456ec3143c346725e2f654c97ddabdf876493fe043c9050ed1fa3d
+      sha: b4caa9a7c9bdea9cdc833d993afbc256d7d3f02aad9075181183715439aab4ae
     - file: sandbox/internal/server/errors/handle_not_found.go
-      sha: fe30fe6aa92994ec41761d0502b02920f88a6cd6ed1ab20d4e9f353c4b814dab
+      sha: 4d4c299206a8749dde62d89de510277aa2d3308802963efae9d568fa9e6ec0f3

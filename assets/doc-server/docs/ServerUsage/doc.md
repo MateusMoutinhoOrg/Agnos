@@ -7,10 +7,9 @@ a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yam
 | Concept | CLI | Server |
 |---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
-| Dispatch | `sandbox/internal/generated/cli/cli/climain.go` | `sandbox/internal/generated/server/server/servermain.go` |
+| Dispatch, matcher and binder | the `OpinatedAgnosCli` lib: `CliMain` | the `OpinatedAgnosServer` lib: `ServerMain` |
 | Declared unit | `commands/<name>/command.yaml` | `routeslist/<name>/route.yaml` |
 | Generated declaration | `new.go` -> `NewCommand`, `entries.go` -> `Entries` | `new.go` -> `NewRoute`, `entries.go` -> `Entries` |
-| Generic matcher and binder | `sandbox/internal/generated/cli/command/` (`IsActionable`, `CommandHandler`) | `sandbox/internal/generated/server/route/` (`IsActionable`, `RequestHandler`) |
 | Surface on the sandbox | `Cli.Commands` | `Server.Routes` |
 | Built by | `sandbox/internal/generated/cli/cli/new.go` | `sandbox/internal/generated/server/server/new.go` |
 | Hand-written half | `InternalPureHandler.go` -> `InternalPureHandler` | `InternalPureHandler.go` -> `InternalPureHandler` |
@@ -111,7 +110,7 @@ route whether it runs or why it is skipped. The three write nothing and run no b
 ```go
 func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
 	if props.User == "" { // set by a middleware in front
-		return routeio.Fail(sandbox, api.StatusUnauthorized, "authorization", "not authorized")
+		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "not authorized")
 	}
 	response.SetStatus(api.StatusCreated)
 	response.Write(payload(sandbox, createUser(sandbox, entries.Tenant, entries.Body)))
@@ -128,7 +127,7 @@ a field of `Entries`, named by its id ([RouteYaml](../RouteYaml/doc.md#entries-a
 has declined, and the next route matching this request runs — that is the whole of what a
 middleware is; what it learned travels to the routes after it on `props`, the request's
 `routeprops.RouteProps`, whose fields the project declares in `sandbox/internal/routeprops/project.go`. Returning
-`routeio.Fail` refuses the request through the `Handle*` file of its status; any other error
+`sandbox.Deps.OpinatedAgnosServer.Fail` refuses the request through the `Handle*` file of its status; any other error
 means "I could not answer this", and hands it to `handle_server_error.go`; returning `nil` means "done" or "not mine", which the
 answer tells apart.
 [Routes](../Routes/doc.md) documents the route on the next build, and

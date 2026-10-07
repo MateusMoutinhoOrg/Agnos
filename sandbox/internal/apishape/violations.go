@@ -29,6 +29,9 @@ func Violations(sandbox *api.Sandbox, shape *Api) []string {
 
 	for _, file := range shape.Files {
 		for _, entry := range file.Parsed.Types {
+			if IsMechanic(shape, entry.Name) {
+				continue
+			}
 			violations = append(violations, typeViolations(sandbox, shape, file.Name, entry)...)
 		}
 		for _, entry := range file.Parsed.Functions {
@@ -50,7 +53,7 @@ func typeViolations(sandbox *api.Sandbox, shape *Api, file string, entry goimpor
 	switch entry.Kind {
 	case "struct":
 		for _, field := range entry.Fields {
-			if IsDepsWiring(entry.Name, field.Name) {
+			if IsDepsWiring(entry.Name, field.Name) || IsMechanicField(shape, field) {
 				continue
 			}
 			if field.Name == "" {

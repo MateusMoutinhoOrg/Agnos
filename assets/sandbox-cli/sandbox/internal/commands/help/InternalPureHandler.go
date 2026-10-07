@@ -311,7 +311,7 @@ func InheritedFlags(sandbox *api.Sandbox, cmd *api.Command) []inheritedFlag {
 		if declared.Strict || declared.Priority >= cmd.Priority || declared.Name == cmd.Name {
 			continue
 		}
-		bound := api.BindCommand(declared)
+		bound := sandbox.Deps.OpinatedAgnosCli.BindCommand(declared)
 		bound.Argv = argv
 		bound.Flags = []api.CommandFlag{}
 		if !declared.IsActionable(bound) {

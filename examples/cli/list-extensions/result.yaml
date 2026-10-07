@@ -1,10 +1,10 @@
 cli-output: |
     sandbox            on   the sandbox core: sandbox/new.go, api/sandbox.go, internal/generated/config
     sandbox-deps       off  the dependency layer: sandbox/deps/, adapters/, availables
-    sandbox-cli        off  the cli layer: cmd/main, the dispatch, help and version
-    sandbox-server     off  the http layer: server/, routeslist/, routeio/
-    sandbox-front      off  the front layer: frontio/ and the route serving assets/frontend/
-    sandbox-database   off  the database layer: databaseio/ and the declared databases
+    sandbox-cli        off  the cli layer: cmd/main, help, version and the OpinatedAgnosCli lib
+    sandbox-server     off  the http layer: server/, routeslist/ and the OpinatedAgnosServer lib
+    sandbox-front      off  the front layer: the route serving assets/frontend/ and the OpinatedAgnosFront lib
+    sandbox-database   off  the database layer: the declared databases and the OpinatedAgnosDatabase lib
     sandbox-example    on   the examples/ suite and exec-test
     sandbox-backoffice off  the admin backoffice: login, users, API tokens and the /api/admin JSON api
     doc                on   the docs/ tree and its Index.md files

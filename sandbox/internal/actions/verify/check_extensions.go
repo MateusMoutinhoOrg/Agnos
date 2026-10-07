@@ -14,6 +14,11 @@ import (
 // It also enforces what each mechanic requires (utils.ExtensionRequires):
 // every sandbox-<x> mechanic renders into the sandbox, and the front layer is
 // served by the server layer, so none can be on while what it needs is off.
+//
+// And it enforces that a mechanic with code has the opinated lib that code
+// lives in (utils.OpinatedLib): its -init installs it, but enable-extension
+// turns the key on alone, and the build then renders api aliases of a
+// contract that is not there.
 func CheckExtensions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 
@@ -40,6 +45,15 @@ func CheckExtensions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 					" on with "+required+" off (it has nothing to render into)")
 			}
 		}
+	}
+
+	for _, spec := range utils.ExtensionCatalog() {
+		lib := utils.OpinatedLib(spec.Name)
+		if lib == "" || !extensions_conf.IsEnabled(spec.Name) || io.IsDir(utils.ContractsDir+"/"+lib) {
+			continue
+		}
+		violations = append(violations, utils.ExtensionsConfPath(sandbox)+" has "+spec.Name+
+			" on with no "+utils.ContractsDir+"/"+lib+" (the layer's code is that lib: add-dep "+lib+")")
 	}
 
 	return violations

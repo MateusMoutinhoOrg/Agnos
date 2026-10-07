@@ -838,8 +838,8 @@ type Actions struct {
 	RemoveArg func(path string, command string, name string) error
 
 	// ServerInit adds the http server layer (sandbox/internal/server, the
-	// routeio package, the health route of sandbox/internal/routeslist and
-	// the start-server command) to a
+	// OpinatedAgnosServer lib, the health route of sandbox/internal/routeslist
+	// and the start-server command) to a
 	// project that has none, installing the CLI layer first when it is
 	// missing.
 	ServerInit func(path string) error
@@ -919,9 +919,9 @@ type Actions struct {
 	// apart, in the order the chain runs them now.
 	RebalanceRoutes func(props RebalanceRoutesProps) error
 
-	// DatabaseInit adds the database layer (the store contract,
-	// sandbox/internal/generated/databaseio and sandbox/internal/databases) to a
-	// project that has none.
+	// DatabaseInit adds the database layer (the store contract, the
+	// OpinatedAgnosDatabase lib and sandbox/internal/databases) to a project
+	// that has none.
 	DatabaseInit func(path string) error
 
 	// DatabasePurge removes the database layer and every database declared
@@ -958,7 +958,7 @@ type Actions struct {
 	// tree, ready to print.
 	ShowDatabase func(path string, database string) ([]string, error)
 
-	// FrontInit adds the front layer (sandbox/internal/generated/frontio, the route
+	// FrontInit adds the front layer (the OpinatedAgnosFront lib, the route
 	// serving every file of assets/frontend and that tree's index.html) to a
 	// project that has none, installing the server layer first when it is
 	// missing.

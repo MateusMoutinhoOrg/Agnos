@@ -1,0 +1,351 @@
+package opinatedagnosserver
+
+import (
+	"fmt"
+	"strconv"
+	"strings"
+
+	opinatedagnosserver "{{.Module}}/sandbox/deps/OpinatedAgnosServer"
+	"{{.Module}}/sandbox/deps/serverdeps"
+)
+
+// run is one ServerMain: the props every request of it is answered with.
+type run struct {
+	props opinatedagnosserver.MainProps
+}
+
+// serverMain opens the port through props.Serverdeps — which routes nothing —
+// and hands every request to dispatch, whatever its method or path.
+// props.Serve.Addr may name a range of ports ("3000:4000"): each one is tried
+// in turn, and the server listens on the first that binds. The address it
+// landed on is printed to stdout, since with a range nobody could know it
+// beforehand. The first request to stop the process — an interrupt, a
+// termination — shuts it down gracefully through props.Signaldeps: no new
+// request is taken, and the ones in flight get ShutdownTimeoutMs to finish,
+// after which Listen returns nil.
+func serverMain(props opinatedagnosserver.MainProps) error {
+	server_run := &run{props: props}
+	serve := props.Serve
+
+	host, first, last, err := parseAddr(serve.Addr)
+	if err != nil {
+		return err
+	}
+
+	var server serverdeps.Server
+	addr := ""
+	for port := first; port <= last; port++ {
+		addr = host + ":" + strconv.FormatInt(int64(port), 10)
+		server = server_run.newServer(addr)
+		// An adapter predating Bind cannot say whether a port is free, so
+		// the range collapses to its first port and Listen binds it.
+		if server.Bind == nil {
+			err = nil
+			break
+		}
+		err = server.Bind()
+		if err == nil {
+			break
+		}
+	}
+	if err != nil {
+		return fmt.Errorf("no port of %s could be bound: %s", serve.Addr, err.Error())
+	}
+
+	props.Signaldeps.OnInterrupt(func() {
+		props.Std.Log("server shutting down \n")
+		if err := server.Shutdown(); err != nil {
+			props.Std.Error("server shutdown: %s \n", err.Error())
+		}
+	})
+
+	props.Std.Printf("server listening on %s \n", addr)
+	return server.Listen()
+}
+
+// newServer builds the server for one address, every request going to
+// dispatch.
+func (server_run *run) newServer(addr string) serverdeps.Server {
+	serve := server_run.props.Serve
+	return server_run.props.Serverdeps.NewServer(serverdeps.ServerProps{
+		Addr:              addr,
+		ReadTimeoutMs:     serve.ReadTimeoutMs,
+		WriteTimeoutMs:    serve.WriteTimeoutMs,
+		ShutdownTimeoutMs: serve.ShutdownTimeoutMs,
+		Handler: func(request serverdeps.Request, response serverdeps.Response) {
+			server_run.dispatch(request, response)
+		},
+	})
+}
+
+// parseAddr reads an address into the host and the inclusive range of ports
+// to try. The last ":" ends the host unless what precedes it is a bare
+// number, which makes the two the bounds of a range:
+//
+//	"4000"                -> "", 4000, 4000
+//	"4000:5000"           -> "", 4000, 5000
+//	"127.0.0.1:4000:5000" -> "127.0.0.1", 4000, 5000
+//	":8080", "[::1]:8080" -> "", 8080, 8080 / "[::1]", 8080, 8080
+func parseAddr(addr string) (string, int, int, error) {
+	cut := strings.LastIndex(addr, ":")
+	head, tail := "", addr
+	if cut >= 0 {
+		head, tail = addr[:cut], addr[cut+1:]
+	}
+	last, err := parsePort(addr, tail)
+	if err != nil {
+		return "", 0, 0, err
+	}
+
+	host_cut := strings.LastIndex(head, ":")
+	start := head[host_cut+1:]
+	if !isNumber(start) {
+		return head, last, last, nil
+	}
+
+	first, err := parsePort(addr, start)
+	if err != nil {
+		return "", 0, 0, err
+	}
+	if first > last {
+		return "", 0, 0, fmt.Errorf("address %s: the range starts after it ends", addr)
+	}
+	host := ""
+	if host_cut >= 0 {
+		host = head[:host_cut]
+	}
+	return host, first, last, nil
+}
+
+// parsePort reads one port, 0 to 65535, out of addr.
+func parsePort(addr string, text string) (int, error) {
+	if !isNumber(text) {
+		return 0, fmt.Errorf("address %s: %q is not a port", addr, text)
+	}
+	port, err := strconv.Atoi(text)
+	if err != nil || port > 65535 {
+		return 0, fmt.Errorf("address %s: %q is not a port", addr, text)
+	}
+	return port, nil
+}
+
+// isNumber reports a non-empty run of decimal digits, and nothing else.
+func isNumber(text string) bool {
+	if text == "" {
+		return false
+	}
+	for i := 0; i < len(text); i++ {
+		if text[i] < '0' || text[i] > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+// dispatch is the whole routing layer: it runs every route of Server.Routes
+// the request is for, in the order the collector put them — lowest `priority`
+// first. Whether a route is for the request is its IsActionable's to say;
+// binding and running it is its RequestHandler's.
+//
+// More than one route may be for one request, which is what a chain is: each
+// one runs in turn until one of them **answers** — sets a status, or writes a
+// byte, which sends a 200. A handler that does neither has declined, so the
+// next route runs — that is the whole of what makes a middleware a
+// middleware. A handler that returns an error without answering ends the
+// chain too, through HandleServerError. Every route of one request is handed
+// one RouteProps, which is how a middleware hands what it learned to the
+// routes after it.
+//
+// Nothing here writes a response itself. Every way a request can end without a
+// route answering it — nothing matched, matched under another method, a value
+// that will not bind, a panic — is raised through Server.Fail and answered by
+// one of the project's own Handle* files.
+func (server_run *run) dispatch(request serverdeps.Request, response serverdeps.Response) {
+	tracked_response, status := tracked(response)
+	var props any
+	if server_run.props.NewProps != nil {
+		props = server_run.props.NewProps()
+	}
+
+	server_run.answer(request, tracked_response, status, props)
+}
+
+// answer runs the chain for one request and, when no route answered it,
+// raises the failure that says why. A HEAD request nothing declares HEAD for
+// is run again as the GET it asks the headers of: net/http drops the body a
+// HEAD answer writes.
+func (server_run *run) answer(request serverdeps.Request, response serverdeps.Response, status func() int, props any) {
+	defer server_run.recoverRoute(request, response, status, props)
+
+	ran, method_mismatch := server_run.runChain(request, response, status, props)
+	if status() != 0 {
+		return
+	}
+
+	if !ran && request.GetMethod() == "HEAD" {
+		as_get := request
+		as_get.GetMethod = func() string { return "GET" }
+		ran, _ = server_run.runChain(as_get, response, status, props)
+		if status() != 0 {
+			return
+		}
+	}
+
+	// A path some route answers under another method is the one failure the
+	// chain can tell apart from a path nothing knows at all — and only when
+	// no route ran, since a chain that ran and wrote nothing is the project
+	// declining to answer, not the method being wrong.
+	if !ran && method_mismatch {
+		server_run.failRequest(request, response, props, opinatedagnosserver.StatusMethodNotAllowed)
+		return
+	}
+
+	server_run.failRequest(request, response, props, opinatedagnosserver.StatusNotFound)
+}
+
+// runChain runs every route the request is for, until one answers or fails.
+// It reports whether a route declaring its methods ran, and whether a route
+// matched the path under another method. A route on ANY — a middleware, most
+// often — says nothing about which methods the path takes, so it running does
+// not keep a 405 from being told apart.
+func (server_run *run) runChain(request serverdeps.Request, response serverdeps.Response, status func() int, props any) (bool, bool) {
+	method_mismatch := false
+	ran := false
+
+	for _, declared := range server_run.props.Server.Routes {
+		bound := bindRoute(declared)
+		bound.Request = request
+		bound.Response = response
+		bound.Props = props
+
+		if !server_run.isActionable(bound) {
+			if server_run.matchesPath(bound) && !acceptsMethod(bound, request.GetMethod()) {
+				method_mismatch = true
+			}
+			continue
+		}
+
+		if !acceptsAny(bound) {
+			ran = true
+		}
+		err := server_run.requestHandler(bound)
+
+		// The answer is what ends the chain, so a handler that answered
+		// *and* returned something has answered: what it returned is
+		// reported and goes no further.
+		if status() != 0 {
+			if err != nil {
+				server_run.props.Std.Log("route %s: %s \n", bound.Name, err.Error())
+			}
+			return ran, method_mismatch
+		}
+		if err != nil {
+			server_run.raise(bound, opinatedagnosserver.StatusFailure, "", "", err.Error())
+			return ran, method_mismatch
+		}
+	}
+
+	return ran, method_mismatch
+}
+
+// isActionable is the bound route's own IsActionable when it declares one,
+// the lib's matcher otherwise.
+func (server_run *run) isActionable(bound *opinatedagnosserver.Route) bool {
+	if bound.IsActionable != nil {
+		return bound.IsActionable(bound)
+	}
+	return server_run.defaultIsActionable(bound)
+}
+
+// matchesPath is the bound route's own MatchesPath when it declares one, the
+// lib's matcher otherwise.
+func (server_run *run) matchesPath(bound *opinatedagnosserver.Route) bool {
+	if bound.MatchesPath != nil {
+		return bound.MatchesPath(bound)
+	}
+	return server_run.defaultMatchesPath(bound)
+}
+
+// requestHandler is the bound route's own RequestHandler when it declares
+// one, the lib's binder otherwise.
+func (server_run *run) requestHandler(bound *opinatedagnosserver.Route) error {
+	if bound.RequestHandler != nil {
+		return bound.RequestHandler(bound)
+	}
+	return server_run.handle(bound)
+}
+
+// acceptsAny reports a route declared for every method.
+func acceptsAny(route *opinatedagnosserver.Route) bool {
+	return len(route.AcceptMethods) == 1 && route.AcceptMethods[0] == opinatedagnosserver.AnyMethod
+}
+
+// failRequest raises a failure that belongs to no route — nothing matched the
+// path, or nothing matched it under this method. The handler still gets a
+// Route, carrying the request and the response and nothing else, so every
+// Handle* file reads the same whichever failure brought it there.
+//
+// It carries no message on purpose. There is nothing to say about these two
+// beyond the status, so the wording is the project's: FailureOf fills in the
+// one the Handle* file spells, which is what makes editing that file change
+// what the server says.
+func (server_run *run) failRequest(request serverdeps.Request, response serverdeps.Response, props any, status int) {
+	route := newRoute()
+	route.Request = request
+	route.Response = response
+	route.Props = props
+
+	server_run.raise(route, status, "", "", "")
+}
+
+// recoverRoute turns a panicking handler into one answered request, so a single
+// bad route cannot take the process down with it. A handler that panicked after
+// answering has already answered: the panic is reported and nothing is written
+// over it.
+func (server_run *run) recoverRoute(request serverdeps.Request, response serverdeps.Response, status func() int, props any) {
+	failure := recover()
+	if failure == nil {
+		return
+	}
+
+	server_run.props.Std.Error("route panicked: %v\n", failure)
+	if status() != 0 {
+		return
+	}
+
+	route := newRoute()
+	route.Request = request
+	route.Response = response
+	route.Props = props
+
+	server_run.raise(route, opinatedagnosserver.StatusFailure, "", "", fmt.Sprintf("%v", failure))
+}
+
+// raise records what went wrong on a bound route and hands it to the
+// project's own handler for that status — HandleBadRequest, HandleTooLarge,
+// HandleWrongContentType, HandleServerError — through Server.Fail. It returns
+// the error that handler returned.
+func (server_run *run) raise(route *opinatedagnosserver.Route, status int, field string, message string, cause string) error {
+	return server_run.raiseFailure(route, &opinatedagnosserver.RouteFailure{
+		Status:  status,
+		Field:   field,
+		Message: message,
+		Cause:   cause,
+	})
+}
+
+// raiseFailure raises one failure already built — what a handler or a
+// generated ReadBody returned through Fail — on the bound route it was
+// returned from.
+func (server_run *run) raiseFailure(route *opinatedagnosserver.Route, failure *opinatedagnosserver.RouteFailure) error {
+	route.Failure = failure
+
+	// A server built without a Fail — a route bound by hand rather than by
+	// the generated registry — has no handler to reach, so the failure is
+	// still reported rather than swallowed.
+	if server_run.props.Server.Fail == nil {
+		return fmt.Errorf("%s", failure.Message)
+	}
+
+	return server_run.props.Server.Fail(route)
+}

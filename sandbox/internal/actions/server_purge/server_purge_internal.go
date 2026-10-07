@@ -31,7 +31,6 @@ var serverDirs = []string{
 	utils.RoutesDir,
 	utils.RoutePropsDir,
 	utils.GeneratedDir + "/server",
-	utils.GeneratedDir + "/routeio",
 	"docs/Routes",
 	utils.ConstructorDir("server"),
 }
@@ -84,9 +83,7 @@ func ServerPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string)
 		io.RemoveDir(dir)
 	}
 
-	if err := utils.RemoveTriggerUnlessUsed(sandbox, io, utils.ExtensionSandboxCli); err != nil {
-		return err
-	}
+	utils.RemoveRetiredGenerated(sandbox, io, utils.ExtensionSandboxServer)
 
 	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {

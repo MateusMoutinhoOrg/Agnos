@@ -4,7 +4,6 @@ import (
 	"{{.Module}}/sandbox/api"
 	serializables "{{.Module}}/sandbox/deps/serializables"
 	"{{.Module}}/sandbox/internal/databases/backofficedb"
-	"{{.Module}}/sandbox/internal/generated/routeio"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
 )
@@ -65,7 +64,7 @@ func Ok(sandbox *api.Sandbox) *serializables.SerializibleObject {
 func Role(sandbox *api.Sandbox, name string) (int64, error) {
 	role, ok := backofficeauth.ParseRole(sandbox, name)
 	if !ok {
-		return 0, routeio.Fail(sandbox, api.StatusBadRequest, "role", "role must be root or viewer")
+		return 0, sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusBadRequest, "role", "role must be root or viewer")
 	}
 	return int64(role), nil
 }

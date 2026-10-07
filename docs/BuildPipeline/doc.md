@@ -16,7 +16,7 @@
 | `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
 | `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `docs/LibUsage/doc.md` |
 | `CollectAvailables` | `adapters/availables/<x>/available.yaml` | `Availables` (`Name`, `Adapters`) | `GenerateAvailableNews` -> `adapters/availables/<x>/new.go` |
-| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (the declaration itself: identifiers, category, help, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `internal/generated/cli/new.go` |
+| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (the declaration itself: identifiers, category, help, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `internal/generated/cli/cli/new.go` |
 | `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
 | `CollectGeneratedDocs` | `assets/doc*/docs/*/props.yaml` over `utils.DocGroups(extensions)`, rendered | merged into the doc tree | same |
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
@@ -44,10 +44,8 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 |---|---|---|
 | `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go` (embedding every struct of `api/<x>sandbox.go` / `api/<x>config.go`; native: `Deps`, `Config`), `internal/generated/config/new.go` |
 | `sandbox-deps` | `sandbox-deps` | `sandbox/deps/deps.go` |
-| `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command,clisandbox}.go`, `internal/generated/cli/`, `help`, `version` |
-| `sandbox-server` | `sandbox-server` | `api/{server,route,serversandbox}.go`, `internal/{server,routes/health,routeio}` |
-| `sandbox-front` | `sandbox-front` | `internal/generated/frontio/` |
-| `sandbox-database` | `sandbox-database` | `internal/generated/databaseio/` |
+| `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command,trigger,clisandbox}.go` (aliases of `OpinatedAgnosCli`), `internal/generated/cli/cli/new.go` (the registry), `help`, `version` |
+| `sandbox-server` | `sandbox-server` | `api/{server,route,serversandbox}.go` (aliases of `OpinatedAgnosServer`), `internal/generated/server/server/new.go` (the registry), the health route |
 | `doc` | `doc` | `docs/{Adapters,DepList,EntriesYaml,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
 | `doc-cli` | `doc` + `sandbox-cli` | `docs/{CliInstall,Commands}` |
 | `doc-server` | `doc` + `sandbox-server` | `docs/{RouteYaml,Routes,ServerUsage}` |
@@ -58,7 +56,17 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `doc-example-cli` | `doc` + `sandbox-example` + `sandbox-cli` | `docs/CliExamples` |
 | `readme` | `readme` | `README.md` |
 
-A group marked `Code: true` — the six `sandbox*` ones — carries Go the collectors read back
+`sandbox-front` and `sandbox-database` have no code group: their code is the `OpinatedAgnosFront`
+and `OpinatedAgnosDatabase` libs their `-init` installs, so they render their pages alone.
+
+The code every project shares — the dispatch, the binders, the matchers, json-schema, the file
+layer, the database readers — is not rendered at all: it is the four `OpinatedAgnos<X>` catalog
+deps (`assets/{deplist,adapterlist}/OpinatedAgnos<X>/`), installed by each mechanic's `-init`.
+What the build still renders under `internal/generated/` is what changes per project: the
+registries and config. `utils.RemoveRetiredGenerated` drops what an older build generated there,
+for every mechanic that is on.
+
+A group marked `Code: true` — the four `sandbox*` ones — carries Go the collectors read back
 off disk, so `utils.SetExtension` renders it once into the transaction that turns the mechanic
 on. Without that pass the build that follows would collect `sandbox/api/` as it was before the
 mechanic existed and write a `sandbox.go` missing the field `cmd/main/main.go` already uses.
@@ -88,10 +96,10 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 `add-dep <module>` (an argument holding a `/`): resolve the module through `go list -m -json` and, failing that, `go mod download -json` (`RemoteModule`); parse `<dir>/sandbox/api/*.go` into an `apishape.Api`; reject it with `apishape.Violations`; copy each file to `sandbox/deps/<name>/` with only the package clause rewritten, then `Format`; plan the converters with `apishape.Converters` and render `templates/remote_shim.go` to `adapters/libs/<name>/<name>.go`; write its `adapter.yaml` with `origin: generated`; `AddRequire`; enroll; `build`. `set-dep <name> --version` reads the module back out of that `adapter.yaml` and runs the same path again.
 
-## Dispatch (`climain.go`)
+## Dispatch (`OpinatedAgnosCli.CliMain`)
 
-`CliMain(args)`: empty -> general help, exit 2. Match `args[0]` against the identifiers of every `api.Command` of `sandbox.Cli.Commands`, then copy the match with `api.BindCommand`; unknown -> exit 2. Then one generic `runCommand`: `argvdeps.New(args[1:])`, read each declared flag (a boolean `quiet` replaces `sandbox.Deps.Std.Log` with a no-op immediately), assign defaults, convert and range-check ints/floats, then drain positionals in order, binding every value into `command.Items` under its declared id. Any unread `-`-prefixed arg = unknown flag; any leftover arg = unexpected argument; missing required = usage error. All exit 2 before the handler. Then `command.Handler(command)`, which is that package's `CommandHandler(sandbox, command)`. Nothing in this file is generated per command — `internal/generated/cli/new.go` is where the set is spelled, out of each package's `NewCommand`.
+`Cli.CliMain(args)` — filled by the generated registry `internal/generated/cli/cli/new.go` — hands `MainProps{Cli: &sandbox.Cli, Args, NewProps, Std: &sandbox.Deps.Std, Argvdeps}` to the lib's `CliMain`. It runs every `api.Command` of `Cli.Commands` in run order, each on a copy made by `BindCommand`: `IsActionable` (segments, arg and flag triggers), then the binder — args off the segments, flags through `Argvdeps`, defaults, conversion and bounds, `Entries` filled by its `id` tags by reflection — then the command's `InternalPureHandler`. The first command that answers (a status, or a `Printf`) ends the chain; a strict one that answers nothing exits `0`; a middleware that answers nothing hands the line on. Every unanswered ending — no command, a value that will not bind, an unconsumed token, a returned failure, a panic — is raised through `Cli.Fail` to one of the project's `handle_*.go`. Nothing in the lib is generated per command — the registry is where the set is spelled, out of each package's `NewCommand`. The server's `OpinatedAgnosServer.ServerMain` is the same chain over `Server.Routes`.
 
 ## Self-hosting
 
-Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/generated/cli/new.go`, `climain.go`, every command's `new.go` and `help`. It turns `sandbox-database` on nowhere: agnos declares no database of its own, so the mechanic is exercised by `examples/{cli,lib}/database` rather than by this tree. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/generated/cli/cli/new.go`, every command's `new.go` and `help`, and runs on its own `OpinatedAgnosCli` (installed from the catalog, so `check_deplist`/`check_adapterlist` hold the catalog to the copy it runs on). It turns `sandbox-database` on nowhere: agnos declares no database of its own, so the mechanic is exercised by `examples/{cli,lib}/database` rather than by this tree. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).

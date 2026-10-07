@@ -6,7 +6,7 @@ Add the http server layer to the project
 agnos server-init [--help] [--path <path>] [--quiet]
 ```
 
-Installs the deps the server layer needs, renders sandbox/internal/server, the routeio package and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.
+Installs the deps the server layer needs — the OpinatedAgnosServer lib, its request chain, among them — renders sandbox/internal/server and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
