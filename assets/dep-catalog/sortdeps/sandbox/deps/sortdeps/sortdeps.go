@@ -1,7 +1,7 @@
 package sortdeps
 
 // This package is the sandbox's *copy* of the api a sorting library exposes —
-// the same mechanic as argvdeps, embeddeps, iodeps, rundeps, std and
+// the same mechanic as argvdeps, embeddeps, iodeps, rundeps, stddeps and
 // stringsdeps, for the same reason: the sandbox may import nothing but the
 // sandbox, so `sort` may not appear inside it. The contract is restated here,
 // and the adapter — which lives outside the sandbox — is what fills it.
@@ -9,8 +9,8 @@ package sortdeps
 // Every field sorts in place and returns nothing, exactly like the standard
 // library function of the same name.
 
-// Sandbox is the sorting library injected whole as the Deps.Sortdeps field.
-type Sandbox struct {
+// Contract is the sorting library injected whole as the Deps.SortDeps field.
+type Contract struct {
 	// Strings sorts a slice of strings into increasing order.
 	Strings func(list []string)
 

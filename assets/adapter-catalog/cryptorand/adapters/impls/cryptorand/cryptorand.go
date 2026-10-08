@@ -1,4 +1,4 @@
-package randdeps
+package cryptorand
 
 import (
 	"crypto/rand"
@@ -9,7 +9,7 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// randomHex fills randdeps.Sandbox.Hex: bytes bytes read from crypto/rand,
+// randomHex fills randdeps.Contract.Hex: bytes bytes read from crypto/rand,
 // lower-case hexadecimal.
 func randomHex(bytes int) (string, error) {
 	buffer := make([]byte, bytes)
@@ -20,10 +20,10 @@ func randomHex(bytes int) (string, error) {
 	return hex.EncodeToString(buffer), nil
 }
 
-// Bind fills deps.Deps.Randdeps with the standard library's crypto/rand and
+// Bind fills deps.Deps.RandDeps with the standard library's crypto/rand and
 // encoding/hex.
 func Bind(deps *deps.Deps) {
-	deps.Randdeps = randdeps.Sandbox{
+	deps.RandDeps = randdeps.Contract{
 		Hex: func(bytes int) (string, error) {
 			return randomHex(bytes)
 		},

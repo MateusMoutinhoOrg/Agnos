@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -13,7 +13,7 @@ import (
 //
 // It calls the same actions `agnos database-init`, `agnos add-database`,
 // `agnos add-table` and `agnos add-table-field` call, and writes only inside
-// TestDir. DatabaseInit installs the store as a remote dep and turns the
+// test-dir. DatabaseInit installs the store as a remote dep and turns the
 // mechanic on; it scaffolds no database, because which tables a project wants
 // is a declaration — so every table below is declared here and api.go, new.go
 // and methods.go are generated from that declaration alone.
@@ -24,24 +24,24 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DatabaseInit("TestDir"); err != nil {
+	if err := lib.Actions.DatabaseInit(api.DatabaseInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddDatabase("TestDir", "app-database", "app"); err != nil {
+	if err := lib.Actions.AddDatabase(api.AddDatabaseProps{Path: "test-dir", Name: "app-database", KeyPrefix: "app"}); err != nil {
 		panic(err)
 	}
 
 	// Two tables, so the link below has somewhere to point.
 	for _, table := range []string{"user", "url"} {
-		if err := lib.Actions.AddTable("TestDir", "app-database", table); err != nil {
+		if err := lib.Actions.AddTable(api.AddTableProps{Path: "test-dir", Database: "app-database", Name: table}); err != nil {
 			panic(err)
 		}
 	}
@@ -50,22 +50,22 @@ func main() {
 	// is the only one that generates a Find; a `link` generates a Get, a
 	// `database` the Add/List pair for the collection nested under each
 	// record, and every plain field an Update and a place in the table's
-	// filtrage. A field declared with a Parent lands inside that nested
+	// filter. A field declared with a Parent lands inside that nested
 	// collection instead of on the table.
-	fields := []api.DatabaseFieldProps{
+	fields := []api.AddTableFieldProps{
 		{Table: "user", Name: "email", Type: "key", Required: true},
 		{Table: "user", Name: "name", Type: "string"},
 		{Table: "url", Name: "alias", Type: "key", Required: true},
 		{Table: "url", Name: "link", Type: "string", Required: true},
-		{Table: "url", Name: "redirects", Type: "int"},
-		{Table: "url", Name: "score", Type: "float"},
+		{Table: "url", Name: "redirects", Type: "integer"},
+		{Table: "url", Name: "score", Type: "number"},
 		{Table: "url", Name: "owner", Type: "link", Target: "user"},
-		{Table: "url", Name: "visits", Type: "database"},
+		{Table: "url", Name: "visits", Type: "object"},
 		{Table: "url", Parent: "visits", Name: "agent", Type: "string"},
-		{Table: "url", Parent: "visits", Name: "at", Type: "int"},
+		{Table: "url", Parent: "visits", Name: "at", Type: "integer"},
 	}
 	for _, field := range fields {
-		field.Path = "TestDir"
+		field.Path = "test-dir"
 		field.Database = "app-database"
 		if err := lib.Actions.AddTableField(field); err != nil {
 			panic(err)
@@ -75,12 +75,12 @@ func main() {
 	// What result.yaml records: the same set the cli side copies.
 	for _, dir := range []string{
 		"sandbox/internal/databases",
-		"sandbox/deps/OpinatedAgnosDatabase",
+		"sandbox/deps/OpinionatedAgnosDatabase",
 		"docs/Databases",
 	} {
-		copyTree("TestDir/"+dir, "AssertDir/"+dir)
+		copyTree("test-dir/"+dir, "assert-dir/"+dir)
 	}
-	copyFile("TestDir/AgnosConfig/extensions.yaml", "AssertDir/AgnosConfig/extensions.yaml")
+	copyFile("test-dir/AgnosConfig/extensions.yaml", "assert-dir/AgnosConfig/extensions.yaml")
 }
 
 // copyTree copies every file under source into dest, keeping the place each

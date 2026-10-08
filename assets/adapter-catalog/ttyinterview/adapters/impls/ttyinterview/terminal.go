@@ -1,4 +1,4 @@
-package interviewer
+package ttyinterview
 
 import (
 	"bufio"
@@ -10,7 +10,7 @@ import (
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
 //
-// The same palette sandbox/internal/commands/help/handler.go prints its
+// The same palette sandbox/internal/commands/info/help/handler.go prints its
 // screens with, so an interview and a help screen read as one interface.
 
 const (
@@ -49,7 +49,7 @@ var ErrNoInput = errors.New("no input left to answer with")
 // line that means "back" is spelled out instead.
 const backToken = ":back"
 
-// isBack fills interviewer.Sandbox.Back: of the errors a question returns,
+// isBack fills interviewdeps.Contract.Back: of the errors a question returns,
 // only this one is undone by asking again.
 func isBack(err error) bool {
 	return errors.Is(err, ErrBack)

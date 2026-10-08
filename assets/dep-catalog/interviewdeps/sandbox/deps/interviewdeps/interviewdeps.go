@@ -1,7 +1,7 @@
-package interviewer
+package interviewdeps
 
 // This package is the sandbox's *copy* of the api an interactive terminal
-// exposes — the same mechanic as argvdeps, iodeps and std, for the same
+// exposes — the same mechanic as argvdeps, iodeps and stddeps, for the same
 // reason: reading a keypress, putting the terminal in raw mode and repainting
 // a menu are OS-bound effects, so `os`, `bufio` and `os/exec` may not appear
 // inside the sandbox. The contract is restated here, and the adapter — which
@@ -11,9 +11,9 @@ package interviewer
 // with a full-screen arrow-key menu, a numbered list read line by line, or a
 // recorded script: the sandbox asks a question and is handed an answer.
 
-// AlternativeOption is one choice offered by an alternative question: Id is
+// Option is one choice offered by an alternative question: Id is
 // what the answer returns, Msg is what the person reading it sees.
-type AlternativeOption struct {
+type Option struct {
 	// Id is the value the question returns when this option is chosen. It
 	// is never displayed.
 	Id string
@@ -21,11 +21,11 @@ type AlternativeOption struct {
 	Msg string
 }
 
-// Sandbox is the interview library injected whole as the Deps.Interviewer
+// Contract is the interview library injected whole as the Deps.InterviewDeps
 // field. Every field asks one question and blocks until it is answered;
 // an error reports that no answer can be had — the input ended, or the
 // terminal could not be read — and never that the answer was invalid.
-type Sandbox struct {
+type Contract struct {
 	// IntQuestion asks for a whole number and returns it already converted.
 	IntQuestion func(question string) (int, error)
 
@@ -43,12 +43,12 @@ type Sandbox struct {
 	// SingleAlternativeQuestion offers a list of options and returns the Id
 	// of the one chosen — never its Msg, so the wording of an option may
 	// change without moving what the caller matches on.
-	SingleAlternativeQuestion func(question string, alternatives []AlternativeOption) (string, error)
+	SingleAlternativeQuestion func(question string, alternatives []Option) (string, error)
 
 	// MultipleAlternativeQuestion offers a list of options and returns the
 	// Ids of every one chosen, in the order the options were declared.
 	// Choosing none is a valid answer and returns an empty slice.
-	MultipleAlternativeQuestion func(question string, alternatives []AlternativeOption) ([]string, error)
+	MultipleAlternativeQuestion func(question string, alternatives []Option) ([]string, error)
 
 	// Back reports whether an error a question returned means the person
 	// asked to step back to the question before it, rather than that no

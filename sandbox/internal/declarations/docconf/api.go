@@ -1,6 +1,6 @@
-package docpropsconf
+package docconf
 
-type DocPropsConf struct {
+type DocConf struct {
 	Name        string
 	Description string
 	Themes      []string

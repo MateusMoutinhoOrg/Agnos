@@ -3,11 +3,11 @@ package set_dep
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 func SetDep(sandbox *api.Sandbox, props api.SetDepProps) error {
-	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := SetDepInternal(sandbox, io, props); err != nil {
 		return err
 	}

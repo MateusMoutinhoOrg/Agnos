@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -24,14 +24,14 @@ var databaseGeneratedFiles = []databaseGeneratedFile{
 
 // GenerateDatabaseNew renders the whole generated half of every declared
 // database: api.go (the records and the struct of function fields), new.go
-// (the database.Props and the wiring) and methods.go (the body of every
+// (the databasedeps.Props and the wiring) and methods.go (the body of every
 // method), each from its own template under assets/templates.
 //
 // It is the database layer's GenerateRouteNew, only wider: a route declares
 // one generated file and a database three, because a database has no generic
 // dispatch to read its declaration back at runtime — its methods are typed by
 // table, so they are spelled out.
-func GenerateDatabaseNew(sandbox *api.Sandbox, io *smartio.SmartIO, databases []map[string]any, module string) error {
+func GenerateDatabaseNew(sandbox *api.Sandbox, io *stagedfs.StagedFS, databases []map[string]any, module string) error {
 	for _, database := range databases {
 		pkg, _ := database["Package"].(string)
 		if pkg == "" {

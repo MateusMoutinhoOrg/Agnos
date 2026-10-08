@@ -1,15 +1,15 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: deps-purge
-category: Deps System
+category: Deps
+description: |
+    Removes the sandbox/deps and adapters directories and calls build.
 examples:
     - deps-purge
     - deps-purge --path ./my-project
-help: Removes the dependency-injection subsystem from the project
-long-description: |
-    Removes the sandbox/deps and adapters directories and calls build.
 priority: 100
+summary: Remove the dependency-injection subsystem from the project

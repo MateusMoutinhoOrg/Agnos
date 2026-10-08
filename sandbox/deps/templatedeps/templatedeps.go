@@ -1,7 +1,7 @@
 package templatedeps
 
 // This package is the sandbox's *copy* of the api a text-template engine
-// exposes — the same mechanic as argvdeps, embeddeps, iodeps, rundeps, std,
+// exposes — the same mechanic as argvdeps, embeddeps, iodeps, rundeps, stddeps,
 // stringsdeps and sortdeps, for the same reason: the sandbox may import
 // nothing but the sandbox, so `text/template` and the `bytes` buffer it
 // renders into may not appear inside it. The contract is restated here, and
@@ -11,8 +11,8 @@ package templatedeps
 // not immediately execute, so parse and execute are one call and no parsed
 // template ever crosses the boundary.
 
-// Sandbox is the template engine injected whole as the Deps.Templatedeps field.
-type Sandbox struct {
+// Contract is the template engine injected whole as the Deps.TemplateDeps field.
+type Contract struct {
 	// Render parses one template source and executes it over the given vars,
 	// returning the result. The error reports a source that does not parse or
 	// an execution that failed — a native function returning an error

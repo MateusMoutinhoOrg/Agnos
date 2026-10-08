@@ -1,15 +1,15 @@
-package add_available
+package add_binding
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-func AddAvailable(sandbox *api.Sandbox, path string, available string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := AddAvailableInternal(sandbox, io, path, available); err != nil {
+func AddBinding(sandbox *api.Sandbox, props api.AddBindingProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := AddBindingInternal(sandbox, io, props.Path, props.Binding); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

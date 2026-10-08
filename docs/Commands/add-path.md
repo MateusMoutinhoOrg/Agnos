@@ -3,14 +3,14 @@
 Add one slice of the request path to a route
 
 ```bash
-agnos add-path <Id> --route <route> [--start <start>] [--end <end>] [--type <type>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--description <description>] [--position <position>] [--help] [--path <path>] [--quiet]
+agnos add-path <Name> --route <route> [--start <start>] [--end <end>] [--type <type>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--description <description>] [--position <position>] [--help] [--path <path>] [--quiet]
 ```
 
-Inserts one entry into the route's paths and runs build so the route's new.go and entries.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Entries.<Id>, and — with --trigger — only lets the route run when the text matches.
+Inserts one entry into the route's paths and runs build so the route's new.go and input.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Input.<Id>, and — with --trigger — only lets the route run when the text matches.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Id` | string, required |  | the id of the path, the Entries field its slice binds to (normalized to an exported Go name) |
+| `Name` | string, required |  | the id of the path, the Input field its slice binds to (normalized to an exported Go name) |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
@@ -25,17 +25,17 @@ Inserts one entry into the route's paths and runs build so the route's new.go an
 | `--description` | string |  | help text shown for the path | — |
 | `--position` | integer | `-1` | zero-based index to insert the path at (defaults to the end) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos add-path tenant --route create-user --start 1 --end 1
 agnos add-path version --route api --start 0 --end 0 --trigger /v1
 ```
 
-Server System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Server · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

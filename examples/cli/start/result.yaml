@@ -1,87 +1,87 @@
-cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \n"
+cli-output: "started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \n"
 exit-code: 0
 tree:
     - file: AgnosConfig/docs/ReadmeHeader.md
-      sha: 79cc71fe02b0ea516b289c4a7ffea65e0bc756ab8cd3cf5cd2a5b7b030b1898b
+      sha: ce9702206760f5df683e3f7c399238d6f36345d28354fb679816a5d6c19628aa
     - file: AgnosConfig/extensions.yaml
-      sha: 24a0819bdafde70ead75eb4b85eac20f6669ee15255e407da930099e0ccbb433
+      sha: 319c9b3d71bf11004d735b767c3d2207b5e818d5e857cc84db33dd00c3e194ab
     - file: AgnosConfig/paths.yaml
       sha: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     - file: AgnosConfig/project.yaml
-      sha: d855450b74c63de8d82ae1523bc76e3dc25175a99bd17fce161e2451e02bb783
+      sha: c6fb691b47c6c73001f9abb5ef67e1e4f9c720d3a39e5de8f8db4d875b2add4f
     - file: AgnosConfig/structure.yaml
-      sha: 033edde90caa82fd248205ef2fa56ba56fde1d60983e34ee766dc014fc5bab09
+      sha: 667280f723bc109d9a118a1a789f00667cf65b673a0fbaf0b55e29eea7ead018
     - file: AgnosConfig/themes.yaml
       sha: bfca54d2e915fa19bd69f60491160116d280bea07e6ff3c1896fb959c1c3e388
     - file: LICENSE
       sha: 9173dbaad07873fbe18b5147e516eefa45321a3bc2ce8534592bd32703390f83
     - file: README.md
-      sha: 4c4f8fd211fd2dde38120833bf21094272d2c34087e0979419682b184099f147
+      sha: 752144d31e8666a58b8fc3096e2074aceff3cb450789d8d3480aa074d4b25a91
     - file: docs/Adapters/doc.md
-      sha: 578aa34983c8510e0f8fc8dca7a5d7b46dfcef40c0e2151991d3d98682cb0918
-    - file: docs/Adapters/props.yaml
-      sha: 358d3f1dfa734fbad170a428773afc67c618522e8e295438475bdaec7d76ffb9
+      sha: b63db36a556fb24161a1127ce69ed6a09456ac6fca254129f084089f76586673
+    - file: docs/Adapters/doc.yaml
+      sha: 8c6a9de3199a8daf591ffd5b9ee8ad517a191d429de00e05500200f8e2cd33bf
     - file: docs/DepList/doc.md
-      sha: 6dc8df3b5ee6a65e77fcf6f5d3cf4a7e9cafb3b4890a3d52a866c7bc4adec607
-    - file: docs/DepList/props.yaml
+      sha: 3c7e020244c4828783258912b3c91c923b8cbaab34b918b78660e1ca430b9368
+    - file: docs/DepList/doc.yaml
       sha: 2cc46fc3b38a91764ba6ec7d5e8bb661ee7dac155f5782369459e4cd1dd29468
     - file: docs/Extensions/doc.md
-      sha: 45199b039e9f0cb2ddf52d729e3b6a85166c728dd9f63b8d7057023c918fccab
-    - file: docs/Extensions/props.yaml
+      sha: c92ad55f86749cac5f07dcaa9e913d7c20937f830c77b5e63deaac15a1cdcc19
+    - file: docs/Extensions/doc.yaml
       sha: 7de2cd40d2152a82ee767844ab2f1c29b119374cef0f5ef40457c2a84997d0ca
     - file: docs/GeneratedFiles/doc.md
-      sha: 0577f7e6f9f9ab1053e90d08394a7350d838cd833dcd62ef77f44055718fea52
-    - file: docs/GeneratedFiles/props.yaml
+      sha: 229de599932707ec156b2f21353f2f25723ad313d8f23bae08645d8f2eb923be
+    - file: docs/GeneratedFiles/doc.yaml
       sha: a0eef341ebd88c5ba305c3948e7486fd5b001ff50af0232d73fb0c9a32982ab3
     - file: docs/LibExamples/doc.md
-      sha: 7644ec4173d4c566e9c7395242cbc8d26e72bf7ddc98691eaab1de83a0e70f86
-    - file: docs/LibExamples/props.yaml
+      sha: 55eb7bfa76ddb783526935c59cb89a800cfd11f7b0777ecef116d78c45254e42
+    - file: docs/LibExamples/doc.yaml
       sha: 8360d95f99ea5cf10bdc90cff522a9ba25c28fc8b25c196745afedfc25d657fd
     - file: docs/LibUsage/doc.md
       sha: 189bbcc9ee693cb2f1ecf2c33257a9e7732c081d7853a10f4d92066b1ec473e8
-    - file: docs/LibUsage/props.yaml
+    - file: docs/LibUsage/doc.yaml
       sha: b901bd3853e5a437cb1c734b15b3d3e97ccf99fa6837048c8f646a7ed948872d
     - file: docs/PublicApi/api.config.md
-      sha: 69463fd9cf38000627ceb2cc263c3251e66ede2ce121bd4221c974ef1ce9608c
+      sha: 21ba93a8f6d352b813e0a00a7759ccd3872ed5dd08fa9eaa5869cc48473acdd7
+    - file: docs/PublicApi/api.projectconfig.md
+      sha: 94c3b607e0876993d2fb002091b5e4265e6065fd265cf4f54884b5ca67eb6f01
+    - file: docs/PublicApi/api.projectsandbox.md
+      sha: 68380b3b3af1653246f948d022d8cce049626899c5f7ced5db8790534739aa83
     - file: docs/PublicApi/api.sandbox.md
-      sha: 473e0aae28f6578aa234d2aaa317c824704795083eaaf3a18586eb6db98ee708
-    - file: docs/PublicApi/api.userconfig.md
-      sha: 3c0b723789afd2a256b881e928923e6705cc75f6a1f0aa46a7b67fb5d5753604
-    - file: docs/PublicApi/api.usersandbox.md
-      sha: 08ba371832246b481794258b2ecf4f7da6bbff96c2182f4d3e88a17c609fb7e9
+      sha: 526887f6a819637d1e5d3f78acfe505acac46148f6c492c7e5b9fadebf0a8ecd
     - file: docs/PublicApi/doc.md
-      sha: 0b554d06fd26ee6ff34a3a52c662c8725ca2cae1e189f44d713e2c1cde4875d5
-    - file: docs/PublicApi/props.yaml
+      sha: 215e9b2d9073ab166de882c86bd9a3976d85c31dd55785bc42708b13172ae789
+    - file: docs/PublicApi/doc.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md
-      sha: 410325c5c091075a0ccbbd26cce5e4c734a6a1abae0bb39019987ce81973983e
-    - file: docs/Requirements/props.yaml
+      sha: 43089012f48bb6ab9ccf56f2e7fde48e9038b699f050b1411b7bb032d7a2d795
+    - file: docs/Requirements/doc.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
-      sha: 466a7c9afc5e8996776d808ed4281797948df3f94f3620baec22dcf1a5a3016b
-    - file: docs/Rules/props.yaml
+      sha: 0728714faa19a2517603d43590293fc8106456ef66e8c8d55146b926d236c673
+    - file: docs/Rules/doc.yaml
       sha: 9767d0cfce07bdc5fd09051518787376986362e7b5feffaef8a0d8775986d762
     - file: docs/Structure/doc.md
-      sha: 407f21e7d0b68a764166aaf799f11982f0ea647cd45fc962631fa5865fa94110
-    - file: docs/Structure/props.yaml
+      sha: 01ee3b12d4e9c956ca28705531d1800adaa60f69395f74c2c925689f506080a6
+    - file: docs/Structure/doc.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 9782a0412e3649c14e3b0ba8e9306b1ceaa950bfcb44c9f56cc3e1ce043f7e78
-    - file: docs/Workflow/props.yaml
+      sha: 3cb65bd57fcd443a89998a35a64e539513305ef5abf6420ab34370f127b2d5fc
+    - file: docs/Workflow/doc.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b
     - file: go.mod
       sha: 78bace56005d8c5ccf295067a06ea07be0770f9a3fdd4d08f6b696fe9b5962f9
     - file: sandbox/api/config.go
-      sha: 5c8386fc72d0f041ac36527add8894c70489269e671858a20285e7d8fe4c581c
+      sha: fadc7d71721b64243cc68bd60de5f8e036944c395f05d0193474b45de2b0db50
+    - file: sandbox/api/projectconfig.go
+      sha: bd9f02f6b26190a0571b68695b5ce5e1607566706b08aa71dd4e2fa87537e720
+    - file: sandbox/api/projectsandbox.go
+      sha: c6c792665ba659b91ba5fcb7ba1cd7c6cab22573741770911cb1f6cffafb34b3
     - file: sandbox/api/sandbox.go
-      sha: f0e2337c4397a2c96a828fafeaa346ccea6b327e7646123472ff3e2f905a8dbc
-    - file: sandbox/api/userconfig.go
-      sha: 11b6ab1add4a4f80aeb135ab6a82e6ec33836769d1d713977015a5e90aa84a08
-    - file: sandbox/api/usersandbox.go
-      sha: d67f597f001ab92965218a9e7335679a0120f122e001391cf58489da529d24a4
+      sha: 81d71cd1f22e0f1c014c51cc9cf2de5fc90d2aa2b187bce85558e0f148d3c736
     - file: sandbox/constructors/config/constructor.go
       sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
     - file: sandbox/internal/generated/config/new.go
-      sha: 8d0e3eb9ca1c9698963400613ce190ac150a50f8cdf9b1a8ff6df8b65cf10403
+      sha: 5ee0bdef453f2f59d85612467d1771e3d970d8f4aa0dc1c22cf10c3de82d637f
     - file: sandbox/new.go
       sha: f847863fac092efbf9dd16653c97f93915d670927b1d14b8a7570e57540f835e

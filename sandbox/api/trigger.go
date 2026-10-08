@@ -1,34 +1,34 @@
 package api
 
 import (
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 )
 
 // TriggerType is how a Trigger compares the text it is handed. It is the
-// OpinatedAgnosCli contract's own, shared by the cli and the server layer.
-type TriggerType = opinatedagnoscli.TriggerType
+// OpinionatedAgnosCli contract's own, shared by the cli and the server layer.
+type TriggerType = opinionatedagnoscli.TriggerType
 
-// EqualTrigger matches a text that is exactly the trigger's Value.
-const EqualTrigger = opinatedagnoscli.EqualTrigger
+// TriggerEqual matches a text that is exactly the trigger's Value.
+const TriggerEqual = opinionatedagnoscli.TriggerEqual
 
-// PrefixTrigger matches a text that is the Value or continues it with a new
+// TriggerPrefix matches a text that is the Value or continues it with a new
 // segment: "/admin" matches "/admin/users", never "/administrator".
-const PrefixTrigger = opinatedagnoscli.PrefixTrigger
+const TriggerPrefix = opinionatedagnoscli.TriggerPrefix
 
-// TextPrefixTrigger matches a text that begins with the Value, whatever
+// TriggerTextPrefix matches a text that begins with the Value, whatever
 // follows it.
-const TextPrefixTrigger = opinatedagnoscli.TextPrefixTrigger
+const TriggerTextPrefix = opinionatedagnoscli.TriggerTextPrefix
 
-// SuffixTrigger matches a text that ends with the Value.
-const SuffixTrigger = opinatedagnoscli.SuffixTrigger
+// TriggerSuffix matches a text that ends with the Value.
+const TriggerSuffix = opinionatedagnoscli.TriggerSuffix
 
-// RegexTrigger matches a text the Value, a regular expression, matches.
-const RegexTrigger = opinatedagnoscli.RegexTrigger
+// TriggerRegex matches a text the Value, a regular expression, matches.
+const TriggerRegex = opinionatedagnoscli.TriggerRegex
 
-// OneOfTrigger matches a text that is exactly one of the trigger's Values.
-const OneOfTrigger = opinatedagnoscli.OneOfTrigger
+// TriggerOneOf matches a text that is exactly one of the trigger's Values.
+const TriggerOneOf = opinionatedagnoscli.TriggerOneOf
 
 // Trigger is the condition one declared slice or value has to meet for its
 // unit to run at all — the parsed form of one `trigger:` of a route.yaml or a
 // command.yaml.
-type Trigger = opinatedagnoscli.Trigger
+type Trigger = opinionatedagnoscli.Trigger

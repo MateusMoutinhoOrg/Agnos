@@ -1,4 +1,4 @@
-package serverdeps
+package nethttpserver
 
 import (
 	"context"
@@ -14,10 +14,10 @@ import (
 	serverdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serverdeps"
 )
 
-// Bind fills deps.Deps.Serverdeps.NewServer with the http-server
+// Bind fills deps.Deps.ServerDeps.NewServer with the http-server
 // implementation built on the standard library's net/http package.
 func Bind(deps *deps.Deps) {
-	deps.Serverdeps.NewServer = newServer
+	deps.ServerDeps.NewServer = newServer
 }
 
 // newServer builds one net/http server over props. Every request goes to the

@@ -3,17 +3,17 @@ package add_cli_example
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // AddCliExample scaffolds a new example under examples/cli/ — an example.sh
 // that already runs — then runs build as a follow-up step so the example
 // listing of the docs names it. Nothing under examples/ is compiled, so the
 // build renders only.
-func AddCliExample(sandbox *api.Sandbox, path string, name string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := AddCliExampleInternal(sandbox, io, name); err != nil {
+func AddCliExample(sandbox *api.Sandbox, props api.AddCliExampleProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := AddCliExampleInternal(sandbox, io, props.Name); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

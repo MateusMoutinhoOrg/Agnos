@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // EmbeddedStruct is one struct a generated aggregate embeds: api.Config embeds
@@ -29,10 +29,10 @@ type EmbeddedStruct struct {
 // pending are files of dir written earlier in this same transaction: the
 // listing reads disk, so a file a migration just moved would be missed
 // without them.
-func CollectEmbeddedStructs(sandbox *api.Sandbox, io *smartio.SmartIO, dir string, accept func(name string) bool, pending []string) ([]EmbeddedStruct, error) {
+func CollectEmbeddedStructs(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string, accept func(name string) bool, pending []string) ([]EmbeddedStruct, error) {
 	files := io.ListFiles(dir)
 	for _, file := range pending {
-		if !containsPath(files, file) {
+		if !contains(files, file) {
 			if _, err := io.ReadFile(file); err == nil {
 				files = append(files, file)
 			}
@@ -42,7 +42,7 @@ func CollectEmbeddedStructs(sandbox *api.Sandbox, io *smartio.SmartIO, dir strin
 	var structs []EmbeddedStruct
 	for _, file := range files {
 		name := baseName(sandbox, file)
-		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || !accept(name) {
+		if !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") || !accept(name) {
 			continue
 		}
 
@@ -50,9 +50,9 @@ func CollectEmbeddedStructs(sandbox *api.Sandbox, io *smartio.SmartIO, dir strin
 		if err != nil {
 			return nil, err
 		}
-		parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+		parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("%s is not parsable Go: %s", file, err.Error())
+			return nil, sandbox.Deps.StdDeps.Errorf("%s is not parsable Go: %s", file, err.Error())
 		}
 
 		for _, entry := range parsed.Types {
@@ -69,7 +69,7 @@ func CollectEmbeddedStructs(sandbox *api.Sandbox, io *smartio.SmartIO, dir strin
 		}
 	}
 
-	sandbox.Deps.Sortdeps.Slice(structs, func(i int, j int) bool {
+	sandbox.Deps.SortDeps.Slice(structs, func(i int, j int) bool {
 		return structs[i].Name < structs[j].Name
 	})
 	return structs, nil
@@ -104,7 +104,7 @@ func EmbeddedCollisions(sandbox *api.Sandbox, aggregate string, structs []Embedd
 }
 
 // SandboxParts is the accept func for CollectEmbeddedStructs taking the files
-// api.Sandbox embeds: usersandbox.go, clisandbox.go, serversandbox.go.
+// api.Sandbox embeds: projectsandbox.go, clisandbox.go, serversandbox.go.
 func SandboxParts(sandbox *api.Sandbox) func(name string) bool {
 	return func(name string) bool {
 		return IsSandboxPart(sandbox, name)
@@ -112,7 +112,7 @@ func SandboxParts(sandbox *api.Sandbox) func(name string) bool {
 }
 
 // ConfigParts is the accept func for CollectEmbeddedStructs taking the files
-// api.Config embeds: userconfig.go, backofficeconfig.go.
+// api.Config embeds: projectconfig.go, backofficeconfig.go.
 func ConfigParts(sandbox *api.Sandbox) func(name string) bool {
 	return func(name string) bool {
 		return IsConfigPart(sandbox, name)

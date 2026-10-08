@@ -2,10 +2,10 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -20,9 +20,9 @@ const (
 // The closed vocabularies agnos itself defines. They are values a command
 // accepts, not names of anything on disk, so they are listed rather than read.
 var (
-	fieldTypes     = []string{"string", "boolean", "int", "float"}
+	fieldTypes     = []string{"string", "boolean", "integer", "number"}
 	tableTypes     = databaseconf.FieldTypes
-	bodyTypes      = []string{"string", "boolean", "int", "float", "object"}
+	bodyTypes      = []string{"string", "boolean", "integer", "number", "object"}
 	routeMethods   = []string{"GET", "POST", "PUT", "PATCH", "DELETE", "HEAD", "OPTIONS"}
 	buildRuntimes  = []string{"go", "none"}
 	compileTargets = []string{"linux86", "linuxarm64", "linuxi32", "mac86", "macarm64", "windows86", "windowsi32", "all"}
@@ -38,7 +38,7 @@ const helpVerb = "help"
 // category is as valid as an existing one — and adds a row for typing a value
 // the list does not hold.
 type suggestion struct {
-	Options []interviewer.AlternativeOption
+	Options []interviewdeps.Option
 	Open    bool
 }
 
@@ -57,7 +57,7 @@ type suggestion struct {
 // A field whose list depends on an answer that has not come yet — a name asked
 // before its --route, which is what the argument order spells — falls back to
 // free text, exactly as it did before there was a list at all.
-func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, id string, answered map[string][]any) suggestion {
+func SuggestFor(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, id string, answered map[string][]any) suggestion {
 	verb := verbOf(command)
 
 	switch id {
@@ -95,14 +95,14 @@ func SuggestFor(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, 
 		return closed(literalOptions(utils.RouteSchemaFormats))
 	case "clear":
 		return clearSuggestion(verb)
-	case "font":
-		return closed(literalOptions(routeconf.ParameterFonts))
+	case "source":
+		return closed(literalOptions(routeconf.ParameterSources))
 	case "trigger-type":
 		return closed(literalOptions(routeconf.TriggerTypes))
 	case "type":
 		return typeSuggestion(verb)
-	case "available":
-		return availableSuggestion(sandbox, io, verb)
+	case "binding":
+		return bindingSuggestion(sandbox, io, verb)
 	case "adapter":
 		return adapterSuggestion(sandbox, io, verb)
 	case "dep":
@@ -195,7 +195,7 @@ func typeSuggestion(verb string) suggestion {
 // targetSuggestion tells the two questions about a target apart: a database
 // field points at a table of its own database, and `compile` names one of the
 // binaries it can cross-build. They are one field id, so the verb decides.
-func targetSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answered map[string][]any) suggestion {
+func targetSuggestion(sandbox *api.Sandbox, io *stagedfs.StagedFS, verb string, answered map[string][]any) suggestion {
 	switch verb {
 	case "add-table-field", "set-table-field":
 		return closed(tableOptions(sandbox, io, answered))
@@ -203,19 +203,19 @@ func targetSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, an
 	return closed(literalOptions(compileTargets))
 }
 
-// availableSuggestion offers the declared availables, except on add-available,
+// bindingSuggestion offers the declared bindings, except on add-binding,
 // where the name is the one being created.
-func availableSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) suggestion {
-	if verb == "add-available" {
+func bindingSuggestion(sandbox *api.Sandbox, io *stagedfs.StagedFS, verb string) suggestion {
+	if verb == "add-binding" {
 		return suggestion{}
 	}
-	return closed(literalOptions(utils.DeclaredAvailables(sandbox, io)))
+	return closed(literalOptions(utils.DeclaredBindings(sandbox, io)))
 }
 
 // adapterSuggestion tells the two questions about an adapter apart: installing
 // one picks from the catalog, binding or removing one picks from what the
 // project already has.
-func adapterSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) suggestion {
+func adapterSuggestion(sandbox *api.Sandbox, io *stagedfs.StagedFS, verb string) suggestion {
 	switch verb {
 	case "add-adapter", "add-dep":
 		catalog, err := utils.CatalogAdapters(sandbox)
@@ -230,7 +230,7 @@ func adapterSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) s
 // depSuggestion is the same split for a dep: add-dep picks from the catalog —
 // and takes a module path besides, which is why its list is open — while every
 // other command names one the project has installed.
-func depSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) suggestion {
+func depSuggestion(sandbox *api.Sandbox, io *stagedfs.StagedFS, verb string) suggestion {
 	if verb == "add-dep" {
 		catalog, err := utils.CatalogDeps(sandbox)
 		if err != nil {
@@ -244,14 +244,22 @@ func depSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) sugge
 // nameSuggestion answers the one field id that means something different on
 // every command. A name a command is about to create has no list, so only the
 // commands that name something existing appear here.
-func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answered map[string][]any) suggestion {
+func nameSuggestion(sandbox *api.Sandbox, io *stagedfs.StagedFS, verb string, answered map[string][]any) suggestion {
 	switch verb {
 	case "enable-extension", "disable-extension":
 		return closed(extensionOptions())
-	case "remove-command", "set-command":
+	case "remove-command", "set-command", "show-command":
 		return closed(commandOptions(sandbox, io))
-	case "remove-route":
+	case "remove-route", "set-route", "show-route", "set-body", "import-body":
 		return closed(routeOptions(sandbox, io))
+	case "add-dep", "remove-dep", "set-dep":
+		return depSuggestion(sandbox, io, verb)
+	case "add-adapter", "remove-adapter":
+		return adapterSuggestion(sandbox, io, verb)
+	case "add-binding", "remove-binding":
+		return bindingSuggestion(sandbox, io, verb)
+	case "show-database":
+		return closed(dirOptions(sandbox, io, utils.DatabasesDir))
 	case "remove-page":
 		return closed(pageOptions(sandbox, io))
 	case "remove-doc":
@@ -260,7 +268,7 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answ
 		return closed(exampleOptions(sandbox, io, utils.ExampleCliSide))
 	case "remove-lib-example":
 		return closed(exampleOptions(sandbox, io, utils.ExampleLibSide))
-	case "update-test":
+	case "update-example":
 		return closed(exampleOptions(sandbox, io, ""))
 	case "set-parameter", "remove-parameter":
 		return closed(routeParameterOptions(sandbox, io, answered))
@@ -286,15 +294,15 @@ func nameSuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string, answ
 // tableOptions is the tables one database of the project declares, read off
 // the --database already answered. A session that has not answered one yet
 // gets no list, exactly as it did before there was one.
-func tableOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+func tableOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) []interviewdeps.Option {
 	conf, found := answeredDatabase(sandbox, io, answered)
 	if !found {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	for _, table := range conf.Tables {
-		options = append(options, interviewer.AlternativeOption{
+		options = append(options, interviewdeps.Option{
 			Id:  table.Name,
 			Msg: labelled(sandbox, table.Name, tableSummary(sandbox, table)),
 		})
@@ -304,17 +312,17 @@ func tableOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string
 
 // tableFieldOptions is every field one table declares, the fields of its
 // nested collections included, by the name the editors of those fields spell.
-func tableFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+func tableFieldOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) []interviewdeps.Option {
 	table, found := answeredTable(sandbox, io, answered)
 	if !found {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	for _, field := range table.Fields {
-		options = append(options, interviewer.AlternativeOption{Id: field.Name, Msg: labelled(sandbox, field.Name, field.Type)})
+		options = append(options, interviewdeps.Option{Id: field.Name, Msg: labelled(sandbox, field.Name, field.Type)})
 		for _, nested := range field.Fields {
-			options = append(options, interviewer.AlternativeOption{
+			options = append(options, interviewdeps.Option{
 				Id:  nested.Name,
 				Msg: labelled(sandbox, field.Name+"."+nested.Name, nested.Type),
 			})
@@ -324,20 +332,20 @@ func tableFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[s
 }
 
 // nestedTableOptions is the nested collections one table declares — the only
-// values --parent accepts, because a field goes inside a `database` field or
+// values --parent accepts, because a field goes inside an `object` field or
 // inside nothing.
-func nestedTableOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+func nestedTableOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) []interviewdeps.Option {
 	table, found := answeredTable(sandbox, io, answered)
 	if !found {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	for _, field := range table.Fields {
-		if field.Type != databaseconf.FieldDatabase {
+		if field.Type != databaseconf.FieldObject {
 			continue
 		}
-		options = append(options, interviewer.AlternativeOption{
+		options = append(options, interviewdeps.Option{
 			Id:  field.Name,
 			Msg: labelled(sandbox, field.Name, "a collection nested under each record"),
 		})
@@ -351,12 +359,12 @@ func tableSummary(sandbox *api.Sandbox, table databaseconf.Table) string {
 	if len(table.Fields) == 1 {
 		return "1 field"
 	}
-	return sandbox.Deps.Std.Sprintf("%d fields", len(table.Fields))
+	return sandbox.Deps.StdDeps.Sprintf("%d fields", len(table.Fields))
 }
 
 // answeredDatabase is the database the session is working on, read off disk,
 // or false while the question naming it has not been answered.
-func answeredDatabase(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) (*databaseconf.DatabaseConf, bool) {
+func answeredDatabase(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) (*databaseconf.DatabaseConf, bool) {
 	database := answeredText(sandbox, answered, "database")
 	if database == "" {
 		return nil, false
@@ -372,7 +380,7 @@ func answeredDatabase(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[st
 // answeredTable is the table the session is working on: the --table answered,
 // looked up in the --database answered. The interview asks both before any
 // field question, which is what makes this list exist at all.
-func answeredTable(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) (databaseconf.Table, bool) {
+func answeredTable(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) (databaseconf.Table, bool) {
 	conf, found := answeredDatabase(sandbox, io, answered)
 	if !found {
 		return databaseconf.Table{}, false
@@ -388,29 +396,29 @@ func answeredTable(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[strin
 // commandFieldOptions is the flags, or the args, one command of the project
 // declares — the same answer for a command that routeFieldOptions is for a
 // route, read off the --command already answered.
-func commandFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any, flags bool) []interviewer.AlternativeOption {
+func commandFieldOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any, flags bool) []interviewdeps.Option {
 	name := answeredText(sandbox, answered, "command")
 	if name == "" {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
 	conf, err := utils.LoadCommandConf(sandbox, io, name)
 	if err != nil {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	if flags {
 		for _, flag := range conf.Flags {
-			options = append(options, interviewer.AlternativeOption{Id: flag.Id, Msg: labelled(sandbox, flag.Keys[0], flag.Description)})
+			options = append(options, interviewdeps.Option{Id: flag.Id, Msg: labelled(sandbox, flag.Keys[0], flag.Description)})
 		}
 		return options
 	}
 	for _, arg := range conf.Args {
-		if arg.Trigger.Exists {
+		if arg.Trigger.Set {
 			continue
 		}
-		options = append(options, interviewer.AlternativeOption{Id: arg.Id, Msg: labelled(sandbox, arg.Id, arg.Description)})
+		options = append(options, interviewdeps.Option{Id: arg.Id, Msg: labelled(sandbox, arg.Id, arg.Description)})
 	}
 	return options
 }
@@ -418,19 +426,19 @@ func commandFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map
 // routePathOptions is every entry of one route's `paths`, by the id its
 // editors spell. It is read off the route that was answered, so a session that
 // has not answered one yet gets no list.
-func routePathOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+func routePathOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) []interviewdeps.Option {
 	conf, found := answeredRoute(sandbox, io, answered)
 	if !found {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	for _, path := range conf.Paths {
 		label := path.Id
-		if path.Trigger.Exists {
+		if path.Trigger.Set {
 			label += "  " + path.Trigger.Value
 		}
-		options = append(options, interviewer.AlternativeOption{Id: path.Id, Msg: labelled(sandbox, label, path.Description)})
+		options = append(options, interviewdeps.Option{Id: path.Id, Msg: labelled(sandbox, label, path.Description)})
 	}
 	return options
 }
@@ -438,15 +446,15 @@ func routePathOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[st
 // routeParameterOptions is every entry of one route's `parameters`, by the key
 // it is read under — the answer to the question a person editing a
 // declaration actually has: which values does this route read.
-func routeParameterOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+func routeParameterOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) []interviewdeps.Option {
 	conf, found := answeredRoute(sandbox, io, answered)
 	if !found {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	for _, parameter := range conf.Parameters {
-		options = append(options, interviewer.AlternativeOption{Id: parameter.Key, Msg: labelled(sandbox, parameter.Key, parameter.Description)})
+		options = append(options, interviewdeps.Option{Id: parameter.Key, Msg: labelled(sandbox, parameter.Key, parameter.Description)})
 	}
 	return options
 }
@@ -454,17 +462,17 @@ func routeParameterOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered m
 // bodyFieldOptions is every property of one route's body json-schema, by the
 // dotted path add-body-field declares it at — the nested ones included, which
 // is the one list a person cannot read off the route.yaml at a glance.
-func bodyFieldOptions(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) []interviewer.AlternativeOption {
+func bodyFieldOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) []interviewdeps.Option {
 	conf, found := answeredRoute(sandbox, io, answered)
 	if !found || conf.Body.Schema == nil {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
-	return appendSchemaPaths(sandbox, []interviewer.AlternativeOption{}, conf.Body.Schema, "")
+	return appendSchemaPaths(sandbox, []interviewdeps.Option{}, conf.Body.Schema, "")
 }
 
 // appendSchemaPaths walks one object schema depth-first, so a nested property
 // is listed under the object it belongs to.
-func appendSchemaPaths(sandbox *api.Sandbox, options []interviewer.AlternativeOption, schema *routeconf.Schema, prefix string) []interviewer.AlternativeOption {
+func appendSchemaPaths(sandbox *api.Sandbox, options []interviewdeps.Option, schema *routeconf.Schema, prefix string) []interviewdeps.Option {
 	for _, property := range schema.Properties {
 		path := property.Name
 		if prefix != "" {
@@ -477,7 +485,7 @@ func appendSchemaPaths(sandbox *api.Sandbox, options []interviewer.AlternativeOp
 			kind = "[]" + object.Type
 		}
 
-		options = append(options, interviewer.AlternativeOption{Id: path, Msg: labelled(sandbox, path, kind)})
+		options = append(options, interviewdeps.Option{Id: path, Msg: labelled(sandbox, path, kind)})
 		if object != nil && object.Type == "object" {
 			options = appendSchemaPaths(sandbox, options, object, path)
 		}
@@ -488,7 +496,7 @@ func appendSchemaPaths(sandbox *api.Sandbox, options []interviewer.AlternativeOp
 // answeredRoute is the route the session is working on, read off disk, or
 // false while the question naming it has not been answered — which is what the
 // argument order leaves true for a name asked before its --route.
-func answeredRoute(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[string][]any) (*routeconf.RouteConf, bool) {
+func answeredRoute(sandbox *api.Sandbox, io *stagedfs.StagedFS, answered map[string][]any) (*routeconf.RouteConf, bool) {
 	route := answeredText(sandbox, answered, "route")
 	if route == "" {
 		return nil, false
@@ -508,13 +516,13 @@ func answeredRoute(sandbox *api.Sandbox, io *smartio.SmartIO, answered map[strin
 // the binary running the interview, and with --path pointing at another
 // project the two have nothing to do with each other. Hidden commands are
 // listed too: one still dispatches, and a flag may still be declared on it.
-func commandOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
-	options := []interviewer.AlternativeOption{}
+func commandOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
+	options := []interviewdeps.Option{}
 
 	for _, declared := range declaredCommands(sandbox, io) {
-		options = append(options, interviewer.AlternativeOption{
+		options = append(options, interviewdeps.Option{
 			Id:  declared.Identifier,
-			Msg: labelled(sandbox, declared.Identifier, declared.Help),
+			Msg: labelled(sandbox, declared.Identifier, declared.Summary),
 		})
 	}
 
@@ -523,15 +531,15 @@ func commandOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.Alt
 
 // runningCommandOptions is the command surface of the binary itself — what
 // `help` answers about, and the one list that is not read off the project.
-func runningCommandOptions(sandbox *api.Sandbox) []interviewer.AlternativeOption {
-	options := []interviewer.AlternativeOption{}
+func runningCommandOptions(sandbox *api.Sandbox) []interviewdeps.Option {
+	options := []interviewdeps.Option{}
 	for _, declared := range sandbox.Cli.Commands {
 		if len(declared.Identifiers) == 0 {
 			continue
 		}
-		options = append(options, interviewer.AlternativeOption{
+		options = append(options, interviewdeps.Option{
 			Id:  declared.Identifiers[0],
-			Msg: labelled(sandbox, declared.Identifiers[0], declared.Help),
+			Msg: labelled(sandbox, declared.Identifiers[0], declared.Summary),
 		})
 	}
 	return options
@@ -542,7 +550,7 @@ func runningCommandOptions(sandbox *api.Sandbox) []interviewer.AlternativeOption
 // docs/Commands, so the two never share a heading — offering a command's
 // categories to add-route is what left every route after the first retyping
 // its own, one typo away from a heading of its own.
-func categorySuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) []interviewer.AlternativeOption {
+func categorySuggestion(sandbox *api.Sandbox, io *stagedfs.StagedFS, verb string) []interviewdeps.Option {
 	switch verb {
 	case "add-route", "set-route":
 		return routeCategoryOptions(sandbox, io)
@@ -553,7 +561,7 @@ func categorySuggestion(sandbox *api.Sandbox, io *smartio.SmartIO, verb string) 
 // commandCategoryOptions is every category the project's own command surface
 // already uses, so a new command joins a heading that exists instead of
 // opening one of its own by a typo.
-func commandCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+func commandCategoryOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
 	categories := []string{}
 	for _, declared := range declaredCommands(sandbox, io) {
 		categories = append(categories, declared.Category)
@@ -564,9 +572,9 @@ func commandCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []intervi
 // routeCategoryOptions is the same list for the server surface, read off the
 // `category` of every declared route.yaml. A route whose declaration will not
 // parse contributes nothing: it has no heading to join.
-func routeCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+func routeCategoryOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
 	if !io.IsDir(routesDir) {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
 	names := unitNames(sandbox, utils.RouteDirs(sandbox, io))
@@ -586,8 +594,8 @@ func routeCategoryOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interview
 // categoryOptions is one row per distinct heading, in the order the surface
 // declares them, with the blanks dropped: a unit with no category is listed
 // under a fallback heading nothing has to be told to reuse.
-func categoryOptions(categories []string) []interviewer.AlternativeOption {
-	options := []interviewer.AlternativeOption{}
+func categoryOptions(categories []string) []interviewdeps.Option {
+	options := []interviewdeps.Option{}
 	seen := map[string]bool{}
 
 	for _, category := range categories {
@@ -595,25 +603,25 @@ func categoryOptions(categories []string) []interviewer.AlternativeOption {
 			continue
 		}
 		seen[category] = true
-		options = append(options, interviewer.AlternativeOption{Id: category, Msg: category})
+		options = append(options, interviewdeps.Option{Id: category, Msg: category})
 	}
 
 	return options
 }
 
-// declaredCommand is the little of one project's entries.yaml the suggestions
+// declaredCommand is the little of one project's command.yaml the suggestions
 // need: what the command is called and what to say about it.
 type declaredCommand struct {
 	Identifier string
 	Category   string
-	Help       string
+	Summary    string
 }
 
 // declaredCommands reads every command.yaml under sandbox/internal/commands of
 // the project being worked on, in whatever folder. A directory whose declaration will not parse is
 // still offered under its own name: the interview is how a person fixes such a
 // command, so hiding it would hide the way out.
-func declaredCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []declaredCommand {
+func declaredCommands(sandbox *api.Sandbox, io *stagedfs.StagedFS) []declaredCommand {
 	if !io.IsDir(commandsDir) {
 		return []declaredCommand{}
 	}
@@ -622,14 +630,14 @@ func declaredCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []declaredComma
 
 	commands := []declaredCommand{}
 	for _, name := range names {
-		declared := declaredCommand{Identifier: utils.CommandIdentifier(sandbox, name)}
+		declared := declaredCommand{Identifier: utils.CommandName(sandbox, name)}
 
 		if conf, err := utils.LoadCommandConf(sandbox, io, name); err == nil {
 			if identifiers := conf.Identifiers(); len(identifiers) > 0 {
 				declared.Identifier = identifiers[0]
 			}
 			declared.Category = conf.Category
-			declared.Help = conf.Help
+			declared.Summary = conf.Summary
 		}
 
 		commands = append(commands, declared)
@@ -640,64 +648,64 @@ func declaredCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []declaredComma
 
 // extensionOptions is the generation-mechanic catalog, with the line
 // list-extensions prints as the label.
-func extensionOptions() []interviewer.AlternativeOption {
-	options := []interviewer.AlternativeOption{}
+func extensionOptions() []interviewdeps.Option {
+	options := []interviewdeps.Option{}
 	for _, spec := range utils.ExtensionCatalog() {
-		options = append(options, interviewer.AlternativeOption{Id: spec.Name, Msg: spec.Name + "  —  " + spec.Help})
+		options = append(options, interviewdeps.Option{Id: spec.Name, Msg: spec.Name + "  —  " + spec.Help})
 	}
 	return options
 }
 
 // themeOptions is the doc themes declared in themes.yaml, by id.
-func themeOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+func themeOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
 	conf, err := utils.LoadThemesConf(sandbox, io)
 	if err != nil {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	for _, theme := range conf.Themes {
-		options = append(options, interviewer.AlternativeOption{Id: theme.Id, Msg: labelled(sandbox, theme.Id, theme.Description)})
+		options = append(options, interviewdeps.Option{Id: theme.Id, Msg: labelled(sandbox, theme.Id, theme.Description)})
 	}
 	return options
 }
 
-// pageOptions is every html file under assets/frontend/, named the way
+// pageOptions is every html file under assets/front/, named the way
 // remove-page spells a page ("index", "blog/post").
-func pageOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
-	options := []interviewer.AlternativeOption{}
+func pageOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
+	options := []interviewdeps.Option{}
 	for _, page := range utils.ListPages(sandbox, io) {
-		options = append(options, interviewer.AlternativeOption{Id: page, Msg: page})
+		options = append(options, interviewdeps.Option{Id: page, Msg: page})
 	}
 	return options
 }
 
 // docOptions is every doc of the tree, sub-docs included, named the way
 // remove-doc spells them ("PublicApi", "PublicApi/api.Actions").
-func docOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+func docOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
 	tree, err := utils.CollectDocTree(sandbox, io)
 	if err != nil {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
-	options := []interviewer.AlternativeOption{}
+	options := []interviewdeps.Option{}
 	return appendDocs(sandbox, options, tree)
 }
 
 // appendDocs walks the doc tree depth-first, so a sub-doc is listed under the
 // parent it belongs to.
-func appendDocs(sandbox *api.Sandbox, options []interviewer.AlternativeOption, docs []utils.Doc) []interviewer.AlternativeOption {
+func appendDocs(sandbox *api.Sandbox, options []interviewdeps.Option, docs []utils.Doc) []interviewdeps.Option {
 	for _, doc := range docs {
-		name := sandbox.Deps.Stringsdeps.TrimPrefix(doc.Path, utils.DocsDir+"/")
-		options = append(options, interviewer.AlternativeOption{Id: name, Msg: labelled(sandbox, name, doc.Description)})
+		name := sandbox.Deps.StringsDeps.TrimPrefix(doc.Path, utils.DocsDir+"/")
+		options = append(options, interviewdeps.Option{Id: name, Msg: labelled(sandbox, name, doc.Description)})
 		options = appendDocs(sandbox, options, doc.Subdocs)
 	}
 	return options
 }
 
 // exampleOptions is the examples of one side, or of both when side is empty —
-// exec-test --only and update-test name an example on both sides at once.
-func exampleOptions(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []interviewer.AlternativeOption {
+// run-examples --only and update-example name an example on both sides at once.
+func exampleOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, side string) []interviewdeps.Option {
 	sides := []string{side}
 	if side == "" {
 		sides = utils.ExampleSides
@@ -715,16 +723,16 @@ func exampleOptions(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []in
 		}
 	}
 
-	sandbox.Deps.Sortdeps.Strings(names)
+	sandbox.Deps.SortDeps.Strings(names)
 	return literalOptions(names)
 }
 
 // dirOptions is one option per directory of a tree, by its own name. It is how
 // every list read off disk is built, so an absent tree yields no options
 // rather than an error.
-func dirOptions(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []interviewer.AlternativeOption {
+func dirOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []interviewdeps.Option {
 	if !io.IsDir(dir) {
-		return []interviewer.AlternativeOption{}
+		return []interviewdeps.Option{}
 	}
 
 	names := []string{}
@@ -735,14 +743,14 @@ func dirOptions(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []intervi
 		}
 	}
 
-	sandbox.Deps.Sortdeps.Strings(names)
+	sandbox.Deps.SortDeps.Strings(names)
 	return literalOptions(names)
 }
 
 // routeOptions is one row per declared route, by name and in order, in
-// whatever folder of sandbox/internal/routeslist it sits: a folder grouping
+// whatever folder of sandbox/internal/routes it sits: a folder grouping
 // routes is not one.
-func routeOptions(sandbox *api.Sandbox, io *smartio.SmartIO) []interviewer.AlternativeOption {
+func routeOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []interviewdeps.Option {
 	return literalOptions(unitNames(sandbox, utils.RouteDirs(sandbox, io)))
 }
 
@@ -752,17 +760,17 @@ func unitNames(sandbox *api.Sandbox, units []utils.UnitDir) []string {
 	for _, unit := range units {
 		names = append(names, unit.Name)
 	}
-	sandbox.Deps.Sortdeps.Strings(names)
+	sandbox.Deps.SortDeps.Strings(names)
 	return names
 }
 
 // ─── Helpers ────────────────────────────────────────────────────────────────
 
 // literalOptions is a list of values that are their own labels.
-func literalOptions(values []string) []interviewer.AlternativeOption {
-	options := []interviewer.AlternativeOption{}
+func literalOptions(values []string) []interviewdeps.Option {
+	options := []interviewdeps.Option{}
 	for _, value := range values {
-		options = append(options, interviewer.AlternativeOption{Id: value, Msg: value})
+		options = append(options, interviewdeps.Option{Id: value, Msg: value})
 	}
 	return options
 }
@@ -770,10 +778,10 @@ func literalOptions(values []string) []interviewer.AlternativeOption {
 // labelled writes one row as the value plus what it is, when there is
 // something to say about it.
 func labelled(sandbox *api.Sandbox, id string, description string) string {
-	if sandbox.Deps.Stringsdeps.TrimSpace(description) == "" {
+	if sandbox.Deps.StringsDeps.TrimSpace(description) == "" {
 		return id
 	}
-	return sandbox.Deps.Std.Sprintf("%s  —  %s", id, description)
+	return sandbox.Deps.StdDeps.Sprintf("%s  —  %s", id, description)
 }
 
 // verbOf is the canonical identifier of a command, the one every table above
@@ -787,10 +795,10 @@ func verbOf(command api.Command) string {
 
 // closed and open are the two shapes a suggestion takes: a list that is the
 // whole of what the field accepts, and one that is only a head start.
-func closed(options []interviewer.AlternativeOption) suggestion {
+func closed(options []interviewdeps.Option) suggestion {
 	return suggestion{Options: options, Open: false}
 }
 
-func open(options []interviewer.AlternativeOption) suggestion {
+func open(options []interviewdeps.Option) suggestion {
 	return suggestion{Options: options, Open: true}
 }

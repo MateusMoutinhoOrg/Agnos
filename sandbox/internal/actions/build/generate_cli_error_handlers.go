@@ -2,13 +2,13 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // cliErrorsDir is where the project's own answers to a failed command line
 // live — hand-written from the first build on, like a command's
-// InternalPureHandler.go.
+// handler.go.
 const cliErrorsDir = "sandbox/internal/cli/errors"
 
 // cliErrorHandlers are the five files of cliErrorsDir, one per
@@ -26,7 +26,7 @@ var cliErrorHandlers = []string{
 // there alone. They are the cli's mirror of the server's eight: not assets of
 // the cli group, since every file of a group is rewritten by every build, and
 // these are the project's once written.
-func GenerateCliErrorHandlers(sandbox *api.Sandbox, io *smartio.SmartIO, module string) error {
+func GenerateCliErrorHandlers(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) error {
 	vars := map[string]any{
 		"Module":        module,
 		"GeneratorName": generatorName(sandbox),

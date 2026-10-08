@@ -2,9 +2,9 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/info/help"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // selfVerb is the one command the interview never offers: answering questions
@@ -33,7 +33,7 @@ const (
 // covered without this file changing. What state.go adds on top is not a
 // command list but a filter: which of those declarations the project in front
 // of the person can actually run.
-func InterviewInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
+func InterviewInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) error {
 	printWelcome(sandbox, io, path)
 
 	for {
@@ -50,7 +50,7 @@ func InterviewInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 		}
 	}
 
-	sandbox.Deps.Std.Printf("  %sNothing else then. Run %s%s interview%s%s whenever you want me back.%s\n\n",
+	sandbox.Deps.StdDeps.Printf("  %sNothing else then. Run %s%s interview%s%s whenever you want me back.%s\n\n",
 		dim, reset+cyan, binaryName(sandbox), reset, dim, reset)
 	return nil
 }
@@ -59,8 +59,8 @@ func InterviewInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 // person pressed ctrl-c, or the input ran out. Neither is a failure of the
 // command, so the session ends quietly and the process exits ok.
 func endSession(sandbox *api.Sandbox, reason error) error {
-	sandbox.Deps.Std.Printf("\n")
-	sandbox.Deps.Std.Log("interview ended: %s \n", reason.Error())
+	sandbox.Deps.StdDeps.Printf("\n")
+	sandbox.Deps.StdDeps.Logf("interview ended: %s \n", reason.Error())
 	return nil
 }
 
@@ -70,11 +70,11 @@ func endSession(sandbox *api.Sandbox, reason error) error {
 // when the person chose to stop instead. The state is read again on every
 // pass: a command that turned a mechanic on opens its area, and the step that
 // turned it on is gone from the next menu.
-func chooseCommand(sandbox *api.Sandbox, io *smartio.SmartIO) (api.Command, bool, error) {
+func chooseCommand(sandbox *api.Sandbox, io *stagedfs.StagedFS) (api.Command, bool, error) {
 	for {
 		state := readState(sandbox, io)
 
-		chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(
+		chosen, err := sandbox.Deps.InterviewDeps.SingleAlternativeQuestion(
 			"What do you want to do?",
 			topRows(sandbox, state),
 		)
@@ -82,7 +82,7 @@ func chooseCommand(sandbox *api.Sandbox, io *smartio.SmartIO) (api.Command, bool
 			// There is no question before the first one, so going back from
 			// here is going out — the same answer the exit row gives, and the
 			// session still ends ok.
-			if sandbox.Deps.Interviewer.Back(err) {
+			if sandbox.Deps.InterviewDeps.Back(err) {
 				return api.Command{}, false, nil
 			}
 			return api.Command{}, false, err
@@ -111,8 +111,8 @@ func chooseCommand(sandbox *api.Sandbox, io *smartio.SmartIO) (api.Command, bool
 // topRows is the first menu: the steps this project has not taken, the areas
 // it has, and the row that ends the session. A step is a command too — it is
 // listed first, in plain words, because it is what the project needs next.
-func topRows(sandbox *api.Sandbox, state projectState) []interviewer.AlternativeOption {
-	rows := []interviewer.AlternativeOption{}
+func topRows(sandbox *api.Sandbox, state projectState) []interviewdeps.Option {
+	rows := []interviewdeps.Option{}
 	suggested := false
 
 	for _, one := range nextSteps(state) {
@@ -126,9 +126,9 @@ func topRows(sandbox *api.Sandbox, state projectState) []interviewer.Alternative
 			suggested = true
 		}
 
-		rows = append(rows, interviewer.AlternativeOption{
+		rows = append(rows, interviewdeps.Option{
 			Id:  stepPrefix + one.Verb,
-			Msg: sandbox.Deps.Std.Sprintf("%s%s  %s(%s)%s", mark, one.Msg, dim, one.Verb, reset),
+			Msg: sandbox.Deps.StdDeps.Sprintf("%s%s  %s(%s)%s", mark, one.Msg, dim, one.Verb, reset),
 		})
 	}
 
@@ -140,16 +140,16 @@ func topRows(sandbox *api.Sandbox, state projectState) []interviewer.Alternative
 
 	rows = append(rows, categoryRows(sandbox, state)...)
 
-	return SafeFirst(rows, interviewer.AlternativeOption{Id: exitOptionId, Msg: "· exit"}, offersOnly)
+	return SafeFirst(rows, interviewdeps.Option{Id: exitOptionId, Msg: "· exit"}, offersOnly)
 }
 
 // stepVerb reads a chosen row back as the command a step runs, reporting false
 // for every row that is not one.
 func stepVerb(sandbox *api.Sandbox, chosen string) (string, bool) {
-	if !sandbox.Deps.Stringsdeps.HasPrefix(chosen, stepPrefix) {
+	if !sandbox.Deps.StringsDeps.HasPrefix(chosen, stepPrefix) {
 		return "", false
 	}
-	return sandbox.Deps.Stringsdeps.TrimPrefix(chosen, stepPrefix), true
+	return sandbox.Deps.StringsDeps.TrimPrefix(chosen, stepPrefix), true
 }
 
 // commandByVerb reads one declaration of the surface back by the name it is
@@ -189,11 +189,11 @@ const helpFlagCommand = "help_flag"
 func chooseInCategory(sandbox *api.Sandbox, state projectState, category string) (api.Command, bool, error) {
 	commands := commandsIn(sandbox, state, category)
 
-	rows := []interviewer.AlternativeOption{}
+	rows := []interviewdeps.Option{}
 	for _, command := range commands {
-		rows = append(rows, interviewer.AlternativeOption{
+		rows = append(rows, interviewdeps.Option{
 			Id:  verbOf(command),
-			Msg: labelled(sandbox, verbOf(command), command.Help),
+			Msg: labelled(sandbox, verbOf(command), command.Summary),
 		})
 	}
 
@@ -202,11 +202,11 @@ func chooseInCategory(sandbox *api.Sandbox, state projectState, category string)
 	// the one that happens to come first takes something away, the way back
 	// leads the menu instead.
 	leads := len(commands) > 0 && DestructiveVerb(sandbox, verbOf(commands[0]))
-	rows = SafeFirst(rows, interviewer.AlternativeOption{Id: backOptionId, Msg: "· back"}, leads)
+	rows = SafeFirst(rows, interviewdeps.Option{Id: backOptionId, Msg: "· back"}, leads)
 
-	chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(category, rows)
+	chosen, err := sandbox.Deps.InterviewDeps.SingleAlternativeQuestion(category, rows)
 	if err != nil {
-		if sandbox.Deps.Interviewer.Back(err) {
+		if sandbox.Deps.InterviewDeps.Back(err) {
 			return api.Command{}, false, nil
 		}
 		return api.Command{}, false, err
@@ -228,7 +228,7 @@ func chooseInCategory(sandbox *api.Sandbox, state projectState, category string)
 // for. The order is the areas table's — what someone new needs first — and an
 // area whose mechanic is off has no command that applies, so no row is built
 // for it at all.
-func categoryRows(sandbox *api.Sandbox, state projectState) []interviewer.AlternativeOption {
+func categoryRows(sandbox *api.Sandbox, state projectState) []interviewdeps.Option {
 	offered := map[string]bool{}
 	declared := []string{}
 
@@ -242,7 +242,7 @@ func categoryRows(sandbox *api.Sandbox, state projectState) []interviewer.Altern
 		declared = append(declared, category)
 	}
 
-	rows := []interviewer.AlternativeOption{}
+	rows := []interviewdeps.Option{}
 	emitted := map[string]bool{}
 
 	for _, one := range areas {
@@ -262,8 +262,8 @@ func categoryRows(sandbox *api.Sandbox, state projectState) []interviewer.Altern
 }
 
 // categoryRow is one area as a menu row, indented to line up under the steps.
-func categoryRow(sandbox *api.Sandbox, category string) interviewer.AlternativeOption {
-	return interviewer.AlternativeOption{
+func categoryRow(sandbox *api.Sandbox, category string) interviewdeps.Option {
+	return interviewdeps.Option{
 		Id:  category,
 		Msg: "  " + labelled(sandbox, category, areaHelp(category)),
 	}
@@ -313,7 +313,7 @@ func categoryOf(command api.Command) string {
 // way as one that finished it — back at the top menu, with the person left to
 // know that add-body-field exists and to find it under an area they have not
 // read yet.
-func runChain(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, carried map[string][]any, path string) error {
+func runChain(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, carried map[string][]any, path string) error {
 	for {
 		values, asked, err := AskValues(sandbox, io, command, path, carried)
 		if err != nil {
@@ -353,7 +353,7 @@ func runChain(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, ca
 // already on the menu — the same mechanism a change before the first run uses.
 // Losing a whole questionnaire to one rejected character was the interview's
 // worst moment, and this loop is the whole of the fix.
-func runPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, path string) (bool, error) {
+func runPlan(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, values map[string][]any, path string) (bool, error) {
 	failed := api.ExitOk
 
 	for {
@@ -380,13 +380,13 @@ func runPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, val
 //
 // failed is the exit code of the attempt before this one, and api.ExitOk when
 // there has not been one.
-func confirmPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, path string, failed int) (bool, error) {
+func confirmPlan(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, values map[string][]any, path string, failed int) (bool, error) {
 	for {
 		printPlan(sandbox, io, command, values, failed)
 
-		chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion("Run it?", planRows(sandbox, command, values))
+		chosen, err := sandbox.Deps.InterviewDeps.SingleAlternativeQuestion("Run it?", planRows(sandbox, command, values))
 		if err != nil {
-			if sandbox.Deps.Interviewer.Back(err) {
+			if sandbox.Deps.InterviewDeps.Back(err) {
 				return false, nil
 			}
 			return false, err
@@ -408,7 +408,7 @@ func confirmPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command,
 		if err != nil {
 			// Going back out of a change changes nothing: the answer that was
 			// there stays, and the screen that offered the change returns.
-			if sandbox.Deps.Interviewer.Back(err) {
+			if sandbox.Deps.InterviewDeps.Back(err) {
 				continue
 			}
 			return false, err
@@ -427,31 +427,31 @@ func confirmPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command,
 // changed, and a way back. The two fields the interview answers by itself are
 // not offered — the path is the session's and the progress stays visible — and
 // neither is one the answers have ruled out, which was never asked.
-func planRows(sandbox *api.Sandbox, command api.Command, values map[string][]any) []interviewer.AlternativeOption {
-	changes := []interviewer.AlternativeOption{}
+func planRows(sandbox *api.Sandbox, command api.Command, values map[string][]any) []interviewdeps.Option {
+	changes := []interviewdeps.Option{}
 
 	for _, field := range FieldsOf(command) {
 		if AnsweredForYou(command, field) || RuledOut(sandbox, command, field, values) {
 			continue
 		}
-		changes = append(changes, interviewer.AlternativeOption{
+		changes = append(changes, interviewdeps.Option{
 			Id:  field.Id,
-			Msg: sandbox.Deps.Std.Sprintf("change %s  %s(%s)%s", label(field), dim, currentText(sandbox, values, field), reset),
+			Msg: sandbox.Deps.StdDeps.Sprintf("change %s  %s(%s)%s", label(field), dim, currentText(sandbox, values, field), reset),
 		})
 	}
 
-	run := interviewer.AlternativeOption{Id: runOptionId, Msg: "yes, run it"}
-	back := interviewer.AlternativeOption{Id: backOptionId, Msg: "· no, back to the menu"}
+	run := interviewdeps.Option{Id: runOptionId, Msg: "yes, run it"}
+	back := interviewdeps.Option{Id: backOptionId, Msg: "· no, back to the menu"}
 
 	// "yes, run it" leads this menu because that is what the screen is for —
 	// except where running it deletes a layer, where the same enter would do
 	// the one thing that cannot be undone. There, saying no is the default and
 	// yes is a row that has to be moved to.
 	if Destructive(sandbox, command, values) {
-		return append([]interviewer.AlternativeOption{back, run}, changes...)
+		return append([]interviewdeps.Option{back, run}, changes...)
 	}
 
-	return append(append([]interviewer.AlternativeOption{run}, changes...), back)
+	return append(append([]interviewdeps.Option{run}, changes...), back)
 }
 
 // currentText is what one answer holds now, for the row that offers to change
@@ -467,7 +467,7 @@ func currentText(sandbox *api.Sandbox, values map[string][]any, field Field) str
 		texts = append(texts, valueText(sandbox, value))
 	}
 
-	return sandbox.Deps.Stringsdeps.Join(texts, ", ")
+	return sandbox.Deps.StringsDeps.Join(texts, ", ")
 }
 
 // findField reads one field of a command back by its id.
@@ -490,12 +490,12 @@ func findField(command api.Command, id string) (Field, bool) {
 // caller can offer the answers again instead of losing them: a wrong answer to
 // one question is no reason to lose the rest of a session.
 func runCommand(sandbox *api.Sandbox, command api.Command, values map[string][]any) int {
-	if sandbox.Cli.CliMain == nil {
+	if sandbox.Cli.Main == nil {
 		printOutcome(sandbox, command, api.ExitFailure)
 		return api.ExitFailure
 	}
 
-	exit := sandbox.Cli.CliMain(commandArgv(sandbox, command, values))
+	exit := sandbox.Cli.Main(commandArgv(sandbox, command, values))
 	printOutcome(sandbox, command, exit)
 	return exit
 }

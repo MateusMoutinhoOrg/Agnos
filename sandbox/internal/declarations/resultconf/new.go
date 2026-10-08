@@ -2,22 +2,22 @@ package resultconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
 func New(sandbox *api.Sandbox, content string) (*ResultConf, error) {
 
 	if content == "" {
-		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.StdDeps.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("result specs is not an object")
+		return nil, sandbox.Deps.StdDeps.Errorf("result specs is not an object")
 	}
 
 	conf := NewEmpty(sandbox)
@@ -56,7 +56,7 @@ func New(sandbox *api.Sandbox, content string) (*ResultConf, error) {
 // parseTree fills conf.Tree from the `tree` key: an array of
 // {file, sha} objects. An entry missing either key is a malformed golden and
 // is reported rather than silently compared as empty.
-func parseTree(sandbox *api.Sandbox, specs *serializibles.SerializibleObject, conf *ResultConf) error {
+func parseTree(sandbox *api.Sandbox, specs *serializabledeps.SerializableObject, conf *ResultConf) error {
 	tree, err := specs.GetObjectItem("tree")
 	if err != nil {
 		return err
@@ -65,7 +65,7 @@ func parseTree(sandbox *api.Sandbox, specs *serializibles.SerializibleObject, co
 		return nil
 	}
 	if !tree.IsArray() {
-		return sandbox.Deps.Std.Errorf("result tree is not an array")
+		return sandbox.Deps.StdDeps.Errorf("result tree is not an array")
 	}
 
 	size, err := tree.GetArraySize()
@@ -76,7 +76,7 @@ func parseTree(sandbox *api.Sandbox, specs *serializibles.SerializibleObject, co
 	for index := 0; index < size; index++ {
 		entry := tree.GetArrayItem(index)
 		if entry == nil || !entry.IsObject() {
-			return sandbox.Deps.Std.Errorf("result tree entry %d is not an object", index)
+			return sandbox.Deps.StdDeps.Errorf("result tree entry %d is not an object", index)
 		}
 
 		file, err := stringItem(sandbox, entry, "file", index)
@@ -96,16 +96,16 @@ func parseTree(sandbox *api.Sandbox, specs *serializibles.SerializibleObject, co
 
 // stringItem reads one required string key of a tree entry, naming the entry
 // when it is absent or of the wrong kind.
-func stringItem(sandbox *api.Sandbox, entry *serializibles.SerializibleObject, key string, index int) (string, error) {
+func stringItem(sandbox *api.Sandbox, entry *serializabledeps.SerializableObject, key string, index int) (string, error) {
 	if !entry.HasKey(key) {
-		return "", sandbox.Deps.Std.Errorf("result tree entry %d has no %s", index, key)
+		return "", sandbox.Deps.StdDeps.Errorf("result tree entry %d has no %s", index, key)
 	}
 	item, err := entry.GetObjectItem(key)
 	if err != nil {
 		return "", err
 	}
 	if item == nil || !item.IsString() {
-		return "", sandbox.Deps.Std.Errorf("result tree entry %d has a non-string %s", index, key)
+		return "", sandbox.Deps.StdDeps.Errorf("result tree entry %d has a non-string %s", index, key)
 	}
 	return item.GetString()
 }

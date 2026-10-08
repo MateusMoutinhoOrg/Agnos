@@ -1,4 +1,4 @@
-# {{.Name}}
+# {{.ProjectName}}
 
 [![Go Reference](https://pkg.go.dev/badge/github.com/MateusMoutinhoOrg/Agnos.svg)](https://pkg.go.dev/github.com/MateusMoutinhoOrg/Agnos)
 [![Release](https://img.shields.io/github/v/release/MateusMoutinhoOrg/Agnos)](https://github.com/MateusMoutinhoOrg/Agnos/releases/latest)
@@ -27,7 +27,7 @@ Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton, `agno
 re-renders every generated file from templates embedded in the binary, and commands like
 `add-command`, `add-flag` and `add-dep` declare the project's whole command surface
 without a file being edited by hand. Only two things stay hand-written: a command's
-`InternalPureHandler.go`, and any contract-plus-adapter pair of your own.
+`handler.go`, and any contract-plus-adapter pair of your own.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/

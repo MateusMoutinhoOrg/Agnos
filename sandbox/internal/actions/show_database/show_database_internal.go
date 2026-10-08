@@ -2,8 +2,8 @@ package show_database
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -16,7 +16,7 @@ const (
 	level  = "  "
 )
 
-// ShowDatabaseInternal reads one specs.yaml and renders it as the lines of a
+// ShowDatabaseInternal reads one database.yaml and renders it as the lines of a
 // tree: the package it declares and where its keys are written, then each
 // table, the fields it holds, and the methods those fields generate.
 //
@@ -25,15 +25,15 @@ const (
 // changed and nothing else, so the declaration as a whole was only ever
 // readable as yaml. This is that declaration said the way the editors talk
 // about it — and the methods beside it, which the yaml never showed at all.
-func ShowDatabaseInternal(sandbox *api.Sandbox, io *smartio.SmartIO, database string) ([]string, error) {
+func ShowDatabaseInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, database string) ([]string, error) {
 	conf, err := utils.LoadDatabaseConf(sandbox, io, database)
 	if err != nil {
 		return nil, err
 	}
 
 	lines := []string{
-		sandbox.Deps.Std.Sprintf("%s  %s", utils.ExportedName(sandbox, conf.Name), utils.DatabaseDir(sandbox, database)),
-		sandbox.Deps.Std.Sprintf("%skeys under  %s", branch, conf.Prefix),
+		sandbox.Deps.StdDeps.Sprintf("%s  %s", utils.GoIdentifier(sandbox, conf.Name), utils.DatabaseDir(sandbox, database)),
+		sandbox.Deps.StdDeps.Sprintf("%skeys under  %s", branch, conf.KeyPrefix),
 	}
 
 	if len(conf.Tables) == 0 {
@@ -41,12 +41,12 @@ func ShowDatabaseInternal(sandbox *api.Sandbox, io *smartio.SmartIO, database st
 	}
 
 	for _, table := range conf.Tables {
-		lines = append(lines, "", sandbox.Deps.Std.Sprintf("%s%s", branch, table.Name))
+		lines = append(lines, "", sandbox.Deps.StdDeps.Sprintf("%s%s", branch, table.Name))
 		lines = append(lines, fieldLines(sandbox, table.Fields, branch+level)...)
 
-		lines = append(lines, sandbox.Deps.Std.Sprintf("%s%smethods", branch, level))
+		lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%s%smethods", branch, level))
 		for _, method := range utils.DatabaseMethods(sandbox, table) {
-			lines = append(lines, sandbox.Deps.Std.Sprintf("%s%s%s%s(%s) %s",
+			lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%s%s%s%s(%s) %s",
 				branch, level, level, method.Name, method.Params, method.Results))
 		}
 	}
@@ -67,7 +67,7 @@ func fieldLines(sandbox *api.Sandbox, fields []databaseconf.Field, prefix string
 		if field.Required {
 			label += ", required"
 		}
-		lines = append(lines, sandbox.Deps.Std.Sprintf("%s%s  %s", prefix, field.Name, label))
+		lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%s%s  %s", prefix, field.Name, label))
 		lines = append(lines, fieldLines(sandbox, field.Fields, prefix+level)...)
 	}
 

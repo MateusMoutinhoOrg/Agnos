@@ -6,29 +6,29 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	var module *string
-	if entries.Module != "" {
-		modVal := entries.Module
+	if input.Module != "" {
+		modVal := input.Module
 		module = &modVal
 	}
 
-	if !sandbox.Deps.Iodeps.Exist(props.Path+"/go.mod") && module == nil {
+	if !sandbox.Deps.IoDeps.Exists(props.Path+"/go.mod") && module == nil {
 		{
-			response.Error("the module flag (--module) is required when there is no go.mod in the path\n")
+			response.Eprintf("the module flag (--module) is required when there is no go.mod in the path\n")
 		}
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitUsage, "", "")
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitUsage, "", "")
 	}
 
 	start_error := startAction.Start(sandbox, api.StartProps{
 		Path:        props.Path,
-		ProjectName: entries.ProjectName,
+		ProjectName: input.ProjectName,
 		Module:      module,
-		Force:       entries.Force,
+		Force:       input.Force,
 	})
 
 	if start_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", start_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", start_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

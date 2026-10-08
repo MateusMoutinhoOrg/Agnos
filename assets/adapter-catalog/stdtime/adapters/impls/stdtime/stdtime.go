@@ -1,4 +1,4 @@
-package timedeps
+package stdtime
 
 import (
 	"time"
@@ -8,13 +8,13 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// formatUnix fills timedeps.Sandbox.FormatUnix: the instant seconds, in UTC,
+// formatUnix fills timedeps.Contract.FormatUnix: the instant seconds, in UTC,
 // spelled by layout.
 func formatUnix(seconds int64, layout string) string {
 	return time.Unix(seconds, 0).UTC().Format(layout)
 }
 
-// parseUnix fills timedeps.Sandbox.ParseUnix: value read as a UTC date spelled
+// parseUnix fills timedeps.Contract.ParseUnix: value read as a UTC date spelled
 // by layout, in seconds since the Unix epoch.
 func parseUnix(layout string, value string) (int64, error) {
 	parsed, err := time.ParseInLocation(layout, value, time.UTC)
@@ -24,9 +24,9 @@ func parseUnix(layout string, value string) (int64, error) {
 	return parsed.Unix(), nil
 }
 
-// Bind fills deps.Deps.Timedeps with the standard library's time.
+// Bind fills deps.Deps.TimeDeps with the standard library's time.
 func Bind(deps *deps.Deps) {
-	deps.Timedeps = timedeps.Sandbox{
+	deps.TimeDeps = timedeps.Contract{
 		FormatUnix: func(seconds int64, layout string) string {
 			return formatUnix(seconds, layout)
 		},

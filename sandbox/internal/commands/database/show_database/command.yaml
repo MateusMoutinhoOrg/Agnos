@@ -1,18 +1,18 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: show-database
     - description: the database (identifier or package name) to print
       end: 1
-      id: Database
+      id: Name
       required: true
       start: 1
-category: Database System
+category: Database
+description: 'Reads sandbox/internal/databases/<database>/database.yaml and prints it as a tree: the package it declares and where its keys are written, then every table, the fields it holds, and the signature of every method those fields generate. It is the one command of the database surface that writes nothing and runs no build.'
 examples:
     - show-database app-database
-help: Print one database's whole declaration as a tree
-long-description: 'Reads sandbox/internal/databases/<database>/specs.yaml and prints it as a tree: the package it declares and where its keys are written, then every table, the fields it holds, and the signature of every method those fields generate. It is the one command of the database surface that writes nothing and runs no build.'
 priority: 100
+summary: Print one database's whole declaration as a tree

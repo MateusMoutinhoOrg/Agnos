@@ -1,5 +1,5 @@
 dep: iodeps
 help: Filesystem over os and path/filepath
 module: ""
-name: iodeps
+name: osio
 origin: catalog

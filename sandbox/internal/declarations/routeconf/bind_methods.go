@@ -2,6 +2,7 @@ package routeconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 func BindMethods(sandbox *api.Sandbox, conf *RouteConf) {
@@ -50,12 +51,12 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 	}
 
 	for _, path := range conf.Paths {
-		if path.Trigger.Exists && path.Trigger.Negate {
+		if path.Trigger.Set && path.Trigger.Negate {
 			negated += " !(" + triggerText(sandbox, path.Trigger) + ")"
 			continue
 		}
 
-		if !path.Trigger.Exists {
+		if !path.Trigger.Set {
 			label := path.Id
 			if path.Type != "" && path.Type != DefaultPathType {
 				label += ":" + path.Type
@@ -73,7 +74,7 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 		switch path.Trigger.Type {
 		case "equal", "prefix":
 			index := path.Start
-			for _, segment := range sandbox.Deps.Stringsdeps.Split(path.Trigger.Value, "/") {
+			for _, segment := range sandbox.Deps.StringsDeps.Split(path.Trigger.Value, "/") {
 				if segment == "" {
 					continue
 				}
@@ -84,7 +85,7 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 				placeTail(index, "*")
 			}
 		case "text-prefix":
-			placeTail(path.Start, sandbox.Deps.Stringsdeps.TrimLeft(path.Trigger.Value, "/")+"*")
+			placeTail(path.Start, sandbox.Deps.StringsDeps.TrimLeft(path.Trigger.Value, "/")+"*")
 		case "suffix":
 			placeTail(path.Start, "*"+path.Trigger.Value)
 		case "regex":
@@ -114,19 +115,19 @@ func Pattern(sandbox *api.Sandbox, conf *RouteConf) string {
 		pieces = append(pieces, tail)
 	}
 
-	pattern := "/" + sandbox.Deps.Stringsdeps.Join(pieces, "/")
+	pattern := "/" + sandbox.Deps.StringsDeps.Join(pieces, "/")
 	return pattern + negated
 }
 
 // triggerText is what a trigger compares against, as a pattern draws it: its
 // value, or a one-of's values joined by "|", each without its leading "/".
-func triggerText(sandbox *api.Sandbox, trigger Trigger) string {
+func triggerText(sandbox *api.Sandbox, trigger triggerconf.Trigger) string {
 	if trigger.Type != "one-of" {
 		return trigger.Value
 	}
 	values := []string{}
 	for _, value := range trigger.Values {
-		values = append(values, sandbox.Deps.Stringsdeps.TrimLeft(value, "/"))
+		values = append(values, sandbox.Deps.StringsDeps.TrimLeft(value, "/"))
 	}
-	return sandbox.Deps.Stringsdeps.Join(values, "|")
+	return sandbox.Deps.StringsDeps.Join(values, "|")
 }

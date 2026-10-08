@@ -16,7 +16,7 @@ func Compile(sandbox *api.Sandbox, props api.CompileProps) error {
 		return err
 	}
 
-	sandbox.Deps.Std.Log("compile started with path %s \n", props.Path)
+	sandbox.Deps.StdDeps.Logf("compile started with path %s \n", props.Path)
 
 	if err := buildAction.Build(sandbox, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo}); err != nil {
 		return err

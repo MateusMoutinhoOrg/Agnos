@@ -1,11 +1,12 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: publish
-category: Core Commands
+category: Core
+description: Runs build, then compile (every target by default, or each --target given), and publishes the binaries that compile wrote as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml. A project with no version and no --release-name is refused.
 flags:
     - description: The name of the release
       id: ReleaseName
@@ -28,6 +29,5 @@ flags:
       keys:
         - --publisher
         - -pub
-help: Builds, compiles and publishes a release via gh
-long-description: Runs build, then compile (every target by default, or each --target given), and publishes the binaries that compile wrote as a gh release named --release-name, defaulting to the version in AgnosConfig/project.yaml. A project with no version and no --release-name is refused.
 priority: 100
+summary: Build, compile and publish a release via gh

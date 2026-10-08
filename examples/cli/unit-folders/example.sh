@@ -2,33 +2,33 @@
 # directory is a route by holding a route.yaml, and a command by holding a
 # command.yaml, at any depth; every other directory is a folder grouping them.
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 
-agnos start --path TestDir --project-name Test --module Test -q
-agnos server-init --path TestDir -q
+agnos start --path test-dir --project-name Test --module Test -q
+agnos server-init --path test-dir -q
 
-# --dir is the folder the unit lands in: routeslist/admin/login.
-agnos add-route login --dir admin --method POST --help "Log in" --path TestDir -q
-agnos add-route users --dir admin/v1 --help "List the users" --path TestDir -q
-agnos add-command deploy --dir ops/cloud --help "Deploy the project" --path TestDir -q
+# --dir is the folder the unit lands in: routes/admin/login.
+agnos add-route login --dir admin --method POST --summary "Log in" --path test-dir -q
+agnos add-route users --dir admin/v1 --summary "List the users" --path test-dir -q
+agnos add-command deploy --dir ops/cloud --summary "Deploy the project" --path test-dir -q
 
 # The editors find a unit by its name, whatever folder holds it.
-agnos add-parameter token --route login --font header --path TestDir -q
-agnos add-flag region -c deploy --path TestDir -q
+agnos add-parameter token --route login --source header --path test-dir -q
+agnos add-flag region -c deploy --path test-dir -q
 
 # rename with --dir moves it; the folder it leaves empty goes with it.
-agnos rename-route users users --dir api --path TestDir -q
+agnos rename-route users users --dir api --path test-dir -q
 
 # remove drops the folder it leaves empty too: admin/ goes with login.
-agnos remove-route login --path TestDir
+agnos remove-route login --path test-dir
 
 # What result.yaml records: the declarations where they now sit, and the
 # generated dispatch importing each from its own folder.
-mkdir -p AssertDir/sandbox/internal/routeslist/api/users AssertDir/sandbox/internal/commands/ops/cloud/deploy
-mkdir -p AssertDir/sandbox/internal/generated/server/server AssertDir/sandbox/internal/generated/cli/cli
-cp TestDir/sandbox/internal/routeslist/api/users/route.yaml AssertDir/sandbox/internal/routeslist/api/users/route.yaml
-cp TestDir/sandbox/internal/commands/ops/cloud/deploy/command.yaml AssertDir/sandbox/internal/commands/ops/cloud/deploy/command.yaml
-cp TestDir/sandbox/internal/generated/server/server/new.go AssertDir/sandbox/internal/generated/server/server/new.go
-cp TestDir/sandbox/internal/generated/cli/cli/new.go AssertDir/sandbox/internal/generated/cli/cli/new.go
-ls TestDir/sandbox/internal/routeslist
+mkdir -p assert-dir/sandbox/internal/routes/api/users assert-dir/sandbox/internal/commands/ops/cloud/deploy
+mkdir -p assert-dir/sandbox/internal/generated/server assert-dir/sandbox/internal/generated/cli
+cp test-dir/sandbox/internal/routes/api/users/route.yaml assert-dir/sandbox/internal/routes/api/users/route.yaml
+cp test-dir/sandbox/internal/commands/ops/cloud/deploy/command.yaml assert-dir/sandbox/internal/commands/ops/cloud/deploy/command.yaml
+cp test-dir/sandbox/internal/generated/server/new.go assert-dir/sandbox/internal/generated/server/new.go
+cp test-dir/sandbox/internal/generated/cli/new.go assert-dir/sandbox/internal/generated/cli/new.go
+ls test-dir/sandbox/internal/routes

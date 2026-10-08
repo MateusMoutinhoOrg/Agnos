@@ -6,16 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	add_error := addDatabaseAction.AddDatabase(
-		sandbox,
-		props.Path,
-		entries.Name,
-		entries.Prefix,
-	)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	add_error := addDatabaseAction.AddDatabase(sandbox, api.AddDatabaseProps{Path: props.Path, Name: input.Name, KeyPrefix: input.KeyPrefix})
 
 	if add_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

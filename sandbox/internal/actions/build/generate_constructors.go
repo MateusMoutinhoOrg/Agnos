@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -16,7 +16,7 @@ import (
 // of the Sandbox is built is the project's to change, and rewriting the file
 // every build is precisely what kept it from being. What every build does own
 // is sandbox/new.go, which calls whatever packages are there.
-func GenerateConstructors(sandbox *api.Sandbox, io *smartio.SmartIO, constructors []Constructor, module string) error {
+func GenerateConstructors(sandbox *api.Sandbox, io *stagedfs.StagedFS, constructors []Constructor, module string) error {
 	for _, constructor := range constructors {
 		if !constructor.HasNew {
 			continue
@@ -29,7 +29,7 @@ func GenerateConstructors(sandbox *api.Sandbox, io *smartio.SmartIO, constructor
 
 		vars := map[string]any{
 			"Module":        module,
-			"Name":          constructor.Name,
+			"ContractName":  constructor.Name,
 			"Package":       constructor.Package,
 			"Source":        constructor.Source,
 			"GeneratorName": generatorName(sandbox),

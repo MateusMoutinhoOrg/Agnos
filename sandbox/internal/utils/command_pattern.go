@@ -2,7 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // CommandPattern is what one --pattern compiles to: the entries of `args` it
@@ -27,9 +28,9 @@ type CommandPattern struct {
 // Literal words in a row are one arg, the first of them named Command and the
 // rest after their words. Without a {*…} the pattern fixes the segment count.
 func CompileCommandPattern(sandbox *api.Sandbox, raw string) (CommandPattern, error) {
-	words := sandbox.Deps.Stringsdeps.Fields(raw)
+	words := sandbox.Deps.StringsDeps.Fields(raw)
 	if len(words) == 0 {
-		return CommandPattern{}, sandbox.Deps.Std.Errorf("--pattern %q declares no word", raw)
+		return CommandPattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q declares no word", raw)
 	}
 
 	compiled := CommandPattern{Args: []commandconf.Arg{}, Segments: len(words), HasSegments: true}
@@ -39,10 +40,10 @@ func CompileCommandPattern(sandbox *api.Sandbox, raw string) (CommandPattern, er
 	}
 	claim := func(id string, index int) (string, error) {
 		if id == "" {
-			return "", sandbox.Deps.Std.Errorf("--pattern %q names an empty capture at segment %d", raw, index)
+			return "", sandbox.Deps.StdDeps.Errorf("--pattern %q names an empty capture at segment %d", raw, index)
 		}
 		if taken[id] {
-			return "", sandbox.Deps.Std.Errorf("--pattern %q binds %s twice, or one Entries already carries", raw, id)
+			return "", sandbox.Deps.StdDeps.Errorf("--pattern %q binds %s twice, or one Input already carries", raw, id)
 		}
 		taken[id] = true
 		return id, nil
@@ -56,10 +57,10 @@ func CompileCommandPattern(sandbox *api.Sandbox, raw string) (CommandPattern, er
 		}
 		id := "Command"
 		if literal_start > 0 || taken[id] {
-			id = CommandEntryId(sandbox, sandbox.Deps.Stringsdeps.Join(literal, "-"))
+			id = GoIdentifier(sandbox, sandbox.Deps.StringsDeps.Join(literal, "-"))
 		}
 		if id == "" || id[0] < 'A' || id[0] > 'Z' || taken[id] {
-			id = "Seg" + sandbox.Deps.Stringsdeps.FormatInt(int64(literal_start), 10)
+			id = "Seg" + sandbox.Deps.StringsDeps.FormatInt(int64(literal_start), 10)
 		}
 		id, err := claim(id, literal_start)
 		if err != nil {
@@ -70,19 +71,19 @@ func CompileCommandPattern(sandbox *api.Sandbox, raw string) (CommandPattern, er
 			Start:   literal_start,
 			End:     end,
 			Type:    commandconf.DefaultArgType,
-			Trigger: commandconf.Trigger{Exists: true, Type: "equal", Value: sandbox.Deps.Stringsdeps.Join(literal, " "), Values: []string{}},
+			Trigger: triggerconf.Trigger{Set: true, Type: "equal", Value: sandbox.Deps.StringsDeps.Join(literal, " "), Values: []string{}},
 		})
 		literal, literal_start = []string{}, -1
 		return nil
 	}
 
 	for index, word := range words {
-		if !sandbox.Deps.Stringsdeps.HasPrefix(word, "{") {
-			if sandbox.Deps.Stringsdeps.Contains(word, "{") || sandbox.Deps.Stringsdeps.Contains(word, "}") {
-				return CommandPattern{}, sandbox.Deps.Std.Errorf("--pattern %q mixes text and a capture in the word %q: a capture is a whole word", raw, word)
+		if !sandbox.Deps.StringsDeps.HasPrefix(word, "{") {
+			if sandbox.Deps.StringsDeps.Contains(word, "{") || sandbox.Deps.StringsDeps.Contains(word, "}") {
+				return CommandPattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q mixes text and a capture in the word %q: a capture is a whole word", raw, word)
 			}
-			if sandbox.Deps.Stringsdeps.HasPrefix(word, "-") {
-				return CommandPattern{}, sandbox.Deps.Std.Errorf("--pattern %q holds %q: a segment never starts with -, declare it with add-flag", raw, word)
+			if sandbox.Deps.StringsDeps.HasPrefix(word, "-") {
+				return CommandPattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q holds %q: a segment never starts with -, declare it with add-flag", raw, word)
 			}
 			if literal_start < 0 {
 				literal_start = index
@@ -94,16 +95,16 @@ func CompileCommandPattern(sandbox *api.Sandbox, raw string) (CommandPattern, er
 		if err := flush(index - 1); err != nil {
 			return CommandPattern{}, err
 		}
-		if !sandbox.Deps.Stringsdeps.HasSuffix(word, "}") {
-			return CommandPattern{}, sandbox.Deps.Std.Errorf("--pattern %q opens a capture it does not close: %q", raw, word)
+		if !sandbox.Deps.StringsDeps.HasSuffix(word, "}") {
+			return CommandPattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q opens a capture it does not close: %q", raw, word)
 		}
 		inner := word[1 : len(word)-1]
 
-		if sandbox.Deps.Stringsdeps.HasPrefix(inner, "*") {
+		if sandbox.Deps.StringsDeps.HasPrefix(inner, "*") {
 			if index != len(words)-1 {
-				return CommandPattern{}, sandbox.Deps.Std.Errorf("--pattern %q puts %s before the end: a {*…} capture takes the rest of the line", raw, word)
+				return CommandPattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q puts %s before the end: a {*…} capture takes the rest of the line", raw, word)
 			}
-			id, err := claim(CommandEntryId(sandbox, inner[1:]), index)
+			id, err := claim(GoIdentifier(sandbox, inner[1:]), index)
 			if err != nil {
 				return CommandPattern{}, err
 			}
@@ -115,14 +116,14 @@ func CompileCommandPattern(sandbox *api.Sandbox, raw string) (CommandPattern, er
 		}
 
 		name, kind := inner, commandconf.DefaultArgType
-		if parts := sandbox.Deps.Stringsdeps.Split(inner, ":"); len(parts) == 2 {
-			name, kind = parts[0], sandbox.Deps.Stringsdeps.ToLower(parts[1])
+		if parts := sandbox.Deps.StringsDeps.Split(inner, ":"); len(parts) == 2 {
+			name, kind = parts[0], sandbox.Deps.StringsDeps.ToLower(parts[1])
 		}
 		if !contains(commandconf.ArgTypes, kind) {
-			return CommandPattern{}, sandbox.Deps.Std.Errorf("--pattern %q declares the unknown type %q (use one of %s)",
-				raw, kind, sandbox.Deps.Stringsdeps.Join(commandconf.ArgTypes, ", "))
+			return CommandPattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q declares the unknown type %q (use one of %s)",
+				raw, kind, sandbox.Deps.StringsDeps.Join(commandconf.ArgTypes, ", "))
 		}
-		id, err := claim(CommandEntryId(sandbox, name), index)
+		id, err := claim(GoIdentifier(sandbox, name), index)
 		if err != nil {
 			return CommandPattern{}, err
 		}

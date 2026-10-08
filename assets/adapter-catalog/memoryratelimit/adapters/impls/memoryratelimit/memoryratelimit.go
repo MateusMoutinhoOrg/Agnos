@@ -1,4 +1,4 @@
-package ratelimitdeps
+package memoryratelimit
 
 import (
 	"sync"
@@ -38,7 +38,7 @@ func (limits *limiter) open(key string, now time.Time) *window {
 	return found
 }
 
-// hit fills ratelimitdeps.Sandbox.Hit.
+// hit fills ratelimitdeps.Contract.Hit.
 func (limits *limiter) hit(key string, windowSeconds int64) int {
 	limits.lock.Lock()
 	defer limits.lock.Unlock()
@@ -56,7 +56,7 @@ func (limits *limiter) hit(key string, windowSeconds int64) int {
 	return found.hits
 }
 
-// count fills ratelimitdeps.Sandbox.Count.
+// count fills ratelimitdeps.Contract.Count.
 func (limits *limiter) count(key string, windowSeconds int64) int {
 	limits.lock.Lock()
 	defer limits.lock.Unlock()
@@ -68,7 +68,7 @@ func (limits *limiter) count(key string, windowSeconds int64) int {
 	return found.hits
 }
 
-// reset fills ratelimitdeps.Sandbox.Reset.
+// reset fills ratelimitdeps.Contract.Reset.
 func (limits *limiter) reset(key string) {
 	limits.lock.Lock()
 	defer limits.lock.Unlock()
@@ -85,11 +85,11 @@ func (limits *limiter) sweep(now time.Time) {
 	}
 }
 
-// Bind fills deps.Deps.Ratelimitdeps with fixed-window counters held in
+// Bind fills deps.Deps.RatelimitDeps with fixed-window counters held in
 // memory, guarded by the standard library's sync.Mutex.
 func Bind(deps *deps.Deps) {
 	shared := &limiter{windows: map[string]*window{}}
-	deps.Ratelimitdeps = ratelimitdeps.Sandbox{
+	deps.RatelimitDeps = ratelimitdeps.Contract{
 		Hit: func(key string, windowSeconds int64) int {
 			return shared.hit(key, windowSeconds)
 		},

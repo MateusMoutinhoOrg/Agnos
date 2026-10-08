@@ -2,8 +2,9 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -11,17 +12,17 @@ import (
 // of sandbox/internal/commands.
 const routesDir = utils.RoutesDir
 
-// CollectRoutes reads every route.yaml under sandbox/internal/routeslist — a
+// CollectRoutes reads every route.yaml under sandbox/internal/routes — a
 // directory holding one is a route, at any depth — and
-// returns one data map per route, for the generated new.go and entries.go of
+// returns one data map per route, for the generated new.go and input.go of
 // that route and the {{range .Routes}} loop of
-// sandbox/internal/generated/server/server/new.go. It is the server layer's
+// sandbox/internal/generated/server/new.go. It is the server layer's
 // CollectCommands: what the map holds is the declaration itself, which the
 // dispatch reads back off Server.Routes at runtime.
 //
 // The list comes back ordered for running: the lowest priority first, then by
 // name, so two builds of one tree always lay the chain down the same way.
-func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
+func CollectRoutes(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string]any, error) {
 	var routes []map[string]any
 
 	units := utils.RouteDirs(sandbox, io)
@@ -37,7 +38,7 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
+			return nil, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
 		}
 
 		if err := checkRouteSchema(sandbox, unit.Dir, conf); err != nil {
@@ -58,12 +59,12 @@ func CollectRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any,
 // The ordering is the collector's, so Server.Routes is already in run order
 // and the dispatch only has to range.
 func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
-	sandbox.Deps.Sortdeps.SliceStable(routes, func(i int, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(routes, func(i int, j int) bool {
 		left, right := routes[i], routes[j]
 		if left["Priority"] != right["Priority"] {
 			return left["Priority"].(int) < right["Priority"].(int)
 		}
-		return left["Name"].(string) < right["Name"].(string)
+		return left["RouteName"].(string) < right["RouteName"].(string)
 	})
 }
 
@@ -75,7 +76,7 @@ func sortRoutes(sandbox *api.Sandbox, routes []map[string]any) {
 // no `key=value` pair can fill.
 func checkRouteSchema(sandbox *api.Sandbox, dir string, conf *routeconf.RouteConf) error {
 	for _, key := range schemaUnknownKeys(conf.Body.Schema) {
-		return sandbox.Deps.Std.Errorf("%s/route.yaml: schema key %q is outside the supported subset", dir, key)
+		return sandbox.Deps.StdDeps.Errorf("%s/route.yaml: schema key %q is outside the supported subset", dir, key)
 	}
 	if conf.Body.Type == "form" {
 		return utils.CheckFormSchema(sandbox, utils.LastSegment(sandbox, dir), conf.Body.Schema)
@@ -97,7 +98,7 @@ func schemaUnknownKeys(schema *routeconf.Schema) []string {
 	return unknown
 }
 
-// routeData is one route as the generated new.go and entries.go read it. Dir
+// routeData is one route as the generated new.go and input.go read it. Dir
 // is the project-relative directory the route sits in, which the generated
 // server imports it from.
 func routeData(sandbox *api.Sandbox, unit utils.UnitDir, conf *routeconf.RouteConf) map[string]any {
@@ -111,25 +112,25 @@ func routeData(sandbox *api.Sandbox, unit utils.UnitDir, conf *routeconf.RouteCo
 	}
 
 	return map[string]any{
-		"Name":            unit.Name,
-		"Dir":             unit.Dir,
-		"Methods":         conf.Methods,
-		"Priority":        conf.Priority,
-		"ResponseType":    conf.ResponseType,
-		"Segments":        conf.Segments,
-		"Trigger":         routeTrigger(conf),
-		"Pattern":         conf.Pattern(),
-		"Paths":           paths,
-		"Parameters":      parameters,
-		"Category":        conf.Category,
-		"Help":            conf.Help,
-		"LongDescription": conf.LongDescription,
-		"Examples":        conf.Examples,
-		"Hidden":          conf.Hidden,
-		"Body":            bodyData(sandbox, conf),
-		"HasBody":         conf.Body.Type != routeconf.BodyNone,
-		"SchemaJson":      conf.SchemaJson(),
-		"BodyStructs":     bodyStructs(sandbox, conf),
+		"RouteName":    unit.Name,
+		"Dir":          unit.Dir,
+		"Methods":      conf.Methods,
+		"Priority":     conf.Priority,
+		"ResponseType": conf.ResponseType,
+		"Segments":     conf.Segments,
+		"Trigger":      routeTrigger(conf),
+		"Pattern":      conf.Pattern(),
+		"Paths":        paths,
+		"Parameters":   parameters,
+		"Category":     conf.Category,
+		"Summary":      conf.Summary,
+		"Description":  conf.Description,
+		"Examples":     conf.Examples,
+		"Hidden":       conf.Hidden,
+		"Body":         bodyData(sandbox, conf),
+		"HasBody":      conf.Body.Type != routeconf.BodyNone,
+		"SchemaJson":   conf.SchemaJson(),
+		"BodyStructs":  bodyStructs(sandbox, conf),
 	}
 }
 
@@ -138,7 +139,7 @@ func routeData(sandbox *api.Sandbox, unit utils.UnitDir, conf *routeconf.RouteCo
 // its pattern.
 func routeTrigger(conf *routeconf.RouteConf) string {
 	for _, path := range conf.Paths {
-		if path.Trigger.Exists {
+		if path.Trigger.Set {
 			return path.Trigger.Value
 		}
 	}
@@ -149,23 +150,23 @@ func routeTrigger(conf *routeconf.RouteConf) string {
 func triggerConst(kind string) string {
 	switch kind {
 	case "prefix":
-		return "api.PrefixTrigger"
+		return "api.TriggerPrefix"
 	case "text-prefix":
-		return "api.TextPrefixTrigger"
+		return "api.TriggerTextPrefix"
 	case "suffix":
-		return "api.SuffixTrigger"
+		return "api.TriggerSuffix"
 	case "regex":
-		return "api.RegexTrigger"
+		return "api.TriggerRegex"
 	case "one-of":
-		return "api.OneOfTrigger"
+		return "api.TriggerOneOf"
 	}
-	return "api.EqualTrigger"
+	return "api.TriggerEqual"
 }
 
 // triggerData is one trigger as the generated api.Trigger literal reads it.
-func triggerData(trigger routeconf.Trigger) map[string]any {
+func triggerData(trigger triggerconf.Trigger) map[string]any {
 	return map[string]any{
-		"Exist":      trigger.Exists,
+		"Set":        trigger.Set,
 		"Type":       triggerConst(trigger.Type),
 		"Value":      trigger.Value,
 		"Values":     trigger.Values,
@@ -191,16 +192,16 @@ func pathData(path routeconf.Path) map[string]any {
 func pathTypeConst(kind string) string {
 	switch kind {
 	case "integer":
-		return "api.IntegerPath"
+		return "api.PathInteger"
 	case "number":
-		return "api.NumberPath"
+		return "api.PathNumber"
 	case "uuid":
-		return "api.UuidPath"
+		return "api.PathUuid"
 	}
-	return "api.StringPath"
+	return "api.PathString"
 }
 
-// pathGoType is the Go type of the Entries field a path binds to.
+// pathGoType is the Go type of the Input field a path binds to.
 func pathGoType(kind string) string {
 	switch kind {
 	case "integer":
@@ -212,24 +213,24 @@ func pathGoType(kind string) string {
 }
 
 // parameterData is one entry of `parameters` as the generated api.Parameter
-// literal and the Entries field read it.
+// literal and the Input field read it.
 func parameterData(parameter routeconf.Parameter) map[string]any {
-	fonts := make([]string, 0, len(parameter.Fonts))
-	for _, font := range parameter.Fonts {
-		switch font {
+	sources := make([]string, 0, len(parameter.Sources))
+	for _, source := range parameter.Sources {
+		switch source {
 		case "header":
-			fonts = append(fonts, "api.HeaderParam")
+			sources = append(sources, "api.SourceHeader")
 		case "cookie":
-			fonts = append(fonts, "api.CookieParam")
+			sources = append(sources, "api.SourceCookie")
 		default:
-			fonts = append(fonts, "api.QueryParam")
+			sources = append(sources, "api.SourceQuery")
 		}
 	}
 
 	return map[string]any{
 		"Id":          parameter.Id,
 		"Key":         parameter.Key,
-		"Fonts":       fonts,
+		"Sources":     sources,
 		"Required":    parameter.Required,
 		"Type":        parameterTypeConst(parameter.Type),
 		"GoType":      parameterGoType(parameter.Type),
@@ -244,22 +245,22 @@ func parameterData(parameter routeconf.Parameter) map[string]any {
 func parameterTypeConst(kind string) string {
 	switch kind {
 	case "integer":
-		return "api.IntegerType"
+		return "api.ParameterInteger"
 	case "number":
-		return "api.NumberType"
+		return "api.ParameterNumber"
 	case "boolean":
-		return "api.BooleanType"
+		return "api.ParameterBoolean"
 	case "datetime":
-		return "api.DateTimeType"
+		return "api.ParameterDateTime"
 	case "string-array":
-		return "api.StringArrayType"
+		return "api.ParameterStringArray"
 	case "integer-array":
-		return "api.IntegerArrayType"
+		return "api.ParameterIntegerArray"
 	}
-	return "api.StringType"
+	return "api.ParameterString"
 }
 
-// parameterGoType is the Go type of the Entries field a parameter binds to.
+// parameterGoType is the Go type of the Input field a parameter binds to.
 func parameterGoType(kind string) string {
 	switch kind {
 	case "integer":
@@ -277,14 +278,14 @@ func parameterGoType(kind string) string {
 }
 
 // bodyData is the route's body declaration as the generated new.go and
-// entries.go read it.
+// input.go read it.
 func bodyData(sandbox *api.Sandbox, conf *routeconf.RouteConf) map[string]any {
 	body := conf.Body
 	return map[string]any{
 		"Type":         body.Type,
 		"Required":     body.Required,
 		"MaxBytes":     body.MaxBytes,
-		"MaxBytesText": sandbox.Deps.Stringsdeps.FormatInt(int64(body.MaxBytes), 10),
+		"MaxBytesText": sandbox.Deps.StringsDeps.FormatInt(int64(body.MaxBytes), 10),
 		"ContentType":  body.ContentType,
 		"HasSchema":    body.HasSchema,
 		"IsRaw":        body.Type == "raw",
@@ -314,7 +315,7 @@ func bodyGoType(body routeconf.Body) string {
 		if bodyIsObject(body) {
 			return "Body"
 		}
-		return "*serializables.SerializibleObject"
+		return "*serializabledeps.SerializableObject"
 	}
 	return ""
 }
@@ -329,7 +330,7 @@ func bodyIsObject(body routeconf.Body) bool {
 }
 
 // bodyStructs flattens the declared json- or form-schema into the Go structs the
-// generated entries.go declares: Body for the root object, Body<Path> for a
+// generated input.go declares: Body for the root object, Body<Path> for a
 // nested object and Body<Path>Item for the object an array holds.
 func bodyStructs(sandbox *api.Sandbox, conf *routeconf.RouteConf) []map[string]any {
 	if !bodyIsObject(conf.Body) {
@@ -402,7 +403,7 @@ func appendBodyStruct(sandbox *api.Sandbox, structs []map[string]any, name strin
 	return structs
 }
 
-// schemaReader is the OpinatedAgnosServer reader the generated bind function pulls one
+// schemaReader is the OpinionatedAgnosServer reader the generated bind function pulls one
 // scalar property with.
 func schemaReader(kind string) string {
 	switch kind {

@@ -1,7 +1,7 @@
 package depconf
 
 // DepConf is the parsed form of one dep declaration: the dep.yaml at the root
-// of assets/deplist/<dep>/, beside the sandbox/deps/<dep>/ tree that dep
+// of assets/dep-catalog/<dep>/, beside the sandbox/deps/<dep>/ tree that dep
 // installs. It names the contract, the Deps field that contract fills, and the
 // adapter `add-dep` installs when the caller chooses none.
 type DepConf struct {

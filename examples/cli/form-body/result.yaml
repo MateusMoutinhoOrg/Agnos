@@ -13,7 +13,7 @@ cli-output: |
       chain     #2 of 2, after health
 
     paths
-      Route                segments 0..-1  equal "/login"
+      Login                segments 0..-1  equal "/login"
 
     body      form, required, application/x-www-form-urlencoded, at most 1048576 bytes
       age                  integer  min 0
@@ -24,8 +24,8 @@ cli-output: |
 exit-code: 0
 tree:
     - file: docs/Routes/login.md
-      sha: 373ad0e378fdd508e58d019d8b64d0136e33754c0a6d2a2c6b12e431bd40f1ea
-    - file: sandbox/internal/routeslist/login/entries.go
-      sha: 00972b2b23b7b2c55cc478bba97cd093b145f35239fe70e13b71563c5b6c1bce
-    - file: sandbox/internal/routeslist/login/route.yaml
-      sha: 502ab5033d91a71d2f562d1fe6e835674b843bbda256ddc63f7bc92689069585
+      sha: 7c61e073cf66158c2fc0eacfdd841878bcd2effe967c8358849adc96efbef3c7
+    - file: sandbox/internal/routes/login/input.go
+      sha: edff48124c77734ce700ad851e720c56fc9a1bedd5c43491ca0c8e2bcd2b9cab
+    - file: sandbox/internal/routes/login/route.yaml
+      sha: 8f031e84990a75052c3607e572b4388640d38ed917911dd595f34c3a0d615110

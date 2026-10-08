@@ -1,14 +1,14 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: server-init
-category: Server System
+category: Server
+description: 'Installs the deps the server layer needs — the OpinionatedAgnosServer lib, its request chain, among them — renders sandbox/internal/server and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.'
 examples:
     - server-init
     - server-init --path ./my-project
-help: Add the http server layer to the project
-long-description: 'Installs the deps the server layer needs — the OpinatedAgnosServer lib, its request chain, among them — renders sandbox/internal/server and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it.'
 priority: 100
+summary: Add the http server layer to the project

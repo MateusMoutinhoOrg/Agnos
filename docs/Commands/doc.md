@@ -10,22 +10,22 @@ whole page. Hidden commands are not listed. The args are the leading words of th
 the flags follow them, in any order. A `repeatable` flag is given once per value. A command's page
 lists the flags of the middlewares in front of it too.
 
-## Backoffice System
+## Backoffice
 
 | Command | Does |
 | --- | --- |
 | [`backoffice-init`](backoffice-init.md) | Add the admin backoffice to the project |
 | [`backoffice-purge`](backoffice-purge.md) | Remove the admin backoffice from the project |
 
-## Cli System
+## Cli
 
 | Command | Does |
 | --- | --- |
 | [`add-arg`](add-arg.md) | Add an arg to a command's command.yaml |
 | [`add-command`](add-command.md) | Scaffold a new command package in the project |
 | [`add-flag`](add-flag.md) | Add a flag to a command's command.yaml |
-| [`cli-init`](cli-init.md) | Initializes the CLI layer for the project |
-| [`cli-purge`](cli-purge.md) | Removes the CLI layer from the project |
+| [`cli-init`](cli-init.md) | Initialize the CLI layer for the project |
+| [`cli-purge`](cli-purge.md) | Remove the CLI layer from the project |
 | [`explain-command`](explain-command.md) | Run a command line against the declared commands without running any |
 | [`list-commands`](list-commands.md) | List every command in the order the chain runs them |
 | [`rebalance-commands`](rebalance-commands.md) | Lay the cli chain down again with room between its rungs |
@@ -34,30 +34,22 @@ lists the flags of the middlewares in front of it too.
 | [`remove-flag`](remove-flag.md) | Remove a flag from a command's command.yaml |
 | [`rename-command`](rename-command.md) | Rename a command: its package, and the verb it answered to by its name |
 | [`set-arg`](set-arg.md) | Rewrite one arg of a command's command.yaml |
-| [`set-command`](set-command.md) | Update the command-level keys of a command's command.yaml |
+| [`set-command`](set-command.md) | Rewrite the command-level keys of a command's command.yaml |
 | [`set-flag`](set-flag.md) | Rewrite one flag of a command's command.yaml |
 | [`show-command`](show-command.md) | Print one command's declaration as a tree: args, flags and the middlewares in front of it |
 
-## Core Commands
+## Core
 
 | Command | Does |
 | --- | --- |
 | [`build`](build.md) | Build the project in a directory |
 | [`compile`](compile.md) | Cross-compile the project's binaries into release/ |
-| [`local-install`](local-install.md) | Builds the project and installs it locally |
-| [`publish`](publish.md) | Builds, compiles and publishes a release via gh |
+| [`local-install`](local-install.md) | Build the project and install it locally |
+| [`publish`](publish.md) | Build, compile and publish a release via gh |
 | [`start`](start.md) | Initialize a new project in a directory |
-| [`verify`](verify.md) | Checks the project keeps the sandbox/adapter schema |
+| [`verify`](verify.md) | Check the project keeps the sandbox/adapter schema |
 
-## Info
-
-| Command | Does |
-| --- | --- |
-| [`interview`](interview.md) | Guided mode: answer questions instead of typing commands |
-| [`help`](help.md) | Display help for a command |
-| [`version`](version.md) | Print the installed version |
-
-## Database System
+## Database
 
 | Command | Does |
 | --- | --- |
@@ -72,24 +64,24 @@ lists the flags of the middlewares in front of it too.
 | [`set-table-field`](set-table-field.md) | Rewrite one declared field of a table |
 | [`show-database`](show-database.md) | Print one database's whole declaration as a tree |
 
-## Deps System
+## Deps
 
 | Command | Does |
 | --- | --- |
-| [`add-adapter`](add-adapter.md) | Installs one further adapter for a contract the project already has |
-| [`add-available`](add-available.md) | Declares one further available |
-| [`add-dep`](add-dep.md) | Installs one dep of the embedded catalog into the project |
-| [`deps-init`](deps-init.md) | Initializes the dependency-injection subsystem for the project |
-| [`deps-purge`](deps-purge.md) | Removes the dependency-injection subsystem from the project |
-| [`list-adapters`](list-adapters.md) | Lists the adapters of the catalog and of the project |
-| [`list-deps`](list-deps.md) | Lists the deps the embedded catalog can install |
-| [`remove-adapter`](remove-adapter.md) | Uninstalls one adapter, leaving the contract it filled |
-| [`remove-available`](remove-available.md) | Deletes one available |
-| [`remove-dep`](remove-dep.md) | Uninstalls one dep from the project |
-| [`set-adapter`](set-adapter.md) | Changes which adapter an available binds for one dep |
-| [`set-dep`](set-dep.md) | Moves one remote dep to another version of its module |
+| [`add-adapter`](add-adapter.md) | Install one further adapter for a contract the project already has |
+| [`add-binding`](add-binding.md) | Declare one further binding |
+| [`add-dep`](add-dep.md) | Install one dep of the embedded catalog into the project |
+| [`deps-init`](deps-init.md) | Initialize the dependency-injection subsystem for the project |
+| [`deps-purge`](deps-purge.md) | Remove the dependency-injection subsystem from the project |
+| [`list-adapters`](list-adapters.md) | List the adapters of the catalog and of the project |
+| [`list-deps`](list-deps.md) | List the deps the embedded catalog can install |
+| [`remove-adapter`](remove-adapter.md) | Uninstall one adapter, leaving the contract it filled |
+| [`remove-binding`](remove-binding.md) | Delete one binding |
+| [`remove-dep`](remove-dep.md) | Uninstall one dep from the project |
+| [`set-adapter`](set-adapter.md) | Change which adapter a binding binds for one dep |
+| [`set-dep`](set-dep.md) | Move one remote dep to another version of its module |
 
-## Documentation
+## Docs
 
 | Command | Does |
 | --- | --- |
@@ -102,10 +94,10 @@ lists the flags of the middlewares in front of it too.
 | --- | --- |
 | [`add-cli-example`](add-cli-example.md) | Scaffold a new example under examples/cli/ |
 | [`add-lib-example`](add-lib-example.md) | Scaffold a new example under examples/lib/ |
-| [`exec-test`](exec-test.md) | Run the project's examples and check them against their goldens |
 | [`remove-cli-example`](remove-cli-example.md) | Delete an example from examples/cli/ |
 | [`remove-lib-example`](remove-lib-example.md) | Delete an example from examples/lib/ |
-| [`update-test`](update-test.md) | Rewrite one example's golden with what it produces now |
+| [`run-examples`](run-examples.md) | Run the project's examples and check them against their goldens |
+| [`update-example`](update-example.md) | Rewrite one example's golden with what it produces now |
 
 ## Extensions
 
@@ -113,18 +105,26 @@ lists the flags of the middlewares in front of it too.
 | --- | --- |
 | [`disable-extension`](disable-extension.md) | Turn one generation mechanic off |
 | [`enable-extension`](enable-extension.md) | Turn one generation mechanic on |
-| [`list-extensions`](list-extensions.md) | Lists the generation mechanics and which are on |
+| [`list-extensions`](list-extensions.md) | List the generation mechanics and which are on |
 
-## Front System
+## Front
 
 | Command | Does |
 | --- | --- |
-| [`add-page`](add-page.md) | Scaffold a new html page under assets/frontend/ |
+| [`add-page`](add-page.md) | Scaffold a new html page under assets/front/ |
 | [`front-init`](front-init.md) | Add the html front layer to the project |
 | [`front-purge`](front-purge.md) | Remove the html front layer from the project |
-| [`remove-page`](remove-page.md) | Remove an html page from assets/frontend/ |
+| [`remove-page`](remove-page.md) | Remove an html page from assets/front/ |
 
-## Server System
+## Info
+
+| Command | Does |
+| --- | --- |
+| [`help`](help.md) | Display help for a command |
+| [`interview`](interview.md) | Answer questions instead of typing commands, in guided mode |
+| [`version`](version.md) | Print the installed version |
+
+## Server
 
 | Command | Does |
 | --- | --- |
@@ -157,6 +157,6 @@ Run in front of the commands they match, lowest `priority` first; typed by nobod
 | Middleware | Runs before | Priority | Flags it adds |
 | --- | --- | --- | --- |
 | [`help-flag`](help-flag.md) | `*` | 5 | `--help`, `-h` |
-| [`project`](project.md) | `*` | 10 | `--path`, `--quiet`, `-q` |
+| [`project-flags`](project-flags.md) | `*` | 10 | `--path`, `--quiet`, `-q` |
 
 Output channels and exit codes are in [Rules](../Rules/doc.md#output-channels).

@@ -1,16 +1,16 @@
-package update_test
+package update_example
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	updateTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_tests"
+	updateExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_example"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	update_error := updateTestsAction.UpdateTest(sandbox, props.Path, entries.Name)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	update_error := updateExampleAction.UpdateExample(sandbox, api.UpdateExampleProps{Path: props.Path, Name: input.Name})
 
 	if update_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", update_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", update_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

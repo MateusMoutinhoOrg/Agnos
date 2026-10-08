@@ -6,13 +6,13 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	rebalance_error := rebalanceRoutesAction.RebalanceRoutes(sandbox, api.RebalanceRoutesProps{
 		Path: props.Path,
-		Step: entries.Step,
+		Step: input.Step,
 	})
 	if rebalance_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", rebalance_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", rebalance_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

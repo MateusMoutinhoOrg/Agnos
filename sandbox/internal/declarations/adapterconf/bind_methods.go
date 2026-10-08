@@ -9,7 +9,7 @@ func BindMethods(sandbox *api.Sandbox, adapter_conf *AdapterConf) {
 		if adapter_conf.Module == "" {
 			return "", "", false
 		}
-		at := sandbox.Deps.Stringsdeps.LastIndex(adapter_conf.Module, "@")
+		at := sandbox.Deps.StringsDeps.LastIndex(adapter_conf.Module, "@")
 		if at < 0 {
 			return adapter_conf.Module, "", true
 		}

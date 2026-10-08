@@ -1,5 +1,4 @@
 category: Backoffice API Tokens
-help: Shows the form that creates an API token
 methods:
     - GET
 paths:
@@ -8,7 +7,8 @@ paths:
       start: 0
       trigger:
         type: equal
-        value: /admin/create-backoffice-api-token
+        value: /admin/add-backoffice-api-token
 priority: 100
 response-type: text/html
 segments: 2
+summary: Shows the form that creates an API token

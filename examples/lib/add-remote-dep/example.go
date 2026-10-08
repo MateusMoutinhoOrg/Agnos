@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -11,8 +11,8 @@ import (
 // The add-remote-dep example: install another agnos repo as a dep
 //
 // It calls the same action `agnos add-dep <module>` calls, and writes only
-// inside TestDir. TestDir/remote is the repo being installed — every agnos repo
-// is installable by construction — and TestDir/app is the consumer. A published
+// inside test-dir. test-dir/remote is the repo being installed — every agnos repo
+// is installable by construction — and test-dir/app is the consumer. A published
 // repo is pinned with "<module>@<version>"; here the two live side by side,
 // wired with a `replace`, which is how a pair of repos is developed together.
 func main() {
@@ -24,37 +24,40 @@ func main() {
 	app_module := "example/app"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir/remote",
+		Path:        "test-dir/remote",
 		ProjectName: "Remote",
 		Module:      &remote_module,
 	}); err != nil {
 		panic(err)
 	}
 
-	write("TestDir/remote/sandbox/api/greeter.go", greeterApi)
-	write("TestDir/remote/sandbox/internal/greeter/new.go", greeterNew)
-	write("TestDir/remote/sandbox/internal/greeter/greeter.go", greeterInternal)
+	write("test-dir/remote/sandbox/api/greeter.go", greeterApi)
+	write("test-dir/remote/sandbox/internal/greeter/new.go", greeterNew)
+	write("test-dir/remote/sandbox/internal/greeter/greeter.go", greeterInternal)
+	// The Greeter is a field of the repo's own part of the Sandbox, which is
+	// what makes it part of the api another repo installs.
+	write("test-dir/remote/sandbox/api/projectsandbox.go", projectSandbox)
 
-	if err := lib.Actions.Build(api.BuildProps{Path: "TestDir/remote", Runtime: api.RuntimeGo}); err != nil {
+	if err := lib.Actions.Build(api.BuildProps{Path: "test-dir/remote", Runtime: api.RuntimeGo}); err != nil {
 		panic(err)
 	}
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir/app",
+		Path:        "test-dir/app",
 		ProjectName: "App",
 		Module:      &app_module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepsInit("TestDir/app"); err != nil {
+	if err := lib.Actions.DepsInit(api.DepsInitProps{Path: "test-dir/app"}); err != nil {
 		panic(err)
 	}
 
-	appendTo("TestDir/app/go.mod", "\nrequire example/remote v0.0.1\n\nreplace example/remote => ../remote\n")
+	appendTo("test-dir/app/go.mod", "\nrequire example/remote v0.0.1\n\nreplace example/remote => ../remote\n")
 
 	if err := lib.Actions.AddDep(api.AddDepProps{
-		Path: "TestDir/app",
+		Path: "test-dir/app",
 		Dep:  "example/remote",
 		As:   "remote",
 	}); err != nil {
@@ -62,11 +65,11 @@ func main() {
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/sandbox/deps", os.DirFS("TestDir/app/sandbox/deps")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/sandbox/deps", os.DirFS("test-dir/app/sandbox/deps")); err != nil {
 		panic(err)
 	}
-	if err := os.CopyFS("AssertDir/adapters", os.DirFS("TestDir/app/adapters")); err != nil {
+	if err := os.CopyFS("assert-dir/adapters", os.DirFS("test-dir/app/adapters")); err != nil {
 		panic(err)
 	}
 }
@@ -122,6 +125,16 @@ type GreetProps struct {
 type Greeting struct {
 	Text  string
 	Words int
+}
+`
+
+const projectSandbox = `package api
+
+// ProjectSandbox is the part of the Sandbox this repo declares: the Greeter it
+// publishes.
+type ProjectSandbox struct {
+	// Greeter is what this repo publishes.
+	Greeter Greeter
 }
 `
 

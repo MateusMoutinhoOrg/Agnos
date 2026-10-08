@@ -2,8 +2,8 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -19,7 +19,7 @@ import (
 // spells, beside SuggestFor, RuledOut and the gate of state.go, and like them
 // it names commands rather than reading them off a declaration — a route is
 // finished by its fields because of what a route is, which nothing in
-// entries.yaml says.
+// command.yaml says.
 
 // followUp is one command worth running next: the command itself, what it does
 // in the words of someone who has just watched the one before it finish, and
@@ -41,82 +41,82 @@ type followUp struct {
 // runs one goes straight back to the menu.
 var followUps = map[string][]followUp{
 	"add-route": {
-		{"import-body", "Read its body from an example payload", "name", "route"},
+		{"import-body", "Read its body from an example payload", "name", "name"},
 		{"add-body-field", "Declare one property of its body", "name", "route"},
-		{"set-body", "Say what kind of body it takes", "name", "route"},
+		{"set-body", "Say what kind of body it takes", "name", "name"},
 		{"add-parameter", "Declare a value it reads from the query or a header", "name", "route"},
 		{"add-path", "Read one more slice of its path", "name", "route"},
-		{"show-route", "Look at what it declares so far", "name", "route"},
+		{"show-route", "Look at what it declares so far", "name", "name"},
 	},
 	"rename-route": {
-		{"show-route", "Look at the route under its new name", "name", "route"},
+		{"show-route", "Look at the route under its new name", "name", "name"},
 	},
 	"import-body": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
-		{"set-body-field", "Change one of the properties it read", "route", "route"},
-		{"add-body-field", "Declare one the example did not carry", "route", "route"},
+		{"show-route", "Look at what the route declares now", "name", "name"},
+		{"set-body-field", "Change one of the properties it read", "name", "route"},
+		{"add-body-field", "Declare one the example did not carry", "name", "route"},
 	},
 	"add-body-field": {
 		{"add-body-field", "Declare one more property", "route", "route"},
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "route", "name"},
 	},
 	"set-body-field": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "route", "name"},
 		{"set-body-field", "Change one more property", "route", "route"},
 	},
 	"show-route": {
-		{"add-body-field", "Declare one more property of its body", "route", "route"},
-		{"set-body-field", "Change one of its body properties", "route", "route"},
-		{"add-parameter", "Declare a value it reads from the query or a header", "route", "route"},
-		{"set-route", "Change what the route itself says", "route", "route"},
+		{"add-body-field", "Declare one more property of its body", "name", "route"},
+		{"set-body-field", "Change one of its body properties", "name", "route"},
+		{"add-parameter", "Declare a value it reads from the query or a header", "name", "route"},
+		{"set-route", "Change what the route itself says", "name", "name"},
 	},
 	"set-body": {
-		{"add-body-field", "Declare one property of its body", "route", "route"},
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"add-body-field", "Declare one property of its body", "name", "route"},
+		{"show-route", "Look at what the route declares now", "name", "name"},
 	},
 	"add-parameter": {
 		{"add-parameter", "Declare one more value it reads", "route", "route"},
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "route", "name"},
 	},
 	"add-path": {
 		{"add-path", "Read one more slice of its path", "route", "route"},
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "route", "name"},
 	},
 	"set-parameter": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "route", "name"},
 		{"set-parameter", "Change one more value it reads", "route", "route"},
 	},
 	"set-path": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "route", "name"},
 		{"set-path", "Change one more slice of its path", "route", "route"},
 	},
 	"set-route": {
-		{"show-route", "Look at what the route declares now", "route", "route"},
+		{"show-route", "Look at what the route declares now", "name", "name"},
 	},
 	"add-database": {
 		{"add-table", "Declare a table it holds", "name", "database"},
-		{"show-database", "Look at what it declares so far", "name", "database"},
+		{"show-database", "Look at what it declares so far", "name", "name"},
 	},
 	"add-table": {
 		{"add-table-field", "Declare one field of it", "name", "table"},
 		{"add-table", "Declare one more table", "database", "database"},
-		{"show-database", "Look at what the database declares now", "database", "database"},
+		{"show-database", "Look at what the database declares now", "database", "name"},
 	},
 	"add-table-field": {
 		{"add-table-field", "Declare one more field", "table", "table"},
-		{"show-database", "Look at what the database declares now", "database", "database"},
+		{"show-database", "Look at what the database declares now", "database", "name"},
 	},
 	"set-table-field": {
-		{"show-database", "Look at what the database declares now", "database", "database"},
+		{"show-database", "Look at what the database declares now", "database", "name"},
 		{"set-table-field", "Change one more field", "table", "table"},
 	},
 	"show-database": {
-		{"add-table", "Declare one more table", "database", "database"},
+		{"add-table", "Declare one more table", "name", "database"},
 	},
 	"add-command": {
 		{"add-flag", "Give it a flag", "name", "command"},
 		{"add-arg", "Give it an argument", "name", "command"},
-		{"set-command", "Say more about it — a long description, an example", "name", "command"},
+		{"set-command", "Say more about it — a long description, an example", "name", "name"},
 	},
 	"add-flag": {
 		{"add-flag", "Give it one more flag", "command", "command"},
@@ -143,26 +143,26 @@ var carriedNames = map[string]bool{
 // and reports false when the person chose to go back to the menu instead. The
 // answers it carries are already on the confirm screen of the command it
 // picks, so nothing about the route or the command in hand is asked twice.
-func chooseFollowUp(sandbox *api.Sandbox, io *smartio.SmartIO, finished api.Command, values map[string][]any) (api.Command, map[string][]any, bool, error) {
+func chooseFollowUp(sandbox *api.Sandbox, io *stagedfs.StagedFS, finished api.Command, values map[string][]any) (api.Command, map[string][]any, bool, error) {
 	offers := offeredFollowUps(sandbox, io, finished, values)
 	if len(offers) == 0 {
 		return api.Command{}, nil, false, nil
 	}
 
-	rows := []interviewer.AlternativeOption{}
+	rows := []interviewdeps.Option{}
 	for _, offer := range offers {
-		rows = append(rows, interviewer.AlternativeOption{
+		rows = append(rows, interviewdeps.Option{
 			Id:  offer.Verb,
-			Msg: sandbox.Deps.Std.Sprintf("%s  %s(%s)%s", offer.Msg, dim, offer.Verb, reset),
+			Msg: sandbox.Deps.StdDeps.Sprintf("%s  %s(%s)%s", offer.Msg, dim, offer.Verb, reset),
 		})
 	}
-	rows = append(rows, interviewer.AlternativeOption{Id: backOptionId, Msg: "· nothing else — back to the menu"})
+	rows = append(rows, interviewdeps.Option{Id: backOptionId, Msg: "· nothing else — back to the menu"})
 
-	chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(followUpQuestion(sandbox, finished, offers[0], values), rows)
+	chosen, err := sandbox.Deps.InterviewDeps.SingleAlternativeQuestion(followUpQuestion(sandbox, finished, offers[0], values), rows)
 	if err != nil {
 		// Going back from here is the same answer as the last row: the
 		// command has already run, so there is nothing to undo.
-		if sandbox.Deps.Interviewer.Back(err) {
+		if sandbox.Deps.InterviewDeps.Back(err) {
 			return api.Command{}, nil, false, nil
 		}
 		return api.Command{}, nil, false, err
@@ -189,7 +189,7 @@ func chooseFollowUp(sandbox *api.Sandbox, io *smartio.SmartIO, finished api.Comm
 // what the finished command actually answered: a follow-up inheriting an
 // answer that was skipped has nothing to carry, and offering it would ask for
 // the route by hand under a heading that promised not to.
-func offeredFollowUps(sandbox *api.Sandbox, io *smartio.SmartIO, finished api.Command, values map[string][]any) []followUp {
+func offeredFollowUps(sandbox *api.Sandbox, io *stagedfs.StagedFS, finished api.Command, values map[string][]any) []followUp {
 	state := readState(sandbox, io)
 
 	offers := []followUp{}
@@ -216,7 +216,7 @@ func followUpQuestion(sandbox *api.Sandbox, finished api.Command, first followUp
 	if subject == "" {
 		return "What next?"
 	}
-	return sandbox.Deps.Std.Sprintf("What next for %s?", subject)
+	return sandbox.Deps.StdDeps.Sprintf("What next for %s?", subject)
 }
 
 // carried is what the follow-up starts with: the answer it inherits, bound
@@ -266,7 +266,7 @@ func carriedText(sandbox *api.Sandbox, finished api.Command, offer followUp, val
 		return ""
 	}
 	if offer.From == nameFieldId && carriedNames[verbOf(finished)] {
-		return utils.CommandIdentifier(sandbox, text)
+		return utils.CommandName(sandbox, text)
 	}
 	return text
 }

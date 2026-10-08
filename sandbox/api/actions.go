@@ -30,7 +30,7 @@ type CompileProps struct {
 }
 
 // StartProps describes one project to scaffold: the directory to write it
-// into, the name it carries in <Name>Config/project.yaml, the module path for
+// into, the name it carries as `project-name` in AgnosConfig/project.yaml, the module path for
 // go.mod (nil derives it from the name) and whether an existing directory may
 // be written over.
 type StartProps struct {
@@ -40,11 +40,11 @@ type StartProps struct {
 	Force       bool
 }
 
-// ExecTestProps describes one run of the project's example suite: the
+// RunExamplesProps describes one run of the project's example suite: the
 // directory holding the project, the single example name to run (empty runs
 // every one, both sides) and whether the goldens are rewritten with what the
 // run produced instead of compared against it.
-type ExecTestProps struct {
+type RunExamplesProps struct {
 	Path   string
 	Only   string
 	Update bool
@@ -55,25 +55,25 @@ type ExecTestProps struct {
 // repo — the same disambiguation `go get` makes. Adapter picks which
 // implementation of a catalog dep fills the contract ("" takes the dep's
 // declared default-adapter); As names the copied contract of a remote one (""
-// takes the last segment of the module path); RemoteAvailable is the available
+// takes the last segment of the module path); RemoteBinding is the binding
 // of the remote repo the generated shim builds its sandbox from ("" is
 // standard).
 type AddDepProps struct {
-	Path            string
-	Dep             string
-	Adapter         string
-	As              string
-	RemoteAvailable string
+	Path          string
+	Dep           string
+	Adapter       string
+	As            string
+	RemoteBinding string
 }
 
 // SetDepProps describes one remote dep to move to another version of the
-// module it was copied from. RemoteAvailable is the available of the remote
+// module it was copied from. RemoteBinding is the binding of the remote
 // repo the regenerated shim builds its sandbox from ("" is standard).
 type SetDepProps struct {
-	Path            string
-	Dep             string
-	Version         string
-	RemoteAvailable string
+	Path          string
+	Dep           string
+	Version       string
+	RemoteBinding string
 }
 
 // RemoveDepProps describes one dep to uninstall. A dep with adapters
@@ -86,21 +86,21 @@ type RemoveDepProps struct {
 }
 
 // AddAdapterProps describes one further implementation to install for a
-// contract the project already has. Available names the available that should
+// contract the project already has. Binding names the binding that should
 // switch to it; "" installs the package and leaves every selection alone.
 type AddAdapterProps struct {
-	Path      string
-	Adapter   string
-	Available string
+	Path    string
+	Adapter string
+	Binding string
 }
 
 // SetAdapterProps describes one selection to change: which adapter fills a
-// dep's field in one available. Available is the standard one when empty.
+// dep's field in one binding. Binding is the standard one when empty.
 type SetAdapterProps struct {
-	Path      string
-	Dep       string
-	Adapter   string
-	Available string
+	Path    string
+	Dep     string
+	Adapter string
+	Binding string
 }
 
 // ExtensionInfo is one row of ListExtensions: one generation mechanic of the
@@ -123,21 +123,21 @@ type DepInfo struct {
 }
 
 // AdapterInfo is one row of ListAdapters: an adapter of the embedded catalog
-// or one installed in the project, and which availables bind it. Origin is
+// or one installed in the project, and which bindings bind it. Origin is
 // "catalog" for one the catalog installs and "generated" for the shim of a dep
 // copied from a remote repo.
 type AdapterInfo struct {
-	Name       string
-	Dep        string
-	Help       string
-	Module     string
-	Origin     string
-	Installed  bool
-	Availables []string
+	Name      string
+	Dep       string
+	Help      string
+	Module    string
+	Origin    string
+	Installed bool
+	Bindings  []string
 }
 
-// FlagProps describes one flag to declare in a command's command.yaml. Name
-// is the flag's name, whose exported Go form is the Entries field it binds to
+// AddFlagProps describes one flag to declare in a command's command.yaml. Name
+// is the flag's name, whose exported Go form is the Input field it binds to
 // ("out-file" -> OutFile); Keys are the spellings a user types, --<name> when
 // none is given. Type is string, integer, number, boolean, string-array or
 // integer-array, and Array asks for the repeatable form of a scalar Type.
@@ -145,7 +145,7 @@ type AdapterInfo struct {
 // unset); Enum is every value accepted, Pattern a regular expression every
 // value matches, and the Trigger* fields what the value has to match for the
 // command to run at all. Position is the index to insert at (< 0 appends).
-type FlagProps struct {
+type AddFlagProps struct {
 	Path              string
 	Command           string
 	Name              string
@@ -166,16 +166,16 @@ type FlagProps struct {
 	Position          int
 }
 
-// ArgProps describes one arg to declare in a command's command.yaml: the
+// AddArgProps describes one arg to declare in a command's command.yaml: the
 // segments Start to End of the command line — the raw indexes typed on the
 // command line, "" being the first segment no arg reads yet and Start again,
-// "-1" the last segment — bound to the Entries field Name becomes. Type is
+// "-1" the last segment — bound to the Input field Name becomes. Type is
 // string, integer, number or uuid, anything but string reading one segment
 // alone; Trigger and TriggerType are what the segments, joined by a space,
 // have to match for the command to run at all, and TriggerNegate /
 // TriggerIgnoreCase the two switches on it. Position is the index to insert at
 // (< 0 appends).
-type ArgProps struct {
+type AddArgProps struct {
 	Path              string
 	Command           string
 	Name              string
@@ -192,12 +192,12 @@ type ArgProps struct {
 	Position          int
 }
 
-// ArgEditProps describes the change set-arg applies to one arg a command
+// SetArgProps describes the change set-arg applies to one arg a command
 // declares. Name is the arg as it is declared now and Rename the name it takes
 // on ("" leaves it alone); every other key overwrites what is there when it is
 // given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case",
 // "type", "required", "default" or "description" off again.
-type ArgEditProps struct {
+type SetArgProps struct {
 	Path              string
 	Command           string
 	Name              string
@@ -215,14 +215,14 @@ type ArgEditProps struct {
 	Clear             []string
 }
 
-// FlagEditProps describes the change set-flag applies to one flag a command
+// SetFlagProps describes the change set-flag applies to one flag a command
 // declares. Name is the flag as it is declared now — its name, its id or one
 // of its keys — and Rename the name it takes on ("" leaves it alone); Keys
 // replace the spellings when any is given, Enum the accepted values, and every
 // other key overwrites what is there when it is given. Clear takes "keys",
 // "type", "required", "default", "min", "max", "enum", "pattern", "trigger",
 // "trigger-negate", "trigger-ignore-case" or "description" off again.
-type FlagEditProps struct {
+type SetFlagProps struct {
 	Path              string
 	Command           string
 	Name              string
@@ -270,7 +270,7 @@ type AddCommandProps struct {
 	HasPriority       bool
 	Before            string
 	After             string
-	Help              string
+	Summary           string
 	Category          string
 	Dir               string
 }
@@ -313,24 +313,24 @@ type ExplainCommandProps struct {
 // rung below or above instead. Segments is the segment count the command line
 // has to have, read when HasSegments is set. Clear takes "segments" off again.
 type SetCommandProps struct {
-	Path            string
-	Command         string
-	Help            string
-	Category        string
-	LongDescription string
-	Hidden          bool
-	Visible         bool
-	Strict          bool
-	Loose           bool
-	Priority        int
-	HasPriority     bool
-	Before          string
-	After           string
-	Segments        int
-	HasSegments     bool
-	Identifiers     []string
-	Examples        []string
-	Clear           []string
+	Path        string
+	Command     string
+	Summary     string
+	Category    string
+	Description string
+	Hidden      bool
+	Visible     bool
+	Strict      bool
+	Loose       bool
+	Priority    int
+	HasPriority bool
+	Before      string
+	After       string
+	Segments    int
+	HasSegments bool
+	Identifiers []string
+	Examples    []string
+	Clear       []string
 }
 
 // AddRouteProps describes one route to scaffold. Trigger is the whole-path
@@ -348,8 +348,8 @@ type SetCommandProps struct {
 // it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for
 // a Middleware. Before and After name another route to land one rung below or
 // above instead, and exclude Priority. Dir is the folder under
-// sandbox/internal/routeslist the route lands in ("" is the top; "admin" puts
-// it in routeslist/admin/<name>): its route.yaml is what makes it a route,
+// sandbox/internal/routes the route lands in ("" is the top; "admin" puts
+// it in routes/admin/<name>): its route.yaml is what makes it a route,
 // whatever folder holds it.
 type AddRouteProps struct {
 	Path              string
@@ -366,7 +366,7 @@ type AddRouteProps struct {
 	Before            string
 	After             string
 	ResponseType      string
-	Help              string
+	Summary           string
 	Category          string
 	Dir               string
 }
@@ -379,7 +379,7 @@ const DefaultRoutePriority = 100
 // when it names none: below every route left on DefaultRoutePriority.
 const DefaultMiddlewarePriority = 10
 
-// RouteProps carries the route-level keys of route.yaml that set-route may
+// SetRouteProps carries the route-level keys of route.yaml that set-route may
 // rewrite. Empty strings leave the current value alone; Methods replace the
 // whole list when any is given; Examples are appended (deduplicated), and
 // Hidden / Visible are the two sides of one switch.
@@ -388,29 +388,29 @@ const DefaultMiddlewarePriority = 10
 // another route to land one rung below or above instead. Segments is the
 // segment count the request path has to have, read when HasSegments is set.
 // Clear takes "segments" off again.
-type RouteProps struct {
-	Path            string
-	Route           string
-	Methods         []string
-	ResponseType    string
-	Help            string
-	Category        string
-	LongDescription string
-	Hidden          bool
-	Visible         bool
-	Priority        int
-	HasPriority     bool
-	Before          string
-	After           string
-	Segments        int
-	HasSegments     bool
-	Examples        []string
-	Clear           []string
+type SetRouteProps struct {
+	Path         string
+	Route        string
+	Methods      []string
+	ResponseType string
+	Summary      string
+	Category     string
+	Description  string
+	Hidden       bool
+	Visible      bool
+	Priority     int
+	HasPriority  bool
+	Before       string
+	After        string
+	Segments     int
+	HasSegments  bool
+	Examples     []string
+	Clear        []string
 }
 
 // RenameRouteProps describes one route to rename: Route as it is declared
 // now, Name the name it takes on. Dir, when HasDir is set, is the folder under
-// sandbox/internal/routeslist it moves to ("" is the top); without it the
+// sandbox/internal/routes it moves to ("" is the top); without it the
 // route stays in the folder it sits in. Name may be its current one when only
 // the folder changes.
 type RenameRouteProps struct {
@@ -440,12 +440,12 @@ type ExplainRouteProps struct {
 	Cookies     []string
 }
 
-// DatabaseFieldProps describes one field to add to a table of a database's
-// specs.yaml. Table is the table it lands in and Parent the nested collection
+// AddTableFieldProps describes one field to add to a table of a database's
+// database.yaml. Table is the table it lands in and Parent the nested collection
 // inside that table, "" for a field of the table itself. Type is one of key,
 // string, int, float, link or database; Target names the table a link points
 // at and belongs to a link alone.
-type DatabaseFieldProps struct {
+type AddTableFieldProps struct {
 	Path     string
 	Database string
 	Table    string
@@ -456,14 +456,25 @@ type DatabaseFieldProps struct {
 	Target   string
 }
 
-// DatabaseFieldEditProps describes the change set-table-field applies to one
+// RemoveTableFieldProps names one field to drop from a table of a database's
+// database.yaml: Table is the table that declares it and Parent the nested
+// collection inside that table, "" for a field of the table itself.
+type RemoveTableFieldProps struct {
+	Path     string
+	Database string
+	Table    string
+	Parent   string
+	Name     string
+}
+
+// SetTableFieldProps describes the change set-table-field applies to one
 // field a table already declares. Name is the field as it is declared now and
 // Rename the spelling it takes on ("" leaves it alone); Type and Target
 // overwrite what is there when they are given, and an empty one leaves it as
 // it is. Clear is how a key is taken off again — "required" or "target" —
 // because an empty string cannot say "unset this" and "leave it alone" at
 // once.
-type DatabaseFieldEditProps struct {
+type SetTableFieldProps struct {
 	Path     string
 	Database string
 	Table    string
@@ -476,8 +487,8 @@ type DatabaseFieldEditProps struct {
 	Clear    []string
 }
 
-// RoutePathProps describes one entry to add to a route's `paths`. Id is the
-// Entries field the slice binds to; Start and End are the raw segment indexes
+// AddPathProps describes one entry to add to a route's `paths`. Name is the
+// Input field the slice binds to; Start and End are the raw segment indexes
 // typed on the command line ("" is 0 and -1, the whole path); Trigger is what
 // the slice has to read as for the route to run and TriggerType how it is
 // compared ("" is equal) — a path with no Trigger is a plain capture — and
@@ -485,10 +496,10 @@ type DatabaseFieldEditProps struct {
 // slice converts to: "string" (the default), "integer", "number" or "uuid",
 // anything but string reading one segment alone. Position is the index to
 // insert at (< 0 appends).
-type RoutePathProps struct {
+type AddPathProps struct {
 	Path              string
 	Route             string
-	Id                string
+	Name              string
 	Start             string
 	End               string
 	Type              string
@@ -500,15 +511,15 @@ type RoutePathProps struct {
 	Position          int
 }
 
-// RoutePathEditProps describes the change set-path applies to one entry of a
-// route's `paths`. Id is the entry as it is declared now and Rename the id it
+// SetPathProps describes the change set-path applies to one entry of a
+// route's `paths`. Name is the entry as it is declared now and Rename the id it
 // takes on ("" leaves it alone); every other key overwrites what is there when
 // it is given. Clear takes "trigger", "trigger-negate",
 // "trigger-ignore-case", "type" or "description" off again.
-type RoutePathEditProps struct {
+type SetPathProps struct {
 	Path              string
 	Route             string
-	Id                string
+	Name              string
 	Rename            string
 	Start             string
 	End               string
@@ -521,21 +532,21 @@ type RoutePathEditProps struct {
 	Clear             []string
 }
 
-// RouteParameterProps describes one entry to add to a route's `parameters`.
-// Name is the query key or header name it is read under — its Entries field is
+// AddParameterProps describes one entry to add to a route's `parameters`.
+// Name is the query key or header name it is read under — its Input field is
 // the exported spelling of it. Type is "string", "integer", "number",
-// "boolean", "datetime", "string-array" or "integer-array"; Fonts are where
+// "boolean", "datetime", "string-array" or "integer-array"; Sources are where
 // it is read from, in order — "query", "header", "cookie" ([] is the query
 // string alone). Default is the raw literal typed on the
 // command line ("" means unset). Trigger and TriggerType are a condition on
 // the value that puts the parameter into what the route matches on. Position
 // is the index to insert at (< 0 appends).
-type RouteParameterProps struct {
+type AddParameterProps struct {
 	Path              string
 	Route             string
 	Name              string
 	Type              string
-	Fonts             []string
+	Sources           []string
 	Required          bool
 	Default           string
 	TriggerType       string
@@ -547,19 +558,19 @@ type RouteParameterProps struct {
 	Position          int
 }
 
-// RouteParameterEditProps describes the change set-parameter applies to one
+// SetParameterProps describes the change set-parameter applies to one
 // entry of a route's `parameters`. Name is the key as it is declared now and
-// Rename the key it takes on ("" leaves it alone); Fonts replace the whole
+// Rename the key it takes on ("" leaves it alone); Sources replace the whole
 // list when any is given; every other key overwrites what is there when it is
 // given. Clear takes "description", "examples", "default", "required",
 // "trigger", "trigger-negate" or "trigger-ignore-case" off again.
-type RouteParameterEditProps struct {
+type SetParameterProps struct {
 	Path              string
 	Route             string
 	Name              string
 	Rename            string
 	Type              string
-	Fonts             []string
+	Sources           []string
 	Required          bool
 	Default           string
 	TriggerType       string
@@ -571,14 +582,14 @@ type RouteParameterEditProps struct {
 	Clear             []string
 }
 
-// RouteBodyProps describes the body envelope of one route — everything about
+// SetBodyProps describes the body envelope of one route — everything about
 // the request body but its schema (the json-schema of a json body, the
 // form-schema of a form one), which is grown property by property with
 // AddBodyField. Type is "none", "raw", "text", "json" or "form"; turning json
 // into form and back carries a flat schema along. Required and Optional are
 // the two sides of one switch, as are the empty strings and MaxBytes < 0 that
 // mean "leave as is". DropSchema deletes the declared schema.
-type RouteBodyProps struct {
+type SetBodyProps struct {
 	Path        string
 	Route       string
 	Type        string
@@ -589,7 +600,7 @@ type RouteBodyProps struct {
 	DropSchema  bool
 }
 
-// RouteBodyFieldProps describes one property of a route's body schema — its
+// AddBodyFieldProps describes one property of a route's body schema — its
 // json-schema, or the flat form-schema of a form body.
 // Name is the dotted path it sits at ("address.city"), and every other field
 // is one keyword of the supported subset: the raw literals typed on the
@@ -597,7 +608,7 @@ type RouteBodyProps struct {
 // "float" or "object", and Array wraps the whole of it in an array schema.
 // AdditionalProperties and NoAdditionalProperties are the two sides of one
 // switch.
-type RouteBodyFieldProps struct {
+type AddBodyFieldProps struct {
 	Path                   string
 	Route                  string
 	Name                   string
@@ -620,7 +631,7 @@ type RouteBodyFieldProps struct {
 	NoAdditionalProperties bool
 }
 
-// RouteBodyFieldEditProps describes the change set-body-field applies to one
+// SetBodyFieldProps describes the change set-body-field applies to one
 // property a route's body json-schema already declares. Name is the dotted
 // path it sits at and Rename the leaf spelling it takes on (it stays in the
 // object it is declared in); every other key is one keyword of the supported
@@ -629,7 +640,7 @@ type RouteBodyFieldProps struct {
 // "exclusive-max", "format", "pattern", "enum", "const", "nullable",
 // "min-items", "max-items", "unique-items" or "additional-properties" — which
 // is the one thing an empty value cannot say.
-type RouteBodyFieldEditProps struct {
+type SetBodyFieldProps struct {
 	Path                   string
 	Route                  string
 	Name                   string
@@ -654,7 +665,7 @@ type RouteBodyFieldEditProps struct {
 	Clear                  []string
 }
 
-// RouteBodyImportProps describes one example payload to read a route's body
+// ImportBodyProps describes one example payload to read a route's body
 // json-schema off. Json is the document itself and File a path to read it from
 // — exactly one of the two — and the inference walks it: an object becomes an
 // object property, a list an array of whatever its first item is, and a scalar
@@ -662,7 +673,7 @@ type RouteBodyFieldEditProps struct {
 // its object's required set, InferFormat reads an email, a uuid, a date-time
 // or a uri back as the format it spells, and Replace drops the schema that is
 // there instead of adding to it.
-type RouteBodyImportProps struct {
+type ImportBodyProps struct {
 	Path        string
 	Route       string
 	Json        string
@@ -672,25 +683,333 @@ type RouteBodyImportProps struct {
 	InferFormat bool
 }
 
-// PageProps describes one html page to scaffold: the project directory, the
-// name the page carries — its path under assets/frontend/ without the .html,
+// AddPageProps describes one html page to scaffold: the project directory, the
+// name the page carries — its path under assets/front/ without the .html,
 // slashes allowed ("blog/post"), "index" the page "/" answers — and the
 // <title> the scaffolded html carries ("" defaults to the name).
-type PageProps struct {
+type AddPageProps struct {
 	Path  string
 	Name  string
 	Title string
 }
 
-// DocProps describes one doc to create under docs/. Name is the doc's
+// AddDocProps describes one doc to create under docs/. Name is the doc's
 // directory, optionally nested under its parent ("PublicApi/api.Actions").
-// Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs
+// Themes are the theme ids of AgnosConfig/themes.yaml the doc belongs
 // to: required on a first-level doc, forbidden on a sub-doc.
-type DocProps struct {
+type AddDocProps struct {
 	Path        string
 	Name        string
 	Description string
 	Themes      []string
+}
+
+// VerifyProps describes one Verify run: Path is the directory holding the
+// project.
+type VerifyProps struct {
+	Path string
+}
+
+// EnableExtensionProps describes one EnableExtension run: Path is the
+// directory holding the project; Name the extension to turn on.
+type EnableExtensionProps struct {
+	Path string
+	Name string
+}
+
+// DisableExtensionProps describes one DisableExtension run: Path is the
+// directory holding the project; Name the extension to turn off.
+type DisableExtensionProps struct {
+	Path string
+	Name string
+}
+
+// ListExtensionsProps describes one ListExtensions run: Path is the directory
+// holding the project.
+type ListExtensionsProps struct {
+	Path string
+}
+
+// DepsInitProps describes one DepsInit run: Path is the directory holding the
+// project.
+type DepsInitProps struct {
+	Path string
+}
+
+// DepsPurgeProps describes one DepsPurge run: Path is the directory holding
+// the project.
+type DepsPurgeProps struct {
+	Path string
+}
+
+// ListDepsProps describes one ListDeps run: Path is the directory holding the
+// project.
+type ListDepsProps struct {
+	Path string
+}
+
+// RemoveAdapterProps describes one RemoveAdapter run: Path is the directory
+// holding the project; Adapter the adapter to uninstall.
+type RemoveAdapterProps struct {
+	Path    string
+	Adapter string
+}
+
+// ListAdaptersProps describes one ListAdapters run: Path is the directory
+// holding the project.
+type ListAdaptersProps struct {
+	Path string
+}
+
+// AddBindingProps describes one AddBinding run: Path is the directory holding
+// the project; Binding the binding to declare.
+type AddBindingProps struct {
+	Path    string
+	Binding string
+}
+
+// RemoveBindingProps describes one RemoveBinding run: Path is the directory
+// holding the project; Binding the binding to delete.
+type RemoveBindingProps struct {
+	Path    string
+	Binding string
+}
+
+// CliInitProps describes one CliInit run: Path is the directory holding the
+// project.
+type CliInitProps struct {
+	Path string
+}
+
+// CliPurgeProps describes one CliPurge run: Path is the directory holding the
+// project.
+type CliPurgeProps struct {
+	Path string
+}
+
+// RemoveCommandProps describes one RemoveCommand run: Path is the directory
+// holding the project; Name the command to delete.
+type RemoveCommandProps struct {
+	Path string
+	Name string
+}
+
+// ListCommandsProps describes one ListCommands run: Path is the directory
+// holding the project.
+type ListCommandsProps struct {
+	Path string
+}
+
+// ShowCommandProps describes one ShowCommand run: Path is the directory
+// holding the project; Name the command to print.
+type ShowCommandProps struct {
+	Path string
+	Name string
+}
+
+// RemoveFlagProps describes one RemoveFlag run: Path is the directory holding
+// the project; Command the command declaring it; Name the flag to drop.
+type RemoveFlagProps struct {
+	Path    string
+	Command string
+	Name    string
+}
+
+// RemoveArgProps describes one RemoveArg run: Path is the directory holding
+// the project; Command the command declaring it; Name the arg to drop.
+type RemoveArgProps struct {
+	Path    string
+	Command string
+	Name    string
+}
+
+// ServerInitProps describes one ServerInit run: Path is the directory holding
+// the project.
+type ServerInitProps struct {
+	Path string
+}
+
+// ServerPurgeProps describes one ServerPurge run: Path is the directory
+// holding the project.
+type ServerPurgeProps struct {
+	Path string
+}
+
+// RemoveRouteProps describes one RemoveRoute run: Path is the directory
+// holding the project; Name the route to delete.
+type RemoveRouteProps struct {
+	Path string
+	Name string
+}
+
+// RemovePathProps describes one RemovePath run: Path is the directory holding
+// the project; Route the route declaring it; Name the id of the path to drop.
+type RemovePathProps struct {
+	Path  string
+	Route string
+	Name  string
+}
+
+// RemoveParameterProps describes one RemoveParameter run: Path is the
+// directory holding the project; Route the route declaring it; Name the
+// parameter to drop.
+type RemoveParameterProps struct {
+	Path  string
+	Route string
+	Name  string
+}
+
+// RemoveBodyFieldProps describes one RemoveBodyField run: Path is the
+// directory holding the project; Route the route declaring it; Name the body
+// property to drop.
+type RemoveBodyFieldProps struct {
+	Path  string
+	Route string
+	Name  string
+}
+
+// ShowRouteProps describes one ShowRoute run: Path is the directory holding
+// the project; Name the route to print.
+type ShowRouteProps struct {
+	Path string
+	Name string
+}
+
+// ListRoutesProps describes one ListRoutes run: Path is the directory holding
+// the project.
+type ListRoutesProps struct {
+	Path string
+}
+
+// DatabaseInitProps describes one DatabaseInit run: Path is the directory
+// holding the project.
+type DatabaseInitProps struct {
+	Path string
+}
+
+// DatabasePurgeProps describes one DatabasePurge run: Path is the directory
+// holding the project.
+type DatabasePurgeProps struct {
+	Path string
+}
+
+// AddDatabaseProps describes one AddDatabase run: Path is the directory
+// holding the project; Name the database to declare; KeyPrefix what every key
+// the database stores starts with.
+type AddDatabaseProps struct {
+	Path      string
+	Name      string
+	KeyPrefix string
+}
+
+// RemoveDatabaseProps describes one RemoveDatabase run: Path is the directory
+// holding the project; Name the database to delete.
+type RemoveDatabaseProps struct {
+	Path string
+	Name string
+}
+
+// AddTableProps describes one AddTable run: Path is the directory holding the
+// project; Database the database declaring it; Name the table to declare.
+type AddTableProps struct {
+	Path     string
+	Database string
+	Name     string
+}
+
+// RemoveTableProps describes one RemoveTable run: Path is the directory
+// holding the project; Database the database declaring it; Name the table to
+// delete.
+type RemoveTableProps struct {
+	Path     string
+	Database string
+	Name     string
+}
+
+// ShowDatabaseProps describes one ShowDatabase run: Path is the directory
+// holding the project; Name the database to print.
+type ShowDatabaseProps struct {
+	Path string
+	Name string
+}
+
+// FrontInitProps describes one FrontInit run: Path is the directory holding
+// the project.
+type FrontInitProps struct {
+	Path string
+}
+
+// FrontPurgeProps describes one FrontPurge run: Path is the directory holding
+// the project.
+type FrontPurgeProps struct {
+	Path string
+}
+
+// BackofficeInitProps describes one BackofficeInit run: Path is the directory
+// holding the project.
+type BackofficeInitProps struct {
+	Path string
+}
+
+// BackofficePurgeProps describes one BackofficePurge run: Path is the
+// directory holding the project.
+type BackofficePurgeProps struct {
+	Path string
+}
+
+// RemovePageProps describes one RemovePage run: Path is the directory holding
+// the project; Name the page to delete.
+type RemovePageProps struct {
+	Path string
+	Name string
+}
+
+// RemoveDocProps describes one RemoveDoc run: Path is the directory holding
+// the project; Name the doc to delete.
+type RemoveDocProps struct {
+	Path string
+	Name string
+}
+
+// AddCliExampleProps describes one AddCliExample run: Path is the directory
+// holding the project; Name the example to scaffold.
+type AddCliExampleProps struct {
+	Path string
+	Name string
+}
+
+// RemoveCliExampleProps describes one RemoveCliExample run: Path is the
+// directory holding the project; Name the example to delete.
+type RemoveCliExampleProps struct {
+	Path string
+	Name string
+}
+
+// AddLibExampleProps describes one AddLibExample run: Path is the directory
+// holding the project; Name the example to scaffold.
+type AddLibExampleProps struct {
+	Path string
+	Name string
+}
+
+// RemoveLibExampleProps describes one RemoveLibExample run: Path is the
+// directory holding the project; Name the example to delete.
+type RemoveLibExampleProps struct {
+	Path string
+	Name string
+}
+
+// UpdateExampleProps describes one UpdateExample run: Path is the directory
+// holding the project; Name the example whose golden is rewritten.
+type UpdateExampleProps struct {
+	Path string
+	Name string
+}
+
+// InterviewProps describes one Interview run: Path is the directory holding
+// the project.
+type InterviewProps struct {
+	Path string
 }
 
 // Actions is the whole set of operations agnos performs on a project. Every
@@ -709,7 +1028,7 @@ type Actions struct {
 
 	// Verify checks the project against the schema every generator assumes
 	// and writes nothing; it reports every violation at once.
-	Verify func(path string) error
+	Verify func(props VerifyProps) error
 
 	// Start scaffolds a new project: the config directory, go.mod, the
 	// sandbox skeleton and a first build.
@@ -718,27 +1037,27 @@ type Actions struct {
 	// EnableExtension turns one generation mechanic on in the project's
 	// extensions.yaml and rebuilds, so what that mechanic owns is rendered
 	// from here on.
-	EnableExtension func(path string, name string) error
+	EnableExtension func(props EnableExtensionProps) error
 
 	// DisableExtension turns one generation mechanic off. Nothing is removed:
 	// agnos stops rendering what that mechanic owns and the files it wrote
 	// become the project's, to keep or to edit by hand. Deleting them is what
 	// the matching <x>-purge is for.
-	DisableExtension func(path string, name string) error
+	DisableExtension func(props DisableExtensionProps) error
 
 	// ListExtensions returns one row per generation mechanic of the catalog,
 	// saying which ones this project turned on.
-	ListExtensions func(path string) ([]ExtensionInfo, error)
+	ListExtensions func(props ListExtensionsProps) ([]ExtensionInfo, error)
 
 	// DepsInit adds the dependency layer (sandbox/deps/ and
-	// adapters/availables/standard/) to a project that has none.
-	DepsInit func(path string) error
+	// adapters/bindings/standard/) to a project that has none.
+	DepsInit func(props DepsInitProps) error
 
 	// DepsPurge removes the dependency layer and every installed dep with it.
-	DepsPurge func(path string) error
+	DepsPurge func(props DepsPurgeProps) error
 
 	// AddDep installs one dep of the built-in list: its contract under
-	// sandbox/deps/, one adapter filling it under adapters/libs/ and that
+	// sandbox/deps/, one adapter filling it under adapters/impls/ and that
 	// adapter's go.mod require.
 	AddDep func(props AddDepProps) error
 
@@ -749,51 +1068,51 @@ type Actions struct {
 
 	// ListDeps returns one row per dep of the embedded catalog, saying which
 	// the project has installed and which adapters fill each one.
-	ListDeps func(path string) ([]DepInfo, error)
+	ListDeps func(props ListDepsProps) ([]DepInfo, error)
 
 	// SetDep re-copies one remote dep at another version of its module and
 	// regenerates the shim that converts it.
 	SetDep func(props SetDepProps) error
 
 	// AddAdapter installs one further implementation of a contract the
-	// project already has, and — when props.Available names one — switches
-	// that available to it.
+	// project already has, and — when props.Binding names one — switches
+	// that binding to it.
 	AddAdapter func(props AddAdapterProps) error
 
 	// RemoveAdapter uninstalls one adapter, its require and its files. It
-	// refuses one that an available still binds, and one written by the
+	// refuses one that a binding still binds, and one written by the
 	// generator as half of a remote dep.
-	RemoveAdapter func(path string, adapter string) error
+	RemoveAdapter func(props RemoveAdapterProps) error
 
 	// SetAdapter changes which adapter fills one dep's field in one
-	// available, the only place that choice is recorded.
+	// binding, the only place that choice is recorded.
 	SetAdapter func(props SetAdapterProps) error
 
 	// ListAdapters returns one row per adapter, of the embedded catalog and
-	// of the project, with the availables that bind each one.
-	ListAdapters func(path string) ([]AdapterInfo, error)
+	// of the project, with the bindings that bind each one.
+	ListAdapters func(props ListAdaptersProps) ([]AdapterInfo, error)
 
-	// AddAvailable creates one further available, seeded with the standard
-	// available's selection so it starts filling every field.
-	AddAvailable func(path string, available string) error
+	// AddBinding creates one further binding, seeded with the standard
+	// binding's selection so it starts filling every field.
+	AddBinding func(props AddBindingProps) error
 
-	// RemoveAvailable deletes one available. The standard one is refused: it
+	// RemoveBinding deletes one binding. The standard one is refused: it
 	// is what cmd/main/main.go imports.
-	RemoveAvailable func(path string, available string) error
+	RemoveBinding func(props RemoveBindingProps) error
 
 	// CliInit adds the CLI layer (cmd/main, the dispatcher and the help and
 	// version commands) to a project that has none.
-	CliInit func(path string) error
+	CliInit func(props CliInitProps) error
 
 	// CliPurge removes the CLI layer and every command declared in it.
-	CliPurge func(path string) error
+	CliPurge func(props CliPurgeProps) error
 
 	// AddCommand declares a new command: its command.yaml, its generated
-	// new.go and entries.go, and an InternalPureHandler.go to fill in.
+	// new.go and input.go, and an handler.go to fill in.
 	AddCommand func(props AddCommandProps) error
 
 	// RemoveCommand deletes one command and unwires it from the dispatch.
-	RemoveCommand func(path string, name string) error
+	RemoveCommand func(props RemoveCommandProps) error
 
 	// SetCommand rewrites the command-level keys of one command's
 	// command.yaml.
@@ -809,104 +1128,104 @@ type Actions struct {
 
 	// ListCommands renders every declared command as one line, in the order
 	// the dispatch runs them.
-	ListCommands func(path string) ([]string, error)
+	ListCommands func(props ListCommandsProps) ([]string, error)
 
 	// ShowCommand renders one command's whole declaration — its args, its
 	// flags and the middlewares in front of it — as the lines of a tree.
-	ShowCommand func(path string, command string) ([]string, error)
+	ShowCommand func(props ShowCommandProps) ([]string, error)
 
 	// ExplainCommand runs one command line against the declared commands
 	// without running any, and says, command by command, whether it runs.
 	ExplainCommand func(props ExplainCommandProps) ([]string, error)
 
 	// AddFlag declares one flag on a command.
-	AddFlag func(props FlagProps) error
+	AddFlag func(props AddFlagProps) error
 
 	// SetFlag rewrites one declared flag of a command.
-	SetFlag func(props FlagEditProps) error
+	SetFlag func(props SetFlagProps) error
 
 	// RemoveFlag deletes one declared flag from a command.
-	RemoveFlag func(path string, command string, name string) error
+	RemoveFlag func(props RemoveFlagProps) error
 
 	// AddArg declares one arg — a slice of the segments — on a command.
-	AddArg func(props ArgProps) error
+	AddArg func(props AddArgProps) error
 
 	// SetArg rewrites one declared arg of a command.
-	SetArg func(props ArgEditProps) error
+	SetArg func(props SetArgProps) error
 
 	// RemoveArg deletes one declared arg from a command.
-	RemoveArg func(path string, command string, name string) error
+	RemoveArg func(props RemoveArgProps) error
 
 	// ServerInit adds the http server layer (sandbox/internal/server, the
-	// OpinatedAgnosServer lib, the health route of sandbox/internal/routeslist
+	// OpinionatedAgnosServer lib, the health route of sandbox/internal/routes
 	// and the start-server command) to a
 	// project that has none, installing the CLI layer first when it is
 	// missing.
-	ServerInit func(path string) error
+	ServerInit func(props ServerInitProps) error
 
 	// ServerPurge removes the server layer and every route declared in it.
-	ServerPurge func(path string) error
+	ServerPurge func(props ServerPurgeProps) error
 
 	// AddRoute declares a new route: its route.yaml, its generated new.go
-	// and entries.go, and an InternalPureHandler.go to fill in.
+	// and input.go, and an handler.go to fill in.
 	AddRoute func(props AddRouteProps) error
 
 	// RemoveRoute deletes one route and unwires it from the dispatch.
-	RemoveRoute func(path string, name string) error
+	RemoveRoute func(props RemoveRouteProps) error
 
 	// SetRoute rewrites the route-level keys of one route's route.yaml.
-	SetRoute func(props RouteProps) error
+	SetRoute func(props SetRouteProps) error
 
 	// AddPath declares one slice of the request path on a route: the
 	// segments it reads, and the trigger they have to match when it declares
 	// one.
-	AddPath func(props RoutePathProps) error
+	AddPath func(props AddPathProps) error
 
 	// SetPath rewrites one entry of a route's `paths`, named by its id.
-	SetPath func(props RoutePathEditProps) error
+	SetPath func(props SetPathProps) error
 
 	// RemovePath deletes one entry of a route's `paths`, named by its id.
-	RemovePath func(path string, route string, id string) error
+	RemovePath func(props RemovePathProps) error
 
 	// AddParameter declares one value a route reads off the query string or
 	// the headers.
-	AddParameter func(props RouteParameterProps) error
+	AddParameter func(props AddParameterProps) error
 
 	// SetParameter rewrites one entry of a route's `parameters`, named by
 	// its key.
-	SetParameter func(props RouteParameterEditProps) error
+	SetParameter func(props SetParameterProps) error
 
 	// RemoveParameter deletes one entry of a route's `parameters`, named by
 	// its key.
-	RemoveParameter func(path string, route string, name string) error
+	RemoveParameter func(props RemoveParameterProps) error
 
 	// SetBody rewrites the body keys of one route's route.yaml.
-	SetBody func(props RouteBodyProps) error
+	SetBody func(props SetBodyProps) error
 
 	// AddBodyField declares one property of a route's body schema (json- or
 	// form-schema, by the body's type), at
 	// the dotted path props.Name.
-	AddBodyField func(props RouteBodyFieldProps) error
+	AddBodyField func(props AddBodyFieldProps) error
 
 	// RemoveBodyField deletes one property from a route's body schema.
-	RemoveBodyField func(path string, route string, name string) error
+	RemoveBodyField func(props RemoveBodyFieldProps) error
 
 	// SetBodyField rewrites one property of a route's body schema, at
 	// the dotted path props.Name.
-	SetBodyField func(props RouteBodyFieldEditProps) error
+	SetBodyField func(props SetBodyFieldProps) error
 
 	// ImportBody declares a route's body schema from an example
 	// payload, inferring one property per key the example carries.
-	ImportBody func(props RouteBodyImportProps) error
+	ImportBody func(props ImportBodyProps) error
 
 	// ShowRoute renders one route's whole declaration — its paths, its
 	// parameters and its body schema — as the lines of
 	// a tree, ready to print.
-	ShowRoute func(path string, route string) ([]string, error)
+	ShowRoute func(props ShowRouteProps) ([]string, error)
 
 	// ListRoutes renders every declared route as one line, in the order the
 	// dispatch runs them.
-	ListRoutes func(path string) ([]string, error)
+	ListRoutes func(props ListRoutesProps) ([]string, error)
 
 	// ExplainRoute runs one request against the declared routes without a
 	// server and renders, route by route, whether it runs and why not.
@@ -920,105 +1239,105 @@ type Actions struct {
 	RebalanceRoutes func(props RebalanceRoutesProps) error
 
 	// DatabaseInit adds the database layer (the store contract, the
-	// OpinatedAgnosDatabase lib and sandbox/internal/databases) to a project
+	// OpinionatedAgnosDatabase lib and sandbox/internal/databases) to a project
 	// that has none.
-	DatabaseInit func(path string) error
+	DatabaseInit func(props DatabaseInitProps) error
 
 	// DatabasePurge removes the database layer and every database declared
 	// in it.
-	DatabasePurge func(path string) error
+	DatabasePurge func(props DatabasePurgeProps) error
 
-	// AddDatabase declares a new database: its specs.yaml, from which its
+	// AddDatabase declares a new database: its database.yaml, from which its
 	// api.go, new.go and methods.go are generated.
-	AddDatabase func(path string, name string, prefix string) error
+	AddDatabase func(props AddDatabaseProps) error
 
 	// RemoveDatabase deletes one database package whole. It refuses one
 	// carrying a hand-written methods_custom.go.
-	RemoveDatabase func(path string, name string) error
+	RemoveDatabase func(props RemoveDatabaseProps) error
 
 	// AddTable declares one collection of records on a database.
-	AddTable func(path string, database string, table string) error
+	AddTable func(props AddTableProps) error
 
 	// RemoveTable deletes one collection from a database. It refuses a table
 	// another table still links to.
-	RemoveTable func(path string, database string, table string) error
+	RemoveTable func(props RemoveTableProps) error
 
 	// AddTableField declares one field on a table, or on a nested
 	// collection of it.
-	AddTableField func(props DatabaseFieldProps) error
+	AddTableField func(props AddTableFieldProps) error
 
 	// SetTableField rewrites one field a table already declares.
-	SetTableField func(props DatabaseFieldEditProps) error
+	SetTableField func(props SetTableFieldProps) error
 
 	// RemoveTableField deletes one declared field from a table.
-	RemoveTableField func(props DatabaseFieldProps) error
+	RemoveTableField func(props RemoveTableFieldProps) error
 
 	// ShowDatabase renders one database's whole declaration — its tables,
 	// their fields and the methods each table generates — as the lines of a
 	// tree, ready to print.
-	ShowDatabase func(path string, database string) ([]string, error)
+	ShowDatabase func(props ShowDatabaseProps) ([]string, error)
 
-	// FrontInit adds the front layer (the OpinatedAgnosFront lib, the route
-	// serving every file of assets/frontend and that tree's index.html) to a
+	// FrontInit adds the front layer (the OpinionatedAgnosFront lib, the route
+	// serving every file of assets/front and that tree's index.html) to a
 	// project that has none, installing the server layer first when it is
 	// missing.
-	FrontInit func(path string) error
+	FrontInit func(props FrontInitProps) error
 
-	// FrontPurge removes the front layer and the frontend route, leaving
-	// assets/frontend/ untouched.
-	FrontPurge func(path string) error
+	// FrontPurge removes the front layer and the front route, leaving
+	// assets/front/ untouched.
+	FrontPurge func(props FrontPurgeProps) error
 
 	// BackofficeInit adds the admin backoffice to a project: login, backoffice
 	// users, API tokens and the /api/admin JSON api, over a database of its
 	// own. It installs the server, front and database layers first when any is
 	// missing, and the catalog deps it calls into. Every file it writes is the
 	// project's from then on.
-	BackofficeInit func(path string) error
+	BackofficeInit func(props BackofficeInitProps) error
 
 	// BackofficePurge removes everything BackofficeInit wrote, leaving the
 	// layers it stood on, the deps it installed and the store on disk.
-	BackofficePurge func(path string) error
+	BackofficePurge func(props BackofficePurgeProps) error
 
-	// AddPage scaffolds a new html page, assets/frontend/<name>.html, which
-	// the frontend route serves as soon as it exists.
-	AddPage func(props PageProps) error
+	// AddPage scaffolds a new html page, assets/front/<name>.html, which
+	// the front route serves as soon as it exists.
+	AddPage func(props AddPageProps) error
 
-	// RemovePage deletes one page, assets/frontend/<name>.html.
-	RemovePage func(path string, name string) error
+	// RemovePage deletes one page, assets/front/<name>.html.
+	RemovePage func(props RemovePageProps) error
 
-	// AddDoc creates one doc directory under docs/, with its props.yaml and
+	// AddDoc creates one doc directory under docs/, with its doc.yaml and
 	// a doc.md to fill in.
-	AddDoc func(props DocProps) error
+	AddDoc func(props AddDocProps) error
 
 	// RemoveDoc deletes one doc directory and everything under it.
-	RemoveDoc func(path string, name string) error
+	RemoveDoc func(props RemoveDocProps) error
 
 	// AddCliExample creates one example under examples/cli/, with an
 	// example.sh stub that already runs.
-	AddCliExample func(path string, name string) error
+	AddCliExample func(props AddCliExampleProps) error
 
 	// RemoveCliExample deletes one example of examples/cli/ whole.
-	RemoveCliExample func(path string, name string) error
+	RemoveCliExample func(props RemoveCliExampleProps) error
 
 	// AddLibExample creates one example under examples/lib/, with an
 	// example.go stub that already runs.
-	AddLibExample func(path string, name string) error
+	AddLibExample func(props AddLibExampleProps) error
 
 	// RemoveLibExample deletes one example of examples/lib/ whole.
-	RemoveLibExample func(path string, name string) error
+	RemoveLibExample func(props RemoveLibExampleProps) error
 
-	// ExecTest runs the project's examples and checks each one against its
+	// RunExamples runs the project's examples and checks each one against its
 	// golden result.yaml, reporting every example that diverged.
-	ExecTest func(props ExecTestProps) error
+	RunExamples func(props RunExamplesProps) error
 
-	// UpdateTest runs one example by name, both sides, and rewrites its
+	// UpdateExample runs one example by name, both sides, and rewrites its
 	// golden result.yaml with what the run produced, printing the changes.
-	UpdateTest func(path string, name string) error
+	UpdateExample func(props UpdateExampleProps) error
 
 	// Interview runs the interactive session over a project: it asks what is
 	// to be done, generates the questions from the declaration of the command
 	// that answers it, and runs that command with the answers bound onto it.
 	// It writes nothing of its own — every command it dispatches runs the
 	// action behind it, which persists and builds for itself.
-	Interview func(path string) error
+	Interview func(props InterviewProps) error
 }

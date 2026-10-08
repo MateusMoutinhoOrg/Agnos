@@ -1,4 +1,4 @@
-package interviewer
+package ttyinterview
 
 import (
 	"fmt"

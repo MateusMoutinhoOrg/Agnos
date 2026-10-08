@@ -1,5 +1,4 @@
 category: Backoffice Users
-help: Shows the form that adds a backoffice user
 methods:
     - GET
 paths:
@@ -12,3 +11,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 3
+summary: Shows the form that adds a backoffice user

@@ -3,14 +3,14 @@ package add_doc
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // AddDoc scaffolds a new doc directory under docs/ — a doc.md stub and the
-// props.yaml declaring it — then runs build as a follow-up step so the theme
+// doc.yaml declaring it — then runs build as a follow-up step so the theme
 // indexes and the parent's Index.md list it.
-func AddDoc(sandbox *api.Sandbox, props api.DocProps) error {
-	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+func AddDoc(sandbox *api.Sandbox, props api.AddDocProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddDocInternal(sandbox, io, props); err != nil {
 		return err
 	}

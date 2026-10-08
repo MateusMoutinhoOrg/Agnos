@@ -1,4 +1,4 @@
-# {{ .Name }} Index
+# {{ .DocName }} Index
 {{ .Description }}
 
 | Doc | Description |

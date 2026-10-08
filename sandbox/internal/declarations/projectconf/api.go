@@ -1,8 +1,8 @@
 package projectconf
 
 type ProjectConf struct {
-	Name    string
-	Version string
+	ProjectName string
+	Version     string
 
 	Render func() string
 }

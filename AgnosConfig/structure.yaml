@@ -5,7 +5,7 @@ AgnosConfig:
   children:
     project.yaml:
       order: 1
-      description: name, version, description  (projectconf)
+      description: project-name, version, description  (projectconf)
     themes.yaml:
       order: 2
       description: "doc themes: name, id, description  (themesconf)"
@@ -17,7 +17,7 @@ AgnosConfig:
       description: which mechanics agnos generates  (extensionsconf)
     paths.yaml:
       order: 5
-      description: SmartIO listing rewrites  (pathreplacerconf)
+      description: StagedFS listing rewrites  (pathsconf)
     docs/ReadmeHeader.md:
       order: 6
       description: README body, a template
@@ -33,7 +33,7 @@ sandbox:
     api:
       order: 2
       dir: true
-      description: contracts only; imports nothing but sandbox/deps, for Sandbox.Deps, and the OpinatedAgnos<X> contracts it aliases
+      description: contracts only; imports nothing but sandbox/deps, for Sandbox.Deps, and the OpinionatedAgnos<X> contracts it aliases
       children:
         sandbox.go:
           order: 1
@@ -45,11 +45,11 @@ sandbox:
         cli.go:
           order: 3
           gen: true
-          description: Cli + exit consts, aliases of the OpinatedAgnosCli contract
+          description: Cli + exit consts, aliases of the OpinionatedAgnosCli contract
         command.go:
           order: 4
           gen: true
-          description: Command/CommandFlag/CommandArg/CommandResponse/CommandFailure, aliases of the OpinatedAgnosCli contract
+          description: Command/CommandFlag/CommandArg/CommandResponse/CommandFailure, aliases of the OpinionatedAgnosCli contract
         config.go:
           order: 5
           gen: true
@@ -57,7 +57,7 @@ sandbox:
         trigger.go:
           order: 6
           gen: true
-          description: Trigger/TriggerType, the condition a route and a command match on; aliases of the OpinatedAgnosCli contract
+          description: Trigger/TriggerType, the condition a route and a command match on; aliases of the OpinionatedAgnosCli contract
     constructors:
       order: 3
       dir: true
@@ -69,18 +69,18 @@ sandbox:
     deps:
       order: 4
       dir: true
-      description: contracts; each <x>/ imports nothing at all, an OpinatedAgnos<X>/ nothing but other contracts
+      description: contracts; each <x>/ imports nothing at all, an OpinionatedAgnos<X>/ nothing but other contracts
       children:
         deps.go:
           order: 1
           gen: true
-          description: Deps struct, one <Title> <dir>.Sandbox per dir
+          description: Deps struct, one <Field> <dir>.Contract per dir
         <x>/<x>.go:
           order: 2
           description: type Sandbox struct of func fields
-        OpinatedAgnosCli/opinatedagnoscli.go:
+        OpinionatedAgnosCli/opinionatedagnoscli.go:
           order: 3
-          description: "the cli lib: the command declaration types, MainProps, and CliMain, NewCommand, BindCommand, Fail, FailureOf, MatchTrigger"
+          description: "the cli lib: the command declaration types, MainProps, and Main, NewCommand, BindCommand, Fail, FailureOf, MatchTrigger"
     internal:
       order: 5
       dir: true
@@ -96,31 +96,31 @@ sandbox:
               order: 1
               gen: true
               description: "NewConfig(sandbox) api.Config: ProjectName, Version"
-            cli/cli/new.go:
+            cli/new.go:
               order: 2
               gen: true
-              description: "NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.CliMain, which hands the line to Deps.OpinatedAgnosCli.CliMain"
+              description: "NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.Main, which hands the line to Deps.OpinionatedAgnosCli.Main"
         commands/<name>:
           order: 4
           dir: true
-          description: command.yaml (decl), new.go + entries.go (gen), InternalPureHandler.go (hand); any depth, under a folder per category (core/, cli/, server/, …) — the command.yaml is what makes a dir a command
+          description: command.yaml (decl), new.go + input.go (gen), handler.go (hand); under the folder of its category (core/, cli/, server/, middleware/, …) — the command.yaml is what makes a dir a command
         actions/new.go:
           order: 5
           description: "NewActions(sandbox) api.Actions: one assignment per action"
         actions/<name>:
           order: 6
           dir: true
-          description: <name>.go (opens SmartIO, persists, follow-up build) + <name>_internal.go (logic on an open SmartIO)
+          description: <name>.go (opens StagedFS, persists, follow-up build) + <name>_internal.go (logic on an open StagedFS)
         actions/build/collect_*.go:
           order: 7
           description: "collectors: list one dir, title-case names"
         actions/build/generate_*.go:
           order: 8
-          description: new.go per command, new.go + entries.go per route, help entries.yaml, doc indexes
+          description: new.go + input.go per command and per route, help's command.yaml, doc indexes
         actions/verify/check_*.go:
           order: 9
           description: one rule set per file, each returns []string
-        parsables/<name>conf:
+        declarations/<name>conf:
           order: 10
           dir: true
           description: api.go, new.go, new_empty.go, bind_methods.go, render.go
@@ -128,36 +128,36 @@ sandbox:
           order: 11
           dir: true
           description: the sandbox/api convertibility rule and the converter plan the remote-dep shim is generated from
-        smartio:
+        stagedfs:
           order: 12
           dir: true
           description: transactional fs rooted at --path
         utils:
           order: 13
           dir: true
-          description: RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, entries.yaml field helpers
+          description: RenderGroup, RenderTemplateToDest, Load*Conf, CollectDocTree, FlattenStructure, GoIdentifier, command.yaml and route.yaml field helpers
 adapters:
   order: 3
   dir: true
   description: the only place OS-bound and third-party code lives
   children:
-    libs/<adapter>/<adapter>.go:
+    impls/<adapter>/<adapter>.go:
       order: 1
       description: one package per adapter, exports Bind(deps *deps.Deps)
-    libs/<adapter>/adapter.yaml:
+    impls/<adapter>/adapter.yaml:
       order: 2
       description: which dep the adapter fills, which module it pins  (adapterconf)
-    libs/OpinatedAgnosCli:
+    impls/OpinionatedAgnosCli:
       order: 3
       dir: true
       description: "the cli lib: the dispatch chain, binder, matcher and trigger every command runs through, over the stdlib"
-    availables/<name>/available.yaml:
+    bindings/<name>/binding.yaml:
       order: 4
-      description: which adapters this available binds, one per Deps field  (availableconf)
-    availables/<name>/new.go:
+      description: which adapters this binding binds, one per Deps field  (bindingconf)
+    bindings/<name>/new.go:
       order: 5
       gen: true
-      description: New() deps.Deps calling the Bind of every adapter declared; an available with no available.yaml is hand-written and left alone
+      description: New() deps.Deps calling the Bind of every adapter declared; a binding with no binding.yaml is hand-written and left alone
 assets:
   order: 4
   dir: true
@@ -171,18 +171,18 @@ assets:
       order: 2
       dir: true
       description: "rendered when the `sandbox` extension is on; one group per extension from here down"
-    sandbox-deps:
+    deps:
       order: 3
       dir: true
-      description: rendered when `sandbox-deps` is on
-    sandbox-cli:
+      description: rendered when `deps` is on
+    cli:
       order: 4
       dir: true
-      description: rendered when `sandbox-cli` is on
-    sandbox-server:
+      description: rendered when `cli` is on
+    server:
       order: 5
       dir: true
-      description: rendered when `sandbox-server` is on
+      description: rendered when `server` is on
     readme:
       order: 6
       dir: true
@@ -194,19 +194,19 @@ assets:
     doc-<x>:
       order: 8
       dir: true
-      description: "rendered when `doc` and every `sandbox-<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)"
-    deplist/<dep>:
+      description: "rendered when `doc` and every `<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)"
+    dep-catalog/<dep>:
       order: 9
       dir: true
-      description: one installable contract, dep.yaml beside the target layout it mirrors; deplist/OpinatedAgnos<X> are the opinated libs, one per mechanic with code (Cli, Server, Front, Database)
-    adapterlist/<adapter>:
+      description: one installable contract, dep.yaml beside the target layout it mirrors; dep-catalog/OpinionatedAgnos<X> are the opinionated libs, one per mechanic with code (Cli, Server, Front, Database)
+    adapter-catalog/<adapter>:
       order: 10
       dir: true
       description: one installable adapter, adapter.yaml beside the target layout it mirrors
     templates:
       order: 11
       dir: true
-      description: single-file scaffolds (new.go, command_*, route_*, page_*, database_*, frontend_*, start_server_*, help_entries.yaml, doc_doc.md, *_index.md)
+      description: single-file scaffolds (command_*, route_*, database_*, front_*, start_server_*, server_handle_*, cli_handle_*, help_command.yaml, doc_page.md, doc_index.md)
     templates/backoffice:
       order: 12
       dir: true
@@ -214,11 +214,11 @@ assets:
 cmd/main/main.go:
   order: 5
   gen: true
-  description: standard.New() -> sandbox.New -> CliMain(os.Args[1:])
+  description: standard.New() -> sandbox.New -> Main(os.Args[1:])
 docs:
   order: 6
   dir: true
-  description: one dir per doc, holding doc.md + props.yaml (+ assets, + sub-docs). README.md indexes them all
+  description: one dir per doc, holding doc.md + doc.yaml (+ assets, + sub-docs). README.md indexes them all
   children:
     "**/Index.md":
       gen: true
@@ -232,7 +232,7 @@ docs:
 examples:
   order: 7
   dir: true
-  description: one dir per example; `exec-test` runs each and diffs it against its golden
+  description: one dir per example; `run-examples` runs each and diffs it against its golden
   children:
     cli/<name>/example.sh:
       order: 1
@@ -243,16 +243,16 @@ examples:
     <side>/<name>/result.yaml:
       order: 3
       gen: true
-      description: "golden: cli-output, exit-code, sha256 of every AssertDir file"
-    <side>/<name>/TestDir:
+      description: "golden: cli-output, exit-code, sha256 of every assert-dir file"
+    <side>/<name>/test-dir:
       order: 4
       dir: true
       description: the only place an example writes; removed before every run
-    <side>/<name>/AssertDir:
+    <side>/<name>/assert-dir:
       order: 5
       dir: true
-      description: what the example copied out of TestDir to assert; the golden's tree
+      description: what the example copied out of test-dir to assert; the golden's tree
 release:
   order: 8
   dir: true
-  description: git-ignored binaries, and the exec-test cli alias
+  description: git-ignored binaries, and the run-examples cli alias

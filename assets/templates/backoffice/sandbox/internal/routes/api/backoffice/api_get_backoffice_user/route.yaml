@@ -13,7 +13,6 @@ body:
 category: Backoffice Users API
 examples:
     - 'curl -X POST localhost:3000/api/admin/get-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":2}'''
-help: Answers one backoffice user by id
 methods:
     - POST
 paths:
@@ -26,3 +25,4 @@ paths:
 priority: 100
 response-type: application/json
 segments: 3
+summary: Answers one backoffice user by id

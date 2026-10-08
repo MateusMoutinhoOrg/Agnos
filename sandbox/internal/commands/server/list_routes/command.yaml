@@ -1,13 +1,13 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: list-routes
-category: Server System
+category: Server
+description: Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them, lowest priority first. Writes nothing.
 examples:
     - list-routes
-help: List every route in the order the chain runs them
-long-description: Prints one line per declared route — the rung, the methods, the pattern and the name — in the order the dispatch runs them, lowest priority first. Writes nothing.
 priority: 100
+summary: List every route in the order the chain runs them

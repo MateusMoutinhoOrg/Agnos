@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -11,5 +11,5 @@ args:
       required: true
       start: 1
 category: Extensions
-help: Turn one generation mechanic on
 priority: 100
+summary: Turn one generation mechanic on

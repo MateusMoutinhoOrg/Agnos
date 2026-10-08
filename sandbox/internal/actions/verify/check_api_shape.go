@@ -3,7 +3,7 @@ package verify
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/apishape"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // apiDir is the contract half of a repo: the package a consumer copies into
@@ -15,7 +15,7 @@ const apiDir = "sandbox/api"
 // runs everywhere and is not opt-in: a violation caught here is caught by the
 // author, and one left for the consumer's install is caught by whoever did not
 // write it. The rule itself is in sandbox/internal/apishape.
-func CheckApiShape(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckApiShape(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	if !io.IsDir(apiDir) {
 		return nil
 	}

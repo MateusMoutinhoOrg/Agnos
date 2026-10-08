@@ -1,10 +1,10 @@
-# `deps.Iodeps`
+# `deps.IoDeps`
 
 `sandbox/deps/iodeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the filesystem library injected whole as the Deps.IoLib field. Paths are whatever the host operating system accepts, resolved by the adapter — unlike embeddeps.Sandbox, which is always slash-separated and rooted at an asset tree. The listing functions report paths that already include the directory they were given, so a result can be passed straight back in. The predicates report false rather than an error: a path that cannot be stat'd is not a directory and is not a file, which is the answer the caller wanted either way.
+Contract is the filesystem library injected whole as the Deps.IoDeps field. Paths are whatever the host operating system accepts, resolved by the adapter — unlike embeddeps.Contract, which is always slash-separated and rooted at an asset tree. The listing functions report paths that already include the directory they were given, so a result can be passed straight back in. The predicates report false rather than an error: a path that cannot be stat'd is not a directory and is not a file, which is the answer the caller wanted either way.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -12,7 +12,7 @@ Sandbox is the filesystem library injected whole as the Deps.IoLib field. Paths 
 | `WriteFile` | `func(path string, content []byte) error` | WriteFile writes content to path, creating any missing parent directory first and truncating an existing file. The error reports a directory or a file that could not be written. |
 | `IsDir` | `func(path string) bool` | IsDir reports whether path exists and is a directory. |
 | `IsFile` | `func(path string) bool` | IsFile reports whether path exists and is not a directory. |
-| `Exist` | `func(path string) bool` | Exist reports whether anything exists at path, directory or file. |
+| `Exists` | `func(path string) bool` | Exists reports whether anything exists at path, directory or file. |
 | `CreateDir` | `func(path string)` | CreateDir creates the directory at path together with any missing parent. It reports nothing: a directory that already exists and a directory just created are the same outcome to the caller. |
 | `RemoveDir` | `func(path string)` | RemoveDir removes the directory or file at path and any children it contains. It reports nothing: a missing path and a path just removed are the same outcome. |
 | `ListDirs` | `func(path string) []string` | ListDirs returns the directories directly inside path. Nested directories are not descended into. |

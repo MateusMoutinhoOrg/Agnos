@@ -1,18 +1,18 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
-        value: remove-available
-    - description: the available to remove
+        value: remove-binding
+    - description: the binding to remove
       end: 1
-      id: Available
+      id: Name
       required: true
       start: 1
-category: Deps System
+category: Deps
+description: 'Removes adapters/bindings/<name>/ whole. The standard binding is refused: cmd/main/main.go imports it.'
 examples:
-    - remove-available lambda
-help: Deletes one available
-long-description: 'Removes adapters/availables/<name>/ whole. The standard available is refused: cmd/main/main.go imports it.'
+    - remove-binding lambda
 priority: 100
+summary: Delete one binding

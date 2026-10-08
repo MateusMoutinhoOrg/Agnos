@@ -1,16 +1,17 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: add-path
-    - description: the id of the path, the Entries field its slice binds to (normalized to an exported Go name)
+    - description: the id of the path, the Input field its slice binds to (normalized to an exported Go name)
       end: 1
-      id: Id
+      id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: Inserts one entry into the route's paths and runs build so the route's new.go and input.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Input.<Id>, and — with --trigger — only lets the route run when the text matches.
 examples:
     - add-path tenant --route create-user --start 1 --end 1
     - add-path version --route api --start 0 --end 0 --trigger /v1
@@ -40,6 +41,5 @@ flags:
       description: zero-based index to insert the path at (defaults to the end)
       id: Position
       type: integer
-help: Add one slice of the request path to a route
-long-description: Inserts one entry into the route's paths and runs build so the route's new.go and entries.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Entries.<Id>, and — with --trigger — only lets the route run when the text matches.
 priority: 100
+summary: Add one slice of the request path to a route

@@ -3,14 +3,14 @@ package add_flag
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // AddFlag appends (or inserts) one flag declaration into
-// sandbox/internal/commands/<command>/entries.yaml, then runs build as a
+// sandbox/internal/commands/<category>/<command>/command.yaml, then runs build as a
 // follow-up step so the command's new.go picks it up.
-func AddFlag(sandbox *api.Sandbox, props api.FlagProps) error {
-	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+func AddFlag(sandbox *api.Sandbox, props api.AddFlagProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddFlagInternal(sandbox, io, props); err != nil {
 		return err
 	}

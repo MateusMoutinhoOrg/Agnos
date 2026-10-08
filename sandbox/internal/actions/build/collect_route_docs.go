@@ -2,9 +2,9 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -70,11 +70,11 @@ type RouteDocReach struct {
 // page. The page is read by whoever calls the server, so every label is in
 // plain words and every request is one that runs.
 type RouteDoc struct {
-	Name            string
-	Method          string
-	Pattern         string
-	Help            string
-	LongDescription string
+	Name        string
+	Method      string
+	Pattern     string
+	Summary     string
+	Description string
 	// Address is one row per part of the path the caller fills in or that
 	// carries a rule; a literal part is spelled by Pattern alone.
 	Address    []RouteDocField
@@ -130,7 +130,7 @@ type routeDocInherited struct {
 	always    bool
 }
 
-// CollectRouteDocs renders every route.yaml under sandbox/internal/routeslist into
+// CollectRouteDocs renders every route.yaml under sandbox/internal/routes into
 // the pages docs/Routes prints, grouped by category in first-seen order — the
 // server layer's CollectCommandDocs. Hidden routes are skipped. Every route is
 // crossed with every route on a lower rung whose triggers may hold on it, and
@@ -140,7 +140,7 @@ type routeDocInherited struct {
 // The declaration is the only source: a route, a field or an example reaches
 // the page by being declared with `add-route`, `add-path`, `add-parameter`,
 // `set-body` or `set-route`, never by the page being edited.
-func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGroup, error) {
+func CollectRouteDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]RouteDocGroup, error) {
 	var groups []RouteDocGroup
 	index := map[string]int{}
 
@@ -153,7 +153,7 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGrou
 
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
+			return nil, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
 		}
 		entries = append(entries, routeDocEntry{name: unit.Name, conf: conf})
 	}
@@ -186,12 +186,12 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteDocGrou
 func routeDoc(sandbox *api.Sandbox, current routeDocEntry, entries []routeDocEntry) RouteDoc {
 	conf := current.conf
 	doc := RouteDoc{
-		Name:            current.name,
-		Method:          sandbox.Deps.Stringsdeps.Join(conf.Methods, ", "),
-		Pattern:         conf.Pattern(),
-		Help:            docCell(sandbox, conf.Help),
-		LongDescription: docText(sandbox, conf.LongDescription),
-		Body:            routeDocBody(sandbox, conf.Body),
+		Name:        current.name,
+		Method:      sandbox.Deps.StringsDeps.Join(conf.Methods, ", "),
+		Pattern:     conf.Pattern(),
+		Summary:     docCell(sandbox, conf.Summary),
+		Description: docText(sandbox, conf.Description),
+		Body:        routeDocBody(sandbox, conf.Body),
 	}
 
 	for _, path := range conf.Paths {
@@ -212,7 +212,7 @@ func routeDoc(sandbox *api.Sandbox, current routeDocEntry, entries []routeDocEnt
 		if reach == utils.NoReach {
 			continue
 		}
-		name := utils.RouteIdentifier(sandbox, other.name)
+		name := utils.RouteName(sandbox, other.name)
 		page := other.name + docPageExt
 		doc.Middlewares = append(doc.Middlewares, RouteDocReach{
 			Name:      name,
@@ -242,7 +242,7 @@ func routeDoc(sandbox *api.Sandbox, current routeDocEntry, entries []routeDocEnt
 
 // routeReachCondition is the cell a crossing is worded with: "" when the
 // route in front always runs.
-func routeReachCondition(reach utils.Reach, condition string) string {
+func routeReachCondition(reach utils.MiddlewareReach, condition string) string {
 	switch {
 	case reach == utils.MayRun && condition != "":
 		return routeDocMayRun + "; " + condition
@@ -269,7 +269,7 @@ func routeDocGenerated(requests []RouteDocRequest, example string) bool {
 func routeDocPath(sandbox *api.Sandbox, path routeconf.Path) (RouteDocField, bool) {
 	row := RouteDocField{Description: docCell(sandbox, path.Description)}
 
-	if !path.Trigger.Exists {
+	if !path.Trigger.Set {
 		row.Name = "`" + routeDocPathLabel(path) + "`"
 		row.Type = routeDocPathWords(path)
 		row.Example = "`" + routeDocPathSample(sandbox, path) + "`"
@@ -285,7 +285,7 @@ func routeDocPath(sandbox *api.Sandbox, path routeconf.Path) (RouteDocField, boo
 	row.Type = docCell(sandbox, "text that "+routeDocRule(sandbox, path.Trigger))
 	row.Example = "—"
 	if sample, ok := routeDocTriggerSample(sandbox, path.Trigger, routeDocSampleFile); ok && !path.Trigger.Negate {
-		row.Example = "`" + docCell(sandbox, sandbox.Deps.Stringsdeps.TrimLeft(sample, "/")) + "`"
+		row.Example = "`" + docCell(sandbox, sandbox.Deps.StringsDeps.TrimLeft(sample, "/")) + "`"
 	}
 	return row, true
 }
@@ -318,7 +318,7 @@ func routeDocPathSample(sandbox *api.Sandbox, path routeconf.Path) string {
 // routeDocPlace names the slice a triggered path reads, counting parts from
 // one.
 func routeDocPlace(sandbox *api.Sandbox, path routeconf.Path) string {
-	first := sandbox.Deps.Stringsdeps.FormatInt(int64(path.Start+1), 10)
+	first := sandbox.Deps.StringsDeps.FormatInt(int64(path.Start+1), 10)
 	switch {
 	case path.Start == 0 && path.End == routeconf.LastSegment:
 		return "the whole address"
@@ -327,7 +327,7 @@ func routeDocPlace(sandbox *api.Sandbox, path routeconf.Path) string {
 	case path.End == path.Start:
 		return "part " + first
 	}
-	return "parts " + first + " to " + sandbox.Deps.Stringsdeps.FormatInt(int64(path.End+1), 10)
+	return "parts " + first + " to " + sandbox.Deps.StringsDeps.FormatInt(int64(path.End+1), 10)
 }
 
 // routeDocParameter is one parameter as its table row. own is false for a
@@ -335,7 +335,7 @@ func routeDocPlace(sandbox *api.Sandbox, path routeconf.Path) string {
 // route, not on this one, so it never makes the value required here.
 func routeDocParameter(sandbox *api.Sandbox, parameter routeconf.Parameter, own bool) RouteDocField {
 	words := routeDocTypeWords(parameter.Type)
-	if parameter.Trigger.Exists {
+	if parameter.Trigger.Set {
 		words += " that " + routeDocRule(sandbox, parameter.Trigger)
 	}
 
@@ -362,30 +362,30 @@ func routeDocParameter(sandbox *api.Sandbox, parameter routeconf.Parameter, own 
 // routeDocTriggered reports whether a parameter carries a trigger its value
 // has to meet — one a missing value fails.
 func routeDocTriggered(parameter routeconf.Parameter) bool {
-	return parameter.Trigger.Exists && !parameter.Trigger.Negate
+	return parameter.Trigger.Set && !parameter.Trigger.Negate
 }
 
-// routeDocFonts is where a parameter is read from, in order; a declaration
+// routeDocSources is where a parameter is read from, in order; a declaration
 // naming none reads the query string alone.
-func routeDocFonts(parameter routeconf.Parameter) []string {
-	if len(parameter.Fonts) == 0 {
+func routeDocSources(parameter routeconf.Parameter) []string {
+	if len(parameter.Sources) == 0 {
 		return []string{"query"}
 	}
-	return parameter.Fonts
+	return parameter.Sources
 }
 
 // routeDocWhere is where a parameter goes, in plain words.
 func routeDocWhere(sandbox *api.Sandbox, parameter routeconf.Parameter) string {
 	places := []string{}
-	for _, font := range routeDocFonts(parameter) {
-		switch font {
+	for _, source := range routeDocSources(parameter) {
+		switch source {
 		case "query":
 			places = append(places, "query string")
 		default:
-			places = append(places, font)
+			places = append(places, source)
 		}
 	}
-	return sandbox.Deps.Stringsdeps.Join(places, " or ")
+	return sandbox.Deps.StringsDeps.Join(places, " or ")
 }
 
 // routeDocTypeWords is a path or parameter type in plain words.
@@ -445,7 +445,7 @@ func routeDocParameterSample(sandbox *api.Sandbox, parameter routeconf.Parameter
 // routeDocTriggerSample is a value a trigger accepts, built around fallback
 // when the trigger only bounds one end; false for a regex, which no sample
 // is derived from.
-func routeDocTriggerSample(sandbox *api.Sandbox, trigger routeconf.Trigger, fallback string) (string, bool) {
+func routeDocTriggerSample(sandbox *api.Sandbox, trigger triggerconf.Trigger, fallback string) (string, bool) {
 	if trigger.Negate {
 		return fallback, true
 	}
@@ -463,7 +463,7 @@ func routeDocTriggerSample(sandbox *api.Sandbox, trigger routeconf.Trigger, fall
 }
 
 // routeDocRule is what a trigger asks of a value, in plain words.
-func routeDocRule(sandbox *api.Sandbox, trigger routeconf.Trigger) string {
+func routeDocRule(sandbox *api.Sandbox, trigger triggerconf.Trigger) string {
 	verb := "must"
 	if trigger.Negate {
 		verb = "must not"
@@ -496,7 +496,7 @@ func routeDocCodeList(sandbox *api.Sandbox, values []string) string {
 	for _, value := range values {
 		quoted = append(quoted, "`"+value+"`")
 	}
-	return sandbox.Deps.Stringsdeps.Join(quoted, ", ")
+	return sandbox.Deps.StringsDeps.Join(quoted, ", ")
 }
 
 // routeDocWord is a Go id or a header name as the lower-case, dash-separated
@@ -533,7 +533,7 @@ func routeDocLowerOrDigit(char byte) bool {
 // reads "anything", and a route declaring a segment count gets that many. A
 // regex or a negated trigger is not sampled.
 func routeDocSamplePath(sandbox *api.Sandbox, conf *routeconf.RouteConf) string {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	slots := map[int]string{}
 	last := -1
 	place := func(index int, text string) {
@@ -558,7 +558,7 @@ func routeDocSamplePath(sandbox *api.Sandbox, conf *routeconf.RouteConf) string 
 
 	for _, path := range conf.Paths {
 		trigger := path.Trigger
-		if !trigger.Exists || trigger.Negate {
+		if !trigger.Set || trigger.Negate {
 			continue
 		}
 		switch trigger.Type {
@@ -571,7 +571,7 @@ func routeDocSamplePath(sandbox *api.Sandbox, conf *routeconf.RouteConf) string 
 		}
 	}
 	for _, path := range conf.Paths {
-		if path.Trigger.Exists {
+		if path.Trigger.Set {
 			continue
 		}
 		end := path.End
@@ -584,7 +584,7 @@ func routeDocSamplePath(sandbox *api.Sandbox, conf *routeconf.RouteConf) string 
 	}
 	for _, path := range conf.Paths {
 		trigger := path.Trigger
-		if !trigger.Exists || trigger.Negate || trigger.Type != "suffix" {
+		if !trigger.Set || trigger.Negate || trigger.Type != "suffix" {
 			continue
 		}
 		end := path.End
@@ -634,7 +634,7 @@ func routeDocRequests(sandbox *api.Sandbox, conf *routeconf.RouteConf, inherited
 // parameter and every body property; otherwise only the ones the route
 // cannot run without.
 func routeDocCurl(sandbox *api.Sandbox, conf *routeconf.RouteConf, inherited []routeDocInherited, complete bool) string {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 
 	head := "curl"
 	method := routeconf.DefaultMethod
@@ -655,7 +655,7 @@ func routeDocCurl(sandbox *api.Sandbox, conf *routeconf.RouteConf, inherited []r
 			return
 		}
 		value := routeDocParameterSample(sandbox, parameter)
-		switch routeDocFonts(parameter)[0] {
+		switch routeDocSources(parameter)[0] {
 		case "header":
 			lines = append(lines, "-H "+routeDocShellQuote(sandbox, parameter.Key+": "+value))
 		case "cookie":
@@ -714,7 +714,7 @@ func routeDocCurl(sandbox *api.Sandbox, conf *routeconf.RouteConf, inherited []r
 // routeDocShellQuote wraps a value in single quotes for a shell, a quote
 // inside it closed, escaped and reopened.
 func routeDocShellQuote(sandbox *api.Sandbox, value string) string {
-	return "'" + sandbox.Deps.Stringsdeps.ReplaceAll(value, "'", `'\''`) + "'"
+	return "'" + sandbox.Deps.StringsDeps.ReplaceAll(value, "'", `'\''`) + "'"
 }
 
 // routeDocShellWord quotes a url only when a shell would read something in
@@ -723,7 +723,7 @@ func routeDocShellWord(sandbox *api.Sandbox, value string) string {
 	for index := 0; index < len(value); index++ {
 		char := value[index]
 		plain := routeDocLowerOrDigit(char) || (char >= 'A' && char <= 'Z') ||
-			sandbox.Deps.Stringsdeps.ContainsAny(string(char), "-._/:%@,+")
+			sandbox.Deps.StringsDeps.ContainsAny(string(char), "-._/:%@,+")
 		if !plain {
 			return routeDocShellQuote(sandbox, value)
 		}
@@ -734,7 +734,7 @@ func routeDocShellWord(sandbox *api.Sandbox, value string) string {
 // routeDocUrlEscape escapes the characters that would end or split a query
 // value.
 func routeDocUrlEscape(sandbox *api.Sandbox, value string) string {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	for _, pair := range [][2]string{{"%", "%25"}, {" ", "%20"}, {"&", "%26"}, {"#", "%23"}, {"+", "%2B"}, {"=", "%3D"}} {
 		value = strings.ReplaceAll(value, pair[0], pair[1])
 	}
@@ -804,7 +804,7 @@ func routeDocFormSample(sandbox *api.Sandbox, schema *routeconf.Schema, complete
 			pairs = append(pairs, routeDocUrlEscape(sandbox, property.Name)+"="+value)
 		}
 	}
-	return sandbox.Deps.Stringsdeps.Join(pairs, "&")
+	return sandbox.Deps.StringsDeps.Join(pairs, "&")
 }
 
 // routeDocFormLeaf is routeDocJsonLeaf as a form field spells it: the same
@@ -819,7 +819,7 @@ func routeDocFormLeaf(sandbox *api.Sandbox, schema *routeconf.Schema) string {
 
 // routeDocSize is a byte count as a person reads it: 1048576 -> "1 MB".
 func routeDocSize(sandbox *api.Sandbox, bytes int) string {
-	format := sandbox.Deps.Stringsdeps.FormatInt
+	format := sandbox.Deps.StringsDeps.FormatInt
 	switch {
 	case bytes >= 1048576 && bytes%1048576 == 0:
 		return format(int64(bytes/1048576), 10) + " MB"
@@ -925,10 +925,10 @@ func routeDocSchemaNoun(schema *routeconf.Schema) (string, string) {
 // routeDocSchemaRules is every bound of a schema node, in plain words.
 func routeDocSchemaRules(sandbox *api.Sandbox, schema *routeconf.Schema) string {
 	number := func(value float64) string {
-		return sandbox.Deps.Stringsdeps.FormatFloat(value, 'f', -1, 64)
+		return sandbox.Deps.StringsDeps.FormatFloat(value, 'f', -1, 64)
 	}
 	count := func(value int) string {
-		return sandbox.Deps.Stringsdeps.FormatInt(int64(value), 10)
+		return sandbox.Deps.StringsDeps.FormatInt(int64(value), 10)
 	}
 
 	rules := []string{}
@@ -984,7 +984,7 @@ func routeDocSchemaRules(sandbox *api.Sandbox, schema *routeconf.Schema) string 
 		rules = append(rules, "no field beyond the ones listed")
 	}
 
-	return docCell(sandbox, sandbox.Deps.Stringsdeps.Join(rules, "; "))
+	return docCell(sandbox, sandbox.Deps.StringsDeps.Join(rules, "; "))
 }
 
 // routeDocJson is one node of a sample json value: a leaf holding its literal
@@ -1031,7 +1031,7 @@ func routeDocJsonSample(sandbox *api.Sandbox, schema *routeconf.Schema, complete
 // routeDocJsonLeaf is the literal json text of a scalar the schema accepts:
 // its const, its first enum value, or a sample of its type inside its bounds.
 func routeDocJsonLeaf(sandbox *api.Sandbox, schema *routeconf.Schema) string {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	quoted := schema.Type == "string" || schema.Type == ""
 	literal := func(value string) string {
 		if quoted {
@@ -1123,11 +1123,11 @@ func routeDocJsonText(sandbox *api.Sandbox, node *routeDocJson, indent string, p
 	for index, child := range node.Children {
 		text := routeDocJsonText(sandbox, child, inner, pretty)
 		if node.Object {
-			text = sandbox.Deps.Stringsdeps.Quote(node.Keys[index]) + colon + text
+			text = sandbox.Deps.StringsDeps.Quote(node.Keys[index]) + colon + text
 		}
 		items = append(items, inner+text)
 	}
-	return opening + newline + sandbox.Deps.Stringsdeps.Join(items, separator+newline) + newline + indent + closing
+	return opening + newline + sandbox.Deps.StringsDeps.Join(items, separator+newline) + newline + indent + closing
 }
 
 // routeDocStatuses is every status this route itself answers with, in plain
@@ -1154,7 +1154,7 @@ func routeDocStatuses(sandbox *api.Sandbox, conf *routeconf.RouteConf, inherited
 	}
 
 	for _, path := range conf.Paths {
-		if !path.Trigger.Exists && path.Type != routeconf.DefaultPathType {
+		if !path.Trigger.Set && path.Type != routeconf.DefaultPathType {
 			statuses = append(statuses, RouteDocStatus{
 				Code: "`404`",
 				Meaning: "`" + routeDocPathLabel(path) + "` is not a " + routeDocTypeWords(path.Type) +

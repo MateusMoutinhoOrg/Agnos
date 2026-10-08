@@ -3,30 +3,30 @@ package help_flag
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/internal/commandprops"
-	"{{.Module}}/sandbox/internal/commands/help"
+	"{{.Module}}/sandbox/internal/commands/info/help"
 )
 
 // helpKey is the spelling this middleware reads, and the one a command
-// declaring a flag of its own under it keeps: `add-command --help "..."` is the
-// help text of the command being declared, not a request for a screen.
+// declaring a flag of its own under it keeps: `<command> --help "..."` is then
+// that flag's value, not a request for a screen.
 const helpKey = "--help"
 
-// InternalPureHandler answers `<command> --help` with the help screen of the
+// Handle answers `<command> --help` with the help screen of the
 // command the line is for — the next strict command of the chain that matches
 // it — and a bare `--help` with the general help. Without --help, or in front
 // of a command that declares --help itself and is given a value for it, it
 // hands the line on.
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	if !entries.Help {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	if !input.Help {
 		return nil
 	}
 
-	next := nextCommand(sandbox, entries.FullCommand)
+	next := nextCommand(sandbox, input.FullCommand)
 	if next == nil {
 		help.PrintGeneralHelp(sandbox, response)
 		return nil
 	}
-	if declaresHelp(next) && helpHasValue(sandbox, entries.FullCommand) {
+	if declaresHelp(next) && helpHasValue(sandbox, input.FullCommand) {
 		return nil
 	}
 
@@ -47,7 +47,7 @@ func declaresHelp(command *api.Command) bool {
 }
 
 // helpHasValue reports that --help is followed by a value on the command line
-// — `add-command x --help "..."` — which is what a command declaring --help
+// — `<command> x --help "..."` — which is what a command declaring --help
 // itself reads. A --help with nothing after it, or another flag, is a request
 // for the screen whatever the command declares.
 func helpHasValue(sandbox *api.Sandbox, argv []string) bool {
@@ -55,7 +55,7 @@ func helpHasValue(sandbox *api.Sandbox, argv []string) bool {
 		if token != helpKey {
 			continue
 		}
-		return index+1 < len(argv) && !sandbox.Deps.Stringsdeps.HasPrefix(argv[index+1], "-")
+		return index+1 < len(argv) && !sandbox.Deps.StringsDeps.HasPrefix(argv[index+1], "-")
 	}
 	return false
 }
@@ -67,9 +67,9 @@ func nextCommand(sandbox *api.Sandbox, argv []string) *api.Command {
 		if !declared.Strict {
 			continue
 		}
-		bound := sandbox.Deps.OpinatedAgnosCli.BindCommand(declared)
+		bound := sandbox.Deps.OpinionatedAgnosCli.BindCommand(declared)
 		bound.Argv = argv
-		if bound.IsActionable(bound) {
+		if bound.Matches(bound) {
 			return declared
 		}
 	}

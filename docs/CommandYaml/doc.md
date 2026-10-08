@@ -2,7 +2,7 @@
 
 `sandbox/internal/commands/[<folder>/]<name>/command.yaml` declares one command — the file is
 what makes its directory a command, at any depth. `agnos build`
-generates `new.go` (the `api.Command` that lands in `Cli.Commands`) and `entries.go` (the `Entries`
+generates `new.go` (the `api.Command` that lands in `Cli.Commands`) and `input.go` (the `Input`
 its handler is handed) from it. Grow it with `add-arg` / `add-flag` / `set-command` and their
 `set-` / `remove-` pairs ([Workflow](../Workflow/doc.md#change-the-command-surface)), not by hand:
 the editors re-render it with keys in alphabetical order and drop comments.
@@ -15,7 +15,7 @@ args:
 flags:
   - { id: Times, keys: [--times, -t], type: integer, default: 1, min: 1 }
 category: Demo
-help: Say hello
+summary: Say hello
 examples: ["greet bob -t 2"]
 ```
 
@@ -27,7 +27,7 @@ examples: ["greet bob -t 2"]
 | `segments` | The segment count the command line has to have, `≥ 1`. Absent: any count |
 | `strict` | `true` (default, omitted): every token of the line has to be read by it or by a middleware before it. `false`: a middleware |
 | `args`, `flags` | What it reads; see below. At least one arg |
-| `category`, `help`, `long-description`, `examples` | The help screens and `docs/Commands` |
+| `category`, `summary`, `description`, `examples` | The help screens and `docs/Commands` |
 | `hidden` | Dropped from the listings, still dispatches |
 
 ## The command line
@@ -45,7 +45,7 @@ naming the arg (exit `2`), never `unknown command`.
 
 | Key | Effect |
 |---|---|
-| `id` | The `Entries` field, an exported Go name, never `FullCommand` |
+| `id` | The `Input` field, an exported Go name, never `FullCommand` |
 | `start`, `end` | The segments read, inclusive; `end: -1` is the last one |
 | `type` | `string` (default), `integer`, `number`, `uuid`; anything but string reads one segment (`start == end`). A range binds `[]string` |
 | `trigger` | `{type, value, negate, ignore-case}` (`values` for `one-of`), compared against the segments joined by a space. The verb is an arg with a trigger |
@@ -56,7 +56,7 @@ naming the arg (exit `2`), never `unknown command`.
 
 | Key | Effect |
 |---|---|
-| `id` | The `Entries` field, as for an arg |
+| `id` | The `Input` field, as for an arg |
 | `keys` | The spellings typed (`[--times, -t]`). Absent: `--<id in kebab-case>` |
 | `type` | `string` (default), `integer`, `number`, `boolean` (presence, never required), `string-array`, `integer-array` (one element per occurrence) |
 | `required`, `default` | As for an arg |
@@ -75,18 +75,18 @@ pattern fixes `segments`.
 
 ## The chain
 
-`CliMain` walks `Cli.Commands` in `priority` order and runs every command whose `IsActionable`
+`Main` walks `Cli.Commands` in `priority` order and runs every command whose `Matches`
 matches. One answers by `response.SetStatus(code)` or `response.Printf(...)` (which answers
 `ExitOk`); one that does neither declined, and the next runs — which is the whole of what a
-middleware is. `response.Error` and `response.Log` answer nothing. Nothing answering is
+middleware is. `response.Eprintf` and `response.Logf` answer nothing. Nothing answering is
 `handle_not_found.go`: the general help on an empty line, `unknown command` otherwise.
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	if entries.Name == "" {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "Name", "nobody to greet")
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	if input.Name == "" {
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "Name", "nobody to greet")
 	}
-	response.Printf("hello %s\n", entries.Name)
+	response.Printf("hello %s\n", input.Name)
 	return nil
 }
 ```

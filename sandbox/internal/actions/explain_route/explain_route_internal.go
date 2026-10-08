@@ -2,8 +2,8 @@ package explain_route
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -13,12 +13,12 @@ import (
 // read as "runs": the first route that answers ends the chain, and a route
 // that answers nothing hands it on. The last line is what the request ends on
 // when no route answers — the 405 or the 404 the dispatch raises.
-func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.ExplainRouteProps) ([]string, error) {
+func ExplainRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.ExplainRouteProps) ([]string, error) {
 	if err := utils.RequireProject(sandbox, io); err != nil {
 		return nil, err
 	}
 	if !io.IsDir(utils.RoutesDir) {
-		return nil, sandbox.Deps.Std.Errorf("the project has no server layer: run server-init first")
+		return nil, sandbox.Deps.StdDeps.Errorf("the project has no server layer: run server-init first")
 	}
 
 	request, err := requestOf(sandbox, props)
@@ -31,7 +31,7 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 		return nil, err
 	}
 
-	lines := []string{sandbox.Deps.Std.Sprintf("%s %s", request.Method, props.RequestPath)}
+	lines := []string{sandbox.Deps.StdDeps.Sprintf("%s %s", request.Method, props.RequestPath)}
 	ran := false
 	method_mismatch := false
 	answered := ""
@@ -42,8 +42,8 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 	for _, entry := range chain {
 
 		match := utils.MatchRouteRequest(sandbox, entry.Conf, request)
-		name := utils.RouteIdentifier(sandbox, entry.Name)
-		head := sandbox.Deps.Std.Sprintf("  %-4d %-24s", entry.Conf.Priority, name)
+		name := utils.RouteName(sandbox, entry.Name)
+		head := sandbox.Deps.StdDeps.Sprintf("  %-4d %-24s", entry.Conf.Priority, name)
 
 		if !match.Runs {
 			if match.MethodMismatch {
@@ -63,7 +63,7 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 		if match.Failure != "" {
 			line := head + " answers " + match.Failure + ", before its handler runs"
 			if len(before) > 0 {
-				line += " — unless " + sandbox.Deps.Stringsdeps.Join(before, ", ") + " answered first"
+				line += " — unless " + sandbox.Deps.StringsDeps.Join(before, ", ") + " answered first"
 			}
 			lines = append(lines, line)
 			answered = name
@@ -76,7 +76,7 @@ func ExplainRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.E
 	lines = append(lines, "")
 	switch {
 	case answered != "" && len(before) > 0:
-		lines = append(lines, "the request ends on the first of "+sandbox.Deps.Stringsdeps.Join(before, ", ")+
+		lines = append(lines, "the request ends on the first of "+sandbox.Deps.StringsDeps.Join(before, ", ")+
 			" whose handler answers — a Write or a SetStatus — and on "+answered+" if none does")
 	case answered != "":
 		lines = append(lines, "the request ends on "+answered)
@@ -102,7 +102,7 @@ func isAny(conf *routeconf.RouteConf) bool {
 // requestOf reads the request typed on the command line: the method (GET when
 // none), the path with its query string, and "key=value" headers and cookies.
 func requestOf(sandbox *api.Sandbox, props api.ExplainRouteProps) (utils.RouteRequest, error) {
-	method := sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(props.Method))
+	method := sandbox.Deps.StringsDeps.ToUpper(sandbox.Deps.StringsDeps.TrimSpace(props.Method))
 	if method == "" {
 		method = routeconf.DefaultMethod
 	}
@@ -112,9 +112,9 @@ func requestOf(sandbox *api.Sandbox, props api.ExplainRouteProps) (utils.RouteRe
 		}
 	}
 
-	raw := sandbox.Deps.Stringsdeps.TrimSpace(props.RequestPath)
-	if !sandbox.Deps.Stringsdeps.HasPrefix(raw, "/") {
-		return utils.RouteRequest{}, sandbox.Deps.Std.Errorf("the request path %q has to start with /", props.RequestPath)
+	raw := sandbox.Deps.StringsDeps.TrimSpace(props.RequestPath)
+	if !sandbox.Deps.StringsDeps.HasPrefix(raw, "/") {
+		return utils.RouteRequest{}, sandbox.Deps.StdDeps.Errorf("the request path %q has to start with /", props.RequestPath)
 	}
 
 	request := utils.RouteRequest{
@@ -127,7 +127,7 @@ func requestOf(sandbox *api.Sandbox, props api.ExplainRouteProps) (utils.RouteRe
 
 	if parts := splitOnce(sandbox, raw, "?"); len(parts) == 2 {
 		request.Path = parts[0]
-		for _, pair := range sandbox.Deps.Stringsdeps.Split(parts[1], "&") {
+		for _, pair := range sandbox.Deps.StringsDeps.Split(parts[1], "&") {
 			if pair == "" {
 				continue
 			}
@@ -141,7 +141,7 @@ func requestOf(sandbox *api.Sandbox, props api.ExplainRouteProps) (utils.RouteRe
 		if err != nil {
 			return request, err
 		}
-		request.Headers[sandbox.Deps.Stringsdeps.ToLower(key)] = value
+		request.Headers[sandbox.Deps.StringsDeps.ToLower(key)] = value
 	}
 	for _, cookie := range props.Cookies {
 		key, value, err := typedPair(sandbox, "--cookie", cookie)
@@ -166,19 +166,19 @@ func splitPair(sandbox *api.Sandbox, pair string) (string, string) {
 // typedPair reads one key=value typed after a flag, refusing one with no key.
 func typedPair(sandbox *api.Sandbox, flag string, pair string) (string, string, error) {
 	key, value := splitPair(sandbox, pair)
-	key = sandbox.Deps.Stringsdeps.TrimSpace(key)
-	if key == "" || !sandbox.Deps.Stringsdeps.Contains(pair, "=") {
-		return "", "", sandbox.Deps.Std.Errorf("%s %q is not key=value", flag, pair)
+	key = sandbox.Deps.StringsDeps.TrimSpace(key)
+	if key == "" || !sandbox.Deps.StringsDeps.Contains(pair, "=") {
+		return "", "", sandbox.Deps.StdDeps.Errorf("%s %q is not key=value", flag, pair)
 	}
-	return key, sandbox.Deps.Stringsdeps.TrimSpace(value), nil
+	return key, sandbox.Deps.StringsDeps.TrimSpace(value), nil
 }
 
 // splitOnce splits text at the first sep: one part when there is none, two
 // otherwise.
 func splitOnce(sandbox *api.Sandbox, text string, sep string) []string {
-	parts := sandbox.Deps.Stringsdeps.Split(text, sep)
+	parts := sandbox.Deps.StringsDeps.Split(text, sep)
 	if len(parts) < 2 {
 		return parts
 	}
-	return []string{parts[0], sandbox.Deps.Stringsdeps.Join(parts[1:], sep)}
+	return []string{parts[0], sandbox.Deps.StringsDeps.Join(parts[1:], sep)}
 }

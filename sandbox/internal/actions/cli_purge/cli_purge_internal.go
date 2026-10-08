@@ -2,13 +2,13 @@ package cli_purge
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // cliDirs are the directories the cli layer owns whole. The asset group only
 // names the files it installs, so removing those one by one would leave the
-// generated neighbours behind — a command's new.go with no entries.yaml
+// generated neighbours behind — a command's new.go with no command.yaml
 // and no handler.go next to it. The cli layer is generated from end to end,
 // so purging it means dropping these directories entirely.
 //
@@ -18,9 +18,9 @@ import (
 // behind for sandbox/new.go to keep calling.
 //
 // docs/Commands is one of them for the same reason: the asset group installs
-// its doc.md and props.yaml, but the build writes one page per command beside
+// its doc.md and doc.yaml, but the build writes one page per command beside
 // them. Removing only the installed two would leave a directory of pages with
-// no props.yaml, which every later build reads as a doc that fails to load.
+// no doc.yaml, which every later build reads as a doc that fails to load.
 //
 // sandbox/internal/cli is one of them too: its errors/ files are written once
 // by the build and then the project's, but every one of them names api.Command,
@@ -42,11 +42,11 @@ var cliDirs = []string{
 // asset group would have installed, at the path it holds inside that group,
 // plus the directories the cli layer owns whole, then drops any directory the
 // removal left empty. The deps the cli layer pulled in (sandbox/deps/argvdeps,
-// sandbox/deps/std) are deliberately left in place: other code may use them.
-func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
-	sandbox.Deps.Std.Log("cli-purge started with path %s \n", path)
+// sandbox/deps/stddeps) are deliberately left in place: other code may use them.
+func CliPurgeInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) error {
+	sandbox.Deps.StdDeps.Logf("cli-purge started with path %s \n", path)
 
-	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionSandboxCli)
+	files, err := utils.ExtensionFiles(sandbox, utils.ExtensionCli)
 	if err != nil {
 		return err
 	}
@@ -69,7 +69,7 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 		io.RemoveDir(dir)
 	}
 
-	utils.RemoveRetiredGenerated(sandbox, io, utils.ExtensionSandboxCli)
+	utils.RemoveRetiredGenerated(sandbox, io, utils.ExtensionCli)
 
 	for _, dir := range ancestorDirs(sandbox, files) {
 		if len(io.ListAll(dir)) == 0 {
@@ -77,7 +77,7 @@ func CliPurgeInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) er
 		}
 	}
 
-	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxCli, false)
+	return utils.SetExtension(sandbox, io, utils.ExtensionCli, false)
 }
 
 // ancestorDirs returns every directory that contains one of the given files,
@@ -86,17 +86,17 @@ func ancestorDirs(sandbox *api.Sandbox, files []string) []string {
 	seen := map[string]bool{}
 	var dirs []string
 	for _, file := range files {
-		parts := sandbox.Deps.Stringsdeps.Split(file, "/")
+		parts := sandbox.Deps.StringsDeps.Split(file, "/")
 		for i := 1; i < len(parts); i++ {
-			dir := sandbox.Deps.Stringsdeps.Join(parts[:i], "/")
+			dir := sandbox.Deps.StringsDeps.Join(parts[:i], "/")
 			if !seen[dir] {
 				seen[dir] = true
 				dirs = append(dirs, dir)
 			}
 		}
 	}
-	sandbox.Deps.Sortdeps.Slice(dirs, func(i, j int) bool {
-		return sandbox.Deps.Stringsdeps.Count(dirs[i], "/") > sandbox.Deps.Stringsdeps.Count(dirs[j], "/")
+	sandbox.Deps.SortDeps.Slice(dirs, func(i, j int) bool {
+		return sandbox.Deps.StringsDeps.Count(dirs[i], "/") > sandbox.Deps.StringsDeps.Count(dirs[j], "/")
 	})
 	return dirs
 }

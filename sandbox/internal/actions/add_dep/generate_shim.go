@@ -3,7 +3,7 @@ package add_dep
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/apishape"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -22,20 +22,25 @@ type ShimProps struct {
 	// Module is the remote module path.
 	Module string
 
-	// Available is the available of the remote repo the shim builds its
+	// Binding is the binding of the remote repo the shim builds its
 	// sandbox from.
-	Available string
+	Binding string
+
+	// BindingDir is that binding's directory inside the remote module:
+	// adapters/bindings/<binding>, or adapters/availables/<binding> in a repo
+	// rendered before the rename.
+	BindingDir string
 
 	// HasDeps reports whether the remote repo has a deps layer at all — a repo
-	// with none has `New()` instead of `New(deps)`, and no available to build.
+	// with none has `New()` instead of `New(deps)`, and no binding to build.
 	HasDeps bool
 }
 
-// GenerateShim writes adapters/libs/<dep>/<dep>.go: the adapter that builds the
+// GenerateShim writes adapters/impls/<dep>/<dep>.go: the adapter that builds the
 // remote sandbox out of the remote repo's own adapters and hands it over as the
 // local contract, plus the converters that carry every value between the two
 // copies of the api.
-func GenerateShim(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.Api, props ShimProps) error {
+func GenerateShim(sandbox *api.Sandbox, io *stagedfs.StagedFS, remote *apishape.Api, props ShimProps) error {
 
 	plan, err := apishape.Converters(sandbox, remote, props.Dep, remoteApiAlias)
 	if err != nil {
@@ -54,7 +59,8 @@ func GenerateShim(sandbox *api.Sandbox, io *smartio.SmartIO, remote *apishape.Ap
 		"Module":       module_conf.Module,
 		"RemoteModule": props.Module,
 		"RemoteApi":    remoteApiAlias,
-		"Available":    props.Available,
+		"Binding":      props.Binding,
+		"BindingDir":   props.BindingDir,
 		"HasDeps":      props.HasDeps,
 		"Entry":        plan.Entry,
 		"Converters":   plan.Converters,

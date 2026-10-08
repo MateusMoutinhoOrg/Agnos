@@ -2,18 +2,18 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/docconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // CollectGeneratedDocs returns the first-level docs the given groups write on
-// this build, read from those groups' own props.yaml templates. They belong in
-// the doc index like any other doc, but SmartIO listings read disk, so on a
+// this build, read from those groups' own doc.yaml templates. They belong in
+// the doc index like any other doc, but StagedFS listings read disk, so on a
 // project's first build they are not there to be listed yet: without this the
 // README of a freshly scaffolded project would index nothing. Any doc later
 // added under assets/<group>/docs/ is picked up here on its own.
-func CollectGeneratedDocs(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}, groups []string) ([]utils.Doc, error) {
+func CollectGeneratedDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS, vars map[string]interface{}, groups []string) ([]utils.Doc, error) {
 	var docs []utils.Doc
 
 	for _, group := range groups {
@@ -28,8 +28,8 @@ func CollectGeneratedDocs(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[st
 }
 
 // collectGroupDocs is CollectGeneratedDocs over one asset group.
-func collectGroupDocs(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}, group string) ([]utils.Doc, error) {
-	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively(group)
+func collectGroupDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS, vars map[string]interface{}, group string) ([]utils.Doc, error) {
+	files, err := sandbox.Deps.EmbedDeps.ListFilesRecursively(group)
 	if err != nil {
 		return nil, err
 	}
@@ -42,17 +42,17 @@ func collectGroupDocs(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string
 			continue
 		}
 
-		src, err := sandbox.Deps.Embeddeps.ReadFile(group + "/" + file)
+		src, err := sandbox.Deps.EmbedDeps.ReadFile(group + "/" + file)
 		if err != nil {
 			return nil, err
 		}
 
-		rendered, err := utils.RenderTemplate(sandbox, io, utils.DocPropsFile, src, vars)
+		rendered, err := utils.RenderTemplate(sandbox, io, utils.DocConfFile, src, vars)
 		if err != nil {
 			return nil, err
 		}
 
-		props, err := docPropsOf(sandbox, string(rendered), group, file)
+		props, err := docConfOf(sandbox, string(rendered), group, file)
 		if err != nil {
 			return nil, err
 		}
@@ -77,37 +77,37 @@ func collectGroupDocs(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string
 }
 
 // generatedDocDir reports the doc directory a group-relative asset path
-// declares, and whether the path is a first-level doc's props.yaml at all
-// ("docs/PublicApi/props.yaml" -> "PublicApi").
+// declares, and whether the path is a first-level doc's doc.yaml at all
+// ("docs/PublicApi/doc.yaml" -> "PublicApi").
 func generatedDocDir(sandbox *api.Sandbox, file string) (string, bool) {
-	parts := sandbox.Deps.Stringsdeps.Split(file, "/")
+	parts := sandbox.Deps.StringsDeps.Split(file, "/")
 	if len(parts) != 3 {
 		return "", false
 	}
-	if parts[0] != utils.DocsDir || parts[2] != utils.DocPropsFile {
+	if parts[0] != utils.DocsDir || parts[2] != utils.DocConfFile {
 		return "", false
 	}
 	return parts[1], true
 }
 
-// docPropsOf parses one rendered props.yaml, naming the asset it came from
+// docConfOf parses one rendered doc.yaml, naming the asset it came from
 // when it does not parse.
-func docPropsOf(sandbox *api.Sandbox, content string, group string, file string) (*docpropsconf.DocPropsConf, error) {
-	conf, err := docpropsconf.New(sandbox, content)
+func docConfOf(sandbox *api.Sandbox, content string, group string, file string) (*docconf.DocConf, error) {
+	conf, err := docconf.New(sandbox, content)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("assets/%s/%s: %w", group, file, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("assets/%s/%s: %w", group, file, err)
 	}
 	return conf, nil
 }
 
 // docsVars is the subset of the build's template vars a generated doc's
-// props.yaml may use. The full var map cannot be handed over here: it carries
+// doc.yaml may use. The full var map cannot be handed over here: it carries
 // the doc index, which is what these docs are being collected to build. A
-// props.yaml that reaches for anything else renders it empty.
+// doc.yaml that reaches for anything else renders it empty.
 func docsVars(module string, name string, generator_name string) map[string]interface{} {
 	return map[string]interface{}{
 		"Module":        module,
-		"Name":          name,
+		"ProjectName":   name,
 		"GeneratorName": generator_name,
 	}
 }

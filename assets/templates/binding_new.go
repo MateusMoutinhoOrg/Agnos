@@ -1,7 +1,7 @@
-package {{.Name}}
+package {{.BindingName}}
 
 import ({{range .Adapters}}
-	{{.Name}} "{{$.Module}}/adapters/libs/{{.Name}}"{{end}}
+	{{.Name}} "{{$.Module}}/adapters/impls/{{.Name}}"{{end}}
 	deps "{{.Module}}/sandbox/deps"
 )
 

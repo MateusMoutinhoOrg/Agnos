@@ -1,4 +1,4 @@
-default-adapter: iodeps
-field: Iodeps
+default-adapter: osio
+field: IoDeps
 help: Filesystem access
 name: iodeps

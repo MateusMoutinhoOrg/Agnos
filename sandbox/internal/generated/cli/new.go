@@ -2,7 +2,7 @@ package cli
 
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/cli/errors"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 	backoffice_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/backoffice/backoffice_init"
@@ -25,7 +25,6 @@ import (
 	show_command "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/cli/show_command"
 	build "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/build"
 	compile "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/compile"
-	interview "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/interview"
 	local_install "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/local_install"
 	publish "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/publish"
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/start"
@@ -41,14 +40,14 @@ import (
 	set_table_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/set_table_field"
 	show_database "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/show_database"
 	add_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/add_adapter"
-	add_available "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/add_available"
+	add_binding "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/add_binding"
 	add_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/add_dep"
 	deps_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/deps_init"
 	deps_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/deps_purge"
 	list_adapters "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/list_adapters"
 	list_deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/list_deps"
 	remove_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/remove_adapter"
-	remove_available "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/remove_available"
+	remove_binding "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/remove_binding"
 	remove_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/remove_dep"
 	set_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/set_adapter"
 	set_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/set_dep"
@@ -56,10 +55,10 @@ import (
 	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/docs/remove_doc"
 	add_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/add_cli_example"
 	add_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/add_lib_example"
-	exec_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/exec_test"
 	remove_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/remove_cli_example"
 	remove_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/remove_lib_example"
-	update_test "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/update_test"
+	run_examples "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/run_examples"
+	update_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/update_example"
 	disable_extension "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/extensions/disable_extension"
 	enable_extension "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/extensions/enable_extension"
 	list_extensions "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/extensions/list_extensions"
@@ -67,9 +66,11 @@ import (
 	front_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front/front_init"
 	front_purge "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front/front_purge"
 	remove_page "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/front/remove_page"
-	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
-	help_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help_flag"
-	project "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/project"
+	help "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/info/help"
+	interview "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/info/interview"
+	version "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/info/version"
+	help_flag "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/middleware/help_flag"
+	project_flags "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/middleware/project_flags"
 	add_body_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server/add_body_field"
 	add_parameter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server/add_parameter"
 	add_path "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server/add_path"
@@ -91,14 +92,13 @@ import (
 	set_path "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server/set_path"
 	set_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server/set_route"
 	show_route "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/server/show_route"
-	version "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/version"
 )
 
 // NewCli builds the cli surface of the sandbox: Commands, one entry per
 // directory under sandbox/internal/commands holding a command.yaml, at any
 // depth, built by that package's generated NewCommand, in run order; Fail,
-// which hands a failure to the project's own handler for it; and CliMain, which
-// hands a command line to Deps.OpinatedAgnosCli.CliMain against them — the
+// which hands a failure to the project's own handler for it; and Main, which
+// hands a command line to Deps.OpinionatedAgnosCli.Main against them — the
 // dispatch is the lib's, everything it runs is the project's. Generated by
 // `agnos build` — do not edit by hand.
 func NewCli(sandbox *api.Sandbox) api.Cli {
@@ -106,10 +106,10 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 
 	cli.Commands = []*api.Command{
 		help_flag.NewCommand(sandbox),
-		project.NewCommand(sandbox),
+		project_flags.NewCommand(sandbox),
 		add_adapter.NewCommand(sandbox),
 		add_arg.NewCommand(sandbox),
-		add_available.NewCommand(sandbox),
+		add_binding.NewCommand(sandbox),
 		add_body_field.NewCommand(sandbox),
 		add_cli_example.NewCommand(sandbox),
 		add_command.NewCommand(sandbox),
@@ -136,7 +136,6 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		deps_purge.NewCommand(sandbox),
 		disable_extension.NewCommand(sandbox),
 		enable_extension.NewCommand(sandbox),
-		exec_test.NewCommand(sandbox),
 		explain_command.NewCommand(sandbox),
 		explain_route.NewCommand(sandbox),
 		front_init.NewCommand(sandbox),
@@ -155,7 +154,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		rebalance_routes.NewCommand(sandbox),
 		remove_adapter.NewCommand(sandbox),
 		remove_arg.NewCommand(sandbox),
-		remove_available.NewCommand(sandbox),
+		remove_binding.NewCommand(sandbox),
 		remove_body_field.NewCommand(sandbox),
 		remove_cli_example.NewCommand(sandbox),
 		remove_command.NewCommand(sandbox),
@@ -172,6 +171,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		remove_table_field.NewCommand(sandbox),
 		rename_command.NewCommand(sandbox),
 		rename_route.NewCommand(sandbox),
+		run_examples.NewCommand(sandbox),
 		server_init.NewCommand(sandbox),
 		server_purge.NewCommand(sandbox),
 		set_adapter.NewCommand(sandbox),
@@ -189,7 +189,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		show_database.NewCommand(sandbox),
 		show_route.NewCommand(sandbox),
 		start.NewCommand(sandbox),
-		update_test.NewCommand(sandbox),
+		update_example.NewCommand(sandbox),
 		verify.NewCommand(sandbox),
 		version.NewCommand(sandbox),
 	}
@@ -199,13 +199,13 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 			return errors.HandleFailure(sandbox, command, command.Response)
 		}
 		switch command.Failure.Kind {
-		case api.NotFoundFailure:
+		case api.FailureNotFound:
 			return errors.HandleNotFound(sandbox, command, command.Response)
-		case api.BadUsageFailure:
+		case api.FailureBadUsage:
 			return errors.HandleBadUsage(sandbox, command, command.Response)
-		case api.UnknownFlagFailure:
+		case api.FailureUnknownFlag:
 			return errors.HandleUnknownFlag(sandbox, command, command.Response)
-		case api.UnexpectedArgFailure:
+		case api.FailureUnexpectedArg:
 			return errors.HandleUnexpectedArg(sandbox, command, command.Response)
 		}
 		return errors.HandleFailure(sandbox, command, command.Response)
@@ -213,17 +213,17 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 
 	// The props are built per call and read the sandbox as the line runs:
 	// sandbox.Cli, so a caller that replaced one of its fields is followed,
-	// and Std by pointer, so a middleware silencing Std.Log
+	// and StdDeps by pointer, so a middleware silencing StdDeps.Logf
 	// silences the response's Log too.
-	cli.CliMain = func(args []string) int {
-		return sandbox.Deps.OpinatedAgnosCli.CliMain(opinatedagnoscli.MainProps{
+	cli.Main = func(args []string) int {
+		return sandbox.Deps.OpinionatedAgnosCli.Main(opinionatedagnoscli.MainProps{
 			Cli:  &sandbox.Cli,
 			Args: args,
 			NewProps: func() any {
 				return &commandprops.CommandProps{}
 			},
-			Std:      &sandbox.Deps.Std,
-			Argvdeps: sandbox.Deps.Argvdeps,
+			StdDeps:  &sandbox.Deps.StdDeps,
+			ArgvDeps: sandbox.Deps.ArgvDeps,
 		})
 	}
 

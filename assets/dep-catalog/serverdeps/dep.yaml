@@ -1,4 +1,4 @@
-default-adapter: serverdeps
-field: Serverdeps
+default-adapter: nethttpserver
+field: ServerDeps
 help: Http server contract
 name: serverdeps

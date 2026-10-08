@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,9 +10,9 @@ args:
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: 'Removes the route''s directory whole, in whatever folder of sandbox/internal/routes it sits, and every folder that leaves empty, then re-renders the dispatch. A directory holding another route is refused. The build renders only: dropping a route may leave hand-written code referring to what is gone.'
 examples:
     - remove-route create-user
-help: Delete one declared route
-long-description: 'Removes the route''s directory whole, in whatever folder of sandbox/internal/routeslist it sits, and every folder that leaves empty, then re-renders the dispatch. A directory holding another route is refused. The build renders only: dropping a route may leave hand-written code referring to what is gone.'
 priority: 100
+summary: Delete one declared route

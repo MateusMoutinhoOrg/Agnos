@@ -2,16 +2,16 @@ package add_lib_example
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // AddLibExampleInternal writes the one file a lib example holds. The stub it
-// renders runs and exits 0 as it stands, so the first exec-test after this
+// renders runs and exits 0 as it stands, so the first run-examples after this
 // records a golden instead of reporting a failure. It refuses to overwrite an
 // existing example.
-func AddLibExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
-	if err := utils.RequireExtension(sandbox, io, utils.ExtensionSandboxExample); err != nil {
+func AddLibExampleInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) error {
+	if err := utils.RequireExtension(sandbox, io, utils.ExtensionExample); err != nil {
 		return err
 	}
 
@@ -21,7 +21,7 @@ func AddLibExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name strin
 
 	dir := utils.ExampleDir(utils.ExampleLibSide, name)
 	if io.IsDir(dir) {
-		return sandbox.Deps.Std.Errorf("example %s already exists", dir)
+		return sandbox.Deps.StdDeps.Errorf("example %s already exists", dir)
 	}
 
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
@@ -29,17 +29,17 @@ func AddLibExampleInternal(sandbox *api.Sandbox, io *smartio.SmartIO, name strin
 		return err
 	}
 
-	sandbox.Deps.Std.Log("add-lib-example creating %s \n", dir)
+	sandbox.Deps.StdDeps.Logf("add-lib-example creating %s \n", dir)
 
-	has_deps, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxDeps)
+	has_deps, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionDeps)
 	if err != nil {
 		return err
 	}
 
 	vars := map[string]interface{}{
-		"Name":    name,
-		"Module":  module_conf.Module,
-		"HasDeps": has_deps,
+		"ExampleName": name,
+		"Module":      module_conf.Module,
+		"HasDeps":     has_deps,
 	}
 	return utils.RenderTemplateToDest(sandbox, io, "templates/example_lib.go", vars, dir+"/"+utils.ExampleLibFile)
 }

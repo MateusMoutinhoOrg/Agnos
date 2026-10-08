@@ -2,16 +2,16 @@ package api
 
 // BackofficeConfig is the part of the Config the backoffice reads, embedded in
 // api.Config so each field is read as sandbox.Config.<Field>. The
-// backoffice-server middleware fills it in front of start-server, before the
+// backoffice-start-server middleware fills it in front of start-server, before the
 // first request is served.
 //
 // Written once by `{{.GeneratorName}} backoffice-init` and the project's from
 // then on; `{{.GeneratorName}} backoffice-purge` removes it.
 type BackofficeConfig struct {
-	// Secret signs the backoffice session tokens. It is read from the
-	// <NAME>_SECRET environment variable, never from the command line, or
-	// generated for the run when that variable is unset.
-	Secret string
+	// SessionSecret signs the backoffice session tokens. It is read from the
+	// <NAME>_BACKOFFICE_SECRET environment variable, never from the command
+	// line, or generated for the run when that variable is unset.
+	SessionSecret string
 
 	// AllowXForwardedFor trusts the last entry of X-Forwarded-For as the
 	// client ip, the one a reverse proxy in front of the server appended. Off,

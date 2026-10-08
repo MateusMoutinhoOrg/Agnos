@@ -2,7 +2,7 @@ package verify
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // contractDirs are the trees docs/PublicApi is generated from: sandbox/api is
@@ -10,12 +10,12 @@ import (
 // or replaces.
 var contractDirs = []string{"sandbox/api", "sandbox/deps"}
 
-// CheckContracts runs the rules docs/PublicApi depends on and returns one
+// CheckContractDocs runs the rules docs/PublicApi depends on and returns one
 // string per violation, in a stable order. The page is rendered from these
 // files by the Go parser dep, so every one of them has to parse, and every
 // exported declaration has to carry the doc comment that becomes its
 // description.
-func CheckContracts(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckContractDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	for _, dir := range contractDirs {
@@ -35,13 +35,13 @@ func CheckContracts(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 // interface methods are not required to be commented: their comment fills a
 // description column when it is there, and the type's own comment covers them
 // when it is not.
-func checkContractFile(sandbox *api.Sandbox, io *smartio.SmartIO, file string) []string {
+func checkContractFile(sandbox *api.Sandbox, io *stagedfs.StagedFS, file string) []string {
 	content, err := io.ReadFile(file)
 	if err != nil {
 		return []string{file + " could not be read"}
 	}
 
-	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
 		return []string{file + " is not parsable Go: " + err.Error()}
 	}
@@ -49,22 +49,22 @@ func checkContractFile(sandbox *api.Sandbox, io *smartio.SmartIO, file string) [
 	var violations []string
 
 	for _, entry := range parsed.Types {
-		if entry.Exported && sandbox.Deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && sandbox.Deps.StringsDeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "type", entry.Name))
 		}
 	}
 	for _, entry := range parsed.Functions {
-		if entry.Exported && sandbox.Deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && sandbox.Deps.StringsDeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "function", entry.Name))
 		}
 	}
 	for _, entry := range parsed.Constants {
-		if entry.Exported && sandbox.Deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && sandbox.Deps.StringsDeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "const", entry.Name))
 		}
 	}
 	for _, entry := range parsed.Variables {
-		if entry.Exported && sandbox.Deps.Stringsdeps.TrimSpace(entry.Doc) == "" {
+		if entry.Exported && sandbox.Deps.StringsDeps.TrimSpace(entry.Doc) == "" {
 			violations = append(violations, undocumented(file, "var", entry.Name))
 		}
 	}

@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
 )
 
 // The edit helpers below are what `set-path`, `set-parameter` and
@@ -39,7 +39,7 @@ func RouteClearSet(sandbox *api.Sandbox, clear []string, known []string) (map[st
 	cleared := map[string]bool{}
 
 	for _, raw := range clear {
-		key := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+		key := sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw))
 		if key == "" {
 			continue
 		}
@@ -52,7 +52,7 @@ func RouteClearSet(sandbox *api.Sandbox, clear []string, known []string) (map[st
 			}
 		}
 		if !found {
-			return nil, sandbox.Deps.Std.Errorf("--clear %q is not a key that can be taken off (use %s)", raw, sandbox.Deps.Stringsdeps.Join(known, ", "))
+			return nil, sandbox.Deps.StdDeps.Errorf("--clear %q is not a key that can be taken off (use %s)", raw, sandbox.Deps.StringsDeps.Join(known, ", "))
 		}
 
 		cleared[key] = true
@@ -61,22 +61,22 @@ func RouteClearSet(sandbox *api.Sandbox, clear []string, known []string) (map[st
 	return cleared, nil
 }
 
-// RoutePathEdited rebuilds one entry of `paths` with the changes applied,
+// EditRoutePath rebuilds one entry of `paths` with the changes applied,
 // holding the result to every rule NewRoutePath holds a new one to.
-func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.RoutePathEditProps) (routeconf.Path, error) {
+func EditRoutePath(sandbox *api.Sandbox, current routeconf.Path, props api.SetPathProps) (routeconf.Path, error) {
 	cleared, err := RouteClearSet(sandbox, props.Clear, RoutePathClearKeys)
 	if err != nil {
 		return routeconf.Path{}, err
 	}
 
-	built := api.RoutePathProps{
-		Id:          current.Id,
-		Start:       sandbox.Deps.Stringsdeps.FormatInt(int64(current.Start), 10),
-		End:         sandbox.Deps.Stringsdeps.FormatInt(int64(current.End), 10),
+	built := api.AddPathProps{
+		Name:        current.Id,
+		Start:       sandbox.Deps.StringsDeps.FormatInt(int64(current.Start), 10),
+		End:         sandbox.Deps.StringsDeps.FormatInt(int64(current.End), 10),
 		Type:        current.Type,
 		Description: current.Description,
 	}
-	if current.Trigger.Exists {
+	if current.Trigger.Set {
 		built.TriggerType, built.Trigger = current.Trigger.Type, current.Trigger.Value
 		built.TriggerNegate, built.TriggerIgnoreCase = current.Trigger.Negate, current.Trigger.IgnoreCase
 	}
@@ -98,25 +98,25 @@ func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.Rou
 		built.Description = ""
 	}
 
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
-		built.Id = value
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Rename); value != "" {
+		built.Name = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Start); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Start); value != "" {
 		built.Start = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.End); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.End); value != "" {
 		built.End = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Description); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Description); value != "" {
 		built.Description = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Trigger); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Trigger); value != "" {
 		built.Trigger = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.TriggerType); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.TriggerType); value != "" {
 		built.TriggerType = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Type); value != "" {
 		built.Type = value
 	}
 	if props.TriggerNegate {
@@ -129,27 +129,27 @@ func RoutePathEdited(sandbox *api.Sandbox, current routeconf.Path, props api.Rou
 	return NewRoutePath(sandbox, built)
 }
 
-// RoutePathEditEmpty reports an edit that changes nothing, so the command can
+// IsRoutePathEditEmpty reports an edit that changes nothing, so the command can
 // say so instead of rewriting a file with the bytes already in it.
-func RoutePathEditEmpty(sandbox *api.Sandbox, props api.RoutePathEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Start + props.End + props.Type +
+func IsRoutePathEditEmpty(sandbox *api.Sandbox, props api.SetPathProps) bool {
+	given := sandbox.Deps.StringsDeps.TrimSpace(props.Rename + props.Start + props.End + props.Type +
 		props.TriggerType + props.Trigger + props.Description)
 	return given == "" && len(props.Clear) == 0 && !props.TriggerNegate && !props.TriggerIgnoreCase
 }
 
-// RouteParameterEdited rebuilds one entry of `parameters` with the changes
+// EditRouteParameter rebuilds one entry of `parameters` with the changes
 // applied, holding the result to every rule NewRouteParameter holds a new one
 // to.
-func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, props api.RouteParameterEditProps) (routeconf.Parameter, error) {
+func EditRouteParameter(sandbox *api.Sandbox, current routeconf.Parameter, props api.SetParameterProps) (routeconf.Parameter, error) {
 	cleared, err := RouteClearSet(sandbox, props.Clear, RouteParameterClearKeys)
 	if err != nil {
 		return routeconf.Parameter{}, err
 	}
 
-	built := api.RouteParameterProps{
+	built := api.AddParameterProps{
 		Name:        current.Key,
 		Type:        current.Type,
-		Fonts:       current.Fonts,
+		Sources:     current.Sources,
 		Required:    current.Required,
 		Description: current.Description,
 		Examples:    current.Examples,
@@ -157,7 +157,7 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 	if current.HasDefault {
 		built.Default = current.Default
 	}
-	if current.Trigger.Exists {
+	if current.Trigger.Set {
 		built.TriggerType, built.Trigger = current.Trigger.Type, current.Trigger.Value
 		built.TriggerNegate, built.TriggerIgnoreCase = current.Trigger.Negate, current.Trigger.IgnoreCase
 	}
@@ -185,31 +185,31 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 		built.TriggerNegate, built.TriggerIgnoreCase = false, false
 	}
 
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Rename); value != "" {
 		built.Name = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Type); value != "" {
 		built.Type = value
 	}
-	if len(props.Fonts) > 0 {
-		built.Fonts = props.Fonts
+	if len(props.Sources) > 0 {
+		built.Sources = props.Sources
 	}
 	if props.Required {
 		built.Required = true
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Default); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Default); value != "" {
 		built.Default = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Description); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Description); value != "" {
 		built.Description = value
 	}
 	if len(props.Examples) > 0 {
 		built.Examples = AppendUnique(built.Examples, props.Examples)
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Trigger); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Trigger); value != "" {
 		built.Trigger = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.TriggerType); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.TriggerType); value != "" {
 		built.TriggerType = value
 	}
 	if props.TriggerNegate {
@@ -222,11 +222,11 @@ func RouteParameterEdited(sandbox *api.Sandbox, current routeconf.Parameter, pro
 	return NewRouteParameter(sandbox, built)
 }
 
-// RouteParameterEditEmpty reports an edit that changes nothing.
-func RouteParameterEditEmpty(sandbox *api.Sandbox, props api.RouteParameterEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Type + props.Default +
+// IsRouteParameterEditEmpty reports an edit that changes nothing.
+func IsRouteParameterEditEmpty(sandbox *api.Sandbox, props api.SetParameterProps) bool {
+	given := sandbox.Deps.StringsDeps.TrimSpace(props.Rename + props.Type + props.Default +
 		props.TriggerType + props.Trigger + props.Description)
-	return given == "" && len(props.Fonts) == 0 && len(props.Examples) == 0 && len(props.Clear) == 0 &&
+	return given == "" && len(props.Sources) == 0 && len(props.Examples) == 0 && len(props.Clear) == 0 &&
 		!props.Required && !props.TriggerNegate && !props.TriggerIgnoreCase
 }
 
@@ -241,9 +241,9 @@ type RouteBodyFieldEdit struct {
 	Dropped  []string
 }
 
-// RouteBodyFieldEdited rebuilds one declared body property with the changes
+// EditRouteBodyField rebuilds one declared body property with the changes
 // applied, through the same RouteBodyPropertySchema that declares a new one.
-func RouteBodyFieldEdited(sandbox *api.Sandbox, current *routeconf.Schema, required bool, props api.RouteBodyFieldEditProps) (RouteBodyFieldEdit, error) {
+func EditRouteBodyField(sandbox *api.Sandbox, current *routeconf.Schema, required bool, props api.SetBodyFieldProps) (RouteBodyFieldEdit, error) {
 	cleared, err := RouteClearSet(sandbox, props.Clear, RouteBodyFieldClearKeys)
 	if err != nil {
 		return RouteBodyFieldEdit{}, err
@@ -299,7 +299,7 @@ func RouteBodyFieldEdited(sandbox *api.Sandbox, current *routeconf.Schema, requi
 	}
 
 	retyped := ""
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Type); value != "" {
 		kind, err := RouteSchemaKind(sandbox, value)
 		if err != nil {
 			return RouteBodyFieldEdit{}, err
@@ -316,37 +316,37 @@ func RouteBodyFieldEdited(sandbox *api.Sandbox, current *routeconf.Schema, requi
 	if props.Array {
 		built.Array = true
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Min); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Min); value != "" {
 		built.Min = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Max); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Max); value != "" {
 		built.Max = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.ExclusiveMin); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.ExclusiveMin); value != "" {
 		built.ExclusiveMin = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.ExclusiveMax); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.ExclusiveMax); value != "" {
 		built.ExclusiveMax = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Format); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Format); value != "" {
 		built.Format = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Pattern); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Pattern); value != "" {
 		built.Pattern = value
 	}
 	if len(props.Enum) > 0 {
 		built.Enum = props.Enum
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Const); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Const); value != "" {
 		built.Const = value
 	}
 	if props.Nullable {
 		built.Nullable = true
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.MinItems); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.MinItems); value != "" {
 		built.MinItems = value
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.MaxItems); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.MaxItems); value != "" {
 		built.MaxItems = value
 	}
 	if props.UniqueItems {
@@ -389,7 +389,7 @@ func carrySchemaChildren(sandbox *api.Sandbox, current *routeconf.Schema, rebuil
 
 	now := SchemaObjectOf(rebuilt)
 	if now == nil || now.Type != "object" {
-		return sandbox.Deps.Std.Errorf(
+		return sandbox.Deps.StdDeps.Errorf(
 			"%d properties are declared under this one, so it cannot stop being an object: drop them first, or drop the whole of it with remove-body-field",
 			len(was.Properties))
 	}
@@ -403,7 +403,7 @@ func carrySchemaChildren(sandbox *api.Sandbox, current *routeconf.Schema, rebuil
 // carry, and names every one it took — a --type that turned text into a number
 // leaves a format behind, and the alternative to dropping it is an error about
 // a keyword the person never typed.
-func dropRetypedKeywords(built *api.RouteBodyFieldProps, retyped string) []string {
+func dropRetypedKeywords(built *api.AddBodyFieldProps, retyped string) []string {
 	if retyped == "" {
 		return nil
 	}
@@ -443,9 +443,9 @@ func dropRetypedKeywords(built *api.RouteBodyFieldProps, retyped string) []strin
 	return dropped
 }
 
-// RouteBodyFieldEditEmpty reports an edit that changes nothing.
-func RouteBodyFieldEditEmpty(sandbox *api.Sandbox, props api.RouteBodyFieldEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Type + props.Min + props.Max +
+// IsRouteBodyFieldEditEmpty reports an edit that changes nothing.
+func IsRouteBodyFieldEditEmpty(sandbox *api.Sandbox, props api.SetBodyFieldProps) bool {
+	given := sandbox.Deps.StringsDeps.TrimSpace(props.Rename + props.Type + props.Min + props.Max +
 		props.ExclusiveMin + props.ExclusiveMax + props.Format + props.Pattern + props.Const +
 		props.MinItems + props.MaxItems)
 	return given == "" && len(props.Enum) == 0 && len(props.Clear) == 0 &&

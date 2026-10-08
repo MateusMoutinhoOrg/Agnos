@@ -25,7 +25,6 @@ body:
 category: Backoffice Users API
 examples:
     - 'curl -X POST localhost:3000/api/admin/root/add-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"username":"ana","email":"ana@example.com","password":"secret123","role":"viewer"}'''
-help: Adds a backoffice user
 methods:
     - POST
 paths:
@@ -38,3 +37,4 @@ paths:
 priority: 100
 response-type: application/json
 segments: 4
+summary: Adds a backoffice user

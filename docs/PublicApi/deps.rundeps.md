@@ -1,10 +1,10 @@
-# `deps.Rundeps`
+# `deps.RunDeps`
 
 `sandbox/deps/rundeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the process runner injected whole as the Deps.Rundeps field. It is what the build action reaches for when it has to hand the rendered project to a real toolchain (`go mod tidy`, `go build ./...`) and report whether that toolchain accepted it.
+Contract is the process runner injected whole as the Deps.RunDeps field. It is what the build action reaches for when it has to hand the rendered project to a real toolchain (`go mod tidy`, `go build ./...`) and report whether that toolchain accepted it.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -20,7 +20,7 @@ RunProps describes one program invocation.
 | `Program` | `string` | Program is the executable to run, looked up on PATH. |
 | `Args` | `[]string` | Args are the arguments handed to the program, excluding its own name. |
 | `Env` | `[]string` | Env is a list of "KEY=VALUE" entries added on top of the current process environment for this one invocation (later entries win). Empty means "inherit the environment unchanged" — the common case. `agnos compile` uses it to set GOOS/GOARCH/CGO_ENABLED per cross-compile. |
-| `PathPrefix` | `[]string` | PathPrefix are directories prepended to the PATH the program sees, ahead of the inherited one, and searched first when Program itself is looked up. A PATH entry cannot be expressed through Env: the adapter is what reads the current PATH and joins it, because the sandbox cannot. `agnos exec-test` uses it to put the project's own cli alias in front of the PATH an example runs with. |
+| `PathPrefix` | `[]string` | PathPrefix are directories prepended to the PATH the program sees, ahead of the inherited one, and searched first when Program itself is looked up. A PATH entry cannot be expressed through Env: the adapter is what reads the current PATH and joins it, because the sandbox cannot. `agnos run-examples` uses it to put the project's own cli alias in front of the PATH an example runs with. |
 
 ## `Result`
 

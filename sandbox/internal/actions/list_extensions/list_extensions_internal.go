@@ -2,13 +2,13 @@ package list_extensions
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // ListExtensionsInternal returns one row per mechanic of the catalog, in the
 // order the catalog declares them, saying which ones this project turned on.
-func ListExtensionsInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) ([]api.ExtensionInfo, error) {
+func ListExtensionsInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) ([]api.ExtensionInfo, error) {
 	extensions_conf, err := utils.LoadExtensionsConf(sandbox, io)
 	if err != nil {
 		return nil, err

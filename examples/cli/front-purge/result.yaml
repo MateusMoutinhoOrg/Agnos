@@ -1,19 +1,19 @@
-cli-output: "front-purge started with path TestDir \nfront-purge kept assets/frontend: every file there is yours \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "front-purge started with path test-dir \nfront-purge kept assets/front: every file there is yours \nbuild started with path test-dir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: ca3a887769c4e6f1983dda8057adcfc18ce29870829914c551453fb91f44bf63
-    - file: assets/frontend/404.html
+      sha: 648a95a7bd347beffd2cec2a787bc5003210d1daba355d47cee3bbf55687ad04
+    - file: assets/front/404.html
       sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
-    - file: assets/frontend/about.html
-      sha: e68343f7220e428ef82934f8138750dce598fa05ddbae013355656ed2ab4d4b9
-    - file: assets/frontend/index.html
-      sha: 732abc93f6ea971bd74abce29385273fe101c5105ad2e60b8268ba24ee2fbd23
-    - file: sandbox/internal/routeslist/health/InternalPureHandler.go
-      sha: 936fe65beb7ce899cc706de76fc0ed296adc933a386c89c5f2cd261c9623c41d
-    - file: sandbox/internal/routeslist/health/entries.go
-      sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
-    - file: sandbox/internal/routeslist/health/new.go
-      sha: 82307eebc739d78a1cc064393921673660a1be61e8c0523897669c71cee4e5b9
-    - file: sandbox/internal/routeslist/health/route.yaml
-      sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9
+    - file: assets/front/about.html
+      sha: 7aba9c317d045289cd1cbc1228d11e321a26f39757bc253c9ca525d8668eeaa4
+    - file: assets/front/index.html
+      sha: 747d5e46c1b49715716825a0c28b39aaaeb1f643582bfdb7b332c2aa5dd0af51
+    - file: sandbox/internal/routes/health/handler.go
+      sha: 6d4c4a70d0c2603fca8927074472f441afe2fef1d56b975299c95c811557135f
+    - file: sandbox/internal/routes/health/input.go
+      sha: a311ad839a2f9a2a89ec777404f785e0d69ec2dd2fb6869c17976385cf6c0c6b
+    - file: sandbox/internal/routes/health/new.go
+      sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
+    - file: sandbox/internal/routes/health/route.yaml
+      sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc

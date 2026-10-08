@@ -14,10 +14,10 @@ const (
 )
 
 // namedUnits is every command that takes a name the person types and writes a
-// different one down. utils.CommandIdentifier is what rewrites it — lowercased,
+// different one down. utils.CommandName is what rewrites it — lowercased,
 // spaces and underscores turned into dashes — and every one of these commands
-// funnels through it, whether it is spelled CommandIdentifier, FieldName,
-// RouteIdentifier, RouteEntryId or RouteFieldName.
+// funnels through it, whether it is spelled CommandName, FieldName,
+// RouteName, GoIdentifier or RouteFieldName.
 //
 // The commands that name something that already exists are not here: they are
 // answered from a menu of names read off disk, so there is nothing to rewrite.
@@ -50,12 +50,12 @@ func NormalizedNotes(sandbox *api.Sandbox, command api.Command, values map[strin
 	}
 
 	typed := answeredText(sandbox, values, nameFieldId)
-	written := utils.CommandIdentifier(sandbox, typed)
+	written := utils.CommandName(sandbox, typed)
 	if typed == "" || written == typed {
 		return []string{}
 	}
 
-	return []string{sandbox.Deps.Std.Sprintf(
+	return []string{sandbox.Deps.StdDeps.Sprintf(
 		"%q is written down as the %s %s", typed, noun, spelling(command, values, written))}
 }
 

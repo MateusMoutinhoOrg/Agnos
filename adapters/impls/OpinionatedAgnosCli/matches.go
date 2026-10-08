@@ -1,11 +1,11 @@
-package opinatedagnoscli
+package opinionatedagnoscli
 
 import (
 	"regexp"
 	"strconv"
 	"strings"
 
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
 )
 
@@ -17,7 +17,7 @@ const endOfFlags = "--"
 // hex form.
 const uuidPattern = `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`
 
-// isActionable reports whether one bound command — its Argv set — is for the
+// matches reports whether one bound command — its Argv set — is for the
 // command line it carries: the line has the Segments the command declares,
 // every arg declaring a trigger finds its slice, converts to its Type and
 // matches it, every arg that finds its slice converts, and every flag
@@ -28,7 +28,7 @@ const uuidPattern = `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4
 // It is mirrored by agnos's own sandbox/internal/utils/command_match.go, which
 // reads a command.yaml for `explain-command`: a change to one is a change to
 // the other.
-func isActionable(parsers argvdeps.Sandbox, command *opinatedagnoscli.Command) bool {
+func matches(parsers argvdeps.Contract, command *opinionatedagnoscli.Command) bool {
 	segments, _ := splitArgv(command.Argv)
 	if command.Segments > 0 && len(segments) != command.Segments {
 		return false
@@ -37,7 +37,7 @@ func isActionable(parsers argvdeps.Sandbox, command *opinatedagnoscli.Command) b
 	for _, arg := range command.Args {
 		values, found := argSlice(segments, arg)
 		if !found {
-			if arg.Trigger.Exist {
+			if arg.Trigger.Set {
 				return false
 			}
 			continue
@@ -45,13 +45,13 @@ func isActionable(parsers argvdeps.Sandbox, command *opinatedagnoscli.Command) b
 		if _, converts := argValue(arg, values); !converts {
 			return false
 		}
-		if arg.Trigger.Exist && !matchTrigger(arg.Trigger, strings.Join(values, " "), true) {
+		if arg.Trigger.Set && !matchTrigger(arg.Trigger, strings.Join(values, " "), true) {
 			return false
 		}
 	}
 
 	for _, flag := range command.Flags {
-		if !flag.Trigger.Exist {
+		if !flag.Trigger.Set {
 			continue
 		}
 		values := flagValues(parsers, command.Argv, flag)
@@ -128,7 +128,7 @@ func flagsEnd(argv []string) int {
 // argSlice is the segments one arg reads, Start to End with End -1 standing
 // for the last one, and whether the command line has them. An arg reading to
 // the last segment finds an empty slice on a line that stops right at Start.
-func argSlice(segments []string, arg opinatedagnoscli.CommandArg) ([]string, bool) {
+func argSlice(segments []string, arg opinionatedagnoscli.CommandArg) ([]string, bool) {
 	end := arg.End
 	if end < 0 {
 		if arg.Start >= len(segments) {
@@ -145,7 +145,7 @@ func argSlice(segments []string, arg opinatedagnoscli.CommandArg) ([]string, boo
 // argValue converts the slice one arg read to its Type: one segment to a
 // string, an int, a float64 or a uuid string, several to a []string. It
 // reports false for a slice that will not convert — a non-match.
-func argValue(arg opinatedagnoscli.CommandArg, values []string) (any, bool) {
+func argValue(arg opinionatedagnoscli.CommandArg, values []string) (any, bool) {
 	if arg.End != arg.Start {
 		return values, true
 	}
@@ -156,15 +156,15 @@ func argValue(arg opinatedagnoscli.CommandArg, values []string) (any, bool) {
 }
 
 // convertArg converts one segment to an arg type.
-func convertArg(kind opinatedagnoscli.ArgType, text string) (any, bool) {
+func convertArg(kind opinionatedagnoscli.ArgType, text string) (any, bool) {
 	switch kind {
-	case opinatedagnoscli.IntegerArg:
+	case opinionatedagnoscli.ArgInteger:
 		value, err := strconv.Atoi(text)
 		return value, err == nil
-	case opinatedagnoscli.NumberArg:
+	case opinionatedagnoscli.ArgNumber:
 		value, err := strconv.ParseFloat(text, 64)
 		return value, err == nil && isFinite(value)
-	case opinatedagnoscli.UuidArg:
+	case opinionatedagnoscli.ArgUuid:
 		matched, err := regexp.MatchString(uuidPattern, text)
 		return text, err == nil && matched
 	}
@@ -182,9 +182,9 @@ func isFinite(value float64) bool {
 // of its own so nothing is consumed: "true" once for a boolean flag that is
 // present, one value per occurrence for any other. It is empty when the flag is
 // absent.
-func flagValues(parsers argvdeps.Sandbox, argv []string, flag opinatedagnoscli.CommandFlag) []string {
+func flagValues(parsers argvdeps.Contract, argv []string, flag opinionatedagnoscli.CommandFlag) []string {
 	parser := parsers.New(argv[:flagsEnd(argv)])
-	if flag.Type == opinatedagnoscli.BooleanFlag {
+	if flag.Type == opinionatedagnoscli.FlagBoolean {
 		if parser.GetOptionsSize(flag.Keys) > 0 {
 			return []string{"true"}
 		}

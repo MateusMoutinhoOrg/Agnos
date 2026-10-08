@@ -1,19 +1,19 @@
-cli-output: "set-adapter started with path TestDir dep sortdeps adapter reflectsort available lambda \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+cli-output: "set-adapter started with path test-dir dep sortdeps adapter reflectsort binding lambda \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: adapters/availables/lambda/available.yaml
+    - file: adapters/bindings/lambda/binding.yaml
       sha: 886bb54fe47b5e6a08946970685fc0da23c3baa1dec01513dec3e0871579fae9
-    - file: adapters/availables/lambda/new.go
-      sha: 2121f908f8fdbfb8b84db6ac117c551141955b97bda208d04fb335190005720a
-    - file: adapters/availables/standard/available.yaml
-      sha: bfe69b2d34623e3596cdab48c484604bb9a5bf69c312fbf561dde0115ce22639
-    - file: adapters/availables/standard/new.go
-      sha: c70533aee77829f509368ee0538452d730866ae4cbb12a3506cb6387c14bd02b
-    - file: adapters/libs/reflectsort/adapter.yaml
+    - file: adapters/bindings/lambda/new.go
+      sha: 2a8f29640decd9a6a0f72e32417546100f9840a3c653374ccd246cedcee41bdd
+    - file: adapters/bindings/standard/binding.yaml
+      sha: a991a7b5d61cbe6b63371da37b14fd3d144dd73f10681b7bb2d6d12b327cc871
+    - file: adapters/bindings/standard/new.go
+      sha: 7d4a0a7b69990f43da5091be4d0ee5799a09994725dfa2605ad25628bab35ad2
+    - file: adapters/impls/reflectsort/adapter.yaml
       sha: 5d5c98be9b69a44dfcbc057e35268050fbab62e26d0ae8d04c416d168ffba747
-    - file: adapters/libs/reflectsort/reflectsort.go
-      sha: af3b2920ce451ecc3f5a705bb01a8ee5b79c7cae82ebed88b3d626a54672c540
-    - file: adapters/libs/sortdeps/adapter.yaml
-      sha: 2f5dd3feb4c4328d39531c6d4fb8b91c32e815566e8609e9bbca0859a793d3bb
-    - file: adapters/libs/sortdeps/sortdeps.go
-      sha: 938364f9047d7ce33ab7dddc33258760573decd3c66e9f8a21375f49dd568bbf
+    - file: adapters/impls/reflectsort/reflectsort.go
+      sha: 8bee481bb7fce0000f341b9317f04ca43b3f115ddfcd22aababcdcbde5887c95
+    - file: adapters/impls/stdsort/adapter.yaml
+      sha: ca2624a58f5742ef4ce9e54e6d82fe34e8a06fca4d58c78c213d4f6aaf5d4486
+    - file: adapters/impls/stdsort/stdsort.go
+      sha: ab369d6c89160885bfcefe066ed5eaf8aabc1ad58745aa7fe5ca0320b70084b3

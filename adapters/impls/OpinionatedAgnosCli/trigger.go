@@ -1,10 +1,10 @@
-package opinatedagnoscli
+package opinionatedagnoscli
 
 import (
 	"regexp"
 	"strings"
 
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 )
 
 // matchTrigger reports whether one text meets a trigger: the comparison its
@@ -12,9 +12,9 @@ import (
 // inverted when it declares Negate. Segmented is true for a text a prefix
 // reads segment by segment — a route's path slice, a command's segments.
 //
-// It is mirrored by agnos's own sandbox/internal/utils/trigger.go: a change to
+// It is mirrored by agnos's own sandbox/internal/utils/trigger_conf.go: a change to
 // one is a change to the other.
-func matchTrigger(trigger opinatedagnoscli.Trigger, text string, segmented bool) bool {
+func matchTrigger(trigger opinionatedagnoscli.Trigger, text string, segmented bool) bool {
 	return compareTrigger(trigger, text, segmented) != trigger.Negate
 }
 
@@ -23,32 +23,32 @@ func matchTrigger(trigger opinatedagnoscli.Trigger, text string, segmented bool)
 // "/admin" or "/admin/…", never "/administrator"; "add" is "add" or "add …",
 // never "add-flag" — which is what tells it from a text-prefix. An empty prefix
 // holds on every text. A value has no segments, so there the two are one.
-func compareTrigger(trigger opinatedagnoscli.Trigger, text string, segmented bool) bool {
+func compareTrigger(trigger opinionatedagnoscli.Trigger, text string, segmented bool) bool {
 	value := trigger.Value
-	if trigger.IgnoreCase && trigger.Type != opinatedagnoscli.RegexTrigger {
+	if trigger.IgnoreCase && trigger.Type != opinionatedagnoscli.TriggerRegex {
 		value = strings.ToLower(value)
 		text = strings.ToLower(text)
 	}
 
 	switch trigger.Type {
-	case opinatedagnoscli.PrefixTrigger:
+	case opinionatedagnoscli.TriggerPrefix:
 		if !segmented {
 			return strings.HasPrefix(text, value)
 		}
 		separator := segmentSeparator(text, value)
 		value = strings.TrimSuffix(value, separator)
 		return value == "" || text == value || strings.HasPrefix(text, value+separator)
-	case opinatedagnoscli.TextPrefixTrigger:
+	case opinionatedagnoscli.TriggerTextPrefix:
 		return strings.HasPrefix(text, value)
-	case opinatedagnoscli.SuffixTrigger:
+	case opinionatedagnoscli.TriggerSuffix:
 		return strings.HasSuffix(text, value)
-	case opinatedagnoscli.RegexTrigger:
+	case opinionatedagnoscli.TriggerRegex:
 		if trigger.IgnoreCase {
 			value = "(?i)" + value
 		}
 		matched, err := regexp.MatchString(value, text)
 		return err == nil && matched
-	case opinatedagnoscli.OneOfTrigger:
+	case opinionatedagnoscli.TriggerOneOf:
 		for _, one := range trigger.Values {
 			if trigger.IgnoreCase {
 				one = strings.ToLower(one)

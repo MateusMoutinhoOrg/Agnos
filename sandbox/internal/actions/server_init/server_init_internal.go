@@ -3,23 +3,23 @@ package server_init
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	cliInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/cli_init"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // startServerDir holds the one command the server layer writes: the entry
 // point that opens the port.
-const startServerDir = "sandbox/internal/commands/start_server"
+const startServerDir = "sandbox/internal/commands/server/start_server"
 
 // ServerInitInternal turns the server mechanic on in the project's declaration
 // and writes the start-server command beside it. The group itself is rendered
 // by the follow-up build, like every other mechanic.
 //
-// A project with no cli layer is given one first, on this same open SmartIO:
+// A project with no cli layer is given one first, on this same open StagedFS:
 // actions compose by sharing one transaction, so there is no intermediate
 // Persist and no intermediate build between the two halves.
-func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
-	sandbox.Deps.Std.Log("server-init started with path %s \n", path)
+func ServerInitInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) error {
+	sandbox.Deps.StdDeps.Logf("server-init started with path %s \n", path)
 
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
@@ -30,7 +30,7 @@ func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 		"Module": module_conf.Module,
 	}
 
-	has_cli, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxCli)
+	has_cli, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionCli)
 	if err != nil {
 		return err
 	}
@@ -40,7 +40,7 @@ func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 		}
 	}
 
-	if err := utils.SetExtension(sandbox, io, utils.ExtensionSandboxServer, true); err != nil {
+	if err := utils.SetExtension(sandbox, io, utils.ExtensionServer, true); err != nil {
 		return err
 	}
 
@@ -48,15 +48,15 @@ func ServerInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) 
 }
 
 // writeStartServer scaffolds the start-server command, leaving an existing one
-// alone: like a route's InternalPureHandler.go, it is written once and then the project's.
-func writeStartServer(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
+// alone: like a route's handler.go, it is written once and then the project's.
+func writeStartServer(sandbox *api.Sandbox, io *stagedfs.StagedFS, vars map[string]interface{}) error {
 	if io.IsDir(startServerDir) {
-		sandbox.Deps.Std.Log("server-init: %s already exists, keeping it \n", startServerDir)
+		sandbox.Deps.StdDeps.Logf("server-init: %s already exists, keeping it \n", startServerDir)
 		return nil
 	}
 
 	if err := utils.RenderTemplateToDest(sandbox, io, "templates/start_server_command.yaml", vars, startServerDir+"/"+utils.CommandConfFile); err != nil {
 		return err
 	}
-	return utils.RenderTemplateToDest(sandbox, io, "templates/start_server_internal_pure_handler.go", vars, startServerDir+"/"+utils.CommandHandlerFile)
+	return utils.RenderTemplateToDest(sandbox, io, "templates/start_server_handler.go", vars, startServerDir+"/"+utils.CommandHandlerFile)
 }

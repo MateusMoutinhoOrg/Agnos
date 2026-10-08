@@ -1,7 +1,7 @@
 package stringsdeps
 
 // This package is the sandbox's *copy* of the api a text library exposes —
-// the same mechanic as argvdeps, embeddeps, iodeps, rundeps and std, for the
+// the same mechanic as argvdeps, embeddeps, iodeps, rundeps and stddeps, for the
 // same reason: the sandbox may import nothing but the sandbox, so `strings`
 // and `strconv` may not appear inside it. The contract is restated here, and
 // the adapter — which lives outside the sandbox — is what fills it.
@@ -10,10 +10,10 @@ package stringsdeps
 // same semantics; the adapter is a straight delegation, so a caller can read
 // the standard library documentation for the behaviour of any of them.
 
-// Sandbox is the text library injected whole as the Deps.Stringsdeps field. The
+// Contract is the text library injected whole as the Deps.StringsDeps field. The
 // first group of fields is string manipulation, the second is conversion
 // between strings and numbers.
-type Sandbox struct {
+type Contract struct {
 	// TrimSpace returns s with leading and trailing white space removed.
 	TrimSpace func(s string) string
 
@@ -100,11 +100,11 @@ type Sandbox struct {
 
 	// ParseInt parses s as an integer in the given base with the given bit
 	// size. The error reports a string that is not one.
-	ParseInt func(s string, base int, bit_size int) (int64, error)
+	ParseInt func(s string, base int, bitSize int) (int64, error)
 
 	// ParseFloat parses s as a floating-point number of the given bit size.
 	// The error reports a string that is not one.
-	ParseFloat func(s string, bit_size int) (float64, error)
+	ParseFloat func(s string, bitSize int) (float64, error)
 
 	// FormatInt returns the string representation of value in the given base.
 	FormatInt func(value int64, base int) string
@@ -112,5 +112,5 @@ type Sandbox struct {
 	// FormatFloat returns the string representation of value, formatted
 	// according to the format byte, the precision and the bit size — the same
 	// three controls the standard library takes.
-	FormatFloat func(value float64, format byte, precision int, bit_size int) string
+	FormatFloat func(value float64, format byte, precision int, bitSize int) string
 }

@@ -3,14 +3,14 @@ package main
 import (
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The remove-flag example: delete one declared flag
 //
-// It calls the same action `agnos remove-flag` calls, and writes only inside TestDir.
+// It calls the same action `agnos remove-flag` calls, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -18,23 +18,23 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.CliInit("TestDir"); err != nil {
+	if err := lib.Actions.CliInit(api.CliInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddCommand("TestDir", "greet", "Greet someone", "Core"); err != nil {
+	if err := lib.Actions.AddCommand(api.AddCommandProps{Path: "test-dir", Name: "greet", Summary: "Greet someone", Category: "Core"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddFlag(api.FieldProps{
-		Path:        "TestDir",
+	if err := lib.Actions.AddFlag(api.AddFlagProps{
+		Path:        "test-dir",
 		Command:     "greet",
 		Name:        "name",
 		Type:        "string",
@@ -45,13 +45,13 @@ func main() {
 		panic(err)
 	}
 
-	if err := lib.Actions.RemoveFlag("TestDir", "greet", "name"); err != nil {
+	if err := lib.Actions.RemoveFlag(api.RemoveFlagProps{Path: "test-dir", Command: "greet", Name: "name"}); err != nil {
 		panic(err)
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/sandbox/internal/commands/greet", os.DirFS("TestDir/sandbox/internal/commands/greet")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/sandbox/internal/commands/core/greet", os.DirFS("test-dir/sandbox/internal/commands/core/greet")); err != nil {
 		panic(err)
 	}
 }

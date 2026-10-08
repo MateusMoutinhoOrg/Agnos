@@ -1,5 +1,4 @@
 category: Backoffice Users
-help: Removes a backoffice user and every session of it
 methods:
     - POST
 paths:
@@ -16,3 +15,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 4
+summary: Removes a backoffice user and every session of it

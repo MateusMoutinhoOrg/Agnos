@@ -2,12 +2,12 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // ExamplesDir is the example tree of a project: one directory per side, each
 // holding one directory per example. Every example is both documentation and
-// a test — `exec-test` runs it and compares what it produced with its golden.
+// a test — `run-examples` runs it and compares what it produced with its golden.
 const ExamplesDir = "examples"
 
 // ExampleCliSide and ExampleLibSide are the two sides of ExamplesDir: the one
@@ -31,8 +31,8 @@ const (
 // about and not the whole project. Both are removed before every run.
 const (
 	ExampleResultFile = "result.yaml"
-	ExampleTestDir    = "TestDir"
-	ExampleAssertDir  = "AssertDir"
+	ExampleTestDir    = "test-dir"
+	ExampleAssertDir  = "assert-dir"
 )
 
 // ExampleSides is the fixed order the two sides are walked in: an example
@@ -69,7 +69,7 @@ type Example struct {
 // examples/, sorted. A project with no examples/ directory — every project
 // before its first add-cli-example / add-lib-example — yields none, which is
 // what the generated listing then documents.
-func CollectExamples(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []Example {
+func CollectExamples(sandbox *api.Sandbox, io *stagedfs.StagedFS, side string) []Example {
 	dir := ExampleSideDir(side)
 	if !io.IsDir(dir) {
 		return nil
@@ -81,7 +81,7 @@ func CollectExamples(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []E
 		desc := ""
 		propsPath := entry + "/props.yaml"
 		if content, err := io.ReadFile(propsPath); err == nil {
-			if tree, err := sandbox.Deps.Serializables.ParseYaml(string(content)); err == nil {
+			if tree, err := sandbox.Deps.SerializableDeps.ParseYaml(string(content)); err == nil {
 				if props, err := tree.GetObjectItem("description"); err == nil {
 					if description, err := props.GetString(); err == nil {
 						desc = description
@@ -91,7 +91,7 @@ func CollectExamples(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []E
 		}
 		examples = append(examples, Example{Name: name, Description: desc})
 	}
-	sandbox.Deps.Sortdeps.Slice(examples, func(i, j int) bool {
+	sandbox.Deps.SortDeps.Slice(examples, func(i, j int) bool {
 		return examples[i].Name < examples[j].Name
 	})
 	return examples
@@ -102,9 +102,9 @@ func CollectExamples(sandbox *api.Sandbox, io *smartio.SmartIO, side string) []E
 // linked from a generated listing, so only letters, digits, dots, dashes and
 // underscores are allowed, and it is one segment — an example is never nested.
 func ValidateExampleName(sandbox *api.Sandbox, name string) error {
-	name = sandbox.Deps.Stringsdeps.TrimSpace(name)
+	name = sandbox.Deps.StringsDeps.TrimSpace(name)
 	if name == "" {
-		return sandbox.Deps.Std.Errorf("an example needs a name")
+		return sandbox.Deps.StdDeps.Errorf("an example needs a name")
 	}
 
 	for _, letter := range name {
@@ -113,7 +113,7 @@ func ValidateExampleName(sandbox *api.Sandbox, name string) error {
 			(letter >= '0' && letter <= '9') ||
 			letter == '.' || letter == '-' || letter == '_'
 		if !valid {
-			return sandbox.Deps.Std.Errorf(
+			return sandbox.Deps.StdDeps.Errorf(
 				"invalid example name %q: only letters, digits, dots, dashes and underscores are allowed (it becomes one directory under %s)",
 				name, ExamplesDir)
 		}
@@ -122,20 +122,20 @@ func ValidateExampleName(sandbox *api.Sandbox, name string) error {
 }
 
 // RemoveExample deletes one example directory and everything in it — the
-// example file, its golden result.yaml and any TestDir / AssertDir the last
+// example file, its golden result.yaml and any test-dir / assert-dir the last
 // run left behind. It is the whole of both remove-*-example actions: the two differ
 // only in the side they name.
-func RemoveExample(sandbox *api.Sandbox, io *smartio.SmartIO, side string, name string) error {
+func RemoveExample(sandbox *api.Sandbox, io *stagedfs.StagedFS, side string, name string) error {
 	if err := ValidateExampleName(sandbox, name); err != nil {
 		return err
 	}
 
 	dir := ExampleDir(side, name)
 	if !io.IsDir(dir) {
-		return sandbox.Deps.Std.Errorf("example %s not found", dir)
+		return sandbox.Deps.StdDeps.Errorf("example %s not found", dir)
 	}
 
-	sandbox.Deps.Std.Log("remove-%s-example removing %s \n", side, dir)
+	sandbox.Deps.StdDeps.Logf("remove-%s-example removing %s \n", side, dir)
 
 	for _, entry := range io.ListAllRecursively(dir) {
 		io.RemoveDir(entry)

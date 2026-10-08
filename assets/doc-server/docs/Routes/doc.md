@@ -3,7 +3,7 @@
 Every address this server answers. Open one to see what to send, a request you can run as it is,
 and what comes back.
 
-The requests call `localhost:3000`, where `{{.Name}} start-server` listens when that port is free —
+The requests call `localhost:3000`, where `{{.ProjectName}} start-server` listens when that port is free —
 it prints the address it took. Change it to wherever your server runs.
 
 ## How to read an address
@@ -24,7 +24,7 @@ it prints the address it took. Change it to wherever your server runs.
 | Route | What it does |
 | --- | --- |
 {{- range .Routes }}
-| [`{{ .Method }} {{ .Pattern }}`]({{ .Name }}.md) | {{ .Help }} |
+| [`{{ .Method }} {{ .Pattern }}`]({{ .Name }}.md) | {{ .Summary }} |
 {{- end }}
 {{- end }}
 
@@ -49,11 +49,11 @@ it is one value, which one:
 ```
 
 For developers: each page is generated on every build from
-`sandbox/internal/routeslist/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)); hidden routes
+`sandbox/internal/routes/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)); hidden routes
 are left out. `{{.GeneratorName}} list-routes` prints the routes in the order they run, and
 `{{.GeneratorName}} explain-route <METHOD> <path>` which ones a request reaches. The error answers are
 the eight files of `sandbox/internal/server/errors/` ([RouteYaml](../RouteYaml/doc.md#failures)).
 {{- else }}
-No route is declared yet. Run `{{.GeneratorName}} add-route <name> --pattern '/<path>/{id}' --help "..." --category "..."`,
+No route is declared yet. Run `{{.GeneratorName}} add-route <name> --pattern '/<path>/{id}' --summary "..." --category "..."`,
 and every route lands on this page on the next build.
 {{- end }}

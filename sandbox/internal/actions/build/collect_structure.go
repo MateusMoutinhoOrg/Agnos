@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -21,14 +21,14 @@ type StructureEntry struct {
 	Line string
 }
 
-// CollectStructure renders <ProjectName>Config/structure.yaml into the lines of
+// CollectStructure renders AgnosConfig/structure.yaml into the lines of
 // the tree docs/Structure prints. The declaration is the only source: nothing
 // is read off disk here, so an item that names a pattern renders like any
 // other. `verify` is what keeps the declaration and the disk in step.
 //
 // A project with no structure.yaml collects no lines, and its Structure doc
 // renders an empty tree.
-func CollectStructure(sandbox *api.Sandbox, io *smartio.SmartIO) ([]StructureEntry, error) {
+func CollectStructure(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]StructureEntry, error) {
 	structure_conf, err := utils.LoadStructureConf(sandbox, io)
 	if err != nil {
 		return nil, err
@@ -39,7 +39,7 @@ func CollectStructure(sandbox *api.Sandbox, io *smartio.SmartIO) ([]StructureEnt
 	labels := make([]string, len(nodes))
 	width := 0
 	for index, node := range nodes {
-		labels[index] = sandbox.Deps.Stringsdeps.Repeat(structureIndent, node.Depth) + node.Label
+		labels[index] = sandbox.Deps.StringsDeps.Repeat(structureIndent, node.Depth) + node.Label
 		if len(labels[index]) > width {
 			width = len(labels[index])
 		}
@@ -62,7 +62,7 @@ func CollectStructure(sandbox *api.Sandbox, io *smartio.SmartIO) ([]StructureEnt
 func structureLine(sandbox *api.Sandbox, label string, width int, node utils.StructureNode) string {
 	description := node.Description
 	if node.Gen {
-		description = sandbox.Deps.Stringsdeps.TrimSpace("(gen) " + description)
+		description = sandbox.Deps.StringsDeps.TrimSpace("(gen) " + description)
 	}
 
 	if description == "" {
@@ -70,5 +70,5 @@ func structureLine(sandbox *api.Sandbox, label string, width int, node utils.Str
 	}
 
 	padding := width - len(label) + structureGap
-	return label + sandbox.Deps.Stringsdeps.Repeat(" ", padding) + description
+	return label + sandbox.Deps.StringsDeps.Repeat(" ", padding) + description
 }

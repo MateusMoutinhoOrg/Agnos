@@ -1,19 +1,20 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: add-parameter
-    - description: the query key or header name it is read under; its Entries field is the exported spelling of it
+    - description: the query key or header name it is read under; its Input field is the exported spelling of it
       end: 1
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: Declares one value a route reads and runs build so the route's new.go and input.go pick it up. It is read under its name from the first of its --source that brings it, converted to its --type and bound to Input.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.
 examples:
     - add-parameter page --route list-users --type number --default 1
-    - add-parameter authorization --route admin --font header --trigger Bearer --trigger-type prefix
+    - add-parameter authorization --route admin --source header --trigger Bearer --trigger-type prefix
 flags:
     - description: the route (identifier or package name) that receives the parameter
       id: Route
@@ -22,12 +23,12 @@ flags:
       description: 'the value type: string, integer, number, boolean, datetime, string-array or integer-array (defaults to string)'
       id: Type
     - description: 'where the value is read from, in order: query, header or cookie (repeatable; defaults to query)'
-      id: Font
+      id: Source
       type: string-array
-    - description: answer 400 when no font brings the value (not for booleans or parameters with --default)
+    - description: answer 400 when no source brings the value (not for booleans or parameters with --default)
       id: Required
       type: boolean
-    - description: the literal bound when no font brings the value (cannot be combined with --required)
+    - description: the literal bound when no source brings the value (cannot be combined with --required)
       id: Default
     - description: what the value has to match for the route to run at all, putting the parameter into what the route matches on
       id: Trigger
@@ -48,6 +49,5 @@ flags:
       description: zero-based index to insert the parameter at (defaults to the end)
       id: Position
       type: integer
-help: Declare one value a route reads from the query string or the headers
-long-description: Declares one value a route reads and runs build so the route's new.go and entries.go pick it up. It is read under its name from the first of its --font that brings it, converted to its --type and bound to Entries.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.
 priority: 100
+summary: Declare one value a route reads from the query string or the headers

@@ -6,7 +6,7 @@ import (
 )
 
 // help is a command like any other — command.yaml, generated new.go and
-// entries.go, and this InternalPureHandler.go — except that
+// input.go, and this handler.go — except that
 // `{{.GeneratorName}} build` writes them instead of the user writing two of
 // them. Nothing about the command set is baked in here: the screens below are
 // printed from Cli.Commands, the same declarations the dispatch binds a command
@@ -27,7 +27,7 @@ func identifiedBy(identifiers []string, name string) bool {
 // project name, lowercased. Usage lines show what to type, not the display
 // name of the project.
 func binaryName(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
+	return sandbox.Deps.StringsDeps.ToLower(sandbox.Config.ProjectName)
 }
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
@@ -48,10 +48,10 @@ const (
 
 // ─── Entry points ───────────────────────────────────────────────────────────
 
-// InternalPureHandler backs `help`: with no argument it prints the general help
+// Handle backs `help`: with no argument it prints the general help
 // screen, with a command name it prints that command's detailed help.
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	name := sandbox.Deps.Stringsdeps.Join(entries.Name, " ")
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	name := sandbox.Deps.StringsDeps.Join(input.Name, " ")
 	if name == "" {
 		PrintGeneralHelp(sandbox, response)
 		return nil
@@ -63,7 +63,7 @@ func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps,
 	}
 
 	response.SetStatus(api.ExitUsage)
-	e := response.Error
+	e := response.Eprintf
 	e("\n")
 	e("  %s%s✘%s Unknown command: %s%s%s\n", bold, red, reset, bold+white, name, reset)
 	e("  %sRun '%s help' to see available commands.%s\n", dim, binaryName(sandbox), reset)
@@ -79,7 +79,7 @@ func FindCommand(sandbox *api.Sandbox, name string) *api.Command {
 			return declared
 		}
 	}
-	pkg := sandbox.Deps.Stringsdeps.ReplaceAll(name, "-", "_")
+	pkg := sandbox.Deps.StringsDeps.ReplaceAll(name, "-", "_")
 	for _, declared := range sandbox.Cli.Commands {
 		if declared.Name == pkg {
 			return declared
@@ -134,24 +134,24 @@ func PrintGeneralHelp(sandbox *api.Sandbox, response *api.CommandResponse) {
 	}
 
 	for _, cat := range categoryOrder {
-		p("  %s%s%s%s\n", bold, cyan, sandbox.Deps.Stringsdeps.ToUpper(cat), reset)
+		p("  %s%s%s%s\n", bold, cyan, sandbox.Deps.StringsDeps.ToUpper(cat), reset)
 		p("  %s│%s\n", gray, reset)
 		for _, cmd := range categorized[cat] {
 			name := cmd.Identifiers[0]
 
 			aliasTag := ""
 			if len(cmd.Identifiers) > 1 {
-				aliasTag = sandbox.Deps.Std.Sprintf("  %s[%s]%s", dim, sandbox.Deps.Stringsdeps.Join(cmd.Identifiers[1:], ", "), reset)
+				aliasTag = sandbox.Deps.StdDeps.Sprintf("  %s[%s]%s", dim, sandbox.Deps.StringsDeps.Join(cmd.Identifiers[1:], ", "), reset)
 			}
 
 			dotsNeeded := (maxNameLen + 20) - len(name)
 			if dotsNeeded < 4 {
 				dotsNeeded = 4
 			}
-			dots := " " + sandbox.Deps.Stringsdeps.Repeat("·", dotsNeeded-2) + " "
+			dots := " " + sandbox.Deps.StringsDeps.Repeat("·", dotsNeeded-2) + " "
 
 			p("  %s│%s  %s%s%s%s%s%s%s%s\n",
-				gray, reset, green+bold, name, reset, gray, dots, reset, cmd.Help, aliasTag,
+				gray, reset, green+bold, name, reset, gray, dots, reset, cmd.Summary, aliasTag,
 			)
 		}
 		p("  %s│%s\n", gray, reset)
@@ -186,9 +186,9 @@ func PrintCommandHelp(sandbox *api.Sandbox, response *api.CommandResponse, cmd *
 		name = cmd.Identifiers[0]
 	}
 
-	titleLine := sandbox.Deps.Std.Sprintf("%s %s", binaryName(sandbox), name)
+	titleLine := sandbox.Deps.StdDeps.Sprintf("%s %s", binaryName(sandbox), name)
 	innerW := len(titleLine) + 4
-	if w := len(cmd.Help) + 4; w > innerW {
+	if w := len(cmd.Summary) + 4; w > innerW {
 		innerW = w
 	}
 	if innerW < 42 {
@@ -196,20 +196,20 @@ func PrintCommandHelp(sandbox *api.Sandbox, response *api.CommandResponse, cmd *
 	}
 
 	p("\n")
-	p("  %s╭%s╮%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╭%s╮%s\n", cyan, sandbox.Deps.StringsDeps.Repeat("─", innerW), reset)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
 		cyan, reset, bold+white, titleLine, reset,
-		sandbox.Deps.Stringsdeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
+		sandbox.Deps.StringsDeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
 	)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
-		cyan, reset, dim, cmd.Help, reset,
-		sandbox.Deps.Stringsdeps.Repeat(" ", innerW-2-len(cmd.Help)), cyan, reset,
+		cyan, reset, dim, cmd.Summary, reset,
+		sandbox.Deps.StringsDeps.Repeat(" ", innerW-2-len(cmd.Summary)), cyan, reset,
 	)
-	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.StringsDeps.Repeat("─", innerW), reset)
 	p("\n")
 
-	if cmd.LongDescription != "" {
-		for _, line := range sandbox.Deps.Stringsdeps.Split(cmd.LongDescription, "\n") {
+	if cmd.Description != "" {
+		for _, line := range sandbox.Deps.StringsDeps.Split(cmd.Description, "\n") {
 			p("  %s%s%s\n", dim, line, reset)
 		}
 		p("\n")
@@ -220,7 +220,7 @@ func PrintCommandHelp(sandbox *api.Sandbox, response *api.CommandResponse, cmd *
 	printSection(p, "USAGE")
 	flagPart := ""
 	if len(cmd.Flags)+len(flags) > 0 {
-		flagPart = sandbox.Deps.Std.Sprintf(" %s[flags]%s", yellow, reset)
+		flagPart = sandbox.Deps.StdDeps.Sprintf(" %s[flags]%s", yellow, reset)
 	}
 	p("  %s│%s  %s$%s %s %s%s\n", gray, reset, dim, reset, binaryName(sandbox), cmd.Pattern, flagPart)
 	p("  %s│%s\n", gray, reset)
@@ -241,7 +241,7 @@ func PrintCommandHelp(sandbox *api.Sandbox, response *api.CommandResponse, cmd *
 
 	args := []api.CommandArg{}
 	for _, arg := range cmd.Args {
-		if !arg.Trigger.Exist {
+		if !arg.Trigger.Set {
 			args = append(args, arg)
 		}
 	}
@@ -265,7 +265,7 @@ func PrintCommandHelp(sandbox *api.Sandbox, response *api.CommandResponse, cmd *
 	if len(all) > 0 {
 		printSection(p, "FLAGS")
 		for i, flag := range all {
-			label := sandbox.Deps.Stringsdeps.Join(flag.Flag.Keys, gray+", "+reset+yellow+bold)
+			label := sandbox.Deps.StringsDeps.Join(flag.Flag.Keys, gray+", "+reset+yellow+bold)
 			from := ""
 			if flag.From != "" {
 				from = "from " + flag.From
@@ -304,17 +304,17 @@ func InheritedFlags(sandbox *api.Sandbox, cmd *api.Command) []inheritedFlag {
 	inherited := []inheritedFlag{}
 	argv := []string{}
 	if len(cmd.Identifiers) > 0 {
-		argv = sandbox.Deps.Stringsdeps.Fields(cmd.Identifiers[0])
+		argv = sandbox.Deps.StringsDeps.Fields(cmd.Identifiers[0])
 	}
 
 	for _, declared := range sandbox.Cli.Commands {
 		if declared.Strict || declared.Priority >= cmd.Priority || declared.Name == cmd.Name {
 			continue
 		}
-		bound := sandbox.Deps.OpinatedAgnosCli.BindCommand(declared)
+		bound := sandbox.Deps.OpinionatedAgnosCli.BindCommand(declared)
 		bound.Argv = argv
 		bound.Flags = []api.CommandFlag{}
-		if !declared.IsActionable(bound) {
+		if !declared.Matches(bound) {
 			continue
 		}
 		for _, flag := range declared.Flags {
@@ -367,19 +367,19 @@ func printField(p func(string, ...any) (int, error), label, description, kind, d
 func printBanner(sandbox *api.Sandbox, response *api.CommandResponse) {
 	p := response.Printf
 
-	titleLine := sandbox.Deps.Std.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
+	titleLine := sandbox.Deps.StdDeps.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
 	innerW := len(titleLine) + 4
 	if innerW < 42 {
 		innerW = 42
 	}
 
 	p("\n")
-	p("  %s╭%s╮%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╭%s╮%s\n", cyan, sandbox.Deps.StringsDeps.Repeat("─", innerW), reset)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
 		cyan, reset, bold+white, titleLine, reset,
-		sandbox.Deps.Stringsdeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
+		sandbox.Deps.StringsDeps.Repeat(" ", innerW-2-len(titleLine)), cyan, reset,
 	)
-	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", innerW), reset)
+	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.StringsDeps.Repeat("─", innerW), reset)
 	p("\n")
 }
 
@@ -394,11 +394,11 @@ func argTypeLabel(arg api.CommandArg) string {
 		return "string..."
 	}
 	switch arg.Type {
-	case api.IntegerArg:
+	case api.ArgInteger:
 		return "integer"
-	case api.NumberArg:
+	case api.ArgNumber:
 		return "number"
-	case api.UuidArg:
+	case api.ArgUuid:
 		return "uuid"
 	}
 	return "string"
@@ -407,15 +407,15 @@ func argTypeLabel(arg api.CommandArg) string {
 // flagTypeLabel spells a flag's type the way the help screen prints it.
 func flagTypeLabel(kind api.FlagType) string {
 	switch kind {
-	case api.IntegerFlag:
+	case api.FlagInteger:
 		return "integer"
-	case api.NumberFlag:
+	case api.FlagNumber:
 		return "number"
-	case api.BooleanFlag:
+	case api.FlagBoolean:
 		return "boolean"
-	case api.StringArrayFlag:
+	case api.FlagStringArray:
 		return "string, repeatable"
-	case api.IntegerArrayFlag:
+	case api.FlagIntegerArray:
 		return "integer, repeatable"
 	}
 	return "string"

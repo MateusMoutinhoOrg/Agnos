@@ -1,4 +1,4 @@
-package rundeps
+package osexecrun
 
 import (
 	"bytes"
@@ -11,15 +11,15 @@ import (
 	rundeps "{{.Module}}/sandbox/deps/rundeps"
 )
 
-// Bind fills deps.Deps.Rundeps, providing the capability to run one external
+// Bind fills deps.Deps.RunDeps, providing the capability to run one external
 // program to completion over the standard library's os/exec.
 func Bind(deps *deps.Deps) {
-	deps.Rundeps = rundeps.Sandbox{
+	deps.RunDeps = rundeps.Contract{
 		Run: run,
 	}
 }
 
-// run fills rundeps.Sandbox.Run, executing the program in props.Dir and merging
+// run fills rundeps.Contract.Run, executing the program in props.Dir and merging
 // its standard output and standard error into one buffer. A non-zero exit
 // status comes back in Result.ExitCode; only a program that could not be
 // started at all is reported as an error.

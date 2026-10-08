@@ -4,7 +4,7 @@ import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
 	addArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_arg"
-	addAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_available"
+	addBindingAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_binding"
 	addBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_body_field"
 	addCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_cli_example"
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_command"
@@ -31,7 +31,6 @@ import (
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	disableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/disable_extension"
 	enableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/enable_extension"
-	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
 	explainCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_command"
 	explainRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_route"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
@@ -47,7 +46,7 @@ import (
 	rebalanceRoutesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rebalance_routes"
 	removeAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_adapter"
 	removeArgAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_arg"
-	removeAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_available"
+	removeBindingAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_binding"
 	removeBodyFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_body_field"
 	removeCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_cli_example"
 	removeCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_command"
@@ -64,6 +63,7 @@ import (
 	removeTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table_field"
 	renameCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_command"
 	renameRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_route"
+	runExamplesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/run_examples"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
 	serverPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_purge"
 	setAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/set_adapter"
@@ -81,7 +81,7 @@ import (
 	showDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_database"
 	showRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/show_route"
 	startAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/start"
-	updateTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_tests"
+	updateExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/update_example"
 	verifyAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/verify"
 )
 
@@ -98,26 +98,26 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.Compile = func(props api.CompileProps) error {
 		return compileAction.Compile(sandbox, props)
 	}
-	actions.Verify = func(path string) error {
-		return verifyAction.Verify(sandbox, path)
+	actions.Verify = func(props api.VerifyProps) error {
+		return verifyAction.Verify(sandbox, props)
 	}
 	actions.Start = func(props api.StartProps) error {
 		return startAction.Start(sandbox, props)
 	}
-	actions.EnableExtension = func(path string, name string) error {
-		return enableExtensionAction.EnableExtension(sandbox, path, name)
+	actions.EnableExtension = func(props api.EnableExtensionProps) error {
+		return enableExtensionAction.EnableExtension(sandbox, props)
 	}
-	actions.DisableExtension = func(path string, name string) error {
-		return disableExtensionAction.DisableExtension(sandbox, path, name)
+	actions.DisableExtension = func(props api.DisableExtensionProps) error {
+		return disableExtensionAction.DisableExtension(sandbox, props)
 	}
-	actions.ListExtensions = func(path string) ([]api.ExtensionInfo, error) {
-		return listExtensionsAction.ListExtensions(sandbox, path)
+	actions.ListExtensions = func(props api.ListExtensionsProps) ([]api.ExtensionInfo, error) {
+		return listExtensionsAction.ListExtensions(sandbox, props)
 	}
-	actions.DepsInit = func(path string) error {
-		return depsInitAction.DepsInit(sandbox, path)
+	actions.DepsInit = func(props api.DepsInitProps) error {
+		return depsInitAction.DepsInit(sandbox, props)
 	}
-	actions.DepsPurge = func(path string) error {
-		return depsPurgeAction.DepsPurge(sandbox, path)
+	actions.DepsPurge = func(props api.DepsPurgeProps) error {
+		return depsPurgeAction.DepsPurge(sandbox, props)
 	}
 	actions.AddDep = func(props api.AddDepProps) error {
 		return addDepAction.AddDep(sandbox, props)
@@ -125,8 +125,8 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.RemoveDep = func(props api.RemoveDepProps) error {
 		return removeDepAction.RemoveDep(sandbox, props)
 	}
-	actions.ListDeps = func(path string) ([]api.DepInfo, error) {
-		return listDepsAction.ListDeps(sandbox, path)
+	actions.ListDeps = func(props api.ListDepsProps) ([]api.DepInfo, error) {
+		return listDepsAction.ListDeps(sandbox, props)
 	}
 	actions.SetDep = func(props api.SetDepProps) error {
 		return setDepAction.SetDep(sandbox, props)
@@ -134,32 +134,32 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.AddAdapter = func(props api.AddAdapterProps) error {
 		return addAdapterAction.AddAdapter(sandbox, props)
 	}
-	actions.RemoveAdapter = func(path string, adapter string) error {
-		return removeAdapterAction.RemoveAdapter(sandbox, path, adapter)
+	actions.RemoveAdapter = func(props api.RemoveAdapterProps) error {
+		return removeAdapterAction.RemoveAdapter(sandbox, props)
 	}
 	actions.SetAdapter = func(props api.SetAdapterProps) error {
 		return setAdapterAction.SetAdapter(sandbox, props)
 	}
-	actions.ListAdapters = func(path string) ([]api.AdapterInfo, error) {
-		return listAdaptersAction.ListAdapters(sandbox, path)
+	actions.ListAdapters = func(props api.ListAdaptersProps) ([]api.AdapterInfo, error) {
+		return listAdaptersAction.ListAdapters(sandbox, props)
 	}
-	actions.AddAvailable = func(path string, available string) error {
-		return addAvailableAction.AddAvailable(sandbox, path, available)
+	actions.AddBinding = func(props api.AddBindingProps) error {
+		return addBindingAction.AddBinding(sandbox, props)
 	}
-	actions.RemoveAvailable = func(path string, available string) error {
-		return removeAvailableAction.RemoveAvailable(sandbox, path, available)
+	actions.RemoveBinding = func(props api.RemoveBindingProps) error {
+		return removeBindingAction.RemoveBinding(sandbox, props)
 	}
-	actions.CliInit = func(path string) error {
-		return cliInitAction.CliInit(sandbox, path)
+	actions.CliInit = func(props api.CliInitProps) error {
+		return cliInitAction.CliInit(sandbox, props)
 	}
-	actions.CliPurge = func(path string) error {
-		return cliPurgeAction.CliPurge(sandbox, path)
+	actions.CliPurge = func(props api.CliPurgeProps) error {
+		return cliPurgeAction.CliPurge(sandbox, props)
 	}
 	actions.AddCommand = func(props api.AddCommandProps) error {
 		return addCommandAction.AddCommand(sandbox, props)
 	}
-	actions.RemoveCommand = func(path string, name string) error {
-		return removeCommandAction.RemoveCommand(sandbox, path, name)
+	actions.RemoveCommand = func(props api.RemoveCommandProps) error {
+		return removeCommandAction.RemoveCommand(sandbox, props)
 	}
 	actions.SetCommand = func(props api.SetCommandProps) error {
 		return setCommandAction.SetCommand(sandbox, props)
@@ -170,86 +170,86 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.RebalanceCommands = func(props api.RebalanceCommandsProps) error {
 		return rebalanceCommandsAction.RebalanceCommands(sandbox, props)
 	}
-	actions.ListCommands = func(path string) ([]string, error) {
-		return listCommandsAction.ListCommands(sandbox, path)
+	actions.ListCommands = func(props api.ListCommandsProps) ([]string, error) {
+		return listCommandsAction.ListCommands(sandbox, props)
 	}
-	actions.ShowCommand = func(path string, command string) ([]string, error) {
-		return showCommandAction.ShowCommand(sandbox, path, command)
+	actions.ShowCommand = func(props api.ShowCommandProps) ([]string, error) {
+		return showCommandAction.ShowCommand(sandbox, props)
 	}
 	actions.ExplainCommand = func(props api.ExplainCommandProps) ([]string, error) {
 		return explainCommandAction.ExplainCommand(sandbox, props)
 	}
-	actions.AddFlag = func(props api.FlagProps) error {
+	actions.AddFlag = func(props api.AddFlagProps) error {
 		return addFlagAction.AddFlag(sandbox, props)
 	}
-	actions.SetFlag = func(props api.FlagEditProps) error {
+	actions.SetFlag = func(props api.SetFlagProps) error {
 		return setFlagAction.SetFlag(sandbox, props)
 	}
-	actions.RemoveFlag = func(path string, command string, name string) error {
-		return removeFlagAction.RemoveFlag(sandbox, path, command, name)
+	actions.RemoveFlag = func(props api.RemoveFlagProps) error {
+		return removeFlagAction.RemoveFlag(sandbox, props)
 	}
-	actions.AddArg = func(props api.ArgProps) error {
+	actions.AddArg = func(props api.AddArgProps) error {
 		return addArgAction.AddArg(sandbox, props)
 	}
-	actions.SetArg = func(props api.ArgEditProps) error {
+	actions.SetArg = func(props api.SetArgProps) error {
 		return setArgAction.SetArg(sandbox, props)
 	}
-	actions.RemoveArg = func(path string, command string, name string) error {
-		return removeArgAction.RemoveArg(sandbox, path, command, name)
+	actions.RemoveArg = func(props api.RemoveArgProps) error {
+		return removeArgAction.RemoveArg(sandbox, props)
 	}
-	actions.ServerInit = func(path string) error {
-		return serverInitAction.ServerInit(sandbox, path)
+	actions.ServerInit = func(props api.ServerInitProps) error {
+		return serverInitAction.ServerInit(sandbox, props)
 	}
-	actions.ServerPurge = func(path string) error {
-		return serverPurgeAction.ServerPurge(sandbox, path)
+	actions.ServerPurge = func(props api.ServerPurgeProps) error {
+		return serverPurgeAction.ServerPurge(sandbox, props)
 	}
 	actions.AddRoute = func(props api.AddRouteProps) error {
 		return addRouteAction.AddRoute(sandbox, props)
 	}
-	actions.RemoveRoute = func(path string, name string) error {
-		return removeRouteAction.RemoveRoute(sandbox, path, name)
+	actions.RemoveRoute = func(props api.RemoveRouteProps) error {
+		return removeRouteAction.RemoveRoute(sandbox, props)
 	}
-	actions.SetRoute = func(props api.RouteProps) error {
+	actions.SetRoute = func(props api.SetRouteProps) error {
 		return setRouteAction.SetRoute(sandbox, props)
 	}
-	actions.AddPath = func(props api.RoutePathProps) error {
+	actions.AddPath = func(props api.AddPathProps) error {
 		return addPathAction.AddPath(sandbox, props)
 	}
-	actions.SetPath = func(props api.RoutePathEditProps) error {
+	actions.SetPath = func(props api.SetPathProps) error {
 		return setPathAction.SetPath(sandbox, props)
 	}
-	actions.RemovePath = func(path string, route string, id string) error {
-		return removePathAction.RemovePath(sandbox, path, route, id)
+	actions.RemovePath = func(props api.RemovePathProps) error {
+		return removePathAction.RemovePath(sandbox, props)
 	}
-	actions.AddParameter = func(props api.RouteParameterProps) error {
+	actions.AddParameter = func(props api.AddParameterProps) error {
 		return addParameterAction.AddParameter(sandbox, props)
 	}
-	actions.SetParameter = func(props api.RouteParameterEditProps) error {
+	actions.SetParameter = func(props api.SetParameterProps) error {
 		return setParameterAction.SetParameter(sandbox, props)
 	}
-	actions.RemoveParameter = func(path string, route string, name string) error {
-		return removeParameterAction.RemoveParameter(sandbox, path, route, name)
+	actions.RemoveParameter = func(props api.RemoveParameterProps) error {
+		return removeParameterAction.RemoveParameter(sandbox, props)
 	}
-	actions.SetBody = func(props api.RouteBodyProps) error {
+	actions.SetBody = func(props api.SetBodyProps) error {
 		return setBodyAction.SetBody(sandbox, props)
 	}
-	actions.AddBodyField = func(props api.RouteBodyFieldProps) error {
+	actions.AddBodyField = func(props api.AddBodyFieldProps) error {
 		return addBodyFieldAction.AddBodyField(sandbox, props)
 	}
-	actions.RemoveBodyField = func(path string, route string, name string) error {
-		return removeBodyFieldAction.RemoveBodyField(sandbox, path, route, name)
+	actions.RemoveBodyField = func(props api.RemoveBodyFieldProps) error {
+		return removeBodyFieldAction.RemoveBodyField(sandbox, props)
 	}
-	actions.SetBodyField = func(props api.RouteBodyFieldEditProps) error {
+	actions.SetBodyField = func(props api.SetBodyFieldProps) error {
 		return setBodyFieldAction.SetBodyField(sandbox, props)
 	}
-	actions.ImportBody = func(props api.RouteBodyImportProps) error {
+	actions.ImportBody = func(props api.ImportBodyProps) error {
 		return importBodyAction.ImportBody(sandbox, props)
 	}
-	actions.ShowRoute = func(path string, route string) ([]string, error) {
-		return showRouteAction.ShowRoute(sandbox, path, route)
+	actions.ShowRoute = func(props api.ShowRouteProps) ([]string, error) {
+		return showRouteAction.ShowRoute(sandbox, props)
 	}
-	actions.ListRoutes = func(path string) ([]string, error) {
-		return listRoutesAction.ListRoutes(sandbox, path)
+	actions.ListRoutes = func(props api.ListRoutesProps) ([]string, error) {
+		return listRoutesAction.ListRoutes(sandbox, props)
 	}
 	actions.ExplainRoute = func(props api.ExplainRouteProps) ([]string, error) {
 		return explainRouteAction.ExplainRoute(sandbox, props)
@@ -260,80 +260,80 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	actions.RebalanceRoutes = func(props api.RebalanceRoutesProps) error {
 		return rebalanceRoutesAction.RebalanceRoutes(sandbox, props)
 	}
-	actions.DatabaseInit = func(path string) error {
-		return databaseInitAction.DatabaseInit(sandbox, path)
+	actions.DatabaseInit = func(props api.DatabaseInitProps) error {
+		return databaseInitAction.DatabaseInit(sandbox, props)
 	}
-	actions.DatabasePurge = func(path string) error {
-		return databasePurgeAction.DatabasePurge(sandbox, path)
+	actions.DatabasePurge = func(props api.DatabasePurgeProps) error {
+		return databasePurgeAction.DatabasePurge(sandbox, props)
 	}
-	actions.AddDatabase = func(path string, name string, prefix string) error {
-		return addDatabaseAction.AddDatabase(sandbox, path, name, prefix)
+	actions.AddDatabase = func(props api.AddDatabaseProps) error {
+		return addDatabaseAction.AddDatabase(sandbox, props)
 	}
-	actions.RemoveDatabase = func(path string, name string) error {
-		return removeDatabaseAction.RemoveDatabase(sandbox, path, name)
+	actions.RemoveDatabase = func(props api.RemoveDatabaseProps) error {
+		return removeDatabaseAction.RemoveDatabase(sandbox, props)
 	}
-	actions.AddTable = func(path string, database string, table string) error {
-		return addTableAction.AddTable(sandbox, path, database, table)
+	actions.AddTable = func(props api.AddTableProps) error {
+		return addTableAction.AddTable(sandbox, props)
 	}
-	actions.RemoveTable = func(path string, database string, table string) error {
-		return removeTableAction.RemoveTable(sandbox, path, database, table)
+	actions.RemoveTable = func(props api.RemoveTableProps) error {
+		return removeTableAction.RemoveTable(sandbox, props)
 	}
-	actions.AddTableField = func(props api.DatabaseFieldProps) error {
+	actions.AddTableField = func(props api.AddTableFieldProps) error {
 		return addTableFieldAction.AddTableField(sandbox, props)
 	}
-	actions.SetTableField = func(props api.DatabaseFieldEditProps) error {
+	actions.SetTableField = func(props api.SetTableFieldProps) error {
 		return setTableFieldAction.SetTableField(sandbox, props)
 	}
-	actions.RemoveTableField = func(props api.DatabaseFieldProps) error {
+	actions.RemoveTableField = func(props api.RemoveTableFieldProps) error {
 		return removeTableFieldAction.RemoveTableField(sandbox, props)
 	}
-	actions.ShowDatabase = func(path string, database string) ([]string, error) {
-		return showDatabaseAction.ShowDatabase(sandbox, path, database)
+	actions.ShowDatabase = func(props api.ShowDatabaseProps) ([]string, error) {
+		return showDatabaseAction.ShowDatabase(sandbox, props)
 	}
-	actions.FrontInit = func(path string) error {
-		return frontInitAction.FrontInit(sandbox, path)
+	actions.FrontInit = func(props api.FrontInitProps) error {
+		return frontInitAction.FrontInit(sandbox, props)
 	}
-	actions.FrontPurge = func(path string) error {
-		return frontPurgeAction.FrontPurge(sandbox, path)
+	actions.FrontPurge = func(props api.FrontPurgeProps) error {
+		return frontPurgeAction.FrontPurge(sandbox, props)
 	}
-	actions.BackofficeInit = func(path string) error {
-		return backofficeInitAction.BackofficeInit(sandbox, path)
+	actions.BackofficeInit = func(props api.BackofficeInitProps) error {
+		return backofficeInitAction.BackofficeInit(sandbox, props)
 	}
-	actions.BackofficePurge = func(path string) error {
-		return backofficePurgeAction.BackofficePurge(sandbox, path)
+	actions.BackofficePurge = func(props api.BackofficePurgeProps) error {
+		return backofficePurgeAction.BackofficePurge(sandbox, props)
 	}
-	actions.AddPage = func(props api.PageProps) error {
+	actions.AddPage = func(props api.AddPageProps) error {
 		return addPageAction.AddPage(sandbox, props)
 	}
-	actions.RemovePage = func(path string, name string) error {
-		return removePageAction.RemovePage(sandbox, path, name)
+	actions.RemovePage = func(props api.RemovePageProps) error {
+		return removePageAction.RemovePage(sandbox, props)
 	}
-	actions.AddDoc = func(props api.DocProps) error {
+	actions.AddDoc = func(props api.AddDocProps) error {
 		return addDocAction.AddDoc(sandbox, props)
 	}
-	actions.RemoveDoc = func(path string, name string) error {
-		return removeDocAction.RemoveDoc(sandbox, path, name)
+	actions.RemoveDoc = func(props api.RemoveDocProps) error {
+		return removeDocAction.RemoveDoc(sandbox, props)
 	}
-	actions.AddCliExample = func(path string, name string) error {
-		return addCliExampleAction.AddCliExample(sandbox, path, name)
+	actions.AddCliExample = func(props api.AddCliExampleProps) error {
+		return addCliExampleAction.AddCliExample(sandbox, props)
 	}
-	actions.RemoveCliExample = func(path string, name string) error {
-		return removeCliExampleAction.RemoveCliExample(sandbox, path, name)
+	actions.RemoveCliExample = func(props api.RemoveCliExampleProps) error {
+		return removeCliExampleAction.RemoveCliExample(sandbox, props)
 	}
-	actions.AddLibExample = func(path string, name string) error {
-		return addLibExampleAction.AddLibExample(sandbox, path, name)
+	actions.AddLibExample = func(props api.AddLibExampleProps) error {
+		return addLibExampleAction.AddLibExample(sandbox, props)
 	}
-	actions.RemoveLibExample = func(path string, name string) error {
-		return removeLibExampleAction.RemoveLibExample(sandbox, path, name)
+	actions.RemoveLibExample = func(props api.RemoveLibExampleProps) error {
+		return removeLibExampleAction.RemoveLibExample(sandbox, props)
 	}
-	actions.ExecTest = func(props api.ExecTestProps) error {
-		return execTestsAction.ExecTest(sandbox, props)
+	actions.RunExamples = func(props api.RunExamplesProps) error {
+		return runExamplesAction.RunExamples(sandbox, props)
 	}
-	actions.UpdateTest = func(path string, name string) error {
-		return updateTestsAction.UpdateTest(sandbox, path, name)
+	actions.UpdateExample = func(props api.UpdateExampleProps) error {
+		return updateExampleAction.UpdateExample(sandbox, props)
 	}
-	actions.Interview = func(path string) error {
-		return interviewAction.Interview(sandbox, path)
+	actions.Interview = func(props api.InterviewProps) error {
+		return interviewAction.Interview(sandbox, props)
 	}
 
 	return actions

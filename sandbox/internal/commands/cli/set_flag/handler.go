@@ -6,29 +6,29 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	set_error := setFlagAction.SetFlag(sandbox, api.FlagEditProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	set_error := setFlagAction.SetFlag(sandbox, api.SetFlagProps{
 		Path:              props.Path,
-		Command:           entries.Target,
-		Name:              entries.Name,
-		Rename:            entries.Rename,
-		Keys:              entries.Key,
-		Type:              entries.Type,
-		Required:          entries.Required,
-		Default:           entries.Default,
-		Min:               entries.Min,
-		Max:               entries.Max,
-		Enum:              entries.Enum,
-		Pattern:           entries.Pattern,
-		Trigger:           entries.Trigger,
-		TriggerType:       entries.TriggerType,
-		TriggerNegate:     entries.TriggerNegate,
-		TriggerIgnoreCase: entries.TriggerIgnoreCase,
-		Description:       entries.Description,
-		Clear:             entries.Clear,
+		Command:           input.Command,
+		Name:              input.Name,
+		Rename:            input.Rename,
+		Keys:              input.Key,
+		Type:              input.Type,
+		Required:          input.Required,
+		Default:           input.Default,
+		Min:               input.Min,
+		Max:               input.Max,
+		Enum:              input.Enum,
+		Pattern:           input.Pattern,
+		Trigger:           input.Trigger,
+		TriggerType:       input.TriggerType,
+		TriggerNegate:     input.TriggerNegate,
+		TriggerIgnoreCase: input.TriggerIgnoreCase,
+		Description:       input.Description,
+		Clear:             input.Clear,
 	})
 	if set_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

@@ -1,13 +1,12 @@
 category: Middleware
-help: Requires a valid backoffice session on /admin, except /admin/login
 methods:
     - ANY
 parameters:
     - description: the session JWT set by POST /admin/login
-      fonts:
+      sources:
         - cookie
       id: AdminToken
-      key: admin_token
+      key: backoffice_session
       type: string
 paths:
     - end: -1
@@ -26,3 +25,4 @@ paths:
         value: /admin/login
 priority: 10
 response-type: text/html
+summary: Requires a valid backoffice session on /admin, except /admin/login

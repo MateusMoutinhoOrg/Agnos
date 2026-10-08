@@ -1,7 +1,7 @@
 priority: 10
 strict: false
 args:
-    - id: Command
+    - id: Verb
       start: 0
       end: -1
       trigger:
@@ -18,8 +18,8 @@ flags:
       type: boolean
       description: Quiets the cli output
 category: Middleware
-help: Read --path and --quiet in front of every command
-long-description: |-
+summary: Read --path and --quiet in front of every command
+description: |-
     Runs in front of every command line and answers none of them. It reads
     --path into props.Path, the project every action works on, and --quiet,
     which silences the progress channel for the rest of the process. No command

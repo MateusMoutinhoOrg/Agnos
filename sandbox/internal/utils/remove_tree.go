@@ -2,12 +2,12 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // RemoveTree removes each given path and then every directory the removal left
 // empty, so the build collectors stop enumerating it.
-func RemoveTree(sandbox *api.Sandbox, io *smartio.SmartIO, paths []string) {
+func RemoveTree(sandbox *api.Sandbox, io *stagedfs.StagedFS, paths []string) {
 	for _, path := range paths {
 		io.RemoveDir(path)
 	}
@@ -25,17 +25,17 @@ func ancestorDirs(sandbox *api.Sandbox, paths []string) []string {
 	seen := map[string]bool{}
 	var dirs []string
 	for _, path := range paths {
-		parts := sandbox.Deps.Stringsdeps.Split(path, "/")
+		parts := sandbox.Deps.StringsDeps.Split(path, "/")
 		for i := 1; i < len(parts); i++ {
-			dir := sandbox.Deps.Stringsdeps.Join(parts[:i], "/")
+			dir := sandbox.Deps.StringsDeps.Join(parts[:i], "/")
 			if !seen[dir] {
 				seen[dir] = true
 				dirs = append(dirs, dir)
 			}
 		}
 	}
-	sandbox.Deps.Sortdeps.Slice(dirs, func(i, j int) bool {
-		return sandbox.Deps.Stringsdeps.Count(dirs[i], "/") > sandbox.Deps.Stringsdeps.Count(dirs[j], "/")
+	sandbox.Deps.SortDeps.Slice(dirs, func(i, j int) bool {
+		return sandbox.Deps.StringsDeps.Count(dirs[i], "/") > sandbox.Deps.StringsDeps.Count(dirs[j], "/")
 	})
 	return dirs
 }

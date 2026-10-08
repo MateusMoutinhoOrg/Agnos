@@ -1,18 +1,18 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
-        value: add-available
-    - description: the name of the new available (it becomes one directory under adapters/availables/)
+        value: add-binding
+    - description: the name of the new binding (it becomes one directory under adapters/bindings/)
       end: 1
-      id: Available
+      id: Name
       required: true
       start: 1
-category: Deps System
+category: Deps
+description: Creates adapters/bindings/<name>/binding.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --binding.
 examples:
-    - add-available lambda
-help: Declares one further available
-long-description: Creates adapters/availables/<name>/available.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --available.
+    - add-binding lambda
 priority: 100
+summary: Declare one further binding

@@ -3,31 +3,31 @@ package backofficeauth
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/jwtdeps"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 )
 
-// CookieName is the cookie the session token travels in. The authentication
+// CookieName is the cookie the session token travels in. The backoffice-session-auth
 // route declares a cookie parameter under the same key.
-const CookieName = "admin_token"
+const CookieName = "backoffice_session"
 
 // SessionSeconds is how long a session token is valid after login.
 const SessionSeconds = 30 * 60
 
 // SecretEnv is the environment variable that may hold the secret that signs
 // session tokens: the project's name upper-cased, every character
-// but a letter or a digit turned into "_", then "_SECRET" — MEUSITE_SECRET for
-// a project named meusite. It follows the name the project is built under, so
+// but a letter or a digit turned into "_", then "_BACKOFFICE_SECRET" —
+// MEUSITE_BACKOFFICE_SECRET for a project named meusite. It follows the name the project is built under, so
 // renaming the project renames the variable. It is never a flag — every user
 // of the machine reads a command line — nor a file, which can end up committed
 // with the code.
 func SecretEnv(sandbox *api.Sandbox) string {
-	name := []byte(sandbox.Deps.Stringsdeps.ToUpper(sandbox.Config.ProjectName))
+	name := []byte(sandbox.Deps.StringsDeps.ToUpper(sandbox.Config.ProjectName))
 	for i, char := range name {
 		if !(char >= 'A' && char <= 'Z') && !(char >= '0' && char <= '9') {
 			name[i] = '_'
 		}
 	}
-	return string(name) + "_SECRET"
+	return string(name) + "_BACKOFFICE_SECRET"
 }
 
 // MinSecretLength is the fewest characters the secret may have.
@@ -85,7 +85,7 @@ func ValidRole(sandbox *api.Sandbox, role Role) bool {
 
 // nowSeconds is the current time in seconds since the Unix epoch.
 func nowSeconds(sandbox *api.Sandbox) int64 {
-	return sandbox.Deps.Std.Now() / 1_000_000_000
+	return sandbox.Deps.StdDeps.Now() / 1_000_000_000
 }
 
 // ReadSecret is the secret that signs session tokens, read from the SecretEnv
@@ -96,13 +96,13 @@ func nowSeconds(sandbox *api.Sandbox) int64 {
 // so a mistyped secret never turns into a generated one in silence.
 func ReadSecret(sandbox *api.Sandbox) (string, bool, error) {
 	env := SecretEnv(sandbox)
-	secret := sandbox.Deps.Envdeps.Getenv(env)
+	secret := sandbox.Deps.EnvDeps.Getenv(env)
 	if secret == "" {
-		generated, err := sandbox.Deps.Randdeps.Hex(GeneratedSecretBytes)
+		generated, err := sandbox.Deps.RandDeps.Hex(GeneratedSecretBytes)
 		return generated, true, err
 	}
 	if len(secret) < MinSecretLength {
-		return "", false, sandbox.Deps.Std.Errorf("the %s environment variable holds fewer than %d characters: set it to a random secret (openssl rand -hex 32), or unset it to have one generated for each run; it signs the backoffice sessions", env, MinSecretLength)
+		return "", false, sandbox.Deps.StdDeps.Errorf("the %s environment variable holds fewer than %d characters: set it to a random secret (openssl rand -hex 32), or unset it to have one generated for each run; it signs the backoffice sessions", env, MinSecretLength)
 	}
 	return secret, false, nil
 }
@@ -111,32 +111,32 @@ func ReadSecret(sandbox *api.Sandbox) (string, bool, error) {
 // slow hash of it, with a salt of its own, so equal passwords never share a
 // hash and a leaked database is slow to guess at.
 func HashPassword(sandbox *api.Sandbox, password string) (string, error) {
-	return sandbox.Deps.Passworddeps.Hash(password)
+	return sandbox.Deps.PasswordDeps.Hash(password)
 }
 
-// FindByLogin looks a backoffice user up by username or email. It reads every
+// FindUserByUsernameOrEmail looks a backoffice user up by username or email. It reads every
 // user once whichever the login is, so a username, an email and a login that
 // names nobody take the same time.
-func FindByLogin(sandbox *api.Sandbox, login string) (backofficedb.BackofficeuserItem, bool, error) {
-	users, err := backofficedb.New(sandbox).ListBackofficeuser(backofficedb.BackofficeuserFiltrage{})
+func FindUserByUsernameOrEmail(sandbox *api.Sandbox, login string) (backoffice_db.BackofficeUserRecord, bool, error) {
+	users, err := backoffice_db.New(sandbox).ListBackofficeUsers(backoffice_db.BackofficeUserFilter{})
 	if err != nil {
-		return backofficedb.BackofficeuserItem{}, false, err
+		return backoffice_db.BackofficeUserRecord{}, false, err
 	}
 	for _, user := range users {
 		if user.Username == login || user.Email == login {
 			return user, true, nil
 		}
 	}
-	return backofficedb.BackofficeuserItem{}, false, nil
+	return backoffice_db.BackofficeUserRecord{}, false, nil
 }
 
 // Authenticate answers the user whose login (username or email) and password
 // match, or false when either does not. A login that names nobody still costs
 // one password hash, so how long a refusal takes never tells an unknown login
 // from a wrong password.
-func Authenticate(sandbox *api.Sandbox, login string, password string) (backofficedb.BackofficeuserItem, bool, error) {
-	none := backofficedb.BackofficeuserItem{}
-	user, ok, err := FindByLogin(sandbox, login)
+func Authenticate(sandbox *api.Sandbox, login string, password string) (backoffice_db.BackofficeUserRecord, bool, error) {
+	none := backoffice_db.BackofficeUserRecord{}
+	user, ok, err := FindUserByUsernameOrEmail(sandbox, login)
 	if err != nil {
 		return none, false, err
 	}
@@ -144,51 +144,51 @@ func Authenticate(sandbox *api.Sandbox, login string, password string) (backoffi
 		_, err = HashPassword(sandbox, password)
 		return none, false, err
 	}
-	match, err := sandbox.Deps.Passworddeps.Verify(user.Passwordhash, password)
+	match, err := sandbox.Deps.PasswordDeps.Verify(user.PasswordHash, password)
 	if err != nil || !match {
 		return none, false, err
 	}
 	return user, true, nil
 }
 
-// IssueToken opens a session for user, whose request came from the client ip
+// IssueSessionJWT opens a session for user, whose request came from the client ip
 // ip, and signs its token, valid for SessionSeconds and bound to ip. The session is a sessions record under user, living as long
 // as the token; its id travels as the token's `jti`, so the authentication
 // middleware can tell whether that one session is still open. The user's
 // expired sessions are dropped first, so they never pile up.
-func IssueToken(sandbox *api.Sandbox, user backofficedb.BackofficeuserItem, ip string) (string, error) {
+func IssueSessionJWT(sandbox *api.Sandbox, user backoffice_db.BackofficeUserRecord, ip string) (string, error) {
 	now := nowSeconds(sandbox)
 	err := dropExpired(sandbox, user.Id, now)
 	if err != nil {
 		return "", err
 	}
 
-	session, err := backofficedb.New(sandbox).AddBackofficeuserSessions(user.Id, backofficedb.SessionsNew{
-		Expiresat: now + SessionSeconds,
+	session, err := backoffice_db.New(sandbox).AddBackofficeUserSession(user.Id, backoffice_db.BackofficeUserSessionInput{
+		ExpiresAt: now + SessionSeconds,
 	})
 	if err != nil {
 		return "", err
 	}
 
-	return sandbox.Deps.Jwtdeps.Sign(jwtdeps.Claims{
-		Id:        sandbox.Deps.Stringsdeps.FormatInt(session.Id, 10),
-		Subject:   sandbox.Deps.Stringsdeps.FormatInt(user.Id, 10),
+	return sandbox.Deps.JwtDeps.Sign(jwtdeps.Claims{
+		Id:        sandbox.Deps.StringsDeps.FormatInt(session.Id, 10),
+		Subject:   sandbox.Deps.StringsDeps.FormatInt(user.Id, 10),
 		IssuedAt:  now,
 		ExpiresAt: now + SessionSeconds,
 		Ip:        ip,
-	}, sandbox.Config.Secret)
+	}, sandbox.Config.SessionSecret)
 }
 
 // SessionCookie is the Set-Cookie value carrying token: HttpOnly,
 // SameSite=Strict, Secure unless start-server serves plain http, on every
 // path, expiring with the token.
 func SessionCookie(sandbox *api.Sandbox, token string) string {
-	return sandbox.Deps.Std.Sprintf("%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Strict%s", CookieName, token, SessionSeconds, secureAttribute(sandbox))
+	return sandbox.Deps.StdDeps.Sprintf("%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Strict%s", CookieName, token, SessionSeconds, secureAttribute(sandbox))
 }
 
 // ClearedCookie is the Set-Cookie value that removes the session cookie.
 func ClearedCookie(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Std.Sprintf("%s=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict%s", CookieName, secureAttribute(sandbox))
+	return sandbox.Deps.StdDeps.Sprintf("%s=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict%s", CookieName, secureAttribute(sandbox))
 }
 
 // secureAttribute is the Secure attribute of the session cookie, which keeps
@@ -206,8 +206,8 @@ func secureAttribute(sandbox *api.Sandbox) string {
 // The api-authentication middleware reads the API token from there, where the
 // authentication one reads the session token from the session cookie.
 func BearerToken(sandbox *api.Sandbox, authorization string) string {
-	fields := sandbox.Deps.Stringsdeps.Fields(authorization)
-	if len(fields) != 2 || sandbox.Deps.Stringsdeps.ToLower(fields[0]) != "bearer" {
+	fields := sandbox.Deps.StringsDeps.Fields(authorization)
+	if len(fields) != 2 || sandbox.Deps.StringsDeps.ToLower(fields[0]) != "bearer" {
 		return ""
 	}
 	return fields[1]
@@ -216,14 +216,14 @@ func BearerToken(sandbox *api.Sandbox, authorization string) string {
 // dropExpired deletes every session of the user with id userId that expired
 // by now: its token is refused anyway, so the record is only garbage.
 func dropExpired(sandbox *api.Sandbox, userId int64, now int64) error {
-	db := backofficedb.New(sandbox)
-	sessions, err := db.ListBackofficeuserSessions(userId)
+	db := backoffice_db.New(sandbox)
+	sessions, err := db.ListBackofficeUserSessions(userId)
 	if err != nil {
 		return err
 	}
 	for _, session := range sessions {
-		if session.Expiresat <= now {
-			err = backofficedb.RemoveBackofficeuserSessions(sandbox, db, userId, session.Id)
+		if session.ExpiresAt <= now {
+			err = backoffice_db.RemoveBackofficeUserSession(sandbox, db, userId, session.Id)
 			if err != nil {
 				return err
 			}
@@ -233,48 +233,48 @@ func dropExpired(sandbox *api.Sandbox, userId int64, now int64) error {
 }
 
 // findSession is the session with id sessionId of the user with id userId.
-func findSession(sandbox *api.Sandbox, userId int64, sessionId int64) (backofficedb.SessionsItem, bool) {
-	sessions, err := backofficedb.New(sandbox).ListBackofficeuserSessions(userId)
+func findSession(sandbox *api.Sandbox, userId int64, sessionId int64) (backoffice_db.BackofficeUserSessionRecord, bool) {
+	sessions, err := backoffice_db.New(sandbox).ListBackofficeUserSessions(userId)
 	if err != nil {
-		return backofficedb.SessionsItem{}, false
+		return backoffice_db.BackofficeUserSessionRecord{}, false
 	}
 	for _, session := range sessions {
 		if session.Id == sessionId {
 			return session, true
 		}
 	}
-	return backofficedb.SessionsItem{}, false
+	return backoffice_db.BackofficeUserSessionRecord{}, false
 }
 
-// SessionOfToken answers the user a session token was issued for and the
+// ResolveSession answers the user a session token was issued for and the
 // session it names, or false when the token is invalid or expired, was issued
 // to another client ip than ip, names a session that was closed by a logout,
 // or its user no longer exists.
-func SessionOfToken(sandbox *api.Sandbox, token string, ip string) (backofficedb.BackofficeuserItem, backofficedb.SessionsItem, bool) {
-	none := func() (backofficedb.BackofficeuserItem, backofficedb.SessionsItem, bool) {
-		return backofficedb.BackofficeuserItem{}, backofficedb.SessionsItem{}, false
+func ResolveSession(sandbox *api.Sandbox, token string, ip string) (backoffice_db.BackofficeUserRecord, backoffice_db.BackofficeUserSessionRecord, bool) {
+	none := func() (backoffice_db.BackofficeUserRecord, backoffice_db.BackofficeUserSessionRecord, bool) {
+		return backoffice_db.BackofficeUserRecord{}, backoffice_db.BackofficeUserSessionRecord{}, false
 	}
 	if token == "" || ip == "" {
 		return none()
 	}
-	claims, err := sandbox.Deps.Jwtdeps.Parse(token, sandbox.Config.Secret)
+	claims, err := sandbox.Deps.JwtDeps.Parse(token, sandbox.Config.SessionSecret)
 	if err != nil || claims.Ip != ip {
 		return none()
 	}
-	userId, err := sandbox.Deps.Stringsdeps.ParseInt(claims.Subject, 10, 64)
+	userId, err := sandbox.Deps.StringsDeps.ParseInt(claims.Subject, 10, 64)
 	if err != nil {
 		return none()
 	}
-	sessionId, err := sandbox.Deps.Stringsdeps.ParseInt(claims.Id, 10, 64)
+	sessionId, err := sandbox.Deps.StringsDeps.ParseInt(claims.Id, 10, 64)
 	if err != nil {
 		return none()
 	}
-	user, ok := backofficedb.New(sandbox).FindBackofficeuserById(userId)
+	user, ok := backoffice_db.New(sandbox).FindBackofficeUserById(userId)
 	if !ok {
 		return none()
 	}
 	session, ok := findSession(sandbox, user.Id, sessionId)
-	if !ok || session.Expiresat <= nowSeconds(sandbox) {
+	if !ok || session.ExpiresAt <= nowSeconds(sandbox) {
 		return none()
 	}
 	return user, session, true
@@ -284,9 +284,9 @@ func SessionOfToken(sandbox *api.Sandbox, token string, ip string) (backofficedb
 // their tokens are refused from here on; nil keep closes them all. It runs
 // when the user's password changes, so a session opened with the old one
 // does not outlive it.
-func CloseSessions(sandbox *api.Sandbox, userId int64, keep *backofficedb.SessionsItem) error {
-	db := backofficedb.New(sandbox)
-	sessions, err := db.ListBackofficeuserSessions(userId)
+func CloseSessions(sandbox *api.Sandbox, userId int64, keep *backoffice_db.BackofficeUserSessionRecord) error {
+	db := backoffice_db.New(sandbox)
+	sessions, err := db.ListBackofficeUserSessions(userId)
 	if err != nil {
 		return err
 	}
@@ -294,7 +294,7 @@ func CloseSessions(sandbox *api.Sandbox, userId int64, keep *backofficedb.Sessio
 		if keep != nil && session.Id == keep.Id {
 			continue
 		}
-		err = backofficedb.RemoveBackofficeuserSessions(sandbox, db, userId, session.Id)
+		err = backoffice_db.RemoveBackofficeUserSession(sandbox, db, userId, session.Id)
 		if err != nil {
 			return err
 		}
@@ -304,8 +304,8 @@ func CloseSessions(sandbox *api.Sandbox, userId int64, keep *backofficedb.Sessio
 
 // Logout closes session of user: its record is deleted, so its token is
 // refused from here on, along with every other session of user that expired.
-func Logout(sandbox *api.Sandbox, user backofficedb.BackofficeuserItem, session backofficedb.SessionsItem) error {
-	err := backofficedb.RemoveBackofficeuserSessions(sandbox, backofficedb.New(sandbox), user.Id, session.Id)
+func Logout(sandbox *api.Sandbox, user backoffice_db.BackofficeUserRecord, session backoffice_db.BackofficeUserSessionRecord) error {
+	err := backoffice_db.RemoveBackofficeUserSession(sandbox, backoffice_db.New(sandbox), user.Id, session.Id)
 	if err != nil {
 		return err
 	}

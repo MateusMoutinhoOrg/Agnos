@@ -1,34 +1,34 @@
-package add_available
+package add_binding
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// AddAvailableInternal declares one further available: a second answer to
+// AddBindingInternal declares one further binding: a second answer to
 // "which adapter wins for each field", for a build that swaps one
 // implementation — a lambda entry point for the http server, say.
 //
-// It starts as a copy of the standard available's selection, not empty: every
-// available has to fill every field, so an empty one would be a tree that
+// It starts as a copy of the standard binding's selection, not empty: every
+// binding has to fill every field, so an empty one would be a tree that
 // fails `verify` the moment it is written. Point it at another adapter with
-// `set-adapter --available <name>`.
-func AddAvailableInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string, available string) error {
-	sandbox.Deps.Std.Log("add-available started with path %s available %s \n", path, available)
+// `set-adapter --binding <name>`.
+func AddBindingInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string, binding string) error {
+	sandbox.Deps.StdDeps.Logf("add-binding started with path %s binding %s \n", path, binding)
 
-	if err := utils.ValidateAvailableName(sandbox, available); err != nil {
+	if err := utils.ValidateBindingName(sandbox, binding); err != nil {
 		return err
 	}
 
-	if io.IsDir(utils.AvailableDir(available)) {
-		return sandbox.Deps.Std.Errorf("available %q already exists", available)
+	if io.IsDir(utils.BindingDir(binding)) {
+		return sandbox.Deps.StdDeps.Errorf("binding %q already exists", binding)
 	}
 
-	conf, err := utils.LoadAvailableConf(sandbox, io, utils.StandardAvailable)
+	conf, err := utils.LoadBindingConf(sandbox, io, utils.StandardBinding)
 	if err != nil {
-		return sandbox.Deps.Std.Errorf("no %s available to copy the selection from: run `agnos deps-init` first", utils.StandardAvailable)
+		return sandbox.Deps.StdDeps.Errorf("no %s binding to copy the selection from: run `agnos deps-init` first", utils.StandardBinding)
 	}
 
-	return io.WriteFile(utils.AvailableConfPath(available), []byte(conf.Render()))
+	return io.CreateFile(utils.BindingConfPath(binding), []byte(conf.Render()))
 }

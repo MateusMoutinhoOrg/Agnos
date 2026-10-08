@@ -13,32 +13,32 @@ go build -o release/bootstrap.bin ./cmd/main
 ./release/bootstrap.bin local-install                           # install the result
 ```
 
-Release: bump `version` in `AgnosConfig/project.yaml`, then `./release/bootstrap.bin build` and `./release/bootstrap.bin exec-test --update` — the bumped version is rendered into `docs/Requirements/doc.md`, so every golden carrying that page moves — then `agnos publish` (or `agnos compile --target all` for the binaries alone).
+Release: bump `version` in `AgnosConfig/project.yaml`, then `./release/bootstrap.bin build` and `./release/bootstrap.bin run-examples --update` — the bumped version is rendered into `docs/Requirements/doc.md`, so every golden carrying that page moves — then `agnos publish` (or `agnos compile --target all` for the binaries alone).
 
 ## Add an action
 
-1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(sandbox, io *smartio.SmartIO, ...) error`. Project-relative paths only. Log via `sandbox.Deps.Std.Log`, fail via `sandbox.Deps.Std.Errorf`, never `Printf`.
-2. `<name>.go`: `func <Name>(sandbox, ...) error` = `smartio.New(sandbox, path, sandbox.Config.ProjectName)` -> internal -> `io.Persist()` -> `buildAction.Build(sandbox, api.BuildProps{Path, Runtime})` (`RuntimeGo` if it adds, `RuntimeNone` if it removes). Props with more than three values go in a struct in `sandbox/api/actions.go`.
+1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(sandbox, io *stagedfs.StagedFS, ...) error`. Project-relative paths only. Log via `sandbox.Deps.StdDeps.Logf`, fail via `sandbox.Deps.StdDeps.Errorf`, never `Printf`.
+2. `<name>.go`: `func <Name>(sandbox, props api.<Name>Props) error` = `stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)` -> internal -> `io.Persist()` -> `buildAction.Build(sandbox, api.BuildProps{Path, Runtime})` (`RuntimeGo` if it adds, `RuntimeNone` if it removes). Every action takes one `<Name>Props` struct of `sandbox/api/actions.go`, `Path` first, so its signature is guessed without reading it.
 3. Add the field to `api.Actions` and the assignment to `NewActions` in `sandbox/internal/actions/new.go`.
 4. Comment the new field: its row in [PublicApi](../PublicApi/doc.md) is generated from that comment.
 
 ## Add a command to agnos
 
-Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core Commands, Cli System, Server System, Front System, Database System, Backoffice System, Dependencies, Dependency System, Info) and the two flags every agnos command carries:
+Declare it with the bootstrap binary, as in [Workflow](../Workflow/doc.md#change-the-command-surface), with a `--category` this repo already uses (Core, Cli, Server, Front, Database, Backoffice, Deps, Docs, Examples, Extensions, Info, Middleware):
 
 ```bash
-./release/bootstrap.bin add-command <name> --help "..." --category "Core Commands" --dir core
+./release/bootstrap.bin add-command <name> --summary "..." --category Core
 ```
 
-`--dir` is the folder of `sandbox/internal/commands/` its category lives in: `core`, `cli`,
-`server`, `front`, `database`, `backoffice`, `deps`, `examples`, `extensions`, `docs`. Only `help`, `version`,
-`help_flag` (generated at a fixed path) and the `project` middleware sit at the top. A directory
-is a command by holding a `command.yaml`, so the folder costs nothing to read; move one with
-`rename-command <name> <name> --dir <folder>`.
+The command lands in the folder of its category, snake_cased: `Core` puts it in
+`sandbox/internal/commands/core/<name>`, and `help`, `version` and `interview` sit in `info/`,
+`help_flag` and the `project-flags` middleware in `middleware/`. `--dir` overrides the folder. A
+directory is a command by holding a `command.yaml`, so the folder costs nothing to read; move one
+with `rename-command <name> <name> --dir <folder>`.
 
-`--path` and `--quiet` come from the `project` middleware: the command declares neither.
-`InternalPureHandler.go` calls the action, returns `sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())`
-on error and `Printf`s the result. Progress goes to `response.Log`, never `Printf`: a print
+`--path` and `--quiet` come from the `project-flags` middleware: the command declares neither.
+`handler.go` calls the action, returns `sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", err.Error())`
+on error and `Printf`s the result. Progress goes to `response.Logf`, never `Printf`: a print
 answers the line with exit 0, but a failure returned after it still exits 1.
 
 `interview` needs nothing for the new command: it generates its questions from the declaration. It is one of the two things agnos writes for a person rather than for an llm — the other is a server project's `docs/Routes/` — ([Interview](../Interview/doc.md)), and seven of its tables take an entry — only for a command that is one of these:
@@ -57,49 +57,49 @@ answers the line with exit 0, but a failure returned after it still exits 1.
 
 ## Add a layer (cli, server, …)
 
-A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one. The front layer is the third column: it declares no unit of its own, because a page **is** a file of `assets/frontend/`, served by one route `front-init` writes. The database layer is the fourth, and the one that breaks the shape: its methods are typed by table, so there is no generic dispatch and no field of the `Sandbox` — the declaration is spelled out into three generated files instead of being read back at runtime.
+A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server layer is the pattern to copy — file for file, it mirrors the cli one. The front layer is the third column: it declares no unit of its own, because a page **is** a file of `assets/front/`, served by one route `front-init` writes. The database layer is the fourth, and the one that breaks the shape: its methods are typed by table, so there is no generic dispatch and no field of the `Sandbox` — the declaration is spelled out into three generated files instead of being read back at runtime.
 
 | Concept | CLI | Server | Front | Database |
 |---|---|---|---|---|
-| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps`) | `sandbox/deps/database/` (a remote dep, not a catalog one) |
-| Surface + constructor | `sandbox/api/{cli,command,trigger}.go` (aliases), `sandbox/internal/generated/cli/cli/new.go` -> `Cli.Commands` | `sandbox/api/{server,route}.go` (aliases), `sandbox/internal/generated/server/server/new.go` -> `Server.Routes` (found by `utils.ConstructorSource`, one level down) | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
+| External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps`) | `sandbox/deps/databasedeps/` (a remote dep, not a catalog one) |
+| Surface + constructor | `sandbox/api/{cli,command,trigger}.go` (aliases), `sandbox/internal/generated/cli/new.go` -> `Cli.Commands` | `sandbox/api/{server,route}.go` (aliases), `sandbox/internal/generated/server/new.go` -> `Server.Routes` (found by `utils.ConstructorSource`, one level down) | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
 | Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — | — |
-| Opinated lib (the code every project shares) | `OpinatedAgnosCli`: `CliMain` (dispatch, binder, matcher), `Fail`, `FailureOf`, `MatchTrigger` | `OpinatedAgnosServer`: `ServerMain` (dispatch, binder, matcher), `Fail`, `FailureOf`, `WriteError`, `WriteJSON`, the json-schema validators | `OpinatedAgnosFront`: `Resolve`, `SafePath`, `ContentTypeOf` | `OpinatedAgnosDatabase`: the readers and filters every `methods.go` calls |
+| Opinionated lib (the code every project shares) | `OpinionatedAgnosCli`: `Main` (dispatch, binder, matcher), `Fail`, `FailureOf`, `MatchTrigger` | `OpinionatedAgnosServer`: `Main` (dispatch, binder, matcher), `Fail`, `FailureOf`, `WriteError`, `WriteJSON`, the json-schema validators | `OpinionatedAgnosFront`: `Resolve`, `SafePath`, `ContentTypeOf` | `OpinionatedAgnosDatabase`: the readers and filters every `methods.go` calls |
 | Answer to bad input | the dispatch, exit 2 | `server/errors/handle_*.go`, written once by `build` | — (the server's) | — |
-| Declared unit | `commands/[<folder>/]<name>/command.yaml` -> generated `new.go` + `entries.go` | `routeslist/[<folder>/]<name>/route.yaml` -> generated `new.go` + `entries.go`, hand-written `InternalPureHandler.go` | none: `assets/frontend/**`, served by `routeslist/frontend/` | `databases/<db>/specs.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
-| Parsable | `parsables/commandconf/` | `parsables/routeconf/` | — (`routeconf`) | `parsables/databaseconf/` |
+| Declared unit | `commands/[<folder>/]<name>/command.yaml` -> generated `new.go` + `input.go` | `routes/[<folder>/]<name>/route.yaml` -> generated `new.go` + `input.go`, hand-written `handler.go` | none: `assets/front/**`, served by `routes/front/` | `databases/<db>/database.yaml` -> generated `api.go`, `new.go`, `methods.go` (+ hand-written `methods_custom.go`) |
+| Declaration package | `declarations/commandconf/` | `declarations/routeconf/` | — (`routeconf`) | `declarations/databaseconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | — | `collect_databases.go`, `collect_database_docs.go` |
-| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
-| Asset groups | `assets/sandbox-cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/sandbox-server/`, `assets/doc-server/` | `assets/doc-front/` | `assets/doc-database/` |
-| Catalog | `assets/{deplist,adapterlist}/OpinatedAgnosCli/` | `assets/{deplist,adapterlist}/OpinatedAgnosServer/` | `assets/{deplist,adapterlist}/OpinatedAgnosFront/` | `assets/{deplist,adapterlist}/OpinatedAgnosDatabase/` |
-| Extension key | `sandbox-cli` | `sandbox-server` | `sandbox-front` | `sandbox-database` |
+| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_server_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
+| Asset groups | `assets/cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/server/`, `assets/doc-server/` | `assets/doc-front/` | `assets/doc-database/` |
+| Catalog | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosCli/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosServer/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosFront/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosDatabase/` |
+| Extension key | `cli` | `server` | `front` | `database` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` | `database-init` / `database-purge` |
-| Interview gate (`interview/state.go`) | `Cli System` -> `sandbox-cli`, step `cli-init` | `Server System` -> `sandbox-server`, step `server-init` | `Front System` -> `sandbox-front`, step `front-init` | `Database System` -> `sandbox-database`, step `database-init` |
+| Interview gate (`interview/state.go`) | `Cli` -> `cli`, step `cli-init` | `Server` -> `server`, step `server-init` | `Front` -> `front`, step `front-init` | `Database` -> `database`, step `database-init` |
 | Verify | `check_sandbox.go` et al | `check_routes.go` | — (`check_routes.go`) | `check_databases.go` |
 
-A layer is an extension, so adding one is [Add an extension](#add-an-extension) plus the rows above. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open SmartIO — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.
+A layer is an extension, so adding one is [Add an extension](#add-an-extension) plus the rows above. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open StagedFS — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.
 
 `<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders the mechanic's code group into the same transaction, and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole — its `sandbox/constructors/<x>/` included, since that package names what is being removed — then writes the key back as `false`.
 
-### The opinated libs
+### The opinionated libs
 
-Code that is the same in every project is never a generated package: it is an **opinated lib**,
-`OpinatedAgnos<X>` — a catalog dep (`assets/deplist/OpinatedAgnos<X>/` + `assets/adapterlist/OpinatedAgnos<X>/`)
+Code that is the same in every project is never a generated package: it is an **opinionated lib**,
+`OpinionatedAgnos<X>` — a catalog dep (`assets/dep-catalog/OpinionatedAgnos<X>/` + `assets/adapter-catalog/OpinionatedAgnos<X>/`)
 whose contract carries the mechanic itself, the one exception to "a dep is 0-opinionated". The
 mechanic's `sandbox/api/` files are type aliases of the contract's types (`type Command =
-opinatedagnoscli.Command`), so the project still reads `api.Command`; `checkSandboxApi`,
-`checkSandboxDeps` and `apishape` admit exactly that (`utils.OpinatedPrefix`). What stays in the
-sandbox is what changes per project: the registries `internal/generated/{cli/cli,server/server}/new.go`,
-config, each unit's `new.go`/`entries.go`, and everything the project writes.
+opinionatedagnoscli.Command`), so the project still reads `api.Command`; `checkSandboxApi`,
+`checkSandboxDeps` and `apishape` admit exactly that (`utils.OpinionatedPrefix`). What stays in the
+sandbox is what changes per project: the registries `internal/generated/{cli,server}/new.go`,
+config, each unit's `new.go`/`input.go`, and everything the project writes.
 
-To change one: edit `assets/deplist/OpinatedAgnos<X>/` and `assets/adapterlist/OpinatedAgnos<X>/`;
-this repo carries `OpinatedAgnosCli` installed, so re-mirror it into `sandbox/deps/` and `adapters/libs/`
-(`check_deplist`/`check_adapterlist` hold the two equal) — the other three are exercised by the
+To change one: edit `assets/dep-catalog/OpinionatedAgnos<X>/` and `assets/adapter-catalog/OpinionatedAgnos<X>/`;
+this repo carries `OpinionatedAgnosCli` installed, so re-mirror it into `sandbox/deps/` and `adapters/impls/`
+(`check_dep_catalog`/`check_adapter_catalog` hold the two equal) — the other three are exercised by the
 examples. Two rules every lib keeps:
 
-- **It holds no dep.** The available returns `deps.Deps` by value and the `project` middleware
-  swaps `Std.Log` on `--quiet`, so a pointer captured at `Bind` would be stale. An entry point
-  takes a `MainProps` the generated registry builds per call (`Std` by pointer, the project's
+- **It holds no dep.** The binding returns `deps.Deps` by value and the `project-flags` middleware
+  swaps `StdDeps.Logf` on `--quiet`, so a pointer captured at `Bind` would be stale. An entry point
+  takes a `MainProps` the generated registry builds per call (`StdDeps` by pointer, the project's
   `RouteProps`/`CommandProps` as a `NewProps` factory); any other function takes the one dep it
   needs as its first parameter (`WriteJSON(serializables, …)`, `Resolve(embedded, …)`).
 - **Only the lib raises.** A handler — or a generated `ReadBody` — returns a failure built by
@@ -109,21 +109,21 @@ examples. Two rules every lib keeps:
 The adapter's code is ported, not wrapped: it uses `strings`, `strconv`, `regexp`, `reflect` and
 `fmt` directly, with the semantics of the stringsdeps/reflectdeps/std adapters it replaced, so a
 command line or a request answers byte for byte as before. Each mechanic's `<x>-init` installs its
-lib after the deps its contract imports (`utils.OpinatedLib`); `verify` refuses a mechanic on
+lib after the deps its contract imports (`utils.OpinionatedLib`); `verify` refuses a mechanic on
 without it, and names any import of a retired `internal/generated/` package with its replacement
 (`utils.RetiredReplacement`).
 
-The project's `handle_*.go` are reached through the `Fail` field of `api.Server` rather than called by the lib, which cannot name them. The eight files — and `sandbox/internal/routeprops/routeprops.go`, the `routeprops.RouteProps` every handler is handed first — are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/server/new.go` always has something to call.
+The project's `handle_*.go` are reached through the `Fail` field of `api.Server` rather than called by the lib, which cannot name them. The eight files — and `sandbox/internal/routeprops/routeprops.go`, the `routeprops.RouteProps` every handler is handed first — are written by `build`, not by `server-init`, for the same reason `sandbox/constructors/<x>/constructor.go` is — a project that gained the layer before they existed picks them up on its next build, and the generated `server/new.go` always has something to call.
 
-A route's `Entries` is a type of its own per route, so the lib builds, fills and calls it by reflection; `api.Route` holds it as `InternalPureHandler any` for the same reason. `server-init` installs `signaldeps` for the graceful shutdown `ServerMain` hooks on, handed to it in `MainProps`.
+A route's `Input` is a type of its own per route, so the lib builds, fills and calls it by reflection; `api.Route` holds it as `Handle any` for the same reason. `server-init` installs `signaldeps` for the graceful shutdown `Main` hooks on, handed to it in `MainProps`.
 
-The cli matcher exists twice the same way: the `OpinatedAgnosCli` lib's `is_actionable.go` and `command_handler.go` (segments, `--key=value`, a number never a flag) and `sandbox/internal/utils/command_match.go`, which `explain-command` reads a `command.yaml` with. A change to one is made to both in the same commit; the same goes for the lib's `trigger.go` and `utils/trigger.go`.
+The cli matcher exists twice the same way: the `OpinionatedAgnosCli` lib's `matches.go` and `run.go` (segments, `--key=value`, a number never a flag) and `sandbox/internal/utils/command_match.go`, which `explain-command` reads a `command.yaml` with. A change to one is made to both in the same commit; the same goes for the lib's `trigger.go` and `utils/trigger_conf.go`.
 
-The matcher exists twice: the `OpinatedAgnosServer` lib's `is_actionable.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
+The matcher exists twice: the `OpinionatedAgnosServer` lib's `matches.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
 
 ## The backoffice: a mechanic that generates nothing
 
-`sandbox-backoffice` is an extension with no code group: `backoffice-init` writes
+`backoffice` is an extension with no code group: `backoffice-init` writes
 `assets/templates/backoffice/**` into the project once, through `utils.RenderTemplateTree`
 (a file already there is kept), and every file is the project's from then on. The key gates
 `doc-backoffice` and `HasBackoffice` alone. Under the tree, `assets/` is copied verbatim — the
@@ -134,7 +134,7 @@ command whole, by name; `utils.BackofficeDirs` whole; any other file alone.
 
 It edits no file the project wrote. What it needs from one goes in a file of its own that a
 generated aggregate embeds: `routeprops/backoffice.go` (`RouteProps`),
-`api/backofficeconfig.go` (`api.Config`), and a cli middleware (`backoffice-server`) in
+`api/backofficeconfig.go` (`api.Config`), and a cli middleware (`backoffice-start-server`) in
 front of `start-server` instead of an edit to its handler. A mechanic that needs a field of
 `RouteProps`, `CommandProps`, `api.Config` or `api.Sandbox` copies this: one new file, one struct —
 `sandbox/api/<x>config.go` / `<x>sandbox.go` for the last two (`clisandbox.go` holds `Cli`).
@@ -145,7 +145,7 @@ front of `start-server` instead of an edit to its handler. A mechanic that needs
 An extension is one generation mechanic and it is declared in three places:
 
 1. `sandbox/internal/utils/extensions_conf.go`: an `Extension<X>` const and a row in `ExtensionCatalog()` (key, default for a fresh project, the line `list-extensions` prints).
-2. `sandbox/internal/utils/asset_groups.go`: one row per group in `AssetGroups()` — the mechanic's own group (`Code: true` when it carries Go the collectors read back) and any `doc-<x>` group it gates.
+2. `sandbox/internal/utils/asset_group.go`: one row per group in `AssetGroups()` — the mechanic's own group (`Code: true` when it carries Go the collectors read back) and any `doc-<x>` group it gates.
 3. `assets/<group>/**`: the templates, at the path each renders to.
 
 Then `assets/start/AgnosConfig/extensions.yaml` gains the key at its default, and the page listing it — `assets/doc/docs/Extensions/doc.md` — gains its row. A mechanic with files to scaffold or to delete also gets an `<x>-init` / `<x>-purge` pair; one that only turns generation on and off is reached through `enable-extension` / `disable-extension` and needs no command of its own.
@@ -156,7 +156,7 @@ The one thing still read off the tree is `hasAssets` (`assets/sandbox/` exists),
 
 ## Add a contract + adapter lib
 
-The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency), the three units they belong to in [Adapters](../Adapters/doc.md). Per-call objects use a constructor field (`New func(...) Thing`) like `argvdeps`/`requestdeps`. Doc-comment every exported declaration and every field you want described in [PublicApi](../PublicApi/doc.md). To make it installable elsewhere, mirror it into `assets/deplist/` below.
+The two halves are in [Workflow](../Workflow/doc.md#add-a-dependency), the three units they belong to in [Adapters](../Adapters/doc.md). Per-call objects use a constructor field (`New func(...) Thing`) like `argvdeps`/`requestdeps`. Doc-comment every exported declaration and every field you want described in [PublicApi](../PublicApi/doc.md). To make it installable elsewhere, mirror it into `assets/dep-catalog/` below.
 
 A second implementation of a contract that already exists is an adapter alone: only step 2 below, plus `add-adapter` and `set-adapter` to bind it.
 
@@ -164,19 +164,19 @@ Whatever you put in `sandbox/api/` has to stay convertible — `verify` runs `ch
 
 ## Add an installable dep
 
-The catalog is two catalogs: `assets/deplist/<dep>/` holds the contract, `assets/adapterlist/<adapter>/` holds one implementation of it, so a dep can gain a second adapter without moving.
+The catalog is two catalogs: `assets/dep-catalog/<dep>/` holds the contract, `assets/adapter-catalog/<adapter>/` holds one implementation of it, so a dep can gain a second adapter without moving.
 
-1. Mirror the contract under `assets/deplist/<dep>/sandbox/deps/<dep>/`, replacing this module path with `{{.Module}}`, and write `assets/deplist/<dep>/dep.yaml` (`name`, `field`, `help`, `default-adapter`).
-2. Mirror the adapter under `assets/adapterlist/<adapter>/adapters/libs/<adapter>/`, same substitution, and write `assets/adapterlist/<adapter>/adapter.yaml` (`name`, `dep`, `help`, `module` — `""` when it needs nothing beyond the stdlib, `<path>@<version>` for a third-party module `add-dep` then requires in the project's `go.mod`, as `jwtdeps` does — and `origin: catalog`). After a third-party one, `go mod tidy -diff` must stay empty here: the template's `{{.Module}}` imports keep it out of this repo's module graph.
+1. Mirror the contract under `assets/dep-catalog/<dep>/sandbox/deps/<dep>/`, replacing this module path with `{{.Module}}`, and write `assets/dep-catalog/<dep>/dep.yaml` (`name`, `field`, `help`, `default-adapter`).
+2. Mirror the adapter under `assets/adapter-catalog/<adapter>/adapters/impls/<adapter>/`, same substitution, and write `assets/adapter-catalog/<adapter>/adapter.yaml` (`name`, `dep`, `help`, `module` — `""` when it needs nothing beyond the stdlib, `<path>@<version>` for a third-party module `add-dep` then requires in the project's `go.mod`, as `jwtdeps` does — and `origin: catalog`). After a third-party one, `go mod tidy -diff` must stay empty here: the template's `{{.Module}}` imports keep it out of this repo's module graph.
 3. Bootstrap, test with `add-dep`/`remove-dep` on a scratch project. Add a row to [DepList](../DepList/doc.md).
 
-Neither `dep.yaml` nor `adapter.yaml` is part of the mirror: the first is installed nowhere, and the second is installed to `adapters/libs/<adapter>/adapter.yaml`, which is what tells the tree later which dep that adapter fills.
+Neither `dep.yaml` nor `adapter.yaml` is part of the mirror: the first is installed nowhere, and the second is installed to `adapters/impls/<adapter>/adapter.yaml`, which is what tells the tree later which dep that adapter fills.
 
 ## Add a template or collector
 
 - Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). The groups are in [Asset groups](../BuildPipeline/doc.md#asset-groups); a new one is a new extension. A scaffold that renders to a file which is itself a template escapes its own braces (`{{ "{{ .Title }}" }}`), or the outer render eats them. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/doc/docs/GeneratedFiles/doc.md`.
-- Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(sandbox, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(sandbox, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `sandbox.Deps.Goimportsdeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
-- Page generator: a doc that grows with the project is split into one page per unit instead of one page that holds them all, so a lookup costs the unit asked about. `sandbox/internal/actions/build/generate_<x>_pages.go` renders `assets/templates/<x>_page.md` once per unit into `docs/<Doc>/<unit>.md`, and the doc's own `doc.md` becomes the index that links them. A page is an asset of the doc directory, not a sub-doc: `CollectDocTree` walks directories, so a plain `.md` beside `doc.md` is ignored by the index and by `verify`, exactly as the generated `Index.md` is. The collector names the page (`CommandDoc`'s identifier, `PublicApiPageOf`, `DepsApiPageOf`) so the index link and the written file cannot disagree, and the generator ends by calling `removeStaleDocPages`, which drops every page this build did not write. `docs/Commands/`, `docs/Routes/` and `docs/PublicApi/` work this way. A layer whose purge owns the doc directory must list it among the directories it owns whole (`cliDirs`, `serverDirs`): the asset group installs only `doc.md` and `props.yaml`, so removing those two alone leaves a directory of pages with no `props.yaml`, which every later build reads as a doc that fails to load.
+- Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(sandbox, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(sandbox, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `sandbox.Deps.GoimportsDeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
+- Page generator: a doc that grows with the project is split into one page per unit instead of one page that holds them all, so a lookup costs the unit asked about. `sandbox/internal/actions/build/generate_<x>_pages.go` renders `assets/templates/<x>_page.md` once per unit into `docs/<Doc>/<unit>.md`, and the doc's own `doc.md` becomes the index that links them. A page is an asset of the doc directory, not a sub-doc: `CollectDocTree` walks directories, so a plain `.md` beside `doc.md` is ignored by the index and by `verify`, exactly as the generated `Index.md` is. The collector names the page (`CommandDoc`'s identifier, `PublicApiPageOf`, `DepContractPageOf`) so the index link and the written file cannot disagree, and the generator ends by calling `removeStaleDocPages`, which drops every page this build did not write. `docs/Commands/`, `docs/Routes/` and `docs/PublicApi/` work this way. A layer whose purge owns the doc directory must list it among the directories it owns whole (`cliDirs`, `serverDirs`): the asset group installs only `doc.md` and `doc.yaml`, so removing those two alone leaves a directory of pages with no `doc.yaml`, which every later build reads as a doc that fails to load.
 - Bootstrap twice; the second run must change nothing.
 
 ## Add an example to agnos
@@ -186,22 +186,22 @@ Examples are declared with the bootstrap binary and run against this tree, never
 ```bash
 ./release/bootstrap.bin add-cli-example <name>
 ./release/bootstrap.bin add-lib-example <name>
-./release/bootstrap.bin update-test <name>
+./release/bootstrap.bin update-example <name>
 ```
 
-`exec-test` writes `release/exec-test/agnos` — `exec go run <repo>/cmd/main "$@"` — and puts it in front of the PATH, so an `example.sh` typing `agnos` runs this source tree. An example that reaches the go runtime is slow (`go mod tidy` + `go build` per run); `--only` narrows the suite. `examples/lib/*/example.go` is `package main` inside the module but outside the compile scope, so it is checked by `exec-test` alone, never by `build`.
+`run-examples` writes `release/run-examples/agnos` — `exec go run <repo>/cmd/main "$@"` — and puts it in front of the PATH, so an `example.sh` typing `agnos` runs this source tree. An example that reaches the go runtime is slow (`go mod tidy` + `go build` per run); `--only` narrows the suite. `examples/lib/*/example.go` is `package main` inside the module but outside the compile scope, so it is checked by `run-examples` alone, never by `build`.
 
-What each example asserts is the set it copies into `AssertDir`, and only `start` copies the whole tree: a change to a `start` template must move that one golden and no other. `exec-test --update` rewrites all of them at once and is for a shape change alone.
+What each example asserts is the set it copies into `assert-dir`, and only `start` copies the whole tree: a change to a `start` template must move that one golden and no other. `run-examples --update` rewrites all of them at once and is for a shape change alone.
 
-## Add a parsable
+## Add a declaration package
 
-`sandbox/internal/parsables/<name>conf/`: `api.go` (struct: data fields, func fields, `Render` last), `new.go` (`New(sandbox, content) (*T, error)` via `sandbox.Deps.Serializables.ParseYaml`), `new_empty.go` (`NewEmpty(sandbox) *T`), `bind_methods.go` (`bindMethods(sandbox, self)`), `render.go` (`SerializeToYaml`). `Render` must round-trip through `New`. Shared loaders go in `utils/` (`LoadXConf`/`SaveXConf`).
+`sandbox/internal/declarations/<name>conf/`: `api.go` (struct: data fields, func fields, `Render` last), `new.go` (`New(sandbox, content) (*T, error)` via `sandbox.Deps.SerializableDeps.ParseYaml`), `new_empty.go` (`NewEmpty(sandbox) *T`), `bind_methods.go` (`bindMethods(sandbox, self)`), `render.go` (`SerializeToYaml`). `Render` must round-trip through `New`. Shared loaders go in `utils/` (`LoadXConf`/`SaveXConf`).
 
 ## Docs
 
-`add-doc` / `remove-doc` and `AgnosConfig/structure.yaml` work as in [Workflow](../Workflow/doc.md#add-a-doc), driven by `./release/bootstrap.bin`. What is specific to this repo: [Workflow](../Workflow/doc.md), [Rules](../Rules/doc.md), [Structure](../Structure/doc.md), [EntriesYaml](../EntriesYaml/doc.md), [DepList](../DepList/doc.md), [GeneratedFiles](../GeneratedFiles/doc.md), [LibUsage](../LibUsage/doc.md), [LibExamples](../LibExamples/doc.md) and [PublicApi](../PublicApi/doc.md) are rendered into *every* agnos project from `assets/doc/docs/`, and [CliInstall](../CliInstall/doc.md) and [Commands](../Commands/doc.md) into every one with a cli from `assets/doc-cli/docs/` ([CliExamples](../CliExamples/doc.md) from `assets/doc-example-cli/docs/`), so a change to one of them is a change to that template — and must read correctly in a scaffolded project, not only here. Guard a line that only holds for this repo with `{{ if .HasAssets }}`.
+`add-doc` / `remove-doc` and `AgnosConfig/structure.yaml` work as in [Workflow](../Workflow/doc.md#add-a-doc), driven by `./release/bootstrap.bin`. What is specific to this repo: [Workflow](../Workflow/doc.md), [Rules](../Rules/doc.md), [Structure](../Structure/doc.md), [Adapters](../Adapters/doc.md), [DepList](../DepList/doc.md), [GeneratedFiles](../GeneratedFiles/doc.md), [LibUsage](../LibUsage/doc.md), [LibExamples](../LibExamples/doc.md) and [PublicApi](../PublicApi/doc.md) are rendered into *every* agnos project from `assets/doc/docs/`, and [CliInstall](../CliInstall/doc.md), [CommandYaml](../CommandYaml/doc.md) and [Commands](../Commands/doc.md) into every one with a cli from `assets/doc-cli/docs/` ([CliExamples](../CliExamples/doc.md) from `assets/doc-example-cli/docs/`), so a change to one of them is a change to that template — and must read correctly in a scaffolded project, not only here. Guard a line that only holds for this repo with `{{ if .HasAssets }}`.
 
-Two different names live in these templates and must never be swapped: `{{.GeneratorName}}` is the cli running the build (`agnos`) and prefixes every command agnos owns — `agnos build`, `agnos add-command`, `agnos add-route`, `agnos exec-test`; `{{.Name}}` is the project being generated and prefixes only the commands that project answers itself — `<name> help`, `<name> version`, `<name> start-server`, plus any command its own `add-command` declared. Never hardcode `agnos` in a template and never reach for `{{.Name}}` to spell an agnos command: in this repo both render `agnos`, so the mistake is invisible here and only shows up in a scaffolded project. The same pair exists for the version: `{{.GeneratorVersion}}` is the release of the binary running the build — the floor [Requirements](../Requirements/doc.md) names, since the tree in front of the reader was rendered by it — and `{{.Version}}` is what the generated project releases under.
+Two different names live in these templates and must never be swapped: `{{.GeneratorName}}` is the cli running the build (`agnos`) and prefixes every command agnos owns — `agnos build`, `agnos add-command`, `agnos add-route`, `agnos run-examples`; `{{.ProjectName}}` is the project being generated and prefixes only the commands that project answers itself — `<name> help`, `<name> version`, `<name> start-server`, plus any command its own `add-command` declared. Never hardcode `agnos` in a template and never reach for `{{.ProjectName}}` to spell an agnos command: in this repo both render `agnos`, so the mistake is invisible here and only shows up in a scaffolded project. The same pair exists for the version: `{{.GeneratorVersion}}` is the release of the binary running the build — the floor [Requirements](../Requirements/doc.md) names, since the tree in front of the reader was rendered by it — and `{{.Version}}` is what the generated project releases under.
 
 A doc an LLM re-reads on every task is split, not grown: [Commands](../Commands/doc.md), [PublicApi](../PublicApi/doc.md) and the server layer's `docs/Routes/` are one page per unit behind an index, written by the page generators above. A `doc.md` that would list every unit of a growing set is the shape to avoid.
 
@@ -214,11 +214,11 @@ Some files are written once and never rewritten, each by a different mechanic �
 | File | Written by | Guard |
 |---|---|---|
 | `sandbox/constructors/<x>/constructor.go` | `build`, `generate_constructors.go` | `io.IsFile(dest)` |
-| `sandbox/internal/server/errors/handle_*.go` | `build`, `generate_error_handlers.go` | `io.IsFile(dest)` |
-| `sandbox/internal/commands/start_server/*` | `server-init` | `io.IsDir(dir)` |
-| `routeslist/<name>/{route.yaml,InternalPureHandler.go}` | `add-route` | `io.WriteFile`, which refuses an existing path |
-| `sandbox/api/{usersandbox,userconfig}.go` | `start`, the `start` asset group | `build` never renders that group; `verify` names either one missing |
+| `sandbox/internal/server/errors/handle_*.go` | `build`, `generate_server_error_handlers.go` | `io.IsFile(dest)` |
+| `sandbox/internal/commands/server/start_server/*` | `server-init` | `io.IsDir(dir)` |
+| `routes/<name>/{route.yaml,handler.go}` | `add-route` | `io.CreateFile`, which refuses an existing path |
+| `sandbox/api/{projectsandbox,projectconfig}.go` | `start`, the `start` asset group | `build` never renders that group; `verify` names either one missing |
 | `sandbox/internal/{routeprops,commandprops}/project.go` | `build`, `generate_props_aggregate.go` | only while the package holds no other part; the aggregate beside it is rewritten every build |
 | `assets/templates/backoffice/**` | `backoffice-init`, `utils.RenderTemplateTree` | `io.ReadFile(dest)` per file |
 
-A write-once file may **not** live in an asset group other than `start`: `utils.RenderGroupExcept` writes every file of a group with `WriteFileOverwrite` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.
+A write-once file may **not** live in an asset group other than `start`: `utils.RenderGroupExcept` writes every file of a group with `WriteFile` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.

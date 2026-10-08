@@ -1,4 +1,4 @@
-# `project`
+# `project-flags`
 
 Read --path and --quiet in front of every command
 
@@ -34,7 +34,6 @@ Runs in front of every command line and answers none of them. It reads --path in
 | [`show-command`](show-command.md) | always |
 | [`build`](build.md) | always |
 | [`compile`](compile.md) | always |
-| [`interview`](interview.md) | always |
 | [`local-install`](local-install.md) | always |
 | [`publish`](publish.md) | always |
 | [`start`](start.md) | always |
@@ -50,14 +49,14 @@ Runs in front of every command line and answers none of them. It reads --path in
 | [`set-table-field`](set-table-field.md) | always |
 | [`show-database`](show-database.md) | always |
 | [`add-adapter`](add-adapter.md) | always |
-| [`add-available`](add-available.md) | always |
+| [`add-binding`](add-binding.md) | always |
 | [`add-dep`](add-dep.md) | always |
 | [`deps-init`](deps-init.md) | always |
 | [`deps-purge`](deps-purge.md) | always |
 | [`list-adapters`](list-adapters.md) | always |
 | [`list-deps`](list-deps.md) | always |
 | [`remove-adapter`](remove-adapter.md) | always |
-| [`remove-available`](remove-available.md) | always |
+| [`remove-binding`](remove-binding.md) | always |
 | [`remove-dep`](remove-dep.md) | always |
 | [`set-adapter`](set-adapter.md) | always |
 | [`set-dep`](set-dep.md) | always |
@@ -65,10 +64,10 @@ Runs in front of every command line and answers none of them. It reads --path in
 | [`remove-doc`](remove-doc.md) | always |
 | [`add-cli-example`](add-cli-example.md) | always |
 | [`add-lib-example`](add-lib-example.md) | always |
-| [`exec-test`](exec-test.md) | always |
 | [`remove-cli-example`](remove-cli-example.md) | always |
 | [`remove-lib-example`](remove-lib-example.md) | always |
-| [`update-test`](update-test.md) | always |
+| [`run-examples`](run-examples.md) | always |
+| [`update-example`](update-example.md) | always |
 | [`disable-extension`](disable-extension.md) | always |
 | [`enable-extension`](enable-extension.md) | always |
 | [`list-extensions`](list-extensions.md) | always |
@@ -77,6 +76,8 @@ Runs in front of every command line and answers none of them. It reads --path in
 | [`front-purge`](front-purge.md) | always |
 | [`remove-page`](remove-page.md) | always |
 | [`help`](help.md) | always |
+| [`interview`](interview.md) | always |
+| [`version`](version.md) | always |
 | [`add-body-field`](add-body-field.md) | always |
 | [`add-parameter`](add-parameter.md) | always |
 | [`add-path`](add-path.md) | always |
@@ -98,6 +99,5 @@ Runs in front of every command line and answers none of them. It reads --path in
 | [`set-path`](set-path.md) | always |
 | [`set-route`](set-route.md) | always |
 | [`show-route`](show-route.md) | always |
-| [`version`](version.md) | always |
 
 Middlewares · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

@@ -3,8 +3,8 @@ package backofficerender
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficetokens"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficeapitokens"
 )
 
 // instantLayout is how the token pages spell an instant.
@@ -51,13 +51,13 @@ type BackofficeApiTokenRow struct {
 	LastUsed string
 }
 
-// apiTokenNoticeOf is how the list page words a backofficetokens notice code;
+// apiTokenNoticeOf is how the list page words a backofficeapitokens notice code;
 // an unknown code shows nothing.
 func apiTokenNoticeOf(sandbox *api.Sandbox, code string) Notice {
 	switch code {
-	case backofficetokens.NoticeRevoked:
+	case backofficeapitokens.NoticeRevoked:
 		return Notice{Text: "Token revoked. It no longer authenticates any request.", Kind: "ok"}
-	case backofficetokens.NoticeNotFound:
+	case backofficeapitokens.NoticeNotFound:
 		return Notice{Text: "That token no longer exists.", Kind: "error"}
 	}
 	return Notice{}
@@ -65,49 +65,49 @@ func apiTokenNoticeOf(sandbox *api.Sandbox, code string) Notice {
 
 // instantOf is the instant seconds as the token pages spell it.
 func instantOf(sandbox *api.Sandbox, seconds int64) string {
-	return sandbox.Deps.Timedeps.FormatUnix(seconds, instantLayout)
+	return sandbox.Deps.TimeDeps.FormatUnix(seconds, instantLayout)
 }
 
 // apiTokenRow is the row of listed on the list page of user, at now.
-func apiTokenRow(sandbox *api.Sandbox, user *backofficedb.BackofficeuserItem, listed backofficetokens.Listed, now int64) BackofficeApiTokenRow {
+func apiTokenRow(sandbox *api.Sandbox, user *backoffice_db.BackofficeUserRecord, listed backofficeapitokens.ApiTokenRow, now int64) BackofficeApiTokenRow {
 	token := listed.Token
 	row := BackofficeApiTokenRow{
-		Id:        sandbox.Deps.Stringsdeps.FormatInt(token.Id, 10),
+		Id:        sandbox.Deps.StringsDeps.FormatInt(token.Id, 10),
 		Name:      token.Name,
 		Prefix:    token.Prefix,
 		Owner:     listed.Owner.Username,
 		IsOwn:     listed.Owner.Id == user.Id,
-		Created:   instantOf(sandbox, token.Createdat),
+		Created:   instantOf(sandbox, token.CreatedAt),
 		Expires:   "Never",
-		IsExpired: backofficetokens.Expired(sandbox, token, now),
+		IsExpired: backofficeapitokens.Expired(sandbox, token, now),
 		Ips:       "Any",
 		LastUsed:  "Never",
 	}
-	if token.Expiresat != 0 {
-		row.Expires = instantOf(sandbox, token.Expiresat)
+	if token.ExpiresAt != 0 {
+		row.Expires = instantOf(sandbox, token.ExpiresAt)
 	}
-	ips := backofficetokens.IpList(sandbox, token)
+	ips := backofficeapitokens.IpList(sandbox, token)
 	if len(ips) > 0 {
-		row.Ips = sandbox.Deps.Stringsdeps.Join(ips, ", ")
+		row.Ips = sandbox.Deps.StringsDeps.Join(ips, ", ")
 	}
-	if token.Lastusedat != 0 {
-		row.LastUsed = instantOf(sandbox, token.Lastusedat) + " from " + token.Lastusedip
+	if token.LastUsedAt != 0 {
+		row.LastUsed = instantOf(sandbox, token.LastUsedAt) + " from " + token.LastUsedIp
 	}
 	return row
 }
 
-// BackofficeApiTokens answers, under status, the API token list page for
+// RenderApiTokensPage answers, under status, the API token list page for
 // user: listed, with the notice code notice above it, and created shown in
 // full when its Token is not "".
-func BackofficeApiTokens(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backofficedb.BackofficeuserItem, listed []backofficetokens.Listed, notice string, created CreatedToken) error {
-	now := sandbox.Deps.Std.Now() / 1_000_000_000
+func RenderApiTokensPage(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backoffice_db.BackofficeUserRecord, listed []backofficeapitokens.ApiTokenRow, notice string, created CreatedToken) error {
+	now := sandbox.Deps.StdDeps.Now() / 1_000_000_000
 	rows := []BackofficeApiTokenRow{}
 	for _, item := range listed {
 		rows = append(rows, apiTokenRow(sandbox, user, item, now))
 	}
 
 	viewer := viewerOf(sandbox, user)
-	return Html(sandbox, response, status, "backoffice/backoffice_api_tokens.html", BackofficeApiTokensPage{
+	return RenderHTML(sandbox, response, status, "backoffice/backoffice_api_tokens.html", BackofficeApiTokensPage{
 		Viewer:    viewer,
 		Notice:    apiTokenNoticeOf(sandbox, notice),
 		Created:   created,

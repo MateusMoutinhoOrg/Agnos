@@ -2,6 +2,7 @@ package commandconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 func BindMethods(sandbox *api.Sandbox, conf *CommandConf) {
@@ -21,7 +22,7 @@ func BindMethods(sandbox *api.Sandbox, conf *CommandConf) {
 // first arg is no literal — a middleware, a capture — has none.
 func Identifiers(sandbox *api.Sandbox, conf *CommandConf) []string {
 	for _, arg := range conf.Args {
-		if arg.Start != 0 || !arg.Trigger.Exists || arg.Trigger.Negate {
+		if arg.Start != 0 || !arg.Trigger.Set || arg.Trigger.Negate {
 			continue
 		}
 		switch arg.Trigger.Type {
@@ -69,12 +70,12 @@ func Pattern(sandbox *api.Sandbox, conf *CommandConf) string {
 
 	for _, arg := range conf.Args {
 		trigger := arg.Trigger
-		if trigger.Exists && trigger.Negate {
+		if trigger.Set && trigger.Negate {
 			negated += " !(" + triggerText(sandbox, trigger) + ")"
 			continue
 		}
 
-		if !trigger.Exists {
+		if !trigger.Set {
 			label := arg.Id
 			if arg.Type != "" && arg.Type != DefaultArgType {
 				label += ":" + arg.Type
@@ -98,7 +99,7 @@ func Pattern(sandbox *api.Sandbox, conf *CommandConf) string {
 		switch trigger.Type {
 		case "equal", "prefix":
 			index := arg.Start
-			for _, word := range sandbox.Deps.Stringsdeps.Fields(trigger.Value) {
+			for _, word := range sandbox.Deps.StringsDeps.Fields(trigger.Value) {
 				place(index, word)
 				index++
 			}
@@ -139,14 +140,14 @@ func Pattern(sandbox *api.Sandbox, conf *CommandConf) string {
 	if len(pieces) == 0 || (len(pieces) == 1 && pieces[0] == "…") {
 		return "*" + negated
 	}
-	return sandbox.Deps.Stringsdeps.Join(pieces, " ") + negated
+	return sandbox.Deps.StringsDeps.Join(pieces, " ") + negated
 }
 
 // triggerText is what a trigger compares against, as a pattern draws it: its
 // value, or a one-of's values joined by "|".
-func triggerText(sandbox *api.Sandbox, trigger Trigger) string {
+func triggerText(sandbox *api.Sandbox, trigger triggerconf.Trigger) string {
 	if trigger.Type != "one-of" {
 		return trigger.Value
 	}
-	return sandbox.Deps.Stringsdeps.Join(trigger.Values, "|")
+	return sandbox.Deps.StringsDeps.Join(trigger.Values, "|")
 }

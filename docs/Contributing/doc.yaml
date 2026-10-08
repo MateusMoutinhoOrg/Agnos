@@ -1,4 +1,4 @@
-description: "Recipes specific to changing agnos itself: bootstrap, actions, installable deps, templates, collectors, parsables"
+description: "Recipes specific to changing agnos itself: bootstrap, actions, installable deps, templates, collectors, declaration packages"
 name: "Contributing"
 order: 5
 themes:

@@ -3,15 +3,15 @@ package database_purge
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // DatabasePurge removes from the project every file the database asset groups
 // would have installed, then runs build as a follow-up step.
-func DatabasePurge(sandbox *api.Sandbox, path string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := DatabasePurgeInternal(sandbox, io, path); err != nil {
+func DatabasePurge(sandbox *api.Sandbox, props api.DatabasePurgeProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := DatabasePurgeInternal(sandbox, io, props.Path); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

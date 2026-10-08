@@ -2,9 +2,9 @@ package backofficeusers
 
 import (
 	"{{.Module}}/sandbox/api"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficetokens"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficeapitokens"
 )
 
 // ListPath is the page every add, edit and remove sends the browser back to.
@@ -63,7 +63,7 @@ type Query struct {
 // Listing is one page of the users a Query keeps.
 type Listing struct {
 	// Users is the page itself.
-	Users []backofficedb.BackofficeuserItem
+	Users []backoffice_db.BackofficeUserRecord
 	// Search is the Query's Search, trimmed.
 	Search string
 	// Role is the Query's Role, "" when it names no role.
@@ -93,28 +93,28 @@ func ListLocation(sandbox *api.Sandbox, notice string) string {
 }
 
 // Find is the user with id id, or false when there is none.
-func Find(sandbox *api.Sandbox, id int64) (backofficedb.BackofficeuserItem, bool) {
-	return backofficedb.New(sandbox).FindBackofficeuserById(id)
+func Find(sandbox *api.Sandbox, id int64) (backoffice_db.BackofficeUserRecord, bool) {
+	return backoffice_db.New(sandbox).FindBackofficeUserById(id)
 }
 
 // List answers the page of users query asks for. The filters run here rather
-// than through the generated filtrage: the search matches anywhere in either
+// than through the generated filter: the search matches anywhere in either
 // field, and a zero RoleMin/RoleMax turns its filter off, so the root role (0)
 // could never be asked for there.
 func List(sandbox *api.Sandbox, query Query) (Listing, error) {
-	users, err := backofficedb.New(sandbox).ListBackofficeuser(backofficedb.BackofficeuserFiltrage{})
+	users, err := backoffice_db.New(sandbox).ListBackofficeUsers(backoffice_db.BackofficeUserFilter{})
 	if err != nil {
 		return Listing{}, err
 	}
 
-	listing := Listing{Search: sandbox.Deps.Stringsdeps.TrimSpace(query.Search)}
+	listing := Listing{Search: sandbox.Deps.StringsDeps.TrimSpace(query.Search)}
 	role, byRole := backofficeauth.ParseRole(sandbox, query.Role)
 	if byRole {
 		listing.Role = query.Role
 	}
-	search := sandbox.Deps.Stringsdeps.ToLower(listing.Search)
+	search := sandbox.Deps.StringsDeps.ToLower(listing.Search)
 
-	kept := []backofficedb.BackofficeuserItem{}
+	kept := []backoffice_db.BackofficeUserRecord{}
 	for _, user := range users {
 		if byRole && backofficeauth.Role(user.Role) != role {
 			continue
@@ -143,13 +143,13 @@ func List(sandbox *api.Sandbox, query Query) (Listing, error) {
 // GeneratedPasswordBytes random bytes: what add-backoffice-user gives the user
 // it creates, so no password ever travels on a command line.
 func GeneratePassword(sandbox *api.Sandbox) (string, error) {
-	return sandbox.Deps.Randdeps.Hex(GeneratedPasswordBytes)
+	return sandbox.Deps.RandDeps.Hex(GeneratedPasswordBytes)
 }
 
 // Add inserts the user fields describe. It answers a message for the form when
 // fields are refused, and the user added with "" once it is.
-func Add(sandbox *api.Sandbox, fields Fields) (backofficedb.BackofficeuserItem, string, error) {
-	none := backofficedb.BackofficeuserItem{}
+func Add(sandbox *api.Sandbox, fields Fields) (backoffice_db.BackofficeUserRecord, string, error) {
+	none := backoffice_db.BackofficeUserRecord{}
 	fields = trimmed(sandbox, fields)
 	message, err := validate(sandbox, fields, true, 0)
 	if err != nil || message != "" {
@@ -160,16 +160,16 @@ func Add(sandbox *api.Sandbox, fields Fields) (backofficedb.BackofficeuserItem, 
 	if err != nil {
 		return none, "", err
 	}
-	user, err := backofficedb.New(sandbox).AddBackofficeuser(backofficedb.BackofficeuserNew{
+	user, err := backoffice_db.New(sandbox).AddBackofficeUser(backoffice_db.BackofficeUserInput{
 		Username:     fields.Username,
 		Email:        fields.Email,
-		Passwordhash: hash,
+		PasswordHash: hash,
 		Role:         fields.Role,
 	})
 	return user, "", err
 }
 
-// Update writes fields over the user with id id on behalf of actor, the
+// Set writes fields over the user with id id on behalf of actor, the
 // password only when one was given. It answers a message for the form when
 // fields are refused — demoting the last root among them — and, once the user
 // is written, the notice the list page shows next. A new role holds from the
@@ -178,7 +178,7 @@ func Add(sandbox *api.Sandbox, fields Fields) (backofficedb.BackofficeuserItem, 
 // revokes every API token of theirs, so whoever held one opened with the old
 // password is out; only session, the actor's own, is spared when actor edits
 // their own account.
-func Update(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, session *backofficedb.SessionsItem, id int64, fields Fields) (string, string, error) {
+func Set(sandbox *api.Sandbox, actor backoffice_db.BackofficeUserRecord, session *backoffice_db.BackofficeUserSessionRecord, id int64, fields Fields) (string, string, error) {
 	fields = trimmed(sandbox, fields)
 	message, err := validate(sandbox, fields, false, id)
 	if err != nil || message != "" {
@@ -199,16 +199,16 @@ func Update(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, session
 		}
 	}
 
-	db := backofficedb.New(sandbox)
-	err = db.UpdateBackofficeuserUsername(id, fields.Username)
+	db := backoffice_db.New(sandbox)
+	err = db.SetBackofficeUserUsername(id, fields.Username)
 	if err != nil {
 		return "", "", err
 	}
-	err = db.UpdateBackofficeuserEmail(id, fields.Email)
+	err = db.SetBackofficeUserEmail(id, fields.Email)
 	if err != nil {
 		return "", "", err
 	}
-	err = db.UpdateBackofficeuserRole(id, fields.Role)
+	err = db.SetBackofficeUserRole(id, fields.Role)
 	if err != nil {
 		return "", "", err
 	}
@@ -220,11 +220,11 @@ func Update(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, session
 	if err != nil {
 		return "", "", err
 	}
-	err = db.UpdateBackofficeuserPasswordhash(id, hash)
+	err = db.SetBackofficeUserPasswordHash(id, hash)
 	if err != nil {
 		return "", "", err
 	}
-	var keep *backofficedb.SessionsItem
+	var keep *backoffice_db.BackofficeUserSessionRecord
 	if actor.Id == id {
 		keep = session
 	}
@@ -232,7 +232,7 @@ func Update(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, session
 	if err != nil {
 		return "", "", err
 	}
-	err = backofficetokens.RemoveOfOwner(sandbox, id)
+	err = backofficeapitokens.RemoveOfOwner(sandbox, id)
 	if err != nil {
 		return "", "", err
 	}
@@ -243,7 +243,7 @@ func Update(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, session
 // with it, on behalf of actor. It answers the notice the list page shows next:
 // a root may not remove its own account, and since actor is a root, another
 // root always remains.
-func Remove(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, id int64) (string, error) {
+func Remove(sandbox *api.Sandbox, actor backoffice_db.BackofficeUserRecord, id int64) (string, error) {
 	if id == actor.Id {
 		return NoticeSelf, nil
 	}
@@ -251,11 +251,11 @@ func Remove(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, id int6
 	if !ok {
 		return NoticeNotFound, nil
 	}
-	err := backofficetokens.RemoveOfOwner(sandbox, id)
+	err := backofficeapitokens.RemoveOfOwner(sandbox, id)
 	if err != nil {
 		return "", err
 	}
-	err = backofficedb.New(sandbox).RemoveBackofficeuser(id)
+	err = backoffice_db.New(sandbox).RemoveBackofficeUser(id)
 	if err != nil {
 		return "", err
 	}
@@ -265,13 +265,13 @@ func Remove(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, id int6
 // holds tells whether text holds search, which is already lower case,
 // regardless of case.
 func holds(sandbox *api.Sandbox, text string, search string) bool {
-	return sandbox.Deps.Stringsdeps.Contains(sandbox.Deps.Stringsdeps.ToLower(text), search)
+	return sandbox.Deps.StringsDeps.Contains(sandbox.Deps.StringsDeps.ToLower(text), search)
 }
 
 // trimmed is fields with the spaces around the username and the email cut.
 func trimmed(sandbox *api.Sandbox, fields Fields) Fields {
-	fields.Username = sandbox.Deps.Stringsdeps.TrimSpace(fields.Username)
-	fields.Email = sandbox.Deps.Stringsdeps.TrimSpace(fields.Email)
+	fields.Username = sandbox.Deps.StringsDeps.TrimSpace(fields.Username)
+	fields.Email = sandbox.Deps.StringsDeps.TrimSpace(fields.Email)
 	return fields
 }
 
@@ -281,7 +281,7 @@ func trimmed(sandbox *api.Sandbox, fields Fields) Fields {
 // a username or an email, so neither may be any other user's username or
 // email, regardless of case.
 func validate(sandbox *api.Sandbox, fields Fields, creating bool, id int64) (string, error) {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	if fields.Username == "" {
 		return "The username is required.", nil
 	}
@@ -302,10 +302,10 @@ func validate(sandbox *api.Sandbox, fields Fields, creating bool, id int64) (str
 		return "The password is required.", nil
 	}
 	if fields.Password != "" && len([]rune(fields.Password)) < MinPasswordLength {
-		return sandbox.Deps.Std.Sprintf("The password needs at least %d characters.", MinPasswordLength), nil
+		return sandbox.Deps.StdDeps.Sprintf("The password needs at least %d characters.", MinPasswordLength), nil
 	}
 
-	users, err := backofficedb.New(sandbox).ListBackofficeuser(backofficedb.BackofficeuserFiltrage{})
+	users, err := backoffice_db.New(sandbox).ListBackofficeUsers(backoffice_db.BackofficeUserFilter{})
 	if err != nil {
 		return "", err
 	}
@@ -330,7 +330,7 @@ func validate(sandbox *api.Sandbox, fields Fields, creating bool, id int64) (str
 
 // countRoots is how many users hold the root role.
 func countRoots(sandbox *api.Sandbox) (int, error) {
-	users, err := backofficedb.New(sandbox).ListBackofficeuser(backofficedb.BackofficeuserFiltrage{})
+	users, err := backoffice_db.New(sandbox).ListBackofficeUsers(backoffice_db.BackofficeUserFilter{})
 	if err != nil {
 		return 0, err
 	}

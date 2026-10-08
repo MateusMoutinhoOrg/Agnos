@@ -1,24 +1,24 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: set-dep
     - description: the remote dep to move
       end: 1
-      id: Dep
+      id: Name
       required: true
       start: 1
-category: Deps System
+category: Deps
+description: Re-copies the remote repo's sandbox/api into sandbox/deps/<dep>/ at the given version and regenerates the shim that converts it, then calls build. The module comes from the shim's own adapter.yaml.
 examples:
     - set-dep mathlib --version v1.3.0
 flags:
     - description: the module version to copy the contract from
       id: Version
       required: true
-    - description: the available of the remote repo the regenerated shim builds its sandbox from
-      id: RemoteAvailable
-help: Moves one remote dep to another version of its module
-long-description: Re-copies the remote repo's sandbox/api into sandbox/deps/<dep>/ at the given version and regenerates the shim that converts it, then calls build. The module comes from the shim's own adapter.yaml.
+    - description: the binding of the remote repo the regenerated shim builds its sandbox from
+      id: RemoteBinding
 priority: 100
+summary: Move one remote dep to another version of its module

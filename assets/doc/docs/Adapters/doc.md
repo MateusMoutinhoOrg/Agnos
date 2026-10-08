@@ -5,19 +5,19 @@ Three units, and the relation between them is declared, never inferred.
 | Unit | Is | Lives in | How many |
 |---|---|---|---|
 | **dep** | the contract: one field of `deps.Deps`, reached as `sandbox.Deps.<Dep>` | `sandbox/deps/<dep>/` (closed) | one per field |
-| **adapter** | one implementation of it, exporting `Bind` | `adapters/libs/<adapter>/` | any number per dep |
-| **available** | a selection: exactly one adapter per dep | `adapters/availables/<name>/` | any number per project |
+| **adapter** | one implementation of it, exporting `Bind` | `adapters/impls/<adapter>/` | any number per dep |
+| **binding** | a selection: exactly one adapter per dep | `adapters/bindings/<name>/` | any number per project |
 
-`adapters/libs/` is what the project **has**. `adapters/availables/<name>/available.yaml` is
-which of them **wins** for each field. `cmd/main/main.go` imports one available — `standard` —
+`adapters/impls/` is what the project **has**. `adapters/bindings/<name>/binding.yaml` is
+which of them **wins** for each field. `cmd/main/main.go` imports one binding — `standard` —
 and that import is the whole of how a program picks its implementations.
 
 ## The invariant
 
-**Every available fills every field of `Deps` exactly once.** Zero leaves a nil func that
+**Every binding fills every field of `Deps` exactly once.** Zero leaves a nil func that
 panics on first use; two is a silent overwrite in which whichever bound last wins. `verify`
 reports both, and names them differently. What each adapter fills is read from its own
-`adapters/libs/<adapter>/adapter.yaml`:
+`adapters/impls/<adapter>/adapter.yaml`:
 
 ```yaml
 dep: sortdeps
@@ -31,30 +31,30 @@ origin: catalog
 the stdlib — and it is what `add-dep` and `add-adapter` put in `go.mod`, filed under the
 adapter that actually imports it. `origin` is `catalog` for one the catalogue installs.
 
-`adapters/availables/<name>/available.yaml` lists the winners, and `new.go` beside it is
+`adapters/bindings/<name>/binding.yaml` lists the winners, and `new.go` beside it is
 generated from that list:
 
 ```yaml
 adapters:
     - reflectsort
-    - std
+    - osstd
 ```
 
-An available directory with no `available.yaml` is a hand-written mix, and no build touches it.
+A binding directory with no `binding.yaml` is a hand-written mix, and no build touches it.
 
 ## Two implementations of one contract
 
 ```bash
 {{.GeneratorName}} add-dep sortdeps                          # contract + its default-adapter, bound everywhere
 {{.GeneratorName}} add-adapter reflectsort                   # a second implementation, bound nowhere yet
-{{.GeneratorName}} add-available lambda                      # a second selection, a copy of standard's
-{{.GeneratorName}} set-adapter sortdeps reflectsort --available lambda
+{{.GeneratorName}} add-binding lambda                        # a second selection, a copy of standard's
+{{.GeneratorName}} set-adapter sortdeps reflectsort --binding lambda
 {{.GeneratorName}} list-adapters                             # who is installed, and who binds whom
 ```
 
-`standard` still binds `sortdeps`; `lambda` binds `reflectsort`. Nothing in `sandbox/` can tell
-the two apart — it calls `sandbox.Deps.Sortdeps` either way — so the choice lives entirely in the
-entry point that picks an available.
+`standard` still binds `stdsort`; `lambda` binds `reflectsort`. Nothing in `sandbox/` can tell
+the two apart — it calls `sandbox.Deps.SortDeps` either way — so the choice lives entirely in the
+entry point that picks a binding.
 
 ## From another agnos repo
 
@@ -64,9 +64,9 @@ is copied.
 
 | Half | Is | Becomes, in the consumer |
 |---|---|---|
-| contract | `sandbox/api/`, which imports nothing but `sandbox/deps` and the `OpinatedAgnos<X>` contracts it aliases, by the rule every agnos repo lives under | `sandbox/deps/<name>/`, the same files with the package clause rewritten, `Sandbox.Deps` dropped and every mechanic's surface — the aliases of an `OpinatedAgnos<X>` type, and the parts holding them — left out |
+| contract | `sandbox/api/`, which imports nothing but `sandbox/deps` and the `OpinionatedAgnos<X>` contracts it aliases, by the rule every agnos repo lives under | `sandbox/deps/<name>/`, the same files with the package clause rewritten, `Sandbox.Deps` dropped and every mechanic's surface — the aliases of an `OpinionatedAgnos<X>` type, and the parts holding them — left out |
 | wiring | `Sandbox.Deps`, how the repo reaches the outside world | nothing — a consumer installs an api, never the wiring behind it |
-| adapter | `sandbox.New` over one of its own availables | nothing — it runs compiled, out of the remote module |
+| adapter | `sandbox.New` over one of its own bindings | nothing — it runs compiled, out of the remote module |
 
 ```bash
 {{.GeneratorName}} add-dep github.com/user/MathLib@v1.2.0 --as mathlib
@@ -96,7 +96,7 @@ identical in both copies — and every case follows from it:
 | a struct with a field of a named type of the same package | a generated converter, field by field — the only case that generates code |
 | a `func` field whose parameters or results fall in the case above | a closure, parameters in the reverse direction |
 | a slice, map or pointer of a convertible named type | a generated loop |
-| a type of another package (`time.Time`, `io.Reader`) | impossible: the api imports nothing but `sandbox/deps` and the opinated libs; `Sandbox.Deps` and the aliases of a lib's types never cross |
+| a type of another package (`time.Time`, `io.Reader`) | impossible: the api imports nothing but `sandbox/deps` and the opinionated libs; `Sandbox.Deps` and the aliases of a lib's types never cross |
 | generics, `chan`, an anonymous struct or interface, an embedded field | rejected — outside the generator, not outside Go |
 
 This is not a new rule: it is the discipline `sandbox/deps/` contracts already
@@ -108,15 +108,15 @@ violation to the consumer's install, which is what the check exists to prevent.
 
 The copy is checked against the module cache on every `verify`, byte for byte,
 whenever that module is already on the machine — the same rule
-`assets/deplist/` lives under, with the cache in place of the assets. No digest
+`assets/dep-catalog/` lives under, with the cache in place of the assets. No digest
 is stored: the cache is immutable per version and `go.sum` already signs it.
 
 ## Removing
 
 | Command | Refuses when |
 |---|---|
-| `{{.GeneratorName}} remove-adapter <adapter>` | an available still binds it (point that available elsewhere first), or the generator wrote it as the shim of a remote dep |
+| `{{.GeneratorName}} remove-adapter <adapter>` | a binding still binds it (point that binding elsewhere first), or the generator wrote it as the shim of a remote dep |
 | `{{.GeneratorName}} remove-dep <dep>` | an adapter still fills it — `--with-adapters` takes them all |
-| `{{.GeneratorName}} remove-available <name>` | it is `standard`: `cmd/main/main.go` imports it |
+| `{{.GeneratorName}} remove-binding <name>` | it is `standard`: `cmd/main/main.go` imports it |
 
 Both refusals name what is holding the unit, so the answer is in the message.

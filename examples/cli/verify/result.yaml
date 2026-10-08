@@ -1,15 +1,15 @@
-cli-output: "verify started with path TestDir \nverify passed\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \n"
+cli-output: "verify started with path test-dir \nverify passed\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \n"
 exit-code: 0
 tree:
     - file: AgnosConfig/docs/ReadmeHeader.md
-      sha: 79cc71fe02b0ea516b289c4a7ffea65e0bc756ab8cd3cf5cd2a5b7b030b1898b
+      sha: ce9702206760f5df683e3f7c399238d6f36345d28354fb679816a5d6c19628aa
     - file: AgnosConfig/extensions.yaml
-      sha: 24a0819bdafde70ead75eb4b85eac20f6669ee15255e407da930099e0ccbb433
+      sha: 319c9b3d71bf11004d735b767c3d2207b5e818d5e857cc84db33dd00c3e194ab
     - file: AgnosConfig/paths.yaml
       sha: e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855
     - file: AgnosConfig/project.yaml
-      sha: d855450b74c63de8d82ae1523bc76e3dc25175a99bd17fce161e2451e02bb783
+      sha: c6fb691b47c6c73001f9abb5ef67e1e4f9c720d3a39e5de8f8db4d875b2add4f
     - file: AgnosConfig/structure.yaml
-      sha: 033edde90caa82fd248205ef2fa56ba56fde1d60983e34ee766dc014fc5bab09
+      sha: 667280f723bc109d9a118a1a789f00667cf65b673a0fbaf0b55e29eea7ead018
     - file: AgnosConfig/themes.yaml
       sha: bfca54d2e915fa19bd69f60491160116d280bea07e6ff3c1896fb959c1c3e388

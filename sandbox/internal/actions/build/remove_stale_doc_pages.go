@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -16,14 +16,14 @@ const docPageExt = ".md"
 //
 // written holds the project-relative path of every page just rendered, which is
 // how a page this build produced is told from one an earlier build left.
-func removeStaleDocPages(sandbox *api.Sandbox, io *smartio.SmartIO, dir string, written map[string]bool) {
+func removeStaleDocPages(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string, written map[string]bool) {
 	for _, path := range io.ListFiles(dir) {
 		file := lastSegmentOf(sandbox, path)
 
 		if file == utils.DocFile || file == utils.DocIndexFile {
 			continue
 		}
-		if !sandbox.Deps.Stringsdeps.HasSuffix(file, docPageExt) {
+		if !sandbox.Deps.StringsDeps.HasSuffix(file, docPageExt) {
 			continue
 		}
 		if written[path] {

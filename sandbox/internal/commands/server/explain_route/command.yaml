@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -15,7 +15,8 @@ args:
       id: RequestPath
       required: true
       start: 2
-category: Server System
+category: Server
+description: Walks the chain the way the generated dispatch does and prints, route by route, whether it runs for the request or why it is skipped — the segment count, a path that is missing, will not convert or fails its trigger, the method, a parameter trigger — and a 400 its binding would answer. What a handler does once it runs is its own code, so the last line says what the request ends on when none answers. Writes nothing.
 examples:
     - explain-route GET /admin/users --header 'x-token=abc'
 flags:
@@ -25,6 +26,5 @@ flags:
     - description: a cookie the request carries, as key=value (repeatable)
       id: Cookie
       type: string-array
-help: Show which routes one request reaches, without a server
-long-description: Walks the chain the way the generated dispatch does and prints, route by route, whether it runs for the request or why it is skipped — the segment count, a path that is missing, will not convert or fails its trigger, the method, a parameter trigger — and a 400 its binding would answer. What a handler does once it runs is its own code, so the last line says what the request ends on when none answers. Writes nothing.
 priority: 100
+summary: Show which routes one request reaches, without a server

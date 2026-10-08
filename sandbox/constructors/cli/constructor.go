@@ -2,11 +2,11 @@ package cli
 
 import (
 	api "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	cli "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cli/cli"
+	cli "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/generated/cli"
 )
 
 // Constructor fills Sandbox.Cli, building it with the
-// NewCli of sandbox/internal/generated/cli/cli. sandbox/new.go calls it
+// NewCli of sandbox/internal/generated/cli. sandbox/new.go calls it
 // once, along with the Constructor of every other package under
 // sandbox/constructors/.
 //

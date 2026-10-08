@@ -1,4 +1,4 @@
-description: "Every address {{.Name}} answers: what to send, a request to run and what comes back"
+description: "Every address {{.ProjectName}} answers: what to send, a request to run and what comes back"
 name: "Routes"
 order: 2
 themes:

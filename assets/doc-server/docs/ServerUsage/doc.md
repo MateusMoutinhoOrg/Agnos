@@ -1,18 +1,18 @@
 # ServerUsage
 
-The server layer mirrors the cli layer file for file: `sandbox/internal/routeslist/<name>/` is to
+The server layer mirrors the cli layer file for file: `sandbox/internal/routes/<name>/` is to
 a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yaml` is to it what
 `command.yaml` is to a command.
 
 | Concept | CLI | Server |
 |---|---|---|
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
-| Dispatch, matcher and binder | the `OpinatedAgnosCli` lib: `CliMain` | the `OpinatedAgnosServer` lib: `ServerMain` |
-| Declared unit | `commands/<name>/command.yaml` | `routeslist/<name>/route.yaml` |
-| Generated declaration | `new.go` -> `NewCommand`, `entries.go` -> `Entries` | `new.go` -> `NewRoute`, `entries.go` -> `Entries` |
+| Dispatch, matcher and binder | the `OpinionatedAgnosCli` lib: `Main` | the `OpinionatedAgnosServer` lib: `Main` |
+| Declared unit | `commands/<name>/command.yaml` | `routes/<name>/route.yaml` |
+| Generated declaration | `new.go` -> `NewCommand`, `input.go` -> `Input` | `new.go` -> `NewRoute`, `input.go` -> `Input` |
 | Surface on the sandbox | `Cli.Commands` | `Server.Routes` |
-| Built by | `sandbox/internal/generated/cli/cli/new.go` | `sandbox/internal/generated/server/server/new.go` |
-| Hand-written half | `InternalPureHandler.go` -> `InternalPureHandler` | `InternalPureHandler.go` -> `InternalPureHandler` |
+| Built by | `sandbox/internal/generated/cli/new.go` | `sandbox/internal/generated/server/new.go` |
+| Hand-written half | `handler.go` -> `Handle` | `handler.go` -> `Handle` |
 | Answer to bad input | `sandbox/internal/cli/errors/handle_*.go`, yours | `sandbox/internal/server/errors/handle_*.go`, yours |
 | Install / remove | `cli-init` / `cli-purge` | `server-init` / `server-purge` |
 
@@ -20,8 +20,8 @@ a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yam
 
 ```bash
 {{.GeneratorName}} server-init  # serverdeps, signaldeps, the server layer, the health route, start-server
-{{.Name}} start-server  # listens on the first free port of 3000..4000; Ctrl+C shuts it down gracefully
-{{.Name}} start-server --addr 4000:5000 --read-timeout-ms 30000 --shutdown-timeout-ms 5000
+{{.ProjectName}} start-server  # listens on the first free port of 3000..4000; Ctrl+C shuts it down gracefully
+{{.ProjectName}} start-server --addr 4000:5000 --read-timeout-ms 30000 --shutdown-timeout-ms 5000
 curl localhost:3000/health
 ```
 
@@ -49,15 +49,15 @@ for them).
 ## Declare a route
 
 ```bash
-{{.GeneratorName}} add-route create-user --pattern '/users/{tenant}' --method POST --help "Create a user" --category Users
+{{.GeneratorName}} add-route create-user --pattern '/users/{tenant}' --method POST --summary "Create a user" --category Users
 {{.GeneratorName}} add-route get-article --pattern '/articles/{article:integer}'
 {{.GeneratorName}} add-route admin --trigger /admin --trigger-type prefix        # /admin, /admin/…, never /administrator
 {{.GeneratorName}} add-route admin-guard --middleware --trigger /admin --before admin
-{{.GeneratorName}} add-parameter authorization --route create-user --font header --required
+{{.GeneratorName}} add-parameter authorization --route create-user --source header --required
 {{.GeneratorName}} add-parameter page --route create-user --type integer --default 1
 {{.GeneratorName}} set-body create-user --type json --required
 {{.GeneratorName}} add-body-field email --route create-user --format email --required
-{{.GeneratorName}} set-parameter page --route create-user --font query --font header
+{{.GeneratorName}} set-parameter page --route create-user --source query --source header
 {{.GeneratorName}} show-route create-user
 {{.GeneratorName}} list-routes                                      # the chain, in run order
 {{.GeneratorName}} explain-route GET /admin/users --header authorization=abc
@@ -68,9 +68,9 @@ for them).
 ```
 
 `add-route` writes `route.yaml` (the declaration — `priority` and `response-type` always
-included, and either the paths `--pattern` compiles to or one path, `Route`, reading the whole
-request path against `--trigger`) and a stub `InternalPureHandler.go` (yours); `build` generates `new.go`, the `api.Route` that lands in
-`Server.Routes`, and `entries.go`, the `Entries` the handler is handed. One editor per place the
+included, and either the paths `--pattern` compiles to or one path reading the whole
+request path against `--trigger`, named after its words — `/api/products` reads into `ApiProducts`) and a stub `handler.go` (yours); `build` generates `new.go`, the `api.Route` that lands in
+`Server.Routes`, and `input.go`, the `Input` the handler is handed. One editor per place the
 declaration holds something — `add-path`, `add-parameter`, `set-body`, `add-body-field`,
 `set-route`, each with its `remove-` inverse — so every key of [RouteYaml](../RouteYaml/doc.md)
 is reachable from the command line and `route.yaml` is never edited by hand.
@@ -81,9 +81,9 @@ already declared, `--clear <key>` takes one off, `--rename` changes the name it 
 the result goes through the same constructor the `add-` side calls.
 
 `add-path` reads a slice of the request path, `--start` to `--end` (`-1` the last segment), into
-`Entries.<Id>`, converted to its `--type` (`string`, `integer`, `number`, `uuid`); with
+`Input.<Id>`, converted to its `--type` (`string`, `integer`, `number`, `uuid`); with
 `--trigger` (and `--trigger-type equal|prefix|text-prefix|suffix|regex|one-of`, `--trigger-negate`,
-`--trigger-ignore-case`) the route only runs when the slice matches. `add-parameter` reads one value from the `--font`s given, in order;
+`--trigger-ignore-case`) the route only runs when the slice matches. `add-parameter` reads one value from the `--source`s given, in order;
 its `--trigger` is a condition on the **value**, and the route runs only when it holds
 ([RouteYaml](../RouteYaml/doc.md#parameter-keys)).
 `add-body-field` takes a dotted path (`address.city`), creating the intervening objects in the
@@ -108,27 +108,27 @@ route whether it runs or why it is skipped. The three write nothing and run no b
 ## Write the handler
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == "" { // set by a middleware in front
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "not authorized")
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "not authorized")
 	}
 	response.SetStatus(api.StatusCreated)
-	response.Write(payload(sandbox, createUser(sandbox, entries.Tenant, entries.Body)))
+	response.Write(payload(sandbox, createUser(sandbox, input.Tenant, input.Body)))
 	return nil
 }
 ```
 
-`entries` arrives bound and converted — the body too, on `entries.Body` — and the response
+`entries` arrives bound and converted — the body too, on `input.Body` — and the response
 already carries the route's `response-type`; a bad request was already answered `400` before
 the handler ran. Every value is
-a field of `Entries`, named by its id ([RouteYaml](../RouteYaml/doc.md#entries-and-internalpurehandler)).
+a field of `Input`, named by its id ([RouteYaml](../RouteYaml/doc.md#entries-and-internalpurehandler)).
 
 **Setting a status or writing a byte is what answers the request.** A handler that does neither
 has declined, and the next route matching this request runs — that is the whole of what a
 middleware is; what it learned travels to the routes after it on `props`, the request's
 `routeprops.RouteProps`, whose fields the project declares in `sandbox/internal/routeprops/project.go`. Returning
-`sandbox.Deps.OpinatedAgnosServer.Fail` refuses the request through the `Handle*` file of its status; any other error
-means "I could not answer this", and hands it to `handle_server_error.go`; returning `nil` means "done" or "not mine", which the
+`sandbox.Deps.OpinionatedAgnosServer.Fail` refuses the request through the `Handle*` file of its status; any other error
+means "I could not answer this", and hands it to `handle_internal_server_error.go`; returning `nil` means "done" or "not mine", which the
 answer tells apart.
 [Routes](../Routes/doc.md) documents the route on the next build, and
 [RouteYaml](../RouteYaml/doc.md#the-chain) has the chain in full.
@@ -137,8 +137,8 @@ answer tells apart.
 
 `build` writes eight more files into `sandbox/internal/server/errors/`, one per way a request can
 end without a route answering it — `handle_not_found.go`, `handle_method_not_allowed.go`,
-`handle_bad_request.go`, `handle_unauthorized.go`, `handle_forbidden.go`, `handle_too_large.go`,
-`handle_wrong_content_type.go` and `handle_server_error.go`. Each is yours: written
+`handle_bad_request.go`, `handle_unauthorized.go`, `handle_forbidden.go`, `handle_payload_too_large.go`,
+`handle_unsupported_media_type.go` and `handle_internal_server_error.go`. Each is yours: written
 once, never regenerated. Editing what your server says when nothing matches is editing
 `handle_not_found.go` and nothing else. The table and the shape are in
 [RouteYaml](../RouteYaml/doc.md#failures).

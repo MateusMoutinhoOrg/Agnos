@@ -1,11 +1,11 @@
-package pathreplacerconf
+package pathsconf
 
 type PathReplacerEntry struct {
 	Original    string
 	Replacement string
 }
 
-type PathReplacerConf struct {
+type PathsConf struct {
 	Entries []PathReplacerEntry
 
 	AddEntry func(original string, replacement string)

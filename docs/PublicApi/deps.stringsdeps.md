@@ -1,10 +1,10 @@
-# `deps.Stringsdeps`
+# `deps.StringsDeps`
 
 `sandbox/deps/stringsdeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the text library injected whole as the Deps.Stringsdeps field. The first group of fields is string manipulation, the second is conversion between strings and numbers.
+Contract is the text library injected whole as the Deps.StringsDeps field. The first group of fields is string manipulation, the second is conversion between strings and numbers.
 
 | Field | Type | Description |
 | --- | --- | --- |
@@ -31,9 +31,9 @@ Sandbox is the text library injected whole as the Deps.Stringsdeps field. The fi
 | `Quote` | `func(s string) string` | Quote returns s as a double-quoted Go string literal, escaping what the Go syntax requires. |
 | `MatchPattern` | `func(pattern string, s string) (bool, error)` | MatchPattern reports whether s is matched by the regular expression pattern, and errors when the pattern itself does not compile. It is the one matching primitive the sandbox has: `regexp` lives on the adapter side like every other standard package. |
 | `Atoi` | `func(s string) (int, error)` | Atoi parses s as a decimal integer. The error reports a string that is not one. |
-| `ParseInt` | `func(s string, base int, bit_size int) (int64, error)` | ParseInt parses s as an integer in the given base with the given bit size. The error reports a string that is not one. |
-| `ParseFloat` | `func(s string, bit_size int) (float64, error)` | ParseFloat parses s as a floating-point number of the given bit size. The error reports a string that is not one. |
+| `ParseInt` | `func(s string, base int, bitSize int) (int64, error)` | ParseInt parses s as an integer in the given base with the given bit size. The error reports a string that is not one. |
+| `ParseFloat` | `func(s string, bitSize int) (float64, error)` | ParseFloat parses s as a floating-point number of the given bit size. The error reports a string that is not one. |
 | `FormatInt` | `func(value int64, base int) string` | FormatInt returns the string representation of value in the given base. |
-| `FormatFloat` | `func(value float64, format byte, precision int, bit_size int) string` | FormatFloat returns the string representation of value, formatted according to the format byte, the precision and the bit size — the same three controls the standard library takes. |
+| `FormatFloat` | `func(value float64, format byte, precision int, bitSize int) string` | FormatFloat returns the string representation of value, formatted according to the format byte, the precision and the bit size — the same three controls the standard library takes. |
 
 [every contract](doc.md)

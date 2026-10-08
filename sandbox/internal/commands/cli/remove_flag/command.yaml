@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,17 +10,17 @@ args:
       id: Name
       required: true
       start: 1
-category: Cli System
+category: Cli
+description: Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and input.go follow it.
 examples:
     - remove-flag output --command exec
     - remove-flag out --command exec
 flags:
     - description: the command (a verb or its package name) that owns the flag
-      id: Target
+      id: Command
       keys:
         - --command
         - -c
       required: true
-help: Remove a flag from a command's command.yaml
-long-description: Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it.
 priority: 100
+summary: Remove a flag from a command's command.yaml

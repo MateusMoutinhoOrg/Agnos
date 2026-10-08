@@ -1,4 +1,4 @@
-default-adapter: stringsdeps
-field: Stringsdeps
+default-adapter: stdstrings
+field: StringsDeps
 help: Text manipulation and string/number conversion
 name: stringsdeps

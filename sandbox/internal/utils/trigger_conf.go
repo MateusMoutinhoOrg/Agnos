@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // TriggerAliases maps the spellings a trigger type may be typed in onto the
@@ -24,13 +24,13 @@ const TriggerValuesSeparator = ","
 // alias becomes the type it stands for, and anything that is neither is
 // refused with the list of both.
 func NormalizeTriggerType(sandbox *api.Sandbox, raw string) (string, error) {
-	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	kind := sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw))
 	if canonical, is := TriggerAliases[kind]; is {
 		kind = canonical
 	}
 	if !contains(triggerconf.TriggerTypes, kind) {
-		return "", sandbox.Deps.Std.Errorf("unknown trigger type %q (use one of %s, or starts-with, ends-with, exact, matches, any-of)",
-			raw, sandbox.Deps.Stringsdeps.Join(triggerconf.TriggerTypes, ", "))
+		return "", sandbox.Deps.StdDeps.Errorf("unknown trigger type %q (use one of %s, or starts-with, ends-with, exact, matches, any-of)",
+			raw, sandbox.Deps.StringsDeps.Join(triggerconf.TriggerTypes, ", "))
 	}
 	return kind, nil
 }
@@ -54,15 +54,15 @@ type TriggerProps struct {
 // regex is taken verbatim, and has to compile; a one-of splits its value on
 // TriggerValuesSeparator.
 func NewTrigger(sandbox *api.Sandbox, props TriggerProps) (triggerconf.Trigger, error) {
-	value := sandbox.Deps.Stringsdeps.TrimSpace(props.Value)
-	raw_kind := sandbox.Deps.Stringsdeps.TrimSpace(props.Type)
+	value := sandbox.Deps.StringsDeps.TrimSpace(props.Value)
+	raw_kind := sandbox.Deps.StringsDeps.TrimSpace(props.Type)
 
 	if value == "" {
 		if raw_kind != "" {
-			return triggerconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-type %q needs a --trigger to compare against", raw_kind)
+			return triggerconf.Trigger{}, sandbox.Deps.StdDeps.Errorf("--trigger-type %q needs a --trigger to compare against", raw_kind)
 		}
 		if props.Negate || props.IgnoreCase {
-			return triggerconf.Trigger{}, sandbox.Deps.Std.Errorf("--trigger-negate and --trigger-ignore-case need a --trigger to apply to")
+			return triggerconf.Trigger{}, sandbox.Deps.StdDeps.Errorf("--trigger-negate and --trigger-ignore-case need a --trigger to apply to")
 		}
 		return triggerconf.Trigger{}, nil
 	}
@@ -75,7 +75,7 @@ func NewTrigger(sandbox *api.Sandbox, props TriggerProps) (triggerconf.Trigger, 
 	}
 
 	trigger := triggerconf.Trigger{
-		Exists:     true,
+		Set:        true,
 		Type:       kind,
 		Values:     []string{},
 		Negate:     props.Negate,
@@ -84,64 +84,64 @@ func NewTrigger(sandbox *api.Sandbox, props TriggerProps) (triggerconf.Trigger, 
 
 	switch {
 	case kind == triggerconf.Regex:
-		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(value, ""); err != nil {
-			return triggerconf.Trigger{}, sandbox.Deps.Std.Errorf("invalid regex trigger %q: %s", value, err.Error())
+		if _, err := sandbox.Deps.StringsDeps.MatchPattern(value, ""); err != nil {
+			return triggerconf.Trigger{}, sandbox.Deps.StdDeps.Errorf("invalid regex trigger %q: %s", value, err.Error())
 		}
 		trigger.Value = value
 	case kind == triggerconf.OneOf:
-		for _, raw := range sandbox.Deps.Stringsdeps.Split(value, TriggerValuesSeparator) {
-			one := sandbox.Deps.Stringsdeps.TrimSpace(raw)
+		for _, raw := range sandbox.Deps.StringsDeps.Split(value, TriggerValuesSeparator) {
+			one := sandbox.Deps.StringsDeps.TrimSpace(raw)
 			if one == "" {
 				continue
 			}
 			if props.OnPath {
-				one = "/" + sandbox.Deps.Stringsdeps.TrimLeft(one, "/")
+				one = "/" + sandbox.Deps.StringsDeps.TrimLeft(one, "/")
 			}
 			trigger.Values = append(trigger.Values, one)
 		}
 	case props.OnPath && kind != "suffix":
-		trigger.Value = "/" + sandbox.Deps.Stringsdeps.TrimLeft(value, "/")
+		trigger.Value = "/" + sandbox.Deps.StringsDeps.TrimLeft(value, "/")
 	default:
 		trigger.Value = value
 	}
 	return trigger, nil
 }
 
-// MatchTrigger is the MatchTrigger of the OpinatedAgnosCli lib
-// (assets/adapterlist/OpinatedAgnosCli/.../trigger.go), read against a
+// MatchTrigger is the MatchTrigger of the OpinionatedAgnosCli lib
+// (assets/adapter-catalog/OpinionatedAgnosCli/.../trigger.go), read against a
 // declaration: a change to one is a change to the other.
 func MatchTrigger(sandbox *api.Sandbox, trigger triggerconf.Trigger, text string, segmented bool) bool {
 	value := trigger.Value
 	if trigger.IgnoreCase && trigger.Type != triggerconf.Regex {
-		value = sandbox.Deps.Stringsdeps.ToLower(value)
-		text = sandbox.Deps.Stringsdeps.ToLower(text)
+		value = sandbox.Deps.StringsDeps.ToLower(value)
+		text = sandbox.Deps.StringsDeps.ToLower(text)
 	}
 
 	matched := text == value
 	switch trigger.Type {
 	case "prefix":
 		if !segmented {
-			matched = sandbox.Deps.Stringsdeps.HasPrefix(text, value)
+			matched = sandbox.Deps.StringsDeps.HasPrefix(text, value)
 			break
 		}
 		separator := triggerSeparator(sandbox, text, value)
-		value = sandbox.Deps.Stringsdeps.TrimSuffix(value, separator)
-		matched = value == "" || text == value || sandbox.Deps.Stringsdeps.HasPrefix(text, value+separator)
+		value = sandbox.Deps.StringsDeps.TrimSuffix(value, separator)
+		matched = value == "" || text == value || sandbox.Deps.StringsDeps.HasPrefix(text, value+separator)
 	case "text-prefix":
-		matched = sandbox.Deps.Stringsdeps.HasPrefix(text, value)
+		matched = sandbox.Deps.StringsDeps.HasPrefix(text, value)
 	case "suffix":
-		matched = sandbox.Deps.Stringsdeps.HasSuffix(text, value)
+		matched = sandbox.Deps.StringsDeps.HasSuffix(text, value)
 	case triggerconf.Regex:
 		if trigger.IgnoreCase {
 			value = "(?i)" + value
 		}
-		ok, err := sandbox.Deps.Stringsdeps.MatchPattern(value, text)
+		ok, err := sandbox.Deps.StringsDeps.MatchPattern(value, text)
 		matched = err == nil && ok
 	case triggerconf.OneOf:
 		matched = false
 		for _, one := range trigger.Values {
 			if trigger.IgnoreCase {
-				one = sandbox.Deps.Stringsdeps.ToLower(one)
+				one = sandbox.Deps.StringsDeps.ToLower(one)
 			}
 			if one == text {
 				matched = true
@@ -152,10 +152,10 @@ func MatchTrigger(sandbox *api.Sandbox, trigger triggerconf.Trigger, text string
 	return matched != trigger.Negate
 }
 
-// triggerSeparator is segmentSeparator of the OpinatedAgnosCli lib: "/"
+// triggerSeparator is segmentSeparator of the OpinionatedAgnosCli lib: "/"
 // on a route's path, " " on a command's segments.
 func triggerSeparator(sandbox *api.Sandbox, text string, value string) string {
-	if sandbox.Deps.Stringsdeps.HasPrefix(text, "/") || sandbox.Deps.Stringsdeps.HasPrefix(value, "/") {
+	if sandbox.Deps.StringsDeps.HasPrefix(text, "/") || sandbox.Deps.StringsDeps.HasPrefix(value, "/") {
 		return "/"
 	}
 	return " "
@@ -164,9 +164,9 @@ func triggerSeparator(sandbox *api.Sandbox, text string, value string) string {
 // DescribeTrigger words one trigger the way explain-route and explain-command
 // print it.
 func DescribeTrigger(sandbox *api.Sandbox, trigger triggerconf.Trigger) string {
-	text := sandbox.Deps.Std.Sprintf("%s %q", trigger.Type, trigger.Value)
+	text := sandbox.Deps.StdDeps.Sprintf("%s %q", trigger.Type, trigger.Value)
 	if trigger.Type == triggerconf.OneOf {
-		text = sandbox.Deps.Std.Sprintf("%s %q", trigger.Type, sandbox.Deps.Stringsdeps.Join(trigger.Values, TriggerValuesSeparator))
+		text = sandbox.Deps.StdDeps.Sprintf("%s %q", trigger.Type, sandbox.Deps.StringsDeps.Join(trigger.Values, TriggerValuesSeparator))
 	}
 	if trigger.IgnoreCase {
 		text += " ignoring case"

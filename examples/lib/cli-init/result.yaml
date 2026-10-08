@@ -1,39 +1,39 @@
-cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep OpinatedAgnosCli \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-dep started with path test-dir dep stddeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep argvdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep stringsdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep OpinionatedAgnosCli \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 2632b90786a34bd9dfbdfc0c112255d1cdb004a3fb03eaa12c7b2bff14563fe0
+      sha: 50218e4cc11314565ddead0f62c27d4a378f3a174e73fdea1b928835bc89d202
     - file: cmd/main/main.go
-      sha: 53424ab74eca6fa06c35b9487ca58dad5d5b99b713a415c19ffed259954661ec
+      sha: 3255a7e61d8e60710592b90a821fe7101e3cf9930ea0d6c170dac3f60bd8fa35
     - file: sandbox/constructors/cli/constructor.go
-      sha: f125a4f2fdc5141e494dd5494c32b395dd515669519d78a4114598e259ba0dc1
+      sha: 5f8aad8a9b82a7b79f9ea0e62219d06c173438701521c687c14029a9ff4efd7c
     - file: sandbox/constructors/config/constructor.go
       sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
-    - file: sandbox/internal/commands/help/InternalPureHandler.go
-      sha: 4e7d55d8ef29b06b212427d4bcb9ce72a83a553357445259fb09bac9649d0d4f
-    - file: sandbox/internal/commands/help/command.yaml
-      sha: aff4bd54b86585eba4f76f13f1eebdec404d22c3fe0d81b178243af025fc0b87
-    - file: sandbox/internal/commands/help/entries.go
-      sha: 197ccebdadcfd649bf66e5f0332e563a4db05baabc7d494c3f0c1e124dbb5707
-    - file: sandbox/internal/commands/help/new.go
-      sha: 9d0a0034f8715ea412b2170ff99f8d5f5ef30c9fd08c90f3a1fc25734b1cee1e
-    - file: sandbox/internal/commands/help_flag/InternalPureHandler.go
-      sha: 3997ccce64bcbb2a4542e94b21681b8a4a2063d6d8345f488aa0e7462c6e9e9f
-    - file: sandbox/internal/commands/help_flag/command.yaml
-      sha: e29b2c5cc712a98e237141eabe9ff975ac96743abd09eececbd5bad73ddba2e6
-    - file: sandbox/internal/commands/help_flag/entries.go
-      sha: 9168de79566c3b653a3b52a4bbf60ec6b9becc990d3d6b3ab7ae3bfd53a0ba53
-    - file: sandbox/internal/commands/help_flag/new.go
-      sha: 453d2debe975680152ec5973a3b3ed10e22d9a8067fc0f43aa2f7690f45fc4fd
-    - file: sandbox/internal/commands/version/InternalPureHandler.go
-      sha: d73b7d53603b4c7d268be0f7099ee172d52a132d40fee05ea2de63b0c07bc03b
-    - file: sandbox/internal/commands/version/command.yaml
-      sha: 9cea48b7a03dd13f11957f589657feb24cbb6a9275f14d269b8ef3b701566740
-    - file: sandbox/internal/commands/version/entries.go
-      sha: 19392ff9ea44d28426243ebca8915313410880e90b1f1a0a4f4399a62acabb6f
-    - file: sandbox/internal/commands/version/new.go
-      sha: cbf2ca2c0d65be400e5dd4645c2f2369f4750af6128a3feb8f55abd490faecc4
-    - file: sandbox/internal/generated/cli/cli/new.go
-      sha: 37aa239f0c2cb873c9cfa40e6d0eb0b19418c607f49779a52b2fb040750182c6
+    - file: sandbox/internal/commands/info/help/command.yaml
+      sha: 9b8324034cd88bd140cc6f35bb16117302c548b28601a5b1e598a4afed2f3206
+    - file: sandbox/internal/commands/info/help/handler.go
+      sha: a8cd392d00ce64bac3038853ebcd6492ab56d3dc557d0b232e4eae1f9936f716
+    - file: sandbox/internal/commands/info/help/input.go
+      sha: cb66f850a4f62cc7be9893c16e00a3d7597a127a9d811ced4128f03f5cd7c983
+    - file: sandbox/internal/commands/info/help/new.go
+      sha: 0a7365732df439caa8e42b797fd870dc2cdb4796d7f62277fc3951f58e103da3
+    - file: sandbox/internal/commands/info/version/command.yaml
+      sha: fb869cf0471a41e752def92267e298b29607af7a975903a259fc23372cd347f8
+    - file: sandbox/internal/commands/info/version/handler.go
+      sha: 28861974ff38e247c46efe6acd32ed79c9ab11ea556529691f7d8890dfd015bc
+    - file: sandbox/internal/commands/info/version/input.go
+      sha: dccf4ac553814f92b94db5a4efc236614dac46f60f0653a05b1a44401d1535a1
+    - file: sandbox/internal/commands/info/version/new.go
+      sha: ebe67688153aabda3b278ed2787daf2b40b3b6529fbae6c45009c8990ff8dbc5
+    - file: sandbox/internal/commands/middleware/help_flag/command.yaml
+      sha: c544a63b225e57366c7d07b346da0586e273ff4a3cb02a43b9f96fd6c1bb4ede
+    - file: sandbox/internal/commands/middleware/help_flag/handler.go
+      sha: a3fe8e61ee344d48a65fd4a4ab8c7c40b884c9f1452ca7c08fdeb0846a848de8
+    - file: sandbox/internal/commands/middleware/help_flag/input.go
+      sha: 60ca5134acdc26b137d405ebae2c59a6b42cbff33f0dc73bfe7c07e738f97a80
+    - file: sandbox/internal/commands/middleware/help_flag/new.go
+      sha: 20af068a7607550f29fcbf5b0d1c0625c9f1502a53d8770169ce3b5e86cbbcbf
+    - file: sandbox/internal/generated/cli/new.go
+      sha: 7d99c61ab264bbb1c76af49b6637908f6d2a9f802a6f3be7ec1fbba887f31ef6
     - file: sandbox/new.go
       sha: f6087a30367cb642f01f7dc51e823627ddb9f474c8b2002fca644ce37d51ce44

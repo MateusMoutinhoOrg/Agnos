@@ -1,5 +1,5 @@
 dep: sortdeps
 help: Sorting over sort
 module: ""
-name: sortdeps
+name: stdsort
 origin: catalog

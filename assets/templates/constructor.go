@@ -5,8 +5,8 @@ import (
 	{{.Package}} "{{.Module}}/{{.Source}}"
 )
 
-// Constructor fills Sandbox.{{.Name}}, building it with the
-// New{{.Name}} of {{.Source}}. sandbox/new.go calls it
+// Constructor fills Sandbox.{{.ContractName}}, building it with the
+// New{{.ContractName}} of {{.Source}}. sandbox/new.go calls it
 // once, along with the Constructor of every other package under
 // sandbox/constructors/.
 //
@@ -14,5 +14,5 @@ import (
 // implementation, decorate the contract, or build a different one entirely.
 // No build rewrites this file once it is there.
 func Constructor(sandbox *api.Sandbox) {
-	sandbox.{{.Name}} = {{.Package}}.New{{.Name}}(sandbox)
+	sandbox.{{.ContractName}} = {{.Package}}.New{{.ContractName}}(sandbox)
 }

@@ -1,10 +1,10 @@
-# `deps.Templatedeps`
+# `deps.TemplateDeps`
 
 `sandbox/deps/templatedeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the template engine injected whole as the Deps.Templatedeps field.
+Contract is the template engine injected whole as the Deps.TemplateDeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |

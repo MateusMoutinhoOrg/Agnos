@@ -1,17 +1,17 @@
-package opinatedagnosfront
+package opinionatedagnosfront
 
 import (
 	"strings"
 
 	"{{.Module}}/sandbox/deps"
-	opinatedagnosfront "{{.Module}}/sandbox/deps/OpinatedAgnosFront"
+	opinionatedagnosfront "{{.Module}}/sandbox/deps/OpinionatedAgnosFront"
 	"{{.Module}}/sandbox/deps/embeddeps"
 )
 
-// Bind fills deps.Deps.OpinatedAgnosFront with the agnos front file layer.
+// Bind fills deps.Deps.OpinionatedAgnosFront with the agnos front file layer.
 // Nothing here holds a dep: Resolve is handed the embedded tree it reads.
 func Bind(deps *deps.Deps) {
-	deps.OpinatedAgnosFront = opinatedagnosfront.Sandbox{
+	deps.OpinionatedAgnosFront = opinionatedagnosfront.Contract{
 		Resolve:       resolve,
 		SafePath:      safePath,
 		ExtensionOf:   extensionOf,
@@ -25,19 +25,19 @@ func Bind(deps *deps.Deps) {
 // index.html. It returns the path relative to Root it read, for contentTypeOf,
 // and false when the path is unsafe or names nothing, which a caller reads as
 // "not mine".
-func resolve(embedded embeddeps.Sandbox, requested string) (string, []byte, bool) {
+func resolve(embedded embeddeps.Contract, requested string) (string, []byte, bool) {
 	relative, ok := safePath(requested)
 	if !ok {
 		return "", nil, false
 	}
 
-	candidates := []string{opinatedagnosfront.Index}
+	candidates := []string{opinionatedagnosfront.Index}
 	if relative != "" {
-		candidates = []string{relative, relative + ".html", relative + "/" + opinatedagnosfront.Index}
+		candidates = []string{relative, relative + ".html", relative + "/" + opinionatedagnosfront.Index}
 	}
 
 	for _, candidate := range candidates {
-		content, err := embedded.ReadFile(opinatedagnosfront.Root + "/" + candidate)
+		content, err := embedded.ReadFile(opinionatedagnosfront.Root + "/" + candidate)
 		if err == nil {
 			return candidate, content, true
 		}

@@ -6,16 +6,16 @@ Typing none of it: `agnos interview` asks these same steps as questions, one sug
 ```bash
 agnos start --project-name my-tool --module github.com/you/my-tool   # AgnosConfig/, go.mod, sandbox skeleton
 agnos list-extensions                                                 # what agnos generates for this project
-agnos deps-init                                                       # sandbox/deps/ + adapters/ (sandbox-deps: true)
+agnos deps-init                                                       # sandbox/deps/ + adapters/ (deps: true)
 agnos add-dep iodeps                                              # any name from `agnos list-deps`
-agnos cli-init                                                        # cmd/main, dispatch, help, version (sandbox-cli: true)
-agnos add-command greet --help "Say hello" --category Demo
+agnos cli-init                                                        # cmd/main, dispatch, help, version (cli: true)
+agnos add-command greet --summary "Say hello" --category Demo
 agnos add-flag name --command greet --key --name --key -n --required --description "who to greet"
 agnos add-arg times --command greet --type integer --default 1 --description "how many times"
 ```
 
-Write the one hand-written file, `sandbox/internal/commands/greet/InternalPureHandler.go`
-(`add-command` wrote a stub; `build` generated `entries.go` beside it):
+Write the one hand-written file, `sandbox/internal/commands/demo/greet/handler.go`
+(`add-command` wrote a stub; `build` generated `input.go` beside it):
 
 ```go
 package greet
@@ -25,10 +25,10 @@ import (
 	"github.com/you/my-tool/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	response.Log("greeting %s\n", entries.Name)         // stderr
-	for i := 0; i < entries.Times; i++ {
-		response.Printf("hello, %s\n", entries.Name)   // stdout, the result
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	response.Logf("greeting %s\n", input.Name)         // stderr
+	for i := 0; i < input.Times; i++ {
+		response.Printf("hello, %s\n", input.Name)   // stdout, the result
 	}
 	return nil
 }

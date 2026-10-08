@@ -1,22 +1,23 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: add-arg
-    - description: the arg name; its exported Go form is the Entries field the handler reads (file-name -> entries.FileName)
+    - description: the arg name; its exported Go form is the Input field the handler reads (file-name -> input.FileName)
       end: 1
       id: Name
       required: true
       start: 1
-category: Cli System
+category: Cli
+description: Inserts one arg — the segments --start to --end of the command line — into sandbox/internal/commands/<command>/command.yaml (at --position, else at the end) and runs build. An arg given no --start reads the first segment no arg reads yet; with --trigger it is part of what the command matches on.
 examples:
     - add-arg file --type string --required --description "the file to process" --command exec
     - add-arg count --type integer --default 1 --position 0 --command exec
 flags:
     - description: the command (a verb or its package name) that receives the arg
-      id: Target
+      id: Command
       keys:
         - --command
         - -c
@@ -58,6 +59,5 @@ flags:
     - description: compare the trigger without regard to case
       id: TriggerIgnoreCase
       type: boolean
-help: Add an arg to a command's command.yaml
-long-description: Inserts one arg — the segments --start to --end of the command line — into sandbox/internal/commands/<command>/command.yaml (at --position, else at the end) and runs build. An arg given no --start reads the first segment no arg reads yet; with --trigger it is part of what the command matches on.
 priority: 100
+summary: Add an arg to a command's command.yaml

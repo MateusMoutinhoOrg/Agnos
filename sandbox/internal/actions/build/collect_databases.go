@@ -2,12 +2,12 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// CollectDatabases reads every sandbox/internal/databases/<db>/specs.yaml and
+// CollectDatabases reads every sandbox/internal/databases/<db>/database.yaml and
 // returns one data map per database, for the generated api.go, new.go and
 // methods.go of that package. It is the database layer's CollectRoutes: what
 // the map holds is the declaration itself, turned into the records and the
@@ -17,7 +17,7 @@ import (
 // A database is not a surface of sandbox/api/: its methods are typed by table,
 // so there is no []Database standing where Cli.Commands stands. The maps
 // therefore feed the per-unit generator alone, never a field of the Sandbox.
-func CollectDatabases(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
+func CollectDatabases(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string]any, error) {
 	var databases []map[string]any
 
 	for _, dir := range io.ListDirs(utils.DatabasesDir) {
@@ -26,14 +26,14 @@ func CollectDatabases(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]a
 			continue
 		}
 
-		content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + utils.DatabaseSpecsFile)
+		content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + utils.DatabaseConfFile)
 		if err != nil {
 			continue
 		}
 
 		conf, err := databaseconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("databases/%s/%s: %w", name, utils.DatabaseSpecsFile, err)
+			return nil, sandbox.Deps.StdDeps.Errorf("databases/%s/%s: %w", name, utils.DatabaseConfFile, err)
 		}
 
 		if err := checkDatabaseSchema(sandbox, name, conf); err != nil {
@@ -56,14 +56,14 @@ func checkDatabaseSchema(sandbox *api.Sandbox, name string, conf *databaseconf.D
 			switch field.Type {
 			case databaseconf.FieldLink:
 				if utils.FindDatabaseTable(sandbox, conf.Tables, field.Target) < 0 {
-					return sandbox.Deps.Std.Errorf("databases/%s/%s: the link %s.%s targets %q, which is not a table of this database",
-						name, utils.DatabaseSpecsFile, table.Name, field.Name, field.Target)
+					return sandbox.Deps.StdDeps.Errorf("databases/%s/%s: the link %s.%s targets %q, which is not a table of this database",
+						name, utils.DatabaseConfFile, table.Name, field.Name, field.Target)
 				}
-			case databaseconf.FieldDatabase:
+			case databaseconf.FieldObject:
 				for _, nested := range field.Fields {
-					if nested.Type == databaseconf.FieldDatabase {
-						return sandbox.Deps.Std.Errorf("databases/%s/%s: %s.%s.%s nests a collection inside a collection; only one level is generated",
-							name, utils.DatabaseSpecsFile, table.Name, field.Name, nested.Name)
+					if nested.Type == databaseconf.FieldObject {
+						return sandbox.Deps.StdDeps.Errorf("databases/%s/%s: %s.%s.%s nests a collection inside a collection; only one level is generated",
+							name, utils.DatabaseConfFile, table.Name, field.Name, nested.Name)
 					}
 				}
 			}
@@ -84,12 +84,12 @@ func databaseData(sandbox *api.Sandbox, name string, conf *databaseconf.Database
 		data := databaseTableData(sandbox, conf, table)
 		tables = append(tables, data)
 
-		records = append(records, recordData(sandbox, table.Name, utils.ExportedName(sandbox, table.Name), table.Fields, true))
+		records = append(records, recordData(sandbox, table.Name, utils.GoIdentifier(sandbox, table.Name), table.Fields, true))
 		for _, field := range table.Fields {
-			if field.Type != databaseconf.FieldDatabase {
+			if field.Type != databaseconf.FieldObject {
 				continue
 			}
-			records = append(records, recordData(sandbox, field.Name, utils.ExportedName(sandbox, field.Name), field.Fields, false))
+			records = append(records, recordData(sandbox, field.Name, utils.GoIdentifier(sandbox, table.Name)+utils.GoIdentifier(sandbox, field.Name), field.Fields, false))
 		}
 
 		for _, method := range utils.DatabaseMethods(sandbox, table) {
@@ -98,13 +98,13 @@ func databaseData(sandbox *api.Sandbox, name string, conf *databaseconf.Database
 	}
 
 	return map[string]any{
-		"Name":    utils.DatabaseIdentifier(sandbox, name),
-		"Package": name,
-		"Type":    utils.ExportedName(sandbox, name),
-		"Prefix":  conf.Prefix,
-		"Tables":  tables,
-		"Records": records,
-		"Methods": methods,
+		"DatabaseName": utils.DatabaseName(sandbox, name),
+		"Package":      name,
+		"Type":         utils.GoIdentifier(sandbox, name),
+		"KeyPrefix":    conf.KeyPrefix,
+		"Tables":       tables,
+		"Records":      records,
+		"Methods":      methods,
 	}
 }
 
@@ -117,12 +117,12 @@ func databaseTableData(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, ta
 
 	return map[string]any{
 		"Name":  table.Name,
-		"Type":  utils.ExportedName(sandbox, table.Name),
+		"Type":  utils.GoIdentifier(sandbox, table.Name),
 		"Items": items,
 	}
 }
 
-// databaseItemData is one field as the database.Item literal reads it, its
+// databaseItemData is one field as the databasedeps.Item literal reads it, its
 // nested collection included.
 func databaseItemData(sandbox *api.Sandbox, field databaseconf.Field) map[string]any {
 	nested := make([]map[string]any, 0, len(field.Fields))
@@ -139,41 +139,41 @@ func databaseItemData(sandbox *api.Sandbox, field databaseconf.Field) map[string
 	}
 }
 
-// databaseItemConst is the database.Item type constant one declared type is
+// databaseItemConst is the databasedeps.Item type constant one declared type is
 // written as.
 func databaseItemConst(kind string) string {
 	switch kind {
 	case databaseconf.FieldKey:
-		return "database.Key"
-	case databaseconf.FieldInt:
-		return "database.Int"
-	case databaseconf.FieldFloat:
-		return "database.Float"
+		return "databasedeps.Key"
+	case databaseconf.FieldInteger:
+		return "databasedeps.Int"
+	case databaseconf.FieldNumber:
+		return "databasedeps.Float"
 	case databaseconf.FieldLink:
-		return "database.Link"
-	case databaseconf.FieldDatabase:
-		return "database.Database"
+		return "databasedeps.Link"
+	case databaseconf.FieldObject:
+		return "databasedeps.Database"
 	}
-	return "database.String"
+	return "databasedeps.String"
 }
 
-// recordData is one Go record the package declares: the <X>Item every read
-// hands back, the <X>New every insert takes, and — for a table, which is the
-// only thing List<T> ranges over — the <X>Filtrage that narrows it.
-func recordData(sandbox *api.Sandbox, name string, kind string, fields []databaseconf.Field, filtrage bool) map[string]any {
+// recordData is one Go record the package declares: the <X>Record every read
+// hands back, the <X>Input every insert takes, and — for a table, which is the
+// only thing List<T> ranges over — the <X>Filter that narrows it.
+func recordData(sandbox *api.Sandbox, name string, kind string, fields []databaseconf.Field, filter bool) map[string]any {
 	plain := []map[string]any{}
 	for _, field := range fields {
-		if field.Type == databaseconf.FieldDatabase {
+		if field.Type == databaseconf.FieldObject {
 			continue
 		}
 		plain = append(plain, databaseFieldData(sandbox, field))
 	}
 
 	return map[string]any{
-		"Name":        name,
-		"Type":        kind,
-		"Fields":      plain,
-		"HasFiltrage": filtrage,
+		"Name":      name,
+		"Type":      kind,
+		"Fields":    plain,
+		"HasFilter": filter,
 	}
 }
 
@@ -183,7 +183,7 @@ func recordData(sandbox *api.Sandbox, name string, kind string, fields []databas
 func databaseFieldData(sandbox *api.Sandbox, field databaseconf.Field) map[string]any {
 	return map[string]any{
 		"Name":    field.Name,
-		"Go":      utils.ExportedName(sandbox, field.Name),
+		"Go":      utils.GoIdentifier(sandbox, field.Name),
 		"Kind":    field.Type,
 		"GoType":  utils.DatabaseGoType(field.Type),
 		"Reader":  databaseReader(field.Type),
@@ -211,7 +211,7 @@ func databaseMethodData(method utils.DatabaseMethod) map[string]any {
 	}
 }
 
-// databaseReader is the OpinatedAgnosDatabase reader one declared type is read back
+// databaseReader is the OpinionatedAgnosDatabase reader one declared type is read back
 // through.
 func databaseReader(kind string) string {
 	switch utils.DatabaseGoType(kind) {

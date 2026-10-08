@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -18,7 +18,7 @@ const publicApiPagesDir = utils.DocsDir + "/PublicApi"
 //
 // The page a contract lands on is the one its collector named, so the link on
 // the index and the file written here can never disagree.
-func GeneratePublicApiPages(sandbox *api.Sandbox, io *smartio.SmartIO, public_api []map[string]any, deps_api []map[string]any) error {
+func GeneratePublicApiPages(sandbox *api.Sandbox, io *stagedfs.StagedFS, public_api []map[string]any, dep_contracts []map[string]any) error {
 	written := map[string]bool{}
 
 	for _, group := range public_api {
@@ -32,7 +32,7 @@ func GeneratePublicApiPages(sandbox *api.Sandbox, io *smartio.SmartIO, public_ap
 		}
 	}
 
-	for _, contract := range deps_api {
+	for _, contract := range dep_contracts {
 		title, _ := contract["Title"].(string)
 		name, _ := contract["Name"].(string)
 		files, _ := contract["Files"].([]map[string]any)
@@ -53,7 +53,7 @@ func GeneratePublicApiPages(sandbox *api.Sandbox, io *smartio.SmartIO, public_ap
 // renderPublicApiPage writes one page to the file its collector named and
 // records it as written, so a page this build produced is never taken for a
 // stale one.
-func renderPublicApiPage(sandbox *api.Sandbox, io *smartio.SmartIO, unit map[string]any, vars map[string]any, written map[string]bool) error {
+func renderPublicApiPage(sandbox *api.Sandbox, io *stagedfs.StagedFS, unit map[string]any, vars map[string]any, written map[string]bool) error {
 	page, _ := unit["Page"].(string)
 	if page == "" {
 		return nil

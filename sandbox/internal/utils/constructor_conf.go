@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // ConstructorsDir is the project-relative directory holding the sandbox's
@@ -18,7 +18,7 @@ const ConstructorFile = "constructor.go"
 
 // GeneratedDir is the project-relative directory holding every package the
 // build rewrites whole — the cli and server registries and config; the
-// dispatch they hand off to is the OpinatedAgnos libs'. Nothing under it is
+// dispatch they hand off to is the OpinionatedAgnos libs'. Nothing under it is
 // the project's to edit; the
 // packages that mix a generated file with a hand-written one (a command, a
 // route, a database) stay beside it under sandbox/internal/.
@@ -47,23 +47,23 @@ const CommandPropsDir = "sandbox/internal/commandprops"
 // name it had in sandbox/api/, the old home the build moves it out of.
 const CommandPropsFile = "commandprops.go"
 
-// UserSandboxFile is the sandbox/api/ file declaring api.UserSandbox, the
+// ProjectSandboxFile is the sandbox/api/ file declaring api.ProjectSandbox, the
 // part of the Sandbox the project types itself. start writes it once and no
 // build rewrites it; api.Sandbox embeds it.
-const UserSandboxFile = "usersandbox.go"
+const ProjectSandboxFile = "projectsandbox.go"
 
-// UserConfigFile is the sandbox/api/ file declaring api.UserConfig, the part
+// ProjectConfigFile is the sandbox/api/ file declaring api.ProjectConfig, the part
 // of the Config the project types itself. start writes it once and no build
 // rewrites it; api.Config embeds it.
-const UserConfigFile = "userconfig.go"
+const ProjectConfigFile = "projectconfig.go"
 
 // SandboxPartSuffix ends the name of every sandbox/api/ file whose structs
-// api.Sandbox embeds: usersandbox.go, the project's, and one more per mechanic
+// api.Sandbox embeds: projectsandbox.go, the project's, and one more per mechanic
 // that adds a part of its own (clisandbox.go, serversandbox.go), so none edits
 // a file of another. sandbox.go, the aggregate itself, is not one.
 const SandboxPartSuffix = "sandbox.go"
 
-// ConfigPartSuffix is SandboxPartSuffix for api.Config: userconfig.go, and
+// ConfigPartSuffix is SandboxPartSuffix for api.Config: projectconfig.go, and
 // <x>config.go per mechanic — backofficeconfig.go, say. config.go, the
 // aggregate itself, is not one.
 const ConfigPartSuffix = "config.go"
@@ -92,14 +92,14 @@ func IsConstructorExempt(sandbox *api.Sandbox, name string) bool {
 // IsSandboxPart reports a sandbox/api/ file whose structs api.Sandbox embeds:
 // its name ends with SandboxPartSuffix and is not sandbox.go itself.
 func IsSandboxPart(sandbox *api.Sandbox, name string) bool {
-	return name != SandboxPartSuffix && sandbox.Deps.Stringsdeps.HasSuffix(name, SandboxPartSuffix)
+	return name != SandboxPartSuffix && sandbox.Deps.StringsDeps.HasSuffix(name, SandboxPartSuffix)
 }
 
 // IsConfigPart reports a sandbox/api/ file whose structs api.Config embeds:
 // its name ends with ConfigPartSuffix and is not config.go itself, which is the
 // Config contract and a field of the Sandbox.
 func IsConfigPart(sandbox *api.Sandbox, name string) bool {
-	return name != ConfigPartSuffix && sandbox.Deps.Stringsdeps.HasSuffix(name, ConfigPartSuffix)
+	return name != ConfigPartSuffix && sandbox.Deps.StringsDeps.HasSuffix(name, ConfigPartSuffix)
 }
 
 // ConstructorDir is the project-relative directory of one constructor package.
@@ -120,7 +120,7 @@ func ConstructorPath(name string) string {
 // server) and keeps the one that builds the contract under its own name one
 // level down. A contract the project writes itself lives at
 // sandbox/internal/<name>, with the same one-level-down fallback.
-func ConstructorSource(io *smartio.SmartIO, name string) string {
+func ConstructorSource(io *stagedfs.StagedFS, name string) string {
 	for _, root := range []string{GeneratedDir, "sandbox/internal"} {
 		nested := root + "/" + name + "/" + name
 		if io.IsFile(nested + "/new.go") {

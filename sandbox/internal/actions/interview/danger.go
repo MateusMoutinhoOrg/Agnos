@@ -2,8 +2,8 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -25,7 +25,7 @@ const removePrefix = "remove-"
 // so: disable-extension stops a mechanic generating, publish reaches a
 // release out of this machine and cannot be taken back, rename-route moves a
 // route's hand-written files, rebalance-routes rewrites the priority of every
-// route, and front-purge drops the frontend route — a purge like the others,
+// route, and front-purge drops the front route — a purge like the others,
 // but one that takes no page with it, so it has no unit to count. So does
 // backoffice-purge: what it takes is one area, not units the person declared.
 var destructiveVerbs = map[string]bool{
@@ -54,7 +54,7 @@ func DestructiveVerb(sandbox *api.Sandbox, verb string) bool {
 	if _, purge := purgeUnits[verb]; purge {
 		return true
 	}
-	if sandbox.Deps.Stringsdeps.HasPrefix(verb, removePrefix) {
+	if sandbox.Deps.StringsDeps.HasPrefix(verb, removePrefix) {
 		return true
 	}
 	return destructiveVerbs[verb]
@@ -73,7 +73,7 @@ func Destructive(sandbox *api.Sandbox, command api.Command, values map[string][]
 // the names themselves, read off the project with the same lists the questions
 // are built from. Every other command answers with no unit, and its confirm
 // screen says only that it removes something.
-func Losses(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command) (string, []string) {
+func Losses(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command) (string, []string) {
 	unit, purge := purgeUnits[verbOf(command)]
 	if !purge {
 		return "", nil
@@ -88,7 +88,7 @@ func Losses(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command) (str
 }
 
 // unitOptions reads the units of one layer, by the unit's own word for itself.
-func unitOptions(sandbox *api.Sandbox, io *smartio.SmartIO, unit string) []interviewer.AlternativeOption {
+func unitOptions(sandbox *api.Sandbox, io *stagedfs.StagedFS, unit string) []interviewdeps.Option {
 	switch unit {
 	case "command":
 		return commandOptions(sandbox, io)
@@ -99,7 +99,7 @@ func unitOptions(sandbox *api.Sandbox, io *smartio.SmartIO, unit string) []inter
 	case "database":
 		return dirOptions(sandbox, io, utils.DatabasesDir)
 	}
-	return []interviewer.AlternativeOption{}
+	return []interviewdeps.Option{}
 }
 
 // SafeFirst orders a menu so that pressing enter without reading it never runs
@@ -110,9 +110,9 @@ func unitOptions(sandbox *api.Sandbox, io *smartio.SmartIO, unit string) []inter
 // It is the answer to the one thing a guided screen must never do: a person who
 // has not read the rows yet is told the default is safe, and the default has to
 // be.
-func SafeFirst(rows []interviewer.AlternativeOption, inert interviewer.AlternativeOption, dangerous bool) []interviewer.AlternativeOption {
+func SafeFirst(rows []interviewdeps.Option, inert interviewdeps.Option, dangerous bool) []interviewdeps.Option {
 	if !dangerous {
 		return append(rows, inert)
 	}
-	return append([]interviewer.AlternativeOption{inert}, rows...)
+	return append([]interviewdeps.Option{inert}, rows...)
 }

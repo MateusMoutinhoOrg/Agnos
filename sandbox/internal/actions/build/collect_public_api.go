@@ -3,7 +3,7 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // CollectPublicApi parses every file of sandbox/api through the Go parser dep
@@ -12,11 +12,11 @@ import (
 // struct, one field per contract), the rest in listing order. Only exported
 // declarations are kept: what is unexported is unreachable from a caller, so
 // it is not public api.
-func CollectPublicApi(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]any, error) {
+func CollectPublicApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string]any, error) {
 
 	files := goFilesOf(sandbox, io, "sandbox/api")
 	isRoot := func(file string) bool { return lastSegmentOf(sandbox, file) == "sandbox.go" }
-	sandbox.Deps.Sortdeps.SliceStable(files, func(i int, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(files, func(i int, j int) bool {
 		return isRoot(files[i]) && !isRoot(files[j])
 	})
 
@@ -28,7 +28,7 @@ func CollectPublicApi(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]a
 		}
 
 		group := fileData(sandbox, file, parsed)
-		group["Name"] = titleOf(sandbox, sandbox.Deps.Stringsdeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go"))
+		group["Name"] = titleOf(sandbox, sandbox.Deps.StringsDeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go"))
 		group["Page"] = PublicApiPageOf(sandbox, file)
 		group["Symbols"] = identifierList(sandbox, declaredSymbols(group))
 		groups = append(groups, group)
@@ -42,13 +42,13 @@ func CollectPublicApi(sandbox *api.Sandbox, io *smartio.SmartIO) ([]map[string]a
 // and relative to the docs/PublicApi directory that indexes it. The index link
 // and the generated page are spelled here and nowhere else.
 func PublicApiPageOf(sandbox *api.Sandbox, file string) string {
-	base := sandbox.Deps.Stringsdeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go")
+	base := sandbox.Deps.StringsDeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go")
 	return "api." + base + ".md"
 }
 
-// DepsApiPageOf is PublicApiPageOf for a dependency contract, named after its
+// DepContractPageOf is PublicApiPageOf for a dependency contract, named after its
 // directory ("stringsdeps" -> "deps.stringsdeps.md").
-func DepsApiPageOf(name string) string {
+func DepContractPageOf(name string) string {
 	return "deps." + name + ".md"
 }
 
@@ -72,15 +72,15 @@ func declaredSymbols(data map[string]any) []string {
 // it with the Go parser dep. An unreadable or unparsable file is a hard error:
 // `verify` reports both as violations, so a build that reaches here works on
 // well-formed sources.
-func parseGoFile(sandbox *api.Sandbox, io *smartio.SmartIO, file string) (*goimportsdeps.File, error) {
+func parseGoFile(sandbox *api.Sandbox, io *stagedfs.StagedFS, file string) (*goimportsdeps.File, error) {
 	content, err := io.ReadFile(file)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read %s: %w", file, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read %s: %w", file, err)
 	}
 
-	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not parse %s: %w", file, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not parse %s: %w", file, err)
 	}
 
 	return parsed, nil
@@ -202,7 +202,7 @@ func anyDocumented(entries []map[string]any) bool {
 // functionSignature renders a parsed function back to the shape a caller
 // writes: `Name(param type, param type) (result, result)`.
 func functionSignature(sandbox *api.Sandbox, function goimportsdeps.Function) string {
-	builder := function.Name + "(" + sandbox.Deps.Stringsdeps.Join(paramList(function.Params), ", ") + ")"
+	builder := function.Name + "(" + sandbox.Deps.StringsDeps.Join(paramList(function.Params), ", ") + ")"
 
 	results := paramList(function.Results)
 	switch len(results) {
@@ -210,7 +210,7 @@ func functionSignature(sandbox *api.Sandbox, function goimportsdeps.Function) st
 	case 1:
 		builder += " " + results[0]
 	default:
-		builder += " (" + sandbox.Deps.Stringsdeps.Join(results, ", ") + ")"
+		builder += " (" + sandbox.Deps.StringsDeps.Join(results, ", ") + ")"
 	}
 
 	return builder
@@ -233,15 +233,15 @@ func paramList(params []goimportsdeps.Param) []string {
 // docLine flattens a doc comment to one markdown table cell: no line breaks,
 // no collapsed run of spaces, and no bare pipe to break the column.
 func docLine(sandbox *api.Sandbox, doc string) string {
-	line := sandbox.Deps.Stringsdeps.Join(sandbox.Deps.Stringsdeps.Fields(doc), " ")
-	return sandbox.Deps.Stringsdeps.ReplaceAll(line, "|", "\\|")
+	line := sandbox.Deps.StringsDeps.Join(sandbox.Deps.StringsDeps.Fields(doc), " ")
+	return sandbox.Deps.StringsDeps.ReplaceAll(line, "|", "\\|")
 }
 
 // goFilesOf lists the .go files directly inside dir, in listing order.
-func goFilesOf(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []string {
+func goFilesOf(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []string {
 	var files []string
 	for _, file := range io.ListFiles(dir) {
-		if sandbox.Deps.Stringsdeps.HasSuffix(file, ".go") {
+		if sandbox.Deps.StringsDeps.HasSuffix(file, ".go") {
 			files = append(files, file)
 		}
 	}
@@ -254,5 +254,5 @@ func titleOf(sandbox *api.Sandbox, name string) string {
 	if len(name) == 0 {
 		return name
 	}
-	return sandbox.Deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
+	return sandbox.Deps.StringsDeps.ToUpper(name[:1]) + name[1:]
 }

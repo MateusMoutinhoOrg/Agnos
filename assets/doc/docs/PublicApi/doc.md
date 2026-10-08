@@ -15,7 +15,7 @@ rather than reading the whole surface.
 | --- | --- |
 {{- if .HasDeps }}
 | `sandbox.New` | `func(deps *deps.Deps) *api.Sandbox` |
-| `standard.New` | `func() deps.Deps` (`adapters/availables/standard`) |
+| `standard.New` | `func() deps.Deps` (`adapters/bindings/standard`) |
 {{- else }}
 | `sandbox.New` | `func() *api.Sandbox` |
 {{- end }}
@@ -30,16 +30,16 @@ struct of function fields, filled by a binder.
 {{- range .PublicApi }}
 | [`{{ .Path }}`]({{ .Page }}) | {{ .Symbols }} |
 {{- end }}
-{{- if .DepsApi }}
+{{- if .DepContracts }}
 
 ## Dependency contracts
 
 `deps.Deps` has one field per directory of `sandbox/deps/`, named by title-casing it. Each
-field is that package's `Sandbox` struct, filled by `adapters/libs/<name>.Bind(&deps)`.
+field is that package's `Sandbox` struct, filled by `adapters/impls/<name>.Bind(&deps)`.
 
 | Page | Declares |
 | --- | --- |
-{{- range .DepsApi }}
+{{- range .DepContracts }}
 | [`deps.{{ .Title }}`]({{ .Page }}) | {{ .Symbols }} |
 {{- end }}
 {{- end }}

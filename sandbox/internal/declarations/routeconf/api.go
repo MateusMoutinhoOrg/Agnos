@@ -1,38 +1,33 @@
 package routeconf
 
-import "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
-
-// Trigger is the condition a path slice or a parameter value has to meet for
-// the route to join the run list. It is the one trigger every declaration
-// shares, so a command.yaml and a route.yaml read it the same way.
-type Trigger = triggerconf.Trigger
+import "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 
 // Path is one entry of a route's `paths`: the slice of request segments from
 // Start to End, both inclusive, End -1 standing for the last segment. The slice
 // is read as "/" + its segments joined by "/", compared against Trigger when
-// one is declared, and bound to Entries.<Id> either way.
+// one is declared, and bound to Input.<Id> either way.
 type Path struct {
 	Id          string
 	Start       int
 	End         int
 	Type        string // "string" | "integer" | "number" | "uuid"
-	Trigger     Trigger
+	Trigger     triggerconf.Trigger
 	Description string
 }
 
 // Parameter is one entry of a route's `parameters`: one value read off the
-// request under Key, from the first of Fonts that carries it, and bound to
-// Entries.<Id>. Key is the external spelling — the query key or the header
+// request under Key, from the first of Sources that carries it, and bound to
+// Input.<Id>. Key is the external spelling — the query key or the header
 // name, a header matched without regard to case — and defaults to Id.
 type Parameter struct {
 	Id          string
 	Key         string
 	Type        string   // "string" | "integer" | "number" | "boolean" | "datetime" | "string-array" | "integer-array"
-	Fonts       []string // "query" | "header" | "cookie", in the order they are read
+	Sources     []string // "query" | "header" | "cookie", in the order they are read
 	Required    bool
 	Default     string
 	HasDefault  bool
-	Trigger     Trigger
+	Trigger     triggerconf.Trigger
 	Description string
 	Examples    []string
 }
@@ -99,9 +94,9 @@ type Body struct {
 	SchemaKeys  []string
 }
 
-// RouteConf is the parsed form of sandbox/internal/routeslist/<name>/route.yaml —
+// RouteConf is the parsed form of sandbox/internal/routes/<name>/route.yaml —
 // the declarative description of one http route, which `agnos build` turns
-// into that route's generated new.go and entries.go. It is written by
+// into that route's generated new.go and input.go. It is written by
 // `add-route` and rewritten by the path, parameter and body editors, never by
 // hand.
 type RouteConf struct {
@@ -116,17 +111,17 @@ type RouteConf struct {
 	ResponseType string
 	// Segments is how many segments the request path has to have for the
 	// route to run; HasSegments is false on a route that takes any count.
-	Segments        int
-	HasSegments     bool
-	Paths           []Path
-	Parameters      []Parameter
-	Category        string
-	Help            string
-	LongDescription string
-	Examples        []string
-	Hidden          bool
-	Body            Body
-	// Legacy lists every key of a pre-routeslist declaration found in the
+	Segments    int
+	HasSegments bool
+	Paths       []Path
+	Parameters  []Parameter
+	Category    string
+	Summary     string
+	Description string
+	Examples    []string
+	Hidden      bool
+	Body        Body
+	// Legacy lists every key of a pre-routes declaration found in the
 	// file (`method`, `headers`, `params`), which verify reports by name.
 	Legacy []string
 

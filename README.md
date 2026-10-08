@@ -27,7 +27,7 @@ Agnos (`agnos`) is a **factory**. `agnos start` writes a project skeleton, `agno
 re-renders every generated file from templates embedded in the binary, and commands like
 `add-command`, `add-flag` and `add-dep` declare the project's whole command surface
 without a file being edited by hand. Only two things stay hand-written: a command's
-`InternalPureHandler.go`, and any contract-plus-adapter pair of your own.
+`handler.go`, and any contract-plus-adapter pair of your own.
 
 ```
 adapters/  ──▶  sandbox/  ◀──  cmd/
@@ -82,7 +82,7 @@ How the project is put together - layers, boundaries, data flow
 
 | Doc | Description |
 | --- | --- |
-| [Adapters](docs/Adapters/doc.md) | Contract, adapter and available: three units, one field of Deps, and who fills it |
+| [Adapters](docs/Adapters/doc.md) | Contract, adapter and binding: three units, one field of Deps, and who fills it |
 
 ### Development
 
@@ -94,9 +94,9 @@ Changing this repository - schema, build mechanics, recipes
 | [Workflow](docs/Workflow/doc.md) | Every change this project takes and the agnos command that makes it |
 | [Rules](docs/Rules/doc.md) | Every rule the generators, `verify` and the hand-written files must hold to |
 | [Structure](docs/Structure/doc.md) | The project schema: what lives where, what is generated, what verify enforces |
-| [BuildPipeline](docs/BuildPipeline/doc.md) | What build does: verify, collectors, template vars, asset groups, SmartIO persist, runtime, dispatch |
-| [Contributing](docs/Contributing/doc.md) | Recipes specific to changing agnos itself: bootstrap, actions, installable deps, templates, collectors, parsables |
-| [plan](docs/plan/doc.md) | future plans of the project |
+| [BuildPipeline](docs/BuildPipeline/doc.md) | What build does: verify, collectors, template vars, asset groups, StagedFS persist, runtime, dispatch |
+| [Contributing](docs/Contributing/doc.md) | Recipes specific to changing agnos itself: bootstrap, actions, installable deps, templates, collectors, declaration packages |
+| [Plan](docs/Plan/doc.md) | future plans of the project |
 
 ### Reference
 

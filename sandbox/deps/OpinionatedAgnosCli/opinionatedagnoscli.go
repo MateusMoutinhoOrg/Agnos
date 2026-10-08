@@ -1,11 +1,11 @@
-package opinatedagnoscli
+package opinionatedagnoscli
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/std"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/stddeps"
 )
 
-// This package is the contract of an *opinated* lib: unlike every other dep,
+// This package is the contract of an *opinionated* lib: unlike every other dep,
 // which restates a library's raw capability and nothing more, it carries the
 // agnos cli mechanic itself — the declaration a command.yaml becomes, the
 // chain that runs a command line against those declarations, how a value is
@@ -13,7 +13,7 @@ import (
 // types, so a handler still reads them as api.Command, api.CommandResponse.
 //
 // What stays in the project is everything it declares or edits: each
-// command's command.yaml and InternalPureHandler.go, the generated
+// command's command.yaml and handler.go, the generated
 // declarations built from them, and the Handle* files of
 // sandbox/internal/cli/errors/ that answer a failure.
 
@@ -21,22 +21,22 @@ import (
 type TriggerType int
 
 const (
-	// EqualTrigger matches a text that is exactly the trigger's Value.
-	EqualTrigger TriggerType = iota
-	// PrefixTrigger matches a text that is the Value or continues it with a
+	// TriggerEqual matches a text that is exactly the trigger's Value.
+	TriggerEqual TriggerType = iota
+	// TriggerPrefix matches a text that is the Value or continues it with a
 	// new segment: "/admin" matches "/admin" and "/admin/users", never
 	// "/administrator". A Value of "/" matches every path.
-	PrefixTrigger
-	// TextPrefixTrigger matches a text that begins with the Value, whatever
+	TriggerPrefix
+	// TriggerTextPrefix matches a text that begins with the Value, whatever
 	// follows it: "/admin" matches "/administrator" too.
-	TextPrefixTrigger
-	// SuffixTrigger matches a text that ends with the Value.
-	SuffixTrigger
-	// RegexTrigger matches a text the Value, a regular expression, matches.
-	RegexTrigger
-	// OneOfTrigger matches a text that is exactly one of the trigger's
+	TriggerTextPrefix
+	// TriggerSuffix matches a text that ends with the Value.
+	TriggerSuffix
+	// TriggerRegex matches a text the Value, a regular expression, matches.
+	TriggerRegex
+	// TriggerOneOf matches a text that is exactly one of the trigger's
 	// Values — how a command answers to more than one name.
-	OneOfTrigger
+	TriggerOneOf
 )
 
 // Trigger is the condition one declared slice or value has to meet for its
@@ -44,14 +44,14 @@ const (
 // command.yaml. Failing it is a non-match, never a usage error or a 400: the
 // input is for some other unit.
 type Trigger struct {
-	// Exist tells a declared trigger from none at all; an entry with none
+	// Set tells a declared trigger from none at all; an entry with none
 	// matches whatever the request brought.
-	Exist bool
+	Set bool
 	// Type is how Value is compared.
 	Type TriggerType
 	// Value is what the text is compared against.
 	Value string
-	// Values are the texts a OneOfTrigger accepts; nil on every other type.
+	// Values are the texts a TriggerOneOf accepts; nil on every other type.
 	Values []string
 	// Negate inverts the comparison: the trigger holds when the text does
 	// not match.
@@ -65,27 +65,27 @@ type Trigger struct {
 type ArgType int
 
 const (
-	// StringArg takes any segment, bound as a string — or any slice of them,
+	// ArgString takes any segment, bound as a string — or any slice of them,
 	// bound as a []string, when the arg reads more than one.
-	StringArg ArgType = iota
-	// IntegerArg takes one segment reading as a whole number, bound as an
+	ArgString ArgType = iota
+	// ArgInteger takes one segment reading as a whole number, bound as an
 	// int.
-	IntegerArg
-	// NumberArg takes one segment reading as a number, bound as a float64.
-	NumberArg
-	// UuidArg takes one segment reading as a canonical uuid, bound as a
+	ArgInteger
+	// ArgNumber takes one segment reading as a number, bound as a float64.
+	ArgNumber
+	// ArgUuid takes one segment reading as a canonical uuid, bound as a
 	// string.
-	UuidArg
+	ArgUuid
 )
 
 // CommandArg is one entry of `args` in command.yaml: the segments of the
 // command line from Start to End, both inclusive, End -1 standing for the last
 // one. A command line's segments are its leading words — every token before the
 // first one starting with "-" — plus every token after a bare "--". The slice
-// is bound to the Entries field tagged with its Id: one segment in its Type,
+// is bound to the Input field tagged with its Id: one segment in its Type,
 // several as a []string.
 type CommandArg struct {
-	// Id is the Entries field the slice is bound to.
+	// Id is the Input field the slice is bound to.
 	Id string
 	// Start is the index of the first segment of the slice.
 	Start int
@@ -109,30 +109,30 @@ type CommandArg struct {
 }
 
 // FlagType is the type a CommandFlag is converted to before it reaches
-// Entries.
+// Input.
 type FlagType int
 
 const (
-	// StringFlag is bound as a string.
-	StringFlag FlagType = iota
-	// IntegerFlag is bound as an int.
-	IntegerFlag
-	// NumberFlag is bound as a float64.
-	NumberFlag
-	// BooleanFlag is bound as a bool: true when one of its keys is on the
+	// FlagString is bound as a string.
+	FlagString FlagType = iota
+	// FlagInteger is bound as an int.
+	FlagInteger
+	// FlagNumber is bound as a float64.
+	FlagNumber
+	// FlagBoolean is bound as a bool: true when one of its keys is on the
 	// command line. It takes no value.
-	BooleanFlag
-	// StringArrayFlag is bound as a []string, one element per occurrence.
-	StringArrayFlag
-	// IntegerArrayFlag is bound as a []int, one element per occurrence.
-	IntegerArrayFlag
+	FlagBoolean
+	// FlagStringArray is bound as a []string, one element per occurrence.
+	FlagStringArray
+	// FlagIntegerArray is bound as a []int, one element per occurrence.
+	FlagIntegerArray
 )
 
 // CommandFlag is one entry of `flags` in command.yaml: the value that follows
-// one of Keys on the command line, converted to Type and bound to the Entries
+// one of Keys on the command line, converted to Type and bound to the Input
 // field tagged with its Id.
 type CommandFlag struct {
-	// Id is the Entries field the value is bound to.
+	// Id is the Input field the value is bound to.
 	Id string
 	// Keys are the spellings a user types it under ("--command", "-c").
 	Keys []string
@@ -175,10 +175,10 @@ type CommandResponse struct {
 	SetStatus func(code int)
 	// Printf writes to stdout, and answers ExitOk unless a status was set.
 	Printf func(format string, a ...any) (int, error)
-	// Error writes to stderr.
-	Error func(format string, a ...any) (int, error)
-	// Log writes a progress notice to stderr, silenced by a quiet run.
-	Log func(format string, a ...any) (int, error)
+	// Eprintf writes to stderr.
+	Eprintf func(format string, a ...any) (int, error)
+	// Logf writes a progress notice to stderr, silenced by a quiet run.
+	Logf func(format string, a ...any) (int, error)
 }
 
 // CommandFailureKind is which of the project's own Handle* files of
@@ -186,25 +186,25 @@ type CommandResponse struct {
 type CommandFailureKind int
 
 const (
-	// HandlerFailure is a failure a handler returned through Fail, or an
+	// FailureHandler is a failure a handler returned through Fail, or an
 	// error it returned without answering.
-	HandlerFailure CommandFailureKind = iota
-	// NotFoundFailure is a command line no command answered.
-	NotFoundFailure
-	// BadUsageFailure is a value that would not bind: a required arg or flag
+	FailureHandler CommandFailureKind = iota
+	// FailureNotFound is a command line no command answered.
+	FailureNotFound
+	// FailureBadUsage is a value that would not bind: a required arg or flag
 	// missing, a value that will not convert or is out of its bounds.
-	BadUsageFailure
-	// UnknownFlagFailure is a token looking like a flag that no command of
+	FailureBadUsage
+	// FailureUnknownFlag is a token looking like a flag that no command of
 	// the chain consumed.
-	UnknownFlagFailure
-	// UnexpectedArgFailure is any other token no command of the chain
+	FailureUnknownFlag
+	// FailureUnexpectedArg is any other token no command of the chain
 	// consumed.
-	UnexpectedArgFailure
+	FailureUnexpectedArg
 )
 
 // CommandFailure is one way a command line did not get answered: which Handle*
-// file answers it, the exit status, and why. It is an error too: an
-// InternalPureHandler refuses a command line by returning one, built by Fail.
+// file answers it, the exit status, and why. It is an error too: a
+// Handle refuses a command line by returning one, built by Fail.
 type CommandFailure struct {
 	// Kind is the Handle* file that answers it.
 	Kind CommandFailureKind
@@ -233,7 +233,7 @@ func (failure *CommandFailure) Error() string {
 //
 // What Cli.Commands holds is the declaration alone: nothing is ever bound onto
 // it. The dispatch copies it with BindCommand, puts the command line and the
-// response on the copy, and hands the copy to IsActionable and CommandHandler.
+// response on the copy, and hands the copy to Matches and Run.
 type Command struct {
 	// Name is the package directory of the command, snake_case.
 	Name string
@@ -255,10 +255,10 @@ type Command struct {
 	Pattern string
 	// Category groups it on the general help screen.
 	Category string
-	// Help is the one-line description.
-	Help string
-	// LongDescription is the paragraph the per-command help screen prints.
-	LongDescription string
+	// Summary is the one-line description.
+	Summary string
+	// Description is the paragraph the per-command help screen prints.
+	Description string
 	// Examples are whole command lines the help screen prints.
 	Examples []string
 	// Hidden keeps it off the general help screen without disabling it.
@@ -268,13 +268,13 @@ type Command struct {
 	// Flags are the flags it reads, in declaration order.
 	Flags []CommandFlag
 
-	// InternalPureHandler is the command package's own InternalPureHandler,
+	// Handle is the command package's own Handle,
 	// closed over the sandbox: a func(props *commandprops.CommandProps,
-	// entries *Entries, response *CommandResponse) error whose Entries is that
+	// input *Input, response *CommandResponse) error whose Input is that
 	// package's generated struct. It is held as any because every command's
-	// Entries is a type of its own; the dispatch builds and fills one by
+	// Input is a type of its own; the dispatch builds and fills one by
 	// reflection and calls it.
-	InternalPureHandler any
+	Handle any
 
 	// Argv is the command line this copy was bound from.
 	Argv []string
@@ -296,28 +296,28 @@ type Command struct {
 	// Handle* files, nil on a normal run. The dispatch sets it as it raises.
 	Failure *CommandFailure
 
-	// IsActionable reports whether one bound copy — its Argv set — is for
+	// Matches reports whether one bound copy — its Argv set — is for
 	// this command: the segment count, and every arg and every flag declaring
 	// a trigger, match it. NewCommand sets it to the lib's own matcher; set it
 	// to decide by hand. The dispatch reads a nil one with the lib's matcher
 	// too.
-	IsActionable func(bound *Command) bool
-	// CommandHandler binds one bound copy's command line onto a fresh Entries
-	// and runs InternalPureHandler with it. It returns the failure the handler
+	Matches func(bound *Command) bool
+	// Run binds one bound copy's command line onto a fresh Input
+	// and runs Handle with it. It returns the failure the handler
 	// did not answer itself, nil otherwise; a handler answering nothing hands
 	// the command line to the next command of the chain. Nil binds with the
 	// lib's own binder; set it to bind by hand.
-	CommandHandler func(bound *Command) error
+	Run func(bound *Command) error
 }
 
 // Cli is the CLI surface of the sandbox: every command the project declares,
 // and the dispatch that reads a command line against them. It is built by
-// sandbox/internal/generated/cli/cli/new.go, generated by the build.
+// sandbox/internal/generated/cli/new.go, generated by the build.
 type Cli struct {
-	// CliMain is the dispatch-and-parse entry point: it hands the command
-	// line to the lib's CliMain against these Commands, and returns the exit
+	// Main is the dispatch-and-parse entry point: it hands the command
+	// line to the lib's Main against these Commands, and returns the exit
 	// status the command line was answered with.
-	CliMain func(args []string) int
+	Main func(args []string) int
 	// Commands is every command the project declares, in run order —
 	// lowest `priority` first, then by name — each built by the generated
 	// NewCommand of its own package. The dispatch reads the command line
@@ -343,7 +343,7 @@ const (
 	ExitUsage = 2
 )
 
-// MainProps is everything one run of CliMain reads: the surface, the command
+// MainProps is everything one run of Main reads: the surface, the command
 // line and the two deps the dispatch reaches the outside world through. The
 // generated registry builds it per call, so nothing the lib holds goes stale.
 type MainProps struct {
@@ -357,17 +357,17 @@ type MainProps struct {
 	// the chain is handed — a type of the project, which is why the lib is
 	// handed a constructor rather than naming it.
 	NewProps func() any
-	// Std is the channel every print of the response goes through, read at
-	// the moment of each print: a middleware that silences Std.Log silences
+	// StdDeps is the channel every print of the response goes through, read at
+	// the moment of each print: a middleware that silences StdDeps.Logf silences
 	// the response's Log too.
-	Std *std.Sandbox
-	// Argvdeps is the parser the flags are read with.
-	Argvdeps argvdeps.Sandbox
+	StdDeps *stddeps.Contract
+	// ArgvDeps is the parser the flags are read with.
+	ArgvDeps argvdeps.Contract
 }
 
-// Sandbox is the cli lib injected whole as the Deps.OpinatedAgnosCli field.
-type Sandbox struct {
-	// CliMain is the whole dispatch layer: it runs every command of
+// Contract is the cli lib injected whole as the Deps.OpinionatedAgnosCli field.
+type Contract struct {
+	// Main is the whole dispatch layer: it runs every command of
 	// props.Cli.Commands the command line is for, in order, and returns the
 	// exit status the line was answered with. Each command runs in turn until
 	// one of them answers — sets a status, or prints to stdout, which answers
@@ -376,24 +376,24 @@ type Sandbox struct {
 	// line can end without an answer — nothing matched, a value that will not
 	// bind, a token nobody read, a panic — is raised through props.Cli.Fail
 	// and answered by one of the project's own Handle* files.
-	CliMain func(props MainProps) int
+	Main func(props MainProps) int
 
 	// NewCommand returns an empty Command with every slice open and
-	// IsActionable set to the lib's own matcher, reading flags through
+	// Matches set to the lib's own matcher, reading flags through
 	// argvdeps — the base a command's generated NewCommand fills its
 	// declaration on.
-	NewCommand func(argvdeps argvdeps.Sandbox) *Command
+	NewCommand func(argvdeps argvdeps.Contract) *Command
 
 	// BindCommand copies one declaration into the command a single command
 	// line runs on: the same declared fields — the slices are read-only and
 	// shared — with no command line, response or failure yet.
 	BindCommand func(command *Command) *Command
 
-	// Fail is how an InternalPureHandler refuses a command line: it builds
+	// Fail is how a Handle refuses a command line: it builds
 	// the failure and returns it as an error, and the handler returns it in
 	// turn, which the dispatch raises on the command:
 	//
-	//	return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
+	//	return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	//
 	// A message left empty is filled by handle_failure.go's own wording.
 	Fail func(status int, field string, message string) error

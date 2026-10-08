@@ -34,7 +34,7 @@ func Render(sandbox *api.Sandbox, conf *ModuleConf) string {
 // separate leaves exactly one blank line between what is written and the
 // directives that follow, however many the sections above happened to end with.
 func separate(sandbox *api.Sandbox, builder string) string {
-	for sandbox.Deps.Stringsdeps.HasSuffix(builder, "\n") {
+	for sandbox.Deps.StringsDeps.HasSuffix(builder, "\n") {
 		builder = builder[:len(builder)-1]
 	}
 	return builder + "\n\n"

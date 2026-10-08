@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // The edit helpers below are what `set-arg` and `set-flag` are, the way
@@ -22,21 +22,21 @@ var CommandFlagClearKeys = []string{"keys", "type", "required", "default", "min"
 // one-of's values joined by the separator NewTrigger splits them on.
 func triggerTyped(sandbox *api.Sandbox, trigger triggerconf.Trigger) string {
 	if trigger.Type == triggerconf.OneOf {
-		return sandbox.Deps.Stringsdeps.Join(trigger.Values, TriggerValuesSeparator)
+		return sandbox.Deps.StringsDeps.Join(trigger.Values, TriggerValuesSeparator)
 	}
 	return trigger.Value
 }
 
-// CommandArgEdited rebuilds one arg with the changes applied, holding the
+// EditCommandArg rebuilds one arg with the changes applied, holding the
 // result to every rule NewCommandArg holds a new one to.
-func CommandArgEdited(sandbox *api.Sandbox, current commandconf.Arg, props api.ArgEditProps) (commandconf.Arg, error) {
-	strs := sandbox.Deps.Stringsdeps
+func EditCommandArg(sandbox *api.Sandbox, current commandconf.Arg, props api.SetArgProps) (commandconf.Arg, error) {
+	strs := sandbox.Deps.StringsDeps
 	cleared, err := RouteClearSet(sandbox, props.Clear, CommandArgClearKeys)
 	if err != nil {
 		return commandconf.Arg{}, err
 	}
 
-	built := api.ArgProps{
+	built := api.AddArgProps{
 		Name:        current.Id,
 		Start:       strs.FormatInt(int64(current.Start), 10),
 		End:         strs.FormatInt(int64(current.End), 10),
@@ -47,7 +47,7 @@ func CommandArgEdited(sandbox *api.Sandbox, current commandconf.Arg, props api.A
 	if current.HasDefault {
 		built.Default = current.Default
 	}
-	if current.Trigger.Exists {
+	if current.Trigger.Set {
 		built.TriggerType, built.Trigger = current.Trigger.Type, triggerTyped(sandbox, current.Trigger)
 		built.TriggerNegate, built.TriggerIgnoreCase = current.Trigger.Negate, current.Trigger.IgnoreCase
 	}
@@ -112,23 +112,23 @@ func CommandArgEdited(sandbox *api.Sandbox, current commandconf.Arg, props api.A
 	return NewCommandArg(sandbox, built, current.Start)
 }
 
-// CommandArgEditEmpty reports an edit that changes nothing.
-func CommandArgEditEmpty(sandbox *api.Sandbox, props api.ArgEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Start + props.End + props.Type +
+// IsCommandArgEditEmpty reports an edit that changes nothing.
+func IsCommandArgEditEmpty(sandbox *api.Sandbox, props api.SetArgProps) bool {
+	given := sandbox.Deps.StringsDeps.TrimSpace(props.Rename + props.Start + props.End + props.Type +
 		props.Default + props.TriggerType + props.Trigger + props.Description)
 	return given == "" && len(props.Clear) == 0 && !props.Required && !props.TriggerNegate && !props.TriggerIgnoreCase
 }
 
-// CommandFlagEdited rebuilds one flag with the changes applied, holding the
+// EditCommandFlag rebuilds one flag with the changes applied, holding the
 // result to every rule NewCommandFlag holds a new one to.
-func CommandFlagEdited(sandbox *api.Sandbox, current commandconf.Flag, props api.FlagEditProps) (commandconf.Flag, error) {
-	strs := sandbox.Deps.Stringsdeps
+func EditCommandFlag(sandbox *api.Sandbox, current commandconf.Flag, props api.SetFlagProps) (commandconf.Flag, error) {
+	strs := sandbox.Deps.StringsDeps
 	cleared, err := RouteClearSet(sandbox, props.Clear, CommandFlagClearKeys)
 	if err != nil {
 		return commandconf.Flag{}, err
 	}
 
-	built := api.FlagProps{
+	built := api.AddFlagProps{
 		Name:        current.Id,
 		Type:        current.Type,
 		Required:    current.Required,
@@ -148,7 +148,7 @@ func CommandFlagEdited(sandbox *api.Sandbox, current commandconf.Flag, props api
 	if current.HasMax {
 		built.Max = strs.FormatFloat(current.Max, 'g', -1, 64)
 	}
-	if current.Trigger.Exists {
+	if current.Trigger.Set {
 		built.TriggerType, built.Trigger = current.Trigger.Type, triggerTyped(sandbox, current.Trigger)
 		built.TriggerNegate, built.TriggerIgnoreCase = current.Trigger.Negate, current.Trigger.IgnoreCase
 	}
@@ -232,9 +232,9 @@ func CommandFlagEdited(sandbox *api.Sandbox, current commandconf.Flag, props api
 	return NewCommandFlag(sandbox, built)
 }
 
-// CommandFlagEditEmpty reports an edit that changes nothing.
-func CommandFlagEditEmpty(sandbox *api.Sandbox, props api.FlagEditProps) bool {
-	given := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename + props.Type + props.Default + props.Min + props.Max +
+// IsCommandFlagEditEmpty reports an edit that changes nothing.
+func IsCommandFlagEditEmpty(sandbox *api.Sandbox, props api.SetFlagProps) bool {
+	given := sandbox.Deps.StringsDeps.TrimSpace(props.Rename + props.Type + props.Default + props.Min + props.Max +
 		props.Pattern + props.TriggerType + props.Trigger + props.Description)
 	return given == "" && len(props.Keys) == 0 && len(props.Enum) == 0 && len(props.Clear) == 0 &&
 		!props.Required && !props.TriggerNegate && !props.TriggerIgnoreCase

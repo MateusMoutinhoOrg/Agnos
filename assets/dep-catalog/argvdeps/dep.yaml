@@ -1,4 +1,4 @@
-default-adapter: argvdeps
-field: Argvdeps
+default-adapter: stdargv
+field: ArgvDeps
 help: Per-call argv parser
 name: argvdeps

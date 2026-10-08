@@ -2,15 +2,15 @@ package commandconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // Render serializes a CommandConf back to the command.yaml shape, leaving out
 // every key that holds its default: `strict` when true, an arg's `type` when
 // string, a flag's `keys` when it declared none.
 func Render(sandbox *api.Sandbox, conf *CommandConf) string {
-	obj := sandbox.Deps.Serializables.CreateObject()
+	obj := sandbox.Deps.SerializableDeps.CreateObject()
 
 	if conf.HasPriority {
 		obj.AddItemToObject("priority", conf.Priority)
@@ -28,9 +28,9 @@ func Render(sandbox *api.Sandbox, conf *CommandConf) string {
 		obj.AddItemToObject("flags", flagsArray(sandbox, conf.Flags))
 	}
 	obj.AddItemToObject("category", conf.Category)
-	obj.AddItemToObject("help", conf.Help)
-	if conf.LongDescription != "" {
-		obj.AddItemToObject("long-description", conf.LongDescription)
+	obj.AddItemToObject("summary", conf.Summary)
+	if conf.Description != "" {
+		obj.AddItemToObject("description", conf.Description)
 	}
 	if len(conf.Examples) > 0 {
 		obj.AddItemToObject("examples", stringArray(sandbox, conf.Examples))
@@ -39,21 +39,21 @@ func Render(sandbox *api.Sandbox, conf *CommandConf) string {
 		obj.AddItemToObject("hidden", true)
 	}
 
-	return sandbox.Deps.Serializables.SerializeToYaml(obj)
+	return sandbox.Deps.SerializableDeps.SerializeToYaml(obj)
 }
 
 // argsArray renders the `args` sequence, in declaration order.
-func argsArray(sandbox *api.Sandbox, args []Arg) *serializibles.SerializibleObject {
-	arr := sandbox.Deps.Serializables.CreateArray()
+func argsArray(sandbox *api.Sandbox, args []Arg) *serializabledeps.SerializableObject {
+	arr := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, arg := range args {
-		entry := sandbox.Deps.Serializables.CreateObject()
+		entry := sandbox.Deps.SerializableDeps.CreateObject()
 		entry.AddItemToObject("id", arg.Id)
 		entry.AddItemToObject("start", arg.Start)
 		entry.AddItemToObject("end", arg.End)
 		if arg.Type != "" && arg.Type != DefaultArgType {
 			entry.AddItemToObject("type", arg.Type)
 		}
-		if arg.Trigger.Exists {
+		if arg.Trigger.Set {
 			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, arg.Trigger))
 		}
 		if arg.Required {
@@ -71,10 +71,10 @@ func argsArray(sandbox *api.Sandbox, args []Arg) *serializibles.SerializibleObje
 }
 
 // flagsArray renders the `flags` sequence, in declaration order.
-func flagsArray(sandbox *api.Sandbox, flags []Flag) *serializibles.SerializibleObject {
-	arr := sandbox.Deps.Serializables.CreateArray()
+func flagsArray(sandbox *api.Sandbox, flags []Flag) *serializabledeps.SerializableObject {
+	arr := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, flag := range flags {
-		entry := sandbox.Deps.Serializables.CreateObject()
+		entry := sandbox.Deps.SerializableDeps.CreateObject()
 		entry.AddItemToObject("id", flag.Id)
 		if flag.HasKeys {
 			entry.AddItemToObject("keys", stringArray(sandbox, flag.Keys))
@@ -100,7 +100,7 @@ func flagsArray(sandbox *api.Sandbox, flags []Flag) *serializibles.SerializibleO
 		if flag.Pattern != "" {
 			entry.AddItemToObject("pattern", flag.Pattern)
 		}
-		if flag.Trigger.Exists {
+		if flag.Trigger.Set {
 			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, flag.Trigger))
 		}
 		if flag.Description != "" {
@@ -111,8 +111,8 @@ func flagsArray(sandbox *api.Sandbox, flags []Flag) *serializibles.SerializibleO
 	return arr
 }
 
-func stringArray(sandbox *api.Sandbox, values []string) *serializibles.SerializibleObject {
-	arr := sandbox.Deps.Serializables.CreateArray()
+func stringArray(sandbox *api.Sandbox, values []string) *serializabledeps.SerializableObject {
+	arr := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, value := range values {
 		arr.AddItemToArray(value)
 	}

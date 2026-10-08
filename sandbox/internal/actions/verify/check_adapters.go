@@ -3,16 +3,16 @@ package verify
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // adaptersAllowedDirs is the fixed set of sub-directories the adapters/ tree
 // may contain.
-var adaptersAllowedDirs = []string{"availables", "libs"}
+var adaptersAllowedDirs = []string{"bindings", "impls"}
 
 // adapterLibsDir holds one package per contract, each exporting the binder
-// adapters/availables/standard/new.go is generated to call.
+// adapters/bindings/standard/new.go is generated to call.
 const adapterLibsDir = utils.AdaptersDir
 
 // binderParamType is the single parameter every adapter binder takes. The
@@ -21,11 +21,11 @@ const adapterLibsDir = utils.AdaptersDir
 // time, after build has already rewritten the tree.
 const binderParamType = "*deps.Deps"
 
-// CheckAdapters enforces the adapters/ tree: it holds only the availables and
+// CheckAdapters enforces the adapters/ tree: it holds only the bindings and
 // libs directories, every lib exports Bind(sandbox *api.Sandbox), and every field
 // of Deps is filled by one of them — an unassigned field is a nil func that
 // panics on first use, which no compiler catches.
-func CheckAdapters(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckAdapters(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	if !io.IsDir("adapters") {
@@ -36,13 +36,13 @@ func CheckAdapters(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		name := lastSegment(sandbox, dir)
 		if !contains(adaptersAllowedDirs, name) {
 			violations = append(violations, "adapters/ contains unexpected directory "+name+
-				" (allowed: availables, libs)")
+				" (allowed: bindings, libs)")
 		}
 	}
 
 	for _, file := range io.ListFiles("adapters") {
 		violations = append(violations, "adapters/ contains unexpected file "+lastSegment(sandbox, file)+
-			" (adapters/ may hold only the availables and libs directories)")
+			" (adapters/ may hold only the bindings and libs directories)")
 	}
 
 	violations = append(violations, checkAdapterBinders(sandbox, io)...)
@@ -51,9 +51,9 @@ func CheckAdapters(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	return violations
 }
 
-// checkAdapterBinders reports every adapters/libs package that does not export
+// checkAdapterBinders reports every adapters/impls package that does not export
 // the binder the generated standard adapter calls.
-func checkAdapterBinders(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkAdapterBinders(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	if !io.IsDir(adapterLibsDir) {
@@ -65,23 +65,23 @@ func checkAdapterBinders(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 			continue
 		}
 		violations = append(violations, lib+" exports no Bind(deps "+binderParamType+")"+
-			" (adapters/availables/standard/new.go is generated to call it)")
+			" (adapters/bindings/standard/new.go is generated to call it)")
 	}
 
 	return violations
 }
 
 // hasBinder reports whether any .go file of lib declares the binder. A file
-// that does not parse is reported by CheckContracts only for the contract
+// that does not parse is reported by CheckContractDocs only for the contract
 // trees, so here an unparsable file simply carries no binder.
-func hasBinder(sandbox *api.Sandbox, io *smartio.SmartIO, lib string) bool {
+func hasBinder(sandbox *api.Sandbox, io *stagedfs.StagedFS, lib string) bool {
 	for _, file := range goFilesUnder(sandbox, io, lib) {
 		content, err := io.ReadFile(file)
 		if err != nil {
 			continue
 		}
 
-		parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+		parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 		if err != nil {
 			continue
 		}
@@ -105,39 +105,39 @@ func isBinder(function goimportsdeps.Function) bool {
 		function.Params[0].Type == binderParamType
 }
 
-// checkAdapterCoverage enforces the one invariant an available exists for:
+// checkAdapterCoverage enforces the one invariant a binding exists for:
 // every field of Deps is filled exactly once. Zero is a nil func that panics
 // on first use; two is a silent overwrite in which the last binder wins, which
 // no compiler and no test catches. Which adapter fills which field is read
 // from the adapter's own declaration, never from the body of its Bind.
 //
-// A project whose availables are all hand-written declares no selection, so
+// A project whose bindings are all hand-written declares no selection, so
 // there is nothing to resolve; it falls back to the weaker question — is every
 // contract mentioned by some adapter at all.
-func checkAdapterCoverage(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkAdapterCoverage(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	if !io.IsDir(adapterLibsDir) || !io.IsDir(utils.ContractsDir) {
 		return nil
 	}
 
-	availables := utils.DeclaredAvailables(sandbox, io)
-	if len(availables) == 0 {
+	bindings := utils.DeclaredBindings(sandbox, io)
+	if len(bindings) == 0 {
 		return checkAdapterMentions(sandbox, io)
 	}
 
 	var violations []string
-	for _, available := range availables {
-		violations = append(violations, checkAvailableCoverage(sandbox, io, available)...)
+	for _, binding := range bindings {
+		violations = append(violations, checkBindingCoverage(sandbox, io, binding)...)
 	}
 
 	return violations
 }
 
-// checkAvailableCoverage resolves one available's selection into the fields it
+// checkBindingCoverage resolves one binding's selection into the fields it
 // fills and reports both ways it can be wrong.
-func checkAvailableCoverage(sandbox *api.Sandbox, io *smartio.SmartIO, available string) []string {
+func checkBindingCoverage(sandbox *api.Sandbox, io *stagedfs.StagedFS, binding string) []string {
 	var violations []string
 
-	conf, err := utils.LoadAvailableConf(sandbox, io, available)
+	conf, err := utils.LoadBindingConf(sandbox, io, binding)
 	if err != nil {
 		return []string{err.Error()}
 	}
@@ -146,7 +146,7 @@ func checkAvailableCoverage(sandbox *api.Sandbox, io *smartio.SmartIO, available
 	for _, adapter := range conf.Adapters {
 		adapter_conf, err := utils.LoadAdapterConf(sandbox, io, adapter)
 		if err != nil {
-			violations = append(violations, utils.AvailableConfPath(available)+" binds "+adapter+
+			violations = append(violations, utils.BindingConfPath(binding)+" binds "+adapter+
 				", which is not installed under "+adapterLibsDir+"/")
 			continue
 		}
@@ -165,11 +165,11 @@ func checkAvailableCoverage(sandbox *api.Sandbox, io *smartio.SmartIO, available
 		case 1:
 			continue
 		case 0:
-			violations = append(violations, "available "+available+" fills deps."+field+
+			violations = append(violations, "binding "+binding+" fills deps."+field+
 				" with no adapter (an unfilled Deps field is a nil func that panics on first use)")
 		default:
-			violations = append(violations, "available "+available+" fills deps."+field+
-				" with "+sandbox.Deps.Stringsdeps.Join(filled[field], " and ")+
+			violations = append(violations, "binding "+binding+" fills deps."+field+
+				" with "+sandbox.Deps.StringsDeps.Join(filled[field], " and ")+
 				" (two binders of one field is a silent overwrite: the last one bound wins)")
 		}
 	}
@@ -178,11 +178,11 @@ func checkAvailableCoverage(sandbox *api.Sandbox, io *smartio.SmartIO, available
 }
 
 // checkAdapterMentions is the coverage question a project with no declared
-// available can still answer: does some adapter mention each contract's Deps
+// binding can still answer: does some adapter mention each contract's Deps
 // field at all. The field name is the title-cased contract directory, the same
 // spelling sandbox/deps/deps.go is generated with, and a binder fills it either
 // whole or field by field — both mention it.
-func checkAdapterMentions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkAdapterMentions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	bound := adapterSources(sandbox, io)
@@ -194,7 +194,7 @@ func checkAdapterMentions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		}
 		field := utils.DepField(sandbox, name)
 
-		if sandbox.Deps.Stringsdeps.Contains(bound, "deps."+field) {
+		if sandbox.Deps.StringsDeps.Contains(bound, "deps."+field) {
 			continue
 		}
 
@@ -206,9 +206,9 @@ func checkAdapterMentions(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	return violations
 }
 
-// adapterSources concatenates every Go source under adapters/libs, so one
+// adapterSources concatenates every Go source under adapters/impls, so one
 // scan answers the question for all contracts at once.
-func adapterSources(sandbox *api.Sandbox, io *smartio.SmartIO) string {
+func adapterSources(sandbox *api.Sandbox, io *stagedfs.StagedFS) string {
 	sources := ""
 
 	for _, file := range goFilesUnder(sandbox, io, adapterLibsDir) {

@@ -1,14 +1,14 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: front-init
-category: Front System
+category: Front
+description: 'Installs the deps the front layer needs — the OpinionatedAgnosFront lib, its file layer, among them — and writes, once, the front route serving every file of assets/front and that tree''s index.html and 404.html. A project with no server layer is given one first: the front is answered over http.'
 examples:
     - front-init
     - front-init --path ./my-project
-help: Add the html front layer to the project
-long-description: 'Installs the deps the front layer needs — the OpinatedAgnosFront lib, its file layer, among them — and writes, once, the frontend route serving every file of assets/frontend and that tree''s index.html and 404.html. A project with no server layer is given one first: the front is answered over http.'
 priority: 100
+summary: Add the html front layer to the project

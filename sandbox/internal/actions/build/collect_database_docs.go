@@ -2,8 +2,8 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -32,21 +32,21 @@ type DatabaseDocMethod struct {
 }
 
 // DatabaseDoc is one database's page of docs/Databases, rendered from its
-// specs.yaml alone: nothing here is written by hand on the page.
+// database.yaml alone: nothing here is written by hand on the page.
 type DatabaseDoc struct {
-	Name    string
-	Package string
-	Type    string
-	Prefix  string
-	Tables  []DatabaseDocTable
-	Methods []DatabaseDocMethod
+	Name      string
+	Package   string
+	Type      string
+	KeyPrefix string
+	Tables    []DatabaseDocTable
+	Methods   []DatabaseDocMethod
 }
 
-// CollectDatabaseDocs renders every sandbox/internal/databases/<db>/specs.yaml
+// CollectDatabaseDocs renders every sandbox/internal/databases/<db>/database.yaml
 // into the page docs/Databases prints for it — the database layer's
 // CollectRouteDocs. The declaration is the only source: a table, a field or a
 // method reaches the page by being declared, never by the page being edited.
-func CollectDatabaseDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]DatabaseDoc, error) {
+func CollectDatabaseDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]DatabaseDoc, error) {
 	var docs []DatabaseDoc
 
 	for _, dir := range io.ListDirs(utils.DatabasesDir) {
@@ -55,14 +55,14 @@ func CollectDatabaseDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]DatabaseD
 			continue
 		}
 
-		content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + utils.DatabaseSpecsFile)
+		content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + utils.DatabaseConfFile)
 		if err != nil {
 			continue
 		}
 
 		conf, err := databaseconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("databases/%s/%s: %w", name, utils.DatabaseSpecsFile, err)
+			return nil, sandbox.Deps.StdDeps.Errorf("databases/%s/%s: %w", name, utils.DatabaseConfFile, err)
 		}
 
 		docs = append(docs, databaseDoc(sandbox, name, conf))
@@ -74,14 +74,14 @@ func CollectDatabaseDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]DatabaseD
 // databaseDoc turns one parsed declaration into its page.
 func databaseDoc(sandbox *api.Sandbox, name string, conf *databaseconf.DatabaseConf) DatabaseDoc {
 	doc := DatabaseDoc{
-		Name:    utils.DatabaseIdentifier(sandbox, name),
-		Package: name,
-		Type:    utils.ExportedName(sandbox, name),
-		Prefix:  conf.Prefix,
+		Name:      utils.DatabaseName(sandbox, name),
+		Package:   name,
+		Type:      utils.GoIdentifier(sandbox, name),
+		KeyPrefix: conf.KeyPrefix,
 	}
 
 	for _, table := range conf.Tables {
-		section := DatabaseDocTable{Name: table.Name, Type: utils.ExportedName(sandbox, table.Name)}
+		section := DatabaseDocTable{Name: table.Name, Type: utils.GoIdentifier(sandbox, table.Name)}
 		for _, field := range table.Fields {
 			section.Fields = append(section.Fields, databaseDocField(field, ""))
 			for _, nested := range field.Fields {

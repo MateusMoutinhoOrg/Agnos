@@ -1,36 +1,35 @@
 category: Backoffice Users
-help: Lists backoffice users, filtered and paginated
 methods:
     - GET
 parameters:
     - description: matches the username or the email, case-insensitive
-      fonts:
+      sources:
         - query
       id: Search
       key: search
       type: string
     - description: root, viewer, or empty for every role
-      fonts:
+      sources:
         - query
       id: Role
       key: role
       type: string
     - default: "1"
       description: the page to show, counted from 1
-      fonts:
+      sources:
         - query
       id: Page
       key: page
       type: integer
     - default: "20"
       description: how many users a page shows, from 1 to 100
-      fonts:
+      sources:
         - query
       id: Limit
       key: limit
       type: integer
     - description: the outcome code of the last add, edit or remove
-      fonts:
+      sources:
         - query
       id: Notice
       key: notice
@@ -45,3 +44,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 2
+summary: Lists backoffice users, filtered and paginated

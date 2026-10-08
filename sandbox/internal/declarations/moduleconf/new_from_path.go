@@ -5,9 +5,9 @@ import (
 )
 
 func NewFromPath(sandbox *api.Sandbox, path string) (*ModuleConf, error) {
-	bytes, err := sandbox.Deps.Iodeps.ReadFile(path)
+	bytes, err := sandbox.Deps.IoDeps.ReadFile(path)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("failed to read module file at %s: %v", path, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("failed to read module file at %s: %v", path, err)
 	}
 
 	return New(sandbox, string(bytes))

@@ -1,10 +1,10 @@
-# `deps.Goimportsdeps`
+# `deps.GoimportsDeps`
 
 `sandbox/deps/goimportsdeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the Go-source parser injected whole as the Deps.Goimportsdeps field. Every field errors when the given content is not parsable Go.
+Contract is the Go-source parser injected whole as the Deps.GoimportsDeps field. Every field errors when the given content is not parsable Go.
 
 | Field | Type | Description |
 | --- | --- | --- |

@@ -13,13 +13,13 @@ Re-renders every generated file of the project in the given directory, then hand
 | `--runtime` | string | `go` | the toolchain the rendered project is handed to: go (tidy + compile) or none | — |
 | `--unsafe` | boolean |  | Skips the verify schema gate before building | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos build
@@ -27,4 +27,4 @@ agnos build --path ./my-project
 agnos build -q
 ```
 
-Core Commands · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Core · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

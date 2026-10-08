@@ -1,4 +1,4 @@
-description: "Every command of {{.Name}}, generated from the command declarations"
+description: "Every command of {{.ProjectName}}, generated from the command declarations"
 name: "Commands"
 order: 3
 themes:

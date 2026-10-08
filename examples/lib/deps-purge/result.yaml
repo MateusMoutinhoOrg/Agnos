@@ -1,19 +1,19 @@
-cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndeps-purge started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ndeps-purge started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 24a0819bdafde70ead75eb4b85eac20f6669ee15255e407da930099e0ccbb433
+      sha: 319c9b3d71bf11004d735b767c3d2207b5e818d5e857cc84db33dd00c3e194ab
     - file: sandbox/api/config.go
-      sha: 5c8386fc72d0f041ac36527add8894c70489269e671858a20285e7d8fe4c581c
+      sha: fadc7d71721b64243cc68bd60de5f8e036944c395f05d0193474b45de2b0db50
+    - file: sandbox/api/projectconfig.go
+      sha: bd9f02f6b26190a0571b68695b5ce5e1607566706b08aa71dd4e2fa87537e720
+    - file: sandbox/api/projectsandbox.go
+      sha: c6c792665ba659b91ba5fcb7ba1cd7c6cab22573741770911cb1f6cffafb34b3
     - file: sandbox/api/sandbox.go
-      sha: f0e2337c4397a2c96a828fafeaa346ccea6b327e7646123472ff3e2f905a8dbc
-    - file: sandbox/api/userconfig.go
-      sha: 11b6ab1add4a4f80aeb135ab6a82e6ec33836769d1d713977015a5e90aa84a08
-    - file: sandbox/api/usersandbox.go
-      sha: d67f597f001ab92965218a9e7335679a0120f122e001391cf58489da529d24a4
+      sha: 81d71cd1f22e0f1c014c51cc9cf2de5fc90d2aa2b187bce85558e0f148d3c736
     - file: sandbox/constructors/config/constructor.go
       sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
     - file: sandbox/internal/generated/config/new.go
-      sha: 8d0e3eb9ca1c9698963400613ce190ac150a50f8cdf9b1a8ff6df8b65cf10403
+      sha: 5ee0bdef453f2f59d85612467d1771e3d970d8f4aa0dc1c22cf10c3de82d637f
     - file: sandbox/new.go
       sha: f847863fac092efbf9dd16653c97f93915d670927b1d14b8a7570e57540f835e

@@ -2,17 +2,17 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // errorsDir holds the project's own answer to every way a request can end
 // without a route answering it, beside the generated dispatch of
-// sandbox/internal/generated/server/server.
+// sandbox/internal/generated/server.
 const errorsDir = "sandbox/internal/server/errors"
 
 // errorHandlerFiles is one file per failure the dispatch can raise, in the
-// order the generated sandbox/internal/generated/server/server/new.go switches on them. Each
+// order the generated sandbox/internal/generated/server/new.go switches on them. Each
 // holds one handler with the route handler's own signature.
 var errorHandlerFiles = []string{
 	"handle_not_found.go",
@@ -20,25 +20,25 @@ var errorHandlerFiles = []string{
 	"handle_bad_request.go",
 	"handle_unauthorized.go",
 	"handle_forbidden.go",
-	"handle_too_large.go",
-	"handle_wrong_content_type.go",
-	"handle_server_error.go",
+	"handle_payload_too_large.go",
+	"handle_unsupported_media_type.go",
+	"handle_internal_server_error.go",
 }
 
-// GenerateErrorHandlers renders assets/templates/handle_*.go into
+// GenerateServerErrorHandlers renders assets/templates/server_handle_*.go into
 // sandbox/internal/server/errors/ — the eight handlers the generated new.go
 // hands a failure to, one per status.
 //
 // It is written **once**, the same way a constructor is. A handler already on
 // disk is left exactly as it is, however far it has drifted from what the
 // template renders: what a 404 says, and whether it is even a 404, is the
-// project's. That is also why these are not part of the sandbox-server asset
+// project's. That is also why these are not part of the server asset
 // group — every file of a group is rewritten by every build.
 //
 // Writing them here rather than in server-init is what carries a project that
 // ran server-init before they existed: the next build fills in what is
 // missing, and the generated new.go always has something to call.
-func GenerateErrorHandlers(sandbox *api.Sandbox, io *smartio.SmartIO, module string) error {
+func GenerateServerErrorHandlers(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) error {
 	for _, handler := range errorHandlerFiles {
 		dest := errorsDir + "/" + handler
 		if io.IsFile(dest) {
@@ -50,7 +50,7 @@ func GenerateErrorHandlers(sandbox *api.Sandbox, io *smartio.SmartIO, module str
 			"GeneratorName": generatorName(sandbox),
 		}
 
-		if err := utils.RenderTemplateToDest(sandbox, io, "templates/"+handler, vars, dest); err != nil {
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/server_"+handler, vars, dest); err != nil {
 			return err
 		}
 	}

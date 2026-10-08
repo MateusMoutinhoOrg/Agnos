@@ -3,14 +3,14 @@ package main
 import (
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The add-doc example: create a doc directory under docs/
 //
-// It calls the same action `agnos add-doc` calls, and writes only inside TestDir.
+// It calls the same action `agnos add-doc` calls, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -18,15 +18,15 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddDoc(api.DocProps{
-		Path:        "TestDir",
+	if err := lib.Actions.AddDoc(api.AddDocProps{
+		Path:        "test-dir",
 		Name:        "Report",
 		Description: "How a report is written",
 		Themes:      []string{"reference"},
@@ -35,8 +35,8 @@ func main() {
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/docs/Report", os.DirFS("TestDir/docs/Report")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/docs/Report", os.DirFS("test-dir/docs/Report")); err != nil {
 		panic(err)
 	}
 }

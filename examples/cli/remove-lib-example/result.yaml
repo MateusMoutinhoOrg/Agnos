@@ -1,7 +1,7 @@
-cli-output: "remove-lib-example removing examples/lib/greet \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "remove-lib-example removing examples/lib/greet \nbuild started with path test-dir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: docs/LibExamples/doc.md
-      sha: 7644ec4173d4c566e9c7395242cbc8d26e72bf7ddc98691eaab1de83a0e70f86
-    - file: docs/LibExamples/props.yaml
+      sha: 55eb7bfa76ddb783526935c59cb89a800cfd11f7b0777ecef116d78c45254e42
+    - file: docs/LibExamples/doc.yaml
       sha: 8360d95f99ea5cf10bdc90cff522a9ba25c28fc8b25c196745afedfc25d657fd

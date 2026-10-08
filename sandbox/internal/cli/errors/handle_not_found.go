@@ -2,7 +2,7 @@ package errors
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/help"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/info/help"
 )
 
 // HandleNotFound answers every command line no command of the chain answered —
@@ -14,7 +14,7 @@ import (
 // `agnos build` and never regenerated, so whatever you put here is
 // what your cli says.
 //
-// What went wrong is on `command.Failure`, read through Deps.OpinatedAgnosCli.FailureOf so a
+// What went wrong is on `command.Failure`, read through Deps.OpinionatedAgnosCli.FailureOf so a
 // command carrying none still answers something. The command is bound when a
 // declared command raised the failure and bare when none did; command.Argv is
 // the command line either way.
@@ -29,14 +29,14 @@ func HandleNotFound(sandbox *api.Sandbox, command *api.Command, response *api.Co
 		return nil
 	}
 
-	failure := sandbox.Deps.OpinatedAgnosCli.FailureOf(command, api.ExitUsage, "")
+	failure := sandbox.Deps.OpinionatedAgnosCli.FailureOf(command, api.ExitUsage, "")
 	response.SetStatus(failure.Status)
 	if failure.Message != "" {
-		response.Error("%s\n", failure.Message)
+		response.Eprintf("%s\n", failure.Message)
 		return nil
 	}
 
-	name := sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
-	response.Error("unknown command %q — run '%s help' to see the available commands\n", command.Argv[0], name)
+	name := sandbox.Deps.StringsDeps.ToLower(sandbox.Config.ProjectName)
+	response.Eprintf("unknown command %q — run '%s help' to see the available commands\n", command.Argv[0], name)
 	return nil
 }

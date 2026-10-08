@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -9,6 +9,6 @@ args:
       end: -1
       id: Argv
       start: 1
-category: Cli System
-help: Run a command line against the declared commands without running any
+category: Cli
 priority: 100
+summary: Run a command line against the declared commands without running any

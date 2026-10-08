@@ -1,13 +1,13 @@
-package embeddeps
+package goembed
 
 // The standard adapter's embedded-asset implementation: the factory filling
-// deps.Deps.Embeddeps out of the assets compiled into the binary. It is the
+// deps.Deps.EmbedDeps out of the assets compiled into the binary. It is the
 // one adapter that reaches for a package of the project outside the sandbox —
 // assets — which is what the conversion helpers below exist for.
 //
 // Everything here is outside the sandbox, which is what makes the `embed`
 // directive and the io/fs walk legal: the sandbox only ever sees the three
-// function fields of embeddeps.Sandbox.
+// function fields of embeddeps.Contract.
 
 import (
 	"bytes"
@@ -68,12 +68,12 @@ func relativeTo(root string, current string) string {
 	return current[len(root)+1:]
 }
 
-// Bind fills deps.Deps.Embeddeps with the project's assets, compiled
+// Bind fills deps.Deps.EmbedDeps with the project's assets, compiled
 // into the binary by the assets package and served from the root of that tree.
 // Each field of the assigned struct is a closure reading the embedded
 // filesystem at call time.
 func Bind(deps *deps.Deps) {
-	deps.Embeddeps = embeddeps.Sandbox{
+	deps.EmbedDeps = embeddeps.Contract{
 		ReadFile: func(requested string) ([]byte, error) {
 			return assets.Files.ReadFile(assetPath(requested))
 		},

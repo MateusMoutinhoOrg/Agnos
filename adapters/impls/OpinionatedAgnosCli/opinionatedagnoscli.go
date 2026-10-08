@@ -1,18 +1,18 @@
-package opinatedagnoscli
+package opinionatedagnoscli
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
 )
 
-// Bind fills deps.Deps.OpinatedAgnosCli with the agnos cli mechanic: the
-// dispatch chain of climain.go, the binder of command_handler.go, the matcher
-// of is_actionable.go and trigger.go. Nothing here holds a dep: what a run
+// Bind fills deps.Deps.OpinionatedAgnosCli with the agnos cli mechanic: the
+// dispatch chain of main.go, the binder of run.go, the matcher
+// of matches.go and trigger.go. Nothing here holds a dep: what a run
 // reaches the outside world through comes in its MainProps, read as it runs.
 func Bind(deps *deps.Deps) {
-	deps.OpinatedAgnosCli = opinatedagnoscli.Sandbox{
-		CliMain:       cliMain,
+	deps.OpinionatedAgnosCli = opinionatedagnoscli.Contract{
+		Main:          cliMain,
 		NewCommand:    newCommand,
 		BindCommand:   bindCommand,
 		Fail:          fail,
@@ -22,19 +22,19 @@ func Bind(deps *deps.Deps) {
 	}
 }
 
-// newCommand returns an empty Command with every slice open and IsActionable
+// newCommand returns an empty Command with every slice open and Matches
 // closed over the parser it reads flags with, so a caller holding a command —
 // the help screen — matches it the way the dispatch does.
-func newCommand(parsers argvdeps.Sandbox) *opinatedagnoscli.Command {
-	command := &opinatedagnoscli.Command{
+func newCommand(parsers argvdeps.Contract) *opinionatedagnoscli.Command {
+	command := &opinionatedagnoscli.Command{
 		Identifiers: []string{},
 		Strict:      true,
 		Examples:    []string{},
-		Args:        []opinatedagnoscli.CommandArg{},
-		Flags:       []opinatedagnoscli.CommandFlag{},
+		Args:        []opinionatedagnoscli.CommandArg{},
+		Flags:       []opinionatedagnoscli.CommandFlag{},
 	}
-	command.IsActionable = func(bound *opinatedagnoscli.Command) bool {
-		return isActionable(parsers, bound)
+	command.Matches = func(bound *opinionatedagnoscli.Command) bool {
+		return matches(parsers, bound)
 	}
 	return command
 }
@@ -43,7 +43,7 @@ func newCommand(parsers argvdeps.Sandbox) *opinatedagnoscli.Command {
 // runs on, with no command line, response or failure yet. The dispatch calls
 // it once per command of the chain, so what Cli.Commands holds is never
 // written to.
-func bindCommand(command *opinatedagnoscli.Command) *opinatedagnoscli.Command {
+func bindCommand(command *opinionatedagnoscli.Command) *opinionatedagnoscli.Command {
 	bound := *command
 	bound.Argv = nil
 	bound.Consumed = nil
@@ -53,15 +53,15 @@ func bindCommand(command *opinatedagnoscli.Command) *opinatedagnoscli.Command {
 	return &bound
 }
 
-// fail builds the failure an InternalPureHandler refuses a command line with.
+// fail builds the failure a Handle refuses a command line with.
 func fail(status int, field string, message string) error {
 	return failWithCause(status, field, message, "")
 }
 
 // failWithCause is fail carrying what went wrong underneath.
 func failWithCause(status int, field string, message string, cause string) error {
-	return &opinatedagnoscli.CommandFailure{
-		Kind:    opinatedagnoscli.HandlerFailure,
+	return &opinionatedagnoscli.CommandFailure{
+		Kind:    opinionatedagnoscli.FailureHandler,
 		Status:  status,
 		Field:   field,
 		Message: message,
@@ -72,9 +72,9 @@ func failWithCause(status int, field string, message string, cause string) error
 // failureOf merges the failure a Handle* file is answering with that file's
 // own status and wording: what the failure carries wins, what it leaves empty
 // the file fills.
-func failureOf(command *opinatedagnoscli.Command, status int, message string) opinatedagnoscli.CommandFailure {
+func failureOf(command *opinionatedagnoscli.Command, status int, message string) opinionatedagnoscli.CommandFailure {
 	if command.Failure == nil {
-		return opinatedagnoscli.CommandFailure{Status: status, Message: message}
+		return opinionatedagnoscli.CommandFailure{Status: status, Message: message}
 	}
 
 	failure := *command.Failure

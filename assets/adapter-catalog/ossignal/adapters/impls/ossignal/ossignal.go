@@ -1,4 +1,4 @@
-package signaldeps
+package ossignal
 
 import (
 	"os"
@@ -8,9 +8,9 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// Bind fills deps.Deps.Signaldeps with the standard library's os/signal.
+// Bind fills deps.Deps.SignalDeps with the standard library's os/signal.
 func Bind(deps *deps.Deps) {
-	deps.Signaldeps.OnInterrupt = onInterrupt
+	deps.SignalDeps.OnInterrupt = onInterrupt
 }
 
 // onInterrupt waits for the first interrupt or termination signal on a

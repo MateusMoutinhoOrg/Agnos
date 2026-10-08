@@ -469,7 +469,7 @@
             {{if $.Viewer.IsRoot}}
             <td data-label="Actions">
               <div class="row-actions">
-                <a class="btn btn-small" href="/admin/root/edit-backoffice-user/{{.Id}}">Edit</a>
+                <a class="btn btn-small" href="/admin/root/set-backoffice-user/{{.Id}}">Edit</a>
                 {{if not .IsSelf}}
                 <form action="/admin/root/remove-backoffice-user/{{.Id}}" method="POST" data-confirm="Remove the user {{html .Username}}? This cannot be undone.">
                   <button type="submit" class="btn btn-small btn-danger">Remove</button>
@@ -496,6 +496,6 @@
       </div>
     </nav>
   </main>
-  <script src="/admin/backoffice.js" defer></script>
+  <script src="/backoffice/backoffice.js" defer></script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-package interviewer
+package ttyinterview
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
@@ -25,14 +25,14 @@ func retry(reason string) {
 	fmt.Fprintf(os.Stdout, "  %s%s%s\n", yellow, reason, reset)
 }
 
-// strQuestion fills interviewer.Sandbox.StrQuestion, reading one line. An
+// strQuestion fills interviewdeps.Contract.StrQuestion, reading one line. An
 // empty line is returned as an empty string, which is how a caller offering a
 // default learns the default was taken.
 func strQuestion(question string) (string, error) {
 	return askText(question)
 }
 
-// intQuestion fills interviewer.Sandbox.IntQuestion, asking again until the
+// intQuestion fills interviewdeps.Contract.IntQuestion, asking again until the
 // answer converts.
 func intQuestion(question string) (int, error) {
 	for {
@@ -51,7 +51,7 @@ func intQuestion(question string) (int, error) {
 	}
 }
 
-// floatQuestion fills interviewer.Sandbox.FloatQuestion, asking again until
+// floatQuestion fills interviewdeps.Contract.FloatQuestion, asking again until
 // the answer converts.
 func floatQuestion(question string) (float64, error) {
 	for {
@@ -70,11 +70,11 @@ func floatQuestion(question string) (float64, error) {
 	}
 }
 
-// boolQuestion fills interviewer.Sandbox.BoolQuestion. It is asked as a
+// boolQuestion fills interviewdeps.Contract.BoolQuestion. It is asked as a
 // two-row menu rather than as a y/n line, so a yes-or-no question is answered
 // with the same keys every other question is.
 func boolQuestion(question string) (bool, error) {
-	chosen, err := runMenu(question, []interviewer.AlternativeOption{
+	chosen, err := runMenu(question, []interviewdeps.Option{
 		{Id: "no", Msg: "No"},
 		{Id: "yes", Msg: "Yes"},
 	}, false)
@@ -86,9 +86,9 @@ func boolQuestion(question string) (bool, error) {
 }
 
 // singleAlternativeQuestion fills
-// interviewer.Sandbox.SingleAlternativeQuestion, returning the Id of the row
+// interviewdeps.Contract.SingleAlternativeQuestion, returning the Id of the row
 // that was chosen.
-func singleAlternativeQuestion(question string, alternatives []interviewer.AlternativeOption) (string, error) {
+func singleAlternativeQuestion(question string, alternatives []interviewdeps.Option) (string, error) {
 	chosen, err := runMenu(question, alternatives, false)
 	if err != nil {
 		return "", err
@@ -101,9 +101,9 @@ func singleAlternativeQuestion(question string, alternatives []interviewer.Alter
 }
 
 // multipleAlternativeQuestion fills
-// interviewer.Sandbox.MultipleAlternativeQuestion, returning the Ids of every
+// interviewdeps.Contract.MultipleAlternativeQuestion, returning the Ids of every
 // row ticked, in declaration order.
-func multipleAlternativeQuestion(question string, alternatives []interviewer.AlternativeOption) ([]string, error) {
+func multipleAlternativeQuestion(question string, alternatives []interviewdeps.Option) ([]string, error) {
 	chosen, err := runMenu(question, alternatives, true)
 	if err != nil {
 		return nil, err
@@ -117,11 +117,11 @@ func multipleAlternativeQuestion(question string, alternatives []interviewer.Alt
 	return ids, nil
 }
 
-// Bind fills deps.Deps.Interviewer with the terminal interview below: an
+// Bind fills deps.Deps.InterviewDeps with the terminal interview below: an
 // arrow-key menu over stdin in raw mode where the terminal allows it, and the
 // same questions as numbered lists where it does not.
 func Bind(deps *deps.Deps) {
-	deps.Interviewer = interviewer.Sandbox{
+	deps.InterviewDeps = interviewdeps.Contract{
 		IntQuestion: func(question string) (int, error) {
 			return intQuestion(question)
 		},
@@ -134,10 +134,10 @@ func Bind(deps *deps.Deps) {
 		BoolQuestion: func(question string) (bool, error) {
 			return boolQuestion(question)
 		},
-		SingleAlternativeQuestion: func(question string, alternatives []interviewer.AlternativeOption) (string, error) {
+		SingleAlternativeQuestion: func(question string, alternatives []interviewdeps.Option) (string, error) {
 			return singleAlternativeQuestion(question, alternatives)
 		},
-		MultipleAlternativeQuestion: func(question string, alternatives []interviewer.AlternativeOption) ([]string, error) {
+		MultipleAlternativeQuestion: func(question string, alternatives []interviewdeps.Option) ([]string, error) {
 			return multipleAlternativeQuestion(question, alternatives)
 		},
 		Back: func(err error) bool {

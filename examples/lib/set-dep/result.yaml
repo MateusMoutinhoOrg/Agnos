@@ -1,23 +1,23 @@
-cli-output: "started with path TestDir/remote \nbuild started with path TestDir/remote \nsuccessfully rendered template\nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nstarted with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nset-dep started with path TestDir/app dep remote version v0.0.1 \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+cli-output: "started with path test-dir/remote \nbuild started with path test-dir/remote \nsuccessfully rendered template\nbuild started with path test-dir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nbuild started with path test-dir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nstarted with path test-dir/app \nbuild started with path test-dir/app \nsuccessfully rendered template\nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path test-dir/app \nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir/app module example/remote as remote \nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nbuild started with path test-dir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nset-dep started with path test-dir/app dep remote version v0.0.1 \nadd-dep started with path test-dir/app module example/remote as remote \nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: adapters/availables/standard/available.yaml
+    - file: adapters/bindings/standard/binding.yaml
       sha: c47436e286fa8e3c76565b464080774687d73b588ca9969d469b37e69b236469
-    - file: adapters/availables/standard/new.go
-      sha: a48746894fdcf3bce2ff7ac373e5cd3a77d506eb1b7be89f1d06e1765858170c
-    - file: adapters/libs/remote/adapter.yaml
+    - file: adapters/bindings/standard/new.go
+      sha: b1d9c94e729e6f0300abf3e381662de93eba8a9e9b6e6beb7628ebcd3eb02faa
+    - file: adapters/impls/remote/adapter.yaml
       sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
-    - file: adapters/libs/remote/remote.go
-      sha: c50157bd03581900c6d71c2fbf9febf68ca4b10474d46dceea23bfe35c0d005a
+    - file: adapters/impls/remote/remote.go
+      sha: 7756f22d7b8e8a739045f08805644cdbce6fb5a8854091b70cbf7efb3bafc808
     - file: sandbox/deps/deps.go
       sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
     - file: sandbox/deps/remote/config.go
-      sha: 6af6b5441ff1431051b1dd76aa55fe368bbea332f56a507ecafab24e47788355
+      sha: 9bf0ffef8c649e9a6b9849022cac33c5d91bc41697171e832d17914733815c29
     - file: sandbox/deps/remote/greeter.go
       sha: 7e9ff865e2bb0e38400b846c8c6cf1fe7f35dc52f38bbb6d6b7fd3214a65a2fb
+    - file: sandbox/deps/remote/projectconfig.go
+      sha: 5182264d78626f1d3151e928b9d59feeca32b04e7d286d90e84c39b096ec7bf7
+    - file: sandbox/deps/remote/projectsandbox.go
+      sha: 2b9d40b5aee297a7e8a16a599246adf47e1f3319fdc350788dcec7fb4809d749
     - file: sandbox/deps/remote/sandbox.go
-      sha: ef4d458e65ca6c11f9da0bbe52c4133b86b3025e2e9d343d9c3e499ae0fd93cd
-    - file: sandbox/deps/remote/userconfig.go
-      sha: aa13428ef96fac0e62f7dfbcab376f9aaa963d1be1cf3e059012f503f9a2f53f
-    - file: sandbox/deps/remote/usersandbox.go
-      sha: fba34ab813036a411fb4059b2fa509ff4297ecfcb8db04885af3891ffa3d3293
+      sha: 9fb8372af095a5ea6fe18615a0d7d0e0b040a1d645d41e5ec768b2bec0e0a91f

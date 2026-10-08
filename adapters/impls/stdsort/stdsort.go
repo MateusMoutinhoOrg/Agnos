@@ -1,4 +1,4 @@
-package sortdeps
+package stdsort
 
 import (
 	"sort"
@@ -8,11 +8,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
-// Bind fills deps.Deps.Sortdeps with the standard library's sort. Every field
+// Bind fills deps.Deps.SortDeps with the standard library's sort. Every field
 // is a straight delegation: the contract restates the standard library api so
 // the sandbox can call it without importing it.
 func Bind(deps *deps.Deps) {
-	deps.Sortdeps = sortdeps.Sandbox{
+	deps.SortDeps = sortdeps.Contract{
 		Strings: func(list []string) {
 			sort.Strings(list)
 		},

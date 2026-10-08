@@ -1,5 +1,5 @@
 dep: templatedeps
 help: Templating over text/template
 module: ""
-name: templatedeps
+name: texttemplate
 origin: catalog

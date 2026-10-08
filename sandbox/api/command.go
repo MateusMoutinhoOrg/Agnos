@@ -1,85 +1,85 @@
 package api
 
 import (
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 )
 
-// Every type here is the OpinatedAgnosCli contract's own, aliased so a
-// handler reads it as api.<Name>: sandbox/deps/OpinatedAgnosCli holds the
+// Every type here is the OpinionatedAgnosCli contract's own, aliased so a
+// handler reads it as api.<Name>: sandbox/deps/OpinionatedAgnosCli holds the
 // whole doc of each.
 
 // ArgType is what the segments an arg reads have to convert to.
-type ArgType = opinatedagnoscli.ArgType
+type ArgType = opinionatedagnoscli.ArgType
 
-// StringArg takes any segment, bound as a string, or several as a []string.
-const StringArg = opinatedagnoscli.StringArg
+// ArgString takes any segment, bound as a string, or several as a []string.
+const ArgString = opinionatedagnoscli.ArgString
 
-// IntegerArg takes one segment reading as a whole number, bound as an int.
-const IntegerArg = opinatedagnoscli.IntegerArg
+// ArgInteger takes one segment reading as a whole number, bound as an int.
+const ArgInteger = opinionatedagnoscli.ArgInteger
 
-// NumberArg takes one segment reading as a number, bound as a float64.
-const NumberArg = opinatedagnoscli.NumberArg
+// ArgNumber takes one segment reading as a number, bound as a float64.
+const ArgNumber = opinionatedagnoscli.ArgNumber
 
-// UuidArg takes one segment reading as a canonical uuid, bound as a string.
-const UuidArg = opinatedagnoscli.UuidArg
+// ArgUuid takes one segment reading as a canonical uuid, bound as a string.
+const ArgUuid = opinionatedagnoscli.ArgUuid
 
 // CommandArg is one entry of `args` in command.yaml.
-type CommandArg = opinatedagnoscli.CommandArg
+type CommandArg = opinionatedagnoscli.CommandArg
 
 // FlagType is the type a CommandFlag is converted to before it reaches
-// Entries.
-type FlagType = opinatedagnoscli.FlagType
+// Input.
+type FlagType = opinionatedagnoscli.FlagType
 
-// StringFlag is bound as a string.
-const StringFlag = opinatedagnoscli.StringFlag
+// FlagString is bound as a string.
+const FlagString = opinionatedagnoscli.FlagString
 
-// IntegerFlag is bound as an int.
-const IntegerFlag = opinatedagnoscli.IntegerFlag
+// FlagInteger is bound as an int.
+const FlagInteger = opinionatedagnoscli.FlagInteger
 
-// NumberFlag is bound as a float64.
-const NumberFlag = opinatedagnoscli.NumberFlag
+// FlagNumber is bound as a float64.
+const FlagNumber = opinionatedagnoscli.FlagNumber
 
-// BooleanFlag is bound as a bool, true when one of its keys is present.
-const BooleanFlag = opinatedagnoscli.BooleanFlag
+// FlagBoolean is bound as a bool, true when one of its keys is present.
+const FlagBoolean = opinionatedagnoscli.FlagBoolean
 
-// StringArrayFlag is bound as a []string, one element per occurrence.
-const StringArrayFlag = opinatedagnoscli.StringArrayFlag
+// FlagStringArray is bound as a []string, one element per occurrence.
+const FlagStringArray = opinionatedagnoscli.FlagStringArray
 
-// IntegerArrayFlag is bound as a []int, one element per occurrence.
-const IntegerArrayFlag = opinatedagnoscli.IntegerArrayFlag
+// FlagIntegerArray is bound as a []int, one element per occurrence.
+const FlagIntegerArray = opinionatedagnoscli.FlagIntegerArray
 
 // CommandFlag is one entry of `flags` in command.yaml.
-type CommandFlag = opinatedagnoscli.CommandFlag
+type CommandFlag = opinionatedagnoscli.CommandFlag
 
 // CommandResponse is how a handler answers: what it prints and the exit
 // status the process ends with.
-type CommandResponse = opinatedagnoscli.CommandResponse
+type CommandResponse = opinionatedagnoscli.CommandResponse
 
 // CommandFailureKind is which Handle* file of sandbox/internal/cli/errors/ a
 // CommandFailure is answered by.
-type CommandFailureKind = opinatedagnoscli.CommandFailureKind
+type CommandFailureKind = opinionatedagnoscli.CommandFailureKind
 
-// HandlerFailure is a failure a handler returned through
-// Deps.OpinatedAgnosCli.Fail, or an error it returned without answering.
-const HandlerFailure = opinatedagnoscli.HandlerFailure
+// FailureHandler is a failure a handler returned through
+// Deps.OpinionatedAgnosCli.Fail, or an error it returned without answering.
+const FailureHandler = opinionatedagnoscli.FailureHandler
 
-// NotFoundFailure is a command line no command answered.
-const NotFoundFailure = opinatedagnoscli.NotFoundFailure
+// FailureNotFound is a command line no command answered.
+const FailureNotFound = opinionatedagnoscli.FailureNotFound
 
-// BadUsageFailure is a value that would not bind.
-const BadUsageFailure = opinatedagnoscli.BadUsageFailure
+// FailureBadUsage is a value that would not bind.
+const FailureBadUsage = opinionatedagnoscli.FailureBadUsage
 
-// UnknownFlagFailure is a token looking like a flag no command consumed.
-const UnknownFlagFailure = opinatedagnoscli.UnknownFlagFailure
+// FailureUnknownFlag is a token looking like a flag no command consumed.
+const FailureUnknownFlag = opinionatedagnoscli.FailureUnknownFlag
 
-// UnexpectedArgFailure is any other token no command consumed.
-const UnexpectedArgFailure = opinatedagnoscli.UnexpectedArgFailure
+// FailureUnexpectedArg is any other token no command consumed.
+const FailureUnexpectedArg = opinionatedagnoscli.FailureUnexpectedArg
 
-// CommandFailure is one way a command line did not get answered; an
-// InternalPureHandler refuses a command line by returning one, built by
-// Deps.OpinatedAgnosCli.Fail.
-type CommandFailure = opinatedagnoscli.CommandFailure
+// CommandFailure is one way a command line did not get answered; a
+// Handle refuses a command line by returning one, built by
+// Deps.OpinionatedAgnosCli.Fail.
+type CommandFailure = opinionatedagnoscli.CommandFailure
 
 // Command is one command of the project: the whole of what its command.yaml
 // declares, plus the handler behind it.
-type Command = opinatedagnoscli.Command
+type Command = opinionatedagnoscli.Command

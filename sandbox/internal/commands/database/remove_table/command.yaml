@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,13 +10,13 @@ args:
       id: Name
       required: true
       start: 1
-category: Database System
+category: Database
+description: 'Drops one table from the database''s database.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first.'
 examples:
     - remove-table url --database app-database
 flags:
     - description: the database (identifier or package name) the table is declared on
       id: Database
       required: true
-help: Delete one collection from a database
-long-description: 'Drops one table from the database''s specs.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first.'
 priority: 100
+summary: Delete one collection from a database

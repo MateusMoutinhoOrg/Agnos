@@ -2,8 +2,8 @@ package remove_body_field
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -11,18 +11,18 @@ import (
 // property named by the same dotted path add-body-field declared it with, and
 // writes the file back. It is the exact inverse of add-body-field, its
 // parent's `required` entry included.
-func RemoveBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string, name string) error {
+func RemoveBodyFieldInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, route string, name string) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, route)
 	if err != nil {
 		return err
 	}
 	if conf.Body.Schema == nil {
-		return sandbox.Deps.Std.Errorf("route %q declares no body schema", route)
+		return sandbox.Deps.StdDeps.Errorf("route %q declares no body schema", route)
 	}
 
 	key := utils.RouteFieldName(sandbox, name)
 	if key == "" {
-		return sandbox.Deps.Std.Errorf("remove-body-field needs the dotted path of the property to drop")
+		return sandbox.Deps.StdDeps.Errorf("remove-body-field needs the dotted path of the property to drop")
 	}
 
 	parts := utils.SplitSchemaPath(sandbox, key)
@@ -32,10 +32,10 @@ func RemoveBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route st
 	}
 
 	if !utils.DropSchemaProperty(parent, parts[len(parts)-1]) {
-		return sandbox.Deps.Std.Errorf("route %q declares no body property named %q", route, key)
+		return sandbox.Deps.StdDeps.Errorf("route %q declares no body property named %q", route, key)
 	}
 
-	sandbox.Deps.Std.Log("remove-body-field removing %s from %s \n", key, utils.RouteConfPath(sandbox, io, route))
+	sandbox.Deps.StdDeps.Logf("remove-body-field removing %s from %s \n", key, utils.RouteConfPath(sandbox, io, route))
 
 	return utils.SaveRouteConf(sandbox, io, route, conf)
 }
@@ -48,7 +48,7 @@ func walkTo(sandbox *api.Sandbox, root *routeconf.Schema, segments []string, rou
 	for _, segment := range segments {
 		child := utils.SchemaObjectOf(utils.SchemaPropertyOf(parent, segment))
 		if child == nil {
-			return nil, sandbox.Deps.Std.Errorf("route %q declares no body property named %q", route, key)
+			return nil, sandbox.Deps.StdDeps.Errorf("route %q declares no body property named %q", route, key)
 		}
 		parent = child
 	}

@@ -2,19 +2,19 @@ package verify
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/themesconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // CheckDocs enforces the documentation tree: every doc directory declares
-// itself in a props.yaml, every theme it names exists in themes.yaml, every
+// itself in a doc.yaml, every theme it names exists in themes.yaml, every
 // first-level doc belongs to at least one theme, and no sub-doc claims a theme
 // (a sub-doc is listed only by its parent's Index.md). A theme no doc names is
 // not a violation: it simply renders no section in README.md's index.
 //
 // A project with no docs/ directory has nothing to check.
-func CheckDocs(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	if !io.IsDir(utils.DocsDir) {
@@ -33,13 +33,13 @@ func CheckDocs(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 	for _, doc := range docs {
 		if len(doc.Themes) == 0 {
-			violations = append(violations, doc.Path+"/props.yaml declares no themes"+
+			violations = append(violations, doc.Path+"/doc.yaml declares no themes"+
 				" (a first-level doc must name at least one theme of themes.yaml)")
 		}
 
 		for _, theme := range doc.Themes {
 			if !hasTheme(themes_conf.Themes, theme) {
-				violations = append(violations, doc.Path+"/props.yaml names unknown theme "+
+				violations = append(violations, doc.Path+"/doc.yaml names unknown theme "+
 					theme+" (it is not declared in themes.yaml)")
 				continue
 			}
@@ -58,7 +58,7 @@ func checkSubdocs(docs []utils.Doc) []string {
 
 	for _, doc := range docs {
 		if len(doc.Themes) > 0 {
-			violations = append(violations, doc.Path+"/props.yaml declares themes"+
+			violations = append(violations, doc.Path+"/doc.yaml declares themes"+
 				" (themes belong to first-level docs only)")
 		}
 		violations = append(violations, checkSubdocs(doc.Subdocs)...)

@@ -1,41 +1,41 @@
-cli-output: "add-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep OpinatedAgnosCli \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serializables \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep serverdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep signaldeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep OpinatedAgnosServer \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nserver-init started with path TestDir \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "add-dep started with path test-dir dep stddeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep argvdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep stringsdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep OpinionatedAgnosCli \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep stddeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep serializabledeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep serverdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep signaldeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep OpinionatedAgnosServer \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nserver-init started with path test-dir \ncli-init started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: ca3a887769c4e6f1983dda8057adcfc18ce29870829914c551453fb91f44bf63
+      sha: 648a95a7bd347beffd2cec2a787bc5003210d1daba355d47cee3bbf55687ad04
     - file: sandbox/api/route.go
-      sha: 81ee57fb4cab3dab4bb17a3d60049cca90161b98050481c8f62f918460048ec9
+      sha: 75f7626e94242318858b417223ed8bed83e0f10f5f1ccfe32af9d1de87db67f2
     - file: sandbox/api/server.go
-      sha: 2ef887fe7fa86c4f1aacf181c5cde1799be0d2fa34cf9f1350426c3439b7ee15
-    - file: sandbox/internal/commands/start_server/InternalPureHandler.go
-      sha: ac3a7477d56b09537965cbc888425e93d570d39622d5494efbeb4c2bb08d315b
-    - file: sandbox/internal/commands/start_server/command.yaml
-      sha: f510b98004dfbf9ce75a4bd66c40a4fd0d5a93126a3884868fb9bbeae2963644
-    - file: sandbox/internal/commands/start_server/entries.go
-      sha: 51390be8027c876695a43fa7108ec8fd050d1032a8e565bb69ce963a16fa9947
-    - file: sandbox/internal/commands/start_server/new.go
-      sha: c61c749b5fb1ab1465986f181fe97b3302fb137e8565c8b22c7a8ff20c2b9cd1
-    - file: sandbox/internal/routeslist/health/InternalPureHandler.go
-      sha: 936fe65beb7ce899cc706de76fc0ed296adc933a386c89c5f2cd261c9623c41d
-    - file: sandbox/internal/routeslist/health/entries.go
-      sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
-    - file: sandbox/internal/routeslist/health/new.go
-      sha: 82307eebc739d78a1cc064393921673660a1be61e8c0523897669c71cee4e5b9
-    - file: sandbox/internal/routeslist/health/route.yaml
-      sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9
+      sha: d4a03415df1c534a6947170e1f94d28fe5e2c4391862aab173c04716f28a6137
+    - file: sandbox/internal/commands/server/start_server/command.yaml
+      sha: fc65fe5d0c3f9c36d4680492089e6952d770bae284b9764bbdad37104618a07d
+    - file: sandbox/internal/commands/server/start_server/handler.go
+      sha: aa8330f9ce2ca884d884d8d581e79e235428adf067d463f42a45df0d53f0d44e
+    - file: sandbox/internal/commands/server/start_server/input.go
+      sha: 8cb490ebcafe7eca48f4b13b4859f27d9d79105e8db5bc202ec0f6ed8013dffe
+    - file: sandbox/internal/commands/server/start_server/new.go
+      sha: 10ba4868041276f3f2875baf28e0168eef608147bd2efa6b788374fa27a53631
+    - file: sandbox/internal/routes/health/handler.go
+      sha: 6d4c4a70d0c2603fca8927074472f441afe2fef1d56b975299c95c811557135f
+    - file: sandbox/internal/routes/health/input.go
+      sha: a311ad839a2f9a2a89ec777404f785e0d69ec2dd2fb6869c17976385cf6c0c6b
+    - file: sandbox/internal/routes/health/new.go
+      sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
+    - file: sandbox/internal/routes/health/route.yaml
+      sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc
     - file: sandbox/internal/server/errors/handle_bad_request.go
-      sha: fc1ae78f54fae3d83b487d5d1c7b2cb45342d0406a81e5780b37f79839983060
+      sha: d9f8825d2d03c2a0ace0502b5b84249871bc19bdcc5508b5aeccfec1868d8512
     - file: sandbox/internal/server/errors/handle_forbidden.go
-      sha: 4ae16fe369fafd72574994904d093c51bfb027b8f3048f656fc2f25096d11a1b
+      sha: 5e271fea7ca7322b0ad13c3bcf7c2f0e3e459b1b3ffc9a986abe8a3639f4e939
+    - file: sandbox/internal/server/errors/handle_internal_server_error.go
+      sha: 5f95ef999646e6d93bc53ce679fc9423104bc60fa439e0b46bd882c86dfd29ea
     - file: sandbox/internal/server/errors/handle_method_not_allowed.go
-      sha: b4caa9a7c9bdea9cdc833d993afbc256d7d3f02aad9075181183715439aab4ae
+      sha: c064d5989893845ac952e01e89751ceb2a4e20d6503319330edabee40047b9b3
     - file: sandbox/internal/server/errors/handle_not_found.go
-      sha: 4d4c299206a8749dde62d89de510277aa2d3308802963efae9d568fa9e6ec0f3
-    - file: sandbox/internal/server/errors/handle_server_error.go
-      sha: 7b9d0647ea4268a15b5bf55763d70f57726aa622edc108086c510d9f5c3409ac
-    - file: sandbox/internal/server/errors/handle_too_large.go
-      sha: 043e50d3a7d4add164122efbbfd566ed023ea4697f8de6371f22e2a9bb2c0d72
+      sha: ff8211a44186d116be04fb93a1e63e56cb72774aa2fddcc6aa799cfc43daffbd
+    - file: sandbox/internal/server/errors/handle_payload_too_large.go
+      sha: 7c569bae92e804136d55be9c80801e7d8c6732bace43384a2005f8d25999f86e
     - file: sandbox/internal/server/errors/handle_unauthorized.go
-      sha: 4ab0a079ad98f5791a39ed201dc7568274f27e1abbe7a3edff508adf4bc4d2eb
-    - file: sandbox/internal/server/errors/handle_wrong_content_type.go
-      sha: 65679c7645d30b3a02bfcf0dc92c30d0ce8b0db87ee4a4ad2840c67516874e2d
+      sha: d237040497a5bb505d4df17207cdabdb1b64af477fdeb363c924fc8479a6b151
+    - file: sandbox/internal/server/errors/handle_unsupported_media_type.go
+      sha: 5ab2ce7ca11316c3f3ba746e02143672b7a1af34d3d87356ed1b0c54beff0461

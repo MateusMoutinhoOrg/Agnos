@@ -1,4 +1,4 @@
-package iodeps
+package osio
 
 import (
 	"io/fs"
@@ -9,10 +9,10 @@ import (
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
 )
 
-// Bind fills deps.Deps.Iodeps with the filesystem implementation built on
+// Bind fills deps.Deps.IoDeps with the filesystem implementation built on
 // the standard library's os and filepath packages.
 func Bind(deps *deps.Deps) {
-	deps.Iodeps = iodeps.Sandbox{
+	deps.IoDeps = iodeps.Contract{
 		ReadFile: func(path string) ([]byte, error) {
 			return os.ReadFile(path)
 		},
@@ -30,7 +30,7 @@ func Bind(deps *deps.Deps) {
 			info, err := os.Stat(path)
 			return err == nil && !info.IsDir()
 		},
-		Exist: func(path string) bool {
+		Exists: func(path string) bool {
 			_, err := os.Stat(path)
 			return err == nil || !os.IsNotExist(err)
 		},

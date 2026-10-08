@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -15,13 +15,13 @@ args:
       id: Adapter
       required: true
       start: 2
-category: Deps System
+category: Deps
+description: Rewrites one binding.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.
 examples:
     - set-adapter sortdeps reflectsort
-    - set-adapter sortdeps reflectsort --available lambda
+    - set-adapter sortdeps reflectsort --binding lambda
 flags:
-    - description: the available to change (defaults to standard)
-      id: Available
-help: Changes which adapter an available binds for one dep
-long-description: Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.
+    - description: the binding to change (defaults to standard)
+      id: Binding
 priority: 100
+summary: Change which adapter a binding binds for one dep

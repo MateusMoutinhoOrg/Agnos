@@ -1,16 +1,16 @@
-package docpropsconf
+package docconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func Render(sandbox *api.Sandbox, doc_props_conf *DocPropsConf) string {
-	obj := sandbox.Deps.Serializables.CreateObject()
+func Render(sandbox *api.Sandbox, doc_props_conf *DocConf) string {
+	obj := sandbox.Deps.SerializableDeps.CreateObject()
 	obj.AddItemToObject("name", doc_props_conf.Name)
 	obj.AddItemToObject("description", doc_props_conf.Description)
 
 	if len(doc_props_conf.Themes) > 0 {
-		themes := sandbox.Deps.Serializables.CreateArray()
+		themes := sandbox.Deps.SerializableDeps.CreateArray()
 		for _, theme := range doc_props_conf.Themes {
 			themes.AddItemToArray(theme)
 		}
@@ -21,5 +21,5 @@ func Render(sandbox *api.Sandbox, doc_props_conf *DocPropsConf) string {
 		obj.AddItemToObject("order", int64(doc_props_conf.Order))
 	}
 
-	return sandbox.Deps.Serializables.SerializeToYaml(obj)
+	return sandbox.Deps.SerializableDeps.SerializeToYaml(obj)
 }

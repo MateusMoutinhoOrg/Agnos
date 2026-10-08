@@ -1,4 +1,4 @@
-package backofficeguard
+package backofficehttp
 
 import (
 	"{{.Module}}/sandbox/api"
@@ -6,7 +6,7 @@ import (
 )
 
 // ContentSecurityPolicy is what a backoffice page may load: scripts only from
-// the server itself (/admin/backoffice.js, never inline), the styles the
+// the server itself (/backoffice/backoffice.js, never inline), the styles the
 // templates carry inline, and no frame around it.
 const ContentSecurityPolicy = "default-src 'none'; script-src 'self'; style-src 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; form-action 'self'; frame-ancestors 'none'; base-uri 'none'"
 
@@ -23,11 +23,11 @@ const ipv6Pattern = `^[0-9a-f]{0,4}(:[0-9a-f]{0,4}){2,7}$`
 
 // IsIp tells whether ip, already lower case, is an IPv4 or an IPv6 address.
 func IsIp(sandbox *api.Sandbox, ip string) (bool, error) {
-	ipv4, err := sandbox.Deps.Stringsdeps.MatchPattern(ipv4Pattern, ip)
+	ipv4, err := sandbox.Deps.StringsDeps.MatchPattern(ipv4Pattern, ip)
 	if err != nil || ipv4 {
 		return ipv4, err
 	}
-	return sandbox.Deps.Stringsdeps.MatchPattern(ipv6Pattern, ip)
+	return sandbox.Deps.StringsDeps.MatchPattern(ipv6Pattern, ip)
 }
 
 // ClientIp is the ip a request came from, given peer, the ip of its
@@ -41,7 +41,7 @@ func ClientIp(sandbox *api.Sandbox, peer string, forwardedFor string) string {
 	if !sandbox.Config.AllowXForwardedFor {
 		return peer
 	}
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	entries := strings.Split(forwardedFor, ",")
 	last := strings.ToLower(strings.TrimSpace(entries[len(entries)-1]))
 	valid, err := IsIp(sandbox, last)
@@ -64,7 +64,7 @@ func SecurityHeaders(sandbox *api.Sandbox, response *serverdeps.Response) {
 	response.SetHeader("Cross-Origin-Opener-Policy", "same-origin")
 	response.SetHeader("Cache-Control", "no-store")
 	if !sandbox.Config.InsecureHttp {
-		response.SetHeader("Strict-Transport-Security", sandbox.Deps.Std.Sprintf("max-age=%d", HstsMaxAge))
+		response.SetHeader("Strict-Transport-Security", sandbox.Deps.StdDeps.Sprintf("max-age=%d", HstsMaxAge))
 	}
 }
 
@@ -79,7 +79,7 @@ func SameOrigin(sandbox *api.Sandbox, origin string, host string) bool {
 	if origin == "" {
 		return true
 	}
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	for _, scheme := range []string{"https://", "http://"} {
 		if strings.HasPrefix(origin, scheme) {
 			return host != "" && strings.ToLower(origin[len(scheme):]) == strings.ToLower(host)
@@ -93,7 +93,7 @@ func SameOrigin(sandbox *api.Sandbox, origin string, host string) bool {
 // rather than on one address: no host, 0.0.0.0 or [::]. A server trusting
 // X-Forwarded-For has to be reachable by its proxy alone, so it is warned.
 func ListensEverywhere(sandbox *api.Sandbox, addr string) bool {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	head := ""
 	cut := strings.LastIndex(addr, ":")
 	if cut >= 0 {

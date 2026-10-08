@@ -33,13 +33,13 @@ Declares one property of the route's body schema at a dotted path, creating the 
 | `--additional-properties` | boolean |  | accept undeclared keys inside an object property | — |
 | `--no-additional-properties` | boolean |  | refuse undeclared keys inside an object property | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos add-body-field email --route create-user --format email --max 254 --required
@@ -48,4 +48,4 @@ agnos add-body-field role --route create-user --enum admin --enum member
 agnos add-body-field tags --route create-user --array --unique-items --max-items 10
 ```
 
-Server System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Server · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

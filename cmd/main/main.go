@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	agnosadapter "github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 
 	agnoslib "github.com/MateusMoutinhoOrg/Agnos/sandbox"
 )
@@ -14,6 +14,6 @@ func main() {
 
 	lib := agnoslib.New(&deps)
 	argslist := os.Args[1:]
-	result := lib.Cli.CliMain(argslist)
+	result := lib.Cli.Main(argslist)
 	os.Exit(result)
 }

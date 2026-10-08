@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,7 +10,8 @@ args:
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: 'Declares one property of the route''s body schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up: the json-schema of a json body, the form-schema of a form one, which stays flat (no object, no nullable). A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.'
 examples:
     - add-body-field email --route create-user --format email --max 254 --required
     - add-body-field address.city --route create-user --required
@@ -62,6 +63,5 @@ flags:
     - description: refuse undeclared keys inside an object property
       id: NoAdditionalProperties
       type: boolean
-help: Declare a property of a route's body json- or form-schema
-long-description: 'Declares one property of the route''s body schema at a dotted path, creating the objects it passes through, and runs build so the Body struct and BodySchema pick it up: the json-schema of a json body, the form-schema of a form one, which stays flat (no object, no nullable). A route that declared no body becomes a json one here. Every keyword the schema subset supports has a flag; ReadBody answers 400 on the first violation, naming the field path.'
 priority: 100
+summary: Declare a property of a route's body json- or form-schema

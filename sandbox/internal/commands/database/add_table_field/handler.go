@@ -6,20 +6,20 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	add_error := addTableFieldAction.AddTableField(sandbox, api.DatabaseFieldProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	add_error := addTableFieldAction.AddTableField(sandbox, api.AddTableFieldProps{
 		Path:     props.Path,
-		Database: entries.Database,
-		Table:    entries.Table,
-		Parent:   entries.Parent,
-		Name:     entries.Name,
-		Type:     entries.Type,
-		Required: entries.Required,
-		Target:   entries.Target,
+		Database: input.Database,
+		Table:    input.Table,
+		Parent:   input.Parent,
+		Name:     input.Name,
+		Type:     input.Type,
+		Required: input.Required,
+		Target:   input.Target,
 	})
 
 	if add_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

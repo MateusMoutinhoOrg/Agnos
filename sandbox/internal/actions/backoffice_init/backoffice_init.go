@@ -6,7 +6,7 @@ import (
 	databaseInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/database_init"
 	frontInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/front_init"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -17,42 +17,42 @@ import (
 // The layers' own deps go in first, outside the transaction, the way
 // front-init installs the server's: their internal halves write nothing to
 // go.mod, and database-init's store is a remote dep fetched as it installs.
-func BackofficeInit(sandbox *api.Sandbox, path string) error {
-	probe := smartio.New(sandbox, path, sandbox.Config.ProjectName)
+func BackofficeInit(sandbox *api.Sandbox, props api.BackofficeInitProps) error {
+	probe := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 
-	has_server, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionSandboxServer)
+	has_server, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionServer)
 	if err != nil {
 		return err
 	}
 	if !has_server {
-		if err := serverInitAction.InstallDeps(sandbox, path); err != nil {
+		if err := serverInitAction.InstallDeps(sandbox, props.Path); err != nil {
 			return err
 		}
 	}
 
-	has_front, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionSandboxFront)
+	has_front, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionFront)
 	if err != nil {
 		return err
 	}
 	if !has_front {
-		if err := frontInitAction.InstallDeps(sandbox, path); err != nil {
+		if err := frontInitAction.InstallDeps(sandbox, props.Path); err != nil {
 			return err
 		}
 	}
 
-	has_database, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionSandboxDatabase)
+	has_database, err := utils.ExtensionEnabled(sandbox, probe, utils.ExtensionDatabase)
 	if err != nil {
 		return err
 	}
 	if !has_database {
-		if err := databaseInitAction.InstallDeps(sandbox, path); err != nil {
+		if err := databaseInitAction.InstallDeps(sandbox, props.Path); err != nil {
 			return err
 		}
 	}
 
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := BackofficeInitInternal(sandbox, io, path); err != nil {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := BackofficeInitInternal(sandbox, io, props.Path); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

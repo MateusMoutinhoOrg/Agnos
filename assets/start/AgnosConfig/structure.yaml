@@ -22,7 +22,7 @@ sandbox:
 docs:
   order: 3
   dir: true
-  description: one dir per doc, holding doc.md + props.yaml. README.md indexes them all
+  description: one dir per doc, holding doc.md + doc.yaml. README.md indexes them all
 go.mod:
   order: 4
   description: written by `start`; add-dep and remove-dep edit its require block

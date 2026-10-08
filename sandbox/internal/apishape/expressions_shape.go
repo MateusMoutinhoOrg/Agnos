@@ -62,5 +62,5 @@ func title(sandbox *api.Sandbox, name string) string {
 	if name == "" {
 		return name
 	}
-	return sandbox.Deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
+	return sandbox.Deps.StringsDeps.ToUpper(name[:1]) + name[1:]
 }

@@ -1,6 +1,6 @@
 # LibUsage
 
-`{{.Name}}` is a Go module before it is anything else: every feature lives in `sandbox/`
+`{{.ProjectName}}` is a Go module before it is anything else: every feature lives in `sandbox/`
 and is reachable from any Go program that imports it.
 
 ```bash
@@ -10,7 +10,7 @@ go get {{.Module}}@latest
 ## Wiring
 {{if .HasDeps}}
 `sandbox/` performs no OS effects of its own — filesystem, clock, stdout, processes all
-arrive through a `deps.Deps` struct. `adapters/availables/standard` builds the ready-made
+arrive through a `deps.Deps` struct. `adapters/bindings/standard` builds the ready-made
 assembly, and `sandbox.New` turns it into the API object, which carries the deps on
 `Sandbox.Deps` — so everything inside reaches them through the api it was handed.
 
@@ -18,7 +18,7 @@ assembly, and `sandbox.New` turns it into the API object, which carries the deps
 package main
 
 import (
-	"{{.Module}}/adapters/availables/standard"
+	"{{.Module}}/adapters/bindings/standard"
 	"{{.Module}}/sandbox"
 )
 
@@ -65,10 +65,10 @@ drives a command without a command line — bind the values into the copy's `Ite
 
 {{end}}{{if .HasServer}}`lib.Server.Routes` (`[]*api.Route`) is the http surface the same way:
 every route the project declares, in run order — lowest `Priority` first — each carrying its
-`paths`, its parameters, its body and the `IsActionable` / `RequestHandler` that match and
+`paths`, its parameters, its body and the `Matches` / `Run` that match and
 answer it. `api.BindRoute(route)` copies one into the route a single request runs on, so a
 caller drives a route without a socket — set the copy's `Request` and `Response` and call
-`copy.RequestHandler(copy)`, which returns the failure it did not answer itself and `nil`
+`copy.Run(copy)`, which returns the failure it did not answer itself and `nil`
 otherwise. What it answered with is the status it wrote on the response, never what it returned.
 
 {{end}}[PublicApi](../PublicApi/doc.md) lists every one of them — signatures, props structs{{if .HasDeps}} and
@@ -84,7 +84,7 @@ test double, an in-memory implementation or an instrumented wrapper. Patch field
 deps := standard.New()
 
 var out bytes.Buffer
-deps.Std.Printf = func(f string, a ...any) (int, error) {
+deps.StdDeps.Printf = func(f string, a ...any) (int, error) {
 	return fmt.Fprintf(&out, f, a...)
 }
 
@@ -95,23 +95,23 @@ The contracts available to patch:
 
 | Field | Contract package |
 | --- | --- |
-{{- range .DepsLibs }}
+{{- range .DepLibs }}
 | `deps.{{ .Title }}` | `sandbox/deps/{{ .Name }}` |
 {{- end }}
 
-Each one is filled by a matching implementation under `adapters/libs/`, every package
+Each one is filled by a matching implementation under `adapters/impls/`, every package
 exposing the same `Bind(deps *deps.Deps)` entry point:
 
 | Adapter lib | Binder |
 | --- | --- |
-{{- range .AdapterLibs }}
-| `adapters/libs/{{ .Name }}` | `{{ .Name }}.Bind(&deps)` |
+{{- range .AdapterImpls }}
+| `adapters/impls/{{ .Name }}` | `{{ .Name }}.Bind(&deps)` |
 {{- end }}
 
 Starting from `standard.New()` is the safe default: an unfilled field is a nil func that
 panics on first call. For a permanent mix, write your own
-`adapters/availables/<name>/new.go` binding only the libs you want — `standard/new.go` is
-regenerated on every build, while other directories under `availables/` are left alone.
+`adapters/bindings/<name>/new.go` binding only the libs you want — `standard/new.go` is
+regenerated on every build, while other directories under `bindings/` are left alone.
 {{end}}
 `sandbox/api` is pure contract and `sandbox/` never touches the OS, so both are safe to import
 anywhere; the rest of the rules a caller can count on are in [Rules](../Rules/doc.md#layers),

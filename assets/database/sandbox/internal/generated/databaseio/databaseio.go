@@ -2,7 +2,7 @@ package databaseio
 
 import (
 	api "{{.Module}}/sandbox/api"
-	database "{{.Module}}/sandbox/deps/database"
+	databasedeps "{{.Module}}/sandbox/deps/databasedeps"
 )
 
 // databaseio is to a database package what routeio is to a route: the code
@@ -17,31 +17,31 @@ import (
 // generated method.
 
 // Fail turns one failure the database reported into an error the sandbox
-// carries. A nil *database.Error is success and answers nil.
-func Fail(sandbox *api.Sandbox, failure *database.Error) error {
+// carries. A nil *databasedeps.Error is success and answers nil.
+func Fail(sandbox *api.Sandbox, failure *databasedeps.Error) error {
 	if failure == nil {
 		return nil
 	}
 	if failure.Key != "" {
-		return sandbox.Deps.Std.Errorf("%s: %s", failure.Key, failure.Message)
+		return sandbox.Deps.StdDeps.Errorf("%s: %s", failure.Key, failure.Message)
 	}
-	return sandbox.Deps.Std.Errorf("%s", failure.Message)
+	return sandbox.Deps.StdDeps.Errorf("%s", failure.Message)
 }
 
 // Schema resolves one collection of a handle by name. A name the Props does
 // not declare is an error rather than a nil instance: a generated method names
-// a table its own specs.yaml declared, so this only fires on a handle built
+// a table its own database.yaml declared, so this only fires on a handle built
 // from another declaration.
-func Schema(sandbox *api.Sandbox, handle database.DatabaseHandle, name string) (database.SchemaInstance, error) {
+func Schema(sandbox *api.Sandbox, handle databasedeps.DatabaseHandle, name string) (databasedeps.SchemaInstance, error) {
 	schema, ok := handle.GetSchema(name)
 	if !ok {
-		return schema, sandbox.Deps.Std.Errorf("this database declares no table %q", name)
+		return schema, sandbox.Deps.StdDeps.Errorf("this database declares no table %q", name)
 	}
 	return schema, nil
 }
 
 // ReadString reads one Key or String field of a record.
-func ReadString(sandbox *api.Sandbox, item database.SchemaItem, field string) (string, error) {
+func ReadString(sandbox *api.Sandbox, item databasedeps.SchemaItem, field string) (string, error) {
 	raw, failure := read(sandbox, item, field)
 	if failure != nil {
 		return "", failure
@@ -57,7 +57,7 @@ func ReadString(sandbox *api.Sandbox, item database.SchemaItem, field string) (s
 }
 
 // ReadInt reads one Int or Link field of a record.
-func ReadInt(sandbox *api.Sandbox, item database.SchemaItem, field string) (int64, error) {
+func ReadInt(sandbox *api.Sandbox, item databasedeps.SchemaItem, field string) (int64, error) {
 	raw, failure := read(sandbox, item, field)
 	if failure != nil {
 		return 0, failure
@@ -73,7 +73,7 @@ func ReadInt(sandbox *api.Sandbox, item database.SchemaItem, field string) (int6
 }
 
 // ReadFloat reads one Float field of a record.
-func ReadFloat(sandbox *api.Sandbox, item database.SchemaItem, field string) (float64, error) {
+func ReadFloat(sandbox *api.Sandbox, item databasedeps.SchemaItem, field string) (float64, error) {
 	raw, failure := read(sandbox, item, field)
 	if failure != nil {
 		return 0, failure
@@ -90,12 +90,12 @@ func ReadFloat(sandbox *api.Sandbox, item database.SchemaItem, field string) (fl
 
 // read is the one call every reader shares: the stored value, or nil when the
 // record carries none for that field.
-func read(sandbox *api.Sandbox, item database.SchemaItem, field string) (any, error) {
+func read(sandbox *api.Sandbox, item databasedeps.SchemaItem, field string) (any, error) {
 	raw, failure := item.Get(field)
 	if failure == nil {
 		return raw, nil
 	}
-	if failure.Type == database.NotFound {
+	if failure.Type == databasedeps.NotFound {
 		return nil, nil
 	}
 	return nil, Fail(sandbox, failure)
@@ -104,16 +104,16 @@ func read(sandbox *api.Sandbox, item database.SchemaItem, field string) (any, er
 // mistyped words the one failure a reader reports: a stored value that is not
 // what the declaration says the field holds.
 func mistyped(sandbox *api.Sandbox, field string, expected string) error {
-	return sandbox.Deps.Std.Errorf("field %q does not hold %s", field, expected)
+	return sandbox.Deps.StdDeps.Errorf("field %q does not hold %s", field, expected)
 }
 
-// TextMatches is the filter a generated <T>Filtrage applies to one text field:
+// TextMatches is the filter a generated <T>Filter applies to one text field:
 // an empty needle passes everything, so a zero value turns the filter off.
 func TextMatches(sandbox *api.Sandbox, value string, starts_with string, equals string) bool {
 	if equals != "" && value != equals {
 		return false
 	}
-	if starts_with != "" && !sandbox.Deps.Stringsdeps.HasPrefix(value, starts_with) {
+	if starts_with != "" && !sandbox.Deps.StringsDeps.HasPrefix(value, starts_with) {
 		return false
 	}
 	return true

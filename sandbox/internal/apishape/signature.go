@@ -22,12 +22,12 @@ type Signature struct {
 // ParseSignature reads a func type expression into its parameters and results,
 // and reports whether expr is a func type at all.
 func ParseSignature(sandbox *api.Sandbox, expr string) (Signature, bool) {
-	rest := sandbox.Deps.Stringsdeps.TrimSpace(expr)
+	rest := sandbox.Deps.StringsDeps.TrimSpace(expr)
 
-	if !sandbox.Deps.Stringsdeps.HasPrefix(rest, "func") {
+	if !sandbox.Deps.StringsDeps.HasPrefix(rest, "func") {
 		return Signature{}, false
 	}
-	rest = sandbox.Deps.Stringsdeps.TrimSpace(rest[len("func"):])
+	rest = sandbox.Deps.StringsDeps.TrimSpace(rest[len("func"):])
 
 	if len(rest) == 0 || rest[0] != '(' {
 		return Signature{}, false
@@ -40,7 +40,7 @@ func ParseSignature(sandbox *api.Sandbox, expr string) (Signature, bool) {
 
 	signature := Signature{Params: splitParams(sandbox, rest[1:close_index])}
 
-	results := sandbox.Deps.Stringsdeps.TrimSpace(rest[close_index+1:])
+	results := sandbox.Deps.StringsDeps.TrimSpace(rest[close_index+1:])
 	if results == "" {
 		return signature, true
 	}
@@ -60,7 +60,7 @@ func splitParams(sandbox *api.Sandbox, list string) []Param {
 	var params []Param
 
 	for _, chunk := range splitTop(list, ',') {
-		chunk = sandbox.Deps.Stringsdeps.TrimSpace(chunk)
+		chunk = sandbox.Deps.StringsDeps.TrimSpace(chunk)
 		if chunk == "" {
 			continue
 		}
@@ -79,7 +79,7 @@ func readParam(sandbox *api.Sandbox, chunk string) Param {
 	}
 
 	name := chunk[:space]
-	rest := sandbox.Deps.Stringsdeps.TrimSpace(chunk[space:])
+	rest := sandbox.Deps.StringsDeps.TrimSpace(chunk[space:])
 
 	if rest == "" || !isIdentifier(name) {
 		return Param{Type: chunk}

@@ -2,8 +2,8 @@ package backofficeapi
 
 import (
 	"{{.Module}}/sandbox/api"
-	serializables "{{.Module}}/sandbox/deps/serializables"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	serializabledeps "{{.Module}}/sandbox/deps/serializabledeps"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
 )
@@ -13,10 +13,10 @@ import (
 // AddItemToArray copy a child as it is when added, so every child is built
 // whole before it is added to its parent.
 
-// User is the JSON object a backoffice user is answered as: its id, username,
+// UserJSON is the JSON object a backoffice user is answered as: its id, username,
 // email and role by name. The password hash never leaves the server.
-func User(sandbox *api.Sandbox, user backofficedb.BackofficeuserItem) *serializables.SerializibleObject {
-	object := sandbox.Deps.Serializables.CreateObject()
+func UserJSON(sandbox *api.Sandbox, user backoffice_db.BackofficeUserRecord) *serializabledeps.SerializableObject {
+	object := sandbox.Deps.SerializableDeps.CreateObject()
 	object.AddItemToObject("id", user.Id)
 	object.AddItemToObject("username", user.Username)
 	object.AddItemToObject("email", user.Email)
@@ -24,22 +24,22 @@ func User(sandbox *api.Sandbox, user backofficedb.BackofficeuserItem) *serializa
 	return object
 }
 
-// UserDocument is {"user": User(user)}.
-func UserDocument(sandbox *api.Sandbox, user backofficedb.BackofficeuserItem) *serializables.SerializibleObject {
-	document := sandbox.Deps.Serializables.CreateObject()
-	document.AddItemToObject("user", User(sandbox, user))
+// UserResponseJSON is {"user": UserJSON(user)}.
+func UserResponseJSON(sandbox *api.Sandbox, user backoffice_db.BackofficeUserRecord) *serializabledeps.SerializableObject {
+	document := sandbox.Deps.SerializableDeps.CreateObject()
+	document.AddItemToObject("user", UserJSON(sandbox, user))
 	return document
 }
 
-// Listing is one page of the user list: the users themselves, the search and
+// UserListJSON is one page of the user list: the users themselves, the search and
 // role it was filtered by, and where the page sits among every page.
-func Listing(sandbox *api.Sandbox, listing backofficeusers.Listing) *serializables.SerializibleObject {
-	users := sandbox.Deps.Serializables.CreateArray()
+func UserListJSON(sandbox *api.Sandbox, listing backofficeusers.Listing) *serializabledeps.SerializableObject {
+	users := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, user := range listing.Users {
-		users.AddItemToArray(User(sandbox, user))
+		users.AddItemToArray(UserJSON(sandbox, user))
 	}
 
-	document := sandbox.Deps.Serializables.CreateObject()
+	document := sandbox.Deps.SerializableDeps.CreateObject()
 	document.AddItemToObject("users", users)
 	document.AddItemToObject("search", listing.Search)
 	document.AddItemToObject("role", listing.Role)
@@ -50,21 +50,9 @@ func Listing(sandbox *api.Sandbox, listing backofficeusers.Listing) *serializabl
 	return document
 }
 
-// Ok is {"status": "ok"}, what an action with nothing else to say answers.
-func Ok(sandbox *api.Sandbox) *serializables.SerializibleObject {
-	document := sandbox.Deps.Serializables.CreateObject()
+// OkJSON is {"status": "ok"}, what an action with nothing else to say answers.
+func OkJSON(sandbox *api.Sandbox) *serializabledeps.SerializableObject {
+	document := sandbox.Deps.SerializableDeps.CreateObject()
 	document.AddItemToObject("status", "ok")
 	return document
-}
-
-// Role is the role column value of the role name a body sent, or a 400 on
-// field "role" when no role has that name. The routes' json-schema already
-// holds role to the names of backofficeauth.Roles, so the failure only
-// guards a schema and a role list drifting apart.
-func Role(sandbox *api.Sandbox, name string) (int64, error) {
-	role, ok := backofficeauth.ParseRole(sandbox, name)
-	if !ok {
-		return 0, sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusBadRequest, "role", "role must be root or viewer")
-	}
-	return int64(role), nil
 }

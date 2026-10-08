@@ -1,18 +1,19 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: add-route
-    - description: the route name (becomes the directory sandbox/internal/routeslist/<name> and its Go package)
+    - description: the route name (becomes the directory sandbox/internal/routes/<name> and its Go package)
       end: 1
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: Writes <name>/route.yaml and a stub handler.go under sandbox/internal/routes — or under the folder --dir names there, e.g. routes/admin/<name> — then runs build so the route's new.go (the api.Route that lands in Server.Routes) and input.go (the Input its handler is handed) are generated. A directory is a route by holding a route.yaml, at any depth; a name is unique across every folder. The paths come from --pattern, or from one path reading the whole request path against --trigger, named after its words (/api/products reads into ApiProducts). A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
 examples:
-    - add-route create-user --trigger /users --method POST --help "Create a user" --category Users
+    - add-route create-user --trigger /users --method POST --summary "Create a user" --category Users
     - add-route get-article --pattern '/articles/{article:integer}'
     - add-route admin-guard --middleware --trigger /admin
 flags:
@@ -48,11 +49,10 @@ flags:
     - description: the Content-Type every response of the route carries (defaults to application/json, or text/plain for a --middleware)
       id: ResponseType
     - description: one-line description of the route
-      id: Help
+      id: Summary
     - description: the heading the route is listed under in docs/Routes (defaults to Routes, or Middleware for a --middleware)
       id: Category
-    - description: the folder under sandbox/internal/routeslist the route lands in, e.g. admin puts it in routeslist/admin/<name> (defaults to the top); a directory holding a route.yaml is a route, whatever folder holds it
+    - description: the folder under sandbox/internal/routes the route lands in, e.g. admin puts it in routes/admin/<name> (defaults to the top); a directory holding a route.yaml is a route, whatever folder holds it
       id: Dir
-help: Declare a new http route
-long-description: Writes <name>/route.yaml and a stub InternalPureHandler.go under sandbox/internal/routeslist — or under the folder --dir names there, e.g. routeslist/admin/<name> — then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. A directory is a route by holding a route.yaml, at any depth; a name is unique across every folder. The paths come from --pattern, or from one path, Route, reading the whole request path against --trigger. A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
 priority: 100
+summary: Declare a new http route

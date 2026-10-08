@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,18 +10,19 @@ args:
       id: Name
       required: true
       start: 1
-category: Cli System
+category: Cli
+description: Overwrites summary, category, description, priority, segments, strict and hidden on one command, appends further verbs (--identifier) and examples, and runs build. Empty options leave the current value alone; --before and --after place the command one rung from another; --clear takes a key off.
 examples:
     - set-command exec --identifier run --example 'exec file.txt'
     - set-command exec --priority 50
     - set-command logger --loose
 flags:
     - description: new one-line help text
-      id: Help
+      id: Summary
     - description: new category the command is grouped under in help output
       id: Category
     - description: new long description shown by help <command>
-      id: LongDescription
+      id: Description
     - description: an extra verb the command answers to (repeatable)
       id: Identifier
       keys:
@@ -61,6 +62,5 @@ flags:
     - description: 'a key to take off: segments, or examples before --example lists them again (repeatable)'
       id: Clear
       type: string-array
-help: Update the command-level keys of a command's command.yaml
-long-description: Overwrites help, category, long-description, priority, segments, strict and hidden on one command, appends further verbs (--identifier) and examples, and runs build. Empty options leave the current value alone; --before and --after place the command one rung from another; --clear takes a key off.
 priority: 100
+summary: Rewrite the command-level keys of a command's command.yaml

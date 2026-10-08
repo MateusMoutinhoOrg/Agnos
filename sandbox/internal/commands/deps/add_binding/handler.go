@@ -1,16 +1,16 @@
-package add_available
+package add_binding
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	addAvailableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_available"
+	addBindingAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_binding"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	add_error := addAvailableAction.AddAvailable(sandbox, props.Path, entries.Available)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	add_error := addBindingAction.AddBinding(sandbox, api.AddBindingProps{Path: props.Path, Binding: input.Name})
 
 	if add_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

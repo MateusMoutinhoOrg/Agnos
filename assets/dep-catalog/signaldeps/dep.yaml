@@ -1,4 +1,4 @@
-default-adapter: signaldeps
-field: Signaldeps
+default-adapter: ossignal
+field: SignalDeps
 help: Hear the signals the operating system sends the process
 name: signaldeps

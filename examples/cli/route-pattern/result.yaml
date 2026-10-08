@@ -38,15 +38,15 @@ cli-output: |
     body      none
 exit-code: 0
 tree:
-    - file: sandbox/internal/routeslist/files/entries.go
-      sha: 50e4e891ee1f154569a158929ca5e9195ee40691c6559c5a211b0738c90d8c5b
-    - file: sandbox/internal/routeslist/files/route.yaml
-      sha: a2b973df11fb292b0978cdd3282c4afed1d1b9093ce53f9a9f08a52f38b00e8f
-    - file: sandbox/internal/routeslist/get_article/entries.go
-      sha: 9556c8c97a10126c9b71d214e3118ac3315b919ce7f4f0d40e7889c9ab25b28c
-    - file: sandbox/internal/routeslist/get_article/route.yaml
-      sha: fc4ef0789496d99e639d4630059f0f9b3f67becf92e2c2d9ce000c7f3aeb9a15
-    - file: sandbox/internal/routeslist/get_comment/entries.go
-      sha: c07a032bc45af06c0597ace69f2a083ba13f1cb3d5590de0c8e06dc9e5102b56
-    - file: sandbox/internal/routeslist/get_comment/route.yaml
-      sha: 9c0a60886832ce1a5cde2e173d82cbb8bb1acc06991db97765fe1959f41ee338
+    - file: sandbox/internal/routes/files/input.go
+      sha: 448d04b7399e0f9fd669810f45d591a35f6edbd84e1842aa63667508f9dccf83
+    - file: sandbox/internal/routes/files/route.yaml
+      sha: 79ebcbd3e8ce677bcc5a220a8100e41bb3bbf22dc7a0a971229c7d27fb486ca5
+    - file: sandbox/internal/routes/get_article/input.go
+      sha: 84c00681eefe26cf838262cac04ddeeb5f889cf92173dccf966e5a3dc59bdc1f
+    - file: sandbox/internal/routes/get_article/route.yaml
+      sha: 1815124546e02a6cdea86b58e27c8eae6c35f4c1f3b7e431389ec998e6e812c3
+    - file: sandbox/internal/routes/get_comment/input.go
+      sha: d4ff97f7210ff3ca75b9cb02a06351478e830431b6dc12728a5900e14170351b
+    - file: sandbox/internal/routes/get_comment/route.yaml
+      sha: a2c446e0fb3bdb6fba11abf193b8911ae065ebda3562a64ccd2122878966d041

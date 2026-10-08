@@ -1,5 +1,5 @@
 dep: argvdeps
 help: Argv parser over strings, strconv and time
 module: ""
-name: argvdeps
+name: stdargv
 origin: catalog

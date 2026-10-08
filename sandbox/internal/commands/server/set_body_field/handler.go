@@ -6,33 +6,33 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	set_error := setBodyFieldAction.SetBodyField(sandbox, api.RouteBodyFieldEditProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	set_error := setBodyFieldAction.SetBodyField(sandbox, api.SetBodyFieldProps{
 		Path:                   props.Path,
-		Route:                  entries.Route,
-		Name:                   entries.Name,
-		Rename:                 entries.Rename,
-		Type:                   entries.Type,
-		Required:               entries.Required,
-		Array:                  entries.Array,
-		Min:                    entries.Min,
-		Max:                    entries.Max,
-		ExclusiveMin:           entries.ExclusiveMin,
-		ExclusiveMax:           entries.ExclusiveMax,
-		Format:                 entries.Format,
-		Pattern:                entries.Pattern,
-		Enum:                   entries.Enum,
-		Const:                  entries.Const,
-		Nullable:               entries.Nullable,
-		MinItems:               entries.MinItems,
-		MaxItems:               entries.MaxItems,
-		UniqueItems:            entries.UniqueItems,
-		AdditionalProperties:   entries.AdditionalProperties,
-		NoAdditionalProperties: entries.NoAdditionalProperties,
-		Clear:                  entries.Clear,
+		Route:                  input.Route,
+		Name:                   input.Name,
+		Rename:                 input.Rename,
+		Type:                   input.Type,
+		Required:               input.Required,
+		Array:                  input.Array,
+		Min:                    input.Min,
+		Max:                    input.Max,
+		ExclusiveMin:           input.ExclusiveMin,
+		ExclusiveMax:           input.ExclusiveMax,
+		Format:                 input.Format,
+		Pattern:                input.Pattern,
+		Enum:                   input.Enum,
+		Const:                  input.Const,
+		Nullable:               input.Nullable,
+		MinItems:               input.MinItems,
+		MaxItems:               input.MaxItems,
+		UniqueItems:            input.UniqueItems,
+		AdditionalProperties:   input.AdditionalProperties,
+		NoAdditionalProperties: input.NoAdditionalProperties,
+		Clear:                  input.Clear,
 	})
 	if set_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

@@ -2,8 +2,8 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -28,7 +28,7 @@ const infoCategory = "Info"
 // project has.
 type area struct {
 	Name      string
-	Help      string
+	Summary   string
 	Extension string
 }
 
@@ -40,15 +40,15 @@ type area struct {
 // to no mechanic, is always offered, and is listed after these under its own
 // name.
 var areas = []area{
-	{"Core Commands", "build it, check it, install it, publish it", ""},
-	{"Cli System", "the commands your program answers to", utils.ExtensionSandboxCli},
-	{"Server System", "the http routes your program answers", utils.ExtensionSandboxServer},
-	{"Front System", "a website your server serves: any html, css or js you put in assets/frontend", utils.ExtensionSandboxFront},
-	{"Database System", "the records your program stores and reads back", utils.ExtensionSandboxDatabase},
-	{"Backoffice System", "an admin area: a sign-in page, the people allowed in, and their API keys", utils.ExtensionSandboxBackoffice},
-	{"Deps System", "the libraries your program is allowed to use", utils.ExtensionSandboxDeps},
-	{"Documentation", "the docs/ tree of this project", utils.ExtensionDoc},
-	{"Examples", "the examples that guard this project", utils.ExtensionSandboxExample},
+	{"Core", "build it, check it, install it, publish it", ""},
+	{"Cli", "the commands your program answers to", utils.ExtensionCli},
+	{"Server", "the http routes your program answers", utils.ExtensionServer},
+	{"Front", "a website your server serves: any html, css or js you put in assets/front", utils.ExtensionFront},
+	{"Database", "the records your program stores and reads back", utils.ExtensionDatabase},
+	{"Backoffice", "an admin area: a sign-in page, the people allowed in, and their API keys", utils.ExtensionBackoffice},
+	{"Deps", "the libraries your program is allowed to use", utils.ExtensionDeps},
+	{"Docs", "the docs/ tree of this project", utils.ExtensionDoc},
+	{"Examples", "the examples that guard this project", utils.ExtensionExample},
 	{"Extensions", "what gets generated for this project", ""},
 	{infoCategory, "help and version of the tool itself", ""},
 }
@@ -70,32 +70,32 @@ func areaHelp(category string) string {
 	if !found {
 		return ""
 	}
-	return one.Help
+	return one.Summary
 }
 
 // extensionInit is the command that turns one mechanic on. It is why an area
 // that is off can still be reached: the init is offered as a step, which is
 // the only place it is ever offered.
 var extensionInit = map[string]string{
-	utils.ExtensionSandboxCli:        "cli-init",
-	utils.ExtensionSandboxServer:     "server-init",
-	utils.ExtensionSandboxFront:      "front-init",
-	utils.ExtensionSandboxDeps:       "deps-init",
-	utils.ExtensionSandboxDatabase:   "database-init",
-	utils.ExtensionSandboxBackoffice: "backoffice-init",
+	utils.ExtensionCli:        "cli-init",
+	utils.ExtensionServer:     "server-init",
+	utils.ExtensionFront:      "front-init",
+	utils.ExtensionDeps:       "deps-init",
+	utils.ExtensionDatabase:   "database-init",
+	utils.ExtensionBackoffice: "backoffice-init",
 }
 
 // scaffoldedUnits are the units an init writes for itself: help and version
-// from assets/sandbox-cli/, health from assets/sandbox-server/, and the
-// frontend route and the index page front-init scaffolds. A layer holding
+// from assets/cli/, health from assets/server/, and the
+// front route and the index page front-init scaffolds. A layer holding
 // nothing else has no unit of its own yet — which is what makes "declare its first one" the step after its
 // init, instead of a step no project ever sees.
 var scaffoldedUnits = map[string]bool{
-	"help":     true,
-	"version":  true,
-	"health":   true,
-	"frontend": true,
-	"index":    true,
+	"help":    true,
+	"version": true,
+	"health":  true,
+	"front":   true,
+	"index":   true,
 }
 
 // projectState is the project at --path as the menus need it: whether there is
@@ -117,7 +117,7 @@ type projectState struct {
 // would fail on it. An extensions.yaml that will not parse leaves every
 // mechanic off, which offers the inits and hides the areas: the same screen a
 // fresh project gets, and the one that leads out of a broken declaration.
-func readState(sandbox *api.Sandbox, io *smartio.SmartIO) projectState {
+func readState(sandbox *api.Sandbox, io *stagedfs.StagedFS) projectState {
 	state := projectState{Extensions: map[string]bool{}}
 
 	if !io.IsFile(utils.ProjectConfPath(sandbox)) {
@@ -126,7 +126,7 @@ func readState(sandbox *api.Sandbox, io *smartio.SmartIO) projectState {
 	state.Started = true
 
 	if conf, err := utils.LoadProjectConf(sandbox, io); err == nil {
-		state.Name = conf.Name
+		state.Name = conf.ProjectName
 	}
 
 	if conf, err := utils.LoadExtensionsConf(sandbox, io); err == nil {
@@ -147,7 +147,7 @@ func readState(sandbox *api.Sandbox, io *smartio.SmartIO) projectState {
 
 // ownUnits is how many units of a layer the project declared itself, which is
 // every one its init did not scaffold — backoffice-init's among them.
-func ownUnits(declared []interviewer.AlternativeOption, backoffice map[string]bool) int {
+func ownUnits(declared []interviewdeps.Option, backoffice map[string]bool) int {
 	count := 0
 	for _, one := range declared {
 		if !scaffoldedUnits[one.Id] && !backoffice[one.Id] {
@@ -189,27 +189,27 @@ func nextSteps(state projectState) []step {
 
 	steps := []step{}
 
-	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxCli), true,
-		extensionInit[utils.ExtensionSandboxCli], "Give it a command line — the commands it answers to")
-	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxCli) && state.Commands == 0, true,
+	steps = appendStep(steps, !enabled(state, utils.ExtensionCli), true,
+		extensionInit[utils.ExtensionCli], "Give it a command line — the commands it answers to")
+	steps = appendStep(steps, enabled(state, utils.ExtensionCli) && state.Commands == 0, true,
 		"add-command", "Declare its first command")
-	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxServer) && state.Routes == 0, true,
+	steps = appendStep(steps, enabled(state, utils.ExtensionServer) && state.Routes == 0, true,
 		"add-route", "Declare its first route")
-	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxFront) && state.Pages == 0, true,
+	steps = appendStep(steps, enabled(state, utils.ExtensionFront) && state.Pages == 0, true,
 		"add-page", "Add its first page")
-	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxDatabase) && state.Databases == 0, true,
+	steps = appendStep(steps, enabled(state, utils.ExtensionDatabase) && state.Databases == 0, true,
 		"add-database", "Declare its first database")
 
-	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxServer), false,
-		extensionInit[utils.ExtensionSandboxServer], "Give it an http server — the routes it answers")
-	steps = appendStep(steps, enabled(state, utils.ExtensionSandboxServer) && !enabled(state, utils.ExtensionSandboxFront), false,
-		extensionInit[utils.ExtensionSandboxFront], "Give it html pages, served by that server")
-	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxDatabase), false,
-		extensionInit[utils.ExtensionSandboxDatabase], "Give it somewhere to store records — tables it reads and writes")
-	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxBackoffice), false,
-		extensionInit[utils.ExtensionSandboxBackoffice], "Give it an admin area — a sign-in page, the people allowed in, and their API keys")
-	steps = appendStep(steps, !enabled(state, utils.ExtensionSandboxDeps), false,
-		extensionInit[utils.ExtensionSandboxDeps], "Give it the dependency layer — deps, adapters, availables")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionServer), false,
+		extensionInit[utils.ExtensionServer], "Give it an http server — the routes it answers")
+	steps = appendStep(steps, enabled(state, utils.ExtensionServer) && !enabled(state, utils.ExtensionFront), false,
+		extensionInit[utils.ExtensionFront], "Give it html pages, served by that server")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionDatabase), false,
+		extensionInit[utils.ExtensionDatabase], "Give it somewhere to store records — tables it reads and writes")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionBackoffice), false,
+		extensionInit[utils.ExtensionBackoffice], "Give it an admin area — a sign-in page, the people allowed in, and their API keys")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionDeps), false,
+		extensionInit[utils.ExtensionDeps], "Give it the dependency layer — deps, adapters, bindings")
 
 	return steps
 }

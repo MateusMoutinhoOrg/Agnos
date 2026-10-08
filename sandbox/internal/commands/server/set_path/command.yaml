@@ -1,16 +1,17 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: set-path
     - description: the id of the path to rewrite
       end: 1
-      id: Id
+      id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: 'Rewrites one entry of the route''s paths in place and runs build. It is add-path applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor.'
 examples:
     - set-path tenant --route create-user --end 2
     - set-path Route --route logger --trigger-type prefix
@@ -41,6 +42,5 @@ flags:
     - description: 'a key to take off: trigger, trigger-negate, trigger-ignore-case, type or description (repeatable)'
       id: Clear
       type: string-array
-help: Rewrite one entry of a route's paths
-long-description: 'Rewrites one entry of the route''s paths in place and runs build. It is add-path applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor.'
 priority: 100
+summary: Rewrite one entry of a route's paths

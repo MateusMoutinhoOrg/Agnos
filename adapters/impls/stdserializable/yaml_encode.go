@@ -1,4 +1,4 @@
-package serializables
+package stdserializable
 
 import (
 	"encoding/base64"
@@ -121,14 +121,14 @@ func (encoder *yamlEncoder) writeIndicator(indicator string, need_whitespace boo
 // item only skips the "- " indicator, which is what lines a mapping up with
 // the key that shares the dash's line; every other level aligns to the next
 // multiple of yamlIndent.
-func (encoder *yamlEncoder) increaseIndent(seq_item bool) {
+func (encoder *yamlEncoder) increaseIndent(seqItem bool) {
 	encoder.indents = append(encoder.indents, encoder.indent)
 
 	if encoder.indent < 0 {
 		encoder.indent = 0
 		return
 	}
-	if seq_item {
+	if seqItem {
 		encoder.indent += 2
 		return
 	}
@@ -141,22 +141,22 @@ func (encoder *yamlEncoder) decreaseIndent() {
 	encoder.indents = encoder.indents[:len(encoder.indents)-1]
 }
 
-// emitNode writes one value. seq_item reports whether it is the node of a
+// emitNode writes one value. seqItem reports whether it is the node of a
 // sequence item, which is the one case indentation is counted differently in.
-func (encoder *yamlEncoder) emitNode(value any, seq_item bool) error {
+func (encoder *yamlEncoder) emitNode(value any, seqItem bool) error {
 	switch typed := value.(type) {
 	case map[string]any:
-		return encoder.emitMapping(typed, seq_item)
+		return encoder.emitMapping(typed, seqItem)
 	case []any:
-		return encoder.emitSequence(typed, seq_item)
+		return encoder.emitSequence(typed, seqItem)
 	default:
-		return encoder.emitScalar(value, false, seq_item)
+		return encoder.emitScalar(value, false, seqItem)
 	}
 }
 
 // emitMapping writes a block mapping, its keys in the order yaml.v3 sorts
 // them. An empty mapping has no block form, so it is written in flow style.
-func (encoder *yamlEncoder) emitMapping(mapping map[string]any, seq_item bool) error {
+func (encoder *yamlEncoder) emitMapping(mapping map[string]any, seqItem bool) error {
 	if len(mapping) == 0 {
 		encoder.writeIndicator("{", true, true, false)
 		encoder.writeIndicator("}", false, false, false)
@@ -169,7 +169,7 @@ func (encoder *yamlEncoder) emitMapping(mapping map[string]any, seq_item bool) e
 	}
 	sort.Slice(keys, func(i int, j int) bool { return lessYamlKey(keys[i], keys[j]) })
 
-	encoder.increaseIndent(seq_item)
+	encoder.increaseIndent(seqItem)
 	for _, key := range keys {
 		encoder.writeIndent()
 
@@ -199,14 +199,14 @@ func (encoder *yamlEncoder) emitMapping(mapping map[string]any, seq_item bool) e
 
 // emitSequence writes a block sequence. An empty one, like an empty mapping,
 // has only a flow form.
-func (encoder *yamlEncoder) emitSequence(sequence []any, seq_item bool) error {
+func (encoder *yamlEncoder) emitSequence(sequence []any, seqItem bool) error {
 	if len(sequence) == 0 {
 		encoder.writeIndicator("[", true, true, false)
 		encoder.writeIndicator("]", false, false, false)
 		return nil
 	}
 
-	encoder.increaseIndent(seq_item)
+	encoder.increaseIndent(seqItem)
 	for _, item := range sequence {
 		encoder.writeIndent()
 		encoder.writeIndicator("-", true, false, true)
@@ -222,7 +222,7 @@ func (encoder *yamlEncoder) emitSequence(sequence []any, seq_item bool) error {
 // emitScalar writes one scalar in the style yamlScalarStyle picked for it. A
 // scalar opens an indentation level of its own, which is what a literal block
 // is indented by.
-func (encoder *yamlEncoder) emitScalar(value any, key bool, seq_item bool) error {
+func (encoder *yamlEncoder) emitScalar(value any, key bool, seqItem bool) error {
 	text, style, tag, err := yamlScalarStyle(value, key)
 	if err != nil {
 		return err
@@ -232,7 +232,7 @@ func (encoder *yamlEncoder) emitScalar(value any, key bool, seq_item bool) error
 		encoder.writeIndicator(tag, true, false, false)
 	}
 
-	encoder.increaseIndent(seq_item)
+	encoder.increaseIndent(seqItem)
 	switch style {
 	case stylePlain:
 		encoder.writePlain(text)

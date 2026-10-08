@@ -1,4 +1,4 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"regexp"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	serializables "{{.Module}}/sandbox/deps/serializables"
+	serializabledeps "{{.Module}}/sandbox/deps/serializabledeps"
 )
 
 // Format patterns. The subset supports four `format` values, and each is
@@ -23,22 +23,22 @@ const (
 	formatUriPattern = `^[A-Za-z][A-Za-z0-9+.-]*:\S*$`
 )
 
-// validator is one validation: the serializables dep every document it reads
+// validator is one validation: the serializabledeps dep every document it reads
 // and writes is built by.
 type validator struct {
-	serializables serializables.Sandbox
+	serializables serializabledeps.Contract
 }
 
 // validateSchema parses body as JSON and checks it against schema_json, the
 // canonical form of the route's declared json-schema. It is a pure function
-// over the serializables dep it is handed: no route, no request and no
+// over the serializabledeps dep it is handed: no route, no request and no
 // response reach it.
 //
 // It returns the parsed document, the field path of the first violation, that
 // violation's message, and whether the body passed. A body that passes comes
 // back with an empty path and message; one that fails comes back with the
 // document parsed as far as it got, so a caller may still report on it.
-func validateSchema(serializer serializables.Sandbox, schema_json string, body []byte) (*serializables.SerializibleObject, string, string, bool) {
+func validateSchema(serializer serializabledeps.Contract, schema_json string, body []byte) (*serializabledeps.SerializableObject, string, string, bool) {
 	check := &validator{serializables: serializer}
 	parsed, err := check.serializables.ParseJson(string(body))
 	if err != nil {
@@ -61,7 +61,7 @@ func validateSchema(serializer serializables.Sandbox, schema_json string, body [
 // validateNode checks one value against one schema node and recurses into its
 // properties and items. It stops at the first violation: a caller answers 400
 // with one message, so finding the rest would be work nobody reads.
-func (check *validator) validateNode(schema *serializables.SerializibleObject, value *serializables.SerializibleObject, path string) (string, string, bool) {
+func (check *validator) validateNode(schema *serializabledeps.SerializableObject, value *serializabledeps.SerializableObject, path string) (string, string, bool) {
 	if value == nil {
 		return path, "is missing", false
 	}
@@ -95,7 +95,7 @@ func (check *validator) validateNode(schema *serializables.SerializibleObject, v
 
 // validateConstAndEnum enforces the two value-listing keywords, comparing the
 // scalar renderings of the value and of each allowed entry.
-func (check *validator) validateConstAndEnum(schema *serializables.SerializibleObject, value *serializables.SerializibleObject, path string) (string, string, bool) {
+func (check *validator) validateConstAndEnum(schema *serializabledeps.SerializableObject, value *serializabledeps.SerializableObject, path string) (string, string, bool) {
 	if item, _ := schema.GetObjectItem("const"); item != nil && !item.IsNull() {
 		if check.scalarText(item) != check.scalarText(value) {
 			return path, "must be " + check.scalarText(item), false
@@ -130,7 +130,7 @@ func (check *validator) validateConstAndEnum(schema *serializables.SerializibleO
 }
 
 // validateObject enforces required, properties and additionalProperties.
-func (check *validator) validateObject(schema *serializables.SerializibleObject, value *serializables.SerializibleObject, path string) (string, string, bool) {
+func (check *validator) validateObject(schema *serializabledeps.SerializableObject, value *serializabledeps.SerializableObject, path string) (string, string, bool) {
 	for _, name := range schemaStringArray(schema, "required") {
 		item, _ := value.GetObjectItem(name)
 		if item == nil || item.IsNull() {
@@ -182,7 +182,7 @@ func (check *validator) validateObject(schema *serializables.SerializibleObject,
 }
 
 // validateArray enforces minItems, maxItems, uniqueItems and the items schema.
-func (check *validator) validateArray(schema *serializables.SerializibleObject, value *serializables.SerializibleObject, path string) (string, string, bool) {
+func (check *validator) validateArray(schema *serializabledeps.SerializableObject, value *serializabledeps.SerializableObject, path string) (string, string, bool) {
 	size, err := value.GetArraySize()
 	if err != nil {
 		return path, "is not a readable array", false
@@ -231,7 +231,7 @@ func (check *validator) validateArray(schema *serializables.SerializibleObject, 
 
 // validateString enforces minLength, maxLength, pattern and format. Lengths
 // count runes, so a multi-byte character counts once.
-func (check *validator) validateString(schema *serializables.SerializibleObject, value *serializables.SerializibleObject, path string) (string, string, bool) {
+func (check *validator) validateString(schema *serializabledeps.SerializableObject, value *serializabledeps.SerializableObject, path string) (string, string, bool) {
 	text, err := value.GetString()
 	if err != nil {
 		return path, "is not a readable string", false
@@ -270,7 +270,7 @@ func (check *validator) validateString(schema *serializables.SerializibleObject,
 }
 
 // validateNumber enforces the four numeric bounds.
-func (check *validator) validateNumber(schema *serializables.SerializibleObject, value *serializables.SerializibleObject, path string) (string, string, bool) {
+func (check *validator) validateNumber(schema *serializabledeps.SerializableObject, value *serializabledeps.SerializableObject, path string) (string, string, bool) {
 	number, ok := numberValue(value)
 	if !ok {
 		return path, "is not a readable number", false
@@ -311,7 +311,7 @@ func formatPattern(format string) (string, bool) {
 // typeMatches reports whether a parsed value is of the declared json type. An
 // integer satisfies `number`, but a fractional value never satisfies
 // `integer`.
-func typeMatches(declared string, value *serializables.SerializibleObject) bool {
+func typeMatches(declared string, value *serializabledeps.SerializableObject) bool {
 	switch declared {
 	case "object":
 		return value.IsObject()
@@ -341,7 +341,7 @@ func childPath(path string, name string) string {
 }
 
 // scalarText renders one scalar as the text const and enum compare on.
-func (check *validator) scalarText(value *serializables.SerializibleObject) string {
+func (check *validator) scalarText(value *serializabledeps.SerializableObject) string {
 	if value == nil {
 		return ""
 	}
@@ -367,7 +367,7 @@ func (check *validator) scalarText(value *serializables.SerializibleObject) stri
 }
 
 // numberValue reads an int or a float node as one float64.
-func numberValue(value *serializables.SerializibleObject) (float64, bool) {
+func numberValue(value *serializabledeps.SerializableObject) (float64, bool) {
 	if value.IsInt() {
 		number, err := value.GetInt()
 		if err != nil {
@@ -394,7 +394,7 @@ func numberText(value float64) string {
 	return strconv.FormatFloat(value, 'g', -1, 64)
 }
 
-func schemaString(schema *serializables.SerializibleObject, key string) string {
+func schemaString(schema *serializabledeps.SerializableObject, key string) string {
 	item, _ := schema.GetObjectItem(key)
 	if item == nil || !item.IsString() {
 		return ""
@@ -406,7 +406,7 @@ func schemaString(schema *serializables.SerializibleObject, key string) string {
 	return value
 }
 
-func schemaBool(schema *serializables.SerializibleObject, key string) bool {
+func schemaBool(schema *serializabledeps.SerializableObject, key string) bool {
 	item, _ := schema.GetObjectItem(key)
 	if item == nil || !item.IsBool() {
 		return false
@@ -418,7 +418,7 @@ func schemaBool(schema *serializables.SerializibleObject, key string) bool {
 	return value
 }
 
-func schemaNumber(schema *serializables.SerializibleObject, key string) (float64, bool) {
+func schemaNumber(schema *serializabledeps.SerializableObject, key string) (float64, bool) {
 	item, _ := schema.GetObjectItem(key)
 	if item == nil {
 		return 0, false
@@ -426,7 +426,7 @@ func schemaNumber(schema *serializables.SerializibleObject, key string) (float64
 	return numberValue(item)
 }
 
-func schemaStringArray(schema *serializables.SerializibleObject, key string) []string {
+func schemaStringArray(schema *serializabledeps.SerializableObject, key string) []string {
 	item, _ := schema.GetObjectItem(key)
 	if item == nil || !item.IsArray() {
 		return nil

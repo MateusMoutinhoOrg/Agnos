@@ -2,13 +2,13 @@ package add_route
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// InternalPureHandlerFile is the one hand-written file of a route package.
-const InternalPureHandlerFile = "InternalPureHandler.go"
+// HandlerFile is the one hand-written file of a route package.
+const HandlerFile = "handler.go"
 
 // MiddlewareHandlerTemplate is the stub `add-route --middleware` writes: a
 // handler that declines, so the chain goes on.
@@ -16,7 +16,7 @@ const MiddlewareHandlerTemplate = "templates/route_middleware_handler.go"
 
 // RouteHandlerTemplate is the stub every other route starts with: a handler
 // that answers.
-const RouteHandlerTemplate = "templates/route_internal_pure_handler.go"
+const RouteHandlerTemplate = "templates/route_handler.go"
 
 // defaultCategory is the heading a route declared without --category is
 // listed under in docs/Routes, and defaultMiddlewareCategory the one of a
@@ -30,7 +30,7 @@ const defaultMiddlewareCategory = "Middleware"
 const middlewareResponseType = "text/plain"
 
 // AddRouteInternal writes the two hand-written files of a new route package,
-// in the folder props.Dir names under sandbox/internal/routeslist. It refuses
+// in the folder props.Dir names under sandbox/internal/routes. It refuses
 // a name another route already carries, in whatever folder.
 //
 // The paths come from one of two places. --pattern compiles a url shape into
@@ -43,18 +43,18 @@ const middlewareResponseType = "text/plain"
 // The rung is --priority when it is given, one below --before or one above
 // --after the route it names, and DefaultRoutePriority — or
 // DefaultMiddlewarePriority — otherwise.
-func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRouteProps) error {
+func AddRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.AddRouteProps) error {
 	name := props.Name
 	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
 	}
 	utils.NoteNormalizedName(sandbox, "route", name)
 
-	identifier := utils.RouteIdentifier(sandbox, name)
+	identifier := utils.RouteName(sandbox, name)
 	pkg := utils.RoutePackage(sandbox, name)
 
 	if pkg == "health" {
-		return sandbox.Deps.Std.Errorf("the health route is generated and cannot be declared")
+		return sandbox.Deps.StdDeps.Errorf("the health route is generated and cannot be declared")
 	}
 
 	group, err := utils.UnitGroup(sandbox, props.Dir)
@@ -62,16 +62,16 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		return err
 	}
 	if existing, found := utils.FindUnitDir(sandbox, io, utils.RoutesDir, utils.RouteConfFile, pkg); found {
-		return sandbox.Deps.Std.Errorf("route %q already exists in %s: a route name is unique across every folder", identifier, existing)
+		return sandbox.Deps.StdDeps.Errorf("route %q already exists in %s: a route name is unique across every folder", identifier, existing)
 	}
 	dir := utils.UnitDirIn(utils.RoutesDir, group, pkg)
 
 	conf := routeconf.NewEmpty(sandbox)
 
-	pattern := sandbox.Deps.Stringsdeps.TrimSpace(props.Pattern)
+	pattern := sandbox.Deps.StringsDeps.TrimSpace(props.Pattern)
 	if pattern != "" {
-		if sandbox.Deps.Stringsdeps.TrimSpace(props.Trigger+props.TriggerType) != "" || props.TriggerNegate || props.TriggerIgnoreCase {
-			return sandbox.Deps.Std.Errorf("--pattern declares the paths itself: it excludes --trigger, --trigger-type, --trigger-negate and --trigger-ignore-case")
+		if sandbox.Deps.StringsDeps.TrimSpace(props.Trigger+props.TriggerType) != "" || props.TriggerNegate || props.TriggerIgnoreCase {
+			return sandbox.Deps.StdDeps.Errorf("--pattern declares the paths itself: it excludes --trigger, --trigger-type, --trigger-negate and --trigger-ignore-case")
 		}
 		compiled, err := utils.CompileRoutePattern(sandbox, pattern)
 		if err != nil {
@@ -82,18 +82,18 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	} else {
 		trigger := props.Trigger
 		trigger_type := props.TriggerType
-		if sandbox.Deps.Stringsdeps.TrimSpace(trigger) == "" {
+		if sandbox.Deps.StringsDeps.TrimSpace(trigger) == "" {
 			trigger = "/" + identifier
 			if props.Middleware {
 				trigger = "/"
 			}
 		}
-		if sandbox.Deps.Stringsdeps.TrimSpace(trigger_type) == "" && props.Middleware {
+		if sandbox.Deps.StringsDeps.TrimSpace(trigger_type) == "" && props.Middleware {
 			trigger_type = "prefix"
 		}
 
-		path, err := utils.NewRoutePath(sandbox, api.RoutePathProps{
-			Id:                "Route",
+		path, err := utils.NewRoutePath(sandbox, api.AddPathProps{
+			Name:              utils.RoutePathIdOf(sandbox, trigger),
 			TriggerType:       trigger_type,
 			Trigger:           trigger,
 			TriggerNegate:     props.TriggerNegate,
@@ -119,7 +119,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		return err
 	}
 
-	response_type := sandbox.Deps.Stringsdeps.TrimSpace(props.ResponseType)
+	response_type := sandbox.Deps.StringsDeps.TrimSpace(props.ResponseType)
 	if response_type == "" {
 		response_type = routeconf.DefaultResponseType
 		if props.Middleware {
@@ -130,7 +130,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		return err
 	}
 
-	category := sandbox.Deps.Stringsdeps.TrimSpace(props.Category)
+	category := sandbox.Deps.StringsDeps.TrimSpace(props.Category)
 	if category == "" {
 		category = defaultCategory
 		if props.Middleware {
@@ -138,7 +138,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		}
 	}
 
-	sandbox.Deps.Std.Log("add-route creating %s \n", dir)
+	sandbox.Deps.StdDeps.Logf("add-route creating %s \n", dir)
 
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
@@ -149,13 +149,13 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	conf.Priority = priority
 	conf.ResponseType = response_type
 	conf.Category = category
-	conf.Help = sandbox.Deps.Stringsdeps.TrimSpace(props.Help)
+	conf.Summary = sandbox.Deps.StringsDeps.TrimSpace(props.Summary)
 
 	if !props.Middleware {
 		warnShadowedRoute(sandbox, io, identifier, conf)
 	}
 
-	if err := io.WriteFile(dir+"/"+utils.RouteConfFile, []byte(conf.Render())); err != nil {
+	if err := io.CreateFile(dir+"/"+utils.RouteConfFile, []byte(conf.Render())); err != nil {
 		return err
 	}
 
@@ -163,7 +163,7 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 		"Identifier": identifier,
 		"Package":    pkg,
 		"Module":     module_conf.Module,
-		"Methods":    sandbox.Deps.Stringsdeps.Join(methods, ", "),
+		"Methods":    sandbox.Deps.StringsDeps.Join(methods, ", "),
 		"Trigger":    conf.Pattern(),
 	}
 
@@ -171,23 +171,23 @@ func AddRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	if props.Middleware {
 		template = MiddlewareHandlerTemplate
 	}
-	handler, err := sandbox.Deps.Embeddeps.RenderTemplate(template, vars)
+	handler, err := sandbox.Deps.EmbedDeps.RenderTemplate(template, vars)
 	if err != nil {
 		return err
 	}
-	return io.WriteFile(dir+"/"+InternalPureHandlerFile, handler)
+	return io.CreateFile(dir+"/"+HandlerFile, handler)
 }
 
 // addRoutePriority is the rung a new route lands on: --priority when it is
 // given, one rung from --before or --after, the default of its kind
 // otherwise. It is never negative.
-func addRoutePriority(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRouteProps) (int, error) {
+func addRoutePriority(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.AddRouteProps) (int, error) {
 	relative, has_relative, err := utils.RouteRelativePriority(sandbox, io, props.Before, props.After)
 	if err != nil {
 		return 0, err
 	}
 	if has_relative && props.HasPriority {
-		return 0, sandbox.Deps.Std.Errorf("--priority excludes --before and --after: name the rung, or the route it sits next to")
+		return 0, sandbox.Deps.StdDeps.Errorf("--priority excludes --before and --after: name the rung, or the route it sits next to")
 	}
 
 	priority := api.DefaultRoutePriority
@@ -202,7 +202,7 @@ func addRoutePriority(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 	}
 
 	if priority < 0 {
-		return 0, sandbox.Deps.Std.Errorf("--priority %d is negative: the chain runs from zero upwards", priority)
+		return 0, sandbox.Deps.StdDeps.Errorf("--priority %d is negative: the chain runs from zero upwards", priority)
 	}
 	return priority, nil
 }
@@ -212,7 +212,7 @@ func addRoutePriority(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddRo
 // method. Both run on every such request, lowest priority first, so whichever
 // answers first shadows the other: legitimate for a middleware, a mistake
 // almost always for two routes, and never something to find out by accident.
-func warnShadowedRoute(sandbox *api.Sandbox, io *smartio.SmartIO, identifier string, conf *routeconf.RouteConf) {
+func warnShadowedRoute(sandbox *api.Sandbox, io *stagedfs.StagedFS, identifier string, conf *routeconf.RouteConf) {
 	signature := routeMatchSignature(sandbox, conf)
 	for _, unit := range utils.RouteDirs(sandbox, io) {
 		other_name := unit.Name
@@ -221,17 +221,17 @@ func warnShadowedRoute(sandbox *api.Sandbox, io *smartio.SmartIO, identifier str
 			continue
 		}
 		if routeMatchSignature(sandbox, other) == signature {
-			sandbox.Deps.Std.Error("warning: route %s matches exactly the requests %s does (%s): the one on the lower priority answers first and shadows the other\n",
-				identifier, utils.RouteIdentifier(sandbox, other_name), conf.Pattern())
+			sandbox.Deps.StdDeps.Eprintf("warning: route %s matches exactly the requests %s does (%s): the one on the lower priority answers first and shadows the other\n",
+				identifier, utils.RouteName(sandbox, other_name), conf.Pattern())
 		}
 	}
 }
 
 // routeMatchSignature is what a route matches on, spelled as one string.
 func routeMatchSignature(sandbox *api.Sandbox, conf *routeconf.RouteConf) string {
-	signature := sandbox.Deps.Std.Sprintf("segments=%v:%d", conf.HasSegments, conf.Segments)
+	signature := sandbox.Deps.StdDeps.Sprintf("segments=%v:%d", conf.HasSegments, conf.Segments)
 	for _, path := range conf.Paths {
-		signature += sandbox.Deps.Std.Sprintf("|%d:%d:%s:%+v", path.Start, path.End, path.Type, path.Trigger)
+		signature += sandbox.Deps.StdDeps.Sprintf("|%d:%d:%s:%+v", path.Start, path.End, path.Type, path.Trigger)
 	}
 	return signature
 }

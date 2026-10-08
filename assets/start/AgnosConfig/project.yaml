@@ -1,2 +1,2 @@
-name: "{{.Name}}"
+project-name: "{{.ProjectName}}"
 version: {{if .Version}}"{{.Version}}"{{else}}null{{end}}

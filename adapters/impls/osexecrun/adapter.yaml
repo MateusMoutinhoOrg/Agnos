@@ -1,5 +1,5 @@
 dep: rundeps
 help: Process runner over os/exec
 module: ""
-name: rundeps
+name: osexecrun
 origin: catalog

@@ -9,7 +9,7 @@ func BindMethods(sandbox *api.Sandbox, structure_conf *StructureConf) {
 	structure_conf.GetItem = func(path string) (*Item, error) {
 		item := findItem(structure_conf.Items, "", path)
 		if item == nil {
-			return nil, sandbox.Deps.Std.Errorf("item not found")
+			return nil, sandbox.Deps.StdDeps.Errorf("item not found")
 		}
 		return item, nil
 	}

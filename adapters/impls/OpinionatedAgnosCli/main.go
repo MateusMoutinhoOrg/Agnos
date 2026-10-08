@@ -1,29 +1,29 @@
-package opinatedagnoscli
+package opinionatedagnoscli
 
 import (
 	"fmt"
 	"strings"
 
-	opinatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	opinionatedagnoscli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 )
 
 // line is one command line being answered: the props it runs with and what
 // every command of its chain shares — the CommandProps, the Consumed slice and
 // the one response, with the reader of the status it was answered with.
 type line struct {
-	props    opinatedagnoscli.MainProps
+	props    opinionatedagnoscli.MainProps
 	args     []string
 	consumed []bool
 	shared   any
-	response *opinatedagnoscli.CommandResponse
+	response *opinionatedagnoscli.CommandResponse
 	status   func() (int, bool)
 }
 
 // cliMain runs every command of props.Cli.Commands the command line is for,
 // in the order the collector put them — lowest `priority` first — and returns
 // the exit status the line was answered with. Whether a command is for the
-// line is its IsActionable's to say; binding and running it is its
-// CommandHandler's.
+// line is its Matches's to say; binding and running it is its
+// Run's.
 //
 // More than one command may be for one line, which is what a chain is: each one
 // runs in turn until one of them **answers** — sets a status, or prints to
@@ -38,7 +38,7 @@ type line struct {
 // answering it — nothing matched, a value that will not bind, a token nobody
 // read, a panic — is raised through props.Cli.Fail and answered by one of the
 // project's own Handle* files.
-func cliMain(props opinatedagnoscli.MainProps) int {
+func cliMain(props opinionatedagnoscli.MainProps) int {
 	response, status := tracked(props)
 	run := &line{
 		props:    props,
@@ -55,14 +55,14 @@ func cliMain(props opinatedagnoscli.MainProps) int {
 
 	code, answered := status()
 	if !answered {
-		return opinatedagnoscli.ExitFailure
+		return opinionatedagnoscli.ExitFailure
 	}
 	return code
 }
 
 // bind copies one declaration onto this line: the command line, the shared
 // Consumed, CommandProps and response.
-func (run *line) bind(declared *opinatedagnoscli.Command) *opinatedagnoscli.Command {
+func (run *line) bind(declared *opinionatedagnoscli.Command) *opinionatedagnoscli.Command {
 	bound := bindCommand(declared)
 	bound.Argv = run.args
 	bound.Consumed = run.consumed
@@ -79,18 +79,18 @@ func (run *line) answer() {
 	for _, declared := range run.props.Cli.Commands {
 		bound := run.bind(declared)
 
-		if !run.isActionable(bound) {
+		if !run.matches(bound) {
 			continue
 		}
 
-		err := run.commandHandler(bound)
+		err := run.runCommand(bound)
 
 		// An error ends the chain whether or not the handler answered first:
 		// a command that printed part of its output and then failed has
 		// failed, and the status HandleFailure sets replaces the ExitOk its
 		// print implied.
 		if err != nil {
-			run.raise(bound, opinatedagnoscli.HandlerFailure, opinatedagnoscli.ExitFailure, "", "", err.Error())
+			run.raise(bound, opinionatedagnoscli.FailureHandler, opinionatedagnoscli.ExitFailure, "", "", err.Error())
 			return
 		}
 		if _, answered := run.status(); answered {
@@ -101,7 +101,7 @@ func (run *line) answer() {
 		// carried the line out, so its silence is ExitOk, never a decline
 		// that would read as "unknown command".
 		if bound.Strict {
-			run.response.SetStatus(opinatedagnoscli.ExitOk)
+			run.response.SetStatus(opinionatedagnoscli.ExitOk)
 			return
 		}
 	}
@@ -111,36 +111,36 @@ func (run *line) answer() {
 	// wrong, never "unknown command".
 	if near := run.nearCommand(); near != nil {
 		bound := run.bind(near)
-		run.raise(bound, opinatedagnoscli.BadUsageFailure, opinatedagnoscli.ExitUsage, "", usageProblem(bound), "")
+		run.raise(bound, opinionatedagnoscli.FailureBadUsage, opinionatedagnoscli.ExitUsage, "", usageProblem(bound), "")
 		return
 	}
 
-	run.failLine(opinatedagnoscli.NotFoundFailure, opinatedagnoscli.ExitUsage, "")
+	run.failLine(opinionatedagnoscli.FailureNotFound, opinionatedagnoscli.ExitUsage, "")
 }
 
-// isActionable is the bound command's own IsActionable when it declares one,
+// matches is the bound command's own Matches when it declares one,
 // the lib's matcher otherwise.
-func (run *line) isActionable(bound *opinatedagnoscli.Command) bool {
-	if bound.IsActionable != nil {
-		return bound.IsActionable(bound)
+func (run *line) matches(bound *opinionatedagnoscli.Command) bool {
+	if bound.Matches != nil {
+		return bound.Matches(bound)
 	}
-	return isActionable(run.props.Argvdeps, bound)
+	return matches(run.props.ArgvDeps, bound)
 }
 
-// commandHandler is the bound command's own CommandHandler when it declares
+// runCommand is the bound command's own Run when it declares
 // one, the lib's binder otherwise.
-func (run *line) commandHandler(bound *opinatedagnoscli.Command) error {
-	if bound.CommandHandler != nil {
-		return bound.CommandHandler(bound)
+func (run *line) runCommand(bound *opinionatedagnoscli.Command) error {
+	if bound.Run != nil {
+		return bound.Run(bound)
 	}
 	return run.handle(bound)
 }
 
 // nearCommand is the strict command whose verb — the longest of its
 // Identifiers — the command line's segments start with, nil when none does.
-func (run *line) nearCommand() *opinatedagnoscli.Command {
+func (run *line) nearCommand() *opinionatedagnoscli.Command {
 	segments, _ := splitArgv(run.args)
-	var near *opinatedagnoscli.Command
+	var near *opinionatedagnoscli.Command
 	longest := 0
 	for _, declared := range run.props.Cli.Commands {
 		if !declared.Strict {
@@ -161,7 +161,7 @@ func (run *line) nearCommand() *opinatedagnoscli.Command {
 
 // usageProblem says what keeps a command line from fitting the command it
 // names: an arg that will not convert, one missing, or a segment too many.
-func usageProblem(bound *opinatedagnoscli.Command) string {
+func usageProblem(bound *opinionatedagnoscli.Command) string {
 	segments, _ := splitArgv(bound.Argv)
 	usage := fmt.Sprintf(" (usage: %s)", bound.Pattern)
 
@@ -204,13 +204,13 @@ func usageProblem(bound *opinatedagnoscli.Command) string {
 }
 
 // argTypeName is how an arg type reads in a message.
-func argTypeName(kind opinatedagnoscli.ArgType) string {
+func argTypeName(kind opinionatedagnoscli.ArgType) string {
 	switch kind {
-	case opinatedagnoscli.IntegerArg:
+	case opinionatedagnoscli.ArgInteger:
 		return "integer"
-	case opinatedagnoscli.NumberArg:
+	case opinionatedagnoscli.ArgNumber:
 		return "number"
-	case opinatedagnoscli.UuidArg:
+	case opinionatedagnoscli.ArgUuid:
 		return "uuid"
 	}
 	return "string"
@@ -224,8 +224,8 @@ func argTypeName(kind opinatedagnoscli.ArgType) string {
 // It carries no message on purpose: the wording is the project's, filled in by
 // the Handle* file through FailureOf, which is what makes editing that file
 // change what the cli says.
-func (run *line) failLine(kind opinatedagnoscli.CommandFailureKind, code int, cause string) {
-	command := newCommand(run.props.Argvdeps)
+func (run *line) failLine(kind opinionatedagnoscli.CommandFailureKind, code int, cause string) {
+	command := newCommand(run.props.ArgvDeps)
 	command.Argv = run.args
 	command.Consumed = run.consumed
 	command.Props = run.shared
@@ -245,15 +245,15 @@ func (run *line) recoverCommand() {
 	}
 
 	cause := fmt.Sprintf("command panicked: %v", failure)
-	run.failLine(opinatedagnoscli.HandlerFailure, opinatedagnoscli.ExitFailure, cause)
+	run.failLine(opinionatedagnoscli.FailureHandler, opinionatedagnoscli.ExitFailure, cause)
 }
 
 // raise records what went wrong on a bound command and hands it to the
 // project's own handler for that kind — HandleNotFound, HandleBadUsage,
 // HandleUnknownFlag, HandleUnexpectedArg, HandleFailure — through
 // props.Cli.Fail.
-func (run *line) raise(command *opinatedagnoscli.Command, kind opinatedagnoscli.CommandFailureKind, status int, field string, message string, cause string) error {
-	return run.raiseFailure(command, &opinatedagnoscli.CommandFailure{
+func (run *line) raise(command *opinionatedagnoscli.Command, kind opinionatedagnoscli.CommandFailureKind, status int, field string, message string, cause string) error {
+	return run.raiseFailure(command, &opinionatedagnoscli.CommandFailure{
 		Kind:    kind,
 		Status:  status,
 		Field:   field,
@@ -264,7 +264,7 @@ func (run *line) raise(command *opinatedagnoscli.Command, kind opinatedagnoscli.
 
 // raiseFailure raises one failure already built — what a handler returned
 // through Fail — on the bound command it was returned from.
-func (run *line) raiseFailure(command *opinatedagnoscli.Command, failure *opinatedagnoscli.CommandFailure) error {
+func (run *line) raiseFailure(command *opinionatedagnoscli.Command, failure *opinionatedagnoscli.CommandFailure) error {
 	command.Failure = failure
 
 	// A cli built without a Fail — a command bound by hand rather than by
@@ -286,19 +286,19 @@ func (run *line) raiseFailure(command *opinatedagnoscli.Command, failure *opinat
 // status, or printing to stdout — which answers ExitOk, the status a command
 // that printed its result ends with. Error and Log answer nothing, which is how
 // a middleware says something and hands the command line on. Every print goes
-// through props.Std at the moment it is made, so a middleware silencing
-// Std.Log silences Log here too.
+// through props.StdDeps at the moment it is made, so a middleware silencing
+// StdDeps.Logf silences Log here too.
 //
 // The first status set is the one the line exits with. A print only implies
 // ExitOk, so a status set after it — a failure the same command raises once it
 // has printed part of its output — still replaces it: a command that printed
 // and then failed never exits 0.
-func tracked(props opinatedagnoscli.MainProps) (*opinatedagnoscli.CommandResponse, func() (int, bool)) {
+func tracked(props opinionatedagnoscli.MainProps) (*opinionatedagnoscli.CommandResponse, func() (int, bool)) {
 	status := 0
 	answered := false
 	explicit := false
 
-	response := &opinatedagnoscli.CommandResponse{}
+	response := &opinionatedagnoscli.CommandResponse{}
 	response.SetStatus = func(code int) {
 		if explicit {
 			return
@@ -307,15 +307,15 @@ func tracked(props opinatedagnoscli.MainProps) (*opinatedagnoscli.CommandRespons
 	}
 	response.Printf = func(format string, a ...any) (int, error) {
 		if !answered {
-			status, answered = opinatedagnoscli.ExitOk, true
+			status, answered = opinionatedagnoscli.ExitOk, true
 		}
-		return props.Std.Printf(format, a...)
+		return props.StdDeps.Printf(format, a...)
 	}
-	response.Error = func(format string, a ...any) (int, error) {
-		return props.Std.Error(format, a...)
+	response.Eprintf = func(format string, a ...any) (int, error) {
+		return props.StdDeps.Eprintf(format, a...)
 	}
-	response.Log = func(format string, a ...any) (int, error) {
-		return props.Std.Log(format, a...)
+	response.Logf = func(format string, a ...any) (int, error) {
+		return props.StdDeps.Logf(format, a...)
 	}
 
 	return response, func() (int, bool) {

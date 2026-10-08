@@ -1,20 +1,20 @@
-package exec_test
+package run_examples
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	execTestsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/exec_tests"
+	runExamplesAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/run_examples"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	exec_error := execTestsAction.ExecTest(sandbox, api.ExecTestProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	exec_error := runExamplesAction.RunExamples(sandbox, api.RunExamplesProps{
 		Path:   props.Path,
-		Only:   entries.Only,
-		Update: entries.Update,
+		Only:   input.Only,
+		Update: input.Update,
 	})
 
 	if exec_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", exec_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", exec_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

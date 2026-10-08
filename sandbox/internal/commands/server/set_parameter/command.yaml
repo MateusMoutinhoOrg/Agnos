@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,10 +10,11 @@ args:
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: 'Rewrites one entry of the route''s parameters in place and runs build. It is add-parameter applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor.'
 examples:
     - set-parameter page --route list-users --type number --default 1
-    - set-parameter token --route admin --font header --clear trigger
+    - set-parameter token --route admin --source header --clear trigger
 flags:
     - description: the route (identifier or package name) that declares the parameter
       id: Route
@@ -23,12 +24,12 @@ flags:
     - description: 'the new value type: string, integer, number, boolean, datetime, string-array or integer-array'
       id: Type
     - description: 'where the value is read from, in order: query, header or cookie (repeatable; replaces the whole list)'
-      id: Font
+      id: Source
       type: string-array
-    - description: answer 400 when no font brings the value
+    - description: answer 400 when no source brings the value
       id: Required
       type: boolean
-    - description: the new literal bound when no font brings the value
+    - description: the new literal bound when no source brings the value
       id: Default
     - description: the new value the parameter has to match for the route to run
       id: Trigger
@@ -48,6 +49,5 @@ flags:
     - description: 'a key to take off: description, examples, default, required, trigger, trigger-negate or trigger-ignore-case (repeatable)'
       id: Clear
       type: string-array
-help: Rewrite one entry of a route's parameters
-long-description: 'Rewrites one entry of the route''s parameters in place and runs build. It is add-parameter applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor.'
 priority: 100
+summary: Rewrite one entry of a route's parameters

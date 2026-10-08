@@ -1,4 +1,4 @@
-package interviewer
+package ttyinterview
 
 import (
 	"fmt"
@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
 )
 
 // runMenu asks one alternative question and returns the indexes chosen. It is
@@ -21,7 +21,7 @@ import (
 // A terminal that cannot be put in raw mode answers the same question as a
 // numbered list read line by line, so every question has an answer whatever it
 // is being run under.
-func runMenu(question string, options []interviewer.AlternativeOption, multiple bool) ([]int, error) {
+func runMenu(question string, options []interviewdeps.Option, multiple bool) ([]int, error) {
 	if len(options) == 0 {
 		return []int{}, nil
 	}
@@ -89,7 +89,7 @@ func printQuestion(question string, multiple bool) {
 // is how many rows were on screen, and the count it returns is how many are
 // now. Raw mode does no carriage return of its own, so every line break here
 // is a \r\n.
-func paintMenu(options []interviewer.AlternativeOption, cursor int, ticked []bool, multiple bool, painted int) int {
+func paintMenu(options []interviewdeps.Option, cursor int, ticked []bool, multiple bool, painted int) int {
 	if painted > 0 {
 		fmt.Fprint(os.Stdout, "\r"+strings.Repeat(lineUp, painted)+clearBelow)
 	}
@@ -120,7 +120,7 @@ func paintMenu(options []interviewer.AlternativeOption, cursor int, ticked []boo
 // printed once, numbered, and the answer is read as a line. A multiple-choice
 // question takes the numbers separated by spaces or commas, and an empty line
 // chooses none.
-func numberedMenu(question string, options []interviewer.AlternativeOption, multiple bool) ([]int, error) {
+func numberedMenu(question string, options []interviewdeps.Option, multiple bool) ([]int, error) {
 	for {
 		fmt.Fprintf(os.Stdout, "\n  %s%s%s\n", bold+cyan, question, reset)
 		for index, option := range options {

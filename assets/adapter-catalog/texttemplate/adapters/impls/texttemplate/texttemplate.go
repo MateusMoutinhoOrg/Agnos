@@ -1,4 +1,4 @@
-package templatedeps
+package texttemplate
 
 import (
 	"bytes"
@@ -9,7 +9,7 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// render fills templatedeps.Sandbox.Render, parsing the source as a Go
+// render fills templatedeps.Contract.Render, parsing the source as a Go
 // text/template with the given native functions registered and executing it
 // over the given vars.
 func render(props templatedeps.RenderProps) (string, error) {
@@ -26,9 +26,9 @@ func render(props templatedeps.RenderProps) (string, error) {
 	return buffer.String(), nil
 }
 
-// Bind fills deps.Deps.Templatedeps with the standard library's text/template.
+// Bind fills deps.Deps.TemplateDeps with the standard library's text/template.
 func Bind(deps *deps.Deps) {
-	deps.Templatedeps = templatedeps.Sandbox{
+	deps.TemplateDeps = templatedeps.Contract{
 		Render: func(props templatedeps.RenderProps) (string, error) {
 			return render(props)
 		},

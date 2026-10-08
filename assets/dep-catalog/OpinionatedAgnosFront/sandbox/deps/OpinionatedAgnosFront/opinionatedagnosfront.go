@@ -1,24 +1,24 @@
-package opinatedagnosfront
+package opinionatedagnosfront
 
 import (
 	"{{.Module}}/sandbox/deps/embeddeps"
 )
 
-// This package is the contract of an *opinated* lib: unlike every other dep,
+// This package is the contract of an *opinionated* lib: unlike every other dep,
 // which restates a library's raw capability and nothing more, it carries the
 // agnos front mechanic itself — how a request path maps onto one file of the
-// embedded assets/frontend/ tree, how that path is kept inside the tree, and
+// embedded assets/front/ tree, how that path is kept inside the tree, and
 // which media type the file is served as. It holds no opinion about what the
 // tree is — hand-written html, or the dist/ of any bundler.
 //
 // What stays in the project is the route that serves the tree
-// (routeslist/frontend, written once by front-init) and the tree itself.
+// (routes/front, written once by front-init) and the tree itself.
 
 const (
 	// Root is the directory of the embedded asset tree every file is read
 	// from, as embeddeps spells a path: slash-separated and relative to the
-	// root of the assets package, so "assets/frontend" on disk.
-	Root = "frontend"
+	// root of the assets package, so "assets/front" on disk.
+	Root = "front"
 	// Index is the file a directory is answered with, "/" included.
 	Index = "index.html"
 	// NotFound is the file a path naming no file is answered with, under a
@@ -30,16 +30,16 @@ const (
 	RevalidateCache = "no-cache"
 )
 
-// Sandbox is the front lib injected whole as the Deps.OpinatedAgnosFront
+// Contract is the front lib injected whole as the Deps.OpinionatedAgnosFront
 // field.
-type Sandbox struct {
+type Contract struct {
 	// Resolve reads, through embedded, the file one request path names under
 	// Root, trying in order the path itself, the path plus ".html", and the
 	// path as a directory holding Index — so /about answers about.html or
 	// about/index.html, and / answers index.html. It returns the path
 	// relative to Root it read, for ContentTypeOf, and false when the path is
 	// unsafe or names nothing, which a caller reads as "not mine".
-	Resolve func(embedded embeddeps.Sandbox, requested string) (string, []byte, bool)
+	Resolve func(embedded embeddeps.Contract, requested string) (string, []byte, bool)
 
 	// SafePath turns a request path into the path relative to Root it names,
 	// and reports false on anything that could climb out of it: "." and

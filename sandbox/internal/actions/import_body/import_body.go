@@ -3,15 +3,15 @@ package import_body
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // ImportBody declares the body json-schema of
-// sandbox/internal/routeslist/<route>/route.yaml from an example payload, then
+// sandbox/internal/routes/<route>/route.yaml from an example payload, then
 // runs build as a follow-up step so the Body struct, BodySchema and ReadBody
 // pick the properties up.
-func ImportBody(sandbox *api.Sandbox, props api.RouteBodyImportProps) error {
-	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+func ImportBody(sandbox *api.Sandbox, props api.ImportBodyProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := ImportBodyInternal(sandbox, io, props); err != nil {
 		return err
 	}

@@ -1,7 +1,7 @@
 package reflectdeps
 
 // This package is the sandbox's *copy* of the api a reflection library exposes
-// — the same mechanic as sortdeps, stringsdeps and std, for the same reason:
+// — the same mechanic as sortdeps, stringsdeps and stddeps, for the same reason:
 // the sandbox may import nothing but the sandbox, so `reflect` may not appear
 // inside it. The contract is restated here, and the adapter — which lives
 // outside the sandbox — is what fills it.
@@ -10,9 +10,9 @@ package reflectdeps
 // fills or calls a value whose type is known only at run time. What a caller
 // does with a struct tag, or which function it calls, is the caller's business.
 
-// Sandbox is the reflection library injected whole as the Deps.Reflectdeps
+// Contract is the reflection library injected whole as the Deps.ReflectDeps
 // field.
-type Sandbox struct {
+type Contract struct {
 	// NumIn returns how many parameters the function fn takes, -1 when fn
 	// is not a function.
 	NumIn func(fn any) int

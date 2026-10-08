@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -12,7 +12,7 @@ import (
 // The front-init example: add the html front layer to a project that has none.
 //
 // It calls the same action `agnos front-init` calls, and writes only inside
-// TestDir.
+// test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -20,26 +20,26 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.FrontInit("TestDir"); err != nil {
+	if err := lib.Actions.FrontInit(api.FrontInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
 	// What result.yaml records: the same set the cli side copies — the file
-	// layer's contract, the route serving assets/frontend, and that tree's
+	// layer's contract, the route serving assets/front, and that tree's
 	// index.html.
 	for _, dir := range []string{
-		"sandbox/deps/OpinatedAgnosFront",
-		"sandbox/internal/routeslist/frontend",
-		"assets/frontend",
+		"sandbox/deps/OpinionatedAgnosFront",
+		"sandbox/internal/routes/front",
+		"assets/front",
 	} {
-		copyTree("TestDir/"+dir, "AssertDir/"+dir)
+		copyTree("test-dir/"+dir, "assert-dir/"+dir)
 	}
 }
 
@@ -81,15 +81,15 @@ func copyTree(source string, dest string) {
 	}
 }
 
-// copyExtensions puts the project's extensions.yaml into AssertDir at the
+// copyExtensions puts the project's extensions.yaml into assert-dir at the
 // place it holds in the tree.
 func copyExtensions() error {
-	content, err := os.ReadFile("TestDir/AgnosConfig/extensions.yaml")
+	content, err := os.ReadFile("test-dir/AgnosConfig/extensions.yaml")
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll("AssertDir/AgnosConfig", 0o755); err != nil {
+	if err := os.MkdirAll("assert-dir/AgnosConfig", 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile("AssertDir/AgnosConfig/extensions.yaml", content, 0o644)
+	return os.WriteFile("assert-dir/AgnosConfig/extensions.yaml", content, 0o644)
 }

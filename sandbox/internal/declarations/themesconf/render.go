@@ -5,10 +5,10 @@ import (
 )
 
 func Render(sandbox *api.Sandbox, themes_conf *ThemesConf) string {
-	new_themes_specs := sandbox.Deps.Serializables.CreateArray()
+	new_themes_specs := sandbox.Deps.SerializableDeps.CreateArray()
 
 	for _, theme := range themes_conf.Themes {
-		theme_obj := sandbox.Deps.Serializables.CreateObject()
+		theme_obj := sandbox.Deps.SerializableDeps.CreateObject()
 		theme_obj.AddItemToObject("name", theme.Name)
 		theme_obj.AddItemToObject("id", theme.Id)
 		theme_obj.AddItemToObject("description", theme.Description)
@@ -16,5 +16,5 @@ func Render(sandbox *api.Sandbox, themes_conf *ThemesConf) string {
 		new_themes_specs.AddItemToArray(theme_obj)
 	}
 
-	return sandbox.Deps.Serializables.SerializeToYaml(new_themes_specs)
+	return sandbox.Deps.SerializableDeps.SerializeToYaml(new_themes_specs)
 }

@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -17,7 +17,7 @@ const routePagesDir = utils.DocsDir + "/Routes"
 //
 // A page whose route is gone is removed here, so the directory holds the routes
 // that are declared now and no page nothing links to.
-func GenerateRoutePages(sandbox *api.Sandbox, io *smartio.SmartIO, groups []RouteDocGroup) error {
+func GenerateRoutePages(sandbox *api.Sandbox, io *stagedfs.StagedFS, groups []RouteDocGroup) error {
 	written := map[string]bool{}
 
 	for _, group := range groups {
@@ -50,7 +50,7 @@ func routePageFile(sandbox *api.Sandbox, name string) (string, error) {
 	file := name + docPageExt
 
 	if file == utils.DocFile || file == utils.DocIndexFile {
-		return "", sandbox.Deps.Std.Errorf(
+		return "", sandbox.Deps.StdDeps.Errorf(
 			"route %s cannot be documented: its page would be %s/%s, which is the doc's own %s",
 			name, routePagesDir, file, file)
 	}

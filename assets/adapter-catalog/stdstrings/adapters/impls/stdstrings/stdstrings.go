@@ -1,4 +1,4 @@
-package stringsdeps
+package stdstrings
 
 import (
 	"regexp"
@@ -10,11 +10,11 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// Bind fills deps.Deps.Stringsdeps with the standard library's strings and
+// Bind fills deps.Deps.StringsDeps with the standard library's strings and
 // strconv. Every field is a straight delegation: the contract restates the
 // standard library api so the sandbox can call it without importing it.
 func Bind(deps *deps.Deps) {
-	deps.Stringsdeps = stringsdeps.Sandbox{
+	deps.StringsDeps = stringsdeps.Contract{
 		TrimSpace: func(s string) string {
 			return strings.TrimSpace(s)
 		},
@@ -84,17 +84,17 @@ func Bind(deps *deps.Deps) {
 		Atoi: func(s string) (int, error) {
 			return strconv.Atoi(s)
 		},
-		ParseInt: func(s string, base int, bit_size int) (int64, error) {
-			return strconv.ParseInt(s, base, bit_size)
+		ParseInt: func(s string, base int, bitSize int) (int64, error) {
+			return strconv.ParseInt(s, base, bitSize)
 		},
-		ParseFloat: func(s string, bit_size int) (float64, error) {
-			return strconv.ParseFloat(s, bit_size)
+		ParseFloat: func(s string, bitSize int) (float64, error) {
+			return strconv.ParseFloat(s, bitSize)
 		},
 		FormatInt: func(value int64, base int) string {
 			return strconv.FormatInt(value, base)
 		},
-		FormatFloat: func(value float64, format byte, precision int, bit_size int) string {
-			return strconv.FormatFloat(value, format, precision, bit_size)
+		FormatFloat: func(value float64, format byte, precision int, bitSize int) string {
+			return strconv.FormatFloat(value, format, precision, bitSize)
 		},
 	}
 }

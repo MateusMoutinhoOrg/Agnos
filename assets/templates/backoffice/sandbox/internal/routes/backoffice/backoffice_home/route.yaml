@@ -1,5 +1,4 @@
 category: Backoffice
-help: Shows the backoffice home page to the signed-in user
 methods:
     - GET
 paths:
@@ -12,3 +11,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 2
+summary: Shows the backoffice home page to the signed-in user

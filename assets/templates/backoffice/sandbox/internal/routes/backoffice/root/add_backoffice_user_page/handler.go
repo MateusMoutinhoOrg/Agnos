@@ -9,13 +9,13 @@ import (
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficerender"
 )
 
-// InternalPureHandler answers GET /admin/root/add-backoffice-user with the
+// Handle answers GET /admin/root/add-backoffice-user with the
 // empty form that POST /admin/root/add-backoffice-user reads, the viewer role
 // selected.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == nil {
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 	fields := backofficeusers.Fields{Role: int64(backofficeauth.RoleViewer)}
-	return backofficerender.AddBackofficeUserForm(sandbox, response, api.StatusOk, props.User, fields, "")
+	return backofficerender.RenderAddUserPage(sandbox, response, api.StatusOK, props.User, fields, "")
 }

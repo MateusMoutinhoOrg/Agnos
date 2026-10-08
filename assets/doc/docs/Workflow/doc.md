@@ -39,28 +39,28 @@ edit. Every key is in [Extensions](../Extensions/doc.md).
 ## Change the command surface
 
 ```bash
-{{.GeneratorName}} add-command <name> --help "one line" [--category "Core"] [--pattern 'route add {name}']
-{{.GeneratorName}} add-command <name> --middleware --help "..."      # runs in front of every command line
+{{.GeneratorName}} add-command <name> --summary "one line" [--category "Core"] [--pattern 'route add {name}']
+{{.GeneratorName}} add-command <name> --middleware --summary "..."      # runs in front of every command line
 {{.GeneratorName}} add-arg  <name> --command <cmd> [--type integer] [--required] [--start 1 --end -1]
 {{.GeneratorName}} add-flag <name> --command <cmd> [--key --out --key -o] [--type integer --min 1] [--enum a --enum b]
-{{.GeneratorName}} set-command <cmd> --long-description "..." --example "<cmd> --flag v" --identifier <alias>
+{{.GeneratorName}} set-command <cmd> --description "..." --example "<cmd> --flag v" --identifier <alias>
 {{.GeneratorName}} set-arg <name> --command <cmd> ... / set-flag <name> --command <cmd> ...
 {{.GeneratorName}} remove-arg <name> --command <cmd> / remove-flag <name> --command <cmd> / remove-command <cmd>
 {{.GeneratorName}} list-commands / show-command <cmd> / explain-command -- <argv…>
 ```
 
 `add-command` writes `sandbox/internal/commands/[<--dir>/]<name>/command.yaml` (the declaration) and a
-stub `InternalPureHandler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`Cli.Commands` — and `entries.go`, the `Entries` it is handed. Every key these editors write is
+stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
+`Cli.Commands` — and `input.go`, the `Input` it is handed. Every key these editors write is
 in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.
 
-Then write `InternalPureHandler.go` — the whole hand-written half of a command:
+Then write `handler.go` — the whole hand-written half of a command:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	result, err := something(sandbox, entries.Name)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	result, err := something(sandbox, input.Name)
 	if err != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	}
 	response.Printf("%s\n", result)
 	return nil
@@ -76,10 +76,10 @@ next build.
 ## Add the CLI layer
 
 ```bash
-{{.GeneratorName}} cli-init     # sandbox/internal/generated/cli, cmd/main, help, version and help-flag, std + argvdeps + stringsdeps + OpinatedAgnosCli
+{{.GeneratorName}} cli-init     # sandbox/internal/generated/cli, cmd/main, help, version and help-flag, stddeps + argvdeps + stringsdeps + OpinionatedAgnosCli
 ```
 
-From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."` declares a command and
+From there `{{.GeneratorName}} add-command <name> --summary "..." --category "..."` declares a command and
 `{{.GeneratorName}} add-flag` / `add-arg` its fields. `{{.GeneratorName}} cli-purge` removes the layer again.
 {{- end }}
 
@@ -87,18 +87,18 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 ## Change the route surface
 
 ```bash
-{{.GeneratorName}} add-route <name> --pattern '/users/{id:integer}' --method POST --help "one line" --category "Users"
+{{.GeneratorName}} add-route <name> --pattern '/users/{id:integer}' --method POST --summary "one line" --category "Users"
 {{.GeneratorName}} add-route <name> --trigger /admin --trigger-type prefix   # /admin and under, never /administrator
 {{.GeneratorName}} add-route <name> --middleware --trigger /admin --before <route>
 {{.GeneratorName}} set-route <route> --method PUT --response-type text/plain --example "curl localhost:8080/users"
-{{.GeneratorName}} add-path <id> --route <route> --start 1 --end 1 --type integer   # one slice of the path
-{{.GeneratorName}} add-path <id> --route <route> --start 0 --end 0 --trigger /v1
-{{.GeneratorName}} add-parameter <name> --route <route> --font header --required
+{{.GeneratorName}} add-path <name> --route <route> --start 1 --end 1 --type integer   # one slice of the path
+{{.GeneratorName}} add-path <name> --route <route> --start 0 --end 0 --trigger /v1
+{{.GeneratorName}} add-parameter <name> --route <route> --source header --required
 {{.GeneratorName}} add-parameter <name> --route <route> --type integer --default 1
 {{.GeneratorName}} set-body <route> --type json --required --max-bytes 2097152
 {{.GeneratorName}} add-body-field <dotted.name> --route <route> --format email --required
 {{.GeneratorName}} import-body <route> --file payload.json --required --infer-format
-{{.GeneratorName}} set-path <id> --route <route> --end -1                  # and set-parameter
+{{.GeneratorName}} set-path <name> --route <route> --end -1                  # and set-parameter
 {{.GeneratorName}} set-body-field <dotted.name> --route <route> --max 130 --clear format
 {{.GeneratorName}} show-route <route>                                      # the whole declaration as a tree
 {{.GeneratorName}} list-routes                                             # the chain, in run order
@@ -110,11 +110,11 @@ From there `{{.GeneratorName}} add-command <name> --help "..." --category "..."`
 {{.GeneratorName}} remove-route <route>
 ```
 
-`add-route` writes `sandbox/internal/routeslist/[<--dir>/]<name>/route.yaml` (the declaration, `priority`
+`add-route` writes `sandbox/internal/routes/[<--dir>/]<name>/route.yaml` (the declaration, `priority`
 and `response-type` always included — `100` for a route, `10` for a `--middleware`) and a stub
-`InternalPureHandler.go` (yours), then
+`handler.go` (yours), then
 generates `new.go` — the `api.Route` that lands in `Server.Routes`, a 1:1 image of the yaml —
-and `entries.go` — the `Entries` the handler is handed.
+and `input.go` — the `Input` the handler is handed.
 One editor per place the declaration holds something, so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
@@ -133,12 +133,12 @@ over. `show-route` prints the whole declaration as a tree, `list-routes` the cha
 `explain-route` which routes one request reaches and why the others are skipped — the three
 write nothing, and `explain-route` is the first step when a route does not run.
 
-Then write `InternalPureHandler.go` — the whole hand-written half of a route:
+Then write `handler.go` — the whole hand-written half of a route:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	response.SetStatus(api.StatusCreated)
-	response.Write(payload(sandbox, create(sandbox, props.User, entries.Tenant, entries.Body)))
+	response.Write(payload(sandbox, create(sandbox, props.User, input.Tenant, input.Body)))
 	return nil
 }
 ```
@@ -150,7 +150,7 @@ Setting a status or writing a byte is what answers the request. Several routes m
 request; they run in `priority` order and stop at the first one that answers, so a handler that
 does neither has declined and the next one runs — that is the whole of what a middleware is, and
 `props` — the request's `routeprops.RouteProps`, typed in `sandbox/internal/routeprops/project.go` — carries what it
-learned to the routes after it. A handler refuses a request by returning `sandbox.Deps.OpinatedAgnosServer.Fail`. What no route answers is answered
+learned to the routes after it. A handler refuses a request by returning `sandbox.Deps.OpinionatedAgnosServer.Fail`. What no route answers is answered
 by the eight `sandbox/internal/server/errors/handle_*.go`, which `build` writes once and no build
 rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 [Routes](../Routes/doc.md) documents the route on the next build, and
@@ -160,7 +160,7 @@ rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 
 ```bash
 {{.GeneratorName}} server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
-{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server  # listens on the first free port of 3000..4000
+{{ if .HasAssets }}<name>{{ else }}{{.ProjectName}}{{ end }} start-server  # listens on the first free port of 3000..4000
 ```
 
 From there `{{.GeneratorName}} add-route <name> --pattern '/<path>/{id}'` declares a
@@ -173,41 +173,41 @@ project with no CLI gets one first: a server needs a command that starts it.
 ## Change the page surface
 
 ```bash
-{{.GeneratorName}} add-page <name> --title "One Line"   # assets/frontend/<name>.html, answered on /<name>
+{{.GeneratorName}} add-page <name> --title "One Line"   # assets/front/<name>.html, answered on /<name>
 {{.GeneratorName}} remove-page <name>                   # deletes the html
 ```
 
-A page is a file of `assets/frontend/`, served as it is by the `frontend` route: write it by
+A page is a file of `assets/front/`, served as it is by the `front` route: write it by
 hand, scaffold it with `add-page`, or point a bundler's output there. Data comes from api
 routes the page's js calls. [FrontUsage](../FrontUsage/doc.md) is the whole recipe.
 {{- else }}
 ## Add the front layer
 
 ```bash
-{{.GeneratorName}} front-init      # the OpinatedAgnosFront lib, the frontend route, assets/frontend/{index,404}.html
-{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server  # serves every file of assets/frontend
+{{.GeneratorName}} front-init      # the OpinionatedAgnosFront lib, the front route, assets/front/{index,404}.html
+{{ if .HasAssets }}<name>{{ else }}{{.ProjectName}}{{ end }} start-server  # serves every file of assets/front
 ```
 
-From there any file under `assets/frontend/` is served; `{{.GeneratorName}} add-page <name>`
+From there any file under `assets/front/` is served; `{{.GeneratorName}} add-page <name>`
 scaffolds an html one and `remove-page` deletes it. A project with no server layer gets one
 first: the front is answered over http. `{{.GeneratorName}} front-purge` removes the layer
-again, leaving `assets/frontend/` alone.
+again, leaving `assets/front/` alone.
 {{- end }}
 {{ if .HasDatabase }}
 ## Change the database surface
 
 ```bash
-{{.GeneratorName}} add-database app-database --prefix app
+{{.GeneratorName}} add-database app-database --key-prefix app
 {{.GeneratorName}} add-table url --database app-database
 {{.GeneratorName}} add-table-field alias --database app-database --table url --type key --required
-{{.GeneratorName}} add-table-field visits --database app-database --table url --type database
+{{.GeneratorName}} add-table-field visits --database app-database --table url --type object
 {{.GeneratorName}} add-table-field agent --database app-database --table url --parent visits
 {{.GeneratorName}} show-database app-database                  # read the declaration back
 ```
 
 `set-table-field` and the `remove-` half of each pair are the inverses. Every command rewrites
-`sandbox/internal/databases/<db>/specs.yaml` and runs `build`, which regenerates `api.go`,
-`new.go` and `methods.go` from it — the records, the insert structs, the filtrage and the body
+`sandbox/internal/databases/<db>/database.yaml` and runs `build`, which regenerates `api.go`,
+`new.go` and `methods.go` from it — the records, the insert structs, the filter and the body
 of every method.
 
 Then call it from wherever needs it:
@@ -224,7 +224,7 @@ and rewritten by no build. [Databases](../Databases/doc.md) is the whole recipe.
 ## Add the database layer
 
 ```bash
-{{.GeneratorName}} database-init                     # the store contract, the OpinatedAgnosDatabase lib, the mechanic on
+{{.GeneratorName}} database-init                     # the store contract, the OpinionatedAgnosDatabase lib, the mechanic on
 {{.GeneratorName}} add-database app-database         # the first database
 {{.GeneratorName}} add-table url --database app-database
 ```
@@ -237,8 +237,8 @@ written for you. `{{.GeneratorName}} database-purge` removes the layer again.
 
 ```bash
 export {{.SecretEnv}}=$(openssl rand -hex 32)   # optional: unset, one is generated per run
-{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} add-backoffice-user --username admin --email admin@example.com --role root
-{{ if .HasAssets }}<name>{{ else }}{{.Name}}{{ end }} start-server --insecure-http   # then /admin/login
+{{ if .HasAssets }}<name>{{ else }}{{.ProjectName}}{{ end }} add-backoffice-user --username admin --email admin@example.com --role root
+{{ if .HasAssets }}<name>{{ else }}{{.ProjectName}}{{ end }} start-server --insecure-http   # then /admin/login
 ```
 
 Every page, route and package of it is the project's, written once: change it by hand.
@@ -247,7 +247,7 @@ Every page, route and package of it is the project's, written once: change it by
 ## Add the backoffice
 
 ```bash
-{{.GeneratorName}} backoffice-init   # /admin pages, /api/admin, users, API tokens, backofficedb
+{{.GeneratorName}} backoffice-init   # /admin pages, /api/admin, users, API tokens, backoffice-db
 ```
 
 It installs the server, front and database layers it is missing, and writes every file once.
@@ -297,12 +297,12 @@ arrives through `sandbox.Deps`. Install a ready-made one:
 
 [DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves:
 
-1. `sandbox/deps/<x>/<x>.go` — `type Sandbox struct { ... }` of function fields, no import at all.
-2. `adapters/libs/<x>/<x>.go` — `func Bind(deps *deps.Deps) { deps.<X> = <x>.Sandbox{...} }`, any
-   import allowed, beside an `adapter.yaml` saying `dep: <x>`.
+1. `sandbox/deps/<x>deps/<x>deps.go` — `type Contract struct { ... }` of function fields, no import at all.
+2. `adapters/impls/<impl><x>/<impl><x>.go` — `func Bind(deps *deps.Deps) { deps.<X>Deps = <x>deps.Contract{...} }`,
+   any import allowed, beside an `adapter.yaml` saying `dep: <x>deps`.
 
-Then bind it: add `<x>` to `adapters/availables/standard/available.yaml`, or let
-`{{.GeneratorName}} add-dep` do both for a dep of the catalogue. Reach it as `sandbox.Deps.<X>`
+Then bind it: add `<impl><x>` to `adapters/bindings/standard/binding.yaml`, or let
+`{{.GeneratorName}} add-dep` do both for a dep of the catalogue. Reach it as `sandbox.Deps.<X>Deps`
 from anywhere inside `sandbox/`.
 
 One contract may have several adapters — see [Adapters](../Adapters/doc.md).
@@ -328,17 +328,17 @@ file is what renders [Structure](../Structure/doc.md).
 ```bash
 {{ if .HasCli }}{{.GeneratorName}} add-cli-example <name>       # examples/cli/<name>/example.sh
 {{ end }}{{.GeneratorName}} add-lib-example <name>       # examples/lib/<name>/example.go
-{{.GeneratorName}} exec-test                    # run them all, check each against its golden
-{{.GeneratorName}} exec-test --only <name>      # one example, both sides
-{{.GeneratorName}} update-test <name>           # rewrite that one golden with what it produces now
-{{.GeneratorName}} exec-test --update           # rewrite every golden at once
+{{.GeneratorName}} run-examples                    # run them all, check each against its golden
+{{.GeneratorName}} run-examples --only <name>      # one example, both sides
+{{.GeneratorName}} update-example <name>           # rewrite that one golden with what it produces now
+{{.GeneratorName}} run-examples --update           # rewrite every golden at once
 {{ if .HasCli }}{{.GeneratorName}} remove-cli-example <name>
 {{ end }}{{.GeneratorName}} remove-lib-example <name>
 ```
 
-Write the example itself, ending with the copy out of `TestDir` into `AssertDir` that says what
-it asserts: `result.yaml` records `AssertDir`, and an example that copies nothing out fails.
-The golden is written by the first `exec-test` and refreshed with `update-test <name>`, which
+Write the example itself, ending with the copy out of `test-dir` into `assert-dir` that says what
+it asserts: `result.yaml` records `assert-dir`, and an example that copies nothing out fails.
+The golden is written by the first `run-examples` and refreshed with `update-example <name>`, which
 prints what it changes before writing. Details in [LibExamples](../LibExamples/doc.md){{ if .HasCli }} and
 [CliExamples](../CliExamples/doc.md){{ end }}.
 
@@ -347,13 +347,13 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | File | Written when |
 | --- | --- |
 {{- if .HasCli }}
-| `sandbox/internal/commands/<name>/InternalPureHandler.go` | a command does something |
+| `sandbox/internal/commands/<name>/handler.go` | a command does something |
 {{- end }}
 {{- if .HasServer }}
-| `sandbox/internal/routeslist/<name>/InternalPureHandler.go` | a route answers something |
+| `sandbox/internal/routes/<name>/handler.go` | a route answers something |
 {{- end }}
 {{- if .HasFront }}
-| `assets/frontend/**` | the site looks like something |
+| `assets/front/**` | the site looks like something |
 {{- end }}
 {{- if .HasBackoffice }}
 | `sandbox/internal/server/backoffice/**`, `assets/backoffice/*.html` | the backoffice behaves or looks otherwise |
@@ -361,20 +361,20 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 | `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |
-| `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
+| `sandbox/deps/<x>/<x>.go` + `adapters/impls/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `{{.ConfigDir}}/docs/ReadmeHeader.md`
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into
 its License section — put whatever license you want there.
 
-A project built before the `OpinatedAgnos<X>` libs keeps hand-written files written against
+A project built before the `OpinionatedAgnos<X>` libs keeps hand-written files written against
 the generated packages they replaced. `add-dep` the lib of every mechanic that is on (`verify`
 names the missing ones); the next `build` removes `sandbox/internal/generated/{cliio,trigger,routeio,frontio,databaseio}`,
-`cli/command`, `server/route`, `climain.go` and `servermain.go`; then `verify` names every
+`cli/command`, `server/route`, `main.go` and `main.go`; then `verify` names every
 hand-written import of them with its replacement — `cliio.Fail(sandbox, …)` is
-`sandbox.Deps.OpinatedAgnosCli.Fail(…)`, `routeio.RequestOf(route)` is `route.Request`, a `Handle*`
-logs and then calls `OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, …)`, and
-`start-server` calls `sandbox.Server.Serve` rather than `server.ServerMain`.
+`sandbox.Deps.OpinionatedAgnosCli.Fail(…)`, `routeio.RequestOf(route)` is `route.Request`, a `Handle*`
+logs and then calls `OpinionatedAgnosServer.WriteError(sandbox.Deps.SerializableDeps, …)`, and
+`start-server` calls `sandbox.Server.Serve` rather than `server.Main`.
 
 ## Ship
 {{ if .HasCli }}
@@ -383,7 +383,7 @@ logs and then calls `OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, 
 {{.GeneratorName}} publish                # build, compile, then a gh release
 ```
 
-`go build -o release/{{.Name}} ./cmd/main` is the plain local binary.
+`go build -o release/{{.ProjectName}} ./cmd/main` is the plain local binary.
 `publish` names the release after `version` in `{{.ConfigDir}}/project.yaml`; bump it there
 first. `compile` targets: `linux86`, `linuxarm64`, `linuxi32`, `mac86`, `macarm64`,
 `windows86`, `windowsi32`, or `all`.

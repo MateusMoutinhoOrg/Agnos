@@ -1,11 +1,11 @@
-cli-output: "remove-arg removing Who from sandbox/internal/commands/greet/command.yaml \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "remove-arg removing Who from sandbox/internal/commands/core/greet/command.yaml \nbuild started with path test-dir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/commands/greet/InternalPureHandler.go
-      sha: e559891705796277b6df4540f262d760e1d20e26ecd03c6fcd66478c4960f154
-    - file: sandbox/internal/commands/greet/command.yaml
-      sha: b9d5f3fa613079dfd16cf0828487b52c99432859fb959707e0a6c306dc846ea9
-    - file: sandbox/internal/commands/greet/entries.go
-      sha: 0f699c28b19dba9ae7d930098b10a8897b88e6e14957efdd7655db415d26801e
-    - file: sandbox/internal/commands/greet/new.go
-      sha: 348bb7d5892870cc5e2a3f6a44c7098f71f41ad328b32c00fde6483aa6f9f407
+    - file: sandbox/internal/commands/core/greet/command.yaml
+      sha: e8e5d3139a208297deb10f10ccdd08ae787a60a98e0c54302a4545ff69de4586
+    - file: sandbox/internal/commands/core/greet/handler.go
+      sha: 7459e32a2e71c4454b90f8d071c9c8a1f780f00bc892b4a6cac7bbaba189960a
+    - file: sandbox/internal/commands/core/greet/input.go
+      sha: eaeaf7fef09269b41172762488097a47b6ac63acfd6817f015f68c1512b0befa
+    - file: sandbox/internal/commands/core/greet/new.go
+      sha: bad21e89f91d52e68e46b6f7211c94dbd65c98cecb9ba24bb3da746d474006b7

@@ -2,21 +2,21 @@ package structureconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
 func Render(sandbox *api.Sandbox, structure_conf *StructureConf) string {
-	return sandbox.Deps.Serializables.SerializeToYaml(renderItems(sandbox, structure_conf.Items))
+	return sandbox.Deps.SerializableDeps.SerializeToYaml(renderItems(sandbox, structure_conf.Items))
 }
 
 // renderItems writes one set of siblings back as an object keyed by item name,
 // recursing into the children of every item that has some. Keys are written in
 // the order the items are held, which New has already sorted.
-func renderItems(sandbox *api.Sandbox, items []Item) *serializibles.SerializibleObject {
-	items_obj := sandbox.Deps.Serializables.CreateObject()
+func renderItems(sandbox *api.Sandbox, items []Item) *serializabledeps.SerializableObject {
+	items_obj := sandbox.Deps.SerializableDeps.CreateObject()
 
 	for _, item := range items {
-		item_obj := sandbox.Deps.Serializables.CreateObject()
+		item_obj := sandbox.Deps.SerializableDeps.CreateObject()
 		item_obj.AddItemToObject("description", item.Description)
 
 		if item.Dir {

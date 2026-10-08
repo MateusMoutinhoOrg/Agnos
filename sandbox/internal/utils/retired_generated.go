@@ -2,32 +2,37 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // retiredGenerated is, per mechanic, every generated file and package an older
 // build wrote under sandbox/internal/generated/ that nothing renders any more:
 // the dispatch, the binders, the matcher and the shared io packages the
-// OpinatedAgnos libs replaced. Each one names a symbol the aliased api dropped
+// OpinionatedAgnos libs replaced, and the registries' old cli/cli and
+// server/server packages, now one level up, and help, version and help_flag
+// from before every command sat in the folder of its category. Each one names a symbol the aliased api dropped
 // (api.NewCommand, api.BindRoute, a Request held as any), so a tree still
 // carrying it would not compile.
 var retiredGenerated = map[string][]string{
-	ExtensionSandboxCli: {
-		GeneratedDir + "/cli/cli/climain.go",
+	ExtensionCli: {
+		GeneratedDir + "/cli/cli",
+		CommandsDir + "/help",
+		CommandsDir + "/version",
+		CommandsDir + "/help_flag",
 		GeneratedDir + "/cli/command",
 		GeneratedDir + "/cliio",
 		GeneratedDir + "/trigger",
 	},
-	ExtensionSandboxServer: {
-		GeneratedDir + "/server/server/servermain.go",
+	ExtensionServer: {
+		GeneratedDir + "/server/server",
 		GeneratedDir + "/server/route",
 		GeneratedDir + "/routeio",
 		GeneratedDir + "/trigger",
 	},
-	ExtensionSandboxFront: {
+	ExtensionFront: {
 		GeneratedDir + "/frontio",
 	},
-	ExtensionSandboxDatabase: {
+	ExtensionDatabase: {
 		GeneratedDir + "/databaseio",
 	},
 }
@@ -36,13 +41,13 @@ var retiredGenerated = map[string][]string{
 // place — the message verify answers an import of it with, which is the whole
 // of the migration a project's hand-written files need.
 var retiredReplacements = map[string]string{
-	GeneratedDir + "/cliio":        "sandbox.Deps.OpinatedAgnosCli: Fail, FailWithCause, FailureOf",
-	GeneratedDir + "/cli/command":  "sandbox.Deps.OpinatedAgnosCli.NewCommand()",
-	GeneratedDir + "/trigger":      "sandbox.Deps.OpinatedAgnosCli.MatchTrigger",
-	GeneratedDir + "/routeio":      "sandbox.Deps.OpinatedAgnosServer: Fail, FailWithCause, FailureOf, WriteError, WriteJSON, WriteText, Redirect, ValidateSchema, ValidateForm and the Read*/Item* readers; route.Request and route.Response for RequestOf and ResponseOf",
-	GeneratedDir + "/server/route": "sandbox.Deps.OpinatedAgnosServer.NewRoute()",
-	GeneratedDir + "/frontio":      "sandbox.Deps.OpinatedAgnosFront: Resolve, SafePath, ExtensionOf, ContentTypeOf, and the constants of sandbox/deps/OpinatedAgnosFront",
-	GeneratedDir + "/databaseio":   "sandbox.Deps.OpinatedAgnosDatabase: Fail, Schema, ReadString, ReadInt, ReadFloat, TextMatches, IntInRange, FloatInRange",
+	GeneratedDir + "/cliio":        "sandbox.Deps.OpinionatedAgnosCli: Fail, FailWithCause, FailureOf",
+	GeneratedDir + "/cli/command":  "sandbox.Deps.OpinionatedAgnosCli.NewCommand()",
+	GeneratedDir + "/trigger":      "sandbox.Deps.OpinionatedAgnosCli.MatchTrigger",
+	GeneratedDir + "/routeio":      "sandbox.Deps.OpinionatedAgnosServer: Fail, FailWithCause, FailureOf, WriteError, WriteJSON, WriteText, Redirect, ValidateSchema, ValidateForm and the Read*/Item* readers; route.Request and route.Response for RequestOf and ResponseOf",
+	GeneratedDir + "/server/route": "sandbox.Deps.OpinionatedAgnosServer.NewRoute()",
+	GeneratedDir + "/frontio":      "sandbox.Deps.OpinionatedAgnosFront: Resolve, SafePath, ExtensionOf, ContentTypeOf, and the constants of sandbox/deps/OpinionatedAgnosFront",
+	GeneratedDir + "/databaseio":   "sandbox.Deps.OpinionatedAgnosDatabase: Fail, Schema, ReadString, ReadInt, ReadFloat, TextMatches, IntInRange, FloatInRange",
 }
 
 // RetiredReplacement is what replaced one retired generated package, named by
@@ -62,7 +67,7 @@ func RetiredGenerated(extension string) []string {
 // for each mechanic that is on, so a project's first build on the libs drops
 // what they replaced; an <x>-purge runs it too, so a purge leaves nothing of
 // an older build behind.
-func RemoveRetiredGenerated(sandbox *api.Sandbox, io *smartio.SmartIO, extension string) {
+func RemoveRetiredGenerated(sandbox *api.Sandbox, io *stagedfs.StagedFS, extension string) {
 	for _, path := range RetiredGenerated(extension) {
 		if io.IsFile(path) {
 			io.RemoveDir(path)

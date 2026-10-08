@@ -1,11 +1,11 @@
-cli-output: "remove-route removing sandbox/internal/routeslist/admin/login \nbuild started with path TestDir \nsuccessfully rendered template\napi\nhealth\n"
+cli-output: "remove-route removing sandbox/internal/routes/admin/login \nbuild started with path test-dir \nsuccessfully rendered template\napi\nhealth\n"
 exit-code: 0
 tree:
     - file: sandbox/internal/commands/ops/cloud/deploy/command.yaml
-      sha: 2f595808916160a0485d8cce3f3a5ef5e0f2735b7aba658a2ba6cac33901ef7e
-    - file: sandbox/internal/generated/cli/cli/new.go
-      sha: 99fd6e01be8d5247a064efb94ed81ca3ef67720aa53bfa35d6976e565cf1faf8
-    - file: sandbox/internal/generated/server/server/new.go
-      sha: 8cb140f6c861f716f6f3e68e92d434e933ed08d7e3d6676e7df923180a441f2a
-    - file: sandbox/internal/routeslist/api/users/route.yaml
-      sha: 99a641710d72889a225143a11054dc0972c3244a887b8d4475d55bfc9ed3bc8b
+      sha: d7fdc46a840517764b27a8f0e609b6c84fee2c64f16457baebeb127a1626da64
+    - file: sandbox/internal/generated/cli/new.go
+      sha: cc952f4c879efa13b325d48db6e7245ffb97a9cbd54c2bc8132b9f785b7c3235
+    - file: sandbox/internal/generated/server/new.go
+      sha: fd5b0bfb33d2d289c7b3cf40ea8ac86b1b160e97e91e1a2e781fa852cae8ea01
+    - file: sandbox/internal/routes/api/users/route.yaml
+      sha: 6fee9aecad349fd4c8fe55f5a288222d468320e0d478c502fc9459ea23a2937a

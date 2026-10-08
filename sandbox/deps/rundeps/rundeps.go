@@ -2,15 +2,15 @@ package rundeps
 
 // This package is the sandbox's *copy* of the api a process runner exposes —
 // the same mechanic as argvdeps, dbdeps, embeddeps, iodeps, requestdeps and
-// std, for the same reason: starting a child process is an OS-bound effect,
+// stddeps, for the same reason: starting a child process is an OS-bound effect,
 // so `os/exec` may not appear inside the sandbox. The contract is restated
 // here, and the adapter — which lives outside the sandbox — is what fills it.
 
-// Sandbox is the process runner injected whole as the Deps.Rundeps field. It is
+// Contract is the process runner injected whole as the Deps.RunDeps field. It is
 // what the build action reaches for when it has to hand the rendered project
 // to a real toolchain (`go mod tidy`, `go build ./...`) and report whether
 // that toolchain accepted it.
-type Sandbox struct {
+type Contract struct {
 	// Run executes one program to completion and returns what it wrote.
 	// A non-zero exit status is reported in Result.ExitCode, not as the
 	// error: the error is reserved for a program that could not be started
@@ -36,7 +36,7 @@ type RunProps struct {
 	// ahead of the inherited one, and searched first when Program itself is
 	// looked up. A PATH entry cannot be expressed through Env: the adapter is
 	// what reads the current PATH and joins it, because the sandbox cannot.
-	// `agnos exec-test` uses it to put the project's own cli alias in front
+	// `agnos run-examples` uses it to put the project's own cli alias in front
 	// of the PATH an example runs with.
 	PathPrefix []string
 }

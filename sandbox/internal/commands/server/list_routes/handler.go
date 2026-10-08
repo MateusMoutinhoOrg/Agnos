@@ -6,10 +6,10 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	lines, list_error := listRoutesAction.ListRoutes(sandbox, props.Path)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	lines, list_error := listRoutesAction.ListRoutes(sandbox, api.ListRoutesProps{Path: props.Path})
 	if list_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", list_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", list_error.Error())
 	}
 
 	for _, line := range lines {

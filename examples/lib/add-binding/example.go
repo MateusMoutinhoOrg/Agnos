@@ -3,14 +3,14 @@ package main
 import (
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-// The add-available example: declare a second available
+// The add-binding example: declare a second binding
 //
-// It calls the same action `agnos add-available` calls, and writes only inside TestDir.
+// It calls the same action `agnos add-binding` calls, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -18,28 +18,28 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepsInit("TestDir"); err != nil {
+	if err := lib.Actions.DepsInit(api.DepsInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddDep(api.AddDepProps{Path: "TestDir", Dep: "sortdeps"}); err != nil {
+	if err := lib.Actions.AddDep(api.AddDepProps{Path: "test-dir", Dep: "sortdeps"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddAvailable("TestDir", "lambda"); err != nil {
+	if err := lib.Actions.AddBinding(api.AddBindingProps{Path: "test-dir", Binding: "lambda"}); err != nil {
 		panic(err)
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/adapters", os.DirFS("TestDir/adapters")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/adapters", os.DirFS("test-dir/adapters")); err != nil {
 		panic(err)
 	}
 }

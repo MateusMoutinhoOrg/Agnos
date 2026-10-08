@@ -1,13 +1,13 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: front-purge
-category: Front System
+category: Front
+description: 'Removes the front route, then rebuilds. assets/front/ is left untouched: every file there is the project''s content, so front-init puts the route back over it. The OpinionatedAgnosFront lib stays installed, like every dep.'
 examples:
     - front-purge
-help: Remove the html front layer from the project
-long-description: 'Removes the frontend route, then rebuilds. assets/frontend/ is left untouched: every file there is the project''s content, so front-init puts the route back over it. The OpinatedAgnosFront lib stays installed, like every dep.'
 priority: 100
+summary: Remove the html front layer from the project

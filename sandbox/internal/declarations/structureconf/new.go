@@ -2,16 +2,16 @@ package structureconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
 func New(sandbox *api.Sandbox, content string) (*StructureConf, error) {
 
 	if content == "" {
-		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.StdDeps.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
@@ -29,7 +29,7 @@ func New(sandbox *api.Sandbox, content string) (*StructureConf, error) {
 	}
 
 	if !structure_specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("structure_specs is not an object")
+		return nil, sandbox.Deps.StdDeps.Errorf("structure_specs is not an object")
 	}
 
 	items, err := parseItems(sandbox, structure_specs, "")
@@ -45,10 +45,10 @@ func New(sandbox *api.Sandbox, content string) (*StructureConf, error) {
 // parseItems reads one object of the document as a set of sibling items,
 // recursing into every `children` it finds. parent is the path the items hang
 // from, used only to name the element in an error message.
-func parseItems(sandbox *api.Sandbox, node *serializibles.SerializibleObject, parent string) ([]Item, error) {
+func parseItems(sandbox *api.Sandbox, node *serializabledeps.SerializableObject, parent string) ([]Item, error) {
 	keys, err := node.GetKeys()
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not get the keys of %s", itemLabel(parent))
+		return nil, sandbox.Deps.StdDeps.Errorf("could not get the keys of %s", itemLabel(parent))
 	}
 
 	items := make([]Item, 0)
@@ -65,7 +65,7 @@ func parseItems(sandbox *api.Sandbox, node *serializibles.SerializibleObject, pa
 		}
 
 		if !item_specs.IsObject() {
-			return nil, sandbox.Deps.Std.Errorf("%s is not an object", path)
+			return nil, sandbox.Deps.StdDeps.Errorf("%s is not an object", path)
 		}
 
 		item, err := parseItem(sandbox, item_specs, key, path)
@@ -82,7 +82,7 @@ func parseItems(sandbox *api.Sandbox, node *serializibles.SerializibleObject, pa
 
 // parseItem reads one item object: its description, its optional gen and order
 // keys, and the children nested under it.
-func parseItem(sandbox *api.Sandbox, item_specs *serializibles.SerializibleObject, name string, path string) (Item, error) {
+func parseItem(sandbox *api.Sandbox, item_specs *serializabledeps.SerializableObject, name string, path string) (Item, error) {
 	item := Item{
 		Name:     name,
 		Children: make([]Item, 0),
@@ -98,21 +98,21 @@ func parseItem(sandbox *api.Sandbox, item_specs *serializibles.SerializibleObjec
 	if description_item != nil && !description_item.IsNull() {
 		item.Description, err = description_item.GetString()
 		if err != nil {
-			return item, sandbox.Deps.Std.Errorf("%s: description is not a string", path)
+			return item, sandbox.Deps.StdDeps.Errorf("%s: description is not a string", path)
 		}
 	}
 
 	if dir_item != nil && !dir_item.IsNull() {
 		item.Dir, err = dir_item.GetBool()
 		if err != nil {
-			return item, sandbox.Deps.Std.Errorf("%s: dir is not a bool", path)
+			return item, sandbox.Deps.StdDeps.Errorf("%s: dir is not a bool", path)
 		}
 	}
 
 	if gen_item != nil && !gen_item.IsNull() {
 		item.Gen, err = gen_item.GetBool()
 		if err != nil {
-			return item, sandbox.Deps.Std.Errorf("%s: gen is not a bool", path)
+			return item, sandbox.Deps.StdDeps.Errorf("%s: gen is not a bool", path)
 		}
 	}
 
@@ -121,7 +121,7 @@ func parseItem(sandbox *api.Sandbox, item_specs *serializibles.SerializibleObjec
 	if order_item != nil && !order_item.IsNull() {
 		order, err := order_item.GetInt()
 		if err != nil {
-			return item, sandbox.Deps.Std.Errorf("%s: order is not an int", path)
+			return item, sandbox.Deps.StdDeps.Errorf("%s: order is not an int", path)
 		}
 		item.Order = int(order)
 		item.HasOrder = true
@@ -129,7 +129,7 @@ func parseItem(sandbox *api.Sandbox, item_specs *serializibles.SerializibleObjec
 
 	if children_item != nil && !children_item.IsNull() {
 		if !children_item.IsObject() {
-			return item, sandbox.Deps.Std.Errorf("%s: children is not an object", path)
+			return item, sandbox.Deps.StdDeps.Errorf("%s: children is not an object", path)
 		}
 
 		item.Children, err = parseItems(sandbox, children_item, path)
@@ -144,7 +144,7 @@ func parseItem(sandbox *api.Sandbox, item_specs *serializibles.SerializibleObjec
 // sortItems orders siblings the way the tree renders them: by `order`, then by
 // name. An item with no `order` comes after every ordered one.
 func sortItems(sandbox *api.Sandbox, items []Item) {
-	sandbox.Deps.Sortdeps.SliceStable(items, func(i, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(items, func(i, j int) bool {
 		left, right := items[i], items[j]
 		if left.HasOrder != right.HasOrder {
 			return left.HasOrder

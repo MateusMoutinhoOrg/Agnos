@@ -3,11 +3,11 @@ package add_adapter
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 func AddAdapter(sandbox *api.Sandbox, props api.AddAdapterProps) error {
-	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddAdapterInternal(sandbox, io, props); err != nil {
 		return err
 	}

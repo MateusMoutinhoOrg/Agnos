@@ -3,7 +3,7 @@ package add_dep
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addAdapterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_adapter"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -13,26 +13,26 @@ import (
 // Everything else is a name of the embedded catalog.
 //
 // The catalog route installs the contract under
-// sandbox/deps/<dep>/ from assets/deplist/<dep>, and one adapter filling it
-// from assets/adapterlist/<adapter> — the dep's declared default-adapter
+// sandbox/deps/<dep>/ from assets/dep-catalog/<dep>, and one adapter filling it
+// from assets/adapter-catalog/<adapter> — the dep's declared default-adapter
 // unless the caller names another. The two halves are separate catalogs, so
 // the same contract can later be filled by a second implementation.
 //
-// The adapter is enrolled in every available: nothing else fills that field
-// yet, and an available that leaves one empty is a nil func waiting to panic.
-func AddDepInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddDepProps) error {
+// The adapter is enrolled in every binding: nothing else fills that field
+// yet, and a binding that leaves one empty is a nil func waiting to panic.
+func AddDepInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.AddDepProps) error {
 	// Installing a dep is asking for the dependency layer, so the mechanic
 	// that renders sandbox/deps/deps.go is turned on here rather than being
 	// inferred later from the directory this install is about to create.
-	if err := utils.SetExtension(sandbox, io, utils.ExtensionSandboxDeps, true); err != nil {
+	if err := utils.SetExtension(sandbox, io, utils.ExtensionDeps, true); err != nil {
 		return err
 	}
 
-	if sandbox.Deps.Stringsdeps.Contains(props.Dep, "/") {
+	if sandbox.Deps.StringsDeps.Contains(props.Dep, "/") {
 		return AddRemoteDepInternal(sandbox, io, props)
 	}
 
-	sandbox.Deps.Std.Log("add-dep started with path %s dep %s \n", props.Path, props.Dep)
+	sandbox.Deps.StdDeps.Logf("add-dep started with path %s dep %s \n", props.Path, props.Dep)
 
 	dep_conf, err := utils.LoadCatalogDepConf(sandbox, props.Dep)
 	if err != nil {
@@ -49,7 +49,7 @@ func AddDepInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddDepP
 		return err
 	}
 	if adapter_conf.Dep != dep_conf.Name {
-		return sandbox.Deps.Std.Errorf("adapter %q fills dep %q, not %q", adapter, adapter_conf.Dep, dep_conf.Name)
+		return sandbox.Deps.StdDeps.Errorf("adapter %q fills dep %q, not %q", adapter, adapter_conf.Dep, dep_conf.Name)
 	}
 
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
@@ -61,7 +61,7 @@ func AddDepInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.AddDepP
 		"Module": module_conf.Module,
 	}
 
-	group := utils.DeplistGroup + "/" + dep_conf.Name
+	group := utils.DepCatalogGroup + "/" + dep_conf.Name
 	if err := utils.RenderGroupExcept(sandbox, io, group, vars, []string{utils.DepConfFile}); err != nil {
 		return err
 	}

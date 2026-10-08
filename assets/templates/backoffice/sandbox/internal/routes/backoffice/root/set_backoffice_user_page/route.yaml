@@ -1,5 +1,4 @@
 category: Backoffice Users
-help: Shows the form that edits a backoffice user
 methods:
     - GET
 paths:
@@ -8,7 +7,7 @@ paths:
       start: 0
       trigger:
         type: equal
-        value: /admin/root/edit-backoffice-user
+        value: /admin/root/set-backoffice-user
     - end: 3
       id: Id
       start: 3
@@ -16,3 +15,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 4
+summary: Shows the form that edits a backoffice user

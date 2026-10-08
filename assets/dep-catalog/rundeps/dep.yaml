@@ -1,4 +1,4 @@
-default-adapter: rundeps
-field: Rundeps
+default-adapter: osexecrun
+field: RunDeps
 help: Run a program to completion
 name: rundeps

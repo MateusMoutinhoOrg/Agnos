@@ -10,7 +10,7 @@ go get github.com/MateusMoutinhoOrg/Agnos@latest
 ## Wiring
 
 `sandbox/` performs no OS effects of its own — filesystem, clock, stdout, processes all
-arrive through a `deps.Deps` struct. `adapters/availables/standard` builds the ready-made
+arrive through a `deps.Deps` struct. `adapters/bindings/standard` builds the ready-made
 assembly, and `sandbox.New` turns it into the API object, which carries the deps on
 `Sandbox.Deps` — so everything inside reaches them through the api it was handed.
 
@@ -18,7 +18,7 @@ assembly, and `sandbox.New` turns it into the API object, which carries the deps
 package main
 
 import (
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 )
 
@@ -60,7 +60,7 @@ test double, an in-memory implementation or an instrumented wrapper. Patch field
 deps := standard.New()
 
 var out bytes.Buffer
-deps.Std.Printf = func(f string, a ...any) (int, error) {
+deps.StdDeps.Printf = func(f string, a ...any) (int, error) {
 	return fmt.Fprintf(&out, f, a...)
 }
 
@@ -71,47 +71,47 @@ The contracts available to patch:
 
 | Field | Contract package |
 | --- | --- |
-| `deps.OpinatedAgnosCli` | `sandbox/deps/OpinatedAgnosCli` |
-| `deps.Argvdeps` | `sandbox/deps/argvdeps` |
-| `deps.Embeddeps` | `sandbox/deps/embeddeps` |
-| `deps.Goimportsdeps` | `sandbox/deps/goimportsdeps` |
-| `deps.Hashdeps` | `sandbox/deps/hashdeps` |
-| `deps.Interviewer` | `sandbox/deps/interviewer` |
-| `deps.Iodeps` | `sandbox/deps/iodeps` |
-| `deps.Reflectdeps` | `sandbox/deps/reflectdeps` |
-| `deps.Rundeps` | `sandbox/deps/rundeps` |
-| `deps.Serializables` | `sandbox/deps/serializables` |
-| `deps.Serverdeps` | `sandbox/deps/serverdeps` |
-| `deps.Sortdeps` | `sandbox/deps/sortdeps` |
-| `deps.Std` | `sandbox/deps/std` |
-| `deps.Stringsdeps` | `sandbox/deps/stringsdeps` |
-| `deps.Templatedeps` | `sandbox/deps/templatedeps` |
+| `deps.OpinionatedAgnosCli` | `sandbox/deps/OpinionatedAgnosCli` |
+| `deps.ArgvDeps` | `sandbox/deps/argvdeps` |
+| `deps.EmbedDeps` | `sandbox/deps/embeddeps` |
+| `deps.GoimportsDeps` | `sandbox/deps/goimportsdeps` |
+| `deps.HashDeps` | `sandbox/deps/hashdeps` |
+| `deps.InterviewDeps` | `sandbox/deps/interviewdeps` |
+| `deps.IoDeps` | `sandbox/deps/iodeps` |
+| `deps.ReflectDeps` | `sandbox/deps/reflectdeps` |
+| `deps.RunDeps` | `sandbox/deps/rundeps` |
+| `deps.SerializableDeps` | `sandbox/deps/serializabledeps` |
+| `deps.ServerDeps` | `sandbox/deps/serverdeps` |
+| `deps.SortDeps` | `sandbox/deps/sortdeps` |
+| `deps.StdDeps` | `sandbox/deps/stddeps` |
+| `deps.StringsDeps` | `sandbox/deps/stringsdeps` |
+| `deps.TemplateDeps` | `sandbox/deps/templatedeps` |
 
-Each one is filled by a matching implementation under `adapters/libs/`, every package
+Each one is filled by a matching implementation under `adapters/impls/`, every package
 exposing the same `Bind(deps *deps.Deps)` entry point:
 
 | Adapter lib | Binder |
 | --- | --- |
-| `adapters/libs/OpinatedAgnosCli` | `OpinatedAgnosCli.Bind(&deps)` |
-| `adapters/libs/argvdeps` | `argvdeps.Bind(&deps)` |
-| `adapters/libs/embeddeps` | `embeddeps.Bind(&deps)` |
-| `adapters/libs/goimportsdeps` | `goimportsdeps.Bind(&deps)` |
-| `adapters/libs/hashdeps` | `hashdeps.Bind(&deps)` |
-| `adapters/libs/interviewer` | `interviewer.Bind(&deps)` |
-| `adapters/libs/iodeps` | `iodeps.Bind(&deps)` |
-| `adapters/libs/reflectdeps` | `reflectdeps.Bind(&deps)` |
-| `adapters/libs/rundeps` | `rundeps.Bind(&deps)` |
-| `adapters/libs/serializables` | `serializables.Bind(&deps)` |
-| `adapters/libs/serverdeps` | `serverdeps.Bind(&deps)` |
-| `adapters/libs/sortdeps` | `sortdeps.Bind(&deps)` |
-| `adapters/libs/std` | `std.Bind(&deps)` |
-| `adapters/libs/stringsdeps` | `stringsdeps.Bind(&deps)` |
-| `adapters/libs/templatedeps` | `templatedeps.Bind(&deps)` |
+| `adapters/impls/OpinionatedAgnosCli` | `OpinionatedAgnosCli.Bind(&deps)` |
+| `adapters/impls/goembed` | `goembed.Bind(&deps)` |
+| `adapters/impls/nethttpserver` | `nethttpserver.Bind(&deps)` |
+| `adapters/impls/osexecrun` | `osexecrun.Bind(&deps)` |
+| `adapters/impls/osio` | `osio.Bind(&deps)` |
+| `adapters/impls/osstd` | `osstd.Bind(&deps)` |
+| `adapters/impls/sha256hash` | `sha256hash.Bind(&deps)` |
+| `adapters/impls/stdargv` | `stdargv.Bind(&deps)` |
+| `adapters/impls/stdgoimports` | `stdgoimports.Bind(&deps)` |
+| `adapters/impls/stdreflect` | `stdreflect.Bind(&deps)` |
+| `adapters/impls/stdserializable` | `stdserializable.Bind(&deps)` |
+| `adapters/impls/stdsort` | `stdsort.Bind(&deps)` |
+| `adapters/impls/stdstrings` | `stdstrings.Bind(&deps)` |
+| `adapters/impls/texttemplate` | `texttemplate.Bind(&deps)` |
+| `adapters/impls/ttyinterview` | `ttyinterview.Bind(&deps)` |
 
 Starting from `standard.New()` is the safe default: an unfilled field is a nil func that
 panics on first call. For a permanent mix, write your own
-`adapters/availables/<name>/new.go` binding only the libs you want — `standard/new.go` is
-regenerated on every build, while other directories under `availables/` are left alone.
+`adapters/bindings/<name>/new.go` binding only the libs you want — `standard/new.go` is
+regenerated on every build, while other directories under `bindings/` are left alone.
 
 `sandbox/api` is pure contract and `sandbox/` never touches the OS, so both are safe to import
 anywhere; the rest of the rules a caller can count on are in [Rules](../Rules/doc.md#layers),

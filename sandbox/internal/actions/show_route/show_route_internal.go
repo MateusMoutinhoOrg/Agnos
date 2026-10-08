@@ -2,8 +2,9 @@ package show_route
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -25,14 +26,14 @@ const (
 // declared by several editors, each of which prints the file it changed and
 // nothing else, so the declaration as a whole was only ever readable as yaml.
 // This is that declaration said the way the editors talk about it.
-func ShowRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string) ([]string, error) {
+func ShowRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, route string) ([]string, error) {
 	conf, err := utils.LoadRouteConf(sandbox, io, route)
 	if err != nil {
 		return nil, err
 	}
 
 	lines := []string{
-		sandbox.Deps.Std.Sprintf("%s %s", sandbox.Deps.Stringsdeps.Join(conf.Methods, ","), conf.Pattern()),
+		sandbox.Deps.StdDeps.Sprintf("%s %s", sandbox.Deps.StringsDeps.Join(conf.Methods, ","), conf.Pattern()),
 	}
 	lines = append(lines, routeHead(sandbox, conf)...)
 	lines = append(lines, chainLine(sandbox, io, route)...)
@@ -49,17 +50,17 @@ func ShowRouteInternal(sandbox *api.Sandbox, io *smartio.SmartIO, route string) 
 func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	lines := []string{}
 
-	if conf.Help != "" {
-		lines = append(lines, branch+conf.Help)
+	if conf.Summary != "" {
+		lines = append(lines, branch+conf.Summary)
 	}
 	if conf.Category != "" {
-		lines = append(lines, sandbox.Deps.Std.Sprintf("%scategory  %s", branch, conf.Category))
+		lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%scategory  %s", branch, conf.Category))
 	}
-	lines = append(lines, sandbox.Deps.Std.Sprintf("%spriority  %d", branch, conf.Priority))
+	lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%spriority  %d", branch, conf.Priority))
 	if conf.HasSegments {
-		lines = append(lines, sandbox.Deps.Std.Sprintf("%ssegments  %d", branch, conf.Segments))
+		lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%ssegments  %d", branch, conf.Segments))
 	}
-	lines = append(lines, sandbox.Deps.Std.Sprintf("%sresponse  %s", branch, conf.ResponseType))
+	lines = append(lines, sandbox.Deps.StdDeps.Sprintf("%sresponse  %s", branch, conf.ResponseType))
 	if conf.Hidden {
 		lines = append(lines, branch+"hidden")
 	}
@@ -69,8 +70,8 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 
 // triggerNote words one trigger: its type and value, and the two switches on
 // it when they are set.
-func triggerNote(sandbox *api.Sandbox, trigger routeconf.Trigger) string {
-	text := sandbox.Deps.Std.Sprintf("%s %q", trigger.Type, trigger.Value)
+func triggerNote(sandbox *api.Sandbox, trigger triggerconf.Trigger) string {
+	text := sandbox.Deps.StdDeps.Sprintf("%s %q", trigger.Type, trigger.Value)
 	if trigger.IgnoreCase {
 		text += " ignoring case"
 	}
@@ -83,7 +84,7 @@ func triggerNote(sandbox *api.Sandbox, trigger routeconf.Trigger) string {
 // chainLine is where the route sits in the chain: its place in run order, and
 // the routes on either side of it. It is empty when the chain cannot be read,
 // which a route on its own never needs to be shown for.
-func chainLine(sandbox *api.Sandbox, io *smartio.SmartIO, route string) []string {
+func chainLine(sandbox *api.Sandbox, io *stagedfs.StagedFS, route string) []string {
 	chain, err := utils.LoadRouteChain(sandbox, io)
 	if err != nil {
 		return []string{}
@@ -94,19 +95,19 @@ func chainLine(sandbox *api.Sandbox, io *smartio.SmartIO, route string) []string
 		if entry.Name != name {
 			continue
 		}
-		text := sandbox.Deps.Std.Sprintf("%schain     #%d of %d", branch, index+1, len(chain))
+		text := sandbox.Deps.StdDeps.Sprintf("%schain     #%d of %d", branch, index+1, len(chain))
 		if index > 0 {
-			text += ", after " + utils.RouteIdentifier(sandbox, chain[index-1].Name)
+			text += ", after " + utils.RouteName(sandbox, chain[index-1].Name)
 		}
 		if index < len(chain)-1 {
-			text += ", before " + utils.RouteIdentifier(sandbox, chain[index+1].Name)
+			text += ", before " + utils.RouteName(sandbox, chain[index+1].Name)
 		}
 		return []string{text}
 	}
 	return []string{}
 }
 
-// pathLines is the route's paths, one line each: the Entries field it binds,
+// pathLines is the route's paths, one line each: the Input field it binds,
 // the segments it reads and the trigger they have to match.
 func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if len(conf.Paths) == 0 {
@@ -115,13 +116,13 @@ func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 
 	lines := []string{"", "paths"}
 	for _, path := range conf.Paths {
-		text := sandbox.Deps.Std.Sprintf("%-20s segments %d..%d", path.Id, path.Start, path.End)
+		text := sandbox.Deps.StdDeps.Sprintf("%-20s segments %d..%d", path.Id, path.Start, path.End)
 
 		notes := []string{}
 		if path.Type != "" && path.Type != routeconf.DefaultPathType {
 			notes = append(notes, path.Type)
 		}
-		if path.Trigger.Exists {
+		if path.Trigger.Set {
 			notes = append(notes, triggerNote(sandbox, path.Trigger))
 		}
 		if path.Description != "" {
@@ -133,7 +134,7 @@ func pathLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	return lines
 }
 
-// parameterLines is the route's parameters, one line each: the Entries field
+// parameterLines is the route's parameters, one line each: the Input field
 // it binds and the Go type it binds to, then where it is read from and every
 // rule the dispatch holds a request to before the handler runs.
 func parameterLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
@@ -143,16 +144,16 @@ func parameterLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 
 	lines := []string{"", "parameters"}
 	for _, parameter := range conf.Parameters {
-		text := sandbox.Deps.Std.Sprintf("%-20s %s", parameter.Id, parameter.Type)
+		text := sandbox.Deps.StdDeps.Sprintf("%-20s %s", parameter.Id, parameter.Type)
 
-		notes := []string{sandbox.Deps.Std.Sprintf("%q from %s", parameter.Key, sandbox.Deps.Stringsdeps.Join(parameter.Fonts, ", "))}
+		notes := []string{sandbox.Deps.StdDeps.Sprintf("%q from %s", parameter.Key, sandbox.Deps.StringsDeps.Join(parameter.Sources, ", "))}
 		if parameter.Required {
 			notes = append(notes, "required")
 		}
 		if parameter.HasDefault {
-			notes = append(notes, sandbox.Deps.Std.Sprintf("default %s", parameter.Default))
+			notes = append(notes, sandbox.Deps.StdDeps.Sprintf("default %s", parameter.Default))
 		}
-		if parameter.Trigger.Exists {
+		if parameter.Trigger.Set {
 			notes = append(notes, triggerNote(sandbox, parameter.Trigger))
 		}
 		if parameter.Description != "" {
@@ -170,7 +171,7 @@ func withNotes(sandbox *api.Sandbox, text string, notes []string) string {
 	if len(notes) == 0 {
 		return text
 	}
-	return sandbox.Deps.Std.Sprintf("%s  %s", text, sandbox.Deps.Stringsdeps.Join(notes, ", "))
+	return sandbox.Deps.StdDeps.Sprintf("%s  %s", text, sandbox.Deps.StringsDeps.Join(notes, ", "))
 }
 
 // bodyLines is the request body: the envelope the dispatch settles before a
@@ -180,7 +181,7 @@ func bodyLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 		return []string{"", "body      none"}
 	}
 
-	head := sandbox.Deps.Std.Sprintf("body      %s", conf.Body.Type)
+	head := sandbox.Deps.StdDeps.Sprintf("body      %s", conf.Body.Type)
 	if conf.Body.Required {
 		head += ", required"
 	}
@@ -188,7 +189,7 @@ func bodyLines(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 		head += ", " + conf.Body.ContentType
 	}
 	if conf.Body.MaxBytes > 0 {
-		head += sandbox.Deps.Std.Sprintf(", at most %s bytes", sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Body.MaxBytes), 10))
+		head += sandbox.Deps.StdDeps.Sprintf(", at most %s bytes", sandbox.Deps.StringsDeps.FormatInt(int64(conf.Body.MaxBytes), 10))
 	}
 
 	lines := []string{"", head}
@@ -220,7 +221,7 @@ func schemaLines(sandbox *api.Sandbox, schema *routeconf.Schema, indent string) 
 // propertyText is one property of the schema on one line: the json type it
 // accepts, whether its object demands it, and every keyword declared on it.
 func propertyText(sandbox *api.Sandbox, parent *routeconf.Schema, property routeconf.SchemaProperty) string {
-	text := sandbox.Deps.Std.Sprintf("%-20s %s", property.Name, schemaTypeText(property.Schema))
+	text := sandbox.Deps.StdDeps.Sprintf("%-20s %s", property.Name, schemaTypeText(property.Schema))
 
 	notes := []string{}
 	if utils.SchemaDemands(parent, property.Name) {
@@ -231,7 +232,7 @@ func propertyText(sandbox *api.Sandbox, parent *routeconf.Schema, property route
 	if len(notes) == 0 {
 		return text
 	}
-	return sandbox.Deps.Std.Sprintf("%s  %s", text, sandbox.Deps.Stringsdeps.Join(notes, ", "))
+	return sandbox.Deps.StdDeps.Sprintf("%s  %s", text, sandbox.Deps.StringsDeps.Join(notes, ", "))
 }
 
 // schemaTypeText is a property's json type, an array said as a list of the
@@ -256,10 +257,10 @@ func keywordNotes(sandbox *api.Sandbox, schema *routeconf.Schema) []string {
 
 	if schema.Type == "array" {
 		if schema.HasMinItems {
-			notes = append(notes, sandbox.Deps.Std.Sprintf("min-items %d", schema.MinItems))
+			notes = append(notes, sandbox.Deps.StdDeps.Sprintf("min-items %d", schema.MinItems))
 		}
 		if schema.HasMaxItems {
-			notes = append(notes, sandbox.Deps.Std.Sprintf("max-items %d", schema.MaxItems))
+			notes = append(notes, sandbox.Deps.StdDeps.Sprintf("max-items %d", schema.MaxItems))
 		}
 		if schema.UniqueItems {
 			notes = append(notes, "unique-items")
@@ -284,13 +285,13 @@ func keywordNotes(sandbox *api.Sandbox, schema *routeconf.Schema) []string {
 		notes = append(notes, "const "+leaf.Const)
 	}
 	if len(leaf.Enum) > 0 {
-		notes = append(notes, "one of "+sandbox.Deps.Stringsdeps.Join(leaf.Enum, "|"))
+		notes = append(notes, "one of "+sandbox.Deps.StringsDeps.Join(leaf.Enum, "|"))
 	}
 	if leaf.HasMinLength {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("min-length %d", leaf.MinLength))
+		notes = append(notes, sandbox.Deps.StdDeps.Sprintf("min-length %d", leaf.MinLength))
 	}
 	if leaf.HasMaxLength {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("max-length %d", leaf.MaxLength))
+		notes = append(notes, sandbox.Deps.StdDeps.Sprintf("max-length %d", leaf.MaxLength))
 	}
 	if leaf.HasMinimum {
 		notes = append(notes, "min "+utils.RouteBoundText(sandbox, leaf.Minimum))

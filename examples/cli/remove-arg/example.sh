@@ -1,16 +1,16 @@
 # The remove-arg example: delete one declared positional argument
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 
-agnos start --path TestDir --project-name Test --module Test -q
-agnos cli-init --path TestDir -q
-agnos add-command greet --help "Greet someone" --category "Core" --path TestDir -q
-agnos add-arg who --command greet --type string --required --description "the person to greet" --path TestDir -q
+agnos start --path test-dir --project-name Test --module Test -q
+agnos cli-init --path test-dir -q
+agnos add-command greet --summary "Greet someone" --category "Core" --path test-dir -q
+agnos add-arg who --command greet --type string --required --description "the person to greet" --path test-dir -q
 
-agnos remove-arg who --command greet --path TestDir
+agnos remove-arg who --command greet --path test-dir
 
 # What result.yaml records: the paths this example asserts, copied out of
-# TestDir. The lib side copies the same set.
-mkdir -p AssertDir/sandbox/internal/commands/greet
-cp -R TestDir/sandbox/internal/commands/greet/. AssertDir/sandbox/internal/commands/greet/
+# test-dir. The lib side copies the same set.
+mkdir -p assert-dir/sandbox/internal/commands/core/greet
+cp -R test-dir/sandbox/internal/commands/core/greet/. assert-dir/sandbox/internal/commands/core/greet/

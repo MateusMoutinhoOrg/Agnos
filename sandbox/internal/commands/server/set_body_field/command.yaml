@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,7 +10,8 @@ args:
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: Rewrites one property of the route's body json-schema in place and runs build. The keywords already declared are read back, the ones given are written over them, and the whole is built again by the constructor add-body-field uses — so the property a forgotten --max is added to is the property that was there. --clear takes a keyword off again, and a --type the old keywords cannot survive drops them, naming each one it dropped. A property that is not declared yet is add-body-field's.
 examples:
     - set-body-field age --route create-user --type int --min 0 --max 130
 flags:
@@ -63,6 +64,5 @@ flags:
     - description: 'a keyword to take off again: required, array, min, max, format, pattern, enum, const, nullable and the rest (repeatable)'
       id: Clear
       type: string-array
-help: Rewrite one property of a route's body json- or form-schema
-long-description: Rewrites one property of the route's body json-schema in place and runs build. The keywords already declared are read back, the ones given are written over them, and the whole is built again by the constructor add-body-field uses — so the property a forgotten --max is added to is the property that was there. --clear takes a keyword off again, and a --type the old keywords cannot survive drops them, naming each one it dropped. A property that is not declared yet is add-body-field's.
 priority: 100
+summary: Rewrite one property of a route's body json- or form-schema

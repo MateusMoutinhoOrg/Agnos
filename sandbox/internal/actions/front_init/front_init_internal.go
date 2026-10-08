@@ -3,22 +3,22 @@ package front_init
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serverInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/server_init"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // FrontInitInternal turns the front mechanic on in the project's declaration,
-// then writes what is the project's from the moment it exists: the frontend
-// route, and the index and 404 pages of assets/frontend/. The group
+// then writes what is the project's from the moment it exists: the front
+// route, and the index and 404 pages of assets/front/. The group
 // itself is rendered by the follow-up build, like every other mechanic.
 //
 // A project with no server layer is given one first, on this same open
-// SmartIO: actions compose by sharing one transaction, so there is no
+// StagedFS: actions compose by sharing one transaction, so there is no
 // intermediate Persist and no intermediate build between the two halves.
-func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
-	sandbox.Deps.Std.Log("front-init started with path %s \n", path)
+func FrontInitInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) error {
+	sandbox.Deps.StdDeps.Logf("front-init started with path %s \n", path)
 
-	has_server, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionSandboxServer)
+	has_server, err := utils.ExtensionEnabled(sandbox, io, utils.ExtensionServer)
 	if err != nil {
 		return err
 	}
@@ -37,7 +37,7 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 		"Module": module_conf.Module,
 	}
 
-	if err := writeFrontendRoute(sandbox, io, vars); err != nil {
+	if err := writeFrontRoute(sandbox, io, vars); err != nil {
 		return err
 	}
 
@@ -49,51 +49,51 @@ func FrontInitInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) e
 		return err
 	}
 
-	return utils.SetExtension(sandbox, io, utils.ExtensionSandboxFront, true)
+	return utils.SetExtension(sandbox, io, utils.ExtensionFront, true)
 }
 
-// writeFrontendRoute scaffolds the route serving assets/frontend, leaving an
-// existing one alone: like any route's InternalPureHandler.go it is written
+// writeFrontRoute scaffolds the route serving assets/front, leaving an
+// existing one alone: like any route's handler.go it is written
 // once and then the project's — turning spaFallback on is an edit to it — so
 // re-rendering over an edited copy would undo a deliberate change without
-// saying so. The path check it relies on lives in the OpinatedAgnosFront lib,
+// saying so. The path check it relies on lives in the OpinionatedAgnosFront lib,
 // so a fix to it reaches the project with the lib whatever this file holds.
-func writeFrontendRoute(sandbox *api.Sandbox, io *smartio.SmartIO, vars map[string]interface{}) error {
-	dir := utils.RouteDir(sandbox, io, utils.FrontendRouteName)
+func writeFrontRoute(sandbox *api.Sandbox, io *stagedfs.StagedFS, vars map[string]interface{}) error {
+	dir := utils.RouteDir(sandbox, io, utils.FrontRouteName)
 
 	if io.IsDir(dir) {
-		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", dir)
+		sandbox.Deps.StdDeps.Logf("front-init: %s already exists, keeping it \n", dir)
 		return nil
 	}
 
-	if err := utils.RenderTemplateToDest(sandbox, io, "templates/frontend_route.yaml", vars, dir+"/route.yaml"); err != nil {
+	if err := utils.RenderTemplateToDest(sandbox, io, "templates/front_route.yaml", vars, dir+"/route.yaml"); err != nil {
 		return err
 	}
-	return utils.RenderTemplateToDest(sandbox, io, "templates/frontend_handler.go", vars, dir+"/InternalPureHandler.go")
+	return utils.RenderTemplateToDest(sandbox, io, "templates/front_handler.go", vars, dir+"/handler.go")
 }
 
-// writeIndexPage writes assets/frontend/index.html, the page "/" answers, the
+// writeIndexPage writes assets/front/index.html, the page "/" answers, the
 // way add-page writes any other — and like it, keeps one already there:
 // everything under that tree is the project's content, so a second front-init
 // (after a front-purge, say) leaves what was written in between untouched.
 // It is also what keeps the tree from being empty, which //go:embed would drop.
-func writeIndexPage(sandbox *api.Sandbox, io *smartio.SmartIO) error {
-	page := utils.PageAsset(sandbox, utils.FrontendIndexPage)
+func writeIndexPage(sandbox *api.Sandbox, io *stagedfs.StagedFS) error {
+	page := utils.PageAsset(sandbox, utils.FrontIndexPage)
 	if io.IsFile(page) {
-		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", page)
+		sandbox.Deps.StdDeps.Logf("front-init: %s already exists, keeping it \n", page)
 		return nil
 	}
-	return utils.WritePage(sandbox, io, utils.FrontendIndexPage, "Home")
+	return utils.WritePage(sandbox, io, utils.FrontIndexPage, "Home")
 }
 
-// writeNotFoundPage writes assets/frontend/404.html, the formatted page the
-// frontend route answers with a 404 when a path names no file, and like
+// writeNotFoundPage writes assets/front/404.html, the formatted page the
+// front route answers with a 404 when a path names no file, and like
 // writeIndexPage keeps one already there: it is the project's content from the
 // moment it exists, so restyling it is an edit to that file.
-func writeNotFoundPage(sandbox *api.Sandbox, io *smartio.SmartIO) error {
-	page := utils.PageAsset(sandbox, utils.FrontendNotFoundPage)
+func writeNotFoundPage(sandbox *api.Sandbox, io *stagedfs.StagedFS) error {
+	page := utils.PageAsset(sandbox, utils.FrontNotFoundPage)
 	if io.IsFile(page) {
-		sandbox.Deps.Std.Log("front-init: %s already exists, keeping it \n", page)
+		sandbox.Deps.StdDeps.Logf("front-init: %s already exists, keeping it \n", page)
 		return nil
 	}
 	return utils.WriteNotFoundPage(sandbox, io)

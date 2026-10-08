@@ -2,49 +2,49 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // The database helpers below mirror the route ones of route_conf.go, one for
 // one: a database is declared, edited and looked up exactly the way a route
-// is, only against specs.yaml instead of route.yaml.
+// is, only against database.yaml instead of route.yaml.
 
 // DatabasesDir holds one declared database per sub-directory, the database
-// layer's mirror of sandbox/internal/routeslist.
+// layer's mirror of sandbox/internal/routes.
 const DatabasesDir = "sandbox/internal/databases"
 
-// DatabaseSpecsFile is the declaration every database directory carries, the
+// DatabaseConfFile is the declaration every database directory carries, the
 // whole of what its api.go, new.go and methods.go are generated from.
-const DatabaseSpecsFile = "specs.yaml"
+const DatabaseConfFile = "database.yaml"
 
 // DatabaseCustomFile is the one file of a database package agnos never writes
-// and never reads: the escape hatch for a query specs.yaml cannot describe.
+// and never reads: the escape hatch for a query database.yaml cannot describe.
 const DatabaseCustomFile = "methods_custom.go"
 
-// DatabaseIdentifier normalizes a user-typed database name into its canonical
+// DatabaseName normalizes a user-typed database name into its canonical
 // spelling, the same alphabet a command and a route are held to.
-func DatabaseIdentifier(sandbox *api.Sandbox, name string) string {
-	return CommandIdentifier(sandbox, name)
+func DatabaseName(sandbox *api.Sandbox, name string) string {
+	return CommandName(sandbox, name)
 }
 
 // ValidateDatabaseName reports whether a user-typed database name normalizes
 // to a usable identifier. It becomes a directory name and a Go package clause,
 // so the same alphabet a route name is held to applies.
 func ValidateDatabaseName(sandbox *api.Sandbox, name string) error {
-	identifier := DatabaseIdentifier(sandbox, name)
+	identifier := DatabaseName(sandbox, name)
 	if identifier == "" {
-		return sandbox.Deps.Std.Errorf("a database needs a name")
+		return sandbox.Deps.StdDeps.Errorf("a database needs a name")
 	}
 	if identifier[0] < 'a' || identifier[0] > 'z' {
-		return sandbox.Deps.Std.Errorf("invalid database name %q: a database name must start with a lowercase letter", name)
+		return sandbox.Deps.StdDeps.Errorf("invalid database name %q: a database name must start with a lowercase letter", name)
 	}
 	for _, letter := range identifier {
 		valid := (letter >= 'a' && letter <= 'z') ||
 			(letter >= '0' && letter <= '9') ||
 			letter == '-'
 		if !valid {
-			return sandbox.Deps.Std.Errorf(
+			return sandbox.Deps.StdDeps.Errorf(
 				"invalid database name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory %s/%s and a Go package name)",
 				name, DatabasesDir, DatabasePackage(sandbox, name))
 		}
@@ -56,7 +56,7 @@ func ValidateDatabaseName(sandbox *api.Sandbox, name string) error {
 // identifier with dashes turned into underscores ("app-database" ->
 // "app_database").
 func DatabasePackage(sandbox *api.Sandbox, name string) string {
-	return sandbox.Deps.Stringsdeps.ReplaceAll(DatabaseIdentifier(sandbox, name), "-", "_")
+	return sandbox.Deps.StringsDeps.ReplaceAll(DatabaseName(sandbox, name), "-", "_")
 }
 
 // DatabaseDir is the project-relative directory holding a database package.
@@ -64,9 +64,9 @@ func DatabaseDir(sandbox *api.Sandbox, name string) string {
 	return DatabasesDir + "/" + DatabasePackage(sandbox, name)
 }
 
-// DatabaseConfPath is the project-relative path of a database's specs.yaml.
+// DatabaseConfPath is the project-relative path of a database's database.yaml.
 func DatabaseConfPath(sandbox *api.Sandbox, name string) string {
-	return DatabaseDir(sandbox, name) + "/" + DatabaseSpecsFile
+	return DatabaseDir(sandbox, name) + "/" + DatabaseConfFile
 }
 
 // DatabaseCustomPath is the project-relative path of a database's hand-written
@@ -76,33 +76,26 @@ func DatabaseCustomPath(sandbox *api.Sandbox, name string) string {
 }
 
 // LoadDatabaseConf reads and parses
-// sandbox/internal/databases/<name>/specs.yaml.
-func LoadDatabaseConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*databaseconf.DatabaseConf, error) {
+// sandbox/internal/databases/<name>/database.yaml.
+func LoadDatabaseConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) (*databaseconf.DatabaseConf, error) {
 	if err := ValidateDatabaseName(sandbox, name); err != nil {
 		return nil, err
 	}
 	content, err := io.ReadFile(DatabaseConfPath(sandbox, name))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("database %q not found in %s", DatabaseIdentifier(sandbox, name), DatabaseDir(sandbox, name))
+		return nil, sandbox.Deps.StdDeps.Errorf("database %q not found in %s", DatabaseName(sandbox, name), DatabaseDir(sandbox, name))
 	}
 	conf, err := databaseconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("databases/%s/%s: %w", DatabasePackage(sandbox, name), DatabaseSpecsFile, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("databases/%s/%s: %w", DatabasePackage(sandbox, name), DatabaseConfFile, err)
 	}
 	return conf, nil
 }
 
 // SaveDatabaseConf renders conf back over
-// sandbox/internal/databases/<name>/specs.yaml.
-func SaveDatabaseConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *databaseconf.DatabaseConf) error {
-	return io.WriteFileOverwrite(DatabaseConfPath(sandbox, name), []byte(conf.Render()))
-}
-
-// DatabaseName normalizes a table or field name. Both become a Go identifier
-// and a key of the stored record, so they are held to the same alphabet the
-// database's own name is.
-func DatabaseName(sandbox *api.Sandbox, name string) string {
-	return DatabaseIdentifier(sandbox, name)
+// sandbox/internal/databases/<name>/database.yaml.
+func SaveDatabaseConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *databaseconf.DatabaseConf) error {
+	return io.WriteFile(DatabaseConfPath(sandbox, name), []byte(conf.Render()))
 }
 
 // ValidateDatabaseMember reports whether a table or field name normalizes to
@@ -112,37 +105,22 @@ func DatabaseName(sandbox *api.Sandbox, name string) string {
 func ValidateDatabaseMember(sandbox *api.Sandbox, kind string, name string) error {
 	identifier := DatabaseName(sandbox, name)
 	if identifier == "" {
-		return sandbox.Deps.Std.Errorf("a %s needs a name", kind)
+		return sandbox.Deps.StdDeps.Errorf("a %s needs a name", kind)
 	}
 	if identifier[0] < 'a' || identifier[0] > 'z' {
-		return sandbox.Deps.Std.Errorf("invalid %s name %q: it must start with a lowercase letter", kind, name)
+		return sandbox.Deps.StdDeps.Errorf("invalid %s name %q: it must start with a lowercase letter", kind, name)
 	}
 	for _, letter := range identifier {
 		valid := (letter >= 'a' && letter <= 'z') ||
 			(letter >= '0' && letter <= '9') ||
 			letter == '-'
 		if !valid {
-			return sandbox.Deps.Std.Errorf(
+			return sandbox.Deps.StdDeps.Errorf(
 				"invalid %s name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes part of a generated Go identifier)",
 				kind, name)
 		}
 	}
 	return nil
-}
-
-// ExportedName is a declared name as the exported Go identifier generated from
-// it: every dash- or underscore-separated part capitalized ("app-database" ->
-// "AppDatabase").
-func ExportedName(sandbox *api.Sandbox, raw string) string {
-	parts := sandbox.Deps.Stringsdeps.FieldsFunc(raw, func(r rune) bool { return r == '-' || r == '_' })
-	out := ""
-	for _, part := range parts {
-		if part == "" {
-			continue
-		}
-		out += sandbox.Deps.Stringsdeps.ToUpper(part[:1]) + part[1:]
-	}
-	return out
 }
 
 // FindDatabaseTable returns the index of the table named name in tables, or -1.
@@ -167,45 +145,29 @@ func FindDatabaseField(sandbox *api.Sandbox, fields []databaseconf.Field, name s
 	return -1
 }
 
-// RemoveDatabaseField drops the field at index from fields.
-func RemoveDatabaseField(fields []databaseconf.Field, index int) []databaseconf.Field {
-	out := make([]databaseconf.Field, 0, len(fields)-1)
-	out = append(out, fields[:index]...)
-	out = append(out, fields[index+1:]...)
-	return out
-}
-
-// RemoveDatabaseTable drops the table at index from tables.
-func RemoveDatabaseTable(tables []databaseconf.Table, index int) []databaseconf.Table {
-	out := make([]databaseconf.Table, 0, len(tables)-1)
-	out = append(out, tables[:index]...)
-	out = append(out, tables[index+1:]...)
-	return out
-}
-
 // DatabaseFieldType normalizes a user-typed field type, refusing one no field
 // may declare.
 func DatabaseFieldType(sandbox *api.Sandbox, raw string) (string, error) {
-	kind := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	kind := sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw))
 	if kind == "" {
 		return databaseconf.FieldString, nil
 	}
 	if !databaseconf.IsFieldType(kind) {
-		return "", sandbox.Deps.Std.Errorf("unknown field type %q (use one of %s)",
-			raw, sandbox.Deps.Stringsdeps.Join(databaseconf.FieldTypes, ", "))
+		return "", sandbox.Deps.StdDeps.Errorf("unknown field type %q (use one of %s)",
+			raw, sandbox.Deps.StringsDeps.Join(databaseconf.FieldTypes, ", "))
 	}
 	return kind, nil
 }
 
 // DatabaseFieldsAt is the field list one --table, or one --parent collection
 // inside it, declares — plus the label error messages name that place by. It
-// is how every editor of a specs.yaml finds the list it is about to change, so
+// is how every editor of a database.yaml finds the list it is about to change, so
 // "a field of a table" and "a field of a nested collection" are one code path.
 func DatabaseFieldsAt(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, table string, parent string) ([]databaseconf.Field, string, error) {
 	name := DatabaseName(sandbox, table)
 	index := FindDatabaseTable(sandbox, conf.Tables, name)
 	if index < 0 {
-		return nil, "", sandbox.Deps.Std.Errorf("this database declares no table %q", name)
+		return nil, "", sandbox.Deps.StdDeps.Errorf("this database declares no table %q", name)
 	}
 
 	if DatabaseName(sandbox, parent) == "" {
@@ -215,11 +177,11 @@ func DatabaseFieldsAt(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, tab
 	nested := DatabaseName(sandbox, parent)
 	at := FindDatabaseField(sandbox, conf.Tables[index].Fields, nested)
 	if at < 0 {
-		return nil, "", sandbox.Deps.Std.Errorf("table %q declares no field %q", name, nested)
+		return nil, "", sandbox.Deps.StdDeps.Errorf("table %q declares no field %q", name, nested)
 	}
-	if conf.Tables[index].Fields[at].Type != databaseconf.FieldDatabase {
-		return nil, "", sandbox.Deps.Std.Errorf(
-			"%s.%s is a %s field, not a nested collection: only a `database` field holds fields of its own",
+	if conf.Tables[index].Fields[at].Type != databaseconf.FieldObject {
+		return nil, "", sandbox.Deps.StdDeps.Errorf(
+			"%s.%s is a %s field, not a nested collection: only an `object` field holds fields of its own",
 			name, nested, conf.Tables[index].Fields[at].Type)
 	}
 
@@ -231,7 +193,7 @@ func SetDatabaseFieldsAt(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, 
 	name := DatabaseName(sandbox, table)
 	index := FindDatabaseTable(sandbox, conf.Tables, name)
 	if index < 0 {
-		return sandbox.Deps.Std.Errorf("this database declares no table %q", name)
+		return sandbox.Deps.StdDeps.Errorf("this database declares no table %q", name)
 	}
 
 	if DatabaseName(sandbox, parent) == "" {
@@ -241,7 +203,7 @@ func SetDatabaseFieldsAt(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, 
 
 	at := FindDatabaseField(sandbox, conf.Tables[index].Fields, parent)
 	if at < 0 {
-		return sandbox.Deps.Std.Errorf("table %q declares no field %q", name, DatabaseName(sandbox, parent))
+		return sandbox.Deps.StdDeps.Errorf("table %q declares no field %q", name, DatabaseName(sandbox, parent))
 	}
 	conf.Tables[index].Fields[at].Fields = fields
 	return nil
@@ -252,7 +214,7 @@ func SetDatabaseFieldsAt(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, 
 // around: a link names a table of this database, a nested collection only
 // exists one level deep and is never required, and nothing else carries a
 // target.
-func NewDatabaseField(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, props api.DatabaseFieldProps) (databaseconf.Field, error) {
+func NewDatabaseField(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, props api.AddTableFieldProps) (databaseconf.Field, error) {
 	field := databaseconf.Field{
 		Name:     DatabaseName(sandbox, props.Name),
 		Required: props.Required,
@@ -282,26 +244,26 @@ func NewDatabaseField(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, pro
 // same reasons.
 func CheckDatabaseField(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, field databaseconf.Field, nested bool) error {
 	if field.Name == databaseIdFieldName {
-		return sandbox.Deps.Std.Errorf("a field cannot be named %q: every record already carries its permanent Id", databaseIdFieldName)
+		return sandbox.Deps.StdDeps.Errorf("a field cannot be named %q: every record already carries its permanent Id", databaseIdFieldName)
 	}
 
 	if field.Type == databaseconf.FieldLink {
 		if field.Target == "" {
-			return sandbox.Deps.Std.Errorf("a link needs --target, the table it points at")
+			return sandbox.Deps.StdDeps.Errorf("a link needs --target, the table it points at")
 		}
 		if FindDatabaseTable(sandbox, conf.Tables, field.Target) < 0 {
-			return sandbox.Deps.Std.Errorf("--target %q is not a table of this database", field.Target)
+			return sandbox.Deps.StdDeps.Errorf("--target %q is not a table of this database", field.Target)
 		}
 	} else if field.Target != "" {
-		return sandbox.Deps.Std.Errorf("--target belongs to `--type link`: a %s field points at no table", field.Type)
+		return sandbox.Deps.StdDeps.Errorf("--target belongs to `--type link`: a %s field points at no table", field.Type)
 	}
 
-	if field.Type == databaseconf.FieldDatabase {
+	if field.Type == databaseconf.FieldObject {
 		if nested {
-			return sandbox.Deps.Std.Errorf("a nested collection holds plain fields only: only one level of `--type database` is generated")
+			return sandbox.Deps.StdDeps.Errorf("a nested collection holds plain fields only: only one level of `--type object` is generated")
 		}
 		if field.Required {
-			return sandbox.Deps.Std.Errorf("a nested collection cannot be required: it is never written by an insert")
+			return sandbox.Deps.StdDeps.Errorf("a nested collection cannot be required: it is never written by an insert")
 		}
 	}
 
@@ -315,29 +277,29 @@ const databaseIdFieldName = "id"
 // DatabaseFieldClearKeys is every key --clear may take off a declared field.
 var DatabaseFieldClearKeys = []string{"required", "target"}
 
-// DatabaseFieldEditEmpty reports a set-table-field that was given nothing to
+// IsDatabaseFieldEditEmpty reports a set-table-field that was given nothing to
 // change, which would otherwise rewrite the declaration to exactly what it
 // already says.
-func DatabaseFieldEditEmpty(sandbox *api.Sandbox, props api.DatabaseFieldEditProps) bool {
-	return sandbox.Deps.Stringsdeps.TrimSpace(props.Rename) == "" &&
-		sandbox.Deps.Stringsdeps.TrimSpace(props.Type) == "" &&
-		sandbox.Deps.Stringsdeps.TrimSpace(props.Target) == "" &&
+func IsDatabaseFieldEditEmpty(sandbox *api.Sandbox, props api.SetTableFieldProps) bool {
+	return sandbox.Deps.StringsDeps.TrimSpace(props.Rename) == "" &&
+		sandbox.Deps.StringsDeps.TrimSpace(props.Type) == "" &&
+		sandbox.Deps.StringsDeps.TrimSpace(props.Target) == "" &&
 		!props.Required && len(props.Clear) == 0
 }
 
-// DatabaseFieldEdited rebuilds one declared field with the changes applied,
+// EditDatabaseField rebuilds one declared field with the changes applied,
 // holding the result to every rule NewDatabaseField holds a new one to. An
 // edited field and a declared one are the same bytes, because the two go
 // through one constructor.
-func DatabaseFieldEdited(sandbox *api.Sandbox, current databaseconf.Field,
-	conf *databaseconf.DatabaseConf, props api.DatabaseFieldEditProps) (databaseconf.Field, error) {
+func EditDatabaseField(sandbox *api.Sandbox, current databaseconf.Field,
+	conf *databaseconf.DatabaseConf, props api.SetTableFieldProps) (databaseconf.Field, error) {
 
 	cleared, err := RouteClearSet(sandbox, props.Clear, DatabaseFieldClearKeys)
 	if err != nil {
 		return databaseconf.Field{}, err
 	}
 
-	built := api.DatabaseFieldProps{
+	built := api.AddTableFieldProps{
 		Parent:   props.Parent,
 		Name:     current.Name,
 		Type:     current.Type,
@@ -355,7 +317,7 @@ func DatabaseFieldEdited(sandbox *api.Sandbox, current databaseconf.Field,
 	if rename := DatabaseName(sandbox, props.Rename); rename != "" {
 		built.Name = rename
 	}
-	if kind := sandbox.Deps.Stringsdeps.TrimSpace(props.Type); kind != "" {
+	if kind := sandbox.Deps.StringsDeps.TrimSpace(props.Type); kind != "" {
 		built.Type = kind
 	}
 	if target := DatabaseName(sandbox, props.Target); target != "" {
@@ -373,7 +335,7 @@ func DatabaseFieldEdited(sandbox *api.Sandbox, current databaseconf.Field,
 	// A field that was already a nested collection keeps what it holds: the
 	// editors of those fields are add-table-field --parent and its inverse,
 	// not this one.
-	if field.Type == databaseconf.FieldDatabase && current.Type == databaseconf.FieldDatabase {
+	if field.Type == databaseconf.FieldObject && current.Type == databaseconf.FieldObject {
 		field.Fields = current.Fields
 	}
 

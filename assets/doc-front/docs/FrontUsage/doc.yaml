@@ -1,4 +1,4 @@
-description: "Serve a website from {{.Name}}: bring the front layer up, drop files in assets/frontend, add pages"
+description: "Serve a website from {{.ProjectName}}: bring the front layer up, drop files in assets/front, add pages"
 name: "FrontUsage"
 order: 2
 themes:

@@ -2,15 +2,15 @@ package routeconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // Render serializes a RouteConf back to the route.yaml shape. Keys come out in
 // one fixed order and comments are dropped, which is what makes a re-render
 // idempotent — and why route.yaml is never edited by hand.
 func Render(sandbox *api.Sandbox, conf *RouteConf) string {
-	obj := sandbox.Deps.Serializables.CreateObject()
+	obj := sandbox.Deps.SerializableDeps.CreateObject()
 
 	obj.AddItemToObject("methods", stringArray(sandbox, conf.Methods))
 	obj.AddItemToObject("priority", int64(conf.Priority))
@@ -23,9 +23,9 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 		obj.AddItemToObject("parameters", parametersArray(sandbox, conf.Parameters))
 	}
 	obj.AddItemToObject("category", conf.Category)
-	obj.AddItemToObject("help", conf.Help)
-	if conf.LongDescription != "" {
-		obj.AddItemToObject("long-description", conf.LongDescription)
+	obj.AddItemToObject("summary", conf.Summary)
+	if conf.Description != "" {
+		obj.AddItemToObject("description", conf.Description)
 	}
 	if len(conf.Examples) > 0 {
 		obj.AddItemToObject("examples", stringArray(sandbox, conf.Examples))
@@ -37,25 +37,25 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 		obj.AddItemToObject("body", bodyObject(sandbox, conf.Body))
 	}
 
-	return sandbox.Deps.Serializables.SerializeToYaml(obj)
+	return sandbox.Deps.SerializableDeps.SerializeToYaml(obj)
 }
 
 // SchemaJson renders the declared json-schema as canonical JSON: the same
 // tree Render writes into route.yaml, serialized for the generated
-// BodySchema constant Deps.OpinatedAgnosServer.ValidateSchema is run against.
+// BodySchema constant Deps.OpinionatedAgnosServer.ValidateSchema is run against.
 func SchemaJson(sandbox *api.Sandbox, conf *RouteConf) string {
 	if !conf.Body.HasSchema || conf.Body.Schema == nil {
 		return ""
 	}
-	return sandbox.Deps.Serializables.SerializeToJson(schemaObject(sandbox, conf.Body.Schema))
+	return sandbox.Deps.SerializableDeps.SerializeToJson(schemaObject(sandbox, conf.Body.Schema))
 }
 
 // pathsArray renders `paths` as the ordered sequence it is: one entry per
 // path slice, its trigger included when it declares one.
-func pathsArray(sandbox *api.Sandbox, paths []Path) *serializibles.SerializibleObject {
-	arr := sandbox.Deps.Serializables.CreateArray()
+func pathsArray(sandbox *api.Sandbox, paths []Path) *serializabledeps.SerializableObject {
+	arr := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, path := range paths {
-		entry := sandbox.Deps.Serializables.CreateObject()
+		entry := sandbox.Deps.SerializableDeps.CreateObject()
 		entry.AddItemToObject("id", path.Id)
 		if path.Description != "" {
 			entry.AddItemToObject("description", path.Description)
@@ -65,7 +65,7 @@ func pathsArray(sandbox *api.Sandbox, paths []Path) *serializibles.SerializibleO
 		if path.Type != "" && path.Type != DefaultPathType {
 			entry.AddItemToObject("type", path.Type)
 		}
-		if path.Trigger.Exists {
+		if path.Trigger.Set {
 			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, path.Trigger))
 		}
 		arr.AddItemToArray(entry)
@@ -75,10 +75,10 @@ func pathsArray(sandbox *api.Sandbox, paths []Path) *serializibles.SerializibleO
 
 // parametersArray renders `parameters` in declaration order. `key` is written
 // only when it differs from `id`, the one spelling it defaults to.
-func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializibles.SerializibleObject {
-	arr := sandbox.Deps.Serializables.CreateArray()
+func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializabledeps.SerializableObject {
+	arr := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, parameter := range parameters {
-		entry := sandbox.Deps.Serializables.CreateObject()
+		entry := sandbox.Deps.SerializableDeps.CreateObject()
 		entry.AddItemToObject("id", parameter.Id)
 		if parameter.Key != "" && parameter.Key != parameter.Id {
 			entry.AddItemToObject("key", parameter.Key)
@@ -90,14 +90,14 @@ func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializible
 			entry.AddItemToObject("examples", stringArray(sandbox, parameter.Examples))
 		}
 		entry.AddItemToObject("type", parameter.Type)
-		entry.AddItemToObject("fonts", stringArray(sandbox, parameter.Fonts))
+		entry.AddItemToObject("sources", stringArray(sandbox, parameter.Sources))
 		if parameter.Required {
 			entry.AddItemToObject("required", true)
 		}
 		if parameter.HasDefault {
 			entry.AddItemToObject("default", parameter.Default)
 		}
-		if parameter.Trigger.Exists {
+		if parameter.Trigger.Set {
 			entry.AddItemToObject("trigger", triggerconf.Render(sandbox, parameter.Trigger))
 		}
 		arr.AddItemToArray(entry)
@@ -108,8 +108,8 @@ func parametersArray(sandbox *api.Sandbox, parameters []Parameter) *serializible
 // bodyObject renders the `body` declaration, the schema tree included under
 // the key its type carries it by — so an editor that turns a json body into a
 // form one moves the schema along.
-func bodyObject(sandbox *api.Sandbox, body Body) *serializibles.SerializibleObject {
-	entry := sandbox.Deps.Serializables.CreateObject()
+func bodyObject(sandbox *api.Sandbox, body Body) *serializabledeps.SerializableObject {
+	entry := sandbox.Deps.SerializableDeps.CreateObject()
 	entry.AddItemToObject("type", body.Type)
 	if body.Required {
 		entry.AddItemToObject("required", true)
@@ -127,8 +127,8 @@ func bodyObject(sandbox *api.Sandbox, body Body) *serializibles.SerializibleObje
 // schemaObject renders one node of the declared json-schema, recursing through
 // `properties` and `items`. Keys outside the subset were never parsed, so they
 // are never written back.
-func schemaObject(sandbox *api.Sandbox, schema *Schema) *serializibles.SerializibleObject {
-	entry := sandbox.Deps.Serializables.CreateObject()
+func schemaObject(sandbox *api.Sandbox, schema *Schema) *serializabledeps.SerializableObject {
+	entry := sandbox.Deps.SerializableDeps.CreateObject()
 
 	if schema.Type != "" {
 		entry.AddItemToObject("type", schema.Type)
@@ -185,7 +185,7 @@ func schemaObject(sandbox *api.Sandbox, schema *Schema) *serializibles.Serializi
 		entry.AddItemToObject("items", schemaObject(sandbox, schema.Items))
 	}
 	if len(schema.Properties) > 0 {
-		properties := sandbox.Deps.Serializables.CreateObject()
+		properties := sandbox.Deps.SerializableDeps.CreateObject()
 		for _, property := range schema.Properties {
 			properties.AddItemToObject(property.Name, schemaObject(sandbox, property.Schema))
 		}
@@ -205,8 +205,8 @@ func numberValue(value float64) any {
 	return value
 }
 
-func stringArray(sandbox *api.Sandbox, values []string) *serializibles.SerializibleObject {
-	arr := sandbox.Deps.Serializables.CreateArray()
+func stringArray(sandbox *api.Sandbox, values []string) *serializabledeps.SerializableObject {
+	arr := sandbox.Deps.SerializableDeps.CreateArray()
 	for _, value := range values {
 		arr.AddItemToArray(value)
 	}

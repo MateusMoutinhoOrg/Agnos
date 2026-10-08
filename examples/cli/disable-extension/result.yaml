@@ -1,7 +1,7 @@
-cli-output: "disable-extension started with path TestDir extension readme \nbuild started with path TestDir \nsuccessfully rendered template\nreadme is off; what it wrote is yours now\nREADME.md still here: yes\n"
+cli-output: "disable-extension started with path test-dir extension readme \nbuild started with path test-dir \nsuccessfully rendered template\nreadme is off; what it wrote is yours now\nREADME.md still here: yes\n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 4fdcc070d3237ec46be1966645d3875254e0cfe3c5b1f9cfcc81ede379d30bc1
+      sha: 4583cc56977999e784185c07e639fa9b891b40110b6b205899ec93b3100172f4
     - file: README.md
-      sha: 4c4f8fd211fd2dde38120833bf21094272d2c34087e0979419682b184099f147
+      sha: 752144d31e8666a58b8fc3096e2074aceff3cb450789d8d3480aa074d4b25a91

@@ -1,4 +1,4 @@
-package std
+package stddeps
 
 // This package is the sandbox's *copy* of the api the process runtime
 // exposes — the same mechanic as argvdeps, dbdeps, embeddeps, iodeps and
@@ -8,12 +8,12 @@ package std
 // which lives outside the sandbox — is what fills it.
 //
 // deps.Deps itself carries no function fields: every capability it exposes
-// is a library struct (iodeps.Sandbox, embeddeps.Sandbox, …). The loose runtime
+// is a library struct (iodeps.Contract, embeddeps.Contract, …). The loose runtime
 // functions the sandbox needs are gathered into this one struct and
-// injected whole as the Deps.Std field.
+// injected whole as the Deps.StdDeps field.
 
-// Sandbox is the runtime library injected whole as the Deps.Std field.
-type Sandbox struct {
+// Contract is the runtime library injected whole as the Deps.StdDeps field.
+type Contract struct {
 	// Now returns the current wall-clock time as nanoseconds since the
 	// Unix epoch, UTC. The sandbox may not name a `time.Time`, so an
 	// instant crosses this boundary as a plain integer.
@@ -24,14 +24,14 @@ type Sandbox struct {
 	// silenced.
 	Printf func(format string, a ...any) (n int, err error)
 
-	// Log writes one formatted progress message to standard error. It is
+	// Logf writes one formatted progress message to standard error. It is
 	// the channel every "… started with path …" notice goes through, so a
 	// caller can keep stdout free of log noise, and it is what --quiet
 	// turns off.
-	Log func(format string, a ...any) (n int, err error)
+	Logf func(format string, a ...any) (n int, err error)
 
-	// Error writes one formatted message to standard error.
-	Error func(format string, a ...any) (n int, err error)
+	// Eprintf writes one formatted message to standard error.
+	Eprintf func(format string, a ...any) (n int, err error)
 
 	// Errorf formats an error message and returns it as an error.
 	Errorf func(format string, a ...any) error
@@ -41,7 +41,7 @@ type Sandbox struct {
 	// values rather than out of concatenation goes through here.
 	Sprintf func(format string, a ...any) string
 
-	// Goos is the name of the operating system the process runs on, in the
+	// GOOS is the name of the operating system the process runs on, in the
 	// spelling the Go toolchain uses ("darwin", "linux", "windows", …).
-	Goos func() string
+	GOOS func() string
 }

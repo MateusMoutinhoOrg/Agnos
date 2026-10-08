@@ -10,10 +10,10 @@ package jwtdeps
 // since the Unix epoch, never a `time.Time`, and the claims are the one flat
 // struct below, never the library's own claims type.
 
-// Sandbox is the JSON Web Token library injected whole as the Deps.Jwtdeps
+// Contract is the JSON Web Token library injected whole as the Deps.JwtDeps
 // field. Every token it signs and every token it accepts is HS256, keyed by
 // the secret handed to the call.
-type Sandbox struct {
+type Contract struct {
 	// Sign returns the compact HS256 token carrying claims, signed with
 	// secret. The error reports an empty secret or a claims set the library
 	// could not encode.

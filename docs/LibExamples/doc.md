@@ -1,21 +1,21 @@
 # LibExamples
 
 Every example of agnos used as a Go module. Each one is a `package main` program that
-runs with its own directory as the working directory and writes only into its own `TestDir`,
+runs with its own directory as the working directory and writes only into its own `test-dir`,
 so it can be read as documentation and copied as a starting point. It ends by copying out of
-`TestDir` into `AssertDir` the paths it asserts — `os.CopyFS(dst, os.DirFS(src))`, one call per
+`test-dir` into `assert-dir` the paths it asserts — `os.CopyFS(dst, os.DirFS(src))`, one call per
 path, each keeping the place it holds in the tree.
 
-`agnos exec-test` runs them all and checks each against the `result.yaml` beside it — the
-golden holding the output, the exit code and the sha256 of every `AssertDir` file, written by
-`exec-test` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
+`agnos run-examples` runs them all and checks each against the `result.yaml` beside it — the
+golden holding the output, the exit code and the sha256 of every `assert-dir` file, written by
+`run-examples` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
 remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 
 | Example | Description | Source |
 |---|---|---|
 | `add-adapter` |  | [example.go](../../examples/lib/add-adapter/example.go) |
 | `add-arg` | declare one positional argument on a command | [example.go](../../examples/lib/add-arg/example.go) |
-| `add-available` |  | [example.go](../../examples/lib/add-available/example.go) |
+| `add-binding` |  | [example.go](../../examples/lib/add-binding/example.go) |
 | `add-cli-example` | create an example under examples/cli/ | [example.go](../../examples/lib/add-cli-example/example.go) |
 | `add-command` | declare a new command | [example.go](../../examples/lib/add-command/example.go) |
 | `add-dep` |  | [example.go](../../examples/lib/add-dep/example.go) |
@@ -43,7 +43,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `list-extensions` |  | [example.go](../../examples/lib/list-extensions/example.go) |
 | `remove-adapter` |  | [example.go](../../examples/lib/remove-adapter/example.go) |
 | `remove-arg` | delete one declared positional argument | [example.go](../../examples/lib/remove-arg/example.go) |
-| `remove-available` |  | [example.go](../../examples/lib/remove-available/example.go) |
+| `remove-binding` |  | [example.go](../../examples/lib/remove-binding/example.go) |
 | `remove-cli-example` | delete an example of examples/cli/ | [example.go](../../examples/lib/remove-cli-example/example.go) |
 | `remove-command` | delete a command and unwire its dispatch | [example.go](../../examples/lib/remove-command/example.go) |
 | `remove-dep` |  | [example.go](../../examples/lib/remove-dep/example.go) |

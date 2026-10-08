@@ -1,9 +1,9 @@
-cli-output: "add-lib-example creating examples/lib/greet \nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "add-lib-example creating examples/lib/greet \nbuild started with path test-dir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: docs/LibExamples/doc.md
-      sha: 6baeb8506d96a176831d7cb537abb5c41bac2e4f7b6abbc45aad23c22bd1e2f4
-    - file: docs/LibExamples/props.yaml
+      sha: 33a15fbd832558b61a6ae4548ba488b4c04427c280c50f600da76aa6aa502be9
+    - file: docs/LibExamples/doc.yaml
       sha: 8360d95f99ea5cf10bdc90cff522a9ba25c28fc8b25c196745afedfc25d657fd
     - file: examples/lib/greet/example.go
-      sha: 6784cbf708ea3cc6f443468d119a3d57fe3b784ef0d364735761e3874c85040b
+      sha: 3c10dd394040567bd56b569c071038ab3e4e5585a24bf2e19c93f1f9ebbbe94b

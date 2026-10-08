@@ -3,31 +3,27 @@ package verify
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
-	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // routesDir is the tree the routes are declared in, at any depth.
 const routesDir = utils.RoutesDir
 
-// legacyRoutesDir is where routes lived before routeslist. A project still
-// carrying it has routes no build collects any more.
-const legacyRoutesDir = "sandbox/internal/routes"
-
 // routeHandlerName is the one exported declaration a route's hand-written half
-// carries, the server layer's CommandHandler.
-const routeHandlerName = "InternalPureHandler"
+// carries, the server layer's twin of a command's Handle.
+const routeHandlerName = "Handle"
 
 // routeHandlerFile is the file it is declared in.
-const routeHandlerFile = "InternalPureHandler.go"
+const routeHandlerFile = "handler.go"
 
-// routeHandlerParams is the canonical InternalPureHandler signature the
+// routeHandlerParams is the canonical Handle signature the
 // generated new.go closes over: the sandbox, the request's shared RouteProps,
-// the route's own Entries and the response being written.
-var routeHandlerParams = []string{"*api.Sandbox", "*routeprops.RouteProps", "*Entries", "*serverdeps.Response"}
+// the route's own Input and the response being written.
+var routeHandlerParams = []string{"*api.Sandbox", "*routeprops.RouteProps", "*Input", "*serverdeps.Response"}
 
 // legacyRoutePropsParam is the props parameter a handler took while
 // RouteProps was declared in sandbox/api.
@@ -48,18 +44,13 @@ var schemaKeys = []string{
 // CheckRoutes enforces the shape the server layer's generators read by
 // convention: the four files of a route package, a parsable declaration
 // carrying its required keys, paths and parameters that can be matched and
-// bound, Entries ids that do not collide, and a hand-written handler with the
+// bound, Input ids that do not collide, and a hand-written handler with the
 // one signature the dispatch calls.
 //
-// A project with no sandbox/internal/routeslist has no server layer and nothing
+// A project with no sandbox/internal/routes has no server layer and nothing
 // to check.
-func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckRoutes(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
-
-	if io.IsDir(legacyRoutesDir) {
-		violations = append(violations, legacyRoutesDir+" is the old home of the routes; move each one to "+
-			routesDir+"/<name>/ with a route.yaml in the methods/paths/parameters shape and an "+routeHandlerFile)
-	}
 
 	if !io.IsDir(routesDir) {
 		return violations
@@ -67,8 +58,8 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 	patterns := map[string]string{}
 
-	violations = append(violations, checkUnitTree(sandbox, io, routesDir, utils.RouteConfFile, "route",
-		[]string{"new.go", "entries.go", routeHandlerFile})...)
+	violations = append(violations, CheckUnitTree(sandbox, io, routesDir, utils.RouteConfFile, "route",
+		[]string{"new.go", "input.go", routeHandlerFile})...)
 
 	for _, unit := range utils.RouteDirs(sandbox, io) {
 		dir := unit.Dir
@@ -96,7 +87,7 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		// two would run in an order nothing declares.
 		for _, method := range conf.Methods {
 			key := method + " " + conf.Pattern() +
-				" at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10)
+				" at priority " + sandbox.Deps.StringsDeps.FormatInt(int64(conf.Priority), 10)
 			if other, taken := patterns[key]; taken {
 				violations = append(violations, routeViolation(dir,
 					"declares "+key+", which "+other+" already declares"))
@@ -112,10 +103,10 @@ func CheckRoutes(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 // checkRouteFiles reports a route package missing any of the four files every
 // route has: the declaration, the two generated files and the hand-written
 // handler.
-func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []string {
+func checkRouteFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []string {
 	var violations []string
 
-	for _, file := range []string{"route.yaml", "new.go", "entries.go", routeHandlerFile} {
+	for _, file := range []string{"route.yaml", "new.go", "input.go", routeHandlerFile} {
 		if !io.IsFile(dir + "/" + file) {
 			violations = append(violations, routeViolation(dir, "has no "+file))
 		}
@@ -126,7 +117,7 @@ func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []st
 		return violations
 	}
 
-	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
 		return append(violations, routeViolation(dir, routeHandlerFile+" is not parsable Go: "+err.Error()))
 	}
@@ -140,7 +131,7 @@ func checkRouteFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []st
 		}
 		return append(violations, routeViolation(dir,
 			routeHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error"+
+				routeHandlerName+"(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error"+
 				legacyPropsHint(function, legacyRoutePropsParam, utils.RoutePropsDir)))
 	}
 
@@ -174,7 +165,7 @@ func legacyPropsHint(function goimportsdeps.Function, legacy string, dir string)
 }
 
 // checkRouteDeclaration enforces the rules that survive parsing: the required
-// keys, the methods, the paths, the parameters and the Entries ids they bind.
+// keys, the methods, the paths, the parameters and the Input ids they bind.
 func checkRouteDeclaration(sandbox *api.Sandbox, dir string, conf *routeconf.RouteConf) []string {
 	var violations []string
 
@@ -185,7 +176,7 @@ func checkRouteDeclaration(sandbox *api.Sandbox, dir string, conf *routeconf.Rou
 			continue
 		}
 		violations = append(violations, routeViolation(dir,
-			"declares `"+key+"`, which routeslist replaced: `methods` lists the methods, and `parameters` (with `fonts`) the headers and query parameters"))
+			"declares `"+key+"`, which the current route.yaml shape replaced: `methods` lists the methods, and `parameters` (with `sources`) the headers and query parameters"))
 	}
 
 	if !conf.HasPriority {
@@ -235,11 +226,11 @@ func checkRouteDeclaration(sandbox *api.Sandbox, dir string, conf *routeconf.Rou
 	claim := func(id string) {
 		if !isExportedId(id) {
 			violations = append(violations, routeViolation(dir,
-				"declares the id "+id+", which is not an exported ASCII Go name (an uppercase ASCII letter, then ASCII letters and digits); it names a field of Entries"))
+				"declares the id "+id+", which is not an exported ASCII Go name (an uppercase ASCII letter, then ASCII letters and digits); it names a field of Input"))
 		}
 		if ids[id] {
 			violations = append(violations, routeViolation(dir,
-				"declares the id "+id+" twice, or one Entries already carries; each id names one field of Entries"))
+				"declares the id "+id+" twice, or one Input already carries; each id names one field of Input"))
 		}
 		ids[id] = true
 	}
@@ -256,7 +247,7 @@ func checkRouteDeclaration(sandbox *api.Sandbox, dir string, conf *routeconf.Rou
 		if !contains(routeconf.PathTypes, path.Type) {
 			violations = append(violations, routeViolation(dir,
 				"declares the path "+path.Id+" with the unknown type "+path.Type+
-					" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.PathTypes, ", ")+")"))
+					" (use "+sandbox.Deps.StringsDeps.Join(routeconf.PathTypes, ", ")+")"))
 		} else if path.Type != routeconf.DefaultPathType && path.Start != path.End {
 			violations = append(violations, routeViolation(dir,
 				"declares the path "+path.Id+" of type "+path.Type+" over more than one segment; a typed path reads one, so `start` and `end` are the same index"))
@@ -269,17 +260,17 @@ func checkRouteDeclaration(sandbox *api.Sandbox, dir string, conf *routeconf.Rou
 		if !contains(routeconf.ParameterTypes, parameter.Type) {
 			violations = append(violations, routeViolation(dir,
 				"declares the parameter "+parameter.Id+" with the unknown type "+parameter.Type+
-					" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.ParameterTypes, ", ")+")"))
+					" (use "+sandbox.Deps.StringsDeps.Join(routeconf.ParameterTypes, ", ")+")"))
 		}
-		if len(parameter.Fonts) == 0 {
+		if len(parameter.Sources) == 0 {
 			violations = append(violations, routeViolation(dir,
-				"declares the parameter "+parameter.Id+" with no `fonts`; name where it is read from"))
+				"declares the parameter "+parameter.Id+" with no `sources`; name where it is read from"))
 		}
-		for _, font := range parameter.Fonts {
-			if !contains(routeconf.ParameterFonts, font) {
+		for _, source := range parameter.Sources {
+			if !contains(routeconf.ParameterSources, source) {
 				violations = append(violations, routeViolation(dir,
-					"declares the parameter "+parameter.Id+" with the unknown font "+font+
-						" (use "+sandbox.Deps.Stringsdeps.Join(routeconf.ParameterFonts, ", ")+")"))
+					"declares the parameter "+parameter.Id+" with the unknown source "+source+
+						" (use "+sandbox.Deps.StringsDeps.Join(routeconf.ParameterSources, ", ")+")"))
 			}
 		}
 		violations = append(violations, checkRouteTrigger(sandbox, dir, "parameter "+parameter.Id, parameter.Trigger)...)
@@ -290,7 +281,7 @@ func checkRouteDeclaration(sandbox *api.Sandbox, dir string, conf *routeconf.Rou
 
 // checkRouteTrigger enforces what a trigger may declare on a route; see
 // triggerProblem.
-func checkRouteTrigger(sandbox *api.Sandbox, dir string, label string, trigger routeconf.Trigger) []string {
+func checkRouteTrigger(sandbox *api.Sandbox, dir string, label string, trigger triggerconf.Trigger) []string {
 	if problem := triggerProblem(sandbox, trigger, false); problem != "" {
 		return []string{routeViolation(dir, "declares the "+label+" with "+problem)}
 	}
@@ -302,12 +293,12 @@ func checkRouteTrigger(sandbox *api.Sandbox, dir string, label string, trigger r
 // that compiles. A prefix with no value matches everything, which is what a
 // command middleware declares, so emptyPrefix lets it through.
 func triggerProblem(sandbox *api.Sandbox, trigger triggerconf.Trigger, emptyPrefix bool) string {
-	if !trigger.Exists {
+	if !trigger.Set {
 		return ""
 	}
 	if !contains(triggerconf.TriggerTypes, trigger.Type) {
 		return "the unknown trigger type " + trigger.Type +
-			" (use " + sandbox.Deps.Stringsdeps.Join(triggerconf.TriggerTypes, ", ") + ")"
+			" (use " + sandbox.Deps.StringsDeps.Join(triggerconf.TriggerTypes, ", ") + ")"
 	}
 	if trigger.Type == triggerconf.OneOf {
 		if len(trigger.Values) == 0 {
@@ -319,7 +310,7 @@ func triggerProblem(sandbox *api.Sandbox, trigger triggerconf.Trigger, emptyPref
 		return "a trigger and no `value`"
 	}
 	if trigger.Type == triggerconf.Regex {
-		if _, err := sandbox.Deps.Stringsdeps.MatchPattern(trigger.Value, ""); err != nil {
+		if _, err := sandbox.Deps.StringsDeps.MatchPattern(trigger.Value, ""); err != nil {
 			return "a regex that does not compile: " + err.Error()
 		}
 	}
@@ -370,7 +361,7 @@ func checkRouteSchemaKeys(sandbox *api.Sandbox, dir string, conf *routeconf.Rout
 	for _, key := range schemaUnknown(conf.Body.Schema) {
 		violations = append(violations, routeViolation(dir,
 			"declares the schema key "+key+", which is outside the supported subset ("+
-				sandbox.Deps.Stringsdeps.Join(schemaKeys, ", ")+")"))
+				sandbox.Deps.StringsDeps.Join(schemaKeys, ", ")+")"))
 	}
 
 	return violations
@@ -393,7 +384,7 @@ func schemaUnknown(schema *routeconf.Schema) []string {
 // two contradictions a parameter entry may carry: required and defaulted, or
 // required and boolean.
 func checkRouteRawFields(sandbox *api.Sandbox, dir string, content string) []string {
-	specs, err := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, err := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if err != nil || !specs.IsObject() {
 		return nil
 	}
@@ -420,7 +411,7 @@ func checkRouteRawFields(sandbox *api.Sandbox, dir string, content string) []str
 
 // checkRawParameter reports the two contradictions one unparsed parameter
 // entry may carry.
-func checkRawParameter(sandbox *api.Sandbox, dir string, entry *serializables.SerializibleObject) []string {
+func checkRawParameter(sandbox *api.Sandbox, dir string, entry *serializabledeps.SerializableObject) []string {
 	if !rawBool(entry, "required") {
 		return nil
 	}
@@ -439,7 +430,7 @@ func checkRawParameter(sandbox *api.Sandbox, dir string, entry *serializables.Se
 	return violations
 }
 
-func rawString(entry *serializables.SerializibleObject, key string) string {
+func rawString(entry *serializabledeps.SerializableObject, key string) string {
 	item, _ := entry.GetObjectItem(key)
 	if item == nil || !item.IsString() {
 		return ""
@@ -451,7 +442,7 @@ func rawString(entry *serializables.SerializibleObject, key string) string {
 	return value
 }
 
-func rawBool(entry *serializables.SerializibleObject, key string) bool {
+func rawBool(entry *serializabledeps.SerializableObject, key string) bool {
 	item, _ := entry.GetObjectItem(key)
 	if item == nil || !item.IsBool() {
 		return false

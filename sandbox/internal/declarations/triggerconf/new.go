@@ -2,7 +2,7 @@ package triggerconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
 // OneOf is the trigger type that holds on any of its `values`, which is how a
@@ -17,14 +17,14 @@ const Regex = "regex"
 var TriggerTypes = []string{"equal", "prefix", "text-prefix", "suffix", Regex, OneOf}
 
 // New parses the `trigger` object of one entry; an entry with none comes back
-// with Exists false.
-func New(sandbox *api.Sandbox, entry *serializibles.SerializibleObject) Trigger {
+// with Set false.
+func New(sandbox *api.Sandbox, entry *serializabledeps.SerializableObject) Trigger {
 	item, _ := entry.GetObjectItem("trigger")
 	if item == nil || !item.IsObject() {
 		return Trigger{}
 	}
 	return Trigger{
-		Exists:     true,
+		Set:        true,
 		Type:       readString(item, "type"),
 		Value:      readString(item, "value"),
 		Values:     readStringArray(item, "values"),
@@ -33,7 +33,7 @@ func New(sandbox *api.Sandbox, entry *serializibles.SerializibleObject) Trigger 
 	}
 }
 
-func readString(obj *serializibles.SerializibleObject, key string) string {
+func readString(obj *serializabledeps.SerializableObject, key string) string {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return ""
@@ -45,7 +45,7 @@ func readString(obj *serializibles.SerializibleObject, key string) string {
 	return value
 }
 
-func readBool(obj *serializibles.SerializibleObject, key string) bool {
+func readBool(obj *serializabledeps.SerializableObject, key string) bool {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return false
@@ -57,7 +57,7 @@ func readBool(obj *serializibles.SerializibleObject, key string) bool {
 	return value
 }
 
-func readStringArray(obj *serializibles.SerializibleObject, key string) []string {
+func readStringArray(obj *serializabledeps.SerializableObject, key string) []string {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || !item.IsArray() {
 		return []string{}

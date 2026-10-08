@@ -7,7 +7,7 @@ cli-output: |
       chain     #1 of 2, before health
 
     paths
-      Route                segments 0..-1  prefix "/users/"
+      Users                segments 0..-1  prefix "/users/"
       Tenant               segments 1..1
 
     parameters
@@ -21,5 +21,5 @@ cli-output: |
       tags                 []string  max-items 10, unique-items
 exit-code: 0
 tree:
-    - file: sandbox/internal/routeslist/create_user/route.yaml
-      sha: faa0ea89d25396985682e9c820b8f46545fa771c73d94524f47e164874bc24c9
+    - file: sandbox/internal/routes/create_user/route.yaml
+      sha: 502dc43e28dbd83abde8cf1d9509e5d4443e023d23b1e05e986008c01dc046cd

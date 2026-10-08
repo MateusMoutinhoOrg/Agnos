@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -15,10 +15,10 @@ import (
 // directories on disk carry the ones the project wrote itself, which is what
 // makes sandbox/new.go an open list rather than a mirror of sandbox/api/. The
 // entries of constructors carry the ones this same build is about to write
-// (GenerateConstructors), which a listing cannot see: SmartIO buffers writes
+// (GenerateConstructors), which a listing cannot see: StagedFS buffers writes
 // until Persist while List* reads disk, so a project's first build would
 // otherwise render a new.go calling nothing.
-func CollectConstructorPackages(sandbox *api.Sandbox, io *smartio.SmartIO, constructors []Constructor) []string {
+func CollectConstructorPackages(sandbox *api.Sandbox, io *stagedfs.StagedFS, constructors []Constructor) []string {
 
 	seen := map[string]bool{}
 	var packages []string
@@ -32,7 +32,7 @@ func CollectConstructorPackages(sandbox *api.Sandbox, io *smartio.SmartIO, const
 	}
 
 	for _, dir := range io.ListDirs(utils.ConstructorsDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
+		parts := sandbox.Deps.StringsDeps.Split(dir, "/")
 		add(parts[len(parts)-1])
 	}
 
@@ -42,6 +42,6 @@ func CollectConstructorPackages(sandbox *api.Sandbox, io *smartio.SmartIO, const
 		}
 	}
 
-	sandbox.Deps.Sortdeps.Strings(packages)
+	sandbox.Deps.SortDeps.Strings(packages)
 	return packages
 }

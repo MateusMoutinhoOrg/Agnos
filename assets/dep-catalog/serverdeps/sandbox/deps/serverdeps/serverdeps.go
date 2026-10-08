@@ -1,22 +1,22 @@
 package serverdeps
 
 // This package is the sandbox's *copy* of the api an http-server library
-// exposes — the same mechanic as argvdeps, iodeps, rundeps and std, for the
+// exposes — the same mechanic as argvdeps, iodeps, rundeps and stddeps, for the
 // same reason: opening a socket is an OS-bound effect, so `net/http` may not
 // appear inside the sandbox. The contract is restated here, and the adapter —
 // which lives outside the sandbox — is what fills it.
 //
 // The contract is deliberately unopinionated: it opens the port, applies the
 // timeouts and hands every request to the one Handler. Routing, method
-// dispatch, path parameters, 404 and 405 are the OpinatedAgnosServer lib's
+// dispatch, path parameters, 404 and 405 are the OpinionatedAgnosServer lib's
 // business, never this library's.
 // Only builtin types cross this boundary — no `time.Time`, no `io.Reader`, no
 // type of the concrete library.
 
-// Sandbox is the http-server library injected whole as the Deps.Serverdeps field.
+// Contract is the http-server library injected whole as the Deps.ServerDeps field.
 // A server is bound to one address and one handler, so it is created per call
 // rather than injected once: what the sandbox holds is this one-field struct.
-type Sandbox struct {
+type Contract struct {
 	// NewServer builds a server over the given props. It binds nothing until
 	// Server.Bind or Server.Listen is called.
 	NewServer func(props ServerProps) Server

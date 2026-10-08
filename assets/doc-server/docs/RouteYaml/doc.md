@@ -1,19 +1,19 @@
 # RouteYaml
 
-`sandbox/internal/routeslist/[<folder>/]<name>/route.yaml` declares one http route — the file is
+`sandbox/internal/routes/[<folder>/]<name>/route.yaml` declares one http route — the file is
 what makes its directory a route, at any depth. `{{.GeneratorName}} build`
 generates two files beside it: `new.go`, the `api.Route` that lands in `Server.Routes` — a 1:1
-image of the yaml, built on `Deps.OpinatedAgnosServer.NewRoute` — and
-`entries.go`, the `Entries` struct the route's `InternalPureHandler` is handed, plus the
-`ReadBody` its body calls for. The dispatch is the `OpinatedAgnosServer` lib's `ServerMain`:
+image of the yaml, built on `Deps.OpinionatedAgnosServer.NewRoute` — and
+`input.go`, the `Input` struct the route's `Handle` is handed, plus the
+`ReadBody` its body calls for. The dispatch is the `OpinionatedAgnosServer` lib's `Main`:
 it reads every request against those declarations, and nothing about a route is spelled
 in Go anywhere else.
 
 | File | Owner |
 |---|---|
 | `route.yaml` | the editors below |
-| `new.go`, `entries.go` | every build |
-| `InternalPureHandler.go` | written once by `{{.GeneratorName}} add-route`, then the project's |
+| `new.go`, `input.go` | every build |
+| `handler.go` | written once by `{{.GeneratorName}} add-route`, then the project's |
 
 Grow the file with the editors of [Workflow](../Workflow/doc.md#change-the-route-surface) — one
 per place it holds something — not by hand: they re-render it with keys in alphabetical order
@@ -38,14 +38,14 @@ and why each other one is skipped — no server needed). `rename-route` and `reb
 | Pattern piece | Becomes |
 |---|---|
 | literal segments in a row | one path with an `equal` trigger, named after them (`/get-article` -> `GetArticle`) |
-| `{name}` | one segment, `Entries.Name string` |
+| `{name}` | one segment, `Input.Name string` |
 | `{name:integer\|number\|uuid}` | one segment of that type |
 | `{*rest}`, last only | the rest of the path, `start: i, end: -1` |
 | no `{*…}` | `segments: <n>` on the route: the segment count is fixed |
 
 ```
 {{.GeneratorName}} add-route get-article --pattern '/get-article/{article:integer}'
-GET /get-article/42      Entries.Article = 42
+GET /get-article/42      Input.Article = 42
 GET /get-article/abc     not this route (the type is part of the match)
 GET /get-article/42/x    not this route (segments: 2)
 ```
@@ -58,7 +58,7 @@ methods: [POST]
 priority: 100
 response-type: application/json
 paths:
-  - id: Route
+  - id: Users
     start: 0
     end: -1
     trigger: { type: prefix, value: /users/ }
@@ -69,10 +69,10 @@ parameters:
   - id: Page
     key: page
     type: number
-    fonts: [query]
+    sources: [query]
     default: "1"
 category: Users
-help: Create a user under a tenant
+summary: Create a user under a tenant
 body:
   type: json
   required: true
@@ -95,7 +95,7 @@ body:
 | `segments` | The segment count the request path has to have, `≥ 1`. Absent: any count |
 | `paths` | The slices of the request path it reads. Required and never empty |
 | `parameters` | The values it reads from the query string and the headers |
-| `category`, `help`, `long-description`, `examples`, `hidden` | As in [CommandYaml](../CommandYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
+| `category`, `summary`, `description`, `examples`, `hidden` | As in [CommandYaml](../CommandYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
 | `body` | The request body, one object rather than a sequence |
 
 `method`, `headers`, `params` and the `identifier` / `name` spelling of `paths` are the older
@@ -104,12 +104,12 @@ declaration; `verify` names each one it finds.
 ## Path keys
 
 A path reads the request segments from `start` to `end` — both inclusive, `-1` the last one — as
-`/` followed by them joined by `/`, and binds that text to `Entries.<id>`. The root path, with no
+`/` followed by them joined by `/`, and binds that text to `Input.<id>`. The root path, with no
 segment at all, reads as `/` for a path of `start: 0, end: -1`.
 
 | Key | Effect |
 |---|---|
-| `id` | The `Entries` field the slice binds to: an exported Go name, unique across `paths` and `parameters`, never `FullRoute` or `Body` |
+| `id` | The `Input` field the slice binds to: an exported Go name, unique across `paths` and `parameters`, never `FullRoute` or `Body` |
 | `start` | Index of the first segment. Default `0` |
 | `end` | Index of the last segment, `-1` the last one. Default `-1` |
 | `type` | `string` (default, omitted), `integer` (`int`), `number` (`float64`), `uuid` (`string`). Anything but `string` needs `start == end`; a segment that does not convert is a **non-match**, never a `400` |
@@ -148,20 +148,20 @@ paths:
 
 ```
 GET /static          404, no segment 1
-GET /static/a        Entries.Item = "/a"
-GET /static/a/b.png  Entries.Item = "/a/b.png"
+GET /static/a        Input.Item = "/a"
+GET /static/a/b.png  Input.Item = "/a/b.png"
 ```
 
 ## Parameter keys
 
 | Key | Effect |
 |---|---|
-| `id` | The `Entries` field the value binds to, as for a path |
+| `id` | The `Input` field the value binds to, as for a path |
 | `key` | The query key or header name it is read under; a header is matched without regard to case. Default `id` |
 | `type` | `string` (default, `string`), `integer` (`int`), `number` (`float64`), `boolean` (`bool`, `true`/`1`/`false`/`0`), `datetime` (`string`, RFC 3339), `string-array` (`[]string`: every occurrence of a query key, a header's comma-separated values), `integer-array` (`[]int`, read the same way) |
-| `fonts` | Where it is read from, in order: `query`, `header`, `cookie`. The first that brings a value wins |
-| `required` | No font brings it: `400` through `HandleBadRequest`. Never on a `boolean`, never with `default` |
-| `default` | The literal bound when no font brings it |
+| `sources` | Where it is read from, in order: `query`, `header`, `cookie`. The first that brings a value wins |
+| `required` | No source brings it: `400` through `HandleBadRequest`. Never on a `boolean`, never with `default` |
+| `default` | The literal bound when no source brings it |
 | `trigger` | As on a path: the value has to match for the route to run at all |
 | `description`, `examples` | One-line help text, whole requests |
 
@@ -176,7 +176,7 @@ response-type: application/json
 paths:
   - { id: Route, start: 0, end: -1, trigger: { type: prefix, value: /admin } }
 parameters:
-  - { id: Authorization, key: authorization, type: string, fonts: [header], trigger: { type: prefix, value: Bearer } }
+  - { id: Authorization, key: authorization, type: string, sources: [header], trigger: { type: prefix, value: Bearer } }
 ```
 
 ```
@@ -185,12 +185,12 @@ GET /admin  Authorization: Basic abc        404, this route never ran
 GET /admin  Authorization: Bearer abc       this route
 ```
 
-## Entries and `InternalPureHandler`
+## Input and `Handle`
 
-`entries.go` declares one struct, every field tagged with the id `RequestHandler` fills it by:
+`input.go` declares one struct, every field tagged with the id `Run` fills it by:
 
 ```go
-type Entries struct {
+type Input struct {
 	FullRoute string `id:"FullRoute"` // the whole request path, always
 	Route     string `id:"Route"`     // one per path, in its type
 	Tenant    string `id:"Tenant"`
@@ -202,13 +202,13 @@ type Entries struct {
 The hand-written half is one function, which `verify` holds to this signature:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error
 ```
 
 `props` is the request's `routeprops.RouteProps` (see [The chain](#the-chain)); `entries` is everything
 the request brought that `route.yaml` declares — the handler is handed no request, so a value it
-needs is a declared path, parameter or body. The `OpinatedAgnosServer` lib builds `Entries` and
-calls the handler by reflection, since every route's `Entries` is a type of its own.
+needs is a declared path, parameter or body. The `OpinionatedAgnosServer` lib builds `Input` and
+calls the handler by reflection, since every route's `Input` is a type of its own.
 
 ## Body keys
 
@@ -258,13 +258,13 @@ body:
 
 `multipart/form-data` (an `enctype` for file uploads) is not read: the form keeps the default
 `application/x-www-form-urlencoded`. `set-body <route> --type form` turns a json body with a flat
-`json-schema` into this one, and `Entries.Body` keeps its fields.
+`json-schema` into this one, and `Input.Body` keeps its fields.
 
 ## Generated `ReadBody`
 
 `ReadBody(sandbox *api.Sandbox, route *api.Route)` is generated into the route's own
-`entries.go`, and `new.go` hands it to `Route.ReadBody`: the dispatch calls it before the handler
-runs and binds what it returns onto `Entries.Body`, in what its `body.type` declares:
+`input.go`, and `new.go` hands it to `Route.ReadBody`: the dispatch calls it before the handler
+runs and binds what it returns onto `Input.Body`, in what its `body.type` declares:
 
 | `body.type` | Returns |
 |---|---|
@@ -274,11 +274,11 @@ runs and binds what it returns onto `Entries.Body`, in what its `body.type` decl
 | `form` without a `form-schema` | `(map[string][]string, error)`; a body that does not parse is `400` |
 | `form` with one | `(Body, error)` |
 | `json` with an object `json-schema` | `(Body, error)` |
-| `json` without one | `(*serializables.SerializibleObject, error)` |
+| `json` without one | `(*serializabledeps.SerializableObject, error)` |
 
 Every variant does, in order: `Request.ReadBody(MaxBodyBytes)` (`413`), the `required` check
-(`400`) and — for `json` — `OpinatedAgnosServer.ValidateSchema` against `BodySchema`, or — for a `form` with a
-schema — `OpinatedAgnosServer.ValidateForm` (`400` on the first violation, its field path in the response's
+(`400`) and — for `json` — `OpinionatedAgnosServer.ValidateSchema` against `BodySchema`, or — for a `form` with a
+schema — `OpinionatedAgnosServer.ValidateForm` (`400` on the first violation, its field path in the response's
 `field`). A nested object becomes `Body<Path>`; an
 object inside an array becomes `Body<Path>Item`.
 
@@ -288,9 +288,9 @@ middleware in front of the route still refuses a request before a byte of it is 
 
 ## The chain
 
-`ServerMain` hands every request to one dispatch, which walks `Server.Routes` in `priority`
+`Main` hands every request to one dispatch, which walks `Server.Routes` in `priority`
 order — lowest rung first, by name within one — and runs every route whose
-`IsActionable` says the request is for it: the method is one of `methods` (or they are `ANY`),
+`Matches` says the request is for it: the method is one of `methods` (or they are `ANY`),
 the path has `segments` segments when the route declares a count, and every path and parameter
 trigger matches.
 
@@ -300,18 +300,18 @@ route a middleware. `SetHeader` alone answers nothing, which is how a middleware
 whatever answers after it.
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
-	if entries.Authorization == "" {
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "")
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
+	if input.Authorization == "" {
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "")
 	}
-	props.User = entries.Authorization // the routes after it read props.User
+	props.User = input.Authorization // the routes after it read props.User
 	return nil                         // nothing answered: the next route runs
 }
 ```
 
 ```bash
 {{.GeneratorName}} add-route admin-guard --middleware --trigger /admin --before admin
-{{.GeneratorName}} add-parameter authorization --route admin-guard --font header
+{{.GeneratorName}} add-parameter authorization --route admin-guard --source header
 ```
 
 Every route of one request is handed the same `props`: the dispatch builds one empty
@@ -327,7 +327,7 @@ When no route answers:
 | a route with explicit `methods` matched the path under another method, and no route with explicit `methods` ran | `405` — an `ANY` route running does not hide it |
 | anything else | `404` |
 
-`OpinatedAgnosServer.WriteJSON` (handed `sandbox.Deps.Serializables`), `WriteText` and `Redirect` answer in one call; the
+`OpinionatedAgnosServer.WriteJSON` (handed `sandbox.Deps.SerializableDeps`), `WriteText` and `Redirect` answer in one call; the
 `Response` also carries `AddHeader` (a second `Set-Cookie`) and `GetHeader`.
 
 ## Failures
@@ -343,18 +343,18 @@ once by `{{.GeneratorName}} build` and never regenerated:
 | a parameter that will not convert, a missing `required` one, a body the schema rejected | `handle_bad_request.go` | 400 |
 | a route raised `api.StatusUnauthorized` — a guard, most often | `handle_unauthorized.go` | 401 |
 | a route raised `api.StatusForbidden` | `handle_forbidden.go` | 403 |
-| `Content-Length` or the body itself above `max-bytes` | `handle_too_large.go` | 413 |
-| `content-type` differs | `handle_wrong_content_type.go` | 415 |
-| a handler returned an error without answering, or panicked | `handle_server_error.go` | 500 |
+| `Content-Length` or the body itself above `max-bytes` | `handle_payload_too_large.go` | 413 |
+| `content-type` differs | `handle_unsupported_media_type.go` | 415 |
+| a handler returned an error without answering, or panicked | `handle_internal_server_error.go` | 500 |
 
 Each holds one function, writes the response itself and returns what it could not answer:
 
 ```go
 func HandleNotFound(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
-	failure := sandbox.Deps.OpinatedAgnosServer.FailureOf(route, api.StatusNotFound, "route not found")
+	failure := sandbox.Deps.OpinionatedAgnosServer.FailureOf(route, api.StatusNotFound, "route not found")
 
-	sandbox.Deps.Std.Log("route error %d %s %s \n", failure.Status, failure.Field, failure.Message)
-	return sandbox.Deps.OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, response, failure.Status, failure.Field, failure.Message)
+	sandbox.Deps.StdDeps.Logf("route error %d %s %s \n", failure.Status, failure.Field, failure.Message)
+	return sandbox.Deps.OpinionatedAgnosServer.WriteError(sandbox.Deps.SerializableDeps, response, failure.Status, failure.Field, failure.Message)
 }
 ```
 
@@ -364,16 +364,16 @@ the wording is the one spelled in that file and changing it there changes what t
 The failures that know something the file could not — which field would not bind, and why —
 carry their own.
 
-A handler refuses a request by returning `sandbox.Deps.OpinatedAgnosServer.Fail`, a `*api.RouteFailure`:
+A handler refuses a request by returning `sandbox.Deps.OpinionatedAgnosServer.Fail`, a `*api.RouteFailure`:
 
 ```go
-return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusForbidden, "", "not authorized")
+return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusForbidden, "", "not authorized")
 ```
 
 The lib's dispatch raises what it returns on the bound route — it is the one part of the server
 layer that raises — and reaches the right file through `sandbox.Server.Fail`, the switch the
 generated registry fills. `WriteError` is the writer underneath, and the default body every one
-of them produces is `{"error": "...", "field": "..."}`, logged on `deps.Std.Log` by the file
+of them produces is `{"error": "...", "field": "..."}`, logged on `deps.StdDeps.Logf` by the file
 before it is written.
 
 A `Handle*` file answers a failure and never raises one: a failure raised from inside one comes

@@ -7,16 +7,16 @@ import (
 func New(sandbox *api.Sandbox, content string) (*DepConf, error) {
 
 	if content == "" {
-		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.StdDeps.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	dep_specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
+	dep_specs, parse_error := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !dep_specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("dep_specs is not an object")
+		return nil, sandbox.Deps.StdDeps.Errorf("dep_specs is not an object")
 	}
 
 	dep_conf := &DepConf{}
@@ -36,7 +36,7 @@ func New(sandbox *api.Sandbox, content string) (*DepConf, error) {
 		}
 		value, err := item.GetString()
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("%s is not a string", field.key)
+			return nil, sandbox.Deps.StdDeps.Errorf("%s is not a string", field.key)
 		}
 		*field.target = value
 	}

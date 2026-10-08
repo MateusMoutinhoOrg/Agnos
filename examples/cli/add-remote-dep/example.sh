@@ -1,19 +1,19 @@
 # The add-remote-dep example: install another agnos repo as a dep
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 #
-# TestDir/remote is the repo being installed — every agnos repo is installable
-# by construction, so there is nothing to declare or turn on in it. TestDir/app
+# test-dir/remote is the repo being installed — every agnos repo is installable
+# by construction, so there is nothing to declare or turn on in it. test-dir/app
 # is the consumer. A published repo is pinned with `add-dep <module>@<version>`;
 # here the two live side by side, wired with a `replace`, which is how a pair of
 # repos is developed together.
 
-agnos start --path TestDir/remote --project-name Remote --module example/remote -q
+agnos start --path test-dir/remote --project-name Remote --module example/remote -q
 
-mkdir -p TestDir/remote/sandbox/internal/greeter
+mkdir -p test-dir/remote/sandbox/internal/greeter
 
-cat > TestDir/remote/sandbox/api/greeter.go <<'GO'
+cat > test-dir/remote/sandbox/api/greeter.go <<'GO'
 package api
 
 // Greeter is what this repo publishes.
@@ -35,7 +35,7 @@ type Greeting struct {
 }
 GO
 
-cat > TestDir/remote/sandbox/internal/greeter/new.go <<'GO'
+cat > test-dir/remote/sandbox/internal/greeter/new.go <<'GO'
 package greeter
 
 import (
@@ -53,7 +53,7 @@ func NewGreeter(sandbox *api.Sandbox) api.Greeter {
 }
 GO
 
-cat > TestDir/remote/sandbox/internal/greeter/greeter.go <<'GO'
+cat > test-dir/remote/sandbox/internal/greeter/greeter.go <<'GO'
 package greeter
 
 import (
@@ -70,17 +70,30 @@ func Greet(props api.GreetProps) api.Greeting {
 }
 GO
 
-agnos build --path TestDir/remote -q
+# The Greeter is a field of the repo's own part of the Sandbox, which is what
+# makes it part of the api another repo installs.
+cat > test-dir/remote/sandbox/api/projectsandbox.go <<'GO'
+package api
 
-agnos start --path TestDir/app --project-name App --module example/app -q
-agnos deps-init --path TestDir/app -q
-printf '\nrequire example/remote v0.0.1\n\nreplace example/remote => ../remote\n' >> TestDir/app/go.mod
+// ProjectSandbox is the part of the Sandbox this repo declares: the Greeter it
+// publishes.
+type ProjectSandbox struct {
+	// Greeter is what this repo publishes.
+	Greeter Greeter
+}
+GO
 
-agnos add-dep example/remote --as remote --path TestDir/app
+agnos build --path test-dir/remote -q
+
+agnos start --path test-dir/app --project-name App --module example/app -q
+agnos deps-init --path test-dir/app -q
+printf '\nrequire example/remote v0.0.1\n\nreplace example/remote => ../remote\n' >> test-dir/app/go.mod
+
+agnos add-dep example/remote --as remote --path test-dir/app
 
 # What result.yaml records: the paths this example asserts, copied out of
-# TestDir. The lib side copies the same set.
-mkdir -p AssertDir/sandbox/deps
-cp -R TestDir/app/sandbox/deps/. AssertDir/sandbox/deps/
-mkdir -p AssertDir/adapters
-cp -R TestDir/app/adapters/. AssertDir/adapters/
+# test-dir. The lib side copies the same set.
+mkdir -p assert-dir/sandbox/deps
+cp -R test-dir/app/sandbox/deps/. assert-dir/sandbox/deps/
+mkdir -p assert-dir/adapters
+cp -R test-dir/app/adapters/. assert-dir/adapters/

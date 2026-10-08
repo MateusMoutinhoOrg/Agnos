@@ -2,14 +2,14 @@ package goimportsdeps
 
 // This package is the sandbox's *copy* of the api a Go-source parser exposes —
 // the same mechanic as argvdeps, dbdeps, embeddeps, iodeps, requestdeps and
-// std, for the same reason: parsing Go source pulls in `go/parser`, `go/ast`,
+// stddeps, for the same reason: parsing Go source pulls in `go/parser`, `go/ast`,
 // `go/printer` and `go/token`, which are OS-adjacent enough to stay outside the
 // sandbox. The contract is restated here, and the adapter — which lives outside
 // the sandbox — is what fills it.
 
-// Sandbox is the Go-source parser injected whole as the Deps.Goimportsdeps field.
+// Contract is the Go-source parser injected whole as the Deps.GoimportsDeps field.
 // Every field errors when the given content is not parsable Go.
-type Sandbox struct {
+type Contract struct {
 	// Parse parses a whole Go source file into a File describing its package
 	// clause, imports and top-level declarations (functions, methods, types,
 	// constants and variables).

@@ -3,8 +3,8 @@ package backofficerender
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficetokens"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficeapitokens"
 )
 
 // BackofficeApiTokenFormPage is what backoffice/backoffice_api_token_form.html
@@ -34,9 +34,9 @@ type ExpirationOption struct {
 }
 
 // expirationOptions are every expiration, the one of fields selected.
-func expirationOptions(sandbox *api.Sandbox, fields backofficetokens.Fields) []ExpirationOption {
+func expirationOptions(sandbox *api.Sandbox, fields backofficeapitokens.Fields) []ExpirationOption {
 	options := []ExpirationOption{}
-	for _, expiration := range backofficetokens.Expirations(sandbox) {
+	for _, expiration := range backofficeapitokens.Expirations(sandbox) {
 		options = append(options, ExpirationOption{
 			Value:    expiration.Value,
 			Label:    expiration.Label,
@@ -46,19 +46,19 @@ func expirationOptions(sandbox *api.Sandbox, fields backofficetokens.Fields) []E
 	return options
 }
 
-// CreateBackofficeApiTokenForm answers, under status, the form that creates
+// RenderAddApiTokenPage answers, under status, the form that creates
 // an API token for user, filled with fields and with message above it, the
 // client ip clientIp offered for the ips field.
-func CreateBackofficeApiTokenForm(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backofficedb.BackofficeuserItem, fields backofficetokens.Fields, clientIp string, message string) error {
-	now := sandbox.Deps.Std.Now() / 1_000_000_000
-	return Html(sandbox, response, status, "backoffice/backoffice_api_token_form.html", BackofficeApiTokenFormPage{
+func RenderAddApiTokenPage(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backoffice_db.BackofficeUserRecord, fields backofficeapitokens.Fields, clientIp string, message string) error {
+	now := sandbox.Deps.StdDeps.Now() / 1_000_000_000
+	return RenderHTML(sandbox, response, status, "backoffice/backoffice_api_token_form.html", BackofficeApiTokenFormPage{
 		Viewer:      viewerOf(sandbox, user),
 		Error:       message,
 		Name:        fields.Name,
 		Expirations: expirationOptions(sandbox, fields),
-		IsCustom:    fields.Expiration == backofficetokens.ExpirationCustom,
+		IsCustom:    fields.Expiration == backofficeapitokens.ExpirationCustom,
 		Date:        fields.Date,
-		MinDate:     sandbox.Deps.Timedeps.FormatUnix(now, backofficetokens.DateLayout),
+		MinDate:     sandbox.Deps.TimeDeps.FormatUnix(now, backofficeapitokens.DateLayout),
 		Ips:         fields.Ips,
 		ClientIp:    clientIp,
 	})

@@ -13,7 +13,7 @@ type LoginPage struct {
 	Username string
 }
 
-// Login answers the login page under status, with message above the form.
-func Login(sandbox *api.Sandbox, response *serverdeps.Response, status int, message string, username string) error {
-	return Html(sandbox, response, status, "backoffice/login.html", LoginPage{Error: message, Username: username})
+// RenderLoginPage answers the login page under status, with message above the form.
+func RenderLoginPage(sandbox *api.Sandbox, response *serverdeps.Response, status int, message string, username string) error {
+	return RenderHTML(sandbox, response, status, "backoffice/login.html", LoginPage{Error: message, Username: username})
 }

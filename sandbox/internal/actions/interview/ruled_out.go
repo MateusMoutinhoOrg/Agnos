@@ -232,8 +232,8 @@ func NotAskedNotes(sandbox *api.Sandbox, command api.Command, values map[string]
 
 	notes := []string{}
 	for _, reason := range reasons {
-		notes = append(notes, sandbox.Deps.Std.Sprintf("not asked: %s — %s",
-			sandbox.Deps.Stringsdeps.Join(taken[reason], ", "), reason))
+		notes = append(notes, sandbox.Deps.StdDeps.Sprintf("not asked: %s — %s",
+			sandbox.Deps.StringsDeps.Join(taken[reason], ", "), reason))
 	}
 
 	return notes
@@ -255,7 +255,7 @@ func PruneRuledOut(sandbox *api.Sandbox, command api.Command, values map[string]
 // above declares "string" as its --type default, so an unanswered type is
 // bound to it and never reads back empty here.
 func numeric(kind string) bool {
-	return kind == typeInt || kind == typeFloat
+	return kind == typeInteger || kind == typeNumber
 }
 
 // answeredText is one answer already given, written the way a command line

@@ -20,7 +20,6 @@ body:
     required: true
     type: form
 category: Backoffice Users
-help: Adds a backoffice user
 methods:
     - POST
 paths:
@@ -33,3 +32,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 3
+summary: Adds a backoffice user

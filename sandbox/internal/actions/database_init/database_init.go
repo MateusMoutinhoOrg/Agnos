@@ -4,7 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -16,12 +16,12 @@ const KeepModule = "github.com/MateusMoutinhoOrg/Keep@v0.0.7"
 
 // DatabaseDep is the name the copied contract lands under. The generated code
 // names it, so it is the one spelling database-init may install it as.
-const DatabaseDep = "database"
+const DatabaseDep = "databasedeps"
 
 // databaseDeps are the contracts the database layer calls into beyond the
 // store itself: the output channels the generated methods log and fail
 // through.
-var databaseDeps = []string{"std"}
+var databaseDeps = []string{"stddeps"}
 
 // InstallDeps installs the store and the contracts the generated code calls
 // into. It is exported for the same reason server-init exports its own: the
@@ -41,20 +41,20 @@ func InstallDeps(sandbox *api.Sandbox, path string) error {
 
 	// The readers and filters every generated methods.go shares: their
 	// contract imports the store's, so they are installed after it.
-	return addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: utils.OpinatedAgnosDatabase})
+	return addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: utils.OpinionatedAgnosDatabase})
 }
 
 // DatabaseInit installs the store the database layer is built over and turns
 // the database mechanic on, then runs build as a follow-up step, which renders
 // the group.
-func DatabaseInit(sandbox *api.Sandbox, path string) error {
-	if err := InstallDeps(sandbox, path); err != nil {
+func DatabaseInit(sandbox *api.Sandbox, props api.DatabaseInitProps) error {
+	if err := InstallDeps(sandbox, props.Path); err != nil {
 		return err
 	}
 
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := DatabaseInitInternal(sandbox, io, path); err != nil {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := DatabaseInitInternal(sandbox, io, props.Path); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeGo})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeGo})
 }

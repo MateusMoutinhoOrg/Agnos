@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,12 +10,12 @@ args:
       id: Name
       required: true
       start: 1
-category: Database System
+category: Database
+description: 'Writes sandbox/internal/databases/<name>/database.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: ''agnos add-table'' declares the first one.'
 examples:
-    - add-database app-database --prefix app
+    - add-database app-database --key-prefix app
 flags:
     - description: the key prefix every record is written under (defaults to the database's own name)
-      id: Prefix
-help: Declare a new database in the project
-long-description: 'Writes sandbox/internal/databases/<name>/specs.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: ''agnos add-table'' declares the first one.'
+      id: KeyPrefix
 priority: 100
+summary: Declare a new database in the project

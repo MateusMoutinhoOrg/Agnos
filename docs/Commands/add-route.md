@@ -3,14 +3,14 @@
 Declare a new http route
 
 ```bash
-agnos add-route <Name> [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--method <method>...] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--response-type <response-type>] [--help <help>] [--category <category>] [--dir <dir>] [--path <path>] [--quiet]
+agnos add-route <Name> [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--method <method>...] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--response-type <response-type>] [--summary <summary>] [--category <category>] [--dir <dir>] [--help] [--path <path>] [--quiet]
 ```
 
-Writes <name>/route.yaml and a stub InternalPureHandler.go under sandbox/internal/routeslist — or under the folder --dir names there, e.g. routeslist/admin/<name> — then runs build so the route's new.go (the api.Route that lands in Server.Routes) and entries.go (the Entries its handler is handed) are generated. A directory is a route by holding a route.yaml, at any depth; a name is unique across every folder. The paths come from --pattern, or from one path, Route, reading the whole request path against --trigger. A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
+Writes <name>/route.yaml and a stub handler.go under sandbox/internal/routes — or under the folder --dir names there, e.g. routes/admin/<name> — then runs build so the route's new.go (the api.Route that lands in Server.Routes) and input.go (the Input its handler is handed) are generated. A directory is a route by holding a route.yaml, at any depth; a name is unique across every folder. The paths come from --pattern, or from one path reading the whole request path against --trigger, named after its words (/api/products reads into ApiProducts). A --middleware declines by default and sits in front of the routes on the default rung; --before and --after place a route next to another one. priority and response-type are always written.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Name` | string, required |  | the route name (becomes the directory sandbox/internal/routeslist/<name> and its Go package) |
+| `Name` | string, required |  | the route name (becomes the directory sandbox/internal/routes/<name> and its Go package) |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
@@ -25,21 +25,22 @@ Writes <name>/route.yaml and a stub InternalPureHandler.go under sandbox/interna
 | `--before` | string |  | land one rung below the route named, so it runs first (excludes --priority) | — |
 | `--after` | string |  | land one rung above the route named, so it runs next (excludes --priority) | — |
 | `--response-type` | string |  | the Content-Type every response of the route carries (defaults to application/json, or text/plain for a --middleware) | — |
-| `--help` | string |  | one-line description of the route | — |
+| `--summary` | string |  | one-line description of the route | — |
 | `--category` | string |  | the heading the route is listed under in docs/Routes (defaults to Routes, or Middleware for a --middleware) | — |
-| `--dir` | string |  | the folder under sandbox/internal/routeslist the route lands in, e.g. admin puts it in routeslist/admin/<name> (defaults to the top); a directory holding a route.yaml is a route, whatever folder holds it | — |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--dir` | string |  | the folder under sandbox/internal/routes the route lands in, e.g. admin puts it in routes/admin/<name> (defaults to the top); a directory holding a route.yaml is a route, whatever folder holds it | — |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
-agnos add-route create-user --trigger /users --method POST --help "Create a user" --category Users
+agnos add-route create-user --trigger /users --method POST --summary "Create a user" --category Users
 agnos add-route get-article --pattern '/articles/{article:integer}'
 agnos add-route admin-guard --middleware --trigger /admin
 ```
 
-Server System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Server · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

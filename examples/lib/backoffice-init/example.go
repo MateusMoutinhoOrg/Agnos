@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -13,7 +13,7 @@ import (
 // none of the layers it stands on.
 //
 // It calls the same action `agnos backoffice-init` calls, and writes only
-// inside TestDir.
+// inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -21,14 +21,14 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.BackofficeInit("TestDir"); err != nil {
+	if err := lib.Actions.BackofficeInit(api.BackofficeInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
@@ -36,11 +36,12 @@ func main() {
 	for _, dir := range []string{
 		"sandbox/internal/routeprops",
 		"sandbox/internal/commands/backoffice",
-		"sandbox/internal/databases/backofficedb",
+		"sandbox/internal/commands/middleware/backoffice_start_server",
+		"sandbox/internal/databases/backoffice_db",
 		"sandbox/internal/server/backoffice/backofficeauth",
 		"docs/Backoffice",
 	} {
-		copyTree("TestDir/"+dir, "AssertDir/"+dir)
+		copyTree("test-dir/"+dir, "assert-dir/"+dir)
 	}
 	for _, file := range []string{
 		".gitignore",
@@ -48,7 +49,7 @@ func main() {
 		"sandbox/api/config.go",
 		"sandbox/api/backofficeconfig.go",
 	} {
-		copyFile("TestDir/"+file, "AssertDir/"+file)
+		copyFile("test-dir/"+file, "assert-dir/"+file)
 	}
 }
 

@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // RouteChainEntry is one declared route as the chain lays it down: its package
@@ -14,10 +14,10 @@ type RouteChainEntry struct {
 	Conf *routeconf.RouteConf
 }
 
-// LoadRouteChain reads every route.yaml under sandbox/internal/routeslist and
+// LoadRouteChain reads every route.yaml under sandbox/internal/routes and
 // returns them in the order the dispatch runs them: by priority, lowest first,
 // then by name — the order the build collector lays Server.Routes down in.
-func LoadRouteChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteChainEntry, error) {
+func LoadRouteChain(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]RouteChainEntry, error) {
 	chain := []RouteChainEntry{}
 
 	for _, unit := range RouteDirs(sandbox, io) {
@@ -27,7 +27,7 @@ func LoadRouteChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteChainEntr
 		}
 		conf, err := routeconf.New(sandbox, string(content))
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, RouteConfFile, err)
+			return nil, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, RouteConfFile, err)
 		}
 		chain = append(chain, RouteChainEntry{Name: unit.Name, Dir: unit.Dir, Conf: conf})
 	}
@@ -38,7 +38,7 @@ func LoadRouteChain(sandbox *api.Sandbox, io *smartio.SmartIO) ([]RouteChainEntr
 
 // SortRouteChain puts a chain in run order, in place.
 func SortRouteChain(sandbox *api.Sandbox, chain []RouteChainEntry) {
-	sandbox.Deps.Sortdeps.SliceStable(chain, func(i int, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(chain, func(i int, j int) bool {
 		left, right := chain[i].Conf, chain[j].Conf
 		if left.Priority != right.Priority {
 			return left.Priority < right.Priority
@@ -50,12 +50,12 @@ func SortRouteChain(sandbox *api.Sandbox, chain []RouteChainEntry) {
 // RouteRelativePriority is the rung one rung below (before) or above (after)
 // the route named, for --before and --after. At most one of the two is given;
 // it reports false when neither is.
-func RouteRelativePriority(sandbox *api.Sandbox, io *smartio.SmartIO, before string, after string) (int, bool, error) {
-	before = sandbox.Deps.Stringsdeps.TrimSpace(before)
-	after = sandbox.Deps.Stringsdeps.TrimSpace(after)
+func RouteRelativePriority(sandbox *api.Sandbox, io *stagedfs.StagedFS, before string, after string) (int, bool, error) {
+	before = sandbox.Deps.StringsDeps.TrimSpace(before)
+	after = sandbox.Deps.StringsDeps.TrimSpace(after)
 
 	if before != "" && after != "" {
-		return 0, false, sandbox.Deps.Std.Errorf("--before and --after exclude each other")
+		return 0, false, sandbox.Deps.StdDeps.Errorf("--before and --after exclude each other")
 	}
 	if before == "" && after == "" {
 		return 0, false, nil
@@ -67,8 +67,8 @@ func RouteRelativePriority(sandbox *api.Sandbox, io *smartio.SmartIO, before str
 			return 0, false, err
 		}
 		if other.Priority == 0 {
-			return 0, false, sandbox.Deps.Std.Errorf(
-				"--before %s: it runs on rung 0, and nothing runs below it — spread the chain with rebalance-routes first", RouteIdentifier(sandbox, before))
+			return 0, false, sandbox.Deps.StdDeps.Errorf(
+				"--before %s: it runs on rung 0, and nothing runs below it — spread the chain with rebalance-routes first", RouteName(sandbox, before))
 		}
 		return other.Priority - 1, true, nil
 	}

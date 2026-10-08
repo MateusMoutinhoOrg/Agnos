@@ -1,18 +1,18 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: remove-adapter
     - description: the adapter to remove from the project
       end: 1
-      id: Adapter
+      id: Name
       required: true
       start: 1
-category: Deps System
+category: Deps
+description: Removes adapters/impls/<adapter>/ and the require its declaration pins. Refuses an adapter a binding still binds — point that binding at another adapter first — and refuses one the generator wrote as the shim of a remote dep.
 examples:
     - remove-adapter reflectsort
-help: Uninstalls one adapter, leaving the contract it filled
-long-description: Removes adapters/libs/<adapter>/ and the require its declaration pins. Refuses an adapter an available still binds — point that available at another adapter first — and refuses one the generator wrote as the shim of a remote dep.
 priority: 100
+summary: Uninstall one adapter, leaving the contract it filled

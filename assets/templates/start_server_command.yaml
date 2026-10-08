@@ -1,6 +1,6 @@
 priority: 100
 args:
-  - id: Command
+  - id: Verb
     start: 0
     end: 0
     trigger: { type: equal, value: start-server }
@@ -21,10 +21,10 @@ flags:
     type: integer
     default: 10000
 category: Server
-help: Starts the http server
-long-description: |
+summary: Start the http server
+description: |
   Opens the port and serves every route declared under
-  sandbox/internal/routeslist, until the process is stopped. An interrupt
+  sandbox/internal/routes, until the process is stopped. An interrupt
   (Ctrl+C) or a termination request stops it gracefully: no new request is
   taken, and the ones in flight get --shutdown-timeout-ms to finish.
 examples:

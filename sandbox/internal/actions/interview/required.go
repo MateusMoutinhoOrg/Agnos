@@ -25,7 +25,7 @@ func RequiredHere(sandbox *api.Sandbox, command api.Command, field Field, values
 	if verbOf(command) != scaffoldVerb || field.Id != moduleFieldId {
 		return false
 	}
-	return !sandbox.Deps.Iodeps.Exist(targetOf(sandbox, values, session) + "/go.mod")
+	return !sandbox.Deps.IoDeps.Exists(targetOf(sandbox, values, session) + "/go.mod")
 }
 
 // targetOf is the folder a scaffold is about to write into: the --path already

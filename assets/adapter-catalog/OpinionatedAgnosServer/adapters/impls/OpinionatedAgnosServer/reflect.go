@@ -1,11 +1,11 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"errors"
 	"reflect"
 )
 
-// The reflection the binder builds, fills and calls a route's own Entries
+// The reflection the binder builds, fills and calls a route's own Input
 // with: every route declares a struct of its own, so the binder knows its
 // type only at run time.
 

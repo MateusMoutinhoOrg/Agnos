@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,10 +10,10 @@ args:
       id: Name
       required: true
       start: 1
-category: Cli System
+category: Cli
 flags:
     - description: the command (a verb or its package name) that declares the flag
-      id: Target
+      id: Command
       keys:
         - --command
         - -c
@@ -54,5 +54,5 @@ flags:
     - description: 'a key to take off: keys, type, required, default, min, max, enum, pattern, trigger, trigger-negate, trigger-ignore-case or description (repeatable)'
       id: Clear
       type: string-array
-help: Rewrite one flag of a command's command.yaml
 priority: 100
+summary: Rewrite one flag of a command's command.yaml

@@ -1,4 +1,4 @@
-description: "Install {{.Name}}: a released binary per platform, or a build from source"
+description: "Install {{.ProjectName}}: a released binary per platform, or a build from source"
 name: "CliInstall"
 order: 0
 themes:

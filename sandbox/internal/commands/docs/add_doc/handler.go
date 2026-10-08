@@ -6,15 +6,15 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	add_error := addDocAction.AddDoc(sandbox, api.DocProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	add_error := addDocAction.AddDoc(sandbox, api.AddDocProps{
 		Path:        props.Path,
-		Name:        entries.Name,
-		Description: entries.Description,
-		Themes:      entries.Theme,
+		Name:        input.Name,
+		Description: input.Description,
+		Themes:      input.Theme,
 	})
 	if add_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

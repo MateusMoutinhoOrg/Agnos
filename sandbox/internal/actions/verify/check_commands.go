@@ -3,24 +3,24 @@ package verify
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // commandsDir is the tree the commands are declared in, at any depth.
 const commandsDir = utils.CommandsDir
 
-// legacyCommandFiles are the two files a command was declared with before
+// legacyCommandFiles are the files a command was declared with before
 // command.yaml: a package still carrying one is an old declaration no build
 // collects.
-var legacyCommandFiles = []string{"entries.yaml", "handler.go"}
+var legacyCommandFiles = []string{"entries.yaml"}
 
-// commandHandlerParams is the canonical InternalPureHandler signature the
+// commandHandlerParams is the canonical Handle signature the
 // generated new.go closes over: the sandbox, the command line's shared
-// CommandProps, the command's own Entries and the response it answers
+// CommandProps, the command's own Input and the response it answers
 // through.
-var commandHandlerParams = []string{"*api.Sandbox", "*commandprops.CommandProps", "*Entries", "*api.CommandResponse"}
+var commandHandlerParams = []string{"*api.Sandbox", "*commandprops.CommandProps", "*Input", "*api.CommandResponse"}
 
 // legacyCommandPropsParam is the props parameter a handler took while
 // CommandProps was declared in sandbox/api.
@@ -29,21 +29,21 @@ const legacyCommandPropsParam = "*api.CommandProps"
 // CheckCommands enforces the shape the cli layer's generators read by
 // convention, the way CheckRoutes does for the server's: the four files of a
 // command package, a parsable declaration carrying its required keys, args
-// and flags that can be matched and bound, Entries ids and keys that do not
+// and flags that can be matched and bound, Input ids and keys that do not
 // collide, and a hand-written handler with the one signature the dispatch
 // calls.
 //
 // A command is a directory holding a command.yaml, in whatever folder of
 // sandbox/internal/commands it sits. A project with no
 // sandbox/internal/commands has no cli layer and nothing to check.
-func CheckCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckCommands(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 	if !io.IsDir(commandsDir) {
 		return violations
 	}
 
-	violations = append(violations, checkUnitTree(sandbox, io, commandsDir, utils.CommandConfFile, "command",
-		append([]string{"new.go", "entries.go", utils.CommandHandlerFile}, legacyCommandFiles...))...)
+	violations = append(violations, CheckUnitTree(sandbox, io, commandsDir, utils.CommandConfFile, "command",
+		append([]string{"new.go", "input.go", utils.CommandHandlerFile}, legacyCommandFiles...))...)
 
 	patterns := map[string]string{}
 	for _, unit := range utils.CommandDirs(sandbox, io) {
@@ -52,7 +52,7 @@ func CheckCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		for _, legacy := range legacyCommandFiles {
 			if io.IsFile(dir + "/" + legacy) {
 				violations = append(violations, commandViolation(dir,
-					"carries "+legacy+", which command.yaml and InternalPureHandler.go replaced: the build no longer reads it"))
+					"carries "+legacy+", which command.yaml and handler.go replaced: the build no longer reads it"))
 			}
 		}
 
@@ -73,7 +73,7 @@ func CheckCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 		// different rungs of the chain — that is what a middleware in front
 		// of a command is. Sharing a rung as well is the ambiguity: the two
 		// would run in an order nothing declares.
-		key := conf.Pattern() + " at priority " + sandbox.Deps.Stringsdeps.FormatInt(int64(conf.Priority), 10)
+		key := conf.Pattern() + " at priority " + sandbox.Deps.StringsDeps.FormatInt(int64(conf.Priority), 10)
 		if other, taken := patterns[key]; taken {
 			violations = append(violations, commandViolation(dir,
 				"declares "+key+", which "+other+" already declares"))
@@ -88,10 +88,10 @@ func CheckCommands(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 // checkCommandFiles reports a command package missing any of the four files
 // every command has, and a handler with another signature than the one the
 // dispatch calls.
-func checkCommandFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []string {
+func checkCommandFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []string {
 	var violations []string
 
-	for _, file := range []string{utils.CommandConfFile, "new.go", "entries.go", utils.CommandHandlerFile} {
+	for _, file := range []string{utils.CommandConfFile, "new.go", "input.go", utils.CommandHandlerFile} {
 		if !io.IsFile(dir + "/" + file) {
 			violations = append(violations, commandViolation(dir, "has no "+file))
 		}
@@ -101,7 +101,7 @@ func checkCommandFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []
 	if err != nil {
 		return violations
 	}
-	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
 		return append(violations, commandViolation(dir, utils.CommandHandlerFile+" is not parsable Go: "+err.Error()))
 	}
@@ -115,7 +115,7 @@ func checkCommandFiles(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []
 		}
 		return append(violations, commandViolation(dir,
 			utils.CommandHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
-				routeHandlerName+"(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error"+
+				routeHandlerName+"(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error"+
 				legacyPropsHint(function, legacyCommandPropsParam, utils.CommandPropsDir)))
 	}
 	return append(violations, commandViolation(dir, utils.CommandHandlerFile+" exports no "+routeHandlerName))
@@ -137,10 +137,10 @@ func isCommandHandler(function goimportsdeps.Function) bool {
 }
 
 // checkCommandDeclaration enforces the rules that survive parsing: the
-// required keys, the args, the flags and the Entries ids and keys they bind.
+// required keys, the args, the flags and the Input ids and keys they bind.
 func checkCommandDeclaration(sandbox *api.Sandbox, dir string, conf *commandconf.CommandConf) []string {
 	var violations []string
-	strs := sandbox.Deps.Stringsdeps
+	strs := sandbox.Deps.StringsDeps
 
 	for _, key := range conf.Legacy {
 		violations = append(violations, commandViolation(dir,
@@ -162,10 +162,10 @@ func checkCommandDeclaration(sandbox *api.Sandbox, dir string, conf *commandconf
 	ids := map[string]string{}
 	claim := func(id string, what string) {
 		if !isExportedId(id) {
-			violations = append(violations, commandViolation(dir, "declares the "+what+" "+id+", which is not an exported ASCII Go name (an uppercase ASCII letter, then ASCII letters and digits); it names a field of Entries"))
+			violations = append(violations, commandViolation(dir, "declares the "+what+" "+id+", which is not an exported ASCII Go name (an uppercase ASCII letter, then ASCII letters and digits); it names a field of Input"))
 		}
 		if contains(utils.CommandReservedIds, id) {
-			violations = append(violations, commandViolation(dir, "declares the "+what+" "+id+", which Entries already carries"))
+			violations = append(violations, commandViolation(dir, "declares the "+what+" "+id+", which Input already carries"))
 		}
 		if other, taken := ids[id]; taken {
 			violations = append(violations, commandViolation(dir, "declares the "+what+" "+id+" twice ("+other+" too)"))

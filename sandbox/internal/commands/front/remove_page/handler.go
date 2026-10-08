@@ -6,11 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	remove_error := removePageAction.RemovePage(sandbox, props.Path, entries.Name)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	remove_error := removePageAction.RemovePage(sandbox, api.RemovePageProps{Path: props.Path, Name: input.Name})
 
 	if remove_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", remove_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", remove_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

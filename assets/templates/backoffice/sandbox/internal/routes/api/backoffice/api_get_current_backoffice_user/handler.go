@@ -1,4 +1,4 @@
-package api_me
+package api_get_current_backoffice_user
 
 import (
 	"{{.Module}}/sandbox/api"
@@ -7,11 +7,11 @@ import (
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeapi"
 )
 
-// InternalPureHandler answers GET /api/admin/me with the user the
-// api-authentication middleware put on props.User.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+// Handle answers GET /api/admin/me with the user the
+// backoffice-api-token-auth middleware put on props.User.
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == nil {
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
-	return sandbox.Deps.OpinatedAgnosServer.WriteJSON(sandbox.Deps.Serializables, *response, api.StatusOk, backofficeapi.UserDocument(sandbox, *props.User))
+	return sandbox.Deps.OpinionatedAgnosServer.WriteJSON(sandbox.Deps.SerializableDeps, *response, api.StatusOK, backofficeapi.UserResponseJSON(sandbox, *props.User))
 }

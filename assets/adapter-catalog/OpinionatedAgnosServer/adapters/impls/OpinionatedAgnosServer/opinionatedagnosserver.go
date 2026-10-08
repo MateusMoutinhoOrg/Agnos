@@ -1,20 +1,20 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"{{.Module}}/sandbox/deps"
-	opinatedagnosserver "{{.Module}}/sandbox/deps/OpinatedAgnosServer"
+	opinionatedagnosserver "{{.Module}}/sandbox/deps/OpinionatedAgnosServer"
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
-// Bind fills deps.Deps.OpinatedAgnosServer with the agnos server mechanic:
-// the request chain of servermain.go, the binder of request_handler.go, the
-// matcher of is_actionable.go, the writers of respond.go and the validators of
+// Bind fills deps.Deps.OpinionatedAgnosServer with the agnos server mechanic:
+// the request chain of main.go, the binder of run.go, the
+// matcher of matches.go, the writers of respond.go and the validators of
 // jsonschema.go and formschema.go. Nothing here holds a dep: what a run
 // reaches the outside world through comes in its MainProps, and a writer or a
 // validator takes the one dep it needs as its first parameter.
 func Bind(deps *deps.Deps) {
-	deps.OpinatedAgnosServer = opinatedagnosserver.Sandbox{
-		ServerMain:     serverMain,
+	deps.OpinionatedAgnosServer = opinionatedagnosserver.Contract{
+		Main:           serverMain,
 		NewRoute:       newRoute,
 		BindRoute:      bindRoute,
 		Fail:           fail,
@@ -40,19 +40,19 @@ func Bind(deps *deps.Deps) {
 }
 
 // newRoute returns an empty Route with every slice open.
-func newRoute() *opinatedagnosserver.Route {
-	return &opinatedagnosserver.Route{
-		AcceptMethods: []string{},
-		Examples:      []string{},
-		Paths:         []opinatedagnosserver.Path{},
-		Parameters:    []opinatedagnosserver.Parameter{},
+func newRoute() *opinionatedagnosserver.Route {
+	return &opinionatedagnosserver.Route{
+		Methods:    []string{},
+		Examples:   []string{},
+		Paths:      []opinionatedagnosserver.Path{},
+		Parameters: []opinionatedagnosserver.Parameter{},
 	}
 }
 
 // bindRoute copies one declaration into the route a single request runs on,
 // with no request, response or failure yet. The dispatch calls it once per
 // request, so two requests in flight never share a bound value.
-func bindRoute(route *opinatedagnosserver.Route) *opinatedagnosserver.Route {
+func bindRoute(route *opinionatedagnosserver.Route) *opinionatedagnosserver.Route {
 	bound := *route
 	bound.Request = serverdeps.Request{}
 	bound.Response = serverdeps.Response{}
@@ -68,7 +68,7 @@ func fail(status int, field string, message string) error {
 
 // failWithCause is fail carrying what went wrong underneath.
 func failWithCause(status int, field string, message string, cause string) error {
-	return &opinatedagnosserver.RouteFailure{
+	return &opinionatedagnosserver.RouteFailure{
 		Status:  status,
 		Field:   field,
 		Message: message,
@@ -79,9 +79,9 @@ func failWithCause(status int, field string, message string, cause string) error
 // failureOf merges the failure a Handle* file is answering with that file's
 // own status and wording: what the failure carries wins, what it leaves empty
 // the file fills.
-func failureOf(route *opinatedagnosserver.Route, status int, message string) opinatedagnosserver.RouteFailure {
+func failureOf(route *opinionatedagnosserver.Route, status int, message string) opinionatedagnosserver.RouteFailure {
 	if route.Failure == nil {
-		return opinatedagnosserver.RouteFailure{Status: status, Message: message}
+		return opinionatedagnosserver.RouteFailure{Status: status, Message: message}
 	}
 
 	failure := *route.Failure

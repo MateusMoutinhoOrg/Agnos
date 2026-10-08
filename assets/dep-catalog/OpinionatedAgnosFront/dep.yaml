@@ -1,4 +1,4 @@
-default-adapter: OpinatedAgnosFront
-field: OpinatedAgnosFront
-help: The agnos front mechanic itself — which file of assets/frontend a request path names, and its media type
-name: OpinatedAgnosFront
+default-adapter: OpinionatedAgnosFront
+field: OpinionatedAgnosFront
+help: The agnos front mechanic itself — which file of assets/front a request path names, and its media type
+name: OpinionatedAgnosFront

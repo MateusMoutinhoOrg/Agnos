@@ -1,9 +1,9 @@
 # `{{ .Route.Method }} {{ .Route.Pattern }}`
-{{- with .Route.Help }}
+{{- with .Route.Summary }}
 
 {{ . }}
 {{- end }}
-{{- with .Route.LongDescription }}
+{{- with .Route.Description }}
 
 {{ . }}
 {{- end }}
@@ -97,4 +97,4 @@ or `403`, for example — or let it through to this route.
 
 ---
 
-For developers: `sandbox/internal/routeslist/{{ .Route.Name }}/` · {{ .Category }} · [every route](doc.md) · [RouteYaml](../RouteYaml/doc.md)
+For developers: `sandbox/internal/routes/{{ .Route.Name }}/` · {{ .Category }} · [every route](doc.md) · [RouteYaml](../RouteYaml/doc.md)

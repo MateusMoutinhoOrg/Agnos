@@ -1,15 +1,15 @@
-package remove_available
+package remove_binding
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-func RemoveAvailable(sandbox *api.Sandbox, path string, available string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := RemoveAvailableInternal(sandbox, io, path, available); err != nil {
+func RemoveBinding(sandbox *api.Sandbox, props api.RemoveBindingProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := RemoveBindingInternal(sandbox, io, props.Path, props.Binding); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

@@ -1,5 +1,5 @@
-dep: std
+dep: stddeps
 help: Clock, formatting and output over time, fmt, runtime and os
 module: ""
-name: std
+name: osstd
 origin: catalog

@@ -2,8 +2,8 @@ package set_body_field
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -18,7 +18,7 @@ import (
 // The objects the path passes through are not created here: a property that is
 // not declared yet is add-body-field's, and creating one silently would make a
 // typo in the path a new property instead of an error.
-func SetBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteBodyFieldEditProps) error {
+func SetBodyFieldInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.SetBodyFieldProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
 		return err
@@ -26,13 +26,13 @@ func SetBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 
 	name := utils.RouteFieldName(sandbox, props.Name)
 	if name == "" {
-		return sandbox.Deps.Std.Errorf("set-body-field needs the dotted path of the property to edit")
+		return sandbox.Deps.StdDeps.Errorf("set-body-field needs the dotted path of the property to edit")
 	}
-	if utils.RouteBodyFieldEditEmpty(sandbox, props) {
-		return sandbox.Deps.Std.Errorf("set-body-field: nothing to change (pass --rename, --type, --required, --array, one of the schema keywords, or --clear)")
+	if utils.IsRouteBodyFieldEditEmpty(sandbox, props) {
+		return sandbox.Deps.StdDeps.Errorf("set-body-field: nothing to change (pass --rename, --type, --required, --array, one of the schema keywords, or --clear)")
 	}
 	if conf.Body.Schema == nil {
-		return sandbox.Deps.Std.Errorf("route %q declares no body schema: add-body-field declares the first property", props.Route)
+		return sandbox.Deps.StdDeps.Errorf("route %q declares no body schema: add-body-field declares the first property", props.Route)
 	}
 
 	parts := utils.SplitSchemaPath(sandbox, name)
@@ -44,32 +44,32 @@ func SetBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 	leaf := parts[len(parts)-1]
 	current := utils.SchemaPropertyOf(parent, leaf)
 	if current == nil {
-		return sandbox.Deps.Std.Errorf("route %q declares no body property named %q", props.Route, name)
+		return sandbox.Deps.StdDeps.Errorf("route %q declares no body property named %q", props.Route, name)
 	}
 
-	edit, err := utils.RouteBodyFieldEdited(sandbox, current, utils.SchemaDemands(parent, leaf), props)
+	edit, err := utils.EditRouteBodyField(sandbox, current, utils.SchemaDemands(parent, leaf), props)
 	if err != nil {
 		return err
 	}
 
 	renamed := leaf
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Rename); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Rename); value != "" {
 		renamed = value
 		if renamed != leaf && utils.SchemaPropertyOf(parent, renamed) != nil {
-			return sandbox.Deps.Std.Errorf("route %q already declares a body property named %q", props.Route, renamed)
+			return sandbox.Deps.StdDeps.Errorf("route %q already declares a body property named %q", props.Route, renamed)
 		}
 	}
 
-	sandbox.Deps.Std.Log("set-body-field updating %s in %s \n", name, utils.RouteConfPath(sandbox, io, props.Route))
+	sandbox.Deps.StdDeps.Logf("set-body-field updating %s in %s \n", name, utils.RouteConfPath(sandbox, io, props.Route))
 	for _, keyword := range edit.Dropped {
-		sandbox.Deps.Std.Log("set-body-field dropping %s: the new type carries none \n", keyword)
+		sandbox.Deps.StdDeps.Logf("set-body-field dropping %s: the new type carries none \n", keyword)
 	}
 
 	utils.DropSchemaProperty(parent, leaf)
 	utils.InsertSchemaProperty(parent, renamed, edit.Schema)
 	if edit.Required {
 		parent.Required = utils.AppendUnique(parent.Required, []string{renamed})
-		sandbox.Deps.Sortdeps.Strings(parent.Required)
+		sandbox.Deps.SortDeps.Strings(parent.Required)
 	}
 	if conf.Body.Type == "form" {
 		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {
@@ -88,12 +88,12 @@ func parentOf(sandbox *api.Sandbox, root *routeconf.Schema, parts []string) (*ro
 	for _, segment := range parts[:len(parts)-1] {
 		property := utils.SchemaPropertyOf(parent, segment)
 		if property == nil {
-			return nil, sandbox.Deps.Std.Errorf("no body property named %q is declared, so nothing under it can be edited", segment)
+			return nil, sandbox.Deps.StdDeps.Errorf("no body property named %q is declared, so nothing under it can be edited", segment)
 		}
 
 		child := utils.SchemaObjectOf(property)
 		if child == nil || child.Type != "object" {
-			return nil, sandbox.Deps.Std.Errorf("body property %q is not an object, so nothing under it can be edited", segment)
+			return nil, sandbox.Deps.StdDeps.Errorf("body property %q is not an object, so nothing under it can be edited", segment)
 		}
 		parent = child
 	}

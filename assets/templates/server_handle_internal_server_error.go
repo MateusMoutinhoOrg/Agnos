@@ -5,7 +5,7 @@ import (
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
-// HandleServerError answers a request no route could carry out: a handler
+// HandleInternalServerError answers a request no route could carry out: a handler
 // that returned an error without answering, one that panicked, or a failure
 // raised with a status no other file of this package stands for.
 //
@@ -15,22 +15,22 @@ import (
 // you put here is what your server says. The default is the same JSON shape
 // every other failure carries, {"error": "...", "field": "..."}.
 //
-// What went wrong is on `route.Failure`, read through Deps.OpinatedAgnosServer.FailureOf so a
+// What went wrong is on `route.Failure`, read through Deps.OpinionatedAgnosServer.FailureOf so a
 // route carrying none still answers something. The route itself is bound when a
 // declared route raised the failure and bare when none did, so
 // route.Request reads the request either way.
 //
 // Answer a failure here; never raise one: a failure raised from here comes back to this file.
-func HandleServerError(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
-	failure := sandbox.Deps.OpinatedAgnosServer.FailureOf(route, api.StatusFailure, "the route could not answer this request")
+func HandleInternalServerError(sandbox *api.Sandbox, route *api.Route, response serverdeps.Response) error {
+	failure := sandbox.Deps.OpinionatedAgnosServer.FailureOf(route, api.StatusInternalServerError, "the route could not answer this request")
 
 	// Cause is what went wrong underneath — an error's text, or the value a
 	// handler panicked with. It is for whoever runs the server, never for
 	// whoever called it, so it is logged and never written.
 	if failure.Cause != "" {
-		sandbox.Deps.Std.Error("route %s failed: %s\n", route.Name, failure.Cause)
+		sandbox.Deps.StdDeps.Eprintf("route %s failed: %s\n", route.Name, failure.Cause)
 	}
 
-	sandbox.Deps.Std.Log("route error %d %s %s \n", failure.Status, failure.Field, failure.Message)
-	return sandbox.Deps.OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, response, failure.Status, failure.Field, failure.Message)
+	sandbox.Deps.StdDeps.Logf("route error %d %s %s \n", failure.Status, failure.Field, failure.Message)
+	return sandbox.Deps.OpinionatedAgnosServer.WriteError(sandbox.Deps.SerializableDeps, response, failure.Status, failure.Field, failure.Message)
 }

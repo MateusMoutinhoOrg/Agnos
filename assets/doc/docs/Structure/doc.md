@@ -4,7 +4,7 @@
 [GeneratedFiles](../GeneratedFiles/doc.md).
 
 ```
-adapters/  -->  sandbox/  <--  cmd/{{ if .HasAssets }}        assets/ (templates, reached via Deps.Embeddeps){{ end }}
+adapters/  -->  sandbox/  <--  cmd/{{ if .HasAssets }}        assets/ (templates, reached via Deps.EmbedDeps){{ end }}
 (reaches OS)    (closed)       (wires)
 ```
 {{ if .Structure }}

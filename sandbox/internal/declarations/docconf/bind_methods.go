@@ -1,10 +1,10 @@
-package docpropsconf
+package docconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(sandbox *api.Sandbox, doc_props_conf *DocPropsConf) {
+func BindMethods(sandbox *api.Sandbox, doc_props_conf *DocConf) {
 
 	doc_props_conf.AddTheme = func(id string) {
 		for _, theme := range doc_props_conf.Themes {

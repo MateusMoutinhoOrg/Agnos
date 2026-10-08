@@ -1,14 +1,14 @@
-package same_origin
+package backoffice_same_origin
 
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/internal/routeprops"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficeguard"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficehttp"
 )
 
-// InternalPureHandler runs in front of every ANY /admin/{*Rest}, login
-// included, on a lower rung of the chain than the authentication middleware:
+// Handle runs in front of every ANY /admin/{*Rest}, login
+// included, on a lower rung of the chain than the backoffice-session-auth middleware:
 // it is a middleware.
 //
 // A request whose Origin header names another host than the one it was sent
@@ -17,9 +17,9 @@ import (
 // Anything else declines, so the route after it runs. It backs up the
 // SameSite=Strict of the session cookie, which keeps another site's requests
 // from carrying a session to begin with.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
-	if backofficeguard.SameOrigin(sandbox, entries.Origin, entries.Host) {
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
+	if backofficehttp.SameOrigin(sandbox, input.Origin, input.Host) {
 		return nil
 	}
-	return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusForbidden, "origin", "a request sent by another site's page is refused")
+	return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusForbidden, "origin", "a request sent by another site's page is refused")
 }

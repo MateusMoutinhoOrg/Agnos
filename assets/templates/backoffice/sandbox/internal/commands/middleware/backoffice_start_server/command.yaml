@@ -1,11 +1,17 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: start-server
 category: Middleware
+description: |-
+    Runs in front of start-server and answers nothing. It reads the secret that signs the backoffice sessions from the {{.SecretEnv}} environment variable, at least 32 characters (openssl rand -hex 32); shorter, the server does not start. Unset, a random secret is generated for the run and a warning printed: it lives only in memory, so every session ends when the server restarts and no other instance accepts them. The secret is never a flag, which every user of the machine reads, nor a file, which can end up committed with the code.
+
+    The session cookie is Secure and Strict-Transport-Security is sent, so the backoffice is served over https, by a reverse proxy that terminates TLS; --insecure-http turns both off, for local development over plain http.
+
+    Behind one reverse proxy, bind the server to an address only the proxy reaches (--addr 127.0.0.1:3000) and pass --allow-x-forwarded-for: the client ip is then the last entry of X-Forwarded-For, the one the proxy appended. In nginx: proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for.
 flags:
     - description: the address start-server listens on, read to warn when X-Forwarded-For is trusted on every interface
       id: Addr
@@ -15,12 +21,6 @@ flags:
     - description: 'serve the backoffice over plain http, for local development only: the session cookie drops Secure and no Strict-Transport-Security is sent'
       id: InsecureHttp
       type: boolean
-help: Read the backoffice secret and settings in front of start-server
-long-description: |-
-    Runs in front of start-server and answers nothing. It reads the secret that signs the backoffice sessions from the {{.SecretEnv}} environment variable, at least 32 characters (openssl rand -hex 32); shorter, the server does not start. Unset, a random secret is generated for the run and a warning printed: it lives only in memory, so every session ends when the server restarts and no other instance accepts them. The secret is never a flag, which every user of the machine reads, nor a file, which can end up committed with the code.
-
-    The session cookie is Secure and Strict-Transport-Security is sent, so the backoffice is served over https, by a reverse proxy that terminates TLS; --insecure-http turns both off, for local development over plain http.
-
-    Behind one reverse proxy, bind the server to an address only the proxy reaches (--addr 127.0.0.1:3000) and pass --allow-x-forwarded-for: the client ip is then the last entry of X-Forwarded-For, the one the proxy appended. In nginx: proxy_set_header Host $host; proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for.
 priority: 50
 strict: false
+summary: Read the backoffice secret and settings in front of start-server

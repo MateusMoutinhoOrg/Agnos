@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -12,7 +12,7 @@ import (
 // The remove-page example: drop a page, its route and its html both.
 //
 // It calls the same actions `agnos front-init`, `agnos add-page` and
-// `agnos remove-page` call, and writes only inside TestDir.
+// `agnos remove-page` call, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -20,32 +20,32 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.FrontInit("TestDir"); err != nil {
+	if err := lib.Actions.FrontInit(api.FrontInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	for _, page := range []api.PageProps{
-		{Path: "TestDir", Name: "about", Title: "About"},
-		{Path: "TestDir", Name: "blog/post"},
+	for _, page := range []api.AddPageProps{
+		{Path: "test-dir", Name: "about", Title: "About"},
+		{Path: "test-dir", Name: "blog/post"},
 	} {
 		if err := lib.Actions.AddPage(page); err != nil {
 			panic(err)
 		}
 	}
 
-	if err := lib.Actions.RemovePage("TestDir", "about"); err != nil {
+	if err := lib.Actions.RemovePage(api.RemovePageProps{Path: "test-dir", Name: "about"}); err != nil {
 		panic(err)
 	}
 
 	// What result.yaml records: the same set the cli side copies.
-	copyTree("TestDir/assets/frontend", "AssertDir/assets/frontend")
+	copyTree("test-dir/assets/front", "assert-dir/assets/front")
 }
 
 // copyTree copies every file under source into dest, keeping the place each

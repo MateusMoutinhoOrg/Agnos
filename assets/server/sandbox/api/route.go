@@ -1,83 +1,83 @@
 package api
 
 import (
-	opinatedagnosserver "{{.Module}}/sandbox/deps/OpinatedAgnosServer"
+	opinionatedagnosserver "{{.Module}}/sandbox/deps/OpinionatedAgnosServer"
 )
 
-// Every type here is the OpinatedAgnosServer contract's own, aliased so a
-// handler reads it as api.<Name>: sandbox/deps/OpinatedAgnosServer holds the
+// Every type here is the OpinionatedAgnosServer contract's own, aliased so a
+// handler reads it as api.<Name>: sandbox/deps/OpinionatedAgnosServer holds the
 // whole doc of each.
 
 // PathType is what one segment a Path reads has to convert to.
-type PathType = opinatedagnosserver.PathType
+type PathType = opinionatedagnosserver.PathType
 
-// StringPath takes any slice, bound as a string.
-const StringPath = opinatedagnosserver.StringPath
+// PathString takes any slice, bound as a string.
+const PathString = opinionatedagnosserver.PathString
 
-// IntegerPath takes one segment reading as a whole number, bound as an int.
-const IntegerPath = opinatedagnosserver.IntegerPath
+// PathInteger takes one segment reading as a whole number, bound as an int.
+const PathInteger = opinionatedagnosserver.PathInteger
 
-// NumberPath takes one segment reading as a number, bound as a float64.
-const NumberPath = opinatedagnosserver.NumberPath
+// PathNumber takes one segment reading as a number, bound as a float64.
+const PathNumber = opinionatedagnosserver.PathNumber
 
-// UuidPath takes one segment reading as a canonical uuid, bound as a string.
-const UuidPath = opinatedagnosserver.UuidPath
+// PathUuid takes one segment reading as a canonical uuid, bound as a string.
+const PathUuid = opinionatedagnosserver.PathUuid
 
 // Path is one entry of `paths` in route.yaml.
-type Path = opinatedagnosserver.Path
+type Path = opinionatedagnosserver.Path
 
-// ParameterFont is one place of the request a Parameter is read from.
-type ParameterFont = opinatedagnosserver.ParameterFont
+// ParameterSource is one place of the request a Parameter is read from.
+type ParameterSource = opinionatedagnosserver.ParameterSource
 
-// HeaderParam reads a request header, matched without regard to case.
-const HeaderParam = opinatedagnosserver.HeaderParam
+// SourceHeader reads a request header, matched without regard to case.
+const SourceHeader = opinionatedagnosserver.SourceHeader
 
-// QueryParam reads a query-string parameter.
-const QueryParam = opinatedagnosserver.QueryParam
+// SourceQuery reads a query-string parameter.
+const SourceQuery = opinionatedagnosserver.SourceQuery
 
-// CookieParam reads a request cookie.
-const CookieParam = opinatedagnosserver.CookieParam
+// SourceCookie reads a request cookie.
+const SourceCookie = opinionatedagnosserver.SourceCookie
 
 // ParameterType is the type a Parameter is converted to before it reaches
-// Entries.
-type ParameterType = opinatedagnosserver.ParameterType
+// Input.
+type ParameterType = opinionatedagnosserver.ParameterType
 
-// StringType is bound as a string.
-const StringType = opinatedagnosserver.StringType
+// ParameterString is bound as a string.
+const ParameterString = opinionatedagnosserver.ParameterString
 
-// NumberType is bound as a float64.
-const NumberType = opinatedagnosserver.NumberType
+// ParameterNumber is bound as a float64.
+const ParameterNumber = opinionatedagnosserver.ParameterNumber
 
-// BooleanType is bound as a bool: true/1 or false/0.
-const BooleanType = opinatedagnosserver.BooleanType
+// ParameterBoolean is bound as a bool: true/1 or false/0.
+const ParameterBoolean = opinionatedagnosserver.ParameterBoolean
 
-// DateTimeType is bound as a string that has to read as RFC 3339.
-const DateTimeType = opinatedagnosserver.DateTimeType
+// ParameterDateTime is bound as a string that has to read as RFC 3339.
+const ParameterDateTime = opinionatedagnosserver.ParameterDateTime
 
-// StringArrayType is bound as a []string.
-const StringArrayType = opinatedagnosserver.StringArrayType
+// ParameterStringArray is bound as a []string.
+const ParameterStringArray = opinionatedagnosserver.ParameterStringArray
 
-// IntegerType is bound as an int.
-const IntegerType = opinatedagnosserver.IntegerType
+// ParameterInteger is bound as an int.
+const ParameterInteger = opinionatedagnosserver.ParameterInteger
 
-// IntegerArrayType is bound as a []int.
-const IntegerArrayType = opinatedagnosserver.IntegerArrayType
+// ParameterIntegerArray is bound as a []int.
+const ParameterIntegerArray = opinionatedagnosserver.ParameterIntegerArray
 
-// AnyMethod is the one entry of AcceptMethods that accepts every http method.
-const AnyMethod = opinatedagnosserver.AnyMethod
+// AnyMethod is the one entry of Methods that accepts every http method.
+const AnyMethod = opinionatedagnosserver.AnyMethod
 
 // Parameter is one entry of `parameters` in route.yaml.
-type Parameter = opinatedagnosserver.Parameter
+type Parameter = opinionatedagnosserver.Parameter
 
 // RouteBody is the request body a route declares — the parsed form of `body:`
 // in its route.yaml.
-type RouteBody = opinatedagnosserver.RouteBody
+type RouteBody = opinionatedagnosserver.RouteBody
 
-// RouteFailure is one way a request did not get answered; an
-// InternalPureHandler refuses a request by returning one, built by
-// Deps.OpinatedAgnosServer.Fail.
-type RouteFailure = opinatedagnosserver.RouteFailure
+// RouteFailure is one way a request did not get answered; a
+// Handle refuses a request by returning one, built by
+// Deps.OpinionatedAgnosServer.Fail.
+type RouteFailure = opinionatedagnosserver.RouteFailure
 
 // Route is one http route of the project: the whole of what its route.yaml
 // declares, plus the handler behind it.
-type Route = opinatedagnosserver.Route
+type Route = opinionatedagnosserver.Route

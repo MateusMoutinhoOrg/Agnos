@@ -1,4 +1,4 @@
-package serializables
+package stdserializable
 
 import (
 	"fmt"

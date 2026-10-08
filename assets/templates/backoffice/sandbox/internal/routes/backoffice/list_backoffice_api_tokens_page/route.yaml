@@ -1,10 +1,9 @@
 category: Backoffice API Tokens
-help: Lists your API tokens, or every user's for a root
 methods:
     - GET
 parameters:
     - description: the outcome code of the last revoke
-      fonts:
+      sources:
         - query
       id: Notice
       key: notice
@@ -19,3 +18,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 2
+summary: Lists your API tokens, or every user's for a root

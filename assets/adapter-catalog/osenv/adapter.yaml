@@ -1,5 +1,5 @@
 dep: envdeps
 help: Environment variables over os
 module: ""
-name: envdeps
+name: osenv
 origin: catalog

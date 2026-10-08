@@ -1,4 +1,4 @@
-package jwtdeps
+package golangjwt
 
 import (
 	"errors"
@@ -18,7 +18,7 @@ type claimsSet struct {
 	Ip string `json:"ip,omitempty"`
 }
 
-// sign fills jwtdeps.Sandbox.Sign: the claims become a claimsSet and are
+// sign fills jwtdeps.Contract.Sign: the claims become a claimsSet and are
 // signed with HMAC-SHA256 over secret.
 func sign(claims jwtdeps.Claims, secret string) (string, error) {
 	if secret == "" {
@@ -36,7 +36,7 @@ func sign(claims jwtdeps.Claims, secret string) (string, error) {
 	return jwt.NewWithClaims(jwt.SigningMethodHS256, set).SignedString([]byte(secret))
 }
 
-// parse fills jwtdeps.Sandbox.Parse: only HS256 is accepted, and a token
+// parse fills jwtdeps.Contract.Parse: only HS256 is accepted, and a token
 // without an `exp` claim is refused along with an expired one.
 func parse(token string, secret string) (jwtdeps.Claims, error) {
 	if secret == "" {
@@ -59,9 +59,9 @@ func parse(token string, secret string) (jwtdeps.Claims, error) {
 	return claims, nil
 }
 
-// Bind fills deps.Deps.Jwtdeps with github.com/golang-jwt/jwt/v5.
+// Bind fills deps.Deps.JwtDeps with github.com/golang-jwt/jwt/v5.
 func Bind(deps *deps.Deps) {
-	deps.Jwtdeps = jwtdeps.Sandbox{
+	deps.JwtDeps = jwtdeps.Contract{
 		Sign: func(claims jwtdeps.Claims, secret string) (string, error) {
 			return sign(claims, secret)
 		},

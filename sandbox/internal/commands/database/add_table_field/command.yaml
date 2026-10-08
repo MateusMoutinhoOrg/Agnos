@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,7 +10,8 @@ args:
       id: Name
       required: true
       start: 1
-category: Database System
+category: Database
+description: 'Appends one field to a table of the database''s database.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, an object the Add/List pair for the collection nested under each record, and every plain field a Set and a place in the table''s filter.'
 examples:
     - add-table-field alias --database app-database --table url --type key --required
 flags:
@@ -20,16 +21,15 @@ flags:
     - description: the table the field is declared on
       id: Table
       required: true
-    - description: the nested database field the new field goes inside, instead of the table itself
+    - description: the nested object field the new field goes inside, instead of the table itself
       id: Parent
     - default: string
-      description: 'the field type: key, string, int, float, link or database'
+      description: 'the field type: key, string, integer, number, link or object'
       id: Type
     - description: an insert must carry this field
       id: Required
       type: boolean
     - description: the table a link points at (only with --type link)
       id: Target
-help: Declare one field on a table of a database
-long-description: 'Appends one field to a table of the database''s specs.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, a database the Add/List pair for the collection nested under each record, and every plain field an Update and a place in the table''s filtrage.'
 priority: 100
+summary: Declare one field on a table of a database

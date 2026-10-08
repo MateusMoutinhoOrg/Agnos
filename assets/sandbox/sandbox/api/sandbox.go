@@ -12,7 +12,7 @@ type Sandbox struct {
 	// {{ .Name }} is a part of the Sandbox, declared in {{ .File }}.
 	// Embedded, so each of its fields is read as sandbox.<Field> like any
 	// contract. Every struct of a sandbox/api/<x>sandbox.go file is one: each
-	// mechanic writes its own, the project writes usersandbox.go.
+	// mechanic writes its own, the project writes projectsandbox.go.
 	{{ .Name }}
 {{ end }}{{if .HasDeps}}
 	// Deps is every capability the sandbox reaches the outside world
@@ -25,6 +25,6 @@ type Sandbox struct {
 	Deps *deps.Deps
 {{end}}
 	// Config is what the project knows about itself, built from
-	// <ProjectName>Config/project.yaml (see sandbox/api/config.go).
+	// {{ .ConfigDir }}/project.yaml (see sandbox/api/config.go).
 	Config Config
 }

@@ -3,7 +3,7 @@ package backofficerender
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
 )
@@ -49,11 +49,11 @@ func roleOptions(sandbox *api.Sandbox, fields backofficeusers.Fields) []RoleOpti
 	return options
 }
 
-// AddBackofficeUserForm answers, under status, the form that adds a
+// RenderAddUserPage answers, under status, the form that adds a
 // backoffice user, filled with fields — never their password — and with
 // message above it.
-func AddBackofficeUserForm(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backofficedb.BackofficeuserItem, fields backofficeusers.Fields, message string) error {
-	return Html(sandbox, response, status, "backoffice/backoffice_user_form.html", BackofficeUserFormPage{
+func RenderAddUserPage(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backoffice_db.BackofficeUserRecord, fields backofficeusers.Fields, message string) error {
+	return RenderHTML(sandbox, response, status, "backoffice/backoffice_user_form.html", BackofficeUserFormPage{
 		Viewer:           viewerOf(sandbox, user),
 		Title:            "Add user",
 		Action:           "/admin/root/add-backoffice-user",
@@ -66,14 +66,14 @@ func AddBackofficeUserForm(sandbox *api.Sandbox, response *serverdeps.Response, 
 	})
 }
 
-// EditBackofficeUserForm answers, under status, the form that edits the
+// RenderSetUserPage answers, under status, the form that edits the
 // backoffice user with id id, filled with fields — never their password — and
 // with message above it.
-func EditBackofficeUserForm(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backofficedb.BackofficeuserItem, id int64, fields backofficeusers.Fields, message string) error {
-	return Html(sandbox, response, status, "backoffice/backoffice_user_form.html", BackofficeUserFormPage{
+func RenderSetUserPage(sandbox *api.Sandbox, response *serverdeps.Response, status int, user *backoffice_db.BackofficeUserRecord, id int64, fields backofficeusers.Fields, message string) error {
+	return RenderHTML(sandbox, response, status, "backoffice/backoffice_user_form.html", BackofficeUserFormPage{
 		Viewer:   viewerOf(sandbox, user),
-		Title:    "Edit user #" + sandbox.Deps.Stringsdeps.FormatInt(id, 10),
-		Action:   "/admin/root/edit-backoffice-user/" + sandbox.Deps.Stringsdeps.FormatInt(id, 10),
+		Title:    "Edit user #" + sandbox.Deps.StringsDeps.FormatInt(id, 10),
+		Action:   "/admin/root/set-backoffice-user/" + sandbox.Deps.StringsDeps.FormatInt(id, 10),
 		Submit:   "Save changes",
 		Error:    message,
 		Username: fields.Username,

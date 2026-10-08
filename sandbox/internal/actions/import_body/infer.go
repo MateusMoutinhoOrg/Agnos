@@ -2,8 +2,8 @@ package import_body
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -26,16 +26,16 @@ var formatPatterns = []struct {
 // whatever its first item is, and a scalar the type it is written as. A json
 // null says only that the key may be null, so it becomes a nullable string —
 // the type an example cannot name is the one the person changes afterwards.
-func inferSchema(sandbox *api.Sandbox, raw string, props api.RouteBodyImportProps) (*routeconf.Schema, error) {
-	document, err := sandbox.Deps.Serializables.ParseJson(raw)
+func inferSchema(sandbox *api.Sandbox, raw string, props api.ImportBodyProps) (*routeconf.Schema, error) {
+	document, err := sandbox.Deps.SerializableDeps.ParseJson(raw)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("the example is not valid json: %w", err)
+		return nil, sandbox.Deps.StdDeps.Errorf("the example is not valid json: %w", err)
 	}
 	return inferNode(sandbox, document, props)
 }
 
 // inferNode is inferSchema over one already-parsed node.
-func inferNode(sandbox *api.Sandbox, node *serializables.SerializibleObject, props api.RouteBodyImportProps) (*routeconf.Schema, error) {
+func inferNode(sandbox *api.Sandbox, node *serializabledeps.SerializableObject, props api.ImportBodyProps) (*routeconf.Schema, error) {
 	if node == nil || node.IsNull() {
 		return &routeconf.Schema{Type: "string", Nullable: true}, nil
 	}
@@ -62,18 +62,18 @@ func inferNode(sandbox *api.Sandbox, node *serializables.SerializibleObject, pro
 // alphabetical order every declaration is read back in. --required lists every
 // one of them: a key the example carries is a key the payload has, which is
 // the most an example can say about it.
-func inferObject(sandbox *api.Sandbox, node *serializables.SerializibleObject, props api.RouteBodyImportProps) (*routeconf.Schema, error) {
+func inferObject(sandbox *api.Sandbox, node *serializabledeps.SerializableObject, props api.ImportBodyProps) (*routeconf.Schema, error) {
 	schema := &routeconf.Schema{Type: "object"}
 
 	keys, err := node.GetKeys()
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read the keys of the example: %w", err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read the keys of the example: %w", err)
 	}
 
 	for _, key := range keys {
 		item, err := node.GetObjectItem(key)
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("could not read %q out of the example: %w", key, err)
+			return nil, sandbox.Deps.StdDeps.Errorf("could not read %q out of the example: %w", key, err)
 		}
 
 		child, err := inferNode(sandbox, item, props)
@@ -87,17 +87,17 @@ func inferObject(sandbox *api.Sandbox, node *serializables.SerializibleObject, p
 		}
 	}
 
-	sandbox.Deps.Sortdeps.Strings(schema.Required)
+	sandbox.Deps.SortDeps.Strings(schema.Required)
 	return schema, nil
 }
 
 // inferArray reads a list as an array of whatever its first item is. An empty
 // list names no element type at all, so it becomes an array of strings — the
 // same answer a json null gets, and for the same reason.
-func inferArray(sandbox *api.Sandbox, node *serializables.SerializibleObject, props api.RouteBodyImportProps) (*routeconf.Schema, error) {
+func inferArray(sandbox *api.Sandbox, node *serializabledeps.SerializableObject, props api.ImportBodyProps) (*routeconf.Schema, error) {
 	size, err := node.GetArraySize()
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read the length of a list in the example: %w", err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read the length of a list in the example: %w", err)
 	}
 	if size == 0 {
 		return &routeconf.Schema{Type: "array", Items: &routeconf.Schema{Type: "string"}}, nil
@@ -112,10 +112,10 @@ func inferArray(sandbox *api.Sandbox, node *serializables.SerializibleObject, pr
 
 // inferString reads one text value, and with --infer-format the format it
 // spells.
-func inferString(sandbox *api.Sandbox, node *serializables.SerializibleObject, props api.RouteBodyImportProps) (*routeconf.Schema, error) {
+func inferString(sandbox *api.Sandbox, node *serializabledeps.SerializableObject, props api.ImportBodyProps) (*routeconf.Schema, error) {
 	value, err := node.GetString()
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read a value of the example: %w", err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read a value of the example: %w", err)
 	}
 
 	schema := &routeconf.Schema{Type: "string"}
@@ -124,7 +124,7 @@ func inferString(sandbox *api.Sandbox, node *serializables.SerializibleObject, p
 	}
 
 	for _, candidate := range formatPatterns {
-		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(candidate.Pattern, value)
+		matched, err := sandbox.Deps.StringsDeps.MatchPattern(candidate.Pattern, value)
 		if err != nil {
 			return nil, err
 		}
@@ -174,6 +174,6 @@ func mergeSchema(sandbox *api.Sandbox, into *routeconf.Schema, from *routeconf.S
 		skipped = append(skipped, path)
 	}
 
-	sandbox.Deps.Sortdeps.Strings(into.Required)
+	sandbox.Deps.SortDeps.Strings(into.Required)
 	return added, skipped
 }

@@ -2,8 +2,8 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -34,19 +34,19 @@ type CommandDocReach struct {
 // command.yaml and the middlewares crossed with it: nothing here is written by
 // hand on the page.
 type CommandDoc struct {
-	Name            string
-	Identifier      string
-	Page            string
-	Aliases         string
-	Help            string
-	LongDescription string
-	Usage           string
-	Pattern         string
-	Priority        int
-	Middleware      bool
-	Flags           []CommandDocField
-	Args            []CommandDocField
-	Examples        []string
+	Name        string
+	Identifier  string
+	Page        string
+	Aliases     string
+	Summary     string
+	Description string
+	Usage       string
+	Pattern     string
+	Priority    int
+	Middleware  bool
+	Flags       []CommandDocField
+	Args        []CommandDocField
+	Examples    []string
 	// Middlewares are the middlewares that run in front of the command.
 	Middlewares []CommandDocReach
 	// RunsBefore are, on a middleware's page, the commands it runs in front
@@ -67,7 +67,6 @@ type CommandDocs struct {
 	Groups      []CommandDocGroup
 	Middlewares []CommandDoc
 }
-
 
 // commandDocOther is the category a command with no declared one falls into,
 // matching what the generated help screen prints for it.
@@ -94,7 +93,7 @@ type commandDocEntry struct {
 // The declaration is the only source: a command, a flag or an example reaches
 // the page by being declared with `add-command`, `add-flag`, `add-arg` or
 // `set-command`, never by the page being edited.
-func CollectCommandDocs(sandbox *api.Sandbox, io *smartio.SmartIO) (CommandDocs, error) {
+func CollectCommandDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) (CommandDocs, error) {
 	docs := CommandDocs{}
 	entries := []commandDocEntry{}
 
@@ -105,7 +104,7 @@ func CollectCommandDocs(sandbox *api.Sandbox, io *smartio.SmartIO) (CommandDocs,
 		}
 		conf, err := commandconf.New(sandbox, string(content))
 		if err != nil {
-			return docs, sandbox.Deps.Std.Errorf("%s/%s: %w", unit.Dir, utils.CommandConfFile, err)
+			return docs, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, utils.CommandConfFile, err)
 		}
 		if conf.Hidden {
 			continue
@@ -142,26 +141,26 @@ func CollectCommandDocs(sandbox *api.Sandbox, io *smartio.SmartIO) (CommandDocs,
 func commandDoc(sandbox *api.Sandbox, entry commandDocEntry, entries []commandDocEntry) CommandDoc {
 	conf := entry.Conf
 	identifiers := conf.Identifiers()
-	identifier := utils.CommandIdentifier(sandbox, entry.Name)
+	identifier := utils.CommandName(sandbox, entry.Name)
 	if len(identifiers) > 0 && conf.Strict {
 		identifier = identifiers[0]
 	}
 
 	doc := CommandDoc{
-		Name:            entry.Name,
-		Identifier:      identifier,
-		Page:            commandDocPage(sandbox, entry),
-		Aliases:         identifierList(sandbox, aliasesOf(identifiers)),
-		Help:            docCell(sandbox, conf.Help),
-		LongDescription: docText(sandbox, conf.LongDescription),
-		Pattern:         conf.Pattern(),
-		Priority:        conf.Priority,
-		Middleware:      !conf.Strict,
-		Examples:        conf.Examples,
+		Name:        entry.Name,
+		Identifier:  identifier,
+		Page:        commandDocPage(sandbox, entry),
+		Aliases:     identifierList(sandbox, aliasesOf(identifiers)),
+		Summary:     docCell(sandbox, conf.Summary),
+		Description: docText(sandbox, conf.Description),
+		Pattern:     conf.Pattern(),
+		Priority:    conf.Priority,
+		Middleware:  !conf.Strict,
+		Examples:    conf.Examples,
 	}
 
 	for _, arg := range conf.Args {
-		if arg.Trigger.Exists {
+		if arg.Trigger.Set {
 			continue
 		}
 		doc.Args = append(doc.Args, CommandDocField{
@@ -182,7 +181,7 @@ func commandDoc(sandbox *api.Sandbox, entry commandDocEntry, entries []commandDo
 		}
 		if doc.Middleware {
 			if other.Conf.Strict {
-				if reach, condition := utils.MiddlewareReach(sandbox, conf, other.Conf); reach != utils.NoReach {
+				if reach, condition := utils.CommandMiddlewareReach(sandbox, conf, other.Conf); reach != utils.NoReach {
 					doc.RunsBefore = append(doc.RunsBefore, CommandDocReach{
 						Name:      commandDocTitle(sandbox, other),
 						Page:      commandDocPage(sandbox, other),
@@ -193,7 +192,7 @@ func commandDoc(sandbox *api.Sandbox, entry commandDocEntry, entries []commandDo
 			continue
 		}
 
-		reach, condition := utils.MiddlewareReach(sandbox, other.Conf, conf)
+		reach, condition := utils.CommandMiddlewareReach(sandbox, other.Conf, conf)
 		if reach == utils.NoReach {
 			continue
 		}
@@ -224,18 +223,18 @@ func commandDocTitle(sandbox *api.Sandbox, entry commandDocEntry) string {
 	if len(identifiers) > 0 && entry.Conf.Strict {
 		return identifiers[0]
 	}
-	return utils.CommandIdentifier(sandbox, entry.Name)
+	return utils.CommandName(sandbox, entry.Name)
 }
 
 // commandDocPage is the file one command's page is written to, relative to
 // docs/Commands.
 func commandDocPage(sandbox *api.Sandbox, entry commandDocEntry) string {
-	return sandbox.Deps.Stringsdeps.ReplaceAll(commandDocTitle(sandbox, entry), " ", "-") + ".md"
+	return sandbox.Deps.StringsDeps.ReplaceAll(commandDocTitle(sandbox, entry), " ", "-") + ".md"
 }
 
 // reachCondition is the cell a crossing is worded with: "" when the
 // middleware always runs.
-func reachCondition(reach utils.Reach, condition string) string {
+func reachCondition(reach utils.MiddlewareReach, condition string) string {
 	switch {
 	case reach == utils.MayRun && condition != "":
 		return commandDocMayRun + "; " + condition
@@ -312,7 +311,7 @@ func flagTypeLabel(sandbox *api.Sandbox, flag commandconf.Flag) string {
 		label += ", <= " + numberLabel(sandbox, flag.Type, flag.Max, true)
 	}
 	if len(flag.Enum) > 0 {
-		label += ", one of " + sandbox.Deps.Stringsdeps.Join(flag.Enum, "/")
+		label += ", one of " + sandbox.Deps.StringsDeps.Join(flag.Enum, "/")
 	}
 	return label
 }
@@ -329,7 +328,7 @@ func commandUsage(sandbox *api.Sandbox, conf *commandconf.CommandConf, inherited
 		}
 		parts = append(parts, token)
 	}
-	return sandbox.Deps.Stringsdeps.Join(parts, " ")
+	return sandbox.Deps.StringsDeps.Join(parts, " ")
 }
 
 // flagToken is one flag as the usage line spells it: its first key, plus a
@@ -339,7 +338,7 @@ func flagToken(sandbox *api.Sandbox, flag commandconf.Flag) string {
 	if flag.Type == "boolean" {
 		return key
 	}
-	token := key + " <" + sandbox.Deps.Stringsdeps.TrimLeft(key, "-") + ">"
+	token := key + " <" + sandbox.Deps.StringsDeps.TrimLeft(key, "-") + ">"
 	if flag.Type == "string-array" || flag.Type == "integer-array" {
 		token += "..."
 	}
@@ -353,26 +352,26 @@ func identifierList(sandbox *api.Sandbox, keys []string) string {
 	for _, key := range keys {
 		quoted = append(quoted, "`"+key+"`")
 	}
-	return sandbox.Deps.Stringsdeps.Join(quoted, ", ")
+	return sandbox.Deps.StringsDeps.Join(quoted, ", ")
 }
 
 // docCell flattens a declared description into one markdown table cell:
 // no line breaks, and no bar to close the cell early.
 func docCell(sandbox *api.Sandbox, raw string) string {
-	flat := sandbox.Deps.Stringsdeps.Join(sandbox.Deps.Stringsdeps.Fields(raw), " ")
-	return sandbox.Deps.Stringsdeps.ReplaceAll(flat, "|", `\|`)
+	flat := sandbox.Deps.StringsDeps.Join(sandbox.Deps.StringsDeps.Fields(raw), " ")
+	return sandbox.Deps.StringsDeps.ReplaceAll(flat, "|", `\|`)
 }
 
 // docText normalizes a long description into paragraphs: the declaration
 // hard-wraps its lines, which markdown would keep, so each blank-line-separated
 // block is joined back into one line.
 func docText(sandbox *api.Sandbox, raw string) string {
-	blocks := sandbox.Deps.Stringsdeps.Split(sandbox.Deps.Stringsdeps.TrimSpace(raw), "\n\n")
+	blocks := sandbox.Deps.StringsDeps.Split(sandbox.Deps.StringsDeps.TrimSpace(raw), "\n\n")
 	joined := make([]string, 0, len(blocks))
 	for _, block := range blocks {
-		if text := sandbox.Deps.Stringsdeps.Join(sandbox.Deps.Stringsdeps.Fields(block), " "); text != "" {
+		if text := sandbox.Deps.StringsDeps.Join(sandbox.Deps.StringsDeps.Fields(block), " "); text != "" {
 			joined = append(joined, text)
 		}
 	}
-	return sandbox.Deps.Stringsdeps.Join(joined, "\n\n")
+	return sandbox.Deps.StringsDeps.Join(joined, "\n\n")
 }

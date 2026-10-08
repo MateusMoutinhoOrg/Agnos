@@ -7,7 +7,7 @@ import (
 // requireModulePath returns the module-path field of a require entry
 // ("github.com/x/y v1.2.3 // indirect" -> "github.com/x/y").
 func requireModulePath(sandbox *api.Sandbox, require string) string {
-	fields := sandbox.Deps.Stringsdeps.Fields(require)
+	fields := sandbox.Deps.StringsDeps.Fields(require)
 	if len(fields) == 0 {
 		return ""
 	}

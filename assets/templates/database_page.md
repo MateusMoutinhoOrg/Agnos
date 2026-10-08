@@ -1,6 +1,6 @@
 # `{{ .Database.Type }}`
 
-`sandbox/internal/databases/{{ .Database.Package }}/`, keys under `{{ .Database.Prefix }}`. Build one with
+`sandbox/internal/databases/{{ .Database.Package }}/`, keys under `{{ .Database.KeyPrefix }}`. Build one with
 `{{ .Database.Package }}.New(sandbox)` — it touches no key, so building one is free.
 {{- range .Database.Tables }}
 

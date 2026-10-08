@@ -6,31 +6,31 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	add_error := addRouteAction.AddRoute(sandbox, api.AddRouteProps{
 		Path:              props.Path,
-		Name:              entries.Name,
-		Methods:           entries.Method,
-		Trigger:           entries.Trigger,
-		TriggerType:       entries.TriggerType,
-		TriggerNegate:     entries.TriggerNegate,
-		TriggerIgnoreCase: entries.TriggerIgnoreCase,
-		Pattern:           entries.Pattern,
-		Middleware:        entries.Middleware,
-		Priority:          entries.Priority,
+		Name:              input.Name,
+		Methods:           input.Method,
+		Trigger:           input.Trigger,
+		TriggerType:       input.TriggerType,
+		TriggerNegate:     input.TriggerNegate,
+		TriggerIgnoreCase: input.TriggerIgnoreCase,
+		Pattern:           input.Pattern,
+		Middleware:        input.Middleware,
+		Priority:          input.Priority,
 		// --priority declares no default, so a rung typed as 0 is told
 		// apart from none by whether anything was bound at all.
-		HasPriority:  entries.Priority >= 0,
-		Before:       entries.Before,
-		After:        entries.After,
-		ResponseType: entries.ResponseType,
-		Help:         entries.Help,
-		Category:     entries.Category,
-		Dir:          entries.Dir,
+		HasPriority:  input.Priority >= 0,
+		Before:       input.Before,
+		After:        input.After,
+		ResponseType: input.ResponseType,
+		Summary:      input.Summary,
+		Category:     input.Category,
+		Dir:          input.Dir,
 	})
 
 	if add_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

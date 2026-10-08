@@ -1,16 +1,17 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: set-route
     - description: the route to edit (identifier or package name)
       end: 1
-      id: Route
+      id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: Overwrites methods, response-type, priority, segments, summary, category, description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
 examples:
     - set-route create-user --method POST --example "curl -X POST localhost:8080/users"
 flags:
@@ -23,11 +24,11 @@ flags:
     - description: the Content-Type every response of the route carries
       id: ResponseType
     - description: one-line description of the route
-      id: Help
+      id: Summary
     - description: the heading the route is listed under in docs/Routes
       id: Category
     - description: the paragraph docs/Routes prints under the route
-      id: LongDescription
+      id: Description
     - description: drop the route from docs/Routes, still dispatched
       id: Hidden
       type: boolean
@@ -52,6 +53,5 @@ flags:
     - description: an usage example for the route (repeatable)
       id: Example
       type: string-array
-help: Rewrite the route-level keys of a route.yaml
-long-description: Overwrites methods, response-type, priority, segments, help, category, long-description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
 priority: 100
+summary: Rewrite the route-level keys of a route.yaml

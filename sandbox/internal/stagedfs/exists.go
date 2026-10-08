@@ -1,8 +1,8 @@
-package smartio
+package stagedfs
 
 import "github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 
-func Exist(sandbox *api.Sandbox, io *SmartIO, path string) bool {
+func Exists(sandbox *api.Sandbox, io *StagedFS, path string) bool {
 	p := processInputPath(io, path)
 	if isPendingRemoval(sandbox, io, p) {
 		return false
@@ -10,5 +10,5 @@ func Exist(sandbox *api.Sandbox, io *SmartIO, path string) bool {
 	if isPendingCreate(io, p) {
 		return true
 	}
-	return sandbox.Deps.Iodeps.Exist(rootedPath(sandbox, io, p))
+	return sandbox.Deps.IoDeps.Exists(rootedPath(sandbox, io, p))
 }

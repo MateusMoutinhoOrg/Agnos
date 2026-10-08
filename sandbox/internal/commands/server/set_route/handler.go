@@ -6,30 +6,30 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	// --priority and --segments declare no default, so a value typed as 0
 	// is told apart from none by whether anything was bound at all.
-	set_error := setRouteAction.SetRoute(sandbox, api.RouteProps{
-		Priority:        entries.Priority,
-		HasPriority:     entries.Priority >= 0,
-		Before:          entries.Before,
-		After:           entries.After,
-		Segments:        entries.Segments,
-		HasSegments:     entries.Segments >= 0,
-		Clear:           entries.Clear,
-		Path:            props.Path,
-		Route:           entries.Route,
-		Methods:         entries.Method,
-		ResponseType:    entries.ResponseType,
-		Help:            entries.Help,
-		Category:        entries.Category,
-		LongDescription: entries.LongDescription,
-		Hidden:          entries.Hidden,
-		Visible:         entries.Visible,
-		Examples:        entries.Example,
+	set_error := setRouteAction.SetRoute(sandbox, api.SetRouteProps{
+		Priority:     input.Priority,
+		HasPriority:  input.Priority >= 0,
+		Before:       input.Before,
+		After:        input.After,
+		Segments:     input.Segments,
+		HasSegments:  input.Segments >= 0,
+		Clear:        input.Clear,
+		Path:         props.Path,
+		Route:        input.Name,
+		Methods:      input.Method,
+		ResponseType: input.ResponseType,
+		Summary:      input.Summary,
+		Category:     input.Category,
+		Description:  input.Description,
+		Hidden:       input.Hidden,
+		Visible:      input.Visible,
+		Examples:     input.Example,
 	})
 	if set_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", set_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

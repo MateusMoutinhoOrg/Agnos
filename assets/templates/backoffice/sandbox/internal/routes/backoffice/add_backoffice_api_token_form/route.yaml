@@ -26,7 +26,6 @@ body:
     required: true
     type: form
 category: Backoffice API Tokens
-help: Creates an API token and shows it once
 methods:
     - POST
 paths:
@@ -35,7 +34,8 @@ paths:
       start: 0
       trigger:
         type: equal
-        value: /admin/create-backoffice-api-token
+        value: /admin/add-backoffice-api-token
 priority: 100
 response-type: text/html
 segments: 2
+summary: Creates an API token and shows it once

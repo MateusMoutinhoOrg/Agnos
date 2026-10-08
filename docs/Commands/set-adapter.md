@@ -1,12 +1,12 @@
 # `set-adapter`
 
-Changes which adapter an available binds for one dep
+Change which adapter a binding binds for one dep
 
 ```bash
-agnos set-adapter <Dep> <Adapter> [--available <available>] [--help] [--path <path>] [--quiet]
+agnos set-adapter <Dep> <Adapter> [--binding <binding>] [--help] [--path <path>] [--quiet]
 ```
 
-Rewrites one available.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.
+Rewrites one binding.yaml so the named adapter is the one bound for that dep, dropping whichever adapter filled the field before. It is the only editor of that choice.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -15,19 +15,19 @@ Rewrites one available.yaml so the named adapter is the one bound for that dep, 
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--available` | string |  | the available to change (defaults to standard) | — |
+| `--binding` | string |  | the binding to change (defaults to standard) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos set-adapter sortdeps reflectsort
-agnos set-adapter sortdeps reflectsort --available lambda
+agnos set-adapter sortdeps reflectsort --binding lambda
 ```
 
-Deps System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Deps · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

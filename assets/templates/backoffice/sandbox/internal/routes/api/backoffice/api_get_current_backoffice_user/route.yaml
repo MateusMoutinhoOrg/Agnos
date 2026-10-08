@@ -1,7 +1,6 @@
 category: Backoffice API
 examples:
     - 'curl localhost:3000/api/admin/me -H "Authorization: Bearer $TOKEN"'
-help: Answers the backoffice user of the Bearer token
 methods:
     - GET
 paths:
@@ -14,3 +13,4 @@ paths:
 priority: 100
 response-type: application/json
 segments: 3
+summary: Answers the backoffice user of the Bearer token

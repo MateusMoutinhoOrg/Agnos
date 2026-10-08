@@ -1,25 +1,23 @@
-cli-output: "started with path TestDir/remote \nbuild started with path TestDir/remote \nsuccessfully rendered template\nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nbuild started with path TestDir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nstarted with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path TestDir/app \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir/app module example/remote as remote \nbuild started with path TestDir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+cli-output: "started with path test-dir/remote \nbuild started with path test-dir/remote \nsuccessfully rendered template\nbuild started with path test-dir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nbuild started with path test-dir/remote \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nstarted with path test-dir/app \nbuild started with path test-dir/app \nsuccessfully rendered template\nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndeps-init started with path test-dir/app \nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir/app module example/remote as remote \nbuild started with path test-dir/app \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: adapters/availables/standard/available.yaml
+    - file: adapters/bindings/standard/binding.yaml
       sha: c47436e286fa8e3c76565b464080774687d73b588ca9969d469b37e69b236469
-    - file: adapters/availables/standard/new.go
-      sha: a48746894fdcf3bce2ff7ac373e5cd3a77d506eb1b7be89f1d06e1765858170c
-    - file: adapters/libs/remote/adapter.yaml
+    - file: adapters/bindings/standard/new.go
+      sha: b1d9c94e729e6f0300abf3e381662de93eba8a9e9b6e6beb7628ebcd3eb02faa
+    - file: adapters/impls/remote/adapter.yaml
       sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
-    - file: adapters/libs/remote/remote.go
-      sha: aee0049436863d95023a47163b12e451853f3f02371ec951420093e2b78025a3
+    - file: adapters/impls/remote/remote.go
+      sha: cd9af44f8d504711c420457623c107221348e736c13c20cd778b51b60afd0409
     - file: sandbox/deps/deps.go
       sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
     - file: sandbox/deps/remote/config.go
-      sha: 4018c9ac382fbd0fdb7fe81c29ff1f454147684ef97ce67e7c3cbe84b3b42366
+      sha: 9bf0ffef8c649e9a6b9849022cac33c5d91bc41697171e832d17914733815c29
     - file: sandbox/deps/remote/greeter.go
       sha: 5fe9fe69498c87176ea5bc32e9ec47f22d0a90a064f4251fad77128e080aacae
+    - file: sandbox/deps/remote/projectconfig.go
+      sha: 5182264d78626f1d3151e928b9d59feeca32b04e7d286d90e84c39b096ec7bf7
+    - file: sandbox/deps/remote/projectsandbox.go
+      sha: 5eaf4cc0c6d2c75b157bee31c65bfe056bbee74e64c312bbc6c128e6a86c4db3
     - file: sandbox/deps/remote/sandbox.go
-      sha: c37a63b3c13b41fd60de282622ebac2d8a8f0e2702d4e54f2741ed091cf7efdf
-    - file: sandbox/deps/remote/trigger.go
-      sha: fc676637a63bd250d44ffb1acfa845eddeefc70c08ae8f82fe0c79e4ed0fe477
-    - file: sandbox/deps/remote/userconfig.go
-      sha: aa13428ef96fac0e62f7dfbcab376f9aaa963d1be1cf3e059012f503f9a2f53f
-    - file: sandbox/deps/remote/usersandbox.go
-      sha: fba34ab813036a411fb4059b2fa509ff4297ecfcb8db04885af3891ffa3d3293
+      sha: 9fb8372af095a5ea6fe18615a0d7d0e0b040a1d645d41e5ec768b2bec0e0a91f

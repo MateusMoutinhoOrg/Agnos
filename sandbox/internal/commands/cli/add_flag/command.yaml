@@ -1,16 +1,17 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: add-flag
-    - description: the flag name; its exported Go form is the Entries field the handler reads (out-file -> entries.OutFile)
+    - description: the flag name; its exported Go form is the Input field the handler reads (out-file -> input.OutFile)
       end: 1
       id: Name
       required: true
       start: 1
-category: Cli System
+category: Cli
+description: Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its input.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
 examples:
     - add-flag output --key --out --key -o --required --command exec
     - add-flag verbose --type boolean --description 'print every step' --command exec
@@ -21,7 +22,7 @@ flags:
       id: Key
       type: string-array
     - description: the command (a verb or its package name) that receives the flag
-      id: Target
+      id: Command
       keys:
         - --command
         - -c
@@ -68,6 +69,5 @@ flags:
     - description: compare the trigger without regard to case
       id: TriggerIgnoreCase
       type: boolean
-help: Add a flag to a command's command.yaml
-long-description: Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its entries.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
 priority: 100
+summary: Add a flag to a command's command.yaml

@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The list-extensions example: what agnos generates for this project
 //
-// It calls the same action `agnos list-extensions` calls, and writes only inside TestDir.
+// It calls the same action `agnos list-extensions` calls, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -19,14 +19,14 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	extensions, err := lib.Actions.ListExtensions("TestDir")
+	extensions, err := lib.Actions.ListExtensions(api.ListExtensionsProps{Path: "test-dir"})
 	if err != nil {
 		panic(err)
 	}
@@ -35,13 +35,13 @@ func main() {
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := copyFile("TestDir/AgnosConfig/extensions.yaml", "AssertDir/AgnosConfig/extensions.yaml"); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := copyFile("test-dir/AgnosConfig/extensions.yaml", "assert-dir/AgnosConfig/extensions.yaml"); err != nil {
 		panic(err)
 	}
 }
 
-// copyFile writes one file of TestDir into AssertDir at the place it holds in
+// copyFile writes one file of test-dir into assert-dir at the place it holds in
 // the tree.
 func copyFile(source string, dest string) error {
 	content, err := os.ReadFile(source)

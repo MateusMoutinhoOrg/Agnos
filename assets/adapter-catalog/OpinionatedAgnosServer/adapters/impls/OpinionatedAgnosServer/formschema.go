@@ -1,11 +1,11 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"sort"
 	"strconv"
 	"strings"
 
-	serializables "{{.Module}}/sandbox/deps/serializables"
+	serializabledeps "{{.Module}}/sandbox/deps/serializabledeps"
 )
 
 // validateForm converts the pairs of a form body into a document and checks it
@@ -22,7 +22,7 @@ import (
 // wrong type. An empty value — an input left blank — counts as absent, so a
 // `required` property catches it. A key the schema does not declare is kept as
 // text, so `additionalProperties: false` still refuses it.
-func validateForm(serializer serializables.Sandbox, schema_json string, form map[string][]string) (*serializables.SerializibleObject, string, string, bool) {
+func validateForm(serializer serializabledeps.Contract, schema_json string, form map[string][]string) (*serializabledeps.SerializableObject, string, string, bool) {
 	check := &validator{serializables: serializer}
 	schema, err := check.serializables.ParseJson(schema_json)
 	if err != nil {
@@ -44,7 +44,7 @@ func validateForm(serializer serializables.Sandbox, schema_json string, form map
 			continue
 		}
 
-		var property *serializables.SerializibleObject
+		var property *serializabledeps.SerializableObject
 		if properties != nil && properties.IsObject() {
 			property, _ = properties.GetObjectItem(key)
 		}
@@ -88,7 +88,7 @@ func formPresent(values []string) []string {
 
 // formArray builds the array one repeated key holds, each occurrence
 // converted to the declared item type.
-func (check *validator) formArray(declared string, values []string) *serializables.SerializibleObject {
+func (check *validator) formArray(declared string, values []string) *serializabledeps.SerializableObject {
 	list := check.serializables.CreateArray()
 	for _, value := range values {
 		list.AddItemToArray(check.formValue(declared, value))

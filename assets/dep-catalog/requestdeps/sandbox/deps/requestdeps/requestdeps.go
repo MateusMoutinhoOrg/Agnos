@@ -8,22 +8,22 @@ package requestdeps
 //
 // It differs from the other copies in one way: a request is created per call
 // rather than injected once, so what the sandbox holds is the one-field
-// Sandbox struct below rather than a library of operations. Everything below
-// Sandbox is what its NewRequest field hands back.
+// Contract struct below rather than a library of operations. Everything below
+// Contract is what its NewRequest field hands back.
 //
 // The tracker in sandbox/ never calls it — nothing it does leaves the
 // machine. It is carried as a standing capability of the template, filled by
-// the standard adapter over `net/http`. See the Deps.RequestLib field.
+// the standard adapter over `net/http`. See the Deps.RequestDeps field.
 
-// Sandbox is the HTTP-request constructor injected whole as the
-// Deps.RequestLib field — the same mechanic as iodeps.Sandbox.
-type Sandbox struct {
+// Contract is the HTTP-request constructor injected whole as the
+// Deps.RequestDeps field — the same mechanic as iodeps.Contract.
+type Contract struct {
 	// NewRequest builds an HTTP request bound to the given url.
 	NewRequest func(url string) Request
 }
 
 // Request is one HTTP request under construction, handed back by
-// Deps.RequestLib.NewRequest already bound to a url. The setters mutate the pending
+// Deps.RequestDeps.NewRequest already bound to a url. The setters mutate the pending
 // request and may be called in any order; nothing leaves the machine until
 // Fetch is called, and a Request may be sent more than once.
 //

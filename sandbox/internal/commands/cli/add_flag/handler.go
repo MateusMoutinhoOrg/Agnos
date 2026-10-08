@@ -6,28 +6,28 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	add_error := addFlagAction.AddFlag(sandbox, api.FlagProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	add_error := addFlagAction.AddFlag(sandbox, api.AddFlagProps{
 		Path:              props.Path,
-		Command:           entries.Target,
-		Name:              entries.Name,
-		Keys:              entries.Key,
-		Type:              entries.Type,
-		Required:          entries.Required,
-		Default:           entries.Default,
-		Min:               entries.Min,
-		Max:               entries.Max,
-		Enum:              entries.Enum,
-		Pattern:           entries.Pattern,
-		Trigger:           entries.Trigger,
-		TriggerType:       entries.TriggerType,
-		TriggerNegate:     entries.TriggerNegate,
-		TriggerIgnoreCase: entries.TriggerIgnoreCase,
-		Description:       entries.Description,
-		Position:          entries.Position,
+		Command:           input.Command,
+		Name:              input.Name,
+		Keys:              input.Key,
+		Type:              input.Type,
+		Required:          input.Required,
+		Default:           input.Default,
+		Min:               input.Min,
+		Max:               input.Max,
+		Enum:              input.Enum,
+		Pattern:           input.Pattern,
+		Trigger:           input.Trigger,
+		TriggerType:       input.TriggerType,
+		TriggerNegate:     input.TriggerNegate,
+		TriggerIgnoreCase: input.TriggerIgnoreCase,
+		Description:       input.Description,
+		Position:          input.Position,
 	})
 	if add_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", add_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

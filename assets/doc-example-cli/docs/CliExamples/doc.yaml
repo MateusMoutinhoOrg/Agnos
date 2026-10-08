@@ -1,4 +1,4 @@
-description: "Index of every runnable example of the {{.Name}} cli"
+description: "Index of every runnable example of the {{.ProjectName}} cli"
 name: "CliExamples"
 order: 4
 themes:

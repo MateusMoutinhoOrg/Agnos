@@ -2,92 +2,109 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/availableconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/bindingconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-// AvailablesDir holds one selection per available: which adapter wins for
-// each field of Deps. adapters/libs/ is what the project has; this is what it
+// BindingsDir holds one selection per binding: which adapter wins for
+// each field of Deps. adapters/impls/ is what the project has; this is what it
 // binds.
-const AvailablesDir = "adapters/availables"
+const BindingsDir = "adapters/bindings"
 
-// AvailableConfFile is the declaration of one available. An available
+// BindingConfFile is the declaration of one binding. A binding
 // directory that has one gets its new.go generated from it; one that has none
 // is a hand-written mix and is left alone.
-const AvailableConfFile = "available.yaml"
+const BindingConfFile = "binding.yaml"
 
-// StandardAvailable is the available every project starts with, the one
+// StandardBinding is the binding every project starts with, the one
 // cmd/main/main.go imports and the one an install writes into unless the
 // caller names another.
-const StandardAvailable = "standard"
+const StandardBinding = "standard"
 
-// AvailableDir is the project-relative directory of one available.
-func AvailableDir(available string) string {
-	return AvailablesDir + "/" + available
+// BindingDir is the project-relative directory of one binding.
+func BindingDir(binding string) string {
+	return BindingsDir + "/" + binding
 }
 
-// AvailableConfPath is the project-relative path of one available's
+// LegacyBindingsDir is where a repo rendered by an agnos older than the
+// binding rename keeps its bindings, under their old name of availables. A
+// remote dep may be such a repo, and its tree is not ours to rename.
+const LegacyBindingsDir = "adapters/availables"
+
+// RemoteBindingDir is the module-relative directory of one binding of a remote
+// repo checked out at moduleDir — adapters/bindings/<binding>, or the legacy
+// adapters/availables/<binding> — and whether the repo has it at all.
+func RemoteBindingDir(sandbox *api.Sandbox, moduleDir string, binding string) (string, bool) {
+	for _, dir := range []string{BindingDir(binding), LegacyBindingsDir + "/" + binding} {
+		if sandbox.Deps.IoDeps.IsDir(sandbox.Deps.IoDeps.Join(moduleDir, dir)) {
+			return dir, true
+		}
+	}
+	return BindingDir(binding), false
+}
+
+// BindingConfPath is the project-relative path of one binding's
 // declaration.
-func AvailableConfPath(available string) string {
-	return AvailableDir(available) + "/" + AvailableConfFile
+func BindingConfPath(binding string) string {
+	return BindingDir(binding) + "/" + BindingConfFile
 }
 
-// LoadAvailableConf reads one available's declaration back through the
+// LoadBindingConf reads one binding's declaration back through the
 // transaction-aware io, so a selection written earlier in the same command is
 // visible before Persist.
-func LoadAvailableConf(sandbox *api.Sandbox, io *smartio.SmartIO, available string) (*availableconf.AvailableConf, error) {
-	rel := AvailableConfPath(available)
+func LoadBindingConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, binding string) (*bindingconf.BindingConf, error) {
+	rel := BindingConfPath(binding)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read %s: no available named %q", rel, available)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read %s: no binding named %q", rel, binding)
 	}
 
-	return availableconf.New(sandbox, string(content))
+	return bindingconf.New(sandbox, string(content))
 }
 
-// DeclaredAvailables returns the name of every available that declares its
-// selection, in listing order. An available with no declaration is not
+// DeclaredBindings returns the name of every binding that declares its
+// selection, in listing order. A binding with no declaration is not
 // reported: it is hand-written, and nothing generated may touch it.
-func DeclaredAvailables(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
-	var availables []string
+func DeclaredBindings(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
+	var bindings []string
 
-	if !io.IsDir(AvailablesDir) {
-		return availables
+	if !io.IsDir(BindingsDir) {
+		return bindings
 	}
 
-	for _, dir := range io.ListDirs(AvailablesDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
+	for _, dir := range io.ListDirs(BindingsDir) {
+		parts := sandbox.Deps.StringsDeps.Split(dir, "/")
 		name := parts[len(parts)-1]
 		if name == "" {
 			continue
 		}
-		if _, err := io.ReadFile(AvailableConfPath(name)); err != nil {
+		if _, err := io.ReadFile(BindingConfPath(name)); err != nil {
 			continue
 		}
-		availables = append(availables, name)
+		bindings = append(bindings, name)
 	}
 
-	return availables
+	return bindings
 }
 
-// EnrollAdapter adds adapter to the selection of every available that declares
-// one, because the invariant is that every available fills every field of Deps:
-// a contract installed into a project and bound by no available is a nil func
-// waiting to panic. A project with no declared available gets the standard
+// EnrollAdapter adds adapter to the selection of every binding that declares
+// one, because the invariant is that every binding fills every field of Deps:
+// a contract installed into a project and bound by no binding is a nil func
+// waiting to panic. A project with no declared binding gets the standard
 // one, which is what cmd/main/main.go imports.
-func EnrollAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) error {
-	availables := DeclaredAvailables(sandbox, io)
-	if len(availables) == 0 {
-		return writeAvailable(sandbox, io, StandardAvailable, availableconf.NewEmpty(sandbox), adapter, true)
+func EnrollAdapter(sandbox *api.Sandbox, io *stagedfs.StagedFS, adapter string) error {
+	bindings := DeclaredBindings(sandbox, io)
+	if len(bindings) == 0 {
+		return writeBinding(sandbox, io, StandardBinding, bindingconf.NewEmpty(sandbox), adapter, true)
 	}
 
-	for _, name := range availables {
-		conf, err := LoadAvailableConf(sandbox, io, name)
+	for _, name := range bindings {
+		conf, err := LoadBindingConf(sandbox, io, name)
 		if err != nil {
 			return err
 		}
-		if err := writeAvailable(sandbox, io, name, conf, adapter, true); err != nil {
+		if err := writeBinding(sandbox, io, name, conf, adapter, true); err != nil {
 			return err
 		}
 	}
@@ -96,15 +113,15 @@ func EnrollAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) er
 }
 
 // UnenrollAdapter is EnrollAdapter's inverse: it drops adapter from every
-// available that binds it, which is what makes removing an adapter leave a
+// binding that binds it, which is what makes removing an adapter leave a
 // tree that still compiles.
-func UnenrollAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) error {
-	for _, name := range DeclaredAvailables(sandbox, io) {
-		conf, err := LoadAvailableConf(sandbox, io, name)
+func UnenrollAdapter(sandbox *api.Sandbox, io *stagedfs.StagedFS, adapter string) error {
+	for _, name := range DeclaredBindings(sandbox, io) {
+		conf, err := LoadBindingConf(sandbox, io, name)
 		if err != nil {
 			return err
 		}
-		if err := writeAvailable(sandbox, io, name, conf, adapter, false); err != nil {
+		if err := writeBinding(sandbox, io, name, conf, adapter, false); err != nil {
 			return err
 		}
 	}
@@ -112,9 +129,9 @@ func UnenrollAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) 
 	return nil
 }
 
-// writeAvailable applies one enrollment change to a selection and writes it
+// writeBinding applies one enrollment change to a selection and writes it
 // back only when something actually changed, so a re-install rewrites nothing.
-func writeAvailable(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *availableconf.AvailableConf, adapter string, enroll bool) error {
+func writeBinding(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *bindingconf.BindingConf, adapter string, enroll bool) error {
 	changed := conf.Remove(adapter)
 	if enroll {
 		changed = conf.Add(adapter)
@@ -124,17 +141,17 @@ func writeAvailable(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf
 		return nil
 	}
 
-	return io.WriteFileOverwrite(AvailableConfPath(name), []byte(conf.Render()))
+	return io.WriteFile(BindingConfPath(name), []byte(conf.Render()))
 }
 
-// SelectAdapter makes adapter the one this available binds for the dep it
+// SelectAdapter makes adapter the one this binding binds for the dep it
 // fills, dropping whichever other adapter filled that same field. It is the
-// single place the "exactly one adapter per field per available" invariant is
+// single place the "exactly one adapter per field per binding" invariant is
 // maintained, so a contract with two implementations can never end up with
 // both bound.
-func SelectAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, available string, adapter string) error {
+func SelectAdapter(sandbox *api.Sandbox, io *stagedfs.StagedFS, binding string, adapter string) error {
 
-	conf, err := LoadAvailableConf(sandbox, io, available)
+	conf, err := LoadBindingConf(sandbox, io, binding)
 	if err != nil {
 		return err
 	}
@@ -164,17 +181,17 @@ func SelectAdapter(sandbox *api.Sandbox, io *smartio.SmartIO, available string, 
 		return nil
 	}
 
-	return io.WriteFileOverwrite(AvailableConfPath(available), []byte(conf.Render()))
+	return io.WriteFile(BindingConfPath(binding), []byte(conf.Render()))
 }
 
-// AvailablesBinding returns the name of every available that binds adapter, in
+// BindingsUsing returns the name of every binding that binds adapter, in
 // listing order. It is what `remove-adapter` refuses on and what
 // `list-adapters` shows.
-func AvailablesBinding(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) []string {
+func BindingsUsing(sandbox *api.Sandbox, io *stagedfs.StagedFS, adapter string) []string {
 	var binding []string
 
-	for _, name := range DeclaredAvailables(sandbox, io) {
-		conf, err := LoadAvailableConf(sandbox, io, name)
+	for _, name := range DeclaredBindings(sandbox, io) {
+		conf, err := LoadBindingConf(sandbox, io, name)
 		if err != nil {
 			continue
 		}
@@ -186,23 +203,23 @@ func AvailablesBinding(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string
 	return binding
 }
 
-// ValidateAvailableName rejects a name that could not be a directory under
-// adapters/availables/ and a Go package clause at the same time — the same
+// ValidateBindingName rejects a name that could not be a directory under
+// adapters/bindings/ and a Go package clause at the same time — the same
 // check ValidateCommandName makes, for the same reason: the name is
 // propagated straight into `package <name>` of the generated new.go.
-func ValidateAvailableName(sandbox *api.Sandbox, available string) error {
-	if available == "" {
-		return sandbox.Deps.Std.Errorf("an available needs a name")
+func ValidateBindingName(sandbox *api.Sandbox, binding string) error {
+	if binding == "" {
+		return sandbox.Deps.StdDeps.Errorf("a binding needs a name")
 	}
-	if available[0] < 'a' || available[0] > 'z' {
-		return sandbox.Deps.Std.Errorf("invalid available name %q: an available name must start with a lowercase letter", available)
+	if binding[0] < 'a' || binding[0] > 'z' {
+		return sandbox.Deps.StdDeps.Errorf("invalid binding name %q: a binding name must start with a lowercase letter", binding)
 	}
-	for _, letter := range available {
+	for _, letter := range binding {
 		if (letter >= 'a' && letter <= 'z') || (letter >= '0' && letter <= '9') {
 			continue
 		}
-		return sandbox.Deps.Std.Errorf("invalid available name %q: only lowercase letters and digits are allowed (it becomes the directory %s and a Go package name)",
-			available, AvailableDir(available))
+		return sandbox.Deps.StdDeps.Errorf("invalid binding name %q: only lowercase letters and digits are allowed (it becomes the directory %s and a Go package name)",
+			binding, BindingDir(binding))
 	}
 	return nil
 }

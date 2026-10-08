@@ -4,14 +4,14 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The list-adapters example: list the adapters of the catalog and of the project
 //
-// It calls the same action `agnos list-adapters` calls, and writes only inside TestDir.
+// It calls the same action `agnos list-adapters` calls, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -19,32 +19,32 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepsInit("TestDir"); err != nil {
+	if err := lib.Actions.DepsInit(api.DepsInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.AddDep(api.AddDepProps{Path: "TestDir", Dep: "sortdeps"}); err != nil {
+	if err := lib.Actions.AddDep(api.AddDepProps{Path: "test-dir", Dep: "sortdeps"}); err != nil {
 		panic(err)
 	}
 
-	adapters, err := lib.Actions.ListAdapters("TestDir")
+	adapters, err := lib.Actions.ListAdapters(api.ListAdaptersProps{Path: "test-dir"})
 	if err != nil {
 		panic(err)
 	}
 	for _, adapter := range adapters {
-		fmt.Println(adapter.Name, adapter.Dep, adapter.Installed, adapter.Availables)
+		fmt.Println(adapter.Name, adapter.Dep, adapter.Installed, adapter.Bindings)
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/adapters", os.DirFS("TestDir/adapters")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/adapters", os.DirFS("test-dir/adapters")); err != nil {
 		panic(err)
 	}
 }

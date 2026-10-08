@@ -35,16 +35,16 @@ Rewrites one property of the route's body json-schema in place and runs build. T
 | `--no-additional-properties` | boolean |  | refuse undeclared keys inside an object property | — |
 | `--clear` | string-array |  | a keyword to take off again: required, array, min, max, format, pattern, enum, const, nullable and the rest (repeatable) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos set-body-field age --route create-user --type int --min 0 --max 130
 ```
 
-Server System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Server · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

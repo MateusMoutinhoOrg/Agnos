@@ -2,30 +2,15 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
-// Reach is whether a middleware runs in front of a command, read off the two
-// declarations alone — without a command line.
-type Reach int
-
-const (
-	// NoReach is a middleware that never runs in front of the command.
-	NoReach Reach = iota
-	// Runs is a middleware that runs in front of every line of the command.
-	Runs
-	// MayRun is a middleware whose trigger reads a segment the command
-	// captures, or a regex: whether it runs depends on what is typed, and
-	// explain-command gives the exact answer.
-	MayRun
-)
-
-// MiddlewareReach crosses one middleware with one command: whether it runs in
+// CommandMiddlewareReach crosses one middleware with one command: whether it runs in
 // front of it — a lower rung, and every trigger of its args holding on the
 // command's literal words — and, when one of its flags declares a trigger, the
 // condition that adds ("only when --x equal \"y\"").
-func MiddlewareReach(sandbox *api.Sandbox, middleware *commandconf.CommandConf, command *commandconf.CommandConf) (Reach, string) {
+func CommandMiddlewareReach(sandbox *api.Sandbox, middleware *commandconf.CommandConf, command *commandconf.CommandConf) (MiddlewareReach, string) {
 	if middleware.Strict || middleware.Priority >= command.Priority {
 		return NoReach, ""
 	}
@@ -40,7 +25,7 @@ func MiddlewareReach(sandbox *api.Sandbox, middleware *commandconf.CommandConf, 
 
 	words := literalWords(sandbox, command)
 	for _, arg := range middleware.Args {
-		if !arg.Trigger.Exists {
+		if !arg.Trigger.Set {
 			continue
 		}
 		switch triggerReach(sandbox, arg, words) {
@@ -53,14 +38,14 @@ func MiddlewareReach(sandbox *api.Sandbox, middleware *commandconf.CommandConf, 
 
 	conditions := []string{}
 	for _, flag := range middleware.Flags {
-		if flag.Trigger.Exists {
+		if flag.Trigger.Set {
 			conditions = append(conditions, flag.Keys[0]+" "+DescribeTrigger(sandbox, flag.Trigger))
 		}
 	}
 	if len(conditions) == 0 {
 		return reach, ""
 	}
-	return reach, "only when " + sandbox.Deps.Stringsdeps.Join(conditions, " and ")
+	return reach, "only when " + sandbox.Deps.StringsDeps.Join(conditions, " and ")
 }
 
 // literalWords is, segment by segment, the one word a command's line is known
@@ -69,10 +54,10 @@ func MiddlewareReach(sandbox *api.Sandbox, middleware *commandconf.CommandConf, 
 func literalWords(sandbox *api.Sandbox, command *commandconf.CommandConf) map[int]string {
 	words := map[int]string{}
 	for _, arg := range command.Args {
-		if !arg.Trigger.Exists || arg.Trigger.Negate || arg.Trigger.Type != "equal" {
+		if !arg.Trigger.Set || arg.Trigger.Negate || arg.Trigger.Type != "equal" {
 			continue
 		}
-		for offset, word := range sandbox.Deps.Stringsdeps.Fields(arg.Trigger.Value) {
+		for offset, word := range sandbox.Deps.StringsDeps.Fields(arg.Trigger.Value) {
 			if _, known := words[arg.Start+offset]; !known {
 				words[arg.Start+offset] = word
 			}
@@ -84,7 +69,7 @@ func literalWords(sandbox *api.Sandbox, command *commandconf.CommandConf) map[in
 // triggerReach is whether one trigger of a middleware's arg holds on a
 // command's literal words: decided when every word it compares is known, or
 // when the known ones already settle a prefix; MayRun otherwise.
-func triggerReach(sandbox *api.Sandbox, arg commandconf.Arg, words map[int]string) Reach {
+func triggerReach(sandbox *api.Sandbox, arg commandconf.Arg, words map[int]string) MiddlewareReach {
 	trigger := arg.Trigger
 	if trigger.Type == triggerconf.Regex {
 		return MayRun
@@ -108,13 +93,13 @@ func triggerReach(sandbox *api.Sandbox, arg commandconf.Arg, words map[int]strin
 		complete = false
 	}
 
-	text := sandbox.Deps.Stringsdeps.Join(known, " ")
+	text := sandbox.Deps.StringsDeps.Join(known, " ")
 	if complete {
 		return boolReach(MatchTrigger(sandbox, trigger, text, true))
 	}
 
 	if trigger.Type == "prefix" && !trigger.Negate {
-		value := sandbox.Deps.Stringsdeps.Fields(trigger.Value)
+		value := sandbox.Deps.StringsDeps.Fields(trigger.Value)
 		if len(value) <= len(known) {
 			return boolReach(MatchTrigger(sandbox, trigger, text, true))
 		}
@@ -128,7 +113,7 @@ func triggerReach(sandbox *api.Sandbox, arg commandconf.Arg, words map[int]strin
 }
 
 // boolReach is Runs for a trigger that holds, NoReach for one that fails.
-func boolReach(holds bool) Reach {
+func boolReach(holds bool) MiddlewareReach {
 	if holds {
 		return Runs
 	}
@@ -136,7 +121,7 @@ func boolReach(holds bool) Reach {
 }
 
 // CommandMatch is what one command makes of one command line, read the way
-// the generated IsActionable and CommandHandler read it: whether it runs,
+// the generated Matches and Run read it: whether it runs,
 // why not when it does not, and — for one that runs — the usage error its
 // values raise before its handler does, "" when they bind.
 type CommandMatch struct {
@@ -145,10 +130,10 @@ type CommandMatch struct {
 	Failure string
 }
 
-// commandEndOfFlags is endOfFlags of the generated IsActionable.go.
+// commandEndOfFlags is endOfFlags of the OpinionatedAgnosCli lib's matches.go.
 const commandEndOfFlags = "--"
 
-// SplitCommandArgv is SplitArgv of the generated IsActionable.go: the
+// SplitCommandArgv is SplitArgv of the OpinionatedAgnosCli lib's matches.go: the
 // segments of a command line and the index in argv of each.
 func SplitCommandArgv(sandbox *api.Sandbox, argv []string) ([]string, []int) {
 	segments := []string{}
@@ -175,17 +160,17 @@ func SplitCommandArgv(sandbox *api.Sandbox, argv []string) ([]string, []int) {
 	return segments, indices
 }
 
-// IsCommandFlagToken is IsFlagToken of the generated IsActionable.go: a token
+// IsCommandFlagToken is IsFlagToken of the OpinionatedAgnosCli lib's matches.go: a token
 // starting with "-" that does not read as a number.
 func IsCommandFlagToken(sandbox *api.Sandbox, token string) bool {
-	if !sandbox.Deps.Stringsdeps.HasPrefix(token, "-") || token == "-" {
+	if !sandbox.Deps.StringsDeps.HasPrefix(token, "-") || token == "-" {
 		return false
 	}
-	_, err := sandbox.Deps.Stringsdeps.ParseFloat(token, 64)
+	_, err := sandbox.Deps.StringsDeps.ParseFloat(token, 64)
 	return err != nil
 }
 
-// commandFlagsEnd is FlagsEnd of the generated IsActionable.go.
+// commandFlagsEnd is FlagsEnd of the OpinionatedAgnosCli lib's matches.go.
 func commandFlagsEnd(argv []string) int {
 	for index, token := range argv {
 		if token == commandEndOfFlags {
@@ -195,7 +180,7 @@ func commandFlagsEnd(argv []string) int {
 	return len(argv)
 }
 
-// commandArgSlice is ArgSlice of the generated IsActionable.go.
+// commandArgSlice is ArgSlice of the OpinionatedAgnosCli lib's matches.go.
 func commandArgSlice(segments []string, arg commandconf.Arg) ([]string, bool) {
 	end := arg.End
 	if end < 0 {
@@ -210,7 +195,7 @@ func commandArgSlice(segments []string, arg commandconf.Arg) ([]string, bool) {
 	return segments[arg.Start : end+1], true
 }
 
-// commandArgConverts is ArgValue of the generated IsActionable.go, reduced to
+// commandArgConverts is ArgValue of the OpinionatedAgnosCli lib's matches.go, reduced to
 // whether the slice converts.
 func commandArgConverts(sandbox *api.Sandbox, arg commandconf.Arg, values []string) bool {
 	if arg.End != arg.Start {
@@ -242,7 +227,7 @@ func commandAssignedOccurrences(sandbox *api.Sandbox, argv []string, flag comman
 	values := []string{}
 	for index, token := range argv[:commandFlagsEnd(argv)] {
 		for _, key := range flag.Keys {
-			if sandbox.Deps.Stringsdeps.HasPrefix(token, key+"=") {
+			if sandbox.Deps.StringsDeps.HasPrefix(token, key+"=") {
 				found = append(found, index)
 				values = append(values, token[len(key)+1:])
 				break
@@ -252,36 +237,36 @@ func commandAssignedOccurrences(sandbox *api.Sandbox, argv []string, flag comman
 	return found, values
 }
 
-// MatchCommandArgv is the generated IsActionable and CommandHandler of one
+// MatchCommandArgv is the generated Matches and Run of one
 // command read against its command.yaml: whether it runs for argv and, when
 // it does, the usage error its values raise. The tokens it reads are marked
 // on consumed — its segments only when it is strict, as the dispatch does —
 // and a strict command reports the first token nobody of the chain read.
 func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv []string, consumed []bool) CommandMatch {
-	strs := sandbox.Deps.Stringsdeps
+	strs := sandbox.Deps.StringsDeps
 	segments, indices := SplitCommandArgv(sandbox, argv)
 
 	if conf.HasSegments && len(segments) != conf.Segments {
-		return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("the line has %d segments, the command takes %d", len(segments), conf.Segments)}
+		return CommandMatch{Reason: sandbox.Deps.StdDeps.Sprintf("the line has %d segments, the command takes %d", len(segments), conf.Segments)}
 	}
 	for _, arg := range conf.Args {
 		values, found := commandArgSlice(segments, arg)
 		if !found {
-			if arg.Trigger.Exists {
-				return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("arg %s: the line has no segment %d", arg.Id, arg.Start)}
+			if arg.Trigger.Set {
+				return CommandMatch{Reason: sandbox.Deps.StdDeps.Sprintf("arg %s: the line has no segment %d", arg.Id, arg.Start)}
 			}
 			continue
 		}
 		text := strs.Join(values, " ")
 		if !commandArgConverts(sandbox, arg, values) {
-			return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("arg %s: %q is not a %s", arg.Id, text, arg.Type)}
+			return CommandMatch{Reason: sandbox.Deps.StdDeps.Sprintf("arg %s: %q is not a %s", arg.Id, text, arg.Type)}
 		}
-		if arg.Trigger.Exists && !MatchTrigger(sandbox, arg.Trigger, text, true) {
-			return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("arg %s: %q fails %s", arg.Id, text, DescribeTrigger(sandbox, arg.Trigger))}
+		if arg.Trigger.Set && !MatchTrigger(sandbox, arg.Trigger, text, true) {
+			return CommandMatch{Reason: sandbox.Deps.StdDeps.Sprintf("arg %s: %q fails %s", arg.Id, text, DescribeTrigger(sandbox, arg.Trigger))}
 		}
 	}
 	for _, flag := range conf.Flags {
-		if !flag.Trigger.Exists {
+		if !flag.Trigger.Set {
 			continue
 		}
 		value := ""
@@ -291,14 +276,14 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 		case len(occurrences) == 0 && len(assigned) > 0 && flag.Type != "boolean":
 			value = assigned[0]
 		case len(occurrences) == 0:
-			return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("flag %s: not on the line, and it declares %s", flag.Keys[0], DescribeTrigger(sandbox, flag.Trigger))}
+			return CommandMatch{Reason: sandbox.Deps.StdDeps.Sprintf("flag %s: not on the line, and it declares %s", flag.Keys[0], DescribeTrigger(sandbox, flag.Trigger))}
 		case flag.Type == "boolean":
 			value = "true"
 		case occurrences[0]+1 < len(argv):
 			value = argv[occurrences[0]+1]
 		}
 		if !MatchTrigger(sandbox, flag.Trigger, value, false) {
-			return CommandMatch{Reason: sandbox.Deps.Std.Sprintf("flag %s: %q fails %s", flag.Keys[0], value, DescribeTrigger(sandbox, flag.Trigger))}
+			return CommandMatch{Reason: sandbox.Deps.StdDeps.Sprintf("flag %s: %q fails %s", flag.Keys[0], value, DescribeTrigger(sandbox, flag.Trigger))}
 		}
 	}
 
@@ -308,7 +293,7 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 		values, found := commandArgSlice(segments, arg)
 		if !found || len(values) == 0 {
 			if arg.Required && match.Failure == "" {
-				match.Failure = sandbox.Deps.Std.Sprintf("a usage error: required arg '%s' not provided", arg.Id)
+				match.Failure = sandbox.Deps.StdDeps.Sprintf("a usage error: required arg '%s' not provided", arg.Id)
 			}
 			continue
 		}
@@ -331,7 +316,7 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 				consumed[index] = true
 				if assigned[position] == "" {
 					if match.Failure == "" {
-						match.Failure = sandbox.Deps.Std.Sprintf("a usage error: flag '%s' expects a value after the =", flag.Keys[0])
+						match.Failure = sandbox.Deps.StdDeps.Sprintf("a usage error: flag '%s' expects a value after the =", flag.Keys[0])
 					}
 					continue
 				}
@@ -341,7 +326,7 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 			}
 		}
 		if len(occurrences) == 0 && (flag.Type == "boolean" || len(assigned_indices) == 0) && flag.Required && match.Failure == "" {
-			match.Failure = sandbox.Deps.Std.Sprintf("a usage error: required flag '%s' not provided", flag.Keys[0])
+			match.Failure = sandbox.Deps.StdDeps.Sprintf("a usage error: required flag '%s' not provided", flag.Keys[0])
 		}
 		for _, index := range occurrences {
 			consumed[index] = true
@@ -350,7 +335,7 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 			}
 			if index+1 >= len(argv) {
 				if match.Failure == "" {
-					match.Failure = sandbox.Deps.Std.Sprintf("a usage error: flag '%s' expects a value", flag.Keys[0])
+					match.Failure = sandbox.Deps.StdDeps.Sprintf("a usage error: flag '%s' expects a value", flag.Keys[0])
 				}
 				continue
 			}
@@ -370,9 +355,9 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 				continue
 			}
 			if IsCommandFlagToken(sandbox, token) {
-				match.Failure = sandbox.Deps.Std.Sprintf("a usage error: unknown flag %q", token)
+				match.Failure = sandbox.Deps.StdDeps.Sprintf("a usage error: unknown flag %q", token)
 			} else {
-				match.Failure = sandbox.Deps.Std.Sprintf("a usage error: unexpected argument %q", token)
+				match.Failure = sandbox.Deps.StdDeps.Sprintf("a usage error: unexpected argument %q", token)
 			}
 			break
 		}
@@ -380,17 +365,17 @@ func MatchCommandArgv(sandbox *api.Sandbox, conf *commandconf.CommandConf, argv 
 	return match
 }
 
-// commandFlagProblem is flagValue of the generated CommandHandler.go read
+// commandFlagProblem is flagValue of the generated Run.go read
 // against a declaration: what is wrong with one raw value of a flag — its
 // enum, its pattern, its type, its bounds — "" when it binds.
 func commandFlagProblem(sandbox *api.Sandbox, flag commandconf.Flag, raw string) string {
 	if len(flag.Enum) > 0 && !contains(flag.Enum, raw) {
-		return sandbox.Deps.Std.Sprintf("%q is not one of %s", raw, sandbox.Deps.Stringsdeps.Join(flag.Enum, ", "))
+		return sandbox.Deps.StdDeps.Sprintf("%q is not one of %s", raw, sandbox.Deps.StringsDeps.Join(flag.Enum, ", "))
 	}
 	if flag.Pattern != "" {
-		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(flag.Pattern, raw)
+		matched, err := sandbox.Deps.StringsDeps.MatchPattern(flag.Pattern, raw)
 		if err != nil || !matched {
-			return sandbox.Deps.Std.Sprintf("%q does not match %s", raw, flag.Pattern)
+			return sandbox.Deps.StdDeps.Sprintf("%q does not match %s", raw, flag.Pattern)
 		}
 	}
 	if err := CheckCommandLiteral(sandbox, flag.Type, "the value", raw); err != nil {
@@ -399,15 +384,15 @@ func commandFlagProblem(sandbox *api.Sandbox, flag commandconf.Flag, raw string)
 	if flag.Type != "integer" && flag.Type != "number" && flag.Type != "integer-array" {
 		return ""
 	}
-	number, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64)
+	number, err := sandbox.Deps.StringsDeps.ParseFloat(raw, 64)
 	if err != nil {
 		return ""
 	}
 	if flag.HasMin && number < flag.Min {
-		return "must be >= " + sandbox.Deps.Stringsdeps.FormatFloat(flag.Min, 'g', -1, 64)
+		return "must be >= " + sandbox.Deps.StringsDeps.FormatFloat(flag.Min, 'g', -1, 64)
 	}
 	if flag.HasMax && number > flag.Max {
-		return "must be <= " + sandbox.Deps.Stringsdeps.FormatFloat(flag.Max, 'g', -1, 64)
+		return "must be <= " + sandbox.Deps.StringsDeps.FormatFloat(flag.Max, 'g', -1, 64)
 	}
 	return ""
 }

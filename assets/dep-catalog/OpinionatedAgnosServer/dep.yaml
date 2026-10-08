@@ -1,4 +1,4 @@
-default-adapter: OpinatedAgnosServer
-field: OpinatedAgnosServer
+default-adapter: OpinionatedAgnosServer
+field: OpinionatedAgnosServer
 help: The agnos server mechanic itself — route declarations, the request chain, binding, validation and failures
-name: OpinatedAgnosServer
+name: OpinionatedAgnosServer

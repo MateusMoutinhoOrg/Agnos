@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/themesconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 

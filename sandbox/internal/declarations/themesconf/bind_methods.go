@@ -12,13 +12,13 @@ func BindMethods(sandbox *api.Sandbox, themes_conf *ThemesConf) {
 				return &themes_conf.Themes[i], nil
 			}
 		}
-		return nil, sandbox.Deps.Std.Errorf("theme not found")
+		return nil, sandbox.Deps.StdDeps.Errorf("theme not found")
 	}
 
 	themes_conf.AddTheme = func(name string, id string, description string) error {
 		_, err := themes_conf.GetTheme(name)
 		if err == nil {
-			return sandbox.Deps.Std.Errorf("theme already exists")
+			return sandbox.Deps.StdDeps.Errorf("theme already exists")
 		}
 
 		themes_conf.Themes = append(themes_conf.Themes, Theme{

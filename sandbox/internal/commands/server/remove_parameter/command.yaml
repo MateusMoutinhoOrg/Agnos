@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,13 +10,13 @@ args:
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: 'Drops one entry of the route''s parameters, the exact inverse of add-parameter. The build renders only: dropping a parameter may leave hand-written code reading an Input field that is gone.'
 examples:
     - remove-parameter page --route list-users
 flags:
     - description: the route (identifier or package name) that declares the parameter
       id: Route
       required: true
-help: Delete one entry of a route's parameters
-long-description: 'Drops one entry of the route''s parameters, the exact inverse of add-parameter. The build renders only: dropping a parameter may leave hand-written code reading an Entries field that is gone.'
 priority: 100
+summary: Delete one entry of a route's parameters

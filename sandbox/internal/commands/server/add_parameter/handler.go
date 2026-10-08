@@ -6,25 +6,25 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	err := addParameterAction.AddParameter(sandbox, api.RouteParameterProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	err := addParameterAction.AddParameter(sandbox, api.AddParameterProps{
 		Path:              props.Path,
-		Route:             entries.Route,
-		Name:              entries.Name,
-		Type:              entries.Type,
-		Fonts:             entries.Font,
-		Required:          entries.Required,
-		Default:           entries.Default,
-		TriggerType:       entries.TriggerType,
-		TriggerNegate:     entries.TriggerNegate,
-		TriggerIgnoreCase: entries.TriggerIgnoreCase,
-		Trigger:           entries.Trigger,
-		Description:       entries.Description,
-		Examples:          entries.Example,
-		Position:          entries.Position,
+		Route:             input.Route,
+		Name:              input.Name,
+		Type:              input.Type,
+		Sources:           input.Source,
+		Required:          input.Required,
+		Default:           input.Default,
+		TriggerType:       input.TriggerType,
+		TriggerNegate:     input.TriggerNegate,
+		TriggerIgnoreCase: input.TriggerIgnoreCase,
+		Trigger:           input.Trigger,
+		Description:       input.Description,
+		Examples:          input.Example,
+		Position:          input.Position,
 	})
 	if err != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

@@ -2,17 +2,17 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/commandconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/commandconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-// CommandIdentifier normalizes a user-typed command name into the CLI verb:
+// CommandName normalizes a user-typed command name into the CLI verb:
 // lowercased, spaces and underscores turned into dashes
 // ("My Feature" -> "my-feature").
-func CommandIdentifier(sandbox *api.Sandbox, name string) string {
-	out := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(name))
-	out = sandbox.Deps.Stringsdeps.ReplaceAll(out, " ", "-")
-	out = sandbox.Deps.Stringsdeps.ReplaceAll(out, "_", "-")
+func CommandName(sandbox *api.Sandbox, name string) string {
+	out := sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(name))
+	out = sandbox.Deps.StringsDeps.ReplaceAll(out, " ", "-")
+	out = sandbox.Deps.StringsDeps.ReplaceAll(out, "_", "-")
 	return out
 }
 
@@ -22,19 +22,19 @@ func CommandIdentifier(sandbox *api.Sandbox, name string) string {
 // into `package bad_name!` and break the whole project's build. The check runs
 // before any file is written.
 func ValidateCommandName(sandbox *api.Sandbox, name string) error {
-	identifier := CommandIdentifier(sandbox, name)
+	identifier := CommandName(sandbox, name)
 	if identifier == "" {
-		return sandbox.Deps.Std.Errorf("a command needs a name")
+		return sandbox.Deps.StdDeps.Errorf("a command needs a name")
 	}
 	if identifier[0] < 'a' || identifier[0] > 'z' {
-		return sandbox.Deps.Std.Errorf("invalid command name %q: a command name must start with a lowercase letter", name)
+		return sandbox.Deps.StdDeps.Errorf("invalid command name %q: a command name must start with a lowercase letter", name)
 	}
 	for _, letter := range identifier {
 		valid := (letter >= 'a' && letter <= 'z') ||
 			(letter >= '0' && letter <= '9') ||
 			letter == '-'
 		if !valid {
-			return sandbox.Deps.Std.Errorf(
+			return sandbox.Deps.StdDeps.Errorf(
 				"invalid command name %q: only letters, digits, spaces, dashes and underscores are allowed (it becomes the directory %s of sandbox/internal/commands and a Go package name)",
 				name, CommandPackage(sandbox, name))
 		}
@@ -52,16 +52,16 @@ func NoteNormalizedCommandName(sandbox *api.Sandbox, name string) {
 // NoteNormalizedName is NoteNormalizedCommandName for any unit named the same
 // way — a route, a database, a table, a field — kind naming which.
 func NoteNormalizedName(sandbox *api.Sandbox, kind string, name string) {
-	identifier := CommandIdentifier(sandbox, name)
+	identifier := CommandName(sandbox, name)
 	if identifier != name {
-		sandbox.Deps.Std.Log("note: %s name %q normalized to %q \n", kind, name, identifier)
+		sandbox.Deps.StdDeps.Logf("note: %s name %q normalized to %q \n", kind, name, identifier)
 	}
 }
 
 // CommandPackage is the Go package / directory name for a command: the
 // identifier with dashes turned into underscores ("my-feature" -> "my_feature").
 func CommandPackage(sandbox *api.Sandbox, name string) string {
-	return sandbox.Deps.Stringsdeps.ReplaceAll(CommandIdentifier(sandbox, name), "-", "_")
+	return sandbox.Deps.StringsDeps.ReplaceAll(CommandName(sandbox, name), "-", "_")
 }
 
 // CommandsDir is the tree the commands are declared in: every directory at
@@ -70,22 +70,22 @@ func CommandPackage(sandbox *api.Sandbox, name string) string {
 const CommandsDir = "sandbox/internal/commands"
 
 // CommandConfFile is the declaration of one command, beside its generated
-// new.go and entries.go and its hand-written InternalPureHandler.go, and what
+// new.go and input.go and its hand-written handler.go, and what
 // makes its directory a command.
 const CommandConfFile = "command.yaml"
 
 // CommandHandlerFile is the one hand-written file of a command.
-const CommandHandlerFile = "InternalPureHandler.go"
+const CommandHandlerFile = "handler.go"
 
 // CommandDirs is every command declared under CommandsDir, at any depth.
-func CommandDirs(sandbox *api.Sandbox, io *smartio.SmartIO) []UnitDir {
+func CommandDirs(sandbox *api.Sandbox, io *stagedfs.StagedFS) []UnitDir {
 	return FindUnitDirs(sandbox, io, CommandsDir, CommandConfFile)
 }
 
 // CommandDir is the project-relative directory holding the command named —
 // by its package name or one of its verbs — in whatever folder it sits; one
 // no command.yaml declares yet lands at the top of CommandsDir.
-func CommandDir(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+func CommandDir(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) string {
 	pkg := CommandPackage(sandbox, ResolveCommandName(sandbox, io, name))
 	if dir, found := FindUnitDir(sandbox, io, CommandsDir, CommandConfFile, pkg); found {
 		return dir
@@ -94,7 +94,7 @@ func CommandDir(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
 }
 
 // CommandConfPath is the project-relative path of a command's command.yaml.
-func CommandConfPath(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+func CommandConfPath(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) string {
 	return CommandDir(sandbox, io, name) + "/" + CommandConfFile
 }
 
@@ -102,7 +102,7 @@ func CommandConfPath(sandbox *api.Sandbox, io *smartio.SmartIO, name string) str
 // package name, or one of the verbs it answers to ("add-flag", "help"). It is
 // returned as given when nothing answers to it, so the caller's own "not
 // found" names what was typed.
-func ResolveCommandName(sandbox *api.Sandbox, io *smartio.SmartIO, name string) string {
+func ResolveCommandName(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) string {
 	units := CommandDirs(sandbox, io)
 	pkg := CommandPackage(sandbox, name)
 	for _, unit := range units {
@@ -120,7 +120,7 @@ func ResolveCommandName(sandbox *api.Sandbox, io *smartio.SmartIO, name string) 
 			continue
 		}
 		for _, identifier := range conf.Identifiers() {
-			if identifier == sandbox.Deps.Stringsdeps.TrimSpace(name) {
+			if identifier == sandbox.Deps.StringsDeps.TrimSpace(name) {
 				return unit.Name
 			}
 		}
@@ -131,7 +131,7 @@ func ResolveCommandName(sandbox *api.Sandbox, io *smartio.SmartIO, name string) 
 // LoadCommandConf reads and parses the command.yaml of the command named —
 // by its package name or one of its verbs — wherever under
 // sandbox/internal/commands it sits.
-func LoadCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*commandconf.CommandConf, error) {
+func LoadCommandConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) (*commandconf.CommandConf, error) {
 	name = ResolveCommandName(sandbox, io, name)
 	if err := ValidateCommandName(sandbox, name); err != nil {
 		return nil, err
@@ -139,30 +139,24 @@ func LoadCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (*c
 	path := CommandConfPath(sandbox, io, name)
 	content, err := io.ReadFile(path)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("command %q not found in %s", CommandIdentifier(sandbox, name), CommandsDir)
+		return nil, sandbox.Deps.StdDeps.Errorf("command %q not found in %s", CommandName(sandbox, name), CommandsDir)
 	}
 	conf, err := commandconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("%s: %w", path, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("%s: %w", path, err)
 	}
 	return conf, nil
 }
 
 // SaveCommandConf renders conf back over the command.yaml of the command
 // named.
-func SaveCommandConf(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *commandconf.CommandConf) error {
-	return io.WriteFileOverwrite(CommandConfPath(sandbox, io, name), []byte(conf.Render()))
+func SaveCommandConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *commandconf.CommandConf) error {
+	return io.WriteFile(CommandConfPath(sandbox, io, name), []byte(conf.Render()))
 }
 
-// CommandReservedIds are the Entries fields the generated entries.go spells
+// CommandReservedIds are the Input fields the generated input.go spells
 // itself, so no arg or flag may take them.
 var CommandReservedIds = []string{"FullCommand"}
-
-// CommandEntryId turns an arg or flag name typed on the command line into the
-// exported Go name its Entries field carries: "out-file" -> "OutFile".
-func CommandEntryId(sandbox *api.Sandbox, raw string) string {
-	return RouteEntryId(sandbox, raw)
-}
 
 // CommandIdTaken reports whether id already names an arg or a flag of conf, or
 // is reserved.
@@ -233,7 +227,7 @@ func NextCommandSegment(conf *commandconf.CommandConf) int {
 // the repeatable form of the type.
 func CommandFlagType(sandbox *api.Sandbox, raw string, array bool) (string, bool) {
 	kind := ""
-	switch sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) {
+	switch sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw)) {
 	case "", "string", "str":
 		kind = "string"
 	case "bool", "boolean":
@@ -266,7 +260,7 @@ func CommandFlagType(sandbox *api.Sandbox, raw string, array bool) (string, bool
 // CommandArgType maps an arg type typed on the command line onto the
 // canonical set; "" defaults to string.
 func CommandArgType(sandbox *api.Sandbox, raw string) (string, bool) {
-	switch sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) {
+	switch sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw)) {
 	case "", "string", "str":
 		return "string", true
 	case "int", "integer":
@@ -284,20 +278,20 @@ func CheckCommandLiteral(sandbox *api.Sandbox, kind string, label string, raw st
 	switch kind {
 	case "boolean":
 		if raw != "true" && raw != "false" {
-			return sandbox.Deps.Std.Errorf("%s for a boolean must be true or false, got %q", label, raw)
+			return sandbox.Deps.StdDeps.Errorf("%s for a boolean must be true or false, got %q", label, raw)
 		}
 	case "integer", "integer-array":
-		if _, err := sandbox.Deps.Stringsdeps.ParseInt(raw, 10, 64); err != nil {
-			return sandbox.Deps.Std.Errorf("%s must be an integer, got %q", label, raw)
+		if _, err := sandbox.Deps.StringsDeps.ParseInt(raw, 10, 64); err != nil {
+			return sandbox.Deps.StdDeps.Errorf("%s must be an integer, got %q", label, raw)
 		}
 	case "number":
-		if value, err := sandbox.Deps.Stringsdeps.ParseFloat(raw, 64); err != nil || value-value != 0 {
-			return sandbox.Deps.Std.Errorf("%s must be a number, got %q", label, raw)
+		if value, err := sandbox.Deps.StringsDeps.ParseFloat(raw, 64); err != nil || value-value != 0 {
+			return sandbox.Deps.StdDeps.Errorf("%s must be a number, got %q", label, raw)
 		}
 	case "uuid":
-		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(routeUuidPattern, raw)
+		matched, err := sandbox.Deps.StringsDeps.MatchPattern(routeUuidPattern, raw)
 		if err != nil || !matched {
-			return sandbox.Deps.Std.Errorf("%s must be a uuid, got %q", label, raw)
+			return sandbox.Deps.StdDeps.Errorf("%s must be a uuid, got %q", label, raw)
 		}
 	}
 	return nil
@@ -306,11 +300,11 @@ func CheckCommandLiteral(sandbox *api.Sandbox, kind string, label string, raw st
 // ParseCommandBound reads a --min or --max: a number, for a numeric flag only.
 func ParseCommandBound(sandbox *api.Sandbox, kind string, label string, raw string) (float64, error) {
 	if kind != "integer" && kind != "number" && kind != "integer-array" {
-		return 0, sandbox.Deps.Std.Errorf("--%s only applies to an integer or a number flag", label)
+		return 0, sandbox.Deps.StdDeps.Errorf("--%s only applies to an integer or a number flag", label)
 	}
-	value, err := sandbox.Deps.Stringsdeps.ParseFloat(sandbox.Deps.Stringsdeps.TrimSpace(raw), 64)
+	value, err := sandbox.Deps.StringsDeps.ParseFloat(sandbox.Deps.StringsDeps.TrimSpace(raw), 64)
 	if err != nil {
-		return 0, sandbox.Deps.Std.Errorf("--%s must be a number, got %q", label, raw)
+		return 0, sandbox.Deps.StdDeps.Errorf("--%s must be a number, got %q", label, raw)
 	}
 	return value, nil
 }
@@ -319,81 +313,28 @@ func ParseCommandBound(sandbox *api.Sandbox, kind string, label string, raw stri
 // flag's default, so "not given" and "at the end" are the same request.
 const AppendPosition = -1
 
-// CheckPosition validates a --position against a list of size entries:
+// CheckCommandPosition validates a --position against a list of size entries:
 // AppendPosition means the end, and anything else must land inside 0..size.
-func CheckPosition(sandbox *api.Sandbox, kind string, position int, size int) (int, error) {
+func CheckCommandPosition(sandbox *api.Sandbox, kind string, position int, size int) (int, error) {
 	if position == AppendPosition {
 		return size, nil
 	}
 	if position < 0 {
-		return 0, sandbox.Deps.Std.Errorf("--position %d is negative: use an index from 0 to %d, or leave it out to append", position, size)
+		return 0, sandbox.Deps.StdDeps.Errorf("--position %d is negative: use an index from 0 to %d, or leave it out to append", position, size)
 	}
 	if position > size {
-		return 0, sandbox.Deps.Std.Errorf("--position %d is out of range: this command has %d %s(s), so the accepted range is 0 to %d", position, size, kind, size)
+		return 0, sandbox.Deps.StdDeps.Errorf("--position %d is out of range: this command has %d %s(s), so the accepted range is 0 to %d", position, size, kind, size)
 	}
 	return position, nil
 }
 
-// InsertCommandArg places arg at position inside args.
-func InsertCommandArg(args []commandconf.Arg, arg commandconf.Arg, position int) []commandconf.Arg {
-	if position < 0 || position >= len(args) {
-		return append(args, arg)
-	}
-	out := make([]commandconf.Arg, 0, len(args)+1)
-	out = append(out, args[:position]...)
-	out = append(out, arg)
-	return append(out, args[position:]...)
-}
-
-// InsertCommandFlag places flag at position inside flags.
-func InsertCommandFlag(flags []commandconf.Flag, flag commandconf.Flag, position int) []commandconf.Flag {
-	if position < 0 || position >= len(flags) {
-		return append(flags, flag)
-	}
-	out := make([]commandconf.Flag, 0, len(flags)+1)
-	out = append(out, flags[:position]...)
-	out = append(out, flag)
-	return append(out, flags[position:]...)
-}
-
-// RemoveCommandArg drops the arg at index.
-func RemoveCommandArg(args []commandconf.Arg, index int) []commandconf.Arg {
-	out := make([]commandconf.Arg, 0, len(args)-1)
-	out = append(out, args[:index]...)
-	return append(out, args[index+1:]...)
-}
-
-// RemoveCommandFlag drops the flag at index.
-func RemoveCommandFlag(flags []commandconf.Flag, index int) []commandconf.Flag {
-	out := make([]commandconf.Flag, 0, len(flags)-1)
-	out = append(out, flags[:index]...)
-	return append(out, flags[index+1:]...)
-}
-
-// AppendUnique appends each value of extra to values, skipping duplicates.
-func AppendUnique(values []string, extra []string) []string {
-	for _, candidate := range extra {
-		found := false
-		for _, existing := range values {
-			if existing == candidate {
-				found = true
-				break
-			}
-		}
-		if !found {
-			values = append(values, candidate)
-		}
-	}
-	return values
-}
-
 // NewCommandFlag builds one flag from what was typed on the command line: its
-// Entries id, its keys (--<name> when none is given, each starting with "-"),
+// Input id, its keys (--<name> when none is given, each starting with "-"),
 // its type, and the default, bounds, enum, pattern and trigger it declares.
-func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag, error) {
-	strs := sandbox.Deps.Stringsdeps
+func NewCommandFlag(sandbox *api.Sandbox, props api.AddFlagProps) (commandconf.Flag, error) {
+	strs := sandbox.Deps.StringsDeps
 	flag := commandconf.Flag{
-		Id:          CommandEntryId(sandbox, props.Name),
+		Id:          GoIdentifier(sandbox, props.Name),
 		Required:    props.Required,
 		Enum:        []string{},
 		Pattern:     strs.TrimSpace(props.Pattern),
@@ -405,7 +346,7 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 
 	kind, ok := CommandFlagType(sandbox, props.Type, props.Array)
 	if !ok {
-		return flag, sandbox.Deps.Std.Errorf("unknown flag type %q (use %s)", props.Type, strs.Join(commandconf.FlagTypes, ", "))
+		return flag, sandbox.Deps.StdDeps.Errorf("unknown flag type %q (use %s)", props.Type, strs.Join(commandconf.FlagTypes, ", "))
 	}
 	flag.Type = kind
 
@@ -413,7 +354,7 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 	for _, key := range props.Keys {
 		key = strs.TrimSpace(key)
 		if !strs.HasPrefix(key, "-") {
-			return flag, sandbox.Deps.Std.Errorf("flag key %q must start with - or --", key)
+			return flag, sandbox.Deps.StdDeps.Errorf("flag key %q must start with - or --", key)
 		}
 		flag.Keys = AppendUnique(flag.Keys, []string{key})
 	}
@@ -424,11 +365,11 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 	}
 
 	if flag.Required && kind == "boolean" {
-		return flag, sandbox.Deps.Std.Errorf("a boolean flag cannot be required (its absence already means false)")
+		return flag, sandbox.Deps.StdDeps.Errorf("a boolean flag cannot be required (its absence already means false)")
 	}
 	if props.Default != "" {
 		if flag.Required {
-			return flag, sandbox.Deps.Std.Errorf("a flag cannot be both required and carry a default (the default already covers its absence)")
+			return flag, sandbox.Deps.StdDeps.Errorf("a flag cannot be both required and carry a default (the default already covers its absence)")
 		}
 		if err := CheckCommandLiteral(sandbox, kind, "default", props.Default); err != nil {
 			return flag, err
@@ -450,7 +391,7 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 		flag.Max, flag.HasMax = value, true
 	}
 	if flag.HasMin && flag.HasMax && flag.Min > flag.Max {
-		return flag, sandbox.Deps.Std.Errorf("min (%s) is greater than max (%s)", props.Min, props.Max)
+		return flag, sandbox.Deps.StdDeps.Errorf("min (%s) is greater than max (%s)", props.Min, props.Max)
 	}
 	for _, value := range props.Enum {
 		if value = strs.TrimSpace(value); value != "" {
@@ -458,16 +399,16 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 		}
 	}
 	if len(flag.Enum) > 0 && kind == "boolean" {
-		return flag, sandbox.Deps.Std.Errorf("--enum does not apply to a boolean flag")
+		return flag, sandbox.Deps.StdDeps.Errorf("--enum does not apply to a boolean flag")
 	}
 	// A default outside the enum fails every run of the command, even one that
 	// never passes the flag: the dispatch validates the default like a value.
 	if flag.HasDefault && len(flag.Enum) > 0 && !contains(flag.Enum, flag.Default) {
-		return flag, sandbox.Deps.Std.Errorf("default %q is not one of the --enum values (%s)", flag.Default, strs.Join(flag.Enum, ", "))
+		return flag, sandbox.Deps.StdDeps.Errorf("default %q is not one of the --enum values (%s)", flag.Default, strs.Join(flag.Enum, ", "))
 	}
 	if flag.Pattern != "" {
 		if _, err := strs.MatchPattern(flag.Pattern, ""); err != nil {
-			return flag, sandbox.Deps.Std.Errorf("invalid --pattern %q: %s", flag.Pattern, err.Error())
+			return flag, sandbox.Deps.StdDeps.Errorf("invalid --pattern %q: %s", flag.Pattern, err.Error())
 		}
 	}
 
@@ -485,13 +426,13 @@ func NewCommandFlag(sandbox *api.Sandbox, props api.FlagProps) (commandconf.Flag
 }
 
 // NewCommandArg builds one arg from what was typed on the command line: its
-// Entries id, the segments it reads — from next, the first no arg reads yet,
+// Input id, the segments it reads — from next, the first no arg reads yet,
 // when no start is given, to its start when no end is — its type, and the
 // default and trigger it declares.
-func NewCommandArg(sandbox *api.Sandbox, props api.ArgProps, next int) (commandconf.Arg, error) {
-	strs := sandbox.Deps.Stringsdeps
+func NewCommandArg(sandbox *api.Sandbox, props api.AddArgProps, next int) (commandconf.Arg, error) {
+	strs := sandbox.Deps.StringsDeps
 	arg := commandconf.Arg{
-		Id:          CommandEntryId(sandbox, props.Name),
+		Id:          GoIdentifier(sandbox, props.Name),
 		Required:    props.Required,
 		Description: strs.TrimSpace(props.Description),
 	}
@@ -503,37 +444,37 @@ func NewCommandArg(sandbox *api.Sandbox, props api.ArgProps, next int) (commandc
 	if raw := strs.TrimSpace(props.Start); raw != "" {
 		value, err := strs.Atoi(raw)
 		if err != nil {
-			return arg, sandbox.Deps.Std.Errorf("--start %q is not a segment index", raw)
+			return arg, sandbox.Deps.StdDeps.Errorf("--start %q is not a segment index", raw)
 		}
 		arg.Start = value
 	}
 	if arg.Start < 0 {
-		return arg, sandbox.Deps.Std.Errorf("the command already reads to its last segment: give the arg a --start before it")
+		return arg, sandbox.Deps.StdDeps.Errorf("the command already reads to its last segment: give the arg a --start before it")
 	}
 	arg.End = arg.Start
 	if raw := strs.TrimSpace(props.End); raw != "" {
 		value, err := strs.Atoi(raw)
 		if err != nil {
-			return arg, sandbox.Deps.Std.Errorf("--end %q is not a segment index (use -1 for the last one)", raw)
+			return arg, sandbox.Deps.StdDeps.Errorf("--end %q is not a segment index (use -1 for the last one)", raw)
 		}
 		arg.End = value
 	}
 	if arg.End != commandconf.LastSegment && arg.End < arg.Start {
-		return arg, sandbox.Deps.Std.Errorf("--end %d is before --start %d", arg.End, arg.Start)
+		return arg, sandbox.Deps.StdDeps.Errorf("--end %d is before --start %d", arg.End, arg.Start)
 	}
 
 	kind, ok := CommandArgType(sandbox, props.Type)
 	if !ok {
-		return arg, sandbox.Deps.Std.Errorf("unknown arg type %q (use %s)", props.Type, strs.Join(commandconf.ArgTypes, ", "))
+		return arg, sandbox.Deps.StdDeps.Errorf("unknown arg type %q (use %s)", props.Type, strs.Join(commandconf.ArgTypes, ", "))
 	}
 	if kind != commandconf.DefaultArgType && arg.End != arg.Start {
-		return arg, sandbox.Deps.Std.Errorf("a %s arg reads one segment: it takes no range", kind)
+		return arg, sandbox.Deps.StdDeps.Errorf("a %s arg reads one segment: it takes no range", kind)
 	}
 	arg.Type = kind
 
 	if props.Default != "" {
 		if arg.Required {
-			return arg, sandbox.Deps.Std.Errorf("an arg cannot be both required and carry a default (the default already covers its absence)")
+			return arg, sandbox.Deps.StdDeps.Errorf("an arg cannot be both required and carry a default (the default already covers its absence)")
 		}
 		if err := CheckCommandLiteral(sandbox, kind, "default", props.Default); err != nil {
 			return arg, err
@@ -565,12 +506,12 @@ func IsGeneratedCommand(sandbox *api.Sandbox, name string) bool {
 	return contains(GeneratedCommands, CommandPackage(sandbox, name))
 }
 
-// FindCommandFlagNamed is the index of the flag a user named: by its Entries
+// FindCommandFlagNamed is the index of the flag a user named: by its Input
 // id ("out-file" -> OutFile), by one of its keys ("--out"), or by a key
 // without its dashes ("command" for --command). -1 when none answers to it.
 func FindCommandFlagNamed(sandbox *api.Sandbox, conf *commandconf.CommandConf, name string) int {
-	name = sandbox.Deps.Stringsdeps.TrimSpace(name)
-	for _, candidate := range []string{CommandEntryId(sandbox, name), name, "--" + name, "-" + name} {
+	name = sandbox.Deps.StringsDeps.TrimSpace(name)
+	for _, candidate := range []string{GoIdentifier(sandbox, name), name, "--" + name, "-" + name} {
 		if index := FindCommandFlag(conf, candidate); index >= 0 {
 			return index
 		}

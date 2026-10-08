@@ -1,4 +1,4 @@
-description: "Every database of {{.Name}}, generated from the table declarations"
+description: "Every database of {{.ProjectName}}, generated from the table declarations"
 name: "Databases"
 order: 3
 themes:

@@ -75,13 +75,13 @@ func IsDepsWiring(typeName string, fieldName string) bool {
 	return typeName == SandboxType && fieldName == DepsField
 }
 
-// OpinatedPrefix starts the last segment of an opinated lib's contract import
-// path: sandbox/deps/OpinatedAgnos<X>, the dep that carries a mechanic.
-const OpinatedPrefix = "OpinatedAgnos"
+// OpinionatedPrefix starts the last segment of an opinionated lib's contract import
+// path: sandbox/deps/OpinionatedAgnos<X>, the dep that carries a mechanic.
+const OpinionatedPrefix = "OpinionatedAgnos"
 
 // IsMechanic reports whether a type of the package is a mechanic's surface: an
-// alias of a type an opinated lib's contract declares — api.Command is
-// opinatedagnoscli.Command — or a struct every field of which is one, the
+// alias of a type an opinionated lib's contract declares — api.Command is
+// opinionatedagnoscli.Command — or a struct every field of which is one, the
 // <x>sandbox.go part a mechanic adds. The lib owns those types and a consumer
 // installs a repo's api, never a mechanic of it: like Sandbox.Deps, the copy
 // drops them, the shape rule skips them and no converter is written for them.

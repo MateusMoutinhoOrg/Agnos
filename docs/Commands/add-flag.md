@@ -6,11 +6,11 @@ Add a flag to a command's command.yaml
 agnos add-flag <Name> [--key <key>...] --command <command> [--type <type>] [--description <description>] [--default <default>] [--required] [--min <min>] [--max <max>] [--position <position>] [--enum <enum>...] [--pattern <pattern>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--help] [--path <path>] [--quiet]
 ```
 
-Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its entries.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
+Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its input.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Name` | string, required |  | the flag name; its exported Go form is the Entries field the handler reads (out-file -> entries.OutFile) |
+| `Name` | string, required |  | the flag name; its exported Go form is the Input field the handler reads (out-file -> input.OutFile) |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
@@ -30,13 +30,13 @@ Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml
 | `--trigger-negate` | boolean |  | invert the trigger: the command runs when the value does not match it | — |
 | `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos add-flag output --key --out --key -o --required --command exec
@@ -45,4 +45,4 @@ agnos add-flag retries --type integer --min 0 --max 5 --default 1 --command exec
 agnos add-flag tag --type string-array --enum a --enum b --command exec
 ```
 
-Cli System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Cli · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

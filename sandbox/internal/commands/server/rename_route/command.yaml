@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -15,10 +15,10 @@ args:
       id: Name
       required: true
       start: 2
-category: Server System
+category: Server
+description: 'Moves the route''s directory to <name>/ in the folder it sits in — or in the one --dir names, / for the top — rewriting the package clause of every hand-written Go file, drops every folder that leaves empty, and runs build so new.go, input.go and the server''s route list follow it. <name> may be the current one when only the folder changes. A page is refused: remove-page and add-page own its html.'
 flags:
-    - description: the folder under sandbox/internal/routeslist the route moves to, / for the top (defaults to the folder it sits in)
+    - description: the folder under sandbox/internal/routes the route moves to, / for the top (defaults to the folder it sits in)
       id: Dir
-help: Rename one route
-long-description: 'Moves the route''s directory to <name>/ in the folder it sits in — or in the one --dir names, / for the top — rewriting the package clause of every hand-written Go file, drops every folder that leaves empty, and runs build so new.go, entries.go and the server''s route list follow it. <name> may be the current one when only the folder changes. A page is refused: remove-page and add-page own its html.'
 priority: 100
+summary: Rename one route

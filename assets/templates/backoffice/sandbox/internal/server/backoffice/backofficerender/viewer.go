@@ -2,7 +2,7 @@ package backofficerender
 
 import (
 	"{{.Module}}/sandbox/api"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 )
 
@@ -16,7 +16,7 @@ type Viewer struct {
 }
 
 // viewerOf is the Viewer of user.
-func viewerOf(sandbox *api.Sandbox, user *backofficedb.BackofficeuserItem) Viewer {
+func viewerOf(sandbox *api.Sandbox, user *backoffice_db.BackofficeUserRecord) Viewer {
 	return Viewer{
 		Username: user.Username,
 		Initial:  initialOf(sandbox, user.Username),

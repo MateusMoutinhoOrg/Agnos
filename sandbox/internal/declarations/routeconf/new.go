@@ -2,8 +2,8 @@ package routeconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // DefaultMethod is the http method `add-route` declares when it is given none.
@@ -36,8 +36,8 @@ var TriggerTypes = triggerconf.TriggerTypes
 // ParameterTypes is every type a parameter may declare.
 var ParameterTypes = []string{"string", "integer", "number", "boolean", "datetime", "string-array", "integer-array"}
 
-// ParameterFonts is every place a parameter may be read from.
-var ParameterFonts = []string{"query", "header", "cookie"}
+// ParameterSources is every place a parameter may be read from.
+var ParameterSources = []string{"query", "header", "cookie"}
 
 // PathTypes is every type a path may declare. Anything but a string is one
 // segment long, and a segment that will not convert is a non-match.
@@ -63,23 +63,24 @@ const JsonSchemaKey = "json-schema"
 const FormSchemaKey = "form-schema"
 
 // legacyKeys are the top-level keys a route declaration no longer carries:
-// the ones routeslist replaced, and `phase`, which went with the `after` phase.
+// the ones `methods` and `parameters` replaced, and `phase`, which went
+// with the `after` phase.
 var legacyKeys = []string{"method", "headers", "params", "phase"}
 
 // New parses one route.yaml body into a RouteConf.
 func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 
 	if content == "" {
-		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.StdDeps.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("route.yaml is not an object")
+		return nil, sandbox.Deps.StdDeps.Errorf("route.yaml is not an object")
 	}
 
 	conf := &RouteConf{
@@ -105,8 +106,8 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 	}
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
-	conf.Help = readString(specs, "help")
-	conf.LongDescription = readString(specs, "long-description")
+	conf.Summary = readString(specs, "summary")
+	conf.Description = readString(specs, "description")
 	conf.Hidden = readBool(specs, "hidden")
 
 	for _, key := range legacyKeys {
@@ -145,12 +146,12 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 // readPaths parses the `paths` sequence. Each entry needs an `id`; `start`
 // defaults to 0 and `end` to the last segment, so an entry declaring neither
 // reads the whole path.
-func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Path, error) {
+func readPaths(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) ([]Path, error) {
 	if item.IsNull() {
 		return []Path{}, nil
 	}
 	if !item.IsArray() {
-		return nil, sandbox.Deps.Std.Errorf("`paths` must be a sequence of path slices")
+		return nil, sandbox.Deps.StdDeps.Errorf("`paths` must be a sequence of path slices")
 	}
 
 	size, err := item.GetArraySize()
@@ -162,7 +163,7 @@ func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]
 	for i := 0; i < size; i++ {
 		entry := item.GetArrayItem(i)
 		if entry == nil || !entry.IsObject() {
-			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d is not an object", i)
+			return nil, sandbox.Deps.StdDeps.Errorf("`paths` entry #%d is not an object", i)
 		}
 
 		path := Path{
@@ -174,7 +175,7 @@ func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]
 			Description: readString(entry, "description"),
 		}
 		if path.Id == "" {
-			return nil, sandbox.Deps.Std.Errorf("`paths` entry #%d needs an `id`", i)
+			return nil, sandbox.Deps.StdDeps.Errorf("`paths` entry #%d needs an `id`", i)
 		}
 		if path.Type == "" {
 			path.Type = DefaultPathType
@@ -192,13 +193,13 @@ func readPaths(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]
 }
 
 // readParameters parses the `parameters` sequence. Each entry needs an `id`;
-// `key` defaults to it, and `fonts` to the query string alone.
-func readParameters(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Parameter, error) {
+// `key` defaults to it, and `sources` to the query string alone.
+func readParameters(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) ([]Parameter, error) {
 	if item.IsNull() {
 		return []Parameter{}, nil
 	}
 	if !item.IsArray() {
-		return nil, sandbox.Deps.Std.Errorf("`parameters` must be a sequence of parameters")
+		return nil, sandbox.Deps.StdDeps.Errorf("`parameters` must be a sequence of parameters")
 	}
 
 	size, err := item.GetArraySize()
@@ -210,21 +211,21 @@ func readParameters(sandbox *api.Sandbox, item *serializibles.SerializibleObject
 	for i := 0; i < size; i++ {
 		entry := item.GetArrayItem(i)
 		if entry == nil || !entry.IsObject() {
-			return nil, sandbox.Deps.Std.Errorf("`parameters` entry #%d is not an object", i)
+			return nil, sandbox.Deps.StdDeps.Errorf("`parameters` entry #%d is not an object", i)
 		}
 
 		parameter := Parameter{
 			Id:          readString(entry, "id"),
 			Key:         readString(entry, "key"),
 			Type:        normalizeType(readString(entry, "type")),
-			Fonts:       readStringArray(entry, "fonts"),
+			Sources:     readStringArray(entry, "sources"),
 			Required:    readBool(entry, "required"),
 			Trigger:     triggerconf.New(sandbox, entry),
 			Description: readString(entry, "description"),
 			Examples:    readStringArray(entry, "examples"),
 		}
 		if parameter.Id == "" {
-			return nil, sandbox.Deps.Std.Errorf("`parameters` entry #%d needs an `id`", i)
+			return nil, sandbox.Deps.StdDeps.Errorf("`parameters` entry #%d needs an `id`", i)
 		}
 		if parameter.Key == "" {
 			parameter.Key = parameter.Id
@@ -241,7 +242,7 @@ func readParameters(sandbox *api.Sandbox, item *serializibles.SerializibleObject
 
 // readBody parses the `body` object, filling in the defaults a declaration
 // leaves out: no body at all, one mebibyte, and application/json for json.
-func readBody(sandbox *api.Sandbox, item *serializibles.SerializibleObject) Body {
+func readBody(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) Body {
 	body := Body{
 		Type:        normalizeBodyType(readString(item, "type")),
 		Required:    readBool(item, "required"),
@@ -286,7 +287,7 @@ var schemaKeys = []string{
 // readSchema parses one node of the declared json-schema, recursing through
 // `properties` and `items`. Property order is alphabetical, so the generated
 // struct and the canonical schema JSON come out the same on every build.
-func readSchema(sandbox *api.Sandbox, item *serializibles.SerializibleObject) *Schema {
+func readSchema(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) *Schema {
 	schema := &Schema{
 		Type:        readString(item, "type"),
 		Format:      readString(item, "format"),
@@ -339,7 +340,7 @@ func readSchema(sandbox *api.Sandbox, item *serializibles.SerializibleObject) *S
 	if properties, _ := item.GetObjectItem("properties"); properties != nil && properties.IsObject() {
 		keys, err := properties.GetKeys()
 		if err == nil {
-			sandbox.Deps.Sortdeps.Strings(keys)
+			sandbox.Deps.SortDeps.Strings(keys)
 			for _, key := range keys {
 				property, _ := properties.GetObjectItem(key)
 				if property == nil || !property.IsObject() {
@@ -358,12 +359,12 @@ func readSchema(sandbox *api.Sandbox, item *serializibles.SerializibleObject) *S
 
 // unknownKeys lists the keys of one schema node that fall outside the subset,
 // sorted so the message a build fails with is the same every time.
-func unknownKeys(sandbox *api.Sandbox, item *serializibles.SerializibleObject) []string {
+func unknownKeys(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) []string {
 	keys, err := item.GetKeys()
 	if err != nil {
 		return nil
 	}
-	sandbox.Deps.Sortdeps.Strings(keys)
+	sandbox.Deps.SortDeps.Strings(keys)
 
 	var unknown []string
 	for _, key := range keys {
@@ -381,7 +382,7 @@ func unknownKeys(sandbox *api.Sandbox, item *serializibles.SerializibleObject) [
 	return unknown
 }
 
-func readSchemaNumber(item *serializibles.SerializibleObject, key string) (float64, bool) {
+func readSchemaNumber(item *serializabledeps.SerializableObject, key string) (float64, bool) {
 	entry, _ := item.GetObjectItem(key)
 	if entry == nil || entry.IsNull() {
 		return 0, false
@@ -389,7 +390,7 @@ func readSchemaNumber(item *serializibles.SerializibleObject, key string) (float
 	return readNumber(entry)
 }
 
-func readSchemaInt(item *serializibles.SerializibleObject, key string) (int, bool) {
+func readSchemaInt(item *serializabledeps.SerializableObject, key string) (int, bool) {
 	value, ok := readSchemaNumber(item, key)
 	return int(value), ok
 }
@@ -397,7 +398,7 @@ func readSchemaInt(item *serializibles.SerializibleObject, key string) (int, boo
 // normalizeMethod maps the method spellings accepted in route.yaml onto the
 // upper-case set the dispatch compares against.
 func normalizeMethod(sandbox *api.Sandbox, raw string) string {
-	method := sandbox.Deps.Stringsdeps.ToUpper(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	method := sandbox.Deps.StringsDeps.ToUpper(sandbox.Deps.StringsDeps.TrimSpace(raw))
 	if method == "*" {
 		return AnyMethod
 	}
@@ -439,7 +440,7 @@ func normalizeType(raw string) string {
 	}
 }
 
-func readString(obj *serializibles.SerializibleObject, key string) string {
+func readString(obj *serializabledeps.SerializableObject, key string) string {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return ""
@@ -453,7 +454,7 @@ func readString(obj *serializibles.SerializibleObject, key string) string {
 
 // readInt reads a whole-number key as an int, answering 0 for an absent, null
 // or non-numeric one — the same shape readString and readBool have.
-func readInt(obj *serializibles.SerializibleObject, key string) int {
+func readInt(obj *serializabledeps.SerializableObject, key string) int {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return 0
@@ -465,7 +466,7 @@ func readInt(obj *serializibles.SerializibleObject, key string) int {
 	return int(value)
 }
 
-func readBool(obj *serializibles.SerializibleObject, key string) bool {
+func readBool(obj *serializabledeps.SerializableObject, key string) bool {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return false
@@ -479,7 +480,7 @@ func readBool(obj *serializibles.SerializibleObject, key string) bool {
 
 // readNumber reads a scalar yaml int or float as a float64, reporting whether
 // a usable numeric value was found.
-func readNumber(item *serializibles.SerializibleObject) (float64, bool) {
+func readNumber(item *serializabledeps.SerializableObject) (float64, bool) {
 	if item.IsInt() {
 		value, err := item.GetInt()
 		if err != nil {
@@ -497,7 +498,7 @@ func readNumber(item *serializibles.SerializibleObject) (float64, bool) {
 	return 0, false
 }
 
-func readStringArray(obj *serializibles.SerializibleObject, key string) []string {
+func readStringArray(obj *serializabledeps.SerializableObject, key string) []string {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || !item.IsArray() {
 		return []string{}
@@ -523,7 +524,7 @@ func readStringArray(obj *serializibles.SerializibleObject, key string) []string
 
 // anyToString renders a scalar yaml value as the string that will be baked
 // into the generated Go literal source.
-func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) string {
+func anyToString(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) string {
 	if item.IsString() {
 		value, _ := item.GetString()
 		return value
@@ -536,11 +537,11 @@ func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) s
 	}
 	if item.IsInt() {
 		value, _ := item.GetInt()
-		return sandbox.Deps.Stringsdeps.FormatInt(value, 10)
+		return sandbox.Deps.StringsDeps.FormatInt(value, 10)
 	}
 	if item.IsFloat() {
 		value, _ := item.GetFloat()
-		return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+		return sandbox.Deps.StringsDeps.FormatFloat(value, 'g', -1, 64)
 	}
 	return ""
 }

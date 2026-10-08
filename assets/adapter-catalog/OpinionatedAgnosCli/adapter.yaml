@@ -1,5 +1,5 @@
-dep: OpinatedAgnosCli
+dep: OpinionatedAgnosCli
 help: The agnos cli dispatch over strings, strconv, regexp and reflect
 module: ""
-name: OpinatedAgnosCli
+name: OpinionatedAgnosCli
 origin: catalog

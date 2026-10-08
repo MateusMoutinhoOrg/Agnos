@@ -2,7 +2,7 @@ package rebalance_commands
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -12,9 +12,9 @@ import (
 // still do, each on a rung of its own; what changes is that --before and
 // --after have room again. The commands the build writes itself keep their
 // rungs: the build writes them back.
-func RebalanceCommandsInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RebalanceCommandsProps) error {
+func RebalanceCommandsInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.RebalanceCommandsProps) error {
 	if props.Step < 1 {
-		return sandbox.Deps.Std.Errorf("--step %d is below 1: the rungs have to be apart", props.Step)
+		return sandbox.Deps.StdDeps.Errorf("--step %d is below 1: the rungs have to be apart", props.Step)
 	}
 
 	chain, err := utils.LoadCommandChain(sandbox, io)
@@ -31,7 +31,7 @@ func RebalanceCommandsInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props 
 		if entry.Conf.Priority == rung {
 			continue
 		}
-		sandbox.Deps.Std.Log("rebalance-commands %s: %d -> %d \n", utils.CommandIdentifier(sandbox, entry.Name), entry.Conf.Priority, rung)
+		sandbox.Deps.StdDeps.Logf("rebalance-commands %s: %d -> %d \n", utils.CommandName(sandbox, entry.Name), entry.Conf.Priority, rung)
 		entry.Conf.Priority = rung
 		if err := utils.SaveCommandConf(sandbox, io, entry.Name, entry.Conf); err != nil {
 			return err

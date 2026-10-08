@@ -1,22 +1,22 @@
 # CliExamples
 
 Every example of the agnos cli. Each one is a shell session that runs with its own
-directory as the working directory and writes only into its own `TestDir`, so it can be read
-as documentation and copied line by line. The script types `agnos`, which `exec-test`
-resolves to the code in this tree. It ends by copying out of `TestDir` into `AssertDir` the
-paths it asserts — `mkdir -p AssertDir/<path>` then `cp -R TestDir/<path>/. AssertDir/<path>/`,
+directory as the working directory and writes only into its own `test-dir`, so it can be read
+as documentation and copied line by line. The script types `agnos`, which `run-examples`
+resolves to the code in this tree. It ends by copying out of `test-dir` into `assert-dir` the
+paths it asserts — `mkdir -p assert-dir/<path>` then `cp -R test-dir/<path>/. assert-dir/<path>/`,
 each keeping the place it holds in the tree.
 
-`agnos exec-test` runs them all and checks each against the `result.yaml` beside it — the
-golden holding the output, the exit code and the sha256 of every `AssertDir` file, written by
-`exec-test` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
+`agnos run-examples` runs them all and checks each against the `result.yaml` beside it — the
+golden holding the output, the exit code and the sha256 of every `assert-dir` file, written by
+`run-examples` and never by hand. [Workflow](../Workflow/doc.md) has the commands that add and
 remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 
 | Example | Description | Source |
 |---|---|---|
 | `add-adapter` |  | [example.sh](../../examples/cli/add-adapter/example.sh) |
 | `add-arg` | declare one positional argument on a command | [example.sh](../../examples/cli/add-arg/example.sh) |
-| `add-available` |  | [example.sh](../../examples/cli/add-available/example.sh) |
+| `add-binding` |  | [example.sh](../../examples/cli/add-binding/example.sh) |
 | `add-cli-example` | create an example under examples/cli/ | [example.sh](../../examples/cli/add-cli-example/example.sh) |
 | `add-command` | declare a new command | [example.sh](../../examples/cli/add-command/example.sh) |
 | `add-dep` |  | [example.sh](../../examples/cli/add-dep/example.sh) |
@@ -50,7 +50,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `list-extensions` |  | [example.sh](../../examples/cli/list-extensions/example.sh) |
 | `remove-adapter` |  | [example.sh](../../examples/cli/remove-adapter/example.sh) |
 | `remove-arg` | delete one declared positional argument | [example.sh](../../examples/cli/remove-arg/example.sh) |
-| `remove-available` |  | [example.sh](../../examples/cli/remove-available/example.sh) |
+| `remove-binding` |  | [example.sh](../../examples/cli/remove-binding/example.sh) |
 | `remove-cli-example` | delete an example of examples/cli/ | [example.sh](../../examples/cli/remove-cli-example/example.sh) |
 | `remove-command` | delete a command and unwire its dispatch | [example.sh](../../examples/cli/remove-command/example.sh) |
 | `remove-dep` |  | [example.sh](../../examples/cli/remove-dep/example.sh) |

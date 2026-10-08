@@ -1,25 +1,25 @@
-# The front-purge example: remove the front layer, keeping assets/frontend
+# The front-purge example: remove the front layer, keeping assets/front
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 
-agnos start --path TestDir --project-name Test --module Test -q
-agnos front-init --path TestDir -q
-agnos add-page about --title "About" --path TestDir -q
+agnos start --path test-dir --project-name Test --module Test -q
+agnos front-init --path test-dir -q
+agnos add-page about --title "About" --path test-dir -q
 
-agnos front-purge --path TestDir
+agnos front-purge --path test-dir
 
-# What result.yaml records: what the purge left. sandbox/internal/routeslist holds
-# the health route alone — the frontend route is gone with the layer it
+# What result.yaml records: what the purge left. sandbox/internal/routes holds
+# the health route alone — the front route is gone with the layer it
 # belongs to — while
-# assets/frontend is untouched, so front-init puts the route back over the
+# assets/front is untouched, so front-init puts the route back over the
 # same content.
-mkdir -p AssertDir/sandbox/internal/routeslist
-cp -R TestDir/sandbox/internal/routeslist/. AssertDir/sandbox/internal/routeslist/
-mkdir -p AssertDir/assets/frontend
-cp -R TestDir/assets/frontend/. AssertDir/assets/frontend/
+mkdir -p assert-dir/sandbox/internal/routes
+cp -R test-dir/sandbox/internal/routes/. assert-dir/sandbox/internal/routes/
+mkdir -p assert-dir/assets/front
+cp -R test-dir/assets/front/. assert-dir/assets/front/
 
 # The declaration the pair wrote: this is the whole of what tells the build the
 # mechanic is on or off from here.
-mkdir -p AssertDir/AgnosConfig
-cp TestDir/AgnosConfig/extensions.yaml AssertDir/AgnosConfig/extensions.yaml
+mkdir -p assert-dir/AgnosConfig
+cp test-dir/AgnosConfig/extensions.yaml assert-dir/AgnosConfig/extensions.yaml

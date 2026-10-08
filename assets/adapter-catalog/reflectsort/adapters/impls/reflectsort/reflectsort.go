@@ -8,17 +8,17 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// Bind fills deps.Deps.Sortdeps with an insertion sort over reflect.Swapper —
-// the same contract adapters/libs/sortdeps fills with the standard library's
+// Bind fills deps.Deps.SortDeps with an insertion sort over reflect.Swapper —
+// the same contract adapters/impls/stdsort fills with the standard library's
 // sort. It is the second implementation of one contract: nothing inside the
 // sandbox can tell the two apart, and which one a build binds is the
-// available's decision.
+// binding's decision.
 //
 // Insertion sort is stable, so Slice and SliceStable are one function. It is
 // O(n²): this adapter is for a program that sorts short lists and would rather
 // not carry `sort`, not a drop-in for large ones.
 func Bind(deps *deps.Deps) {
-	deps.Sortdeps = sortdeps.Sandbox{
+	deps.SortDeps = sortdeps.Contract{
 		Strings: func(list []string) {
 			insertion(len(list),
 				func(i int, j int) bool { return list[i] < list[j] },

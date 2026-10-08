@@ -1,29 +1,29 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"fmt"
 	"strconv"
 	"strings"
 
-	opinatedagnosserver "{{.Module}}/sandbox/deps/OpinatedAgnosServer"
+	opinionatedagnosserver "{{.Module}}/sandbox/deps/OpinionatedAgnosServer"
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
-// run is one ServerMain: the props every request of it is answered with.
+// run is one Main: the props every request of it is answered with.
 type run struct {
-	props opinatedagnosserver.MainProps
+	props opinionatedagnosserver.MainProps
 }
 
-// serverMain opens the port through props.Serverdeps — which routes nothing —
+// serverMain opens the port through props.ServerDeps — which routes nothing —
 // and hands every request to dispatch, whatever its method or path.
 // props.Serve.Addr may name a range of ports ("3000:4000"): each one is tried
 // in turn, and the server listens on the first that binds. The address it
 // landed on is printed to stdout, since with a range nobody could know it
 // beforehand. The first request to stop the process — an interrupt, a
-// termination — shuts it down gracefully through props.Signaldeps: no new
+// termination — shuts it down gracefully through props.SignalDeps: no new
 // request is taken, and the ones in flight get ShutdownTimeoutMs to finish,
 // after which Listen returns nil.
-func serverMain(props opinatedagnosserver.MainProps) error {
+func serverMain(props opinionatedagnosserver.MainProps) error {
 	server_run := &run{props: props}
 	serve := props.Serve
 
@@ -52,14 +52,14 @@ func serverMain(props opinatedagnosserver.MainProps) error {
 		return fmt.Errorf("no port of %s could be bound: %s", serve.Addr, err.Error())
 	}
 
-	props.Signaldeps.OnInterrupt(func() {
-		props.Std.Log("server shutting down \n")
+	props.SignalDeps.OnInterrupt(func() {
+		props.StdDeps.Logf("server shutting down \n")
 		if err := server.Shutdown(); err != nil {
-			props.Std.Error("server shutdown: %s \n", err.Error())
+			props.StdDeps.Eprintf("server shutdown: %s \n", err.Error())
 		}
 	})
 
-	props.Std.Printf("server listening on %s \n", addr)
+	props.StdDeps.Printf("server listening on %s \n", addr)
 	return server.Listen()
 }
 
@@ -67,7 +67,7 @@ func serverMain(props opinatedagnosserver.MainProps) error {
 // dispatch.
 func (server_run *run) newServer(addr string) serverdeps.Server {
 	serve := server_run.props.Serve
-	return server_run.props.Serverdeps.NewServer(serverdeps.ServerProps{
+	return server_run.props.ServerDeps.NewServer(serverdeps.ServerProps{
 		Addr:              addr,
 		ReadTimeoutMs:     serve.ReadTimeoutMs,
 		WriteTimeoutMs:    serve.WriteTimeoutMs,
@@ -144,15 +144,15 @@ func isNumber(text string) bool {
 
 // dispatch is the whole routing layer: it runs every route of Server.Routes
 // the request is for, in the order the collector put them — lowest `priority`
-// first. Whether a route is for the request is its IsActionable's to say;
-// binding and running it is its RequestHandler's.
+// first. Whether a route is for the request is its Matches's to say;
+// binding and running it is its Run's.
 //
 // More than one route may be for one request, which is what a chain is: each
 // one runs in turn until one of them **answers** — sets a status, or writes a
 // byte, which sends a 200. A handler that does neither has declined, so the
 // next route runs — that is the whole of what makes a middleware a
 // middleware. A handler that returns an error without answering ends the
-// chain too, through HandleServerError. Every route of one request is handed
+// chain too, through HandleInternalServerError. Every route of one request is handed
 // one RouteProps, which is how a middleware hands what it learned to the
 // routes after it.
 //
@@ -196,11 +196,11 @@ func (server_run *run) answer(request serverdeps.Request, response serverdeps.Re
 	// no route ran, since a chain that ran and wrote nothing is the project
 	// declining to answer, not the method being wrong.
 	if !ran && method_mismatch {
-		server_run.failRequest(request, response, props, opinatedagnosserver.StatusMethodNotAllowed)
+		server_run.failRequest(request, response, props, opinionatedagnosserver.StatusMethodNotAllowed)
 		return
 	}
 
-	server_run.failRequest(request, response, props, opinatedagnosserver.StatusNotFound)
+	server_run.failRequest(request, response, props, opinionatedagnosserver.StatusNotFound)
 }
 
 // runChain runs every route the request is for, until one answers or fails.
@@ -218,7 +218,7 @@ func (server_run *run) runChain(request serverdeps.Request, response serverdeps.
 		bound.Response = response
 		bound.Props = props
 
-		if !server_run.isActionable(bound) {
+		if !server_run.matches(bound) {
 			if server_run.matchesPath(bound) && !acceptsMethod(bound, request.GetMethod()) {
 				method_mismatch = true
 			}
@@ -228,19 +228,19 @@ func (server_run *run) runChain(request serverdeps.Request, response serverdeps.
 		if !acceptsAny(bound) {
 			ran = true
 		}
-		err := server_run.requestHandler(bound)
+		err := server_run.runRequest(bound)
 
 		// The answer is what ends the chain, so a handler that answered
 		// *and* returned something has answered: what it returned is
 		// reported and goes no further.
 		if status() != 0 {
 			if err != nil {
-				server_run.props.Std.Log("route %s: %s \n", bound.Name, err.Error())
+				server_run.props.StdDeps.Logf("route %s: %s \n", bound.Name, err.Error())
 			}
 			return ran, method_mismatch
 		}
 		if err != nil {
-			server_run.raise(bound, opinatedagnosserver.StatusFailure, "", "", err.Error())
+			server_run.raise(bound, opinionatedagnosserver.StatusInternalServerError, "", "", err.Error())
 			return ran, method_mismatch
 		}
 	}
@@ -248,36 +248,36 @@ func (server_run *run) runChain(request serverdeps.Request, response serverdeps.
 	return ran, method_mismatch
 }
 
-// isActionable is the bound route's own IsActionable when it declares one,
+// matches is the bound route's own Matches when it declares one,
 // the lib's matcher otherwise.
-func (server_run *run) isActionable(bound *opinatedagnosserver.Route) bool {
-	if bound.IsActionable != nil {
-		return bound.IsActionable(bound)
+func (server_run *run) matches(bound *opinionatedagnosserver.Route) bool {
+	if bound.Matches != nil {
+		return bound.Matches(bound)
 	}
 	return server_run.defaultIsActionable(bound)
 }
 
 // matchesPath is the bound route's own MatchesPath when it declares one, the
 // lib's matcher otherwise.
-func (server_run *run) matchesPath(bound *opinatedagnosserver.Route) bool {
+func (server_run *run) matchesPath(bound *opinionatedagnosserver.Route) bool {
 	if bound.MatchesPath != nil {
 		return bound.MatchesPath(bound)
 	}
 	return server_run.defaultMatchesPath(bound)
 }
 
-// requestHandler is the bound route's own RequestHandler when it declares
+// runRequest is the bound route's own Run when it declares
 // one, the lib's binder otherwise.
-func (server_run *run) requestHandler(bound *opinatedagnosserver.Route) error {
-	if bound.RequestHandler != nil {
-		return bound.RequestHandler(bound)
+func (server_run *run) runRequest(bound *opinionatedagnosserver.Route) error {
+	if bound.Run != nil {
+		return bound.Run(bound)
 	}
 	return server_run.handle(bound)
 }
 
 // acceptsAny reports a route declared for every method.
-func acceptsAny(route *opinatedagnosserver.Route) bool {
-	return len(route.AcceptMethods) == 1 && route.AcceptMethods[0] == opinatedagnosserver.AnyMethod
+func acceptsAny(route *opinionatedagnosserver.Route) bool {
+	return len(route.Methods) == 1 && route.Methods[0] == opinionatedagnosserver.AnyMethod
 }
 
 // failRequest raises a failure that belongs to no route — nothing matched the
@@ -308,7 +308,7 @@ func (server_run *run) recoverRoute(request serverdeps.Request, response serverd
 		return
 	}
 
-	server_run.props.Std.Error("route panicked: %v\n", failure)
+	server_run.props.StdDeps.Eprintf("route panicked: %v\n", failure)
 	if status() != 0 {
 		return
 	}
@@ -318,15 +318,15 @@ func (server_run *run) recoverRoute(request serverdeps.Request, response serverd
 	route.Response = response
 	route.Props = props
 
-	server_run.raise(route, opinatedagnosserver.StatusFailure, "", "", fmt.Sprintf("%v", failure))
+	server_run.raise(route, opinionatedagnosserver.StatusInternalServerError, "", "", fmt.Sprintf("%v", failure))
 }
 
 // raise records what went wrong on a bound route and hands it to the
-// project's own handler for that status — HandleBadRequest, HandleTooLarge,
-// HandleWrongContentType, HandleServerError — through Server.Fail. It returns
+// project's own handler for that status — HandleBadRequest, HandlePayloadTooLarge,
+// HandleUnsupportedMediaType, HandleInternalServerError — through Server.Fail. It returns
 // the error that handler returned.
-func (server_run *run) raise(route *opinatedagnosserver.Route, status int, field string, message string, cause string) error {
-	return server_run.raiseFailure(route, &opinatedagnosserver.RouteFailure{
+func (server_run *run) raise(route *opinionatedagnosserver.Route, status int, field string, message string, cause string) error {
+	return server_run.raiseFailure(route, &opinionatedagnosserver.RouteFailure{
 		Status:  status,
 		Field:   field,
 		Message: message,
@@ -337,7 +337,7 @@ func (server_run *run) raise(route *opinatedagnosserver.Route, status int, field
 // raiseFailure raises one failure already built — what a handler or a
 // generated ReadBody returned through Fail — on the bound route it was
 // returned from.
-func (server_run *run) raiseFailure(route *opinatedagnosserver.Route, failure *opinatedagnosserver.RouteFailure) error {
+func (server_run *run) raiseFailure(route *opinionatedagnosserver.Route, failure *opinionatedagnosserver.RouteFailure) error {
 	route.Failure = failure
 
 	// A server built without a Fail — a route bound by hand rather than by

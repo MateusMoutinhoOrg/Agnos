@@ -1,10 +1,10 @@
+backoffice: false
+cli: false
+database: false
+deps: false
 doc: true
+example: true
+front: false
 readme: true
 sandbox: true
-sandbox-backoffice: false
-sandbox-cli: false
-sandbox-database: false
-sandbox-deps: false
-sandbox-example: true
-sandbox-front: false
-sandbox-server: false
+server: false

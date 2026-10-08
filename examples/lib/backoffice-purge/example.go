@@ -4,7 +4,7 @@ import (
 	"os"
 	"path/filepath"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -13,7 +13,7 @@ import (
 // wrote.
 //
 // It calls the same actions `agnos backoffice-init` and `agnos
-// backoffice-purge` call, and writes only inside TestDir.
+// backoffice-purge` call, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -21,34 +21,34 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.BackofficeInit("TestDir"); err != nil {
+	if err := lib.Actions.BackofficeInit(api.BackofficeInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.BackofficePurge("TestDir"); err != nil {
+	if err := lib.Actions.BackofficePurge(api.BackofficePurgeProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
 	// What result.yaml records: the same set the cli side copies.
 	for _, dir := range []string{
 		"sandbox/internal/routeprops",
-		"sandbox/internal/routeslist",
+		"sandbox/internal/routes",
 		"sandbox/internal/commands",
 	} {
-		copyTree("TestDir/"+dir, "AssertDir/"+dir)
+		copyTree("test-dir/"+dir, "assert-dir/"+dir)
 	}
 	for _, file := range []string{
 		"AgnosConfig/extensions.yaml",
 		"sandbox/api/config.go",
 	} {
-		copyFile("TestDir/"+file, "AssertDir/"+file)
+		copyFile("test-dir/"+file, "assert-dir/"+file)
 	}
 }
 

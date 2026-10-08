@@ -1,4 +1,4 @@
-default-adapter: envdeps
-field: Envdeps
+default-adapter: osenv
+field: EnvDeps
 help: Read the process environment variables
 name: envdeps

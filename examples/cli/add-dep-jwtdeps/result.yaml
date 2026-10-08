@@ -1,17 +1,17 @@
-cli-output: "add-dep started with path TestDir dep jwtdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
+cli-output: "add-dep started with path test-dir dep jwtdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: adapters/availables/standard/available.yaml
-      sha: b2b219b395e87176be7eb93ce109ab56a372da582db42f002f6582c804141015
-    - file: adapters/availables/standard/new.go
-      sha: c65a9ad4dd753acfa18768afc18d3eafdd9e28d932e4bdf84b65ced06ac193b1
-    - file: adapters/libs/jwtdeps/adapter.yaml
-      sha: 91477c9921cb57819e9118b0042c2a85326f06fe98a60bd9f8e00903928f1613
-    - file: adapters/libs/jwtdeps/jwtdeps.go
-      sha: bcc68ca309b3a96f84a2de02526915a13fc24b13aa5480f8eef9ee9b18fee6a4
+    - file: adapters/bindings/standard/binding.yaml
+      sha: 57e862de530b1ee5bf2da73019bb8563947aaf846b95f2674f81d40272ab5216
+    - file: adapters/bindings/standard/new.go
+      sha: c26816438cfd3209049eb5d67b806c07cece1e14520a4d1860283678b50a9942
+    - file: adapters/impls/golangjwt/adapter.yaml
+      sha: 0fe425505f3be9bf5ffecd6633fe2c4b1be5da3adb068d975bc4eb1b8d5f1cdc
+    - file: adapters/impls/golangjwt/golangjwt.go
+      sha: 96984a7dc81901008232c618ca38c622bbf11445888d9658e2c7e0919b07ee4a
     - file: go.mod
       sha: 2d740f8916797ce6c1898410b60118093ad80f119d9d42bbc0e40d2ca3085911
     - file: sandbox/deps/deps.go
-      sha: 4eec01941eac68312248a0f120f1b2178bfa82fea36cfacba98c106d16111b5b
+      sha: 86924618ca0b08ea206ca48aa7ce05e5ce72896d8fa79e3e23e3e9ac45252ae6
     - file: sandbox/deps/jwtdeps/jwtdeps.go
-      sha: 2eb2c4f3c44518e5121f44af1670a61db51a2b8e30ab0d42f324a3dc7e27c671
+      sha: c0983f43849e359848ca455131f01d4ec4a1baf08b8e0f5a85322603386ea139

@@ -2,8 +2,8 @@ package add_body_field
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -13,7 +13,7 @@ import (
 // route that declared no body becomes a json one here: declaring a property is
 // what says it takes a body at all. A form body is flat, so a property that
 // would nest is refused rather than written.
-func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteBodyFieldProps) error {
+func AddBodyFieldInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.AddBodyFieldProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
 		return err
@@ -24,7 +24,7 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 
 	name := utils.RouteFieldName(sandbox, props.Name)
 	if name == "" {
-		return sandbox.Deps.Std.Errorf("a body property needs a name")
+		return sandbox.Deps.StdDeps.Errorf("a body property needs a name")
 	}
 
 	if conf.Body.Type == routeconf.BodyNone {
@@ -32,7 +32,7 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		conf.Body.ContentType = routeconf.DefaultJsonContentType
 	}
 	if routeconf.SchemaKeyOf(conf.Body.Type) == "" {
-		return sandbox.Deps.Std.Errorf("route %q declares a %q body, which carries no schema (`set-body --type json` or `--type form` first)", props.Route, conf.Body.Type)
+		return sandbox.Deps.StdDeps.Errorf("route %q declares a %q body, which carries no schema (`set-body --type json` or `--type form` first)", props.Route, conf.Body.Type)
 	}
 	if conf.Body.Schema == nil {
 		conf.Body.Schema = &routeconf.Schema{Type: "object"}
@@ -47,7 +47,7 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 
 	leaf := parts[len(parts)-1]
 	if utils.SchemaPropertyOf(parent, leaf) != nil {
-		return sandbox.Deps.Std.Errorf("route %q already declares a body property named %q", props.Route, name)
+		return sandbox.Deps.StdDeps.Errorf("route %q already declares a body property named %q", props.Route, name)
 	}
 
 	schema, err := utils.RouteBodyPropertySchema(sandbox, props)
@@ -55,12 +55,12 @@ func AddBodyFieldInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.R
 		return err
 	}
 
-	sandbox.Deps.Std.Log("add-body-field adding %s to %s \n", name, utils.RouteConfPath(sandbox, io, props.Route))
+	sandbox.Deps.StdDeps.Logf("add-body-field adding %s to %s \n", name, utils.RouteConfPath(sandbox, io, props.Route))
 
 	utils.InsertSchemaProperty(parent, leaf, schema)
 	if props.Required {
 		parent.Required = utils.AppendUnique(parent.Required, []string{leaf})
-		sandbox.Deps.Sortdeps.Strings(parent.Required)
+		sandbox.Deps.SortDeps.Strings(parent.Required)
 	}
 	if conf.Body.Type == "form" {
 		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {

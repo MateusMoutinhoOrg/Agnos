@@ -1,17 +1,17 @@
 # The remove-cli-example example: delete an example of examples/cli/
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 
-agnos start --path TestDir --project-name Test --module Test -q
-agnos cli-init --path TestDir -q
-agnos add-cli-example greet --path TestDir -q
+agnos start --path test-dir --project-name Test --module Test -q
+agnos cli-init --path test-dir -q
+agnos add-cli-example greet --path test-dir -q
 
-agnos remove-cli-example greet --path TestDir
+agnos remove-cli-example greet --path test-dir
 
 # What result.yaml records: the paths this example asserts, copied out of
-# TestDir. The lib side copies the same set.
-mkdir -p AssertDir/examples
-cp -R TestDir/examples/. AssertDir/examples/
-mkdir -p AssertDir/docs/CliExamples
-cp -R TestDir/docs/CliExamples/. AssertDir/docs/CliExamples/
+# test-dir. The lib side copies the same set.
+mkdir -p assert-dir/examples
+cp -R test-dir/examples/. assert-dir/examples/
+mkdir -p assert-dir/docs/CliExamples
+cp -R test-dir/docs/CliExamples/. assert-dir/docs/CliExamples/

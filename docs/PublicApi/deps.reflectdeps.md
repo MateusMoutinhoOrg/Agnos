@@ -1,10 +1,10 @@
-# `deps.Reflectdeps`
+# `deps.ReflectDeps`
 
 `sandbox/deps/reflectdeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the reflection library injected whole as the Deps.Reflectdeps field.
+Contract is the reflection library injected whole as the Deps.ReflectDeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |

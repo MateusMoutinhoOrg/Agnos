@@ -1,13 +1,13 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: list-adapters
-category: Deps System
+category: Deps
+description: 'One row per adapter: the name, the dep it fills, whether it is installed, the bindings that bind it, and what backs it.'
 examples:
     - list-adapters
-help: Lists the adapters of the catalog and of the project
-long-description: 'One row per adapter: the name, the dep it fills, whether it is installed, the availables binding it, and what backs it.'
 priority: 100
+summary: List the adapters of the catalog and of the project

@@ -2,7 +2,7 @@ package explain_command
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -13,12 +13,12 @@ import (
 // command that runs as the one that answers it. The last line is what the line
 // ends on — that command, the usage error it raises before its handler runs,
 // or the not-found every unmatched line ends on.
-func ExplainCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.ExplainCommandProps) ([]string, error) {
+func ExplainCommandInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.ExplainCommandProps) ([]string, error) {
 	if err := utils.RequireProject(sandbox, io); err != nil {
 		return nil, err
 	}
 	if !io.IsDir(utils.CommandsDir) {
-		return nil, sandbox.Deps.Std.Errorf("the project has no cli layer: run cli-init first")
+		return nil, sandbox.Deps.StdDeps.Errorf("the project has no cli layer: run cli-init first")
 	}
 
 	chain, err := utils.LoadCommandChain(sandbox, io)
@@ -26,18 +26,18 @@ func ExplainCommandInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api
 		return nil, err
 	}
 
-	binary := sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
-	if project_conf, err := utils.LoadProjectConf(sandbox, io); err == nil && project_conf.Name != "" {
-		binary = sandbox.Deps.Stringsdeps.ToLower(project_conf.Name)
+	binary := sandbox.Deps.StringsDeps.ToLower(sandbox.Config.ProjectName)
+	if project_conf, err := utils.LoadProjectConf(sandbox, io); err == nil && project_conf.ProjectName != "" {
+		binary = sandbox.Deps.StringsDeps.ToLower(project_conf.ProjectName)
 	}
-	lines := []string{sandbox.Deps.Stringsdeps.Join(append([]string{binary}, props.Argv...), " ")}
+	lines := []string{sandbox.Deps.StringsDeps.Join(append([]string{binary}, props.Argv...), " ")}
 	consumed := make([]bool, len(props.Argv))
 	answered := ""
 	failure := ""
 
 	for _, entry := range chain {
-		name := utils.CommandIdentifier(sandbox, entry.Name)
-		head := sandbox.Deps.Std.Sprintf("  %-4d %-24s", entry.Conf.Priority, name)
+		name := utils.CommandName(sandbox, entry.Name)
+		head := sandbox.Deps.StdDeps.Sprintf("  %-4d %-24s", entry.Conf.Priority, name)
 
 		if answered != "" {
 			lines = append(lines, head+" not reached: "+answered+" answered first")
@@ -91,12 +91,12 @@ func nearCommand(sandbox *api.Sandbox, chain []utils.CommandChainEntry, argv []s
 			continue
 		}
 		for _, identifier := range entry.Conf.Identifiers() {
-			words := sandbox.Deps.Stringsdeps.Fields(identifier)
+			words := sandbox.Deps.StringsDeps.Fields(identifier)
 			if len(words) == 0 || len(words) > len(segments) || len(words) <= longest {
 				continue
 			}
-			if sandbox.Deps.Stringsdeps.Join(segments[:len(words)], " ") == identifier {
-				near, longest = utils.CommandIdentifier(sandbox, entry.Name), len(words)
+			if sandbox.Deps.StringsDeps.Join(segments[:len(words)], " ") == identifier {
+				near, longest = utils.CommandName(sandbox, entry.Name), len(words)
 			}
 		}
 	}

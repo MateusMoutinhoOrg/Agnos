@@ -5,11 +5,11 @@ import (
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
-// Html renders the template at path with vars and answers it under status.
+// RenderHTML renders the template at path with vars and answers it under status.
 // Templates run on text/template, so every value a user can influence is
 // escaped in the template itself with {{"{{"}}html ...}}.
-func Html(sandbox *api.Sandbox, response *serverdeps.Response, status int, path string, vars any) error {
-	content, err := sandbox.Deps.Embeddeps.RenderTemplate(path, vars)
+func RenderHTML(sandbox *api.Sandbox, response *serverdeps.Response, status int, path string, vars any) error {
+	content, err := sandbox.Deps.EmbedDeps.RenderTemplate(path, vars)
 	if err != nil {
 		return err
 	}

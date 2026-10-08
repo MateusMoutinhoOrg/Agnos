@@ -27,7 +27,7 @@ CompileProps describes one cross-compile run: the directory holding the project 
 
 ## `StartProps`
 
-StartProps describes one project to scaffold: the directory to write it into, the name it carries in <Name>Config/project.yaml, the module path for go.mod (nil derives it from the name) and whether an existing directory may be written over.
+StartProps describes one project to scaffold: the directory to write it into, the name it carries as `project-name` in AgnosConfig/project.yaml, the module path for go.mod (nil derives it from the name) and whether an existing directory may be written over.
 
 | Field | Type |
 | --- | --- |
@@ -36,9 +36,9 @@ StartProps describes one project to scaffold: the directory to write it into, th
 | `Module` | `*string` |
 | `Force` | `bool` |
 
-## `ExecTestProps`
+## `RunExamplesProps`
 
-ExecTestProps describes one run of the project's example suite: the directory holding the project, the single example name to run (empty runs every one, both sides) and whether the goldens are rewritten with what the run produced instead of compared against it.
+RunExamplesProps describes one run of the project's example suite: the directory holding the project, the single example name to run (empty runs every one, both sides) and whether the goldens are rewritten with what the run produced instead of compared against it.
 
 | Field | Type |
 | --- | --- |
@@ -48,7 +48,7 @@ ExecTestProps describes one run of the project's example suite: the directory ho
 
 ## `AddDepProps`
 
-AddDepProps describes one dep to install. Dep is either a name of the embedded catalog or, when it holds a "/", the module path of another agnos repo — the same disambiguation `go get` makes. Adapter picks which implementation of a catalog dep fills the contract ("" takes the dep's declared default-adapter); As names the copied contract of a remote one ("" takes the last segment of the module path); RemoteAvailable is the available of the remote repo the generated shim builds its sandbox from ("" is standard).
+AddDepProps describes one dep to install. Dep is either a name of the embedded catalog or, when it holds a "/", the module path of another agnos repo — the same disambiguation `go get` makes. Adapter picks which implementation of a catalog dep fills the contract ("" takes the dep's declared default-adapter); As names the copied contract of a remote one ("" takes the last segment of the module path); RemoteBinding is the binding of the remote repo the generated shim builds its sandbox from ("" is standard).
 
 | Field | Type |
 | --- | --- |
@@ -56,18 +56,18 @@ AddDepProps describes one dep to install. Dep is either a name of the embedded c
 | `Dep` | `string` |
 | `Adapter` | `string` |
 | `As` | `string` |
-| `RemoteAvailable` | `string` |
+| `RemoteBinding` | `string` |
 
 ## `SetDepProps`
 
-SetDepProps describes one remote dep to move to another version of the module it was copied from. RemoteAvailable is the available of the remote repo the regenerated shim builds its sandbox from ("" is standard).
+SetDepProps describes one remote dep to move to another version of the module it was copied from. RemoteBinding is the binding of the remote repo the regenerated shim builds its sandbox from ("" is standard).
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Dep` | `string` |
 | `Version` | `string` |
-| `RemoteAvailable` | `string` |
+| `RemoteBinding` | `string` |
 
 ## `RemoveDepProps`
 
@@ -81,24 +81,24 @@ RemoveDepProps describes one dep to uninstall. A dep with adapters installed is 
 
 ## `AddAdapterProps`
 
-AddAdapterProps describes one further implementation to install for a contract the project already has. Available names the available that should switch to it; "" installs the package and leaves every selection alone.
+AddAdapterProps describes one further implementation to install for a contract the project already has. Binding names the binding that should switch to it; "" installs the package and leaves every selection alone.
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Adapter` | `string` |
-| `Available` | `string` |
+| `Binding` | `string` |
 
 ## `SetAdapterProps`
 
-SetAdapterProps describes one selection to change: which adapter fills a dep's field in one available. Available is the standard one when empty.
+SetAdapterProps describes one selection to change: which adapter fills a dep's field in one binding. Binding is the standard one when empty.
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Dep` | `string` |
 | `Adapter` | `string` |
-| `Available` | `string` |
+| `Binding` | `string` |
 
 ## `ExtensionInfo`
 
@@ -125,7 +125,7 @@ DepInfo is one row of ListDeps: a dep of the embedded catalog, and what the proj
 
 ## `AdapterInfo`
 
-AdapterInfo is one row of ListAdapters: an adapter of the embedded catalog or one installed in the project, and which availables bind it. Origin is "catalog" for one the catalog installs and "generated" for the shim of a dep copied from a remote repo.
+AdapterInfo is one row of ListAdapters: an adapter of the embedded catalog or one installed in the project, and which bindings bind it. Origin is "catalog" for one the catalog installs and "generated" for the shim of a dep copied from a remote repo.
 
 | Field | Type |
 | --- | --- |
@@ -135,11 +135,11 @@ AdapterInfo is one row of ListAdapters: an adapter of the embedded catalog or on
 | `Module` | `string` |
 | `Origin` | `string` |
 | `Installed` | `bool` |
-| `Availables` | `[]string` |
+| `Bindings` | `[]string` |
 
-## `FlagProps`
+## `AddFlagProps`
 
-FlagProps describes one flag to declare in a command's command.yaml. Name is the flag's name, whose exported Go form is the Entries field it binds to ("out-file" -> OutFile); Keys are the spellings a user types, --<name> when none is given. Type is string, integer, number, boolean, string-array or integer-array, and Array asks for the repeatable form of a scalar Type. Default, Min and Max are the raw literals typed on the command line ("" means unset); Enum is every value accepted, Pattern a regular expression every value matches, and the Trigger* fields what the value has to match for the command to run at all. Position is the index to insert at (< 0 appends).
+AddFlagProps describes one flag to declare in a command's command.yaml. Name is the flag's name, whose exported Go form is the Input field it binds to ("out-file" -> OutFile); Keys are the spellings a user types, --<name> when none is given. Type is string, integer, number, boolean, string-array or integer-array, and Array asks for the repeatable form of a scalar Type. Default, Min and Max are the raw literals typed on the command line ("" means unset); Enum is every value accepted, Pattern a regular expression every value matches, and the Trigger* fields what the value has to match for the command to run at all. Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
@@ -162,9 +162,9 @@ FlagProps describes one flag to declare in a command's command.yaml. Name is the
 | `Description` | `string` |
 | `Position` | `int` |
 
-## `ArgProps`
+## `AddArgProps`
 
-ArgProps describes one arg to declare in a command's command.yaml: the segments Start to End of the command line — the raw indexes typed on the command line, "" being the first segment no arg reads yet and Start again, "-1" the last segment — bound to the Entries field Name becomes. Type is string, integer, number or uuid, anything but string reading one segment alone; Trigger and TriggerType are what the segments, joined by a space, have to match for the command to run at all, and TriggerNegate / TriggerIgnoreCase the two switches on it. Position is the index to insert at (< 0 appends).
+AddArgProps describes one arg to declare in a command's command.yaml: the segments Start to End of the command line — the raw indexes typed on the command line, "" being the first segment no arg reads yet and Start again, "-1" the last segment — bound to the Input field Name becomes. Type is string, integer, number or uuid, anything but string reading one segment alone; Trigger and TriggerType are what the segments, joined by a space, have to match for the command to run at all, and TriggerNegate / TriggerIgnoreCase the two switches on it. Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
@@ -183,9 +183,9 @@ ArgProps describes one arg to declare in a command's command.yaml: the segments 
 | `Description` | `string` |
 | `Position` | `int` |
 
-## `ArgEditProps`
+## `SetArgProps`
 
-ArgEditProps describes the change set-arg applies to one arg a command declares. Name is the arg as it is declared now and Rename the name it takes on ("" leaves it alone); every other key overwrites what is there when it is given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case", "type", "required", "default" or "description" off again.
+SetArgProps describes the change set-arg applies to one arg a command declares. Name is the arg as it is declared now and Rename the name it takes on ("" leaves it alone); every other key overwrites what is there when it is given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case", "type", "required", "default" or "description" off again.
 
 | Field | Type |
 | --- | --- |
@@ -205,9 +205,9 @@ ArgEditProps describes the change set-arg applies to one arg a command declares.
 | `Description` | `string` |
 | `Clear` | `[]string` |
 
-## `FlagEditProps`
+## `SetFlagProps`
 
-FlagEditProps describes the change set-flag applies to one flag a command declares. Name is the flag as it is declared now — its name, its id or one of its keys — and Rename the name it takes on ("" leaves it alone); Keys replace the spellings when any is given, Enum the accepted values, and every other key overwrites what is there when it is given. Clear takes "keys", "type", "required", "default", "min", "max", "enum", "pattern", "trigger", "trigger-negate", "trigger-ignore-case" or "description" off again.
+SetFlagProps describes the change set-flag applies to one flag a command declares. Name is the flag as it is declared now — its name, its id or one of its keys — and Rename the name it takes on ("" leaves it alone); Keys replace the spellings when any is given, Enum the accepted values, and every other key overwrites what is there when it is given. Clear takes "keys", "type", "required", "default", "min", "max", "enum", "pattern", "trigger", "trigger-negate", "trigger-ignore-case" or "description" off again.
 
 | Field | Type |
 | --- | --- |
@@ -248,7 +248,7 @@ AddCommandProps describes one command to scaffold. Name is its package and the v
 | `HasPriority` | `bool` |
 | `Before` | `string` |
 | `After` | `string` |
-| `Help` | `string` |
+| `Summary` | `string` |
 | `Category` | `string` |
 | `Dir` | `string` |
 
@@ -290,9 +290,9 @@ SetCommandProps carries the command-level keys of command.yaml that set-command 
 | --- | --- |
 | `Path` | `string` |
 | `Command` | `string` |
-| `Help` | `string` |
+| `Summary` | `string` |
 | `Category` | `string` |
-| `LongDescription` | `string` |
+| `Description` | `string` |
 | `Hidden` | `bool` |
 | `Visible` | `bool` |
 | `Strict` | `bool` |
@@ -309,7 +309,7 @@ SetCommandProps carries the command-level keys of command.yaml that set-command 
 
 ## `AddRouteProps`
 
-AddRouteProps describes one route to scaffold. Trigger is the whole-path value its first path compares against ("" is "/" followed by the name), TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or the aliases starts-with, ends-with, exact, equals and matches; "" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the paths from one url shape instead ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType. Methods are the http methods it answers to ([] is GET — ANY for a Middleware) and ResponseType the Content-Type its responses carry ("" is application/json — text/plain for a Middleware). Priority is the rung it runs on, used only when HasPriority is set; without it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for a Middleware. Before and After name another route to land one rung below or above instead, and exclude Priority. Dir is the folder under sandbox/internal/routeslist the route lands in ("" is the top; "admin" puts it in routeslist/admin/<name>): its route.yaml is what makes it a route, whatever folder holds it.
+AddRouteProps describes one route to scaffold. Trigger is the whole-path value its first path compares against ("" is "/" followed by the name), TriggerType how ("equal", "prefix", "text-prefix", "suffix" or "regex", or the aliases starts-with, ends-with, exact, equals and matches; "" is equal — prefix for a Middleware), and TriggerNegate / TriggerIgnoreCase the two switches on it. Pattern declares the paths from one url shape instead ("/users/{id:integer}/{*rest}") and excludes Trigger and TriggerType. Methods are the http methods it answers to ([] is GET — ANY for a Middleware) and ResponseType the Content-Type its responses carry ("" is application/json — text/plain for a Middleware). Priority is the rung it runs on, used only when HasPriority is set; without it the route lands on DefaultRoutePriority, or DefaultMiddlewarePriority for a Middleware. Before and After name another route to land one rung below or above instead, and exclude Priority. Dir is the folder under sandbox/internal/routes the route lands in ("" is the top; "admin" puts it in routes/admin/<name>): its route.yaml is what makes it a route, whatever folder holds it.
 
 | Field | Type |
 | --- | --- |
@@ -327,13 +327,13 @@ AddRouteProps describes one route to scaffold. Trigger is the whole-path value i
 | `Before` | `string` |
 | `After` | `string` |
 | `ResponseType` | `string` |
-| `Help` | `string` |
+| `Summary` | `string` |
 | `Category` | `string` |
 | `Dir` | `string` |
 
-## `RouteProps`
+## `SetRouteProps`
 
-RouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Methods replace the whole list when any is given; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch. Priority is the rung the route runs on, and HasPriority is what tells a priority declared as zero from one not given at all; Before and After name another route to land one rung below or above instead. Segments is the segment count the request path has to have, read when HasSegments is set. Clear takes "segments" off again.
+SetRouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Methods replace the whole list when any is given; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch. Priority is the rung the route runs on, and HasPriority is what tells a priority declared as zero from one not given at all; Before and After name another route to land one rung below or above instead. Segments is the segment count the request path has to have, read when HasSegments is set. Clear takes "segments" off again.
 
 | Field | Type |
 | --- | --- |
@@ -341,9 +341,9 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 | `Route` | `string` |
 | `Methods` | `[]string` |
 | `ResponseType` | `string` |
-| `Help` | `string` |
+| `Summary` | `string` |
 | `Category` | `string` |
-| `LongDescription` | `string` |
+| `Description` | `string` |
 | `Hidden` | `bool` |
 | `Visible` | `bool` |
 | `Priority` | `int` |
@@ -357,7 +357,7 @@ RouteProps carries the route-level keys of route.yaml that set-route may rewrite
 
 ## `RenameRouteProps`
 
-RenameRouteProps describes one route to rename: Route as it is declared now, Name the name it takes on. Dir, when HasDir is set, is the folder under sandbox/internal/routeslist it moves to ("" is the top); without it the route stays in the folder it sits in. Name may be its current one when only the folder changes.
+RenameRouteProps describes one route to rename: Route as it is declared now, Name the name it takes on. Dir, when HasDir is set, is the folder under sandbox/internal/routes it moves to ("" is the top); without it the route stays in the folder it sits in. Name may be its current one when only the folder changes.
 
 | Field | Type |
 | --- | --- |
@@ -388,9 +388,9 @@ ExplainRouteProps describes one request to run against the declared routes witho
 | `Headers` | `[]string` |
 | `Cookies` | `[]string` |
 
-## `DatabaseFieldProps`
+## `AddTableFieldProps`
 
-DatabaseFieldProps describes one field to add to a table of a database's specs.yaml. Table is the table it lands in and Parent the nested collection inside that table, "" for a field of the table itself. Type is one of key, string, int, float, link or database; Target names the table a link points at and belongs to a link alone.
+AddTableFieldProps describes one field to add to a table of a database's database.yaml. Table is the table it lands in and Parent the nested collection inside that table, "" for a field of the table itself. Type is one of key, string, int, float, link or database; Target names the table a link points at and belongs to a link alone.
 
 | Field | Type |
 | --- | --- |
@@ -403,9 +403,21 @@ DatabaseFieldProps describes one field to add to a table of a database's specs.y
 | `Required` | `bool` |
 | `Target` | `string` |
 
-## `DatabaseFieldEditProps`
+## `RemoveTableFieldProps`
 
-DatabaseFieldEditProps describes the change set-table-field applies to one field a table already declares. Name is the field as it is declared now and Rename the spelling it takes on ("" leaves it alone); Type and Target overwrite what is there when they are given, and an empty one leaves it as it is. Clear is how a key is taken off again — "required" or "target" — because an empty string cannot say "unset this" and "leave it alone" at once.
+RemoveTableFieldProps names one field to drop from a table of a database's database.yaml: Table is the table that declares it and Parent the nested collection inside that table, "" for a field of the table itself.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Database` | `string` |
+| `Table` | `string` |
+| `Parent` | `string` |
+| `Name` | `string` |
+
+## `SetTableFieldProps`
+
+SetTableFieldProps describes the change set-table-field applies to one field a table already declares. Name is the field as it is declared now and Rename the spelling it takes on ("" leaves it alone); Type and Target overwrite what is there when they are given, and an empty one leaves it as it is. Clear is how a key is taken off again — "required" or "target" — because an empty string cannot say "unset this" and "leave it alone" at once.
 
 | Field | Type |
 | --- | --- |
@@ -420,15 +432,15 @@ DatabaseFieldEditProps describes the change set-table-field applies to one field
 | `Target` | `string` |
 | `Clear` | `[]string` |
 
-## `RoutePathProps`
+## `AddPathProps`
 
-RoutePathProps describes one entry to add to a route's `paths`. Id is the Entries field the slice binds to; Start and End are the raw segment indexes typed on the command line ("" is 0 and -1, the whole path); Trigger is what the slice has to read as for the route to run and TriggerType how it is compared ("" is equal) — a path with no Trigger is a plain capture — and TriggerNegate / TriggerIgnoreCase the two switches on it. Type is what the slice converts to: "string" (the default), "integer", "number" or "uuid", anything but string reading one segment alone. Position is the index to insert at (< 0 appends).
+AddPathProps describes one entry to add to a route's `paths`. Name is the Input field the slice binds to; Start and End are the raw segment indexes typed on the command line ("" is 0 and -1, the whole path); Trigger is what the slice has to read as for the route to run and TriggerType how it is compared ("" is equal) — a path with no Trigger is a plain capture — and TriggerNegate / TriggerIgnoreCase the two switches on it. Type is what the slice converts to: "string" (the default), "integer", "number" or "uuid", anything but string reading one segment alone. Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Route` | `string` |
-| `Id` | `string` |
+| `Name` | `string` |
 | `Start` | `string` |
 | `End` | `string` |
 | `Type` | `string` |
@@ -439,15 +451,15 @@ RoutePathProps describes one entry to add to a route's `paths`. Id is the Entrie
 | `Description` | `string` |
 | `Position` | `int` |
 
-## `RoutePathEditProps`
+## `SetPathProps`
 
-RoutePathEditProps describes the change set-path applies to one entry of a route's `paths`. Id is the entry as it is declared now and Rename the id it takes on ("" leaves it alone); every other key overwrites what is there when it is given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case", "type" or "description" off again.
+SetPathProps describes the change set-path applies to one entry of a route's `paths`. Name is the entry as it is declared now and Rename the id it takes on ("" leaves it alone); every other key overwrites what is there when it is given. Clear takes "trigger", "trigger-negate", "trigger-ignore-case", "type" or "description" off again.
 
 | Field | Type |
 | --- | --- |
 | `Path` | `string` |
 | `Route` | `string` |
-| `Id` | `string` |
+| `Name` | `string` |
 | `Rename` | `string` |
 | `Start` | `string` |
 | `End` | `string` |
@@ -459,9 +471,9 @@ RoutePathEditProps describes the change set-path applies to one entry of a route
 | `Description` | `string` |
 | `Clear` | `[]string` |
 
-## `RouteParameterProps`
+## `AddParameterProps`
 
-RouteParameterProps describes one entry to add to a route's `parameters`. Name is the query key or header name it is read under — its Entries field is the exported spelling of it. Type is "string", "integer", "number", "boolean", "datetime", "string-array" or "integer-array"; Fonts are where it is read from, in order — "query", "header", "cookie" ([] is the query string alone). Default is the raw literal typed on the command line ("" means unset). Trigger and TriggerType are a condition on the value that puts the parameter into what the route matches on. Position is the index to insert at (< 0 appends).
+AddParameterProps describes one entry to add to a route's `parameters`. Name is the query key or header name it is read under — its Input field is the exported spelling of it. Type is "string", "integer", "number", "boolean", "datetime", "string-array" or "integer-array"; Sources are where it is read from, in order — "query", "header", "cookie" ([] is the query string alone). Default is the raw literal typed on the command line ("" means unset). Trigger and TriggerType are a condition on the value that puts the parameter into what the route matches on. Position is the index to insert at (< 0 appends).
 
 | Field | Type |
 | --- | --- |
@@ -469,7 +481,7 @@ RouteParameterProps describes one entry to add to a route's `parameters`. Name i
 | `Route` | `string` |
 | `Name` | `string` |
 | `Type` | `string` |
-| `Fonts` | `[]string` |
+| `Sources` | `[]string` |
 | `Required` | `bool` |
 | `Default` | `string` |
 | `TriggerType` | `string` |
@@ -480,9 +492,9 @@ RouteParameterProps describes one entry to add to a route's `parameters`. Name i
 | `Examples` | `[]string` |
 | `Position` | `int` |
 
-## `RouteParameterEditProps`
+## `SetParameterProps`
 
-RouteParameterEditProps describes the change set-parameter applies to one entry of a route's `parameters`. Name is the key as it is declared now and Rename the key it takes on ("" leaves it alone); Fonts replace the whole list when any is given; every other key overwrites what is there when it is given. Clear takes "description", "examples", "default", "required", "trigger", "trigger-negate" or "trigger-ignore-case" off again.
+SetParameterProps describes the change set-parameter applies to one entry of a route's `parameters`. Name is the key as it is declared now and Rename the key it takes on ("" leaves it alone); Sources replace the whole list when any is given; every other key overwrites what is there when it is given. Clear takes "description", "examples", "default", "required", "trigger", "trigger-negate" or "trigger-ignore-case" off again.
 
 | Field | Type |
 | --- | --- |
@@ -491,7 +503,7 @@ RouteParameterEditProps describes the change set-parameter applies to one entry 
 | `Name` | `string` |
 | `Rename` | `string` |
 | `Type` | `string` |
-| `Fonts` | `[]string` |
+| `Sources` | `[]string` |
 | `Required` | `bool` |
 | `Default` | `string` |
 | `TriggerType` | `string` |
@@ -502,9 +514,9 @@ RouteParameterEditProps describes the change set-parameter applies to one entry 
 | `Examples` | `[]string` |
 | `Clear` | `[]string` |
 
-## `RouteBodyProps`
+## `SetBodyProps`
 
-RouteBodyProps describes the body envelope of one route — everything about the request body but its schema (the json-schema of a json body, the form-schema of a form one), which is grown property by property with AddBodyField. Type is "none", "raw", "text", "json" or "form"; turning json into form and back carries a flat schema along. Required and Optional are the two sides of one switch, as are the empty strings and MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared schema.
+SetBodyProps describes the body envelope of one route — everything about the request body but its schema (the json-schema of a json body, the form-schema of a form one), which is grown property by property with AddBodyField. Type is "none", "raw", "text", "json" or "form"; turning json into form and back carries a flat schema along. Required and Optional are the two sides of one switch, as are the empty strings and MaxBytes < 0 that mean "leave as is". DropSchema deletes the declared schema.
 
 | Field | Type |
 | --- | --- |
@@ -517,9 +529,9 @@ RouteBodyProps describes the body envelope of one route — everything about the
 | `ContentType` | `string` |
 | `DropSchema` | `bool` |
 
-## `RouteBodyFieldProps`
+## `AddBodyFieldProps`
 
-RouteBodyFieldProps describes one property of a route's body schema — its json-schema, or the flat form-schema of a form body. Name is the dotted path it sits at ("address.city"), and every other field is one keyword of the supported subset: the raw literals typed on the command line, where "" means unset. Type is "string", "boolean", "int", "float" or "object", and Array wraps the whole of it in an array schema. AdditionalProperties and NoAdditionalProperties are the two sides of one switch.
+AddBodyFieldProps describes one property of a route's body schema — its json-schema, or the flat form-schema of a form body. Name is the dotted path it sits at ("address.city"), and every other field is one keyword of the supported subset: the raw literals typed on the command line, where "" means unset. Type is "string", "boolean", "int", "float" or "object", and Array wraps the whole of it in an array schema. AdditionalProperties and NoAdditionalProperties are the two sides of one switch.
 
 | Field | Type |
 | --- | --- |
@@ -544,9 +556,9 @@ RouteBodyFieldProps describes one property of a route's body schema — its json
 | `AdditionalProperties` | `bool` |
 | `NoAdditionalProperties` | `bool` |
 
-## `RouteBodyFieldEditProps`
+## `SetBodyFieldProps`
 
-RouteBodyFieldEditProps describes the change set-body-field applies to one property a route's body json-schema already declares. Name is the dotted path it sits at and Rename the leaf spelling it takes on (it stays in the object it is declared in); every other key is one keyword of the supported subset, overwriting what is there when it is given. Clear names the keywords to take off instead — "required", "array", "min", "max", "exclusive-min", "exclusive-max", "format", "pattern", "enum", "const", "nullable", "min-items", "max-items", "unique-items" or "additional-properties" — which is the one thing an empty value cannot say.
+SetBodyFieldProps describes the change set-body-field applies to one property a route's body json-schema already declares. Name is the dotted path it sits at and Rename the leaf spelling it takes on (it stays in the object it is declared in); every other key is one keyword of the supported subset, overwriting what is there when it is given. Clear names the keywords to take off instead — "required", "array", "min", "max", "exclusive-min", "exclusive-max", "format", "pattern", "enum", "const", "nullable", "min-items", "max-items", "unique-items" or "additional-properties" — which is the one thing an empty value cannot say.
 
 | Field | Type |
 | --- | --- |
@@ -573,9 +585,9 @@ RouteBodyFieldEditProps describes the change set-body-field applies to one prope
 | `NoAdditionalProperties` | `bool` |
 | `Clear` | `[]string` |
 
-## `RouteBodyImportProps`
+## `ImportBodyProps`
 
-RouteBodyImportProps describes one example payload to read a route's body json-schema off. Json is the document itself and File a path to read it from — exactly one of the two — and the inference walks it: an object becomes an object property, a list an array of whatever its first item is, and a scalar the type it is written as. Required lists every key the example carries in its object's required set, InferFormat reads an email, a uuid, a date-time or a uri back as the format it spells, and Replace drops the schema that is there instead of adding to it.
+ImportBodyProps describes one example payload to read a route's body json-schema off. Json is the document itself and File a path to read it from — exactly one of the two — and the inference walks it: an object becomes an object property, a list an array of whatever its first item is, and a scalar the type it is written as. Required lists every key the example carries in its object's required set, InferFormat reads an email, a uuid, a date-time or a uri back as the format it spells, and Replace drops the schema that is there instead of adding to it.
 
 | Field | Type |
 | --- | --- |
@@ -587,9 +599,9 @@ RouteBodyImportProps describes one example payload to read a route's body json-s
 | `Replace` | `bool` |
 | `InferFormat` | `bool` |
 
-## `PageProps`
+## `AddPageProps`
 
-PageProps describes one html page to scaffold: the project directory, the name the page carries — its path under assets/frontend/ without the .html, slashes allowed ("blog/post"), "index" the page "/" answers — and the <title> the scaffolded html carries ("" defaults to the name).
+AddPageProps describes one html page to scaffold: the project directory, the name the page carries — its path under assets/front/ without the .html, slashes allowed ("blog/post"), "index" the page "/" answers — and the <title> the scaffolded html carries ("" defaults to the name).
 
 | Field | Type |
 | --- | --- |
@@ -597,9 +609,9 @@ PageProps describes one html page to scaffold: the project directory, the name t
 | `Name` | `string` |
 | `Title` | `string` |
 
-## `DocProps`
+## `AddDocProps`
 
-DocProps describes one doc to create under docs/. Name is the doc's directory, optionally nested under its parent ("PublicApi/api.Actions"). Themes are the theme ids of <ProjectName>Config/themes.yaml the doc belongs to: required on a first-level doc, forbidden on a sub-doc.
+AddDocProps describes one doc to create under docs/. Name is the doc's directory, optionally nested under its parent ("PublicApi/api.Actions"). Themes are the theme ids of AgnosConfig/themes.yaml the doc belongs to: required on a first-level doc, forbidden on a sub-doc.
 
 | Field | Type |
 | --- | --- |
@@ -607,6 +619,400 @@ DocProps describes one doc to create under docs/. Name is the doc's directory, o
 | `Name` | `string` |
 | `Description` | `string` |
 | `Themes` | `[]string` |
+
+## `VerifyProps`
+
+VerifyProps describes one Verify run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `EnableExtensionProps`
+
+EnableExtensionProps describes one EnableExtension run: Path is the directory holding the project; Name the extension to turn on.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `DisableExtensionProps`
+
+DisableExtensionProps describes one DisableExtension run: Path is the directory holding the project; Name the extension to turn off.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `ListExtensionsProps`
+
+ListExtensionsProps describes one ListExtensions run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `DepsInitProps`
+
+DepsInitProps describes one DepsInit run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `DepsPurgeProps`
+
+DepsPurgeProps describes one DepsPurge run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `ListDepsProps`
+
+ListDepsProps describes one ListDeps run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `RemoveAdapterProps`
+
+RemoveAdapterProps describes one RemoveAdapter run: Path is the directory holding the project; Adapter the adapter to uninstall.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Adapter` | `string` |
+
+## `ListAdaptersProps`
+
+ListAdaptersProps describes one ListAdapters run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `AddBindingProps`
+
+AddBindingProps describes one AddBinding run: Path is the directory holding the project; Binding the binding to declare.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Binding` | `string` |
+
+## `RemoveBindingProps`
+
+RemoveBindingProps describes one RemoveBinding run: Path is the directory holding the project; Binding the binding to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Binding` | `string` |
+
+## `CliInitProps`
+
+CliInitProps describes one CliInit run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `CliPurgeProps`
+
+CliPurgeProps describes one CliPurge run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `RemoveCommandProps`
+
+RemoveCommandProps describes one RemoveCommand run: Path is the directory holding the project; Name the command to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `ListCommandsProps`
+
+ListCommandsProps describes one ListCommands run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `ShowCommandProps`
+
+ShowCommandProps describes one ShowCommand run: Path is the directory holding the project; Name the command to print.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `RemoveFlagProps`
+
+RemoveFlagProps describes one RemoveFlag run: Path is the directory holding the project; Command the command declaring it; Name the flag to drop.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Command` | `string` |
+| `Name` | `string` |
+
+## `RemoveArgProps`
+
+RemoveArgProps describes one RemoveArg run: Path is the directory holding the project; Command the command declaring it; Name the arg to drop.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Command` | `string` |
+| `Name` | `string` |
+
+## `ServerInitProps`
+
+ServerInitProps describes one ServerInit run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `ServerPurgeProps`
+
+ServerPurgeProps describes one ServerPurge run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `RemoveRouteProps`
+
+RemoveRouteProps describes one RemoveRoute run: Path is the directory holding the project; Name the route to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `RemovePathProps`
+
+RemovePathProps describes one RemovePath run: Path is the directory holding the project; Route the route declaring it; Name the id of the path to drop.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+
+## `RemoveParameterProps`
+
+RemoveParameterProps describes one RemoveParameter run: Path is the directory holding the project; Route the route declaring it; Name the parameter to drop.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+
+## `RemoveBodyFieldProps`
+
+RemoveBodyFieldProps describes one RemoveBodyField run: Path is the directory holding the project; Route the route declaring it; Name the body property to drop.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Route` | `string` |
+| `Name` | `string` |
+
+## `ShowRouteProps`
+
+ShowRouteProps describes one ShowRoute run: Path is the directory holding the project; Name the route to print.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `ListRoutesProps`
+
+ListRoutesProps describes one ListRoutes run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `DatabaseInitProps`
+
+DatabaseInitProps describes one DatabaseInit run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `DatabasePurgeProps`
+
+DatabasePurgeProps describes one DatabasePurge run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `AddDatabaseProps`
+
+AddDatabaseProps describes one AddDatabase run: Path is the directory holding the project; Name the database to declare; KeyPrefix what every key the database stores starts with.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+| `KeyPrefix` | `string` |
+
+## `RemoveDatabaseProps`
+
+RemoveDatabaseProps describes one RemoveDatabase run: Path is the directory holding the project; Name the database to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `AddTableProps`
+
+AddTableProps describes one AddTable run: Path is the directory holding the project; Database the database declaring it; Name the table to declare.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Database` | `string` |
+| `Name` | `string` |
+
+## `RemoveTableProps`
+
+RemoveTableProps describes one RemoveTable run: Path is the directory holding the project; Database the database declaring it; Name the table to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Database` | `string` |
+| `Name` | `string` |
+
+## `ShowDatabaseProps`
+
+ShowDatabaseProps describes one ShowDatabase run: Path is the directory holding the project; Name the database to print.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `FrontInitProps`
+
+FrontInitProps describes one FrontInit run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `FrontPurgeProps`
+
+FrontPurgeProps describes one FrontPurge run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `BackofficeInitProps`
+
+BackofficeInitProps describes one BackofficeInit run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `BackofficePurgeProps`
+
+BackofficePurgeProps describes one BackofficePurge run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `RemovePageProps`
+
+RemovePageProps describes one RemovePage run: Path is the directory holding the project; Name the page to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `RemoveDocProps`
+
+RemoveDocProps describes one RemoveDoc run: Path is the directory holding the project; Name the doc to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `AddCliExampleProps`
+
+AddCliExampleProps describes one AddCliExample run: Path is the directory holding the project; Name the example to scaffold.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `RemoveCliExampleProps`
+
+RemoveCliExampleProps describes one RemoveCliExample run: Path is the directory holding the project; Name the example to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `AddLibExampleProps`
+
+AddLibExampleProps describes one AddLibExample run: Path is the directory holding the project; Name the example to scaffold.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `RemoveLibExampleProps`
+
+RemoveLibExampleProps describes one RemoveLibExample run: Path is the directory holding the project; Name the example to delete.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `UpdateExampleProps`
+
+UpdateExampleProps describes one UpdateExample run: Path is the directory holding the project; Name the example whose golden is rewritten.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Name` | `string` |
+
+## `InterviewProps`
+
+InterviewProps describes one Interview run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
 
 ## `Actions`
 
@@ -616,84 +1022,84 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | --- | --- | --- |
 | `Build` | `func(props BuildProps) error` | Build re-renders every generated file of the project and hands the result to the runtime named by the props. |
 | `Compile` | `func(props CompileProps) error` | Compile cross-compiles the project's cmd/ binaries into release/, one file per named target. |
-| `Verify` | `func(path string) error` | Verify checks the project against the schema every generator assumes and writes nothing; it reports every violation at once. |
+| `Verify` | `func(props VerifyProps) error` | Verify checks the project against the schema every generator assumes and writes nothing; it reports every violation at once. |
 | `Start` | `func(props StartProps) error` | Start scaffolds a new project: the config directory, go.mod, the sandbox skeleton and a first build. |
-| `EnableExtension` | `func(path string, name string) error` | EnableExtension turns one generation mechanic on in the project's extensions.yaml and rebuilds, so what that mechanic owns is rendered from here on. |
-| `DisableExtension` | `func(path string, name string) error` | DisableExtension turns one generation mechanic off. Nothing is removed: agnos stops rendering what that mechanic owns and the files it wrote become the project's, to keep or to edit by hand. Deleting them is what the matching <x>-purge is for. |
-| `ListExtensions` | `func(path string) ([]ExtensionInfo, error)` | ListExtensions returns one row per generation mechanic of the catalog, saying which ones this project turned on. |
-| `DepsInit` | `func(path string) error` | DepsInit adds the dependency layer (sandbox/deps/ and adapters/availables/standard/) to a project that has none. |
-| `DepsPurge` | `func(path string) error` | DepsPurge removes the dependency layer and every installed dep with it. |
-| `AddDep` | `func(props AddDepProps) error` | AddDep installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/libs/ and that adapter's go.mod require. |
+| `EnableExtension` | `func(props EnableExtensionProps) error` | EnableExtension turns one generation mechanic on in the project's extensions.yaml and rebuilds, so what that mechanic owns is rendered from here on. |
+| `DisableExtension` | `func(props DisableExtensionProps) error` | DisableExtension turns one generation mechanic off. Nothing is removed: agnos stops rendering what that mechanic owns and the files it wrote become the project's, to keep or to edit by hand. Deleting them is what the matching <x>-purge is for. |
+| `ListExtensions` | `func(props ListExtensionsProps) ([]ExtensionInfo, error)` | ListExtensions returns one row per generation mechanic of the catalog, saying which ones this project turned on. |
+| `DepsInit` | `func(props DepsInitProps) error` | DepsInit adds the dependency layer (sandbox/deps/ and adapters/bindings/standard/) to a project that has none. |
+| `DepsPurge` | `func(props DepsPurgeProps) error` | DepsPurge removes the dependency layer and every installed dep with it. |
+| `AddDep` | `func(props AddDepProps) error` | AddDep installs one dep of the built-in list: its contract under sandbox/deps/, one adapter filling it under adapters/impls/ and that adapter's go.mod require. |
 | `RemoveDep` | `func(props RemoveDepProps) error` | RemoveDep uninstalls one installed dep: its adapters, their requires, and then the contract itself. It refuses a dep that still has an adapter installed unless props.WithAdapters says to take those too. |
-| `ListDeps` | `func(path string) ([]DepInfo, error)` | ListDeps returns one row per dep of the embedded catalog, saying which the project has installed and which adapters fill each one. |
+| `ListDeps` | `func(props ListDepsProps) ([]DepInfo, error)` | ListDeps returns one row per dep of the embedded catalog, saying which the project has installed and which adapters fill each one. |
 | `SetDep` | `func(props SetDepProps) error` | SetDep re-copies one remote dep at another version of its module and regenerates the shim that converts it. |
-| `AddAdapter` | `func(props AddAdapterProps) error` | AddAdapter installs one further implementation of a contract the project already has, and — when props.Available names one — switches that available to it. |
-| `RemoveAdapter` | `func(path string, adapter string) error` | RemoveAdapter uninstalls one adapter, its require and its files. It refuses one that an available still binds, and one written by the generator as half of a remote dep. |
-| `SetAdapter` | `func(props SetAdapterProps) error` | SetAdapter changes which adapter fills one dep's field in one available, the only place that choice is recorded. |
-| `ListAdapters` | `func(path string) ([]AdapterInfo, error)` | ListAdapters returns one row per adapter, of the embedded catalog and of the project, with the availables that bind each one. |
-| `AddAvailable` | `func(path string, available string) error` | AddAvailable creates one further available, seeded with the standard available's selection so it starts filling every field. |
-| `RemoveAvailable` | `func(path string, available string) error` | RemoveAvailable deletes one available. The standard one is refused: it is what cmd/main/main.go imports. |
-| `CliInit` | `func(path string) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
-| `CliPurge` | `func(path string) error` | CliPurge removes the CLI layer and every command declared in it. |
-| `AddCommand` | `func(props AddCommandProps) error` | AddCommand declares a new command: its command.yaml, its generated new.go and entries.go, and an InternalPureHandler.go to fill in. |
-| `RemoveCommand` | `func(path string, name string) error` | RemoveCommand deletes one command and unwires it from the dispatch. |
+| `AddAdapter` | `func(props AddAdapterProps) error` | AddAdapter installs one further implementation of a contract the project already has, and — when props.Binding names one — switches that binding to it. |
+| `RemoveAdapter` | `func(props RemoveAdapterProps) error` | RemoveAdapter uninstalls one adapter, its require and its files. It refuses one that a binding still binds, and one written by the generator as half of a remote dep. |
+| `SetAdapter` | `func(props SetAdapterProps) error` | SetAdapter changes which adapter fills one dep's field in one binding, the only place that choice is recorded. |
+| `ListAdapters` | `func(props ListAdaptersProps) ([]AdapterInfo, error)` | ListAdapters returns one row per adapter, of the embedded catalog and of the project, with the bindings that bind each one. |
+| `AddBinding` | `func(props AddBindingProps) error` | AddBinding creates one further binding, seeded with the standard binding's selection so it starts filling every field. |
+| `RemoveBinding` | `func(props RemoveBindingProps) error` | RemoveBinding deletes one binding. The standard one is refused: it is what cmd/main/main.go imports. |
+| `CliInit` | `func(props CliInitProps) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
+| `CliPurge` | `func(props CliPurgeProps) error` | CliPurge removes the CLI layer and every command declared in it. |
+| `AddCommand` | `func(props AddCommandProps) error` | AddCommand declares a new command: its command.yaml, its generated new.go and input.go, and an handler.go to fill in. |
+| `RemoveCommand` | `func(props RemoveCommandProps) error` | RemoveCommand deletes one command and unwires it from the dispatch. |
 | `SetCommand` | `func(props SetCommandProps) error` | SetCommand rewrites the command-level keys of one command's command.yaml. |
 | `RenameCommand` | `func(props RenameCommandProps) error` | RenameCommand moves one command to a new name: its package, and the verb its first arg answers to when that verb was its name. |
 | `RebalanceCommands` | `func(props RebalanceCommandsProps) error` | RebalanceCommands lays every command down again, Step rungs apart, in the order the chain runs them now. |
-| `ListCommands` | `func(path string) ([]string, error)` | ListCommands renders every declared command as one line, in the order the dispatch runs them. |
-| `ShowCommand` | `func(path string, command string) ([]string, error)` | ShowCommand renders one command's whole declaration — its args, its flags and the middlewares in front of it — as the lines of a tree. |
+| `ListCommands` | `func(props ListCommandsProps) ([]string, error)` | ListCommands renders every declared command as one line, in the order the dispatch runs them. |
+| `ShowCommand` | `func(props ShowCommandProps) ([]string, error)` | ShowCommand renders one command's whole declaration — its args, its flags and the middlewares in front of it — as the lines of a tree. |
 | `ExplainCommand` | `func(props ExplainCommandProps) ([]string, error)` | ExplainCommand runs one command line against the declared commands without running any, and says, command by command, whether it runs. |
-| `AddFlag` | `func(props FlagProps) error` | AddFlag declares one flag on a command. |
-| `SetFlag` | `func(props FlagEditProps) error` | SetFlag rewrites one declared flag of a command. |
-| `RemoveFlag` | `func(path string, command string, name string) error` | RemoveFlag deletes one declared flag from a command. |
-| `AddArg` | `func(props ArgProps) error` | AddArg declares one arg — a slice of the segments — on a command. |
-| `SetArg` | `func(props ArgEditProps) error` | SetArg rewrites one declared arg of a command. |
-| `RemoveArg` | `func(path string, command string, name string) error` | RemoveArg deletes one declared arg from a command. |
-| `ServerInit` | `func(path string) error` | ServerInit adds the http server layer (sandbox/internal/server, the OpinatedAgnosServer lib, the health route of sandbox/internal/routeslist and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
-| `ServerPurge` | `func(path string) error` | ServerPurge removes the server layer and every route declared in it. |
-| `AddRoute` | `func(props AddRouteProps) error` | AddRoute declares a new route: its route.yaml, its generated new.go and entries.go, and an InternalPureHandler.go to fill in. |
-| `RemoveRoute` | `func(path string, name string) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
-| `SetRoute` | `func(props RouteProps) error` | SetRoute rewrites the route-level keys of one route's route.yaml. |
-| `AddPath` | `func(props RoutePathProps) error` | AddPath declares one slice of the request path on a route: the segments it reads, and the trigger they have to match when it declares one. |
-| `SetPath` | `func(props RoutePathEditProps) error` | SetPath rewrites one entry of a route's `paths`, named by its id. |
-| `RemovePath` | `func(path string, route string, id string) error` | RemovePath deletes one entry of a route's `paths`, named by its id. |
-| `AddParameter` | `func(props RouteParameterProps) error` | AddParameter declares one value a route reads off the query string or the headers. |
-| `SetParameter` | `func(props RouteParameterEditProps) error` | SetParameter rewrites one entry of a route's `parameters`, named by its key. |
-| `RemoveParameter` | `func(path string, route string, name string) error` | RemoveParameter deletes one entry of a route's `parameters`, named by its key. |
-| `SetBody` | `func(props RouteBodyProps) error` | SetBody rewrites the body keys of one route's route.yaml. |
-| `AddBodyField` | `func(props RouteBodyFieldProps) error` | AddBodyField declares one property of a route's body schema (json- or form-schema, by the body's type), at the dotted path props.Name. |
-| `RemoveBodyField` | `func(path string, route string, name string) error` | RemoveBodyField deletes one property from a route's body schema. |
-| `SetBodyField` | `func(props RouteBodyFieldEditProps) error` | SetBodyField rewrites one property of a route's body schema, at the dotted path props.Name. |
-| `ImportBody` | `func(props RouteBodyImportProps) error` | ImportBody declares a route's body schema from an example payload, inferring one property per key the example carries. |
-| `ShowRoute` | `func(path string, route string) ([]string, error)` | ShowRoute renders one route's whole declaration — its paths, its parameters and its body schema — as the lines of a tree, ready to print. |
-| `ListRoutes` | `func(path string) ([]string, error)` | ListRoutes renders every declared route as one line, in the order the dispatch runs them. |
+| `AddFlag` | `func(props AddFlagProps) error` | AddFlag declares one flag on a command. |
+| `SetFlag` | `func(props SetFlagProps) error` | SetFlag rewrites one declared flag of a command. |
+| `RemoveFlag` | `func(props RemoveFlagProps) error` | RemoveFlag deletes one declared flag from a command. |
+| `AddArg` | `func(props AddArgProps) error` | AddArg declares one arg — a slice of the segments — on a command. |
+| `SetArg` | `func(props SetArgProps) error` | SetArg rewrites one declared arg of a command. |
+| `RemoveArg` | `func(props RemoveArgProps) error` | RemoveArg deletes one declared arg from a command. |
+| `ServerInit` | `func(props ServerInitProps) error` | ServerInit adds the http server layer (sandbox/internal/server, the OpinionatedAgnosServer lib, the health route of sandbox/internal/routes and the start-server command) to a project that has none, installing the CLI layer first when it is missing. |
+| `ServerPurge` | `func(props ServerPurgeProps) error` | ServerPurge removes the server layer and every route declared in it. |
+| `AddRoute` | `func(props AddRouteProps) error` | AddRoute declares a new route: its route.yaml, its generated new.go and input.go, and an handler.go to fill in. |
+| `RemoveRoute` | `func(props RemoveRouteProps) error` | RemoveRoute deletes one route and unwires it from the dispatch. |
+| `SetRoute` | `func(props SetRouteProps) error` | SetRoute rewrites the route-level keys of one route's route.yaml. |
+| `AddPath` | `func(props AddPathProps) error` | AddPath declares one slice of the request path on a route: the segments it reads, and the trigger they have to match when it declares one. |
+| `SetPath` | `func(props SetPathProps) error` | SetPath rewrites one entry of a route's `paths`, named by its id. |
+| `RemovePath` | `func(props RemovePathProps) error` | RemovePath deletes one entry of a route's `paths`, named by its id. |
+| `AddParameter` | `func(props AddParameterProps) error` | AddParameter declares one value a route reads off the query string or the headers. |
+| `SetParameter` | `func(props SetParameterProps) error` | SetParameter rewrites one entry of a route's `parameters`, named by its key. |
+| `RemoveParameter` | `func(props RemoveParameterProps) error` | RemoveParameter deletes one entry of a route's `parameters`, named by its key. |
+| `SetBody` | `func(props SetBodyProps) error` | SetBody rewrites the body keys of one route's route.yaml. |
+| `AddBodyField` | `func(props AddBodyFieldProps) error` | AddBodyField declares one property of a route's body schema (json- or form-schema, by the body's type), at the dotted path props.Name. |
+| `RemoveBodyField` | `func(props RemoveBodyFieldProps) error` | RemoveBodyField deletes one property from a route's body schema. |
+| `SetBodyField` | `func(props SetBodyFieldProps) error` | SetBodyField rewrites one property of a route's body schema, at the dotted path props.Name. |
+| `ImportBody` | `func(props ImportBodyProps) error` | ImportBody declares a route's body schema from an example payload, inferring one property per key the example carries. |
+| `ShowRoute` | `func(props ShowRouteProps) ([]string, error)` | ShowRoute renders one route's whole declaration — its paths, its parameters and its body schema — as the lines of a tree, ready to print. |
+| `ListRoutes` | `func(props ListRoutesProps) ([]string, error)` | ListRoutes renders every declared route as one line, in the order the dispatch runs them. |
 | `ExplainRoute` | `func(props ExplainRouteProps) ([]string, error)` | ExplainRoute runs one request against the declared routes without a server and renders, route by route, whether it runs and why not. |
 | `RenameRoute` | `func(props RenameRouteProps) error` | RenameRoute moves one route package to a new name. |
 | `RebalanceRoutes` | `func(props RebalanceRoutesProps) error` | RebalanceRoutes gives every route a rung of its own, props.Step apart, in the order the chain runs them now. |
-| `DatabaseInit` | `func(path string) error` | DatabaseInit adds the database layer (the store contract, the OpinatedAgnosDatabase lib and sandbox/internal/databases) to a project that has none. |
-| `DatabasePurge` | `func(path string) error` | DatabasePurge removes the database layer and every database declared in it. |
-| `AddDatabase` | `func(path string, name string, prefix string) error` | AddDatabase declares a new database: its specs.yaml, from which its api.go, new.go and methods.go are generated. |
-| `RemoveDatabase` | `func(path string, name string) error` | RemoveDatabase deletes one database package whole. It refuses one carrying a hand-written methods_custom.go. |
-| `AddTable` | `func(path string, database string, table string) error` | AddTable declares one collection of records on a database. |
-| `RemoveTable` | `func(path string, database string, table string) error` | RemoveTable deletes one collection from a database. It refuses a table another table still links to. |
-| `AddTableField` | `func(props DatabaseFieldProps) error` | AddTableField declares one field on a table, or on a nested collection of it. |
-| `SetTableField` | `func(props DatabaseFieldEditProps) error` | SetTableField rewrites one field a table already declares. |
-| `RemoveTableField` | `func(props DatabaseFieldProps) error` | RemoveTableField deletes one declared field from a table. |
-| `ShowDatabase` | `func(path string, database string) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
-| `FrontInit` | `func(path string) error` | FrontInit adds the front layer (the OpinatedAgnosFront lib, the route serving every file of assets/frontend and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
-| `FrontPurge` | `func(path string) error` | FrontPurge removes the front layer and the frontend route, leaving assets/frontend/ untouched. |
-| `BackofficeInit` | `func(path string) error` | BackofficeInit adds the admin backoffice to a project: login, backoffice users, API tokens and the /api/admin JSON api, over a database of its own. It installs the server, front and database layers first when any is missing, and the catalog deps it calls into. Every file it writes is the project's from then on. |
-| `BackofficePurge` | `func(path string) error` | BackofficePurge removes everything BackofficeInit wrote, leaving the layers it stood on, the deps it installed and the store on disk. |
-| `AddPage` | `func(props PageProps) error` | AddPage scaffolds a new html page, assets/frontend/<name>.html, which the frontend route serves as soon as it exists. |
-| `RemovePage` | `func(path string, name string) error` | RemovePage deletes one page, assets/frontend/<name>.html. |
-| `AddDoc` | `func(props DocProps) error` | AddDoc creates one doc directory under docs/, with its props.yaml and a doc.md to fill in. |
-| `RemoveDoc` | `func(path string, name string) error` | RemoveDoc deletes one doc directory and everything under it. |
-| `AddCliExample` | `func(path string, name string) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |
-| `RemoveCliExample` | `func(path string, name string) error` | RemoveCliExample deletes one example of examples/cli/ whole. |
-| `AddLibExample` | `func(path string, name string) error` | AddLibExample creates one example under examples/lib/, with an example.go stub that already runs. |
-| `RemoveLibExample` | `func(path string, name string) error` | RemoveLibExample deletes one example of examples/lib/ whole. |
-| `ExecTest` | `func(props ExecTestProps) error` | ExecTest runs the project's examples and checks each one against its golden result.yaml, reporting every example that diverged. |
-| `UpdateTest` | `func(path string, name string) error` | UpdateTest runs one example by name, both sides, and rewrites its golden result.yaml with what the run produced, printing the changes. |
-| `Interview` | `func(path string) error` | Interview runs the interactive session over a project: it asks what is to be done, generates the questions from the declaration of the command that answers it, and runs that command with the answers bound onto it. It writes nothing of its own — every command it dispatches runs the action behind it, which persists and builds for itself. |
+| `DatabaseInit` | `func(props DatabaseInitProps) error` | DatabaseInit adds the database layer (the store contract, the OpinionatedAgnosDatabase lib and sandbox/internal/databases) to a project that has none. |
+| `DatabasePurge` | `func(props DatabasePurgeProps) error` | DatabasePurge removes the database layer and every database declared in it. |
+| `AddDatabase` | `func(props AddDatabaseProps) error` | AddDatabase declares a new database: its database.yaml, from which its api.go, new.go and methods.go are generated. |
+| `RemoveDatabase` | `func(props RemoveDatabaseProps) error` | RemoveDatabase deletes one database package whole. It refuses one carrying a hand-written methods_custom.go. |
+| `AddTable` | `func(props AddTableProps) error` | AddTable declares one collection of records on a database. |
+| `RemoveTable` | `func(props RemoveTableProps) error` | RemoveTable deletes one collection from a database. It refuses a table another table still links to. |
+| `AddTableField` | `func(props AddTableFieldProps) error` | AddTableField declares one field on a table, or on a nested collection of it. |
+| `SetTableField` | `func(props SetTableFieldProps) error` | SetTableField rewrites one field a table already declares. |
+| `RemoveTableField` | `func(props RemoveTableFieldProps) error` | RemoveTableField deletes one declared field from a table. |
+| `ShowDatabase` | `func(props ShowDatabaseProps) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
+| `FrontInit` | `func(props FrontInitProps) error` | FrontInit adds the front layer (the OpinionatedAgnosFront lib, the route serving every file of assets/front and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
+| `FrontPurge` | `func(props FrontPurgeProps) error` | FrontPurge removes the front layer and the front route, leaving assets/front/ untouched. |
+| `BackofficeInit` | `func(props BackofficeInitProps) error` | BackofficeInit adds the admin backoffice to a project: login, backoffice users, API tokens and the /api/admin JSON api, over a database of its own. It installs the server, front and database layers first when any is missing, and the catalog deps it calls into. Every file it writes is the project's from then on. |
+| `BackofficePurge` | `func(props BackofficePurgeProps) error` | BackofficePurge removes everything BackofficeInit wrote, leaving the layers it stood on, the deps it installed and the store on disk. |
+| `AddPage` | `func(props AddPageProps) error` | AddPage scaffolds a new html page, assets/front/<name>.html, which the front route serves as soon as it exists. |
+| `RemovePage` | `func(props RemovePageProps) error` | RemovePage deletes one page, assets/front/<name>.html. |
+| `AddDoc` | `func(props AddDocProps) error` | AddDoc creates one doc directory under docs/, with its doc.yaml and a doc.md to fill in. |
+| `RemoveDoc` | `func(props RemoveDocProps) error` | RemoveDoc deletes one doc directory and everything under it. |
+| `AddCliExample` | `func(props AddCliExampleProps) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |
+| `RemoveCliExample` | `func(props RemoveCliExampleProps) error` | RemoveCliExample deletes one example of examples/cli/ whole. |
+| `AddLibExample` | `func(props AddLibExampleProps) error` | AddLibExample creates one example under examples/lib/, with an example.go stub that already runs. |
+| `RemoveLibExample` | `func(props RemoveLibExampleProps) error` | RemoveLibExample deletes one example of examples/lib/ whole. |
+| `RunExamples` | `func(props RunExamplesProps) error` | RunExamples runs the project's examples and checks each one against its golden result.yaml, reporting every example that diverged. |
+| `UpdateExample` | `func(props UpdateExampleProps) error` | UpdateExample runs one example by name, both sides, and rewrites its golden result.yaml with what the run produced, printing the changes. |
+| `Interview` | `func(props InterviewProps) error` | Interview runs the interactive session over a project: it asks what is to be done, generates the questions from the declaration of the command that answers it, and runs that command with the answers bound onto it. It writes nothing of its own — every command it dispatches runs the action behind it, which persists and builds for itself. |
 
 [every contract](doc.md)

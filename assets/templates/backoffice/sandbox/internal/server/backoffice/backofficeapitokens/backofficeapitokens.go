@@ -1,10 +1,10 @@
-package backofficetokens
+package backofficeapitokens
 
 import (
 	"{{.Module}}/sandbox/api"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficeguard"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficehttp"
 )
 
 // An API token is what the /api/admin routes authenticate with, sent as
@@ -89,10 +89,10 @@ type Fields struct {
 	Ips string
 }
 
-// Listed is one token of the list, with the user it belongs to.
-type Listed struct {
-	Token backofficedb.ApitokenItem
-	Owner backofficedb.BackofficeuserItem
+// ApiTokenRow is one token of the list, with the user it belongs to.
+type ApiTokenRow struct {
+	Token backoffice_db.ApiTokenRecord
+	Owner backoffice_db.BackofficeUserRecord
 }
 
 // Expirations is every expiration the form offers, in the order it offers them.
@@ -115,43 +115,43 @@ func ListLocation(sandbox *api.Sandbox, notice string) string {
 
 // nowSeconds is the current time in seconds since the Unix epoch.
 func nowSeconds(sandbox *api.Sandbox) int64 {
-	return sandbox.Deps.Std.Now() / 1_000_000_000
+	return sandbox.Deps.StdDeps.Now() / 1_000_000_000
 }
 
 // tokenSha is how a token is stored and looked up: its SHA-256, lower-case
 // hex. A token is SecretBytes of randomness, so no salt is needed.
 func tokenSha(sandbox *api.Sandbox, token string) string {
-	return sandbox.Deps.Hashdeps.Sha256Hex([]byte(token))
+	return sandbox.Deps.HashDeps.Sha256Hex([]byte(token))
 }
 
 // isRoot tells whether user holds the root role.
-func isRoot(sandbox *api.Sandbox, user backofficedb.BackofficeuserItem) bool {
+func isRoot(sandbox *api.Sandbox, user backoffice_db.BackofficeUserRecord) bool {
 	return backofficeauth.Role(user.Role) == backofficeauth.RoleRoot
 }
 
 // Expired tells whether token stopped being valid by now. A token without an
 // expiration never does.
-func Expired(sandbox *api.Sandbox, token backofficedb.ApitokenItem, now int64) bool {
-	return token.Expiresat != 0 && token.Expiresat <= now
+func Expired(sandbox *api.Sandbox, token backoffice_db.ApiTokenRecord, now int64) bool {
+	return token.ExpiresAt != 0 && token.ExpiresAt <= now
 }
 
 // IpList is the ips a token is accepted from, as stored in its ips field;
 // empty when it is accepted from any ip.
-func IpList(sandbox *api.Sandbox, token backofficedb.ApitokenItem) []string {
+func IpList(sandbox *api.Sandbox, token backoffice_db.ApiTokenRecord) []string {
 	if token.Ips == "" {
 		return []string{}
 	}
-	return sandbox.Deps.Stringsdeps.Split(token.Ips, ",")
+	return sandbox.Deps.StringsDeps.Split(token.Ips, ",")
 }
 
-// Create issues a new token for owner, as fields describe it. It answers a
+// Add issues a new token for owner, as fields describe it. It answers a
 // message for the form when fields are refused; once the token is stored, it
 // answers the token itself — the one time it is ever shown — and its record.
-func Create(sandbox *api.Sandbox, owner backofficedb.BackofficeuserItem, fields Fields) (string, backofficedb.ApitokenItem, string, error) {
-	none := backofficedb.ApitokenItem{}
+func Add(sandbox *api.Sandbox, owner backoffice_db.BackofficeUserRecord, fields Fields) (string, backoffice_db.ApiTokenRecord, string, error) {
+	none := backoffice_db.ApiTokenRecord{}
 	now := nowSeconds(sandbox)
 
-	name := sandbox.Deps.Stringsdeps.TrimSpace(fields.Name)
+	name := sandbox.Deps.StringsDeps.TrimSpace(fields.Name)
 	message, err := validateName(sandbox, owner, name)
 	if err != nil || message != "" {
 		return "", none, message, err
@@ -165,18 +165,18 @@ func Create(sandbox *api.Sandbox, owner backofficedb.BackofficeuserItem, fields 
 		return "", none, message, err
 	}
 
-	secret, err := sandbox.Deps.Randdeps.Hex(SecretBytes)
+	secret, err := sandbox.Deps.RandDeps.Hex(SecretBytes)
 	if err != nil {
 		return "", none, "", err
 	}
 	token := TokenPrefix + secret
-	item, err := backofficedb.New(sandbox).AddApitoken(backofficedb.ApitokenNew{
-		Tokensha:  tokenSha(sandbox, token),
+	item, err := backoffice_db.New(sandbox).AddApiToken(backoffice_db.ApiTokenInput{
+		TokenSha256:  tokenSha(sandbox, token),
 		Name:      name,
 		Prefix:    token[:PrefixLength],
-		Ownerid:   owner.Id,
-		Createdat: now,
-		Expiresat: expiresAt,
+		OwnerId:   owner.Id,
+		CreatedAt: now,
+		ExpiresAt: expiresAt,
 		Ips:       ips,
 	})
 	if err != nil {
@@ -188,25 +188,25 @@ func Create(sandbox *api.Sandbox, owner backofficedb.BackofficeuserItem, fields 
 // List is every token viewer may see, newest first: a root sees every user's,
 // anyone else only their own. A token whose user no longer exists is left
 // out.
-func List(sandbox *api.Sandbox, viewer backofficedb.BackofficeuserItem) ([]Listed, error) {
-	db := backofficedb.New(sandbox)
-	tokens, err := db.ListApitoken(backofficedb.ApitokenFiltrage{})
+func List(sandbox *api.Sandbox, viewer backoffice_db.BackofficeUserRecord) ([]ApiTokenRow, error) {
+	db := backoffice_db.New(sandbox)
+	tokens, err := db.ListApiTokens(backoffice_db.ApiTokenFilter{})
 	if err != nil {
 		return nil, err
 	}
 
-	listed := []Listed{}
+	listed := []ApiTokenRow{}
 	for _, token := range tokens {
-		if !isRoot(sandbox, viewer) && token.Ownerid != viewer.Id {
+		if !isRoot(sandbox, viewer) && token.OwnerId != viewer.Id {
 			continue
 		}
-		owner, ok := db.FindBackofficeuserById(token.Ownerid)
+		owner, ok := db.FindBackofficeUserById(token.OwnerId)
 		if !ok {
 			continue
 		}
-		listed = append(listed, Listed{Token: token, Owner: owner})
+		listed = append(listed, ApiTokenRow{Token: token, Owner: owner})
 	}
-	sandbox.Deps.Sortdeps.SliceStable(listed, func(i int, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(listed, func(i int, j int) bool {
 		return listed[i].Token.Id > listed[j].Token.Id
 	})
 	return listed, nil
@@ -216,13 +216,13 @@ func List(sandbox *api.Sandbox, viewer backofficedb.BackofficeuserItem) ([]Liste
 // from the next request on. It answers the notice the list page shows next:
 // a user revokes their own tokens, a root anyone's, and a token actor may not
 // revoke reads as one that does not exist.
-func Revoke(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, id int64) (string, error) {
-	db := backofficedb.New(sandbox)
-	token, ok := db.FindApitokenById(id)
-	if !ok || (token.Ownerid != actor.Id && !isRoot(sandbox, actor)) {
+func Revoke(sandbox *api.Sandbox, actor backoffice_db.BackofficeUserRecord, id int64) (string, error) {
+	db := backoffice_db.New(sandbox)
+	token, ok := db.FindApiTokenById(id)
+	if !ok || (token.OwnerId != actor.Id && !isRoot(sandbox, actor)) {
 		return NoticeNotFound, nil
 	}
-	err := db.RemoveApitoken(id)
+	err := db.RemoveApiToken(id)
 	if err != nil {
 		return "", err
 	}
@@ -232,16 +232,16 @@ func Revoke(sandbox *api.Sandbox, actor backofficedb.BackofficeuserItem, id int6
 // RemoveOfOwner deletes every token of the user with id ownerId. It runs when
 // that user is removed, so no token outlives its user.
 func RemoveOfOwner(sandbox *api.Sandbox, ownerId int64) error {
-	db := backofficedb.New(sandbox)
-	tokens, err := db.ListApitoken(backofficedb.ApitokenFiltrage{})
+	db := backoffice_db.New(sandbox)
+	tokens, err := db.ListApiTokens(backoffice_db.ApiTokenFilter{})
 	if err != nil {
 		return err
 	}
 	for _, token := range tokens {
-		if token.Ownerid != ownerId {
+		if token.OwnerId != ownerId {
 			continue
 		}
-		err = db.RemoveApitoken(token.Id)
+		err = db.RemoveApiToken(token.Id)
 		if err != nil {
 			return err
 		}
@@ -254,15 +254,15 @@ func RemoveOfOwner(sandbox *api.Sandbox, ownerId int64) error {
 // unknown — revoked included —, has expired, is not accepted from ip, or its
 // user no longer exists. A token it accepts is marked as last used now, from
 // ip.
-func Resolve(sandbox *api.Sandbox, token string, ip string) (backofficedb.BackofficeuserItem, backofficedb.ApitokenItem, bool, error) {
-	noUser := backofficedb.BackofficeuserItem{}
-	noToken := backofficedb.ApitokenItem{}
-	if !sandbox.Deps.Stringsdeps.HasPrefix(token, TokenPrefix) {
+func Resolve(sandbox *api.Sandbox, token string, ip string) (backoffice_db.BackofficeUserRecord, backoffice_db.ApiTokenRecord, bool, error) {
+	noUser := backoffice_db.BackofficeUserRecord{}
+	noToken := backoffice_db.ApiTokenRecord{}
+	if !sandbox.Deps.StringsDeps.HasPrefix(token, TokenPrefix) {
 		return noUser, noToken, false, nil
 	}
 
-	db := backofficedb.New(sandbox)
-	item, ok := db.FindApitokenByTokensha(tokenSha(sandbox, token))
+	db := backoffice_db.New(sandbox)
+	item, ok := db.FindApiTokenByTokenSha256(tokenSha(sandbox, token))
 	if !ok {
 		return noUser, noToken, false, nil
 	}
@@ -270,32 +270,32 @@ func Resolve(sandbox *api.Sandbox, token string, ip string) (backofficedb.Backof
 	if Expired(sandbox, item, now) || !accepts(sandbox, item, ip) {
 		return noUser, noToken, false, nil
 	}
-	user, ok := db.FindBackofficeuserById(item.Ownerid)
+	user, ok := db.FindBackofficeUserById(item.OwnerId)
 	if !ok {
 		return noUser, noToken, false, nil
 	}
 
-	err := db.UpdateApitokenLastusedat(item.Id, now)
+	err := db.SetApiTokenLastUsedAt(item.Id, now)
 	if err != nil {
 		return noUser, noToken, false, err
 	}
-	err = db.UpdateApitokenLastusedip(item.Id, ip)
+	err = db.SetApiTokenLastUsedIp(item.Id, ip)
 	if err != nil {
 		return noUser, noToken, false, err
 	}
-	item.Lastusedat = now
-	item.Lastusedip = ip
+	item.LastUsedAt = now
+	item.LastUsedIp = ip
 	return user, item, true, nil
 }
 
 // accepts tells whether token may be used from the client ip ip: any ip when
 // it lists none, one of its own otherwise.
-func accepts(sandbox *api.Sandbox, token backofficedb.ApitokenItem, ip string) bool {
+func accepts(sandbox *api.Sandbox, token backoffice_db.ApiTokenRecord, ip string) bool {
 	allowed := IpList(sandbox, token)
 	if len(allowed) == 0 {
 		return true
 	}
-	ip = sandbox.Deps.Stringsdeps.ToLower(ip)
+	ip = sandbox.Deps.StringsDeps.ToLower(ip)
 	for _, candidate := range allowed {
 		if candidate == ip {
 			return true
@@ -307,21 +307,21 @@ func accepts(sandbox *api.Sandbox, token backofficedb.ApitokenItem, ip string) b
 // validateName answers why name may not name a new token of owner, "" when it
 // may: it is required, at most MaxNameLength characters, and no other token of
 // owner bears it, regardless of case.
-func validateName(sandbox *api.Sandbox, owner backofficedb.BackofficeuserItem, name string) (string, error) {
+func validateName(sandbox *api.Sandbox, owner backoffice_db.BackofficeUserRecord, name string) (string, error) {
 	if name == "" {
 		return "The name is required.", nil
 	}
 	if len([]rune(name)) > MaxNameLength {
-		return sandbox.Deps.Std.Sprintf("The name can have at most %d characters.", MaxNameLength), nil
+		return sandbox.Deps.StdDeps.Sprintf("The name can have at most %d characters.", MaxNameLength), nil
 	}
 
-	tokens, err := backofficedb.New(sandbox).ListApitoken(backofficedb.ApitokenFiltrage{})
+	tokens, err := backoffice_db.New(sandbox).ListApiTokens(backoffice_db.ApiTokenFilter{})
 	if err != nil {
 		return "", err
 	}
-	lowered := sandbox.Deps.Stringsdeps.ToLower(name)
+	lowered := sandbox.Deps.StringsDeps.ToLower(name)
 	for _, token := range tokens {
-		if token.Ownerid == owner.Id && sandbox.Deps.Stringsdeps.ToLower(token.Name) == lowered {
+		if token.OwnerId == owner.Id && sandbox.Deps.StringsDeps.ToLower(token.Name) == lowered {
 			return "You already have a token with that name.", nil
 		}
 	}
@@ -337,7 +337,7 @@ func expirationOf(sandbox *api.Sandbox, fields Fields, now int64) (int64, string
 	case ExpirationNever:
 		return 0, ""
 	case ExpirationCustom:
-		day, err := sandbox.Deps.Timedeps.ParseUnix(DateLayout, sandbox.Deps.Stringsdeps.TrimSpace(fields.Date))
+		day, err := sandbox.Deps.TimeDeps.ParseUnix(DateLayout, sandbox.Deps.StringsDeps.TrimSpace(fields.Date))
 		if err != nil {
 			return 0, "Choose the date the token expires on."
 		}
@@ -360,7 +360,7 @@ func expirationOf(sandbox *api.Sandbox, fields Fields, now int64) (int64, string
 // commas, trimmed, lower-cased, stripped of empties and duplicates, and joined
 // back by commas. "" is a token accepted from any ip.
 func normalizeIps(sandbox *api.Sandbox, list string) (string, string, error) {
-	strings := sandbox.Deps.Stringsdeps
+	strings := sandbox.Deps.StringsDeps
 	kept := []string{}
 	seen := map[string]bool{}
 	for _, entry := range strings.Split(list, ",") {
@@ -368,12 +368,12 @@ func normalizeIps(sandbox *api.Sandbox, list string) (string, string, error) {
 		if ip == "" || seen[ip] {
 			continue
 		}
-		valid, err := backofficeguard.IsIp(sandbox, ip)
+		valid, err := backofficehttp.IsIp(sandbox, ip)
 		if err != nil {
 			return "", "", err
 		}
 		if !valid {
-			return "", sandbox.Deps.Std.Sprintf("%s is not a valid IP address.", ip), nil
+			return "", sandbox.Deps.StdDeps.Sprintf("%s is not a valid IP address.", ip), nil
 		}
 		seen[ip] = true
 		kept = append(kept, ip)

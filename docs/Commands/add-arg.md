@@ -10,7 +10,7 @@ Inserts one arg — the segments --start to --end of the command line — into s
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
-| `Name` | string, required |  | the arg name; its exported Go form is the Entries field the handler reads (file-name -> entries.FileName) |
+| `Name` | string, required |  | the arg name; its exported Go form is the Input field the handler reads (file-name -> input.FileName) |
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
@@ -27,17 +27,17 @@ Inserts one arg — the segments --start to --end of the command line — into s
 | `--trigger-negate` | boolean |  | invert the trigger: the command runs when the segments do not match it | — |
 | `--trigger-ignore-case` | boolean |  | compare the trigger without regard to case | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos add-arg file --type string --required --description "the file to process" --command exec
 agnos add-arg count --type integer --default 1 --position 0 --command exec
 ```
 
-Cli System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Cli · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

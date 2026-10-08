@@ -2,7 +2,7 @@ package {{.Adapter}}
 
 import (
 {{- if .HasDeps}}
-	remoteavailable "{{.RemoteModule}}/adapters/availables/{{.Available}}"
+	remotebinding "{{.RemoteModule}}/{{.BindingDir}}"
 {{- end}}
 	remotelib "{{.RemoteModule}}/sandbox"
 	{{.RemoteApi}} "{{.RemoteModule}}/sandbox/api"
@@ -23,7 +23,7 @@ import (
 // struct whose fields are named types are never the same type.
 func Bind(deps *deps.Deps) {
 {{- if .HasDeps}}
-	remote_deps := remoteavailable.New()
+	remote_deps := remotebinding.New()
 	remote_sandbox := remotelib.New(&remote_deps)
 {{- else}}
 	remote_sandbox := remotelib.New()

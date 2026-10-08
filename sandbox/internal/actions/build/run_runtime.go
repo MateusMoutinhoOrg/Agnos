@@ -3,7 +3,7 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // runtimeStep is one program the runtime hands the rendered project to, in
@@ -33,19 +33,19 @@ func RunRuntime(sandbox *api.Sandbox, path string, runtime string) error {
 	}
 
 	for _, step := range steps {
-		command := step.Program + " " + sandbox.Deps.Stringsdeps.Join(step.Args, " ")
-		sandbox.Deps.Std.Log("runtime %s: %s \n", runtime, command)
+		command := step.Program + " " + sandbox.Deps.StringsDeps.Join(step.Args, " ")
+		sandbox.Deps.StdDeps.Logf("runtime %s: %s \n", runtime, command)
 
-		result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
+		result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{
 			Dir:     path,
 			Program: step.Program,
 			Args:    step.Args,
 		})
 		if err != nil {
-			return sandbox.Deps.Std.Errorf("runtime %s: could not run `%s`: %w", runtime, command, err)
+			return sandbox.Deps.StdDeps.Errorf("runtime %s: could not run `%s`: %w", runtime, command, err)
 		}
 		if result.ExitCode != 0 {
-			return sandbox.Deps.Std.Errorf("runtime %s: `%s` failed:\n%s", runtime, command, result.Output)
+			return sandbox.Deps.StdDeps.Errorf("runtime %s: `%s` failed:\n%s", runtime, command, result.Output)
 		}
 	}
 
@@ -61,7 +61,7 @@ func runtimeSteps(sandbox *api.Sandbox, path string, runtime string) ([]runtimeS
 	case api.RuntimeGo:
 		return goRuntimeSteps(sandbox, path), nil
 	default:
-		return nil, sandbox.Deps.Std.Errorf("unknown runtime %q (use %q or %q)", runtime, api.RuntimeGo, api.RuntimeNone)
+		return nil, sandbox.Deps.StdDeps.Errorf("unknown runtime %q (use %q or %q)", runtime, api.RuntimeGo, api.RuntimeNone)
 	}
 }
 
@@ -74,7 +74,7 @@ func goRuntimeSteps(sandbox *api.Sandbox, path string) []runtimeStep {
 		{Program: "go", Args: []string{"mod", "tidy"}},
 	}
 
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
+	io := stagedfs.New(sandbox, path, sandbox.Config.ProjectName)
 	packages := []string{"build"}
 	for _, dir := range compilableDirs {
 		if io.IsDir(dir) {

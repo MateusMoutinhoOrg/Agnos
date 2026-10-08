@@ -10,19 +10,19 @@ package iodeps
 // through Deps.DatabaseLib. It is carried as a standing capability of the
 // template, filled by the standard adapter over `os` and `path/filepath`, so
 // a derived library that must touch the filesystem directly finds the
-// contract already declared and already wired. See the Deps.IoLib field.
+// contract already declared and already wired. See the Deps.IoDeps field.
 
-// Sandbox is the filesystem library injected whole as the Deps.IoLib field.
+// Contract is the filesystem library injected whole as the Deps.IoDeps field.
 //
 // Paths are whatever the host operating system accepts, resolved by the
-// adapter — unlike embeddeps.Sandbox, which is always slash-separated and rooted
+// adapter — unlike embeddeps.Contract, which is always slash-separated and rooted
 // at an asset tree. The listing functions report paths that already include
 // the directory they were given, so a result can be passed straight back in.
 //
 // The predicates report false rather than an error: a path that cannot be
 // stat'd is not a directory and is not a file, which is the answer the caller
 // wanted either way.
-type Sandbox struct {
+type Contract struct {
 	// ReadFile returns the whole content of the file at path. The error
 	// reports a file that does not exist or could not be read.
 	ReadFile func(path string) ([]byte, error)
@@ -38,8 +38,8 @@ type Sandbox struct {
 	// IsFile reports whether path exists and is not a directory.
 	IsFile func(path string) bool
 
-	// Exist reports whether anything exists at path, directory or file.
-	Exist func(path string) bool
+	// Exists reports whether anything exists at path, directory or file.
+	Exists func(path string) bool
 
 	// CreateDir creates the directory at path together with any missing
 	// parent. It reports nothing: a directory that already exists and a

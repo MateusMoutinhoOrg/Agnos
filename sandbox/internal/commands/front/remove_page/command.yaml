@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,9 +10,9 @@ args:
       id: Name
       required: true
       start: 1
-category: Front System
+category: Front
+description: 'Deletes assets/front/<name>.html. The name is spelled as add-page spells it: the path under assets/front/ without .html.'
 examples:
     - remove-page about
-help: Remove an html page from assets/frontend/
-long-description: 'Deletes assets/frontend/<name>.html. The name is spelled as add-page spells it: the path under assets/frontend/ without .html.'
 priority: 100
+summary: Remove an html page from assets/front/

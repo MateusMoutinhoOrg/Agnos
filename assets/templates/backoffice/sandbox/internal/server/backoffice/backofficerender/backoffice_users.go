@@ -3,7 +3,7 @@ package backofficerender
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
-	"{{.Module}}/sandbox/internal/databases/backofficedb"
+	"{{.Module}}/sandbox/internal/databases/backoffice_db"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
 )
@@ -102,13 +102,13 @@ func limitOptions(sandbox *api.Sandbox, limit int) []LimitOption {
 	return options
 }
 
-// BackofficeUsers answers the backoffice user list page for user: listing,
+// RenderUsersPage answers the backoffice user list page for user: listing,
 // with the notice code notice above it.
-func BackofficeUsers(sandbox *api.Sandbox, response *serverdeps.Response, user *backofficedb.BackofficeuserItem, listing backofficeusers.Listing, notice string) error {
+func RenderUsersPage(sandbox *api.Sandbox, response *serverdeps.Response, user *backoffice_db.BackofficeUserRecord, listing backofficeusers.Listing, notice string) error {
 	rows := []BackofficeUserRow{}
 	for _, item := range listing.Users {
 		rows = append(rows, BackofficeUserRow{
-			Id:       sandbox.Deps.Stringsdeps.FormatInt(item.Id, 10),
+			Id:       sandbox.Deps.StringsDeps.FormatInt(item.Id, 10),
 			Username: item.Username,
 			Email:    item.Email,
 			Role:     backofficeauth.RoleName(sandbox, backofficeauth.Role(item.Role)),
@@ -137,5 +137,5 @@ func BackofficeUsers(sandbox *api.Sandbox, response *serverdeps.Response, user *
 		page.From = (listing.Page-1)*listing.Limit + 1
 		page.To = page.From + len(rows) - 1
 	}
-	return Html(sandbox, response, api.StatusOk, "backoffice/backoffice_users.html", page)
+	return RenderHTML(sandbox, response, api.StatusOK, "backoffice/backoffice_users.html", page)
 }

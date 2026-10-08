@@ -2,15 +2,15 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // ─── ANSI escape sequences ──────────────────────────────────────────────────
 //
-// The palette sandbox/internal/commands/help/handler.go prints its screens
+// The palette sandbox/internal/commands/info/help/handler.go prints its screens
 // with. It is restated rather than shared: help/handler.go is rendered into
-// every project from assets/sandbox-cli/, and the interview is agnos's own.
+// every project from assets/cli/, and the interview is agnos's own.
 
 const (
 	bold   = "\033[1m"
@@ -27,35 +27,35 @@ const (
 // binaryName is the executable's name as a user types it, the same spelling
 // the help screens use.
 func binaryName(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
+	return sandbox.Deps.StringsDeps.ToLower(sandbox.Config.ProjectName)
 }
 
 // notice reports one unusable answer, between the question and the next
 // attempt at it.
 func notice(sandbox *api.Sandbox, format string, a ...any) {
-	sandbox.Deps.Std.Printf("  %s%s%s\n", yellow, sandbox.Deps.Std.Sprintf(format, a...), reset)
+	sandbox.Deps.StdDeps.Printf("  %s%s%s\n", yellow, sandbox.Deps.StdDeps.Sprintf(format, a...), reset)
 }
 
 // printWelcome opens the session: who is asking, which project the answers
 // will be applied to, and what state that project is in — the same reading the
 // menus are filtered by, said once in plain words so the first menu is not a
 // surprise.
-func printWelcome(sandbox *api.Sandbox, io *smartio.SmartIO, path string) {
-	p := sandbox.Deps.Std.Printf
+func printWelcome(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) {
+	p := sandbox.Deps.StdDeps.Printf
 
-	title := sandbox.Deps.Std.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
+	title := sandbox.Deps.StdDeps.Sprintf("%s  %s", sandbox.Config.ProjectName, sandbox.Config.Version)
 	width := len(title) + 4
 	if width < 46 {
 		width = 46
 	}
 
 	p("\n")
-	p("  %s╭%s╮%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", width), reset)
+	p("  %s╭%s╮%s\n", cyan, sandbox.Deps.StringsDeps.Repeat("─", width), reset)
 	p("  %s│%s  %s%s%s%s%s│%s\n",
 		cyan, reset, bold+white, title, reset,
-		sandbox.Deps.Stringsdeps.Repeat(" ", width-2-len(title)), cyan, reset,
+		sandbox.Deps.StringsDeps.Repeat(" ", width-2-len(title)), cyan, reset,
 	)
-	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.Stringsdeps.Repeat("─", width), reset)
+	p("  %s╰%s╯%s\n", cyan, sandbox.Deps.StringsDeps.Repeat("─", width), reset)
 	p("\n")
 	p("  %sYou do not need to know any command to use this.%s\n", bold+white, reset)
 	p("  %sPick what you want from the menu, answer the questions, and I run it.%s\n", dim, reset)
@@ -78,7 +78,7 @@ func printWelcome(sandbox *api.Sandbox, io *smartio.SmartIO, path string) {
 // off, and this line is where that is said.
 func projectText(sandbox *api.Sandbox, state projectState) string {
 	if !state.Started {
-		return sandbox.Deps.Std.Sprintf("%snone here yet — creating one is the first step%s", yellow, reset)
+		return sandbox.Deps.StdDeps.Sprintf("%snone here yet — creating one is the first step%s", yellow, reset)
 	}
 
 	name := state.Name
@@ -86,17 +86,17 @@ func projectText(sandbox *api.Sandbox, state projectState) string {
 		name = "unnamed"
 	}
 
-	text := sandbox.Deps.Std.Sprintf("%s%s%s  ", bold+white, name, reset)
+	text := sandbox.Deps.StdDeps.Sprintf("%s%s%s  ", bold+white, name, reset)
 	for _, spec := range utils.ExtensionCatalog() {
 		if extensionInit[spec.Name] == "" {
 			continue
 		}
 
-		mark := sandbox.Deps.Std.Sprintf("%soff%s", red, reset)
+		mark := sandbox.Deps.StdDeps.Sprintf("%soff%s", red, reset)
 		if enabled(state, spec.Name) {
-			mark = sandbox.Deps.Std.Sprintf("%son%s", green, reset)
+			mark = sandbox.Deps.StdDeps.Sprintf("%son%s", green, reset)
 		}
-		text += sandbox.Deps.Std.Sprintf("  %s%s%s %s", dim, layerName(sandbox, spec.Name), reset, mark)
+		text += sandbox.Deps.StdDeps.Sprintf("  %s%s%s %s", dim, layerName(sandbox, spec.Name), reset, mark)
 	}
 
 	return text
@@ -105,7 +105,7 @@ func projectText(sandbox *api.Sandbox, state projectState) string {
 // layerName is a mechanic without its sandbox- prefix, which is the generator's
 // word for it and not the person's.
 func layerName(sandbox *api.Sandbox, extension string) string {
-	return sandbox.Deps.Stringsdeps.TrimPrefix(extension, "sandbox-")
+	return sandbox.Deps.StringsDeps.TrimPrefix(extension, "sandbox-")
 }
 
 // printPlan is the confirm screen: the command line the answers add up to,
@@ -117,8 +117,8 @@ func layerName(sandbox *api.Sandbox, extension string) string {
 // answers were kept, that a name is written down differently from the way it
 // was typed, that questions were left out and why, and that running this takes
 // a layer away.
-func printPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, values map[string][]any, failed int) {
-	p := sandbox.Deps.Std.Printf
+func printPlan(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, values map[string][]any, failed int) {
+	p := sandbox.Deps.StdDeps.Printf
 
 	p("\n")
 
@@ -153,14 +153,14 @@ func printPlan(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, v
 // the units it takes with it, and naming them is the difference between a
 // person agreeing to a command line and agreeing to losing four routes they
 // wrote.
-func lossText(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command) string {
+func lossText(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command) string {
 	unit, names := Losses(sandbox, io, command)
 	if len(names) == 0 {
 		return "there is no undoing this one"
 	}
 
-	return sandbox.Deps.Std.Sprintf("this removes %d %s: %s",
-		len(names), plural(unit, len(names)), sandbox.Deps.Stringsdeps.Join(names, ", "))
+	return sandbox.Deps.StdDeps.Sprintf("this removes %d %s: %s",
+		len(names), plural(unit, len(names)), sandbox.Deps.StringsDeps.Join(names, ", "))
 }
 
 // plural is a unit said of however many there are of it.
@@ -174,7 +174,7 @@ func plural(unit string, count int) string {
 // printOutcome reports what the command answered with, in the words the exit
 // code carries.
 func printOutcome(sandbox *api.Sandbox, command api.Command, exit int) {
-	p := sandbox.Deps.Std.Printf
+	p := sandbox.Deps.StdDeps.Printf
 
 	if exit == api.ExitOk {
 		p("\n  %s✔%s %s%s%s finished\n\n", green+bold, reset, bold+white, verbOf(command), reset)
@@ -191,19 +191,19 @@ func printOutcome(sandbox *api.Sandbox, command api.Command, exit int) {
 func CommandLine(sandbox *api.Sandbox, command api.Command, values map[string][]any) string {
 	words := []string{binaryName(sandbox)}
 	for _, word := range commandArgv(sandbox, command, values) {
-		if word == "" || sandbox.Deps.Stringsdeps.ContainsAny(word, " \t\"'") {
+		if word == "" || sandbox.Deps.StringsDeps.ContainsAny(word, " \t\"'") {
 			word = quoted(sandbox, word)
 		}
 		words = append(words, word)
 	}
-	return sandbox.Deps.Stringsdeps.Join(words, " ")
+	return sandbox.Deps.StringsDeps.Join(words, " ")
 }
 
 // commandArgv is the command line the bound values are typed as: the verb,
 // the args in the order of their segments, then every flag bound to something
 // but its default.
 func commandArgv(sandbox *api.Sandbox, command api.Command, values map[string][]any) []string {
-	argv := sandbox.Deps.Stringsdeps.Fields(verbOf(command))
+	argv := sandbox.Deps.StringsDeps.Fields(verbOf(command))
 
 	fields := FieldsOf(command)
 	last := -1
@@ -260,18 +260,18 @@ func valueText(sandbox *api.Sandbox, value any) string {
 		}
 		return "false"
 	case int:
-		return sandbox.Deps.Stringsdeps.FormatInt(int64(typed), 10)
+		return sandbox.Deps.StringsDeps.FormatInt(int64(typed), 10)
 	case float64:
-		return sandbox.Deps.Stringsdeps.FormatFloat(typed, 'g', -1, 64)
+		return sandbox.Deps.StringsDeps.FormatFloat(typed, 'g', -1, 64)
 	}
-	return sandbox.Deps.Std.Sprintf("%v", value)
+	return sandbox.Deps.StdDeps.Sprintf("%v", value)
 }
 
 // quoted wraps a value the shell would otherwise split, so the printed line is
 // one that can be pasted.
 func quoted(sandbox *api.Sandbox, text string) string {
-	if text == "" || sandbox.Deps.Stringsdeps.Contains(text, " ") {
-		return sandbox.Deps.Std.Sprintf("%q", text)
+	if text == "" || sandbox.Deps.StringsDeps.Contains(text, " ") {
+		return sandbox.Deps.StdDeps.Sprintf("%q", text)
 	}
 	return text
 }

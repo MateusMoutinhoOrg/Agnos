@@ -6,18 +6,18 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	import_error := importBodyAction.ImportBody(sandbox, api.RouteBodyImportProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	import_error := importBodyAction.ImportBody(sandbox, api.ImportBodyProps{
 		Path:        props.Path,
-		Route:       entries.Route,
-		Json:        entries.Json,
-		File:        entries.File,
-		Required:    entries.Required,
-		Replace:     entries.Replace,
-		InferFormat: entries.InferFormat,
+		Route:       input.Name,
+		Json:        input.Json,
+		File:        input.File,
+		Required:    input.Required,
+		Replace:     input.Replace,
+		InferFormat: input.InferFormat,
 	})
 	if import_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", import_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", import_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

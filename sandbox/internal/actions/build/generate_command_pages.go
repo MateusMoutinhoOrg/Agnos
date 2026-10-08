@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -20,7 +20,7 @@ const commandPagesDir = utils.DocsDir + "/Commands"
 //
 // A page whose command is gone is removed here, so the directory holds the
 // commands that are declared now and no page nothing links to.
-func GenerateCommandPages(sandbox *api.Sandbox, io *smartio.SmartIO, docs CommandDocs, name string) error {
+func GenerateCommandPages(sandbox *api.Sandbox, io *stagedfs.StagedFS, docs CommandDocs, name string) error {
 	written := map[string]bool{}
 
 	render := func(category string, command CommandDoc) error {
@@ -29,9 +29,9 @@ func GenerateCommandPages(sandbox *api.Sandbox, io *smartio.SmartIO, docs Comman
 			return err
 		}
 		vars := map[string]any{
-			"Name":     name,
-			"Category": category,
-			"Command":  command,
+			"ProjectName": name,
+			"Category":    category,
+			"Command":     command,
 		}
 		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_page.md", vars, file); err != nil {
 			return err
@@ -61,10 +61,10 @@ func GenerateCommandPages(sandbox *api.Sandbox, io *smartio.SmartIO, docs Comman
 // spells one of the two reserved names of a doc directory is a hard error
 // rather than a page silently overwriting the index it is linked from.
 func commandPageFile(sandbox *api.Sandbox, file string) (string, error) {
-	identifier := sandbox.Deps.Stringsdeps.TrimSuffix(file, docPageExt)
+	identifier := sandbox.Deps.StringsDeps.TrimSuffix(file, docPageExt)
 
 	if file == utils.DocFile || file == utils.DocIndexFile {
-		return "", sandbox.Deps.Std.Errorf(
+		return "", sandbox.Deps.StdDeps.Errorf(
 			"command %s cannot be documented: its page would be %s/%s, which is the doc's own %s",
 			identifier, commandPagesDir, file, file)
 	}

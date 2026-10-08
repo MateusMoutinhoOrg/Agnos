@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
 )
 
 // DatabaseMethod is one method a table generates, spelled once for the three
@@ -40,9 +40,9 @@ type DatabaseMethod struct {
 // is the id of the record it points at, which is an int64 like any other id.
 func DatabaseGoType(kind string) string {
 	switch kind {
-	case databaseconf.FieldInt, databaseconf.FieldLink:
+	case databaseconf.FieldInteger, databaseconf.FieldLink:
 		return "int64"
-	case databaseconf.FieldFloat:
+	case databaseconf.FieldNumber:
 		return "float64"
 	}
 	return "string"
@@ -69,11 +69,12 @@ func DatabaseMethodNames(sandbox *api.Sandbox, table databaseconf.Table) []strin
 // closure of new.go calls through with — so the three templates spell one
 // method the same way without deriving it three times.
 func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseMethod {
-	kind := ExportedName(sandbox, table.Name)
-	item := kind + "Item"
+	kind := GoIdentifier(sandbox, table.Name)
+	item := kind + "Record"
+	plural := Plural(kind)
 
 	methods := []DatabaseMethod{
-		databaseMethod(sandbox, "add", table, "Add"+kind, "props "+kind+"New", "("+item+", error)", "props",
+		databaseMethod(sandbox, "add", table, "Add"+kind, "props "+kind+"Input", "("+item+", error)", "props",
 			"inserts one "+table.Name+" record"),
 		databaseMethod(sandbox, "findById", table, "Find"+kind+"ById", "id int64", "("+item+", bool)", "id",
 			"reads one "+table.Name+" record by its permanent id"),
@@ -83,7 +84,7 @@ func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseM
 		if field.Type != databaseconf.FieldKey {
 			continue
 		}
-		name := "Find" + kind + "By" + ExportedName(sandbox, field.Name)
+		name := "Find" + kind + "By" + GoIdentifier(sandbox, field.Name)
 		method := databaseMethod(sandbox, "findByKey", table, name, "value string", "("+item+", bool)", "value",
 			"reads one "+table.Name+" record by its indexed "+field.Name)
 		method.Field = field.Name
@@ -91,19 +92,19 @@ func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseM
 	}
 
 	methods = append(methods,
-		databaseMethod(sandbox, "list", table, "List"+kind, "filtrage "+kind+"Filtrage", "([]"+item+", error)", "filtrage",
-			"reads every "+table.Name+" record the filtrage keeps"),
-		databaseMethod(sandbox, "page", table, "Page"+kind, "position int, chunk int", "([]"+item+", error)", "position, chunk",
-			"reads one page of "+table.Name+" records, counted from 1"),
+		databaseMethod(sandbox, "list", table, "List"+plural, "filter "+kind+"Filter", "([]"+item+", error)", "filter",
+			"reads every "+table.Name+" record the filter keeps"),
+		databaseMethod(sandbox, "page", table, "List"+plural+"Page", "offset int, limit int", "([]"+item+", error)", "offset, limit",
+			"reads up to limit "+table.Name+" records after the first offset, every one past them when limit is 0"),
 		databaseMethod(sandbox, "count", table, "Count"+kind, "", "(int, error)", "",
 			"is how many "+table.Name+" records are live"),
 	)
 
 	for _, field := range table.Fields {
-		if field.Type == databaseconf.FieldDatabase {
+		if field.Type == databaseconf.FieldObject {
 			continue
 		}
-		name := "Update" + kind + ExportedName(sandbox, field.Name)
+		name := "Set" + kind + GoIdentifier(sandbox, field.Name)
 		method := databaseMethod(sandbox, "update", table, name,
 			"id int64, value "+DatabaseGoType(field.Type), "error", "id, value",
 			"writes a new "+field.Name+" on one "+table.Name+" record")
@@ -120,9 +121,9 @@ func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseM
 		if field.Type != databaseconf.FieldLink {
 			continue
 		}
-		target := ExportedName(sandbox, field.Target)
-		name := "Get" + kind + ExportedName(sandbox, field.Name)
-		method := databaseMethod(sandbox, "getLink", table, name, "id int64", "("+target+"Item, bool)", "id",
+		target := GoIdentifier(sandbox, field.Target)
+		name := "Get" + kind + GoIdentifier(sandbox, field.Name)
+		method := databaseMethod(sandbox, "getLink", table, name, "id int64", "("+target+"Record, bool)", "id",
 			"resolves the "+field.Name+" link of one "+table.Name+" record to the "+field.Target+" it points at")
 		method.Field = field.Name
 		method.Record = target
@@ -130,19 +131,19 @@ func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseM
 	}
 
 	for _, field := range table.Fields {
-		if field.Type != databaseconf.FieldDatabase {
+		if field.Type != databaseconf.FieldObject {
 			continue
 		}
-		sub := ExportedName(sandbox, field.Name)
+		sub := kind + GoIdentifier(sandbox, field.Name)
 
-		add := databaseMethod(sandbox, "addSub", table, "Add"+kind+sub,
-			"parent_id int64, props "+sub+"New", "("+sub+"Item, error)", "parent_id, props",
+		add := databaseMethod(sandbox, "addSub", table, "Add"+sub,
+			"parentId int64, props "+sub+"Input", "("+sub+"Record, error)", "parentId, props",
 			"inserts one "+field.Name+" record under one "+table.Name+" record")
 		add.Field = field.Name
 		add.Record = sub
 
-		list := databaseMethod(sandbox, "listSub", table, "List"+kind+sub,
-			"parent_id int64", "([]"+sub+"Item, error)", "parent_id",
+		list := databaseMethod(sandbox, "listSub", table, "List"+Plural(sub),
+			"parentId int64", "([]"+sub+"Record, error)", "parentId",
 			"reads every "+field.Name+" record of one "+table.Name+" record")
 		list.Field = field.Name
 		list.Record = sub
@@ -158,7 +159,7 @@ func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseM
 func databaseMethod(sandbox *api.Sandbox, kind string, table databaseconf.Table, name string,
 	params string, results string, args string, help string) DatabaseMethod {
 
-	record := ExportedName(sandbox, table.Name)
+	record := GoIdentifier(sandbox, table.Name)
 	return DatabaseMethod{
 		Kind:    kind,
 		Name:    name,
@@ -170,4 +171,28 @@ func databaseMethod(sandbox *api.Sandbox, kind string, table databaseconf.Table,
 		Args:    args,
 		Help:    help,
 	}
+}
+
+// Plural is the plural of one exported Go name, for the methods that hand
+// back many records: Product -> Products, Category -> Categories, Address ->
+// Addresses.
+func Plural(name string) string {
+	if name == "" {
+		return name
+	}
+	last := name[len(name)-1]
+	if last == 'y' && len(name) > 1 && !isVowel(name[len(name)-2]) {
+		return name[:len(name)-1] + "ies"
+	}
+	for _, suffix := range []string{"s", "x", "z", "ch", "sh"} {
+		if len(name) >= len(suffix) && name[len(name)-len(suffix):] == suffix {
+			return name + "es"
+		}
+	}
+	return name + "s"
+}
+
+// isVowel reports a lower-case ASCII vowel.
+func isVowel(letter byte) bool {
+	return letter == 'a' || letter == 'e' || letter == 'i' || letter == 'o' || letter == 'u'
 }

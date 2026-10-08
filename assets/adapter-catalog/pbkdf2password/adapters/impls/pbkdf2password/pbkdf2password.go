@@ -1,4 +1,4 @@
-package passworddeps
+package pbkdf2password
 
 import (
 	"crypto/pbkdf2"
@@ -36,7 +36,7 @@ const keyBytes = 32
 // encoding spells the salt and the key: standard base64 without padding.
 var encoding = base64.RawStdEncoding
 
-// hash fills passworddeps.Sandbox.Hash:
+// hash fills passworddeps.Contract.Hash:
 // "pbkdf2-sha256$<iterations>$<salt>$<key>", salt and key in base64.
 func hash(password string) (string, error) {
 	salt := make([]byte, saltBytes)
@@ -56,7 +56,7 @@ func hash(password string) (string, error) {
 	}, "$"), nil
 }
 
-// verify fills passworddeps.Sandbox.Verify: password derived again with the
+// verify fills passworddeps.Contract.Verify: password derived again with the
 // salt and the count hash carries, compared with its key in constant time.
 func verify(hash string, password string) (bool, error) {
 	parts := strings.Split(hash, "$")
@@ -82,10 +82,10 @@ func verify(hash string, password string) (bool, error) {
 	return subtle.ConstantTimeCompare(key, stored) == 1, nil
 }
 
-// Bind fills deps.Deps.Passworddeps with PBKDF2-HMAC-SHA256 from the standard
+// Bind fills deps.Deps.PasswordDeps with PBKDF2-HMAC-SHA256 from the standard
 // library's crypto/pbkdf2.
 func Bind(deps *deps.Deps) {
-	deps.Passworddeps = passworddeps.Sandbox{
+	deps.PasswordDeps = passworddeps.Contract{
 		Hash: func(password string) (string, error) {
 			return hash(password)
 		},

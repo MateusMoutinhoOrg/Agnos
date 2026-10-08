@@ -3,7 +3,7 @@ package verify
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -14,7 +14,7 @@ var sandboxAllowedFiles = []string{"new.go"}
 
 // CheckSandbox runs every sandbox-layer rule and returns one string per
 // violation, in a stable order.
-func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+func CheckSandbox(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) []string {
 	var violations []string
 
 	if !io.IsDir("sandbox") {
@@ -37,16 +37,16 @@ func CheckSandbox(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []st
 // writes for the part of it the project types itself, and the struct that
 // one declares and the first embeds.
 var userApiFiles = [][3]string{
-	{"sandbox.go", utils.UserSandboxFile, "UserSandbox"},
-	{"config.go", utils.UserConfigFile, "UserConfig"},
+	{"sandbox.go", utils.ProjectSandboxFile, "ProjectSandbox"},
+	{"config.go", utils.ProjectConfigFile, "ProjectConfig"},
 }
 
 // checkSandboxUserApi enforces that the file start writes once is there
 // whenever the generated file embedding it is: api.Sandbox embeds
-// api.UserSandbox and api.Config embeds api.UserConfig, and no build writes
+// api.ProjectSandbox and api.Config embeds api.ProjectConfig, and no build writes
 // either — a project started before they existed would otherwise fail to
 // compile on a name it never declared.
-func checkSandboxUserApi(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkSandboxUserApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	for _, pair := range userApiFiles {
@@ -62,7 +62,7 @@ func checkSandboxUserApi(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 // checkSandboxContents enforces that sandbox/ holds only the api, constructors,
 // deps and internal directories plus a loose new.go.
-func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkSandboxContents(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	for _, dir := range io.ListDirs("sandbox") {
@@ -93,7 +93,7 @@ func checkSandboxContents(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 //
 // sandbox/deps/ is the one exception, being the contracts themselves;
 // checkSandboxDeps is what constrains those.
-func checkSandboxImports(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+func checkSandboxImports(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(sandbox, io, "sandbox") {
@@ -114,11 +114,11 @@ func checkSandboxImports(sandbox *api.Sandbox, io *smartio.SmartIO, module strin
 }
 
 // checkRetiredImports names, for a file importing a package of
-// sandbox/internal/generated/ that the OpinatedAgnos libs replaced, what
+// sandbox/internal/generated/ that the OpinionatedAgnos libs replaced, what
 // replaced it. The build has already removed the package, so the import is a
 // hand-written file — a Handle*, a handler, a methods_custom.go — written
 // against an older agnos, and the replacement is the whole of its migration.
-func checkRetiredImports(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+func checkRetiredImports(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(sandbox, io, "sandbox") {
@@ -131,7 +131,7 @@ func checkRetiredImports(sandbox *api.Sandbox, io *smartio.SmartIO, module strin
 				continue
 			}
 			violations = append(violations, file+" imports "+imp+
-				", which the OpinatedAgnos libs replaced; use "+replacement)
+				", which the OpinionatedAgnos libs replaced; use "+replacement)
 		}
 	}
 
@@ -150,32 +150,32 @@ func checkRetiredImports(sandbox *api.Sandbox, io *smartio.SmartIO, module strin
 // part of what it offers, so apishape.DepsField keeps it out of the copy a
 // consumer installs — which is what leaves the contract as portable as it was.
 //
-// An opinated lib's contract (sandbox/deps/OpinatedAgnos<X>) is the other: a
+// An opinionated lib's contract (sandbox/deps/OpinionatedAgnos<X>) is the other: a
 // mechanic's api file aliases the types the lib declares, so a handler reads
 // api.Command while the lib owns it. apishape keeps those aliases out of a
 // consumer's copy the same way it keeps Deps.
-func checkSandboxApi(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+func checkSandboxApi(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(sandbox, io, "sandbox/api") {
 		for _, imp := range fileImports(sandbox, io, file) {
-			if imp == module+"/sandbox/deps" || isOpinatedContract(sandbox, imp, module) {
+			if imp == module+"/sandbox/deps" || isOpinionatedContract(sandbox, imp, module) {
 				continue
 			}
 			violations = append(violations,
 				file+" imports "+imp+"; sandbox/api/* may import nothing but "+module+"/sandbox/deps"+
-					" and the opinated libs' "+module+"/sandbox/deps/"+utils.OpinatedPrefix+"<X>")
+					" and the opinionated libs' "+module+"/sandbox/deps/"+utils.OpinionatedPrefix+"<X>")
 		}
 	}
 
 	return violations
 }
 
-// isOpinatedContract reports whether an import names an opinated lib's
+// isOpinionatedContract reports whether an import names an opinionated lib's
 // contract: a direct child of sandbox/deps whose name carries
-// utils.OpinatedPrefix.
-func isOpinatedContract(sandbox *api.Sandbox, imp string, module string) bool {
-	return isDirectChild(sandbox, imp, module+"/sandbox/deps") && utils.IsOpinatedLib(sandbox, lastSegment(sandbox, imp))
+// utils.OpinionatedPrefix.
+func isOpinionatedContract(sandbox *api.Sandbox, imp string, module string) bool {
+	return isDirectChild(sandbox, imp, module+"/sandbox/deps") && utils.IsOpinionatedLib(sandbox, lastSegment(sandbox, imp))
 }
 
 // checkSandboxDeps enforces that a contract package under sandbox/deps/<x>/
@@ -187,11 +187,11 @@ func isOpinatedContract(sandbox *api.Sandbox, imp string, module string) bool {
 // The loose files directly in sandbox/deps/ are the one exception. deps.go
 // composes the contracts into deps.Deps, so it names them and nothing else.
 //
-// An opinated lib's contract is the other: it carries a mechanic, and a
+// An opinionated lib's contract is the other: it carries a mechanic, and a
 // mechanic is written over raw deps — the server lib names serverdeps.Request,
 // and the cli lib's Trigger — so it may import another contract under
 // sandbox/deps/<x>/, and still nothing else.
-func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+func checkSandboxDeps(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) []string {
 	var violations []string
 
 	for _, file := range goFilesUnder(sandbox, io, "sandbox/deps") {
@@ -204,23 +204,23 @@ func checkSandboxDeps(sandbox *api.Sandbox, io *smartio.SmartIO, module string) 
 					file+" imports "+imp+"; sandbox/deps/*.go may import only sandbox/deps packages")
 				continue
 			}
-			if isInOpinatedContract(sandbox, file) && isUnder(imp, module+"/sandbox/deps") && imp != module+"/sandbox/deps" {
+			if isInOpinionatedContract(sandbox, file) && isUnder(imp, module+"/sandbox/deps") && imp != module+"/sandbox/deps" {
 				continue
 			}
 			violations = append(violations,
 				file+" imports "+imp+"; sandbox/deps/<x>/ may import nothing at all"+
-					" (an opinated lib's contract may import other contracts under sandbox/deps/)")
+					" (an opinionated lib's contract may import other contracts under sandbox/deps/)")
 		}
 	}
 
 	return violations
 }
 
-// isInOpinatedContract reports whether a file belongs to an opinated lib's
-// contract: sandbox/deps/OpinatedAgnos<X>/.
-func isInOpinatedContract(sandbox *api.Sandbox, file string) bool {
-	parts := sandbox.Deps.Stringsdeps.Split(file, "/")
-	return len(parts) > 3 && utils.IsOpinatedLib(sandbox, parts[2])
+// isInOpinionatedContract reports whether a file belongs to an opinionated lib's
+// contract: sandbox/deps/OpinionatedAgnos<X>/.
+func isInOpinionatedContract(sandbox *api.Sandbox, file string) bool {
+	parts := sandbox.Deps.StringsDeps.Split(file, "/")
+	return len(parts) > 3 && utils.IsOpinionatedLib(sandbox, parts[2])
 }
 
 // checkSandboxConstructors enforces that the package building a contract builds
@@ -231,17 +231,17 @@ func isInOpinatedContract(sandbox *api.Sandbox, file string) bool {
 // A contract with no sandbox/internal/<x>/new.go passes. Such a field is one
 // this repo does not fill — an api published for a consumer to install, say —
 // and no constructor package is written for it.
-func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkSandboxConstructors(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	for _, file := range io.ListFiles("sandbox/api") {
 		name := lastSegment(sandbox, file)
-		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
+		if !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
 			continue
 		}
 
-		base := sandbox.Deps.Stringsdeps.TrimSuffix(name, ".go")
-		constructor := "New" + sandbox.Deps.Stringsdeps.ToUpper(base[:1]) + base[1:]
+		base := sandbox.Deps.StringsDeps.TrimSuffix(name, ".go")
+		constructor := "New" + sandbox.Deps.StringsDeps.ToUpper(base[:1]) + base[1:]
 		newFile := utils.ConstructorSource(io, base) + "/new.go"
 
 		if !io.IsFile(newFile) {
@@ -250,7 +250,7 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []strin
 		if !declaresFunc(sandbox, io, newFile, constructor) {
 			violations = append(violations,
 				newFile+" does not declare "+constructor+"; it is what "+utils.ConstructorPath(base)+" calls to fill Sandbox."+
-					sandbox.Deps.Stringsdeps.ToUpper(base[:1])+base[1:])
+					sandbox.Deps.StringsDeps.ToUpper(base[:1])+base[1:])
 		}
 	}
 
@@ -265,7 +265,7 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []strin
 // The directories are the list, not sandbox/api/ — which is the whole point of
 // the layer. A project may add a constructor of its own and have it called,
 // and may rewrite a generated one, so long as it keeps this one shape.
-func checkSandboxConstructorPackages(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func checkSandboxConstructorPackages(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	for _, dir := range io.ListDirs(utils.ConstructorsDir) {
@@ -290,7 +290,7 @@ func checkSandboxConstructorPackages(sandbox *api.Sandbox, io *smartio.SmartIO) 
 
 // declaresFunc reports whether a file declares a plain top-level function of
 // that name.
-func declaresFunc(sandbox *api.Sandbox, io *smartio.SmartIO, file string, name string) bool {
+func declaresFunc(sandbox *api.Sandbox, io *stagedfs.StagedFS, file string, name string) bool {
 	parsed := parseFile(sandbox, io, file)
 	if parsed == nil {
 		return false
@@ -304,7 +304,7 @@ func declaresFunc(sandbox *api.Sandbox, io *smartio.SmartIO, file string, name s
 }
 
 // fileImports returns the import paths of one Go file, sorted.
-func fileImports(sandbox *api.Sandbox, io *smartio.SmartIO, file string) []string {
+func fileImports(sandbox *api.Sandbox, io *stagedfs.StagedFS, file string) []string {
 	parsed := parseFile(sandbox, io, file)
 	if parsed == nil {
 		return nil
@@ -314,18 +314,18 @@ func fileImports(sandbox *api.Sandbox, io *smartio.SmartIO, file string) []strin
 	for _, spec := range parsed.Imports {
 		imports = append(imports, spec.Path)
 	}
-	sandbox.Deps.Sortdeps.Strings(imports)
+	sandbox.Deps.SortDeps.Strings(imports)
 	return imports
 }
 
 // parseFile reads file through the transaction-aware io and parses it. A file
 // that cannot be read or parsed yields nil (the compiler reports those).
-func parseFile(sandbox *api.Sandbox, io *smartio.SmartIO, file string) *goimportsdeps.File {
+func parseFile(sandbox *api.Sandbox, io *stagedfs.StagedFS, file string) *goimportsdeps.File {
 	content, err := io.ReadFile(file)
 	if err != nil {
 		return nil
 	}
-	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
 		return nil
 	}
@@ -333,10 +333,10 @@ func parseFile(sandbox *api.Sandbox, io *smartio.SmartIO, file string) *goimport
 }
 
 // goFilesUnder lists every .go file at or below dir, in listing order.
-func goFilesUnder(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []string {
+func goFilesUnder(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []string {
 	var files []string
 	for _, file := range io.ListFilesRecursively(dir) {
-		if sandbox.Deps.Stringsdeps.HasSuffix(file, ".go") {
+		if sandbox.Deps.StringsDeps.HasSuffix(file, ".go") {
 			files = append(files, file)
 		}
 	}
@@ -344,7 +344,7 @@ func goFilesUnder(sandbox *api.Sandbox, io *smartio.SmartIO, dir string) []strin
 }
 
 func lastSegment(sandbox *api.Sandbox, path string) string {
-	parts := sandbox.Deps.Stringsdeps.Split(path, "/")
+	parts := sandbox.Deps.StringsDeps.Split(path, "/")
 	return parts[len(parts)-1]
 }
 
@@ -366,5 +366,5 @@ func isUnder(imp string, prefix string) bool {
 // directory below it.
 func isDirectChild(sandbox *api.Sandbox, path string, dir string) bool {
 	return isUnder(path, dir) &&
-		len(sandbox.Deps.Stringsdeps.Split(path, "/")) == len(sandbox.Deps.Stringsdeps.Split(dir, "/"))+1
+		len(sandbox.Deps.StringsDeps.Split(path, "/")) == len(sandbox.Deps.StringsDeps.Split(dir, "/"))+1
 }

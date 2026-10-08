@@ -37,28 +37,28 @@ edit. Every key is in [Extensions](../Extensions/doc.md).
 ## Change the command surface
 
 ```bash
-agnos add-command <name> --help "one line" [--category "Core"] [--pattern 'route add {name}']
-agnos add-command <name> --middleware --help "..."      # runs in front of every command line
+agnos add-command <name> --summary "one line" [--category "Core"] [--pattern 'route add {name}']
+agnos add-command <name> --middleware --summary "..."      # runs in front of every command line
 agnos add-arg  <name> --command <cmd> [--type integer] [--required] [--start 1 --end -1]
 agnos add-flag <name> --command <cmd> [--key --out --key -o] [--type integer --min 1] [--enum a --enum b]
-agnos set-command <cmd> --long-description "..." --example "<cmd> --flag v" --identifier <alias>
+agnos set-command <cmd> --description "..." --example "<cmd> --flag v" --identifier <alias>
 agnos set-arg <name> --command <cmd> ... / set-flag <name> --command <cmd> ...
 agnos remove-arg <name> --command <cmd> / remove-flag <name> --command <cmd> / remove-command <cmd>
 agnos list-commands / show-command <cmd> / explain-command -- <argv…>
 ```
 
 `add-command` writes `sandbox/internal/commands/[<--dir>/]<name>/command.yaml` (the declaration) and a
-stub `InternalPureHandler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`Cli.Commands` — and `entries.go`, the `Entries` it is handed. Every key these editors write is
+stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
+`Cli.Commands` — and `input.go`, the `Input` it is handed. Every key these editors write is
 in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.
 
-Then write `InternalPureHandler.go` — the whole hand-written half of a command:
+Then write `handler.go` — the whole hand-written half of a command:
 
 ```go
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	result, err := something(sandbox, entries.Name)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	result, err := something(sandbox, input.Name)
 	if err != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	}
 	response.Printf("%s\n", result)
 	return nil
@@ -88,19 +88,19 @@ project with no CLI gets one first: a server needs a command that starts it.
 ## Add the front layer
 
 ```bash
-agnos front-init      # the OpinatedAgnosFront lib, the frontend route, assets/frontend/{index,404}.html
-<name> start-server  # serves every file of assets/frontend
+agnos front-init      # the OpinionatedAgnosFront lib, the front route, assets/front/{index,404}.html
+<name> start-server  # serves every file of assets/front
 ```
 
-From there any file under `assets/frontend/` is served; `agnos add-page <name>`
+From there any file under `assets/front/` is served; `agnos add-page <name>`
 scaffolds an html one and `remove-page` deletes it. A project with no server layer gets one
 first: the front is answered over http. `agnos front-purge` removes the layer
-again, leaving `assets/frontend/` alone.
+again, leaving `assets/front/` alone.
 
 ## Add the database layer
 
 ```bash
-agnos database-init                     # the store contract, the OpinatedAgnosDatabase lib, the mechanic on
+agnos database-init                     # the store contract, the OpinionatedAgnosDatabase lib, the mechanic on
 agnos add-database app-database         # the first database
 agnos add-table url --database app-database
 ```
@@ -111,11 +111,11 @@ written for you. `agnos database-purge` removes the layer again.
 ## Add the backoffice
 
 ```bash
-agnos backoffice-init   # /admin pages, /api/admin, users, API tokens, backofficedb
+agnos backoffice-init   # /admin pages, /api/admin, users, API tokens, backoffice-db
 ```
 
 It installs the server, front and database layers it is missing, and writes every file once.
-`start-server` then reads the session secret from `AGNOS_SECRET`, or generates one per run when
+`start-server` then reads the session secret from `AGNOS_BACKOFFICE_SECRET`, or generates one per run when
 it is unset. `agnos backoffice-purge` removes it again.
 ## Add reusable logic
 
@@ -160,12 +160,12 @@ agnos remove-dep <dep> [--with-adapters]
 
 [DepList](../DepList/doc.md) is the catalogue. For one of your own, write the two halves:
 
-1. `sandbox/deps/<x>/<x>.go` — `type Sandbox struct { ... }` of function fields, no import at all.
-2. `adapters/libs/<x>/<x>.go` — `func Bind(deps *deps.Deps) { deps.<X> = <x>.Sandbox{...} }`, any
-   import allowed, beside an `adapter.yaml` saying `dep: <x>`.
+1. `sandbox/deps/<x>deps/<x>deps.go` — `type Contract struct { ... }` of function fields, no import at all.
+2. `adapters/impls/<impl><x>/<impl><x>.go` — `func Bind(deps *deps.Deps) { deps.<X>Deps = <x>deps.Contract{...} }`,
+   any import allowed, beside an `adapter.yaml` saying `dep: <x>deps`.
 
-Then bind it: add `<x>` to `adapters/availables/standard/available.yaml`, or let
-`agnos add-dep` do both for a dep of the catalogue. Reach it as `sandbox.Deps.<X>`
+Then bind it: add `<impl><x>` to `adapters/bindings/standard/binding.yaml`, or let
+`agnos add-dep` do both for a dep of the catalogue. Reach it as `sandbox.Deps.<X>Deps`
 from anywhere inside `sandbox/`.
 
 One contract may have several adapters — see [Adapters](../Adapters/doc.md).
@@ -187,17 +187,17 @@ file is what renders [Structure](../Structure/doc.md).
 ```bash
 agnos add-cli-example <name>       # examples/cli/<name>/example.sh
 agnos add-lib-example <name>       # examples/lib/<name>/example.go
-agnos exec-test                    # run them all, check each against its golden
-agnos exec-test --only <name>      # one example, both sides
-agnos update-test <name>           # rewrite that one golden with what it produces now
-agnos exec-test --update           # rewrite every golden at once
+agnos run-examples                    # run them all, check each against its golden
+agnos run-examples --only <name>      # one example, both sides
+agnos update-example <name>           # rewrite that one golden with what it produces now
+agnos run-examples --update           # rewrite every golden at once
 agnos remove-cli-example <name>
 agnos remove-lib-example <name>
 ```
 
-Write the example itself, ending with the copy out of `TestDir` into `AssertDir` that says what
-it asserts: `result.yaml` records `AssertDir`, and an example that copies nothing out fails.
-The golden is written by the first `exec-test` and refreshed with `update-test <name>`, which
+Write the example itself, ending with the copy out of `test-dir` into `assert-dir` that says what
+it asserts: `result.yaml` records `assert-dir`, and an example that copies nothing out fails.
+The golden is written by the first `run-examples` and refreshed with `update-example <name>`, which
 prints what it changes before writing. Details in [LibExamples](../LibExamples/doc.md) and
 [CliExamples](../CliExamples/doc.md).
 
@@ -205,24 +205,24 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 
 | File | Written when |
 | --- | --- |
-| `sandbox/internal/commands/<name>/InternalPureHandler.go` | a command does something |
+| `sandbox/internal/commands/<name>/handler.go` | a command does something |
 | `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |
-| `sandbox/deps/<x>/<x>.go` + `adapters/libs/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
+| `sandbox/deps/<x>/<x>.go` + `adapters/impls/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
 
 Everything else is regenerated over. Two more files are yours: `AgnosConfig/docs/ReadmeHeader.md`
 is the whole of `README.md` above the documentation index, and `LICENSE` is pasted verbatim into
 its License section — put whatever license you want there.
 
-A project built before the `OpinatedAgnos<X>` libs keeps hand-written files written against
+A project built before the `OpinionatedAgnos<X>` libs keeps hand-written files written against
 the generated packages they replaced. `add-dep` the lib of every mechanic that is on (`verify`
 names the missing ones); the next `build` removes `sandbox/internal/generated/{cliio,trigger,routeio,frontio,databaseio}`,
-`cli/command`, `server/route`, `climain.go` and `servermain.go`; then `verify` names every
+`cli/command`, `server/route`, `main.go` and `main.go`; then `verify` names every
 hand-written import of them with its replacement — `cliio.Fail(sandbox, …)` is
-`sandbox.Deps.OpinatedAgnosCli.Fail(…)`, `routeio.RequestOf(route)` is `route.Request`, a `Handle*`
-logs and then calls `OpinatedAgnosServer.WriteError(sandbox.Deps.Serializables, …)`, and
-`start-server` calls `sandbox.Server.Serve` rather than `server.ServerMain`.
+`sandbox.Deps.OpinionatedAgnosCli.Fail(…)`, `routeio.RequestOf(route)` is `route.Request`, a `Handle*`
+logs and then calls `OpinionatedAgnosServer.WriteError(sandbox.Deps.SerializableDeps, …)`, and
+`start-server` calls `sandbox.Server.Serve` rather than `server.Main`.
 
 ## Ship
 

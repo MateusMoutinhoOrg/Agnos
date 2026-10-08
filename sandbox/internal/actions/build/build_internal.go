@@ -2,25 +2,16 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
-
-// projectNameConst title-cases the configured project name for use as the
-// generated Config.ProjectName of the project (which names the <X>Config/ dir).
-func projectNameConst(sandbox *api.Sandbox, name string) string {
-	if len(name) == 0 {
-		return sandbox.Config.ProjectName
-	}
-	return sandbox.Deps.Stringsdeps.ToUpper(name[:1]) + name[1:]
-}
 
 // generatorName is the cli name of the binary running this build — the
 // generator, never the project being generated. Docs that spell a command of
 // the generator ("agnos add-route") render it from here, while a command of the
 // generated project ("<name> start-server") renders from the project's own Name.
 func generatorName(sandbox *api.Sandbox) string {
-	return sandbox.Deps.Stringsdeps.ToLower(sandbox.Config.ProjectName)
+	return sandbox.Deps.StringsDeps.ToLower(sandbox.Config.ProjectName)
 }
 
 // generatorVersion is the release of the binary running this build. A tree was
@@ -31,8 +22,8 @@ func generatorVersion(sandbox *api.Sandbox) string {
 	return sandbox.Config.Version
 }
 
-func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error {
-	sandbox.Deps.Std.Log("build started with path %s \n", path)
+func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) error {
+	sandbox.Deps.StdDeps.Logf("build started with path %s \n", path)
 
 	module_conf, err := utils.LoadModuleConf(sandbox, io)
 	if err != nil {
@@ -54,13 +45,13 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	hasSandbox := extensions_conf.IsEnabled(utils.ExtensionSandbox)
-	hasDeps := extensions_conf.IsEnabled(utils.ExtensionSandboxDeps)
-	hasCli := extensions_conf.IsEnabled(utils.ExtensionSandboxCli)
-	hasServer := extensions_conf.IsEnabled(utils.ExtensionSandboxServer)
-	hasFront := extensions_conf.IsEnabled(utils.ExtensionSandboxFront)
-	hasDatabase := extensions_conf.IsEnabled(utils.ExtensionSandboxDatabase)
-	hasExample := extensions_conf.IsEnabled(utils.ExtensionSandboxExample)
-	hasBackoffice := extensions_conf.IsEnabled(utils.ExtensionSandboxBackoffice)
+	hasDeps := extensions_conf.IsEnabled(utils.ExtensionDeps)
+	hasCli := extensions_conf.IsEnabled(utils.ExtensionCli)
+	hasServer := extensions_conf.IsEnabled(utils.ExtensionServer)
+	hasFront := extensions_conf.IsEnabled(utils.ExtensionFront)
+	hasDatabase := extensions_conf.IsEnabled(utils.ExtensionDatabase)
+	hasExample := extensions_conf.IsEnabled(utils.ExtensionExample)
+	hasBackoffice := extensions_conf.IsEnabled(utils.ExtensionBackoffice)
 	hasDoc := extensions_conf.IsEnabled(utils.ExtensionDoc)
 	hasReadme := extensions_conf.IsEnabled(utils.ExtensionReadme)
 
@@ -113,7 +104,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	if hasCli {
 		helpVars := map[string]interface{}{
 			"Module":        module_conf.Module,
-			"ProjectName":   projectNameConst(sandbox, project_conf.Name),
+			"ProjectName":   project_conf.ProjectName,
 			"GeneratorName": generatorName(sandbox),
 		}
 		if err := GenerateHelpCommandYaml(sandbox, io, helpVars); err != nil {
@@ -163,15 +154,15 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		return err
 	}
 
-	deps_api, err := CollectDepsApi(sandbox, io)
+	dep_contracts, err := CollectDepContracts(sandbox, io)
 	if err != nil {
 		return err
 	}
 
-	// An available is a declared selection, not a directory listing: two
+	// A binding is a declared selection, not a directory listing: two
 	// adapters may implement the same contract, so which one binds is read
-	// from adapters/availables/<name>/available.yaml and nowhere else.
-	availables, err := CollectAvailables(sandbox, io)
+	// from adapters/bindings/<name>/binding.yaml and nowhere else.
+	bindings, err := CollectBindings(sandbox, io)
 	if err != nil {
 		return err
 	}
@@ -186,7 +177,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 
 	// docs/Commands is rendered from the command declarations themselves, so
 	// every visible command, flag, argument and example on the page is the one
-	// its entries.yaml declares.
+	// its command.yaml declares.
 	command_docs, err := CollectCommandDocs(sandbox, io)
 	if err != nil {
 		return err
@@ -207,9 +198,9 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	}
 
 	// The docs this build generates are merged in before the index is built:
-	// SmartIO listings read disk, so on a project's first build they are not
+	// StagedFS listings read disk, so on a project's first build they are not
 	// there to be walked yet.
-	generated_docs, err := CollectGeneratedDocs(sandbox, io, docsVars(module_conf.Module, project_conf.Name, generatorName(sandbox)), utils.DocGroups(sandbox, extensions_conf))
+	generated_docs, err := CollectGeneratedDocs(sandbox, io, docsVars(module_conf.Module, project_conf.ProjectName, generatorName(sandbox)), utils.DocGroups(sandbox, extensions_conf))
 	if err != nil {
 		return err
 	}
@@ -227,7 +218,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	// write are rendered first, and named along with the two start writes and
 	// the parts migrated above: start builds before it persists, and the
 	// listing reads disk.
-	api_parts := append([]string{"sandbox/api/" + utils.UserConfigFile, "sandbox/api/" + utils.UserSandboxFile}, moved_parts...)
+	api_parts := append([]string{"sandbox/api/" + utils.ProjectConfigFile, "sandbox/api/" + utils.ProjectSandboxFile}, moved_parts...)
 	if hasSandbox {
 		group_parts, err := GenerateApiParts(sandbox, io, utils.RenderableGroups(extensions_conf), map[string]interface{}{
 			"Module":        module_conf.Module,
@@ -249,12 +240,11 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 
 	vars := map[string]interface{}{
 		"Module":              module_conf.Module,
-		"Name":                project_conf.Name,
 		"Version":             project_conf.Version,
-		"ProjectName":         projectNameConst(sandbox, project_conf.Name),
+		"ProjectName":         project_conf.ProjectName,
 		"GeneratorName":       generatorName(sandbox),
 		"GeneratorVersion":    generatorVersion(sandbox),
-		"ConfigDir":           sandbox.Config.ProjectName + "Config",
+		"ConfigDir":           utils.ConfigDir(sandbox),
 		"GoRelease":           utils.GoRelease,
 		"GoFloor":             utils.GoFloor,
 		"StructureConfFile":   utils.StructureConfFile,
@@ -266,7 +256,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"HasDatabase":         hasDatabase,
 		"HasExample":          hasExample,
 		"HasBackoffice":       hasBackoffice,
-		"SecretEnv":           utils.SecretEnvName(sandbox, project_conf.Name),
+		"SecretEnv":           utils.SecretEnvName(sandbox, project_conf.ProjectName),
 		"HasDoc":              hasDoc,
 		"HasReadme":           hasReadme,
 		"HasAssets":           hasAssets,
@@ -274,9 +264,9 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"ConfigStructs":       config_structs,
 		"SandboxStructs":      sandbox_structs,
 		"ConstructorPackages": CollectConstructorPackages(sandbox, io, constructors),
-		"DepsLibs":            CollectDepsLibs(sandbox, io),
-		"AdapterLibs":         CollectAdapterLibs(sandbox, io),
-		"Availables":          availables,
+		"DepLibs":             CollectDepLibs(sandbox, io),
+		"AdapterImpls":        CollectAdapterImpls(sandbox, io),
+		"Bindings":            bindings,
 		"CliExamples":         utils.CollectExamples(sandbox, io, utils.ExampleCliSide),
 		"LibExamples":         utils.CollectExamples(sandbox, io, utils.ExampleLibSide),
 		"Commands":            commands,
@@ -289,13 +279,13 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		"DocIndex":            CollectDocIndex(sandbox, docs, themes_conf.Themes),
 		"PublicApi":           public_api,
 		"Structure":           structure,
-		"DepsApi":             deps_api,
+		"DepContracts":        dep_contracts,
 	}
 
-	// The per-unit generators: one new.go per declared available, command and
+	// The per-unit generators: one new.go per declared binding, command and
 	// route, each owned by the mechanic that declares the unit.
 	if hasDeps {
-		if err := GenerateAvailableNews(sandbox, io, availables, module_conf.Module); err != nil {
+		if err := GenerateBindingNewFiles(sandbox, io, bindings, module_conf.Module); err != nil {
 			return err
 		}
 	}
@@ -318,7 +308,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	// One page per command beside docs/Commands' own index: a lookup costs the
 	// page of the command asked about, never every command of the project.
 	if hasDoc && hasCli {
-		if err := GenerateCommandPages(sandbox, io, command_docs, project_conf.Name); err != nil {
+		if err := GenerateCommandPages(sandbox, io, command_docs, project_conf.ProjectName); err != nil {
 			return err
 		}
 	}
@@ -340,14 +330,14 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 	// The same for the contracts: one page per file of sandbox/api and per
 	// contract of sandbox/deps, indexed by the symbols each one declares.
 	if hasDoc && hasSandbox {
-		if err := GeneratePublicApiPages(sandbox, io, public_api, deps_api); err != nil {
+		if err := GeneratePublicApiPages(sandbox, io, public_api, dep_contracts); err != nil {
 			return err
 		}
 	}
 
 	// What an older build wrote under sandbox/internal/generated/ and the
-	// OpinatedAgnos libs replaced, dropped for every mechanic that is on.
-	for _, extension := range []string{utils.ExtensionSandboxCli, utils.ExtensionSandboxServer, utils.ExtensionSandboxFront, utils.ExtensionSandboxDatabase} {
+	// OpinionatedAgnos libs replaced, dropped for every mechanic that is on.
+	for _, extension := range []string{utils.ExtensionCli, utils.ExtensionServer, utils.ExtensionFront, utils.ExtensionDatabase} {
 		if extensions_conf.IsEnabled(extension) {
 			utils.RemoveRetiredGenerated(sandbox, io, extension)
 		}
@@ -359,7 +349,7 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 		// Written once and never again: the eight files that say what this
 		// project answers when no route does.
-		if err := GenerateErrorHandlers(sandbox, io, module_conf.Module); err != nil {
+		if err := GenerateServerErrorHandlers(sandbox, io, module_conf.Module); err != nil {
 			return err
 		}
 		// Written once too: what one request's chain of routes shares.
@@ -386,6 +376,6 @@ func BuildInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) error
 		}
 	}
 
-	sandbox.Deps.Std.Log("successfully rendered template\n")
+	sandbox.Deps.StdDeps.Logf("successfully rendered template\n")
 	return nil
 }

@@ -1,19 +1,23 @@
-cli-output: "started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-dep started with path TestDir dep std \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep argvdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path TestDir dep stringsdeps \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path TestDir \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \nadd-command creating sandbox/internal/commands/greet \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \nadd-dep started with path test-dir dep stddeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep argvdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep stringsdeps \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \nadd-dep started with path test-dir dep OpinionatedAgnosCli \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... ./adapters/... \ncli-init started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \nadd-command creating sandbox/internal/commands/core/greet \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
     - file: docs/Commands/doc.md
-      sha: 2ff15f3ac08c490989d6e3a02edce01b49bdd08ee608ffe69042134058c0ff6a
-    - file: docs/Commands/greet.md
-      sha: ba7169279e2ec040b3d8c5d78ddd70a1f7e31e3fc9518b7f9b81802cc60b2349
-    - file: docs/Commands/help.md
-      sha: e18d835c2e1bf014718cb11f7ae962bce71764596e7841f8eed27a75244c59af
-    - file: docs/Commands/props.yaml
+      sha: 96ccbc09412e40cb4308556932a42a6007a4357a0753f96533ff039434b95983
+    - file: docs/Commands/doc.yaml
       sha: 73a8fdea26e1b84ab7873161f41b6eb4ee5369d0efea0a2cc3617d820bce65fc
+    - file: docs/Commands/greet.md
+      sha: c44c7840c5b4081e02d100c4e27a1d1571c6b39e3aadfca985f8a6cac4192405
+    - file: docs/Commands/help-flag.md
+      sha: 8bc540aa8503b7622d3eff06261645d4670b7cb0e08ba70a89b25635f744f0d7
+    - file: docs/Commands/help.md
+      sha: a5c35d7aac3b3ab4f692f3867fdc2906b1d843614c42c92751c9f036cecf1dbd
     - file: docs/Commands/version.md
-      sha: 4e4bb1a3c9f878233b796e03c65503388abdcd38ca6613b6b51bed8ac26e6ce3
-    - file: sandbox/internal/commands/greet/entries.yaml
-      sha: 79aaf6eee2c70d28ff7c72c8e3633c6f8062f3152955183529efe41243ed1817
-    - file: sandbox/internal/commands/greet/handler.go
-      sha: b65d5636e16aceb058b357657c83779be3fc7a7011fa779a60328f3929d0c27a
-    - file: sandbox/internal/commands/greet/new.go
-      sha: 3a8a7594be0cedbba6616f7f90af08d402b4bc3cbeedb5846a055596f3a8efe4
+      sha: dc2bb6deeaa61f717dc01d8c7185200bb51e92f0febd0c8009872be5df5a9193
+    - file: sandbox/internal/commands/core/greet/command.yaml
+      sha: e8e5d3139a208297deb10f10ccdd08ae787a60a98e0c54302a4545ff69de4586
+    - file: sandbox/internal/commands/core/greet/handler.go
+      sha: 7459e32a2e71c4454b90f8d071c9c8a1f780f00bc892b4a6cac7bbaba189960a
+    - file: sandbox/internal/commands/core/greet/input.go
+      sha: eaeaf7fef09269b41172762488097a47b6ac63acfd6817f015f68c1512b0befa
+    - file: sandbox/internal/commands/core/greet/new.go
+      sha: bad21e89f91d52e68e46b6f7211c94dbd65c98cecb9ba24bb3da746d474006b7

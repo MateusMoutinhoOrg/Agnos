@@ -1,23 +1,23 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
-	opinatedagnoscli "{{.Module}}/sandbox/deps/OpinatedAgnosCli"
-	serializables "{{.Module}}/sandbox/deps/serializables"
+	opinionatedagnoscli "{{.Module}}/sandbox/deps/OpinionatedAgnosCli"
+	serializabledeps "{{.Module}}/sandbox/deps/serializabledeps"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/deps/signaldeps"
-	"{{.Module}}/sandbox/deps/std"
+	"{{.Module}}/sandbox/deps/stddeps"
 )
 
-// This package is the contract of an *opinated* lib: unlike every other dep,
+// This package is the contract of an *opinionated* lib: unlike every other dep,
 // which restates a library's raw capability and nothing more, it carries the
 // agnos server mechanic itself — the declaration a route.yaml becomes, the
 // chain that runs a request against those declarations, how a value and a
 // body are bound and validated, how a failure is raised and written. The
 // project's sandbox/api aliases its types, so a handler still reads them as
-// api.Route, api.StatusOk.
+// api.Route, api.StatusOK.
 //
 // What stays in the project is everything it declares or edits: each route's
-// route.yaml and InternalPureHandler.go, the generated declarations built from
+// route.yaml and handler.go, the generated declarations built from
 // them, routeprops, and the Handle* files of sandbox/internal/server/errors/.
 
 // PathType is what one segment a Path reads has to convert to. A segment
@@ -25,88 +25,88 @@ import (
 type PathType int
 
 const (
-	// StringPath takes any slice, bound as a string.
-	StringPath PathType = iota
-	// IntegerPath takes one segment reading as a whole number, bound as an
+	// PathString takes any slice, bound as a string.
+	PathString PathType = iota
+	// PathInteger takes one segment reading as a whole number, bound as an
 	// int.
-	IntegerPath
-	// NumberPath takes one segment reading as a number, bound as a float64.
-	NumberPath
-	// UuidPath takes one segment reading as a canonical uuid, bound as a
+	PathInteger
+	// PathNumber takes one segment reading as a number, bound as a float64.
+	PathNumber
+	// PathUuid takes one segment reading as a canonical uuid, bound as a
 	// string.
-	UuidPath
+	PathUuid
 )
 
 // Path is one entry of `paths` in route.yaml: the slice of request segments
 // from Start to End, both inclusive, End -1 standing for the last segment. The
 // slice reads as "/" followed by its segments joined by "/", and is bound to
-// the Entries field tagged with its Id.
+// the Input field tagged with its Id.
 type Path struct {
-	// Id is the Entries field the slice is bound to.
+	// Id is the Input field the slice is bound to.
 	Id string
 	// Start is the index of the first segment of the slice.
 	Start int
 	// End is the index of the last segment of the slice, -1 for the last
 	// segment of the request.
 	End int
-	// Type is what the slice converts to; anything but StringPath reads one
+	// Type is what the slice converts to; anything but PathString reads one
 	// segment alone.
 	Type PathType
 	// Description is the one-line help text.
 	Description string
 	// Trigger is what the slice has to match for the route to run.
-	Trigger opinatedagnoscli.Trigger
+	Trigger opinionatedagnoscli.Trigger
 }
 
-// ParameterFont is one place of the request a Parameter is read from.
-type ParameterFont int
+// ParameterSource is one place of the request a Parameter is read from.
+type ParameterSource int
 
 const (
-	// HeaderParam reads a request header, matched without regard to case.
-	HeaderParam ParameterFont = iota
-	// QueryParam reads a query-string parameter.
-	QueryParam
-	// CookieParam reads a request cookie.
-	CookieParam
+	// SourceHeader reads a request header, matched without regard to case.
+	SourceHeader ParameterSource = iota
+	// SourceQuery reads a query-string parameter.
+	SourceQuery
+	// SourceCookie reads a request cookie.
+	SourceCookie
 )
 
 // ParameterType is the type a Parameter is converted to before it reaches
-// Entries.
+// Input.
 type ParameterType int
 
 const (
-	// StringType is bound as a string.
-	StringType ParameterType = iota
-	// NumberType is bound as a float64.
-	NumberType
-	// BooleanType is bound as a bool: true/1 or false/0.
-	BooleanType
-	// DateTimeType is bound as a string that has to read as RFC 3339.
-	DateTimeType
-	// StringArrayType is bound as a []string: every occurrence of a query
+	// ParameterString is bound as a string.
+	ParameterString ParameterType = iota
+	// ParameterNumber is bound as a float64.
+	ParameterNumber
+	// ParameterBoolean is bound as a bool: true/1 or false/0.
+	ParameterBoolean
+	// ParameterDateTime is bound as a string that has to read as RFC 3339.
+	ParameterDateTime
+	// ParameterStringArray is bound as a []string: every occurrence of a query
 	// key, or a header's comma-separated values.
-	StringArrayType
-	// IntegerType is bound as an int.
-	IntegerType
-	// IntegerArrayType is bound as a []int, read the way a StringArrayType
+	ParameterStringArray
+	// ParameterInteger is bound as an int.
+	ParameterInteger
+	// ParameterIntegerArray is bound as a []int, read the way a ParameterStringArray
 	// is.
-	IntegerArrayType
+	ParameterIntegerArray
 )
 
-// AnyMethod is the one entry of AcceptMethods that accepts every http method.
+// AnyMethod is the one entry of Methods that accepts every http method.
 const AnyMethod = "ANY"
 
 // Parameter is one entry of `parameters` in route.yaml: one value read off the
-// request under Key, from the first of Fonts that carries it, and bound to the
-// Entries field tagged with its Id.
+// request under Key, from the first of Sources that carries it, and bound to the
+// Input field tagged with its Id.
 type Parameter struct {
-	// Id is the Entries field the value is bound to.
+	// Id is the Input field the value is bound to.
 	Id string
 	// Key is the query key or the header name the value is read under.
 	Key string
-	// Fonts are the places the value is read from, in order: the first one
+	// Sources are the places the value is read from, in order: the first one
 	// that brings a value wins.
-	Fonts []ParameterFont
+	Sources []ParameterSource
 	// Required reports that the request is answered 400 without it.
 	Required bool
 	// Type is what the value is converted to.
@@ -116,7 +116,7 @@ type Parameter struct {
 	Default    string
 	HasDefault bool
 	// Trigger is what the value has to match for the route to run.
-	Trigger opinatedagnoscli.Trigger
+	Trigger opinionatedagnoscli.Trigger
 	// Description is the one-line help text.
 	Description string
 }
@@ -146,7 +146,7 @@ type RouteBody struct {
 // returned an error, a path nothing matched — arrives at one of the project's
 // own Handle* files as this, read off the Failure of the route it is handed.
 //
-// It is an error too: an InternalPureHandler refuses a request by returning
+// It is an error too: a Handle refuses a request by returning
 // one, built by Fail, and the dispatch answers it through the Handle* file of
 // its Status.
 type RouteFailure struct {
@@ -172,19 +172,19 @@ func (failure *RouteFailure) Error() string {
 
 // Route is one http route of the project, as the sandbox offers it: the whole
 // of what its route.yaml declares, plus the handler behind it. Server.Routes
-// holds one per directory under sandbox/internal/routeslist holding a
+// holds one per directory under sandbox/internal/routes holding a
 // route.yaml, at any depth, each built by that package's generated NewRoute,
 // in run order — lowest Priority first.
 //
 // What Server.Routes holds is the declaration alone: nothing is ever bound
 // onto it. The dispatch copies it with BindRoute, puts the request and the
-// response on the copy, and hands the copy to IsActionable and RequestHandler.
+// response on the copy, and hands the copy to Matches and Run.
 type Route struct {
 	// Name is the package directory of the route, snake_case.
 	Name string
-	// AcceptMethods are the http methods it answers to ("GET", "POST"), or
+	// Methods are the http methods it answers to ("GET", "POST"), or
 	// AnyMethod alone for every one.
-	AcceptMethods []string
+	Methods []string
 	// Priority is the rung this route runs on when several match one
 	// request: the dispatch runs them from the lowest upwards and stops at
 	// the first handler that sets a status.
@@ -199,10 +199,10 @@ type Route struct {
 	Pattern string
 	// Category groups it on the generated Routes page.
 	Category string
-	// Help is the one-line description.
-	Help string
-	// LongDescription is the paragraph the Routes page prints.
-	LongDescription string
+	// Summary is the one-line description.
+	Summary string
+	// Description is the paragraph the Routes page prints.
+	Description string
 	// Examples are whole requests the Routes page prints.
 	Examples []string
 	// Hidden keeps it off the Routes page without disabling it.
@@ -218,19 +218,19 @@ type Route struct {
 
 	// ReadBody reads, validates and converts the request body of one bound
 	// copy — the route package's own generated ReadBody, closed over the
-	// sandbox. RequestHandler calls it before the handler runs and binds
-	// what it returns onto Entries.Body; it is nil on a route whose body is
+	// sandbox. Run calls it before the handler runs and binds
+	// what it returns onto Input.Body; it is nil on a route whose body is
 	// `none`. A body that fails comes back as a *RouteFailure, which the
 	// dispatch raises.
 	ReadBody func(bound *Route) (any, error)
 
-	// InternalPureHandler is the route package's own InternalPureHandler,
+	// Handle is the route package's own Handle,
 	// closed over the sandbox: a func(props *routeprops.RouteProps, entries
-	// *Entries, response *serverdeps.Response) error whose Entries is that package's
-	// generated struct. It is held as any because every route's Entries is a
+	// *Input, response *serverdeps.Response) error whose Input is that package's
+	// generated struct. It is held as any because every route's Input is a
 	// type of its own; the dispatch builds and fills one by reflection and
 	// calls it.
-	InternalPureHandler any
+	Handle any
 
 	// Request is the http request this copy was bound from and Response the
 	// one being written, the response a handler is handed a pointer to.
@@ -238,7 +238,7 @@ type Route struct {
 	Response serverdeps.Response
 
 	// Props is one request's *routeprops.RouteProps, shared by every route
-	// of the chain that runs for it and handed to each InternalPureHandler as
+	// of the chain that runs for it and handed to each Handle as
 	// its first argument: what a middleware sets on it, the routes after it
 	// read. It is held as any because the project types it under
 	// sandbox/internal, which no contract may name; a Handle* file reads it
@@ -250,28 +250,28 @@ type Route struct {
 	// which is the one way any part of the server layer raises a failure.
 	Failure *RouteFailure
 
-	// IsActionable reports whether one bound copy — its Request set — is for
+	// Matches reports whether one bound copy — its Request set — is for
 	// this route: the method is accepted, and every path slice and every
 	// parameter declaring a trigger matches it. Nil reads the copy with the
 	// lib's own matcher; set it to decide by hand.
-	IsActionable func(bound *Route) bool
+	Matches func(bound *Route) bool
 	// MatchesPath reports whether one bound copy's request path is for this
 	// route whatever its method — what tells a 405 from a 404. Nil reads it
 	// with the lib's own matcher.
 	MatchesPath func(bound *Route) bool
-	// RequestHandler binds one bound copy's request onto a fresh Entries and
-	// runs InternalPureHandler with it. It returns the failure the handler
+	// Run binds one bound copy's request onto a fresh Input and
+	// runs Handle with it. It returns the failure the handler
 	// did not answer itself, nil otherwise; what it answered with is the
 	// status it wrote, and a handler writing none hands the request to the
 	// next route of the chain. Nil binds with the lib's own binder.
-	RequestHandler func(bound *Route) error
+	Run func(bound *Route) error
 }
 
 // Server is the http surface of the sandbox: every route the project declares,
 // and the dispatch that reads a request against them. It is built by
-// sandbox/internal/generated/server/server/new.go, generated by the build.
+// sandbox/internal/generated/server/new.go, generated by the build.
 type Server struct {
-	// Serve opens the server: it hands the props to the lib's ServerMain
+	// Serve opens the server: it hands the props to the lib's Main
 	// against these Routes, and blocks until the server stops.
 	Serve func(props ServeProps) error
 	// Routes is every http route the project declares, in run order —
@@ -302,8 +302,8 @@ type ServeProps struct {
 }
 
 const (
-	// StatusOk reports that the route did what it was asked to do.
-	StatusOk = 200
+	// StatusOK reports that the route did what it was asked to do.
+	StatusOK = 200
 	// StatusCreated reports that the route created what it was asked for.
 	StatusCreated = 201
 	// StatusNoContent reports success with nothing to send back.
@@ -342,22 +342,22 @@ const (
 	// StatusPayloadTooLarge reports a body longer than the route's
 	// max-bytes.
 	StatusPayloadTooLarge = 413
-	// StatusUnsupportedMedia reports a content type the route does not
+	// StatusUnsupportedMediaType reports a content type the route does not
 	// declare.
-	StatusUnsupportedMedia = 415
-	// StatusUnprocessable reports a well-formed request whose content
+	StatusUnsupportedMediaType = 415
+	// StatusUnprocessableEntity reports a well-formed request whose content
 	// breaks a rule of the domain.
-	StatusUnprocessable = 422
+	StatusUnprocessableEntity = 422
 	// StatusTooManyRequests reports a caller over its rate.
 	StatusTooManyRequests = 429
-	// StatusFailure reports a well-formed request the route could not carry
+	// StatusInternalServerError reports a well-formed request the route could not carry
 	// out.
-	StatusFailure = 500
-	// StatusUnavailable reports a server that cannot answer right now.
-	StatusUnavailable = 503
+	StatusInternalServerError = 500
+	// StatusServiceUnavailable reports a server that cannot answer right now.
+	StatusServiceUnavailable = 503
 )
 
-// MainProps is everything one run of ServerMain reads: the surface, the
+// MainProps is everything one run of Main reads: the surface, the
 // address and timeouts, and the deps the server reaches the outside world
 // through. The generated registry builds it per call, so nothing the lib holds
 // goes stale.
@@ -373,21 +373,21 @@ type MainProps struct {
 	// lib is handed a constructor rather than naming it.
 	NewProps func() any
 	// MatchTrigger is how a path or a parameter is held to its trigger: the
-	// OpinatedAgnosCli lib's own, shared with the cli layer.
-	MatchTrigger func(trigger opinatedagnoscli.Trigger, text string, segmented bool) bool
-	// Std is the channel the server reports on, read at the moment of each
+	// OpinionatedAgnosCli lib's own, shared with the cli layer.
+	MatchTrigger func(trigger opinionatedagnoscli.Trigger, text string, segmented bool) bool
+	// StdDeps is the channel the server reports on, read at the moment of each
 	// print.
-	Std *std.Sandbox
-	// Serverdeps opens the port; it routes nothing.
-	Serverdeps serverdeps.Sandbox
-	// Signaldeps hears the request to stop, which shuts the server down.
-	Signaldeps signaldeps.Sandbox
+	StdDeps *stddeps.Contract
+	// ServerDeps opens the port; it routes nothing.
+	ServerDeps serverdeps.Contract
+	// SignalDeps hears the request to stop, which shuts the server down.
+	SignalDeps signaldeps.Contract
 }
 
-// Sandbox is the server lib injected whole as the Deps.OpinatedAgnosServer
+// Contract is the server lib injected whole as the Deps.OpinionatedAgnosServer
 // field.
-type Sandbox struct {
-	// ServerMain opens the port through props.Serverdeps — which routes
+type Contract struct {
+	// Main opens the port through props.ServerDeps — which routes
 	// nothing — and runs every request through the chain of
 	// props.Server.Routes: each route the request is for runs, lowest
 	// `priority` first, until one of them answers — sets a status, or writes
@@ -397,7 +397,7 @@ type Sandbox struct {
 	// name a range of ports ("3000:4000"), tried in turn; the address it
 	// landed on is printed to stdout. The first request to stop the process
 	// shuts it down gracefully, after which it returns nil.
-	ServerMain func(props MainProps) error
+	Main func(props MainProps) error
 
 	// NewRoute returns an empty Route with every slice open, the base a
 	// route's generated NewRoute fills its declaration on.
@@ -408,12 +408,12 @@ type Sandbox struct {
 	// with no request, response or failure yet.
 	BindRoute func(route *Route) *Route
 
-	// Fail is how an InternalPureHandler — or a generated ReadBody — refuses
+	// Fail is how a Handle — or a generated ReadBody — refuses
 	// a request: it builds the failure and returns it as an error, which the
 	// dispatch raises on the route, reaching the project's own Handle* file
 	// for that status:
 	//
-	//	return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "invalid token")
+	//	return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "invalid token")
 	//
 	// A message left empty is filled by that file's own wording.
 	Fail func(status int, field string, message string) error
@@ -436,10 +436,10 @@ type Sandbox struct {
 	// policy: what decides whether a failure is answered this way is the
 	// project's own Handle* file. It returns the message as an error, so a
 	// Handle* file answers and reports in one line.
-	WriteError func(serializables serializables.Sandbox, response serverdeps.Response, status int, field string, message string) error
+	WriteError func(serializables serializabledeps.Contract, response serverdeps.Response, status int, field string, message string) error
 
 	// WriteJSON answers with one document serialized as JSON.
-	WriteJSON func(serializables serializables.Sandbox, response serverdeps.Response, status int, document *serializables.SerializibleObject) error
+	WriteJSON func(serializables serializabledeps.Contract, response serverdeps.Response, status int, document *serializabledeps.SerializableObject) error
 
 	// WriteText answers with one text as text/plain.
 	WriteText func(response serverdeps.Response, status int, text string) error
@@ -456,36 +456,36 @@ type Sandbox struct {
 	// pattern, format (email, uuid, date-time, uri) and the four numeric
 	// bounds. It returns the parsed document, the field path of the first
 	// violation, that violation's message, and whether the body passed.
-	ValidateSchema func(serializables serializables.Sandbox, schemaJson string, body []byte) (*serializables.SerializibleObject, string, string, bool)
+	ValidateSchema func(serializables serializabledeps.Contract, schemaJson string, body []byte) (*serializabledeps.SerializableObject, string, string, bool)
 
 	// ValidateForm is ValidateSchema for a body that arrives as `key=value`
 	// pairs: each declared key is converted to what its property declares —
 	// an integer or a number parsed, a boolean read as true/1/on or
 	// false/0/off, an array taking every occurrence — before the schema
 	// runs. An empty value counts as absent.
-	ValidateForm func(serializables serializables.Sandbox, schemaJson string, form map[string][]string) (*serializables.SerializibleObject, string, string, bool)
+	ValidateForm func(serializables serializabledeps.Contract, schemaJson string, form map[string][]string) (*serializabledeps.SerializableObject, string, string, bool)
 
 	// ReadString returns the named property of a validated document as
 	// text; every reader below returns the zero value for a property that is
 	// absent or of another kind, since the schema has been enforced by then.
-	ReadString func(object *serializables.SerializibleObject, key string) string
+	ReadString func(object *serializabledeps.SerializableObject, key string) string
 	// ReadInt returns the named property as an int.
-	ReadInt func(object *serializables.SerializibleObject, key string) int
+	ReadInt func(object *serializabledeps.SerializableObject, key string) int
 	// ReadFloat returns the named property as a float64.
-	ReadFloat func(object *serializables.SerializibleObject, key string) float64
+	ReadFloat func(object *serializabledeps.SerializableObject, key string) float64
 	// ReadBool returns the named property as a bool.
-	ReadBool func(object *serializables.SerializibleObject, key string) bool
+	ReadBool func(object *serializabledeps.SerializableObject, key string) bool
 	// ReadObject returns the named property as a document to read further,
 	// nil when it is absent.
-	ReadObject func(object *serializables.SerializibleObject, key string) *serializables.SerializibleObject
+	ReadObject func(object *serializabledeps.SerializableObject, key string) *serializabledeps.SerializableObject
 	// ReadItems returns the named property's items, in order.
-	ReadItems func(object *serializables.SerializibleObject, key string) []*serializables.SerializibleObject
+	ReadItems func(object *serializabledeps.SerializableObject, key string) []*serializabledeps.SerializableObject
 	// ItemString reads one array item as text.
-	ItemString func(item *serializables.SerializibleObject) string
+	ItemString func(item *serializabledeps.SerializableObject) string
 	// ItemInt reads one array item as an int.
-	ItemInt func(item *serializables.SerializibleObject) int
+	ItemInt func(item *serializabledeps.SerializableObject) int
 	// ItemFloat reads one array item as a float64.
-	ItemFloat func(item *serializables.SerializibleObject) float64
+	ItemFloat func(item *serializabledeps.SerializableObject) float64
 	// ItemBool reads one array item as a bool.
-	ItemBool func(item *serializables.SerializibleObject) bool
+	ItemBool func(item *serializabledeps.SerializableObject) bool
 }

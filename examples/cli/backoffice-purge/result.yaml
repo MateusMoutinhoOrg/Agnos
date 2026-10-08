@@ -1,59 +1,59 @@
-cli-output: "backoffice-purge started with path TestDir \nbackoffice-purge kept ./backofficedb, the store holding the users: remove it by hand if you mean to\nbuild started with path TestDir \nsuccessfully rendered template\n"
+cli-output: "backoffice-purge started with path test-dir \nbackoffice-purge kept ./backoffice_db, the store holding the users: remove it by hand if you mean to\nbuild started with path test-dir \nsuccessfully rendered template\n"
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 3f021705d81306281f30550baf2430abcc3d5e7bdc2b53cc8e9295532446ee54
+      sha: 33d84dec8898adc7015a0325ff68b6c7ee3be650e9de1aead9c3f76e90028d21
     - file: sandbox/api/config.go
-      sha: 5c8386fc72d0f041ac36527add8894c70489269e671858a20285e7d8fe4c581c
-    - file: sandbox/internal/commands/help/InternalPureHandler.go
-      sha: 4e7d55d8ef29b06b212427d4bcb9ce72a83a553357445259fb09bac9649d0d4f
-    - file: sandbox/internal/commands/help/command.yaml
-      sha: aff4bd54b86585eba4f76f13f1eebdec404d22c3fe0d81b178243af025fc0b87
-    - file: sandbox/internal/commands/help/entries.go
-      sha: 197ccebdadcfd649bf66e5f0332e563a4db05baabc7d494c3f0c1e124dbb5707
-    - file: sandbox/internal/commands/help/new.go
-      sha: 9d0a0034f8715ea412b2170ff99f8d5f5ef30c9fd08c90f3a1fc25734b1cee1e
-    - file: sandbox/internal/commands/help_flag/InternalPureHandler.go
-      sha: 3997ccce64bcbb2a4542e94b21681b8a4a2063d6d8345f488aa0e7462c6e9e9f
-    - file: sandbox/internal/commands/help_flag/command.yaml
-      sha: e29b2c5cc712a98e237141eabe9ff975ac96743abd09eececbd5bad73ddba2e6
-    - file: sandbox/internal/commands/help_flag/entries.go
-      sha: 9168de79566c3b653a3b52a4bbf60ec6b9becc990d3d6b3ab7ae3bfd53a0ba53
-    - file: sandbox/internal/commands/help_flag/new.go
-      sha: 453d2debe975680152ec5973a3b3ed10e22d9a8067fc0f43aa2f7690f45fc4fd
-    - file: sandbox/internal/commands/start_server/InternalPureHandler.go
-      sha: ac3a7477d56b09537965cbc888425e93d570d39622d5494efbeb4c2bb08d315b
-    - file: sandbox/internal/commands/start_server/command.yaml
-      sha: f510b98004dfbf9ce75a4bd66c40a4fd0d5a93126a3884868fb9bbeae2963644
-    - file: sandbox/internal/commands/start_server/entries.go
-      sha: 51390be8027c876695a43fa7108ec8fd050d1032a8e565bb69ce963a16fa9947
-    - file: sandbox/internal/commands/start_server/new.go
-      sha: c61c749b5fb1ab1465986f181fe97b3302fb137e8565c8b22c7a8ff20c2b9cd1
-    - file: sandbox/internal/commands/version/InternalPureHandler.go
-      sha: d73b7d53603b4c7d268be0f7099ee172d52a132d40fee05ea2de63b0c07bc03b
-    - file: sandbox/internal/commands/version/command.yaml
-      sha: 9cea48b7a03dd13f11957f589657feb24cbb6a9275f14d269b8ef3b701566740
-    - file: sandbox/internal/commands/version/entries.go
-      sha: 19392ff9ea44d28426243ebca8915313410880e90b1f1a0a4f4399a62acabb6f
-    - file: sandbox/internal/commands/version/new.go
-      sha: cbf2ca2c0d65be400e5dd4645c2f2369f4750af6128a3feb8f55abd490faecc4
+      sha: fadc7d71721b64243cc68bd60de5f8e036944c395f05d0193474b45de2b0db50
+    - file: sandbox/internal/commands/info/help/command.yaml
+      sha: 9b8324034cd88bd140cc6f35bb16117302c548b28601a5b1e598a4afed2f3206
+    - file: sandbox/internal/commands/info/help/handler.go
+      sha: a8cd392d00ce64bac3038853ebcd6492ab56d3dc557d0b232e4eae1f9936f716
+    - file: sandbox/internal/commands/info/help/input.go
+      sha: cb66f850a4f62cc7be9893c16e00a3d7597a127a9d811ced4128f03f5cd7c983
+    - file: sandbox/internal/commands/info/help/new.go
+      sha: 0a7365732df439caa8e42b797fd870dc2cdb4796d7f62277fc3951f58e103da3
+    - file: sandbox/internal/commands/info/version/command.yaml
+      sha: fb869cf0471a41e752def92267e298b29607af7a975903a259fc23372cd347f8
+    - file: sandbox/internal/commands/info/version/handler.go
+      sha: 28861974ff38e247c46efe6acd32ed79c9ab11ea556529691f7d8890dfd015bc
+    - file: sandbox/internal/commands/info/version/input.go
+      sha: dccf4ac553814f92b94db5a4efc236614dac46f60f0653a05b1a44401d1535a1
+    - file: sandbox/internal/commands/info/version/new.go
+      sha: ebe67688153aabda3b278ed2787daf2b40b3b6529fbae6c45009c8990ff8dbc5
+    - file: sandbox/internal/commands/middleware/help_flag/command.yaml
+      sha: c544a63b225e57366c7d07b346da0586e273ff4a3cb02a43b9f96fd6c1bb4ede
+    - file: sandbox/internal/commands/middleware/help_flag/handler.go
+      sha: a3fe8e61ee344d48a65fd4a4ab8c7c40b884c9f1452ca7c08fdeb0846a848de8
+    - file: sandbox/internal/commands/middleware/help_flag/input.go
+      sha: 60ca5134acdc26b137d405ebae2c59a6b42cbff33f0dc73bfe7c07e738f97a80
+    - file: sandbox/internal/commands/middleware/help_flag/new.go
+      sha: 20af068a7607550f29fcbf5b0d1c0625c9f1502a53d8770169ce3b5e86cbbcbf
+    - file: sandbox/internal/commands/server/start_server/command.yaml
+      sha: fc65fe5d0c3f9c36d4680492089e6952d770bae284b9764bbdad37104618a07d
+    - file: sandbox/internal/commands/server/start_server/handler.go
+      sha: aa8330f9ce2ca884d884d8d581e79e235428adf067d463f42a45df0d53f0d44e
+    - file: sandbox/internal/commands/server/start_server/input.go
+      sha: 8cb490ebcafe7eca48f4b13b4859f27d9d79105e8db5bc202ec0f6ed8013dffe
+    - file: sandbox/internal/commands/server/start_server/new.go
+      sha: 10ba4868041276f3f2875baf28e0168eef608147bd2efa6b788374fa27a53631
     - file: sandbox/internal/routeprops/project.go
       sha: 4b166b0973356e4ce4ca0a7e753d1e1cb028b78e02fb0837bf576f3c176fbccf
     - file: sandbox/internal/routeprops/routeprops.go
-      sha: 8ecd6fd56a102bfe28365d35501a3891a69b9084149df8cbd2d18086db748eb5
-    - file: sandbox/internal/routeslist/frontend/InternalPureHandler.go
-      sha: 0c9fd0a556ec8c51ca6677f5f9a81cda66e90ff65a8fff3d879a34708bc858f2
-    - file: sandbox/internal/routeslist/frontend/entries.go
-      sha: 6c0fbc57755f3199f5bceea7f482ad8780991e213b980b333d47f5085cd87fd5
-    - file: sandbox/internal/routeslist/frontend/new.go
-      sha: 66c993d93a77b1a298e655268e35d7e929a76e9724471ed20560d86e6b923909
-    - file: sandbox/internal/routeslist/frontend/route.yaml
-      sha: 5668920287a070b50cb1b32992664036a8e74f325e1fdc06aefa0075fb08d3f9
-    - file: sandbox/internal/routeslist/health/InternalPureHandler.go
-      sha: 936fe65beb7ce899cc706de76fc0ed296adc933a386c89c5f2cd261c9623c41d
-    - file: sandbox/internal/routeslist/health/entries.go
-      sha: 1c6d58086308bd11283cbc55fb9b897932fb06181eef857e8b3314e87edbbc6b
-    - file: sandbox/internal/routeslist/health/new.go
-      sha: 82307eebc739d78a1cc064393921673660a1be61e8c0523897669c71cee4e5b9
-    - file: sandbox/internal/routeslist/health/route.yaml
-      sha: 00e5c82fd5c872641c57b3df90d8f0ddf3cb843e9731773c61231d1b92d28ec9
+      sha: fcadbe4f5cd93b1cbf2e4d0c072533c7523845b5051ac66a27549df2f2607f31
+    - file: sandbox/internal/routes/front/handler.go
+      sha: 413982a78f6cae3ec4c8ba0bcadf3a8747fb212ddd0a4f4bb30ed15f7e50a63b
+    - file: sandbox/internal/routes/front/input.go
+      sha: bfbb988997584c4a9181432facefe51234edf43a4cf70d89b3159d5d83b4c4e4
+    - file: sandbox/internal/routes/front/new.go
+      sha: 6b4ee978b67bf5a86e187e740a57b5093ff4775eaa3b98f77702e2e6edb59231
+    - file: sandbox/internal/routes/front/route.yaml
+      sha: 8ffd75b2d6b2851f34b5628867b4dc5a22047f555b0f670d4eb2bf168b6561d9
+    - file: sandbox/internal/routes/health/handler.go
+      sha: 6d4c4a70d0c2603fca8927074472f441afe2fef1d56b975299c95c811557135f
+    - file: sandbox/internal/routes/health/input.go
+      sha: a311ad839a2f9a2a89ec777404f785e0d69ec2dd2fb6869c17976385cf6c0c6b
+    - file: sandbox/internal/routes/health/new.go
+      sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
+    - file: sandbox/internal/routes/health/route.yaml
+      sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc

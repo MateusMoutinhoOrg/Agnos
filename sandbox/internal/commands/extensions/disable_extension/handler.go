@@ -6,14 +6,14 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	disable_error := disableExtensionAction.DisableExtension(sandbox, props.Path, entries.Name)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	disable_error := disableExtensionAction.DisableExtension(sandbox, api.DisableExtensionProps{Path: props.Path, Name: input.Name})
 
 	if disable_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", disable_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", disable_error.Error())
 	}
 
-	response.Printf("%s is off; what it wrote is yours now\n", entries.Name)
+	response.Printf("%s is off; what it wrote is yours now\n", input.Name)
 	response.SetStatus(api.ExitOk)
 	return nil
 }

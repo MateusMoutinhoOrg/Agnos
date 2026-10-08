@@ -1,4 +1,4 @@
-description: "Serve http from {{.Name}}: bring the layer up, declare routes, read a body"
+description: "Serve http from {{.ProjectName}}: bring the layer up, declare routes, read a body"
 name: "ServerUsage"
 order: 1
 themes:

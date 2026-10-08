@@ -2,16 +2,16 @@ package triggerconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
 // Render renders one `trigger` object: `values` on a one-of, `value` on every
 // other type.
-func Render(sandbox *api.Sandbox, trigger Trigger) *serializibles.SerializibleObject {
-	entry := sandbox.Deps.Serializables.CreateObject()
+func Render(sandbox *api.Sandbox, trigger Trigger) *serializabledeps.SerializableObject {
+	entry := sandbox.Deps.SerializableDeps.CreateObject()
 	entry.AddItemToObject("type", trigger.Type)
 	if trigger.Type == OneOf {
-		values := sandbox.Deps.Serializables.CreateArray()
+		values := sandbox.Deps.SerializableDeps.CreateArray()
 		for _, value := range trigger.Values {
 			values.AddItemToArray(value)
 		}

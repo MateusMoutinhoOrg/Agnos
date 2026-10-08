@@ -1,16 +1,16 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"regexp"
 	"strconv"
 	"strings"
 
-	opinatedagnosserver "{{.Module}}/sandbox/deps/OpinatedAgnosServer"
+	opinionatedagnosserver "{{.Module}}/sandbox/deps/OpinionatedAgnosServer"
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
 // defaultIsActionable reports whether one bound route — its Request set — is
-// for the request it carries: the method is one of AcceptMethods, every entry
+// for the request it carries: the method is one of Methods, every entry
 // of Paths finds its slice and matches its trigger, and every parameter
 // declaring a trigger brings a value that matches it. A parameter that is
 // merely missing is not a non-match: that is the binder's to answer, with a
@@ -19,7 +19,7 @@ import (
 // It is mirrored by agnos's own sandbox/internal/utils/route_match.go, which
 // reads a route.yaml for `explain-route`: a change to one is a change to the
 // other.
-func (server_run *run) defaultIsActionable(route *opinatedagnosserver.Route) bool {
+func (server_run *run) defaultIsActionable(route *opinionatedagnosserver.Route) bool {
 	request := route.Request
 
 	if !acceptsMethod(route, request.GetMethod()) {
@@ -30,7 +30,7 @@ func (server_run *run) defaultIsActionable(route *opinatedagnosserver.Route) boo
 	}
 
 	for _, parameter := range route.Parameters {
-		if !parameter.Trigger.Exist {
+		if !parameter.Trigger.Set {
 			continue
 		}
 		values := parameterValues(request, parameter)
@@ -46,7 +46,7 @@ func (server_run *run) defaultIsActionable(route *opinatedagnosserver.Route) boo
 // for it, whatever the method: the path has the Segments the route declares,
 // and every entry of Paths finds its slice, converts to its Type and matches
 // its trigger when it declares one.
-func (server_run *run) defaultMatchesPath(route *opinatedagnosserver.Route) bool {
+func (server_run *run) defaultMatchesPath(route *opinionatedagnosserver.Route) bool {
 	segments := splitPath(route.Request.GetPath())
 
 	if route.Segments > 0 && len(segments) != route.Segments {
@@ -61,7 +61,7 @@ func (server_run *run) defaultMatchesPath(route *opinatedagnosserver.Route) bool
 		if _, ok := pathValue(path, text); !ok {
 			return false
 		}
-		if path.Trigger.Exist && !server_run.props.MatchTrigger(path.Trigger, text, true) {
+		if path.Trigger.Set && !server_run.props.MatchTrigger(path.Trigger, text, true) {
 			return false
 		}
 	}
@@ -73,26 +73,26 @@ func (server_run *run) defaultMatchesPath(route *opinatedagnosserver.Route) bool
 const uuidPattern = `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`
 
 // pathValue converts the slice one entry of Paths read to the value its
-// Entries field carries, in its Type: a path of one segment (Start equal to
+// Input field carries, in its Type: a path of one segment (Start equal to
 // End) binds the segment itself — "42", not "/42" — and a range binds the
 // slice as its trigger reads it, leading slash included. It reports false when
 // the slice does not convert — which makes the route a non-match, not a bad
 // request. The matcher and the binder both read a path through it, so what
-// decides the match and what fills Entries never disagree.
-func pathValue(path opinatedagnosserver.Path, text string) (any, bool) {
-	if path.Type == opinatedagnosserver.StringPath && path.Start != path.End {
+// decides the match and what fills Input never disagree.
+func pathValue(path opinionatedagnosserver.Path, text string) (any, bool) {
+	if path.Type == opinionatedagnosserver.PathString && path.Start != path.End {
 		return text, true
 	}
 
 	segment := strings.TrimPrefix(text, "/")
 	switch path.Type {
-	case opinatedagnosserver.IntegerPath:
+	case opinionatedagnosserver.PathInteger:
 		value, err := strconv.Atoi(segment)
 		return value, err == nil
-	case opinatedagnosserver.NumberPath:
+	case opinionatedagnosserver.PathNumber:
 		value, err := strconv.ParseFloat(segment, 64)
 		return value, err == nil
-	case opinatedagnosserver.UuidPath:
+	case opinionatedagnosserver.PathUuid:
 		matched, err := regexp.MatchString(uuidPattern, segment)
 		return segment, err == nil && matched
 	}
@@ -116,7 +116,7 @@ func splitPath(path string) []string {
 // by the segments from Start to End joined by "/", End -1 standing for the
 // last one. It reports false when the request has no such slice — except the
 // whole path of the root, which reads as "/".
-func pathSlice(segments []string, path opinatedagnosserver.Path) (string, bool) {
+func pathSlice(segments []string, path opinionatedagnosserver.Path) (string, bool) {
 	end := path.End
 	if end < 0 {
 		end = len(segments) - 1
@@ -133,12 +133,12 @@ func pathSlice(segments []string, path opinatedagnosserver.Path) (string, bool) 
 }
 
 // parameterValues is the raw values one parameter brings, from the first of
-// its Fonts that carries any: every occurrence of a query key or every
+// its Sources that carries any: every occurrence of a query key or every
 // comma-separated value of a header for an array type, one value otherwise.
-// It is empty when no font carries the parameter.
-func parameterValues(request serverdeps.Request, parameter opinatedagnosserver.Parameter) []string {
-	for _, font := range parameter.Fonts {
-		values := fontValues(request, parameter, font)
+// It is empty when no source carries the parameter.
+func parameterValues(request serverdeps.Request, parameter opinionatedagnosserver.Parameter) []string {
+	for _, source := range parameter.Sources {
+		values := sourceValues(request, parameter, source)
 		if len(values) > 0 {
 			return values
 		}
@@ -146,26 +146,26 @@ func parameterValues(request serverdeps.Request, parameter opinatedagnosserver.P
 	return []string{}
 }
 
-// fontValues is the raw values one font of the request brings for one
+// sourceValues is the raw values one source of the request brings for one
 // parameter, empty ones dropped.
-func fontValues(request serverdeps.Request, parameter opinatedagnosserver.Parameter, font opinatedagnosserver.ParameterFont) []string {
+func sourceValues(request serverdeps.Request, parameter opinionatedagnosserver.Parameter, source opinionatedagnosserver.ParameterSource) []string {
 	raws := []string{}
 
-	switch font {
-	case opinatedagnosserver.HeaderParam:
+	switch source {
+	case opinionatedagnosserver.SourceHeader:
 		raw := request.GetHeader(parameter.Key)
 		if isArrayType(parameter.Type) {
 			raws = strings.Split(raw, ",")
 		} else {
 			raws = []string{raw}
 		}
-	case opinatedagnosserver.QueryParam:
+	case opinionatedagnosserver.SourceQuery:
 		if isArrayType(parameter.Type) {
 			raws = request.GetQueryAll(parameter.Key)
 		} else {
 			raws = []string{request.GetQueryParam(parameter.Key)}
 		}
-	case opinatedagnosserver.CookieParam:
+	case opinionatedagnosserver.SourceCookie:
 		raws = []string{request.GetCookie(parameter.Key)}
 	}
 
@@ -181,14 +181,14 @@ func fontValues(request serverdeps.Request, parameter opinatedagnosserver.Parame
 
 // isArrayType reports a parameter type bound from every value the request
 // brings rather than the first.
-func isArrayType(kind opinatedagnosserver.ParameterType) bool {
-	return kind == opinatedagnosserver.StringArrayType || kind == opinatedagnosserver.IntegerArrayType
+func isArrayType(kind opinionatedagnosserver.ParameterType) bool {
+	return kind == opinionatedagnosserver.ParameterStringArray || kind == opinionatedagnosserver.ParameterIntegerArray
 }
 
 // acceptsMethod reports whether a request method is one of the route's.
-func acceptsMethod(route *opinatedagnosserver.Route, method string) bool {
-	for _, accepted := range route.AcceptMethods {
-		if accepted == method || accepted == opinatedagnosserver.AnyMethod {
+func acceptsMethod(route *opinionatedagnosserver.Route, method string) bool {
+	for _, accepted := range route.Methods {
+		if accepted == method || accepted == opinionatedagnosserver.AnyMethod {
 			return true
 		}
 	}

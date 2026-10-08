@@ -1,10 +1,10 @@
-# `deps.Serverdeps`
+# `deps.ServerDeps`
 
 `sandbox/deps/serverdeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the http-server library injected whole as the Deps.Serverdeps field. A server is bound to one address and one handler, so it is created per call rather than injected once: what the sandbox holds is this one-field struct.
+Contract is the http-server library injected whole as the Deps.ServerDeps field. A server is bound to one address and one handler, so it is created per call rather than injected once: what the sandbox holds is this one-field struct.
 
 | Field | Type | Description |
 | --- | --- | --- |

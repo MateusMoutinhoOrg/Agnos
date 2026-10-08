@@ -2,14 +2,14 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/adapterconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/adapterconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-// AdapterlistGroup is the embedded catalog of installable adapters: one
+// AdapterCatalogGroup is the embedded catalog of installable adapters: one
 // directory per adapter, holding the adapter.yaml that declares it beside the
-// adapters/libs/<adapter>/ tree it installs.
-const AdapterlistGroup = "adapterlist"
+// adapters/impls/<adapter>/ tree it installs.
+const AdapterCatalogGroup = "adapter-catalog"
 
 // AdapterConfFile is the declaration of one adapter. It sits at the root of
 // the catalog directory, and install writes it into the installed package —
@@ -18,7 +18,7 @@ const AdapterConfFile = "adapter.yaml"
 
 // AdaptersDir holds one adapter package per implementation, the open side of
 // the pair a contract declares.
-const AdaptersDir = "adapters/libs"
+const AdaptersDir = "adapters/impls"
 
 // AdapterDir is the project-relative directory of one installed adapter.
 func AdapterDir(adapter string) string {
@@ -31,13 +31,13 @@ func AdapterConfPath(adapter string) string {
 	return AdapterDir(adapter) + "/" + AdapterConfFile
 }
 
-// LoadCatalogAdapterConf reads assets/adapterlist/<adapter>/adapter.yaml out of
+// LoadCatalogAdapterConf reads assets/adapter-catalog/<adapter>/adapter.yaml out of
 // the embedded catalog. An adapter with no declaration is not an adapter, so
 // the error is the one callers report for an unknown name.
 func LoadCatalogAdapterConf(sandbox *api.Sandbox, adapter string) (*adapterconf.AdapterConf, error) {
-	content, err := sandbox.Deps.Embeddeps.ReadFile(AdapterlistGroup + "/" + adapter + "/" + AdapterConfFile)
+	content, err := sandbox.Deps.EmbedDeps.ReadFile(AdapterCatalogGroup + "/" + adapter + "/" + AdapterConfFile)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("unknown adapter %q", adapter)
+		return nil, sandbox.Deps.StdDeps.Errorf("unknown adapter %q", adapter)
 	}
 
 	return adapterconf.New(sandbox, string(content))
@@ -45,12 +45,12 @@ func LoadCatalogAdapterConf(sandbox *api.Sandbox, adapter string) (*adapterconf.
 
 // LoadAdapterConf reads the declaration of one adapter already installed in
 // the target project, through the transaction-aware io.
-func LoadAdapterConf(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) (*adapterconf.AdapterConf, error) {
+func LoadAdapterConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, adapter string) (*adapterconf.AdapterConf, error) {
 	rel := AdapterConfPath(adapter)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read %s: %w", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read %s: %w", rel, err)
 	}
 
 	return adapterconf.New(sandbox, string(content))
@@ -59,12 +59,12 @@ func LoadAdapterConf(sandbox *api.Sandbox, io *smartio.SmartIO, adapter string) 
 // CatalogAdapters returns the name of every adapter in the embedded catalog,
 // in listing order.
 func CatalogAdapters(sandbox *api.Sandbox) ([]string, error) {
-	return catalogEntries(sandbox, AdapterlistGroup)
+	return catalogEntries(sandbox, AdapterCatalogGroup)
 }
 
 // InstalledAdapters returns the name of every adapter installed in the target
-// project, one per adapters/libs sub-directory, in listing order.
-func InstalledAdapters(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+// project, one per adapters/impls sub-directory, in listing order.
+func InstalledAdapters(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var adapters []string
 
 	if !io.IsDir(AdaptersDir) {
@@ -72,7 +72,7 @@ func InstalledAdapters(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	}
 
 	for _, dir := range io.ListDirs(AdaptersDir) {
-		parts := sandbox.Deps.Stringsdeps.Split(dir, "/")
+		parts := sandbox.Deps.StringsDeps.Split(dir, "/")
 		name := parts[len(parts)-1]
 		if name == "" {
 			continue
@@ -85,8 +85,8 @@ func InstalledAdapters(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 // AdaptersFillingDep returns the name of every installed adapter whose
 // declaration names dep, in listing order. It is the question `remove-dep`
-// asks before refusing, and the one an available resolves a field with.
-func AdaptersFillingDep(sandbox *api.Sandbox, io *smartio.SmartIO, dep string) []string {
+// asks before refusing, and the one a binding resolves a field with.
+func AdaptersFillingDep(sandbox *api.Sandbox, io *stagedfs.StagedFS, dep string) []string {
 	var adapters []string
 
 	for _, adapter := range InstalledAdapters(sandbox, io) {

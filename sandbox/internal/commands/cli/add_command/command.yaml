@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,14 +10,15 @@ args:
       id: Name
       required: true
       start: 1
-category: Cli System
+category: Cli
+description: Creates <name>/ under the folder of its --category in sandbox/internal/commands — commands/core/<name> for Core — or under the folder --dir names there, with a hand-written command.yaml and a stub handler.go, then runs build so new.go, input.go and the dispatch pick it up. A directory is a command by holding a command.yaml, at any depth; a name is unique across every folder. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses a name another command already carries.
 examples:
-    - add-command my-feature --help 'Do the feature'
-    - add-command route-add --pattern 'route add {name}' --help 'Add a route'
-    - add-command profile --middleware --help 'Read --profile in front of every command'
+    - add-command my-feature --summary 'Do the feature'
+    - add-command route-add --pattern 'route add {name}' --summary 'Add a route'
+    - add-command profile --middleware --summary 'Read --profile in front of every command'
 flags:
     - description: one-line help text for the new command
-      id: Help
+      id: Summary
       required: true
     - description: the heading the command is listed under in help and docs/Commands (defaults to Commands, or Middleware for a --middleware)
       id: Category
@@ -44,8 +45,7 @@ flags:
       id: Before
     - description: land one rung above the command named, so it runs next (excludes --priority)
       id: After
-    - description: the folder under sandbox/internal/commands the command lands in, e.g. admin puts it in commands/admin/<name> (defaults to the top); a directory holding a command.yaml is a command, whatever folder holds it
+    - description: the folder under sandbox/internal/commands the command lands in, e.g. admin puts it in commands/admin/<name> (defaults to the folder of its category, commands/core/<name> for Core); a directory holding a command.yaml is a command, whatever folder holds it
       id: Dir
-help: Scaffold a new command package in the project
-long-description: Creates <name>/ under sandbox/internal/commands — or under the folder --dir names there, e.g. commands/admin/<name> — with a hand-written command.yaml and a stub InternalPureHandler.go, then runs build so new.go, entries.go and the dispatch pick it up. A directory is a command by holding a command.yaml, at any depth; a name is unique across every folder. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses a name another command already carries.
 priority: 100
+summary: Scaffold a new command package in the project

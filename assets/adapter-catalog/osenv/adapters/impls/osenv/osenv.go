@@ -1,4 +1,4 @@
-package envdeps
+package osenv
 
 import (
 	"os"
@@ -8,9 +8,9 @@ import (
 	"{{.Module}}/sandbox/deps"
 )
 
-// Bind fills deps.Deps.Envdeps with the standard library's os.
+// Bind fills deps.Deps.EnvDeps with the standard library's os.
 func Bind(deps *deps.Deps) {
-	deps.Envdeps = envdeps.Sandbox{
+	deps.EnvDeps = envdeps.Contract{
 		Getenv: func(key string) string {
 			return os.Getenv(key)
 		},

@@ -1,13 +1,13 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: server-purge
-category: Server System
+category: Server
+description: Drops sandbox/internal/{server,routes} and the start-server command, then re-renders. The cli layer and the installed deps — the OpinionatedAgnosServer lib among them — are left in place.
 examples:
     - server-purge
-help: Remove the http server layer and every route in it
-long-description: Drops sandbox/internal/{server,routeslist} and the start-server command, then re-renders. The cli layer and the installed deps — the OpinatedAgnosServer lib among them — are left in place.
 priority: 100
+summary: Remove the http server layer and every route in it

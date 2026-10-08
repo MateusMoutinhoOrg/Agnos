@@ -3,13 +3,13 @@ package remove_adapter
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-func RemoveAdapter(sandbox *api.Sandbox, path string, adapter string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := RemoveAdapterInternal(sandbox, io, path, adapter); err != nil {
+func RemoveAdapter(sandbox *api.Sandbox, props api.RemoveAdapterProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := RemoveAdapterInternal(sandbox, io, props.Path, props.Adapter); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

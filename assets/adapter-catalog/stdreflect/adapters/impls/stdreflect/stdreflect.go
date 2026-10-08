@@ -1,4 +1,4 @@
-package reflectdeps
+package stdreflect
 
 import (
 	"errors"
@@ -8,9 +8,9 @@ import (
 	reflectdeps "{{.Module}}/sandbox/deps/reflectdeps"
 )
 
-// Bind fills deps.Deps.Reflectdeps with the standard library's reflect.
+// Bind fills deps.Deps.ReflectDeps with the standard library's reflect.
 func Bind(deps *deps.Deps) {
-	deps.Reflectdeps = reflectdeps.Sandbox{
+	deps.ReflectDeps = reflectdeps.Contract{
 		NumIn:     numIn,
 		NewIn:     newIn,
 		Call:      call,

@@ -6,62 +6,62 @@
 
 1. Read `go.mod`, `AgnosConfig/project.yaml` and `AgnosConfig/extensions.yaml` (hard error if either is missing). Fill any catalog key the declaration lacks with its default and write it back. `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasDatabase`, `HasExample`, `HasDoc` and `HasReadme` are read straight off those keys — nothing is inferred from a directory. `HasAssets` is the one exception and stays a probe (`assets/sandbox/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
 2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the enabled groups themselves write — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions), which `HasDoc` gates.
-3. If `HasCli`: write `help/entries.yaml` if missing, then `CollectCommands`, then one `new.go` per command.
-4. Collectors, then the per-unit generators (`GenerateAvailableNews`, `GenerateCommandNew`, `GenerateRouteNew`, `GenerateDatabaseNew`, each behind its own key), then `utils.RenderGroup` over `utils.RenderableGroups(extensions)` — see [Asset groups](#asset-groups).
+3. If `HasCli`: write `info/help/command.yaml` if missing, then `CollectCommands`, then one `new.go` and `input.go` per command.
+4. Collectors, then the per-unit generators (`GenerateBindingNewFiles`, `GenerateCommandNew`, `GenerateRouteNew`, `GenerateDatabaseNew`, each behind its own key), then `utils.RenderGroup` over `utils.RenderableGroups(extensions)` — see [Asset groups](#asset-groups).
 
 | Collector | Lists | Var | Feeds |
 |---|---|---|---|
-| `CollectConstructors` | `sandbox/api/*` minus `utils.ConstructorExempt` and every `<x>sandbox.go` / `<x>config.go` | `Constructors` (`Name`, `Package`, `HasNew`) | `sandbox/constructors/`, `sandbox/new.go` |
+| `CollectConstructors` | `sandbox/api/*` minus `utils.ConstructorExempt` and every `<x>sandbox.go` / `<x>config.go` | `Constructors` (`Name`, `Package`, `HasNew`; `constructor.go` reads them as `ContractName`, `Package`) | `sandbox/constructors/`, `sandbox/new.go` |
 | `CollectEmbeddedStructs` | `sandbox/api/<x>sandbox.go`, `<x>config.go` — after `GenerateApiParts` renders the enabled groups' parts, so a first build sees them | `SandboxStructs`, `ConfigStructs` | `sandbox/api/{sandbox,config}.go` |
-| `CollectDepsLibs` | `sandbox/deps/<x>/` | `DepsLibs` (`Title`, `Name`) | `sandbox/deps/deps.go` |
-| `CollectAdapterLibs` | `adapters/libs/<x>/` | `AdapterLibs` (`Name`) | `docs/LibUsage/doc.md` |
-| `CollectAvailables` | `adapters/availables/<x>/available.yaml` | `Availables` (`Name`, `Adapters`) | `GenerateAvailableNews` -> `adapters/availables/<x>/new.go` |
-| `CollectCommands` | `commands/<x>/entries.yaml` | `Commands` (the declaration itself: identifiers, category, help, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `internal/generated/cli/cli/new.go` |
-| `CollectDocs` | `docs/**/props.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
-| `CollectGeneratedDocs` | `assets/doc*/docs/*/props.yaml` over `utils.DocGroups(extensions)`, rendered | merged into the doc tree | same |
+| `CollectDepLibs` | `sandbox/deps/<x>/` | `DepLibs` (`Name`, `Title` — the `Deps` field — and `Type`, `Contract` or a remote dep's `Sandbox`) | `sandbox/deps/deps.go` |
+| `CollectAdapterImpls` | `adapters/impls/<x>/` | `AdapterImpls` (`Name`) | `docs/LibUsage/doc.md` |
+| `CollectBindings` | `adapters/bindings/<x>/binding.yaml` | `Bindings` (`BindingName`, `Adapters`) | `GenerateBindingNewFiles` -> `adapters/bindings/<x>/new.go` |
+| `CollectCommands` | `commands/<category>/<x>/command.yaml` | `Commands` (the declaration itself: `CommandName`, identifiers, category, summary, `Flags`/`Args` with ids, types, defaults, bounds) | `new.go`, `internal/generated/cli/new.go` |
+| `CollectDocs` | `docs/**/doc.yaml` | doc tree sorted by `order` then name | `**/Index.md`, `DocIndex` |
+| `CollectGeneratedDocs` | `assets/doc*/docs/*/doc.yaml` over `utils.DocGroups(extensions)`, rendered | merged into the doc tree | same |
 | `CollectDocIndex` | the merged tree grouped by theme | `DocIndex` (per theme: `Name`, `Description`, `Docs`) | `README.md`. A theme no doc names renders no section |
-| `CollectPublicApi` | `sandbox/api/*.go` parsed by `deps.Goimportsdeps` | `PublicApi` (per file: `Path`, `Doc`, `Types`, `Constants`, `Variables`, `Functions`; exported only, doc comments flattened to one table line) | `docs/PublicApi/doc.md` |
-| `CollectDepsApi` | `sandbox/deps/<x>/*.go`, same parse | `DepsApi` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |
-| `CollectRoutes` | `routeslist/<x>/route.yaml` | `Routes` (the declaration itself: `Methods`, `ResponseType`, `Paths`, `Parameters`, `Body`, `SchemaJson`, `BodyStructs`), **ordered to run**: `Priority`, then name | `route_new.go`, `route_entries.go`, `internal/generated/server/server/new.go` |
-| `CollectRouteDocs` | `routeslist/<x>/route.yaml` (visible ones), grouped by category in first-seen order, each crossed with the routes in front of it | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Help`, `LongDescription`, `Address`/`Parameters` as table rows, `Body` with its schema rows and a json sample, `Requests` as generated `curl` calls, `Examples`, `Statuses`, `Middlewares`) — plain words, for whoever calls the server | `docs/Routes/doc.md`, `GenerateRoutePages` |
-| `CollectCommandDocs` | `commands/<x>/entries.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Help`, `LongDescription`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
-| `CollectDatabases` | `databases/<x>/specs.yaml` | `Databases` (per database: `Package`, `Type`, `Prefix`, `Tables` as `database.Item` literals, `Records` as the Go structs, `Methods` with `Kind`, `Params`, `Results`, `Args`) | `GenerateDatabaseNew` -> `databases/<x>/{api.go,new.go,methods.go}` |
-| `CollectDatabaseDocs` | `databases/<x>/specs.yaml` | `DatabaseDocs` (per database: `Tables` with their fields as table rows, `Methods` with the whole signature) | `docs/Databases/doc.md`, `GenerateDatabasePages` |
+| `CollectPublicApi` | `sandbox/api/*.go` parsed by `deps.GoimportsDeps` | `PublicApi` (per file: `Path`, `Doc`, `Types`, `Constants`, `Variables`, `Functions`; exported only, doc comments flattened to one table line) | `docs/PublicApi/doc.md` |
+| `CollectDepContracts` | `sandbox/deps/<x>/*.go`, same parse | `DepContracts` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |
+| `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (the declaration itself: `RouteName`, `Methods`, `ResponseType`, `Paths`, `Parameters`, `Body`, `SchemaJson`, `BodyStructs`), **ordered to run**: `Priority`, then name | `route_new.go`, `route_input.go`, `internal/generated/server/new.go` |
+| `CollectRouteDocs` | `routes/<x>/route.yaml` (visible ones), grouped by category in first-seen order, each crossed with the routes in front of it | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Summary`, `Description`, `Address`/`Parameters` as table rows, `Body` with its schema rows and a json sample, `Requests` as generated `curl` calls, `Examples`, `Statuses`, `Middlewares`) — plain words, for whoever calls the server | `docs/Routes/doc.md`, `GenerateRoutePages` |
+| `CollectCommandDocs` | `commands/<category>/<x>/command.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Summary`, `Description`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
+| `CollectDatabases` | `databases/<x>/database.yaml` | `Databases` (per database: `DatabaseName`, `Package`, `Type`, `KeyPrefix`, `Tables` as `databasedeps.Item` literals, `Records` as the Go structs, `Methods` with `Kind`, `Params`, `Results`, `Args`) | `GenerateDatabaseNew` -> `databases/<x>/{api.go,new.go,methods.go}` |
+| `CollectDatabaseDocs` | `databases/<x>/database.yaml` | `DatabaseDocs` (per database: `Tables` with their fields as table rows, `Methods` with the whole signature) | `docs/Databases/doc.md`, `GenerateDatabasePages` |
 | `CollectStructure` | `AgnosConfig/structure.yaml` (structureconf) | `Structure` (one `Line` per item, depth-indented and padded to a common description column) | `docs/Structure/doc.md` |
 
-Every render whose destination ends in `.go` is passed through `deps.Goimportsdeps.Format` (`go/format`, i.e. `gofmt`) before it is written, so generated Go is byte-identical to what a formatting editor saves and a regenerated tree diffs to zero. An unparsable render is written unformatted and reported by the runtime compile, not by the renderer.
+Every render whose destination ends in `.go` is passed through `deps.GoimportsDeps.Format` (`go/format`, i.e. `gofmt`) before it is written, so generated Go is byte-identical to what a formatting editor saves and a regenerated tree diffs to zero. An unparsable render is written unformatted and reported by the runtime compile, not by the renderer.
 
-Template vars: `Module`, `Name` (the project being generated), `GeneratorName` (the cli running the build — `agnos`; every command agnos owns is spelled with it, never with `Name`), `Version`, `ProjectName`, `ConfigDir`, `StructureConfFile`, `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasDatabase`, `HasExample`, `HasDoc`, `HasReadme`, `HasAssets`, `Themes`, plus the collector outputs. The two parsing collectors read the sources as they are on disk at collect time, so a doc comment added to a *generated* contract file shows up on the next build. Native template funcs: `render "<path>"` (read a project file through the transaction, render it with the same vars, nestable) and `copy "<path>"` (verbatim). Missing target = hard error. `README.md` = `render ConfigDir/docs/ReadmeHeader.md` + the `DocIndex` sections + a link to `LICENSE`. It is the single entry point to the docs: there is no index file between it and a doc.
+Template vars: `Module`, `ProjectName` (the project being generated, as `project-name` of `project.yaml` spells it), `GeneratorName` (the cli running the build — `agnos`; every command agnos owns is spelled with it, never with `ProjectName`), `Version`, `GeneratorVersion`, `ConfigDir`, `StructureConfFile`, `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasDatabase`, `HasExample`, `HasDoc`, `HasReadme`, `HasAssets`, `Themes`, plus the collector outputs. The two parsing collectors read the sources as they are on disk at collect time, so a doc comment added to a *generated* contract file shows up on the next build. Native template funcs: `render "<path>"` (read a project file through the transaction, render it with the same vars, nestable) and `copy "<path>"` (verbatim). Missing target = hard error. `README.md` = `render ConfigDir/docs/ReadmeHeader.md` + the `DocIndex` sections + a link to `LICENSE`. It is the single entry point to the docs: there is no index file between it and a doc.
 
 ## Asset groups
 
 `assets/<group>/` is one group; the group's name is the condition under which `build` renders
 it, and `utils.AssetGroups()` is the whole list. A group named after an extension renders when
-that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `sandbox-<a>`,
-`sandbox-<b>` it names are on. `assets/start/` is outside this: it is written once, by `start`.
+that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `<a>`,
+`<b>` it names are on. `assets/start/` is outside this: it is written once, by `start`.
 
 | Group | Renders when | Holds |
 |---|---|---|
 | `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go` (embedding every struct of `api/<x>sandbox.go` / `api/<x>config.go`; native: `Deps`, `Config`), `internal/generated/config/new.go` |
-| `sandbox-deps` | `sandbox-deps` | `sandbox/deps/deps.go` |
-| `sandbox-cli` | `sandbox-cli` | `cmd/main`, `api/{cli,command,trigger,clisandbox}.go` (aliases of `OpinatedAgnosCli`), `internal/generated/cli/cli/new.go` (the registry), `help`, `version` |
-| `sandbox-server` | `sandbox-server` | `api/{server,route,serversandbox}.go` (aliases of `OpinatedAgnosServer`), `internal/generated/server/server/new.go` (the registry), the health route |
-| `doc` | `doc` | `docs/{Adapters,DepList,EntriesYaml,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
-| `doc-cli` | `doc` + `sandbox-cli` | `docs/{CliInstall,Commands}` |
-| `doc-server` | `doc` + `sandbox-server` | `docs/{RouteYaml,Routes,ServerUsage}` |
-| `doc-front` | `doc` + `sandbox-front` | `docs/FrontUsage` |
-| `doc-database` | `doc` + `sandbox-database` | `docs/Databases` |
-| `doc-backoffice` | `doc` + `sandbox-backoffice` | `docs/Backoffice`. The backoffice has no code group: `backoffice-init` writes `assets/templates/backoffice/**` once |
-| `doc-example` | `doc` + `sandbox-example` | `docs/LibExamples` |
-| `doc-example-cli` | `doc` + `sandbox-example` + `sandbox-cli` | `docs/CliExamples` |
+| `deps` | `deps` | `sandbox/deps/deps.go` |
+| `cli` | `cli` | `cmd/main`, `api/{cli,command,trigger,clisandbox}.go` (aliases of `OpinionatedAgnosCli`), `internal/generated/cli/new.go` (the registry), `info/help`, `info/version`, `middleware/help_flag` |
+| `server` | `server` | `api/{server,route,serversandbox}.go` (aliases of `OpinionatedAgnosServer`), `internal/generated/server/new.go` (the registry), the health route |
+| `doc` | `doc` | `docs/{Adapters,DepList,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
+| `doc-cli` | `doc` + `cli` | `docs/{CliInstall,Commands}` |
+| `doc-server` | `doc` + `server` | `docs/{RouteYaml,Routes,ServerUsage}` |
+| `doc-front` | `doc` + `front` | `docs/FrontUsage` |
+| `doc-database` | `doc` + `database` | `docs/Databases` |
+| `doc-backoffice` | `doc` + `backoffice` | `docs/Backoffice`. The backoffice has no code group: `backoffice-init` writes `assets/templates/backoffice/**` once |
+| `doc-example` | `doc` + `example` | `docs/LibExamples` |
+| `doc-example-cli` | `doc` + `example` + `cli` | `docs/CliExamples` |
 | `readme` | `readme` | `README.md` |
 
-`sandbox-front` and `sandbox-database` have no code group: their code is the `OpinatedAgnosFront`
-and `OpinatedAgnosDatabase` libs their `-init` installs, so they render their pages alone.
+`front` and `database` have no code group: their code is the `OpinionatedAgnosFront`
+and `OpinionatedAgnosDatabase` libs their `-init` installs, so they render their pages alone.
 
 The code every project shares — the dispatch, the binders, the matchers, json-schema, the file
-layer, the database readers — is not rendered at all: it is the four `OpinatedAgnos<X>` catalog
-deps (`assets/{deplist,adapterlist}/OpinatedAgnos<X>/`), installed by each mechanic's `-init`.
+layer, the database readers — is not rendered at all: it is the four `OpinionatedAgnos<X>` catalog
+deps (`assets/{dep-catalog,adapter-catalog}/OpinionatedAgnos<X>/`), installed by each mechanic's `-init`.
 What the build still renders under `internal/generated/` is what changes per project: the
 registries and config. `utils.RemoveRetiredGenerated` drops what an older build generated there,
 for every mechanic that is on.
@@ -71,20 +71,20 @@ off disk, so `utils.SetExtension` renders it once into the transaction that turn
 on. Without that pass the build that follows would collect `sandbox/api/` as it was before the
 mechanic existed and write a `sandbox.go` missing the field `cmd/main/main.go` already uses.
 
-## SmartIO
+## StagedFS
 
-`smartio.New(deps, path, projectName)`: `Root` = `--path` (normalized; `""`/`.`/`./` = no prefix). Every path an action passes is project-relative; `Root` is joined only at the `deps.Iodeps` boundary, so nothing escapes `--path`. Loads `paths.yaml` to rewrite the paths it is handed.
+`stagedfs.New(sandbox, path, projectName)`: `Root` = `--path` (normalized; `""`/`.`/`./` = no prefix). Every path an action passes is project-relative; `Root` is joined only at the `deps.IoDeps` boundary, so nothing escapes `--path`. Loads `paths.yaml` to rewrite the paths it is handed.
 
 | Call | Effect |
 |---|---|
-| `WriteFile` | Buffers; refuses to overwrite (disk or pending) |
-| `WriteFileOverwrite` | Buffers, replaces. Every generated file uses it |
+| `CreateFile` | Buffers; refuses to overwrite (disk or pending) |
+| `WriteFile` | Buffers, replaces. Every generated file uses it |
 | `CreateDir`, `RemoveDir` | Pending sets (`RemoveDir` takes files too) |
-| `ReadFile`, `Exist`, `IsFile`, `IsDir` | Transaction-aware |
+| `ReadFile`, `Exists`, `IsFile`, `IsDir` | Transaction-aware |
 | `List*` | **Disk only** (with ignore/paths applied) |
 | `Persist` | Removals, then dir creations, then file writes |
 
-Because listings read disk, an action that runs `build` as a follow-up must `Persist` first. Actions compose by sharing one open `*SmartIO` through their `*Internal` function.
+Because listings read disk, an action that runs `build` as a follow-up must `Persist` first. Actions compose by sharing one open `*StagedFS` through their `*Internal` function.
 
 ## Runtime
 
@@ -92,14 +92,14 @@ After `Persist`, `RunRuntime(deps, path, runtime)`: `go` = `go mod tidy` (writes
 
 ## Deps install
 
-`add-dep <name>`: read `deplist/<dep>/dep.yaml` in embedded assets (missing = unknown dep), pick `--adapter` or its `default-adapter`, read `adapterlist/<adapter>/adapter.yaml` (its `dep:` must match), `RenderGroupExcept` both catalogs minus their own declaration, write the adapter's declaration to `adapters/libs/<adapter>/adapter.yaml`, add the `require` its `module:` pins, enroll the adapter in every available, persist, then `build`. `remove-dep` is the inverse: every adapter whose declaration names the dep, then the contract.
+`add-dep <name>`: read `dep-catalog/<dep>/dep.yaml` in embedded assets (missing = unknown dep), pick `--adapter` or its `default-adapter`, read `adapter-catalog/<adapter>/adapter.yaml` (its `dep:` must match), `RenderGroupExcept` both catalogs minus their own declaration, write the adapter's declaration to `adapters/impls/<adapter>/adapter.yaml`, add the `require` its `module:` pins, enroll the adapter in every binding, persist, then `build`. `remove-dep` is the inverse: every adapter whose declaration names the dep, then the contract.
 
-`add-dep <module>` (an argument holding a `/`): resolve the module through `go list -m -json` and, failing that, `go mod download -json` (`RemoteModule`); parse `<dir>/sandbox/api/*.go` into an `apishape.Api`; reject it with `apishape.Violations`; copy each file to `sandbox/deps/<name>/` with only the package clause rewritten, then `Format`; plan the converters with `apishape.Converters` and render `templates/remote_shim.go` to `adapters/libs/<name>/<name>.go`; write its `adapter.yaml` with `origin: generated`; `AddRequire`; enroll; `build`. `set-dep <name> --version` reads the module back out of that `adapter.yaml` and runs the same path again.
+`add-dep <module>` (an argument holding a `/`): resolve the module through `go list -m -json` and, failing that, `go mod download -json` (`RemoteModule`); parse `<dir>/sandbox/api/*.go` into an `apishape.Api`; reject it with `apishape.Violations`; copy each file to `sandbox/deps/<name>/` with only the package clause rewritten, then `Format`; plan the converters with `apishape.Converters` and render `templates/remote_shim.go` to `adapters/impls/<name>/<name>.go`; write its `adapter.yaml` with `origin: generated`; `AddRequire`; enroll; `build`. `set-dep <name> --version` reads the module back out of that `adapter.yaml` and runs the same path again.
 
-## Dispatch (`OpinatedAgnosCli.CliMain`)
+## Dispatch (`OpinionatedAgnosCli.Main`)
 
-`Cli.CliMain(args)` — filled by the generated registry `internal/generated/cli/cli/new.go` — hands `MainProps{Cli: &sandbox.Cli, Args, NewProps, Std: &sandbox.Deps.Std, Argvdeps}` to the lib's `CliMain`. It runs every `api.Command` of `Cli.Commands` in run order, each on a copy made by `BindCommand`: `IsActionable` (segments, arg and flag triggers), then the binder — args off the segments, flags through `Argvdeps`, defaults, conversion and bounds, `Entries` filled by its `id` tags by reflection — then the command's `InternalPureHandler`. The first command that answers (a status, or a `Printf`) ends the chain; a strict one that answers nothing exits `0`; a middleware that answers nothing hands the line on. Every unanswered ending — no command, a value that will not bind, an unconsumed token, a returned failure, a panic — is raised through `Cli.Fail` to one of the project's `handle_*.go`. Nothing in the lib is generated per command — the registry is where the set is spelled, out of each package's `NewCommand`. The server's `OpinatedAgnosServer.ServerMain` is the same chain over `Server.Routes`.
+`Cli.Main(args)` — filled by the generated registry `internal/generated/cli/new.go` — hands `MainProps{Cli: &sandbox.Cli, Args, NewProps, StdDeps: &sandbox.Deps.StdDeps, ArgvDeps}` to the lib's `Main`. It runs every `api.Command` of `Cli.Commands` in run order, each on a copy made by `BindCommand`: `Matches` (segments, arg and flag triggers), then the binder — args off the segments, flags through `ArgvDeps`, defaults, conversion and bounds, `Input` filled by its `id` tags by reflection — then the command's `Handle`. The first command that answers (a status, or a `Printf`) ends the chain; a strict one that answers nothing exits `0`; a middleware that answers nothing hands the line on. Every unanswered ending — no command, a value that will not bind, an unconsumed token, a returned failure, a panic — is raised through `Cli.Fail` to one of the project's `handle_*.go`. Nothing in the lib is generated per command — the registry is where the set is spelled, out of each package's `NewCommand`. The server's `OpinionatedAgnosServer.Main` is the same chain over `Server.Routes`.
 
 ## Self-hosting
 
-Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/generated/cli/cli/new.go`, every command's `new.go` and `help`, and runs on its own `OpinatedAgnosCli` (installed from the catalog, so `check_deplist`/`check_adapterlist` hold the catalog to the copy it runs on). It turns `sandbox-database` on nowhere: agnos declares no database of its own, so the mechanic is exercised by `examples/{cli,lib}/database` rather than by this tree. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).
+Agnos regenerates its own `deps.go`, `standard/new.go`, `new.go`, `sandbox.go`, `command.go`, `internal/generated/cli/new.go`, every command's `new.go` and `input.go`, `info/help`, and runs on its own `OpinionatedAgnosCli` (installed from the catalog, so `check_dep_catalog`/`check_adapter_catalog` hold the catalog to the copy it runs on). It turns `database` on nowhere: agnos declares no database of its own, so the mechanic is exercised by `examples/{cli,lib}/database` rather than by this tree. `build` must stay idempotent and compilable over this tree. See [Contributing](../Contributing/doc.md#bootstrap).

@@ -6,15 +6,15 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	remove_error := removeDepAction.RemoveDep(sandbox, api.RemoveDepProps{
 		Path:         props.Path,
-		Dep:          entries.Dep,
-		WithAdapters: entries.WithAdapters,
+		Dep:          input.Name,
+		WithAdapters: input.WithAdapters,
 	})
 
 	if remove_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", remove_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", remove_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

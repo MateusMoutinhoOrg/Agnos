@@ -1,10 +1,10 @@
 package api
 
-// UserConfig is the part of the Config the project declares itself: api.Config
+// ProjectConfig is the part of the Config the project declares itself: api.Config
 // embeds it, so every field typed here is read as sandbox.Config.<Field>,
 // beside the ProjectName and Version the build renders from project.yaml:
 //
-//	type UserConfig struct {
+//	type ProjectConfig struct {
 //		Port int
 //	}
 //
@@ -14,5 +14,5 @@ package api
 //
 // Written once by `agnos start` and then yours: no build rewrites
 // this file.
-type UserConfig struct {
+type ProjectConfig struct {
 }

@@ -26,12 +26,12 @@ agnos set-arg <Name> --command <command> [--rename <rename>] [--start <start>] [
 | `--description` | string |  | the one-line help text | — |
 | `--clear` | string-array |  | a key to take off: trigger, trigger-negate, trigger-ignore-case, type, required, default or description (repeatable) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
-Cli System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Cli · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

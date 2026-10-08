@@ -12,13 +12,13 @@ Runs build over the project and then cross-compiles its ./cmd/main entrypoint on
 | --- | --- | --- | --- | --- |
 | `--target`, `-t` | string-array, required |  | a target to cross-compile (repeatable); one of linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, or all | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos compile --target linux86
@@ -26,4 +26,4 @@ agnos compile --target linux86 --target macarm64
 agnos compile --target all
 ```
 
-Core Commands · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Core · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

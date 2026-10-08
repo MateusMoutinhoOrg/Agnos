@@ -464,7 +464,7 @@
         <h1>API tokens</h1>
         <p class="muted">{{if .ShowOwner}}Every token of every backoffice user. A token acts as its user on /api/admin, with that user's role.{{else}}Tokens that act as you on /api/admin, with your role.{{end}}</p>
       </div>
-      <a class="btn btn-primary" href="/admin/create-backoffice-api-token">+ New token</a>
+      <a class="btn btn-primary" href="/admin/add-backoffice-api-token">+ New token</a>
     </section>
 
     {{if .Notice.Text}}<div class="notice notice-{{.Notice.Kind}}" role="status">{{html .Notice.Text}}</div>{{end}}
@@ -521,6 +521,6 @@
       {{end}}
     </div>
   </main>
-  <script src="/admin/backoffice.js" defer></script>
+  <script src="/backoffice/backoffice.js" defer></script>
 </body>
 </html>

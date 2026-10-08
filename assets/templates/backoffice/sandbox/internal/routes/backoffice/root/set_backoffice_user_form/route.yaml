@@ -19,8 +19,7 @@ body:
     required: true
     type: form
 category: Backoffice Users
-help: Edits a backoffice user; a blank password keeps the current one
-long-description: A new password ends every session of the user and revokes every API token of theirs; when a root changes their own password, the session they sent it from stays open.
+description: A new password ends every session of the user and revokes every API token of theirs; when a root changes their own password, the session they sent it from stays open.
 methods:
     - POST
 paths:
@@ -29,7 +28,7 @@ paths:
       start: 0
       trigger:
         type: equal
-        value: /admin/root/edit-backoffice-user
+        value: /admin/root/set-backoffice-user
     - end: 3
       id: Id
       start: 3
@@ -37,3 +36,4 @@ paths:
 priority: 100
 response-type: text/html
 segments: 4
+summary: Edits a backoffice user; a blank password keeps the current one

@@ -1,4 +1,4 @@
-default-adapter: passworddeps
-field: Passworddeps
+default-adapter: pbkdf2password
+field: PasswordDeps
 help: Salted, slow password hashes and their constant-time check
 name: passworddeps

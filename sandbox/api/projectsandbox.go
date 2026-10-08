@@ -1,11 +1,11 @@
 package api
 
-// UserSandbox is the part of the Sandbox the project declares itself:
+// ProjectSandbox is the part of the Sandbox the project declares itself:
 // api.Sandbox embeds it, so every field typed here is a field of the Sandbox,
 // reached as sandbox.<Field> by every function handed it, like any contract
 // the build lists:
 //
-//	type UserSandbox struct {
+//	type ProjectSandbox struct {
 //		Greeting string
 //	}
 //
@@ -16,7 +16,7 @@ package api
 //
 // Written once by `agnos start` and then yours: no build rewrites
 // this file.
-type UserSandbox struct {
+type ProjectSandbox struct {
 	// Actions is every action agnos runs — the work behind each command,
 	// built by the Constructor of sandbox/constructors/actions.
 	Actions Actions

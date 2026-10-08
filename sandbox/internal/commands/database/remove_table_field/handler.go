@@ -6,17 +6,17 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	remove_error := removeTableFieldAction.RemoveTableField(sandbox, api.DatabaseFieldProps{
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	remove_error := removeTableFieldAction.RemoveTableField(sandbox, api.RemoveTableFieldProps{
 		Path:     props.Path,
-		Database: entries.Database,
-		Table:    entries.Table,
-		Parent:   entries.Parent,
-		Name:     entries.Name,
+		Database: input.Database,
+		Table:    input.Table,
+		Parent:   input.Parent,
+		Name:     input.Name,
 	})
 
 	if remove_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", remove_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", remove_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

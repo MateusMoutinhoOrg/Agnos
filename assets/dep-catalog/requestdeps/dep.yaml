@@ -1,4 +1,4 @@
-default-adapter: requestdeps
-field: Requestdeps
+default-adapter: nethttprequest
+field: RequestDeps
 help: Per-call HTTP request
 name: requestdeps

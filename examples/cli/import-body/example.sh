@@ -1,14 +1,14 @@
 # The import-body example: declare a route's whole body json-schema from one
 # example payload, instead of one add-body-field per key
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 
-agnos start --path TestDir --project-name Test --module Test -q
-agnos server-init --path TestDir -q
-agnos add-route create-user --trigger /users --method POST --help "Create a user" --category Users --path TestDir -q
+agnos start --path test-dir --project-name Test --module Test -q
+agnos server-init --path test-dir -q
+agnos add-route create-user --trigger /users --method POST --summary "Create a user" --category Users --path test-dir -q
 
-cat > TestDir/payload.json <<'JSON'
+cat > test-dir/payload.json <<'JSON'
 {
   "email": "someone@example.com",
   "age": 30,
@@ -23,10 +23,10 @@ cat > TestDir/payload.json <<'JSON'
 }
 JSON
 
-agnos import-body create-user --file TestDir/payload.json --required --infer-format --path TestDir
+agnos import-body create-user --file test-dir/payload.json --required --infer-format --path test-dir
 
 # What result.yaml records: the schema the payload was read as, and the Body
 # struct build generated from it. The lib side copies the same set.
-mkdir -p AssertDir/sandbox/internal/routeslist/create_user
-cp TestDir/sandbox/internal/routeslist/create_user/route.yaml AssertDir/sandbox/internal/routeslist/create_user/route.yaml
-cp TestDir/sandbox/internal/routeslist/create_user/entries.go AssertDir/sandbox/internal/routeslist/create_user/entries.go
+mkdir -p assert-dir/sandbox/internal/routes/create_user
+cp test-dir/sandbox/internal/routes/create_user/route.yaml assert-dir/sandbox/internal/routes/create_user/route.yaml
+cp test-dir/sandbox/internal/routes/create_user/input.go assert-dir/sandbox/internal/routes/create_user/input.go

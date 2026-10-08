@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -11,8 +11,8 @@ args:
       required: true
       start: 1
 category: Examples
+description: Deletes examples/cli/<name>/ whole - the example.sh, the golden result.yaml and any test-dir or assert-dir the last run left behind - and runs build so the example listing of the docs is rewritten without it.
 examples:
     - remove-cli-example start
-help: Delete an example from examples/cli/
-long-description: Deletes examples/cli/<name>/ whole - the example.sh, the golden result.yaml and any TestDir or AssertDir the last run left behind - and runs build so the example listing of the docs is rewritten without it.
 priority: 100
+summary: Delete an example from examples/cli/

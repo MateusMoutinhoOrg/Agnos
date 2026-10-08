@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/structureconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/structureconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // StructureConfFile is the declaration docs/Structure is rendered from, held
@@ -26,24 +26,24 @@ type StructureNode struct {
 }
 
 // IsStructurePattern reports whether a declared path stands for a family of
-// paths rather than one ("libs/<lib>/<lib>.go", "collect_*.go"). Such an item
+// paths rather than one ("impls/<adapter>/<adapter>.go", "collect_*.go"). Such an item
 // has nothing to exist on disk under its own name, so `verify` checks the
 // literal part of the path instead (see StructureParentPath).
 func IsStructurePattern(sandbox *api.Sandbox, path string) bool {
-	return sandbox.Deps.Stringsdeps.ContainsAny(path, "<>*?")
+	return sandbox.Deps.StringsDeps.ContainsAny(path, "<>*?")
 }
 
 // StructureConfPath is the project-relative path of the structure declaration.
 func StructureConfPath(sandbox *api.Sandbox) string {
-	return sandbox.Config.ProjectName + "Config/" + StructureConfFile
+	return ConfigDir(sandbox) + "/" + StructureConfFile
 }
 
-// LoadStructureConf reads <ProjectName>Config/structure.yaml through the
+// LoadStructureConf reads AgnosConfig/structure.yaml through the
 // transaction-aware io. Unlike project.yaml and themes.yaml it may be absent —
 // a project scaffolded by an older agnos has none — and then describes nothing
 // rather than failing the build. A file that is there but does not parse is a
 // hard error.
-func LoadStructureConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*structureconf.StructureConf, error) {
+func LoadStructureConf(sandbox *api.Sandbox, io *stagedfs.StagedFS) (*structureconf.StructureConf, error) {
 	rel := StructureConfPath(sandbox)
 
 	content, err := io.ReadFile(rel)
@@ -53,7 +53,7 @@ func LoadStructureConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*structurecon
 
 	conf, err := structureconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("%s: %w", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("%s: %w", rel, err)
 	}
 	return conf, nil
 }
@@ -103,12 +103,12 @@ func flattenStructureIn(items []structureconf.Item, parent string, depth int) []
 func StructureParentPath(sandbox *api.Sandbox, path string) string {
 	var literal []string
 
-	for _, segment := range sandbox.Deps.Stringsdeps.Split(path, "/") {
-		if sandbox.Deps.Stringsdeps.ContainsAny(segment, "<>*?") {
+	for _, segment := range sandbox.Deps.StringsDeps.Split(path, "/") {
+		if sandbox.Deps.StringsDeps.ContainsAny(segment, "<>*?") {
 			break
 		}
 		literal = append(literal, segment)
 	}
 
-	return sandbox.Deps.Stringsdeps.Join(literal, "/")
+	return sandbox.Deps.StringsDeps.Join(literal, "/")
 }

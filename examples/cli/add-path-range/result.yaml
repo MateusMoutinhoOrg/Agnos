@@ -1,9 +1,9 @@
-cli-output: "add-path adding Rest to sandbox/internal/routeslist/static/route.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "add-path adding Rest to sandbox/internal/routes/static/route.yaml \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/routeslist/static/entries.go
-      sha: 00aaeca47ba67fc57b34c49f62dc11248fceb42dbe445723f5ae45e6863fc8a7
-    - file: sandbox/internal/routeslist/static/new.go
-      sha: 75fb3dc2cce80cac5fc96e0c725bfabd281767def018aeb4b11774da437e5ec3
-    - file: sandbox/internal/routeslist/static/route.yaml
-      sha: a8a38e3960bae1c25318b6c427e5da728263ed9716a202727a42da8c89038f3d
+    - file: sandbox/internal/routes/static/input.go
+      sha: 856a47fcb8dc2d83c725757d8cce94a80d7048b65169daf83e2a0201e137f98e
+    - file: sandbox/internal/routes/static/new.go
+      sha: 07cb431e3b478f60a3136f6266c3c45407d82fdf4694373e2a832be7660cf768
+    - file: sandbox/internal/routes/static/route.yaml
+      sha: ce8ac417c4da27f248273d1f751e3ad342b4b189c165b9641a7dff90a1ce3803

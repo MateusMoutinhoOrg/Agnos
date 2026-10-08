@@ -1,7 +1,7 @@
-cli-output: "add-doc creating docs/Report \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \n"
+cli-output: "add-doc creating docs/Report \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \n"
 exit-code: 0
 tree:
     - file: docs/Report/doc.md
       sha: b2152423b623e43b288b304aac4709d7592cffb72a3501578698ec50e4af171e
-    - file: docs/Report/props.yaml
+    - file: docs/Report/doc.yaml
       sha: eed9cfa8deb64fd7c90f64dfe616188ed6dead4b5ae57b3d480e089c7220ed7b

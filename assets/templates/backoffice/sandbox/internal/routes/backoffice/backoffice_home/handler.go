@@ -1,4 +1,4 @@
-package home
+package backoffice_home
 
 import (
 	"{{.Module}}/sandbox/api"
@@ -8,11 +8,11 @@ import (
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficerender"
 )
 
-// InternalPureHandler answers GET /admin/home with backoffice/home.html,
-// rendered for the user the authentication middleware put on props.User.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+// Handle answers GET /admin/home with backoffice/home.html,
+// rendered for the user the backoffice-session-auth middleware put on props.User.
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == nil {
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
-	return backofficerender.Home(sandbox, response, props.User, backofficeauth.SessionSeconds/60)
+	return backofficerender.RenderHomePage(sandbox, response, props.User, backofficeauth.SessionSeconds/60)
 }

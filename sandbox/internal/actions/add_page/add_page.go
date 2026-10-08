@@ -3,14 +3,14 @@ package add_page
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-// AddPage scaffolds a new page — assets/frontend/<name>.html — then runs build
+// AddPage scaffolds a new page — assets/front/<name>.html — then runs build
 // as a follow-up step. The build renders only: a page adds no Go, so there is
 // nothing to compile.
-func AddPage(sandbox *api.Sandbox, props api.PageProps) error {
-	io := smartio.New(sandbox, props.Path, sandbox.Config.ProjectName)
+func AddPage(sandbox *api.Sandbox, props api.AddPageProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddPageInternal(sandbox, io, props); err != nil {
 		return err
 	}

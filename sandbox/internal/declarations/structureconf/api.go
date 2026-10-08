@@ -1,7 +1,7 @@
 package structureconf
 
 // Item is one described element of the project tree: a file, a directory, or a
-// pattern standing for a family of them ("libs/<lib>/<lib>.go"). Name is the
+// pattern standing for a family of them ("impls/<adapter>/<adapter>.go"). Name is the
 // path of the element relative to its parent, so it may itself hold slashes.
 type Item struct {
 	Name        string
@@ -25,7 +25,7 @@ type Item struct {
 	Children []Item
 }
 
-// StructureConf is <ProjectName>Config/structure.yaml: the shape of the
+// StructureConf is AgnosConfig/structure.yaml: the shape of the
 // project as its author describes it, one nested Item per element worth
 // documenting. docs/Structure is rendered from it, and `verify` rejects an
 // item whose path is no longer on disk.

@@ -1,7 +1,7 @@
 # `{{ .Command.Identifier }}`
 {{- with .Command.Aliases }} — {{ . }}{{ end }}
 
-{{ .Command.Help }}
+{{ .Command.Summary }}
 {{- if .Command.Middleware }}
 
 A middleware: it runs on rung {{ .Command.Priority }}, in front of every command line matching
@@ -9,10 +9,10 @@ A middleware: it runs on rung {{ .Command.Priority }}, in front of every command
 {{- else }}
 
 ```bash
-{{ .Name }} {{ .Command.Usage }}
+{{ .ProjectName }} {{ .Command.Usage }}
 ```
 {{- end }}
-{{- with .Command.LongDescription }}
+{{- with .Command.Description }}
 
 {{ . }}
 {{- end }}
@@ -54,7 +54,7 @@ A middleware: it runs on rung {{ .Command.Priority }}, in front of every command
 
 ```bash
 {{- range .Command.Examples }}
-{{ $.Name }} {{ . }}
+{{ $.ProjectName }} {{ . }}
 {{- end }}
 ```
 {{- end }}

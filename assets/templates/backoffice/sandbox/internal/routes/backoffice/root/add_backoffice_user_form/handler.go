@@ -1,4 +1,4 @@
-package add_backoffice_user
+package add_backoffice_user_form
 
 import (
 	"{{.Module}}/sandbox/api"
@@ -8,27 +8,27 @@ import (
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficerender"
 )
 
-// InternalPureHandler answers POST /admin/root/add-backoffice-user. A user the
+// Handle answers POST /admin/root/add-backoffice-user. A user the
 // form describes well is added and the browser is sent to the list; anything
 // else answers the form again, filled with what was sent but the password,
 // under a 400 with the reason above it.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == nil {
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
 	fields := backofficeusers.Fields{
-		Username: entries.Body.Username,
-		Email:    entries.Body.Email,
-		Password: entries.Body.Password,
-		Role:     int64(entries.Body.Role),
+		Username: input.Body.Username,
+		Email:    input.Body.Email,
+		Password: input.Body.Password,
+		Role:     int64(input.Body.Role),
 	}
 	_, message, err := backofficeusers.Add(sandbox, fields)
 	if err != nil {
 		return err
 	}
 	if message != "" {
-		return backofficerender.AddBackofficeUserForm(sandbox, response, api.StatusBadRequest, props.User, fields, message)
+		return backofficerender.RenderAddUserPage(sandbox, response, api.StatusBadRequest, props.User, fields, message)
 	}
-	return sandbox.Deps.OpinatedAgnosServer.Redirect(*response, api.StatusSeeOther, backofficeusers.ListLocation(sandbox, backofficeusers.NoticeAdded))
+	return sandbox.Deps.OpinionatedAgnosServer.Redirect(*response, api.StatusSeeOther, backofficeusers.ListLocation(sandbox, backofficeusers.NoticeAdded))
 }

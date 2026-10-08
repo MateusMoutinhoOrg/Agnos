@@ -1,57 +1,57 @@
-package serializables
+package stdserializable
 
 import (
 	"encoding/json"
 	"fmt"
 
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
-// Bind fills deps.Deps.Serializables, providing the capability to
+// Bind fills deps.Deps.SerializableDeps, providing the capability to
 // create, parse, and serialize generic JSON/YAML structures. JSON goes
 // through encoding/json; YAML through the codec of yaml_decode.go and
 // yaml_encode.go, which reads and writes what gopkg.in/yaml.v3 read and
 // wrote before it, byte for byte.
 func Bind(deps *deps.Deps) {
-	deps.Serializables = serializibles.Sandbox{
-		CreateString: func(value string) *serializibles.SerializibleObject {
+	deps.SerializableDeps = serializabledeps.Contract{
+		CreateString: func(value string) *serializabledeps.SerializableObject {
 			var v any = value
 			return wrapValue(&v)
 		},
-		CreateInt: func(value int64) *serializibles.SerializibleObject {
+		CreateInt: func(value int64) *serializabledeps.SerializableObject {
 			var v any = value
 			return wrapValue(&v)
 		},
-		CreateFloat: func(value float64) *serializibles.SerializibleObject {
+		CreateFloat: func(value float64) *serializabledeps.SerializableObject {
 			var v any = value
 			return wrapValue(&v)
 		},
-		CreateBool: func(value bool) *serializibles.SerializibleObject {
+		CreateBool: func(value bool) *serializabledeps.SerializableObject {
 			var v any = value
 			return wrapValue(&v)
 		},
-		CreateNull: func() *serializibles.SerializibleObject {
+		CreateNull: func() *serializabledeps.SerializableObject {
 			var v any = nil
 			return wrapValue(&v)
 		},
-		CreateObject: func() *serializibles.SerializibleObject {
+		CreateObject: func() *serializabledeps.SerializableObject {
 			var v any = make(map[string]any)
 			return wrapValue(&v)
 		},
-		CreateArray: func() *serializibles.SerializibleObject {
+		CreateArray: func() *serializabledeps.SerializableObject {
 			var v any = make([]any, 0)
 			return wrapValue(&v)
 		},
 
-		ParseJson: func(data string) (*serializibles.SerializibleObject, error) {
+		ParseJson: func(data string) (*serializabledeps.SerializableObject, error) {
 			var v any
 			if err := json.Unmarshal([]byte(data), &v); err != nil {
 				return nil, err
 			}
 			return wrapValue(&v), nil
 		},
-		ParseYaml: func(data string) (*serializibles.SerializibleObject, error) {
+		ParseYaml: func(data string) (*serializabledeps.SerializableObject, error) {
 			v, err := decodeYaml(data)
 			if err != nil {
 				return nil, err
@@ -61,7 +61,7 @@ func Bind(deps *deps.Deps) {
 			return wrapValue(&v), nil
 		},
 
-		SerializeToJson: func(data *serializibles.SerializibleObject) string {
+		SerializeToJson: func(data *serializabledeps.SerializableObject) string {
 			raw := reconstruct(data)
 			bytes, err := json.Marshal(raw)
 			if err != nil {
@@ -69,7 +69,7 @@ func Bind(deps *deps.Deps) {
 			}
 			return string(bytes)
 		},
-		SerializeToYaml: func(data *serializibles.SerializibleObject) string {
+		SerializeToYaml: func(data *serializabledeps.SerializableObject) string {
 			raw := reconstruct(data)
 			result, err := encodeYaml(raw)
 			if err != nil {
@@ -86,9 +86,9 @@ func Bind(deps *deps.Deps) {
 }
 
 // wrapValue takes a pointer to an 'any' variable and returns a functional
-// SerializibleObject contract around it.
-func wrapValue(val *any) *serializibles.SerializibleObject {
-	return &serializibles.SerializibleObject{
+// SerializableObject contract around it.
+func wrapValue(val *any) *serializabledeps.SerializableObject {
+	return &serializabledeps.SerializableObject{
 		IsInt: func() bool {
 			if val == nil || *val == nil {
 				return false
@@ -200,7 +200,7 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 			return false, fmt.Errorf("not a bool")
 		},
 
-		GetObjectItem: func(key string) (*serializibles.SerializibleObject, error) {
+		GetObjectItem: func(key string) (*serializabledeps.SerializableObject, error) {
 			var nullVal any = nil
 			nullObj := wrapValue(&nullVal)
 
@@ -247,7 +247,7 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 			return keys, nil
 		},
 
-		GetArrayItem: func(index int) *serializibles.SerializibleObject {
+		GetArrayItem: func(index int) *serializabledeps.SerializableObject {
 			var nullVal any = nil
 			nullObj := wrapValue(&nullVal)
 
@@ -285,7 +285,7 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 			if !ok {
 				return fmt.Errorf("not an object")
 			}
-			if obj, isObj := item.(*serializibles.SerializibleObject); isObj {
+			if obj, isObj := item.(*serializabledeps.SerializableObject); isObj {
 				m[key] = reconstruct(obj)
 			} else {
 				m[key] = item
@@ -303,7 +303,7 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 			if _, exists := m[key]; !exists {
 				return fmt.Errorf("key not found")
 			}
-			if obj, isObj := item.(*serializibles.SerializibleObject); isObj {
+			if obj, isObj := item.(*serializabledeps.SerializableObject); isObj {
 				m[key] = reconstruct(obj)
 			} else {
 				m[key] = item
@@ -331,7 +331,7 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 				return fmt.Errorf("not an array")
 			}
 			var actualItem any
-			if obj, isObj := item.(*serializibles.SerializibleObject); isObj {
+			if obj, isObj := item.(*serializabledeps.SerializableObject); isObj {
 				actualItem = reconstruct(obj)
 			} else {
 				actualItem = item
@@ -358,8 +358,8 @@ func wrapValue(val *any) *serializibles.SerializibleObject {
 	}
 }
 
-// reconstruct recursively turns a SerializibleObject back into a Go interface{} (any).
-func reconstruct(item *serializibles.SerializibleObject) any {
+// reconstruct recursively turns a SerializableObject back into a Go interface{} (any).
+func reconstruct(item *serializabledeps.SerializableObject) any {
 	if item.IsNull() {
 		return nil
 	}

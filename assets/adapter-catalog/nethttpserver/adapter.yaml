@@ -1,5 +1,5 @@
 dep: serverdeps
 help: Http server over net/http
 module: ""
-name: serverdeps
+name: nethttpserver
 origin: catalog

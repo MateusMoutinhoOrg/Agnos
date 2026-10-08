@@ -19,7 +19,7 @@ so a command added tomorrow is covered without this feature changing.
 | Step | Comes from |
 | --- | --- |
 | What do you want to do? | the steps this project has not taken, then the areas it has |
-| Which command? | the commands of that area, with their `help` |
+| Which command? | the commands of that area, with their `summary` |
 | One question per field | each `CommandArg` and `CommandFlag` of that command |
 | Nothing has run yet | the command line the answers add up to, what it rewrites, what it never asked and what it removes |
 | Run it / change one answer / back | — |
@@ -66,7 +66,7 @@ is the way out.
 
 Nothing is answered by going back — a text question reads the keys itself rather than a whole
 line, which is what keeps every printable character an answer and leaves escape meaning escape.
-`deps.Interviewer.Back` is how a session tells that error from one that means no answer can be
+`deps.InterviewDeps.Back` is how a session tells that error from one that means no answer can be
 had at all.
 
 Reading the keys is also what makes a text answer editable: `←`/`→` move the cursor one rune at a
@@ -85,18 +85,18 @@ is marked `★`; the rest are offers.
 | Step | Offered when | Key |
 | --- | --- | --- |
 | `start` | there is no project in the folder | ★ |
-| `cli-init` | `sandbox-cli` is off | ★ |
+| `cli-init` | `cli` is off | ★ |
 | `add-command` | the cli is on and declares no command of its own | ★ |
 | `add-route` | the server is on and declares no route of its own | ★ |
-| `add-page` | the front is on and `assets/frontend/` holds no html but `index.html` | ★ |
+| `add-page` | the front is on and `assets/front/` holds no html but `index.html` | ★ |
 | `add-database` | the database layer is on and declares no database | ★ |
-| `server-init` | `sandbox-server` is off | |
-| `front-init` | the server is on and `sandbox-front` is off | |
-| `database-init` | `sandbox-database` is off | |
-| `backoffice-init` | `sandbox-backoffice` is off | |
-| `deps-init` | `sandbox-deps` is off | |
+| `server-init` | `server` is off | |
+| `front-init` | the server is on and `front` is off | |
+| `database-init` | `database` is off | |
+| `backoffice-init` | `backoffice` is off | |
+| `deps-init` | `deps` is off | |
 
-`help`, `version`, `health`, `frontend` and `index` are what an init scaffolds, so they never count as
+`help`, `version`, `health`, `front` and `index` are what an init scaffolds, so they never count as
 units the project declared itself; neither does any route, command or database `backoffice-init`
 wrote (`utils.BackofficeUnits`).
 
@@ -105,15 +105,15 @@ owns it is on.
 
 | Area | Needs |
 | --- | --- |
-| `Cli System` | `sandbox-cli` |
-| `Server System` | `sandbox-server` |
-| `Front System` | `sandbox-front` |
-| `Database System` | `sandbox-database` |
-| `Backoffice System` | `sandbox-backoffice` |
-| `Deps System` | `sandbox-deps` |
-| `Examples` | `sandbox-example` |
-| `Documentation` | `doc` |
-| `Core Commands`, `Extensions`, `Info` | — |
+| `Cli` | `cli` |
+| `Server` | `server` |
+| `Front` | `front` |
+| `Database` | `database` |
+| `Backoffice` | `backoffice` |
+| `Deps` | `deps` |
+| `Examples` | `example` |
+| `Docs` | `doc` |
+| `Core`, `Extensions`, `Info` | — |
 
 With no project in the folder only `start` and `Info` are offered: every other command answers
 *run `agnos start` first*. An `<x>-init` is only ever a step — while its mechanic is off the area
@@ -121,7 +121,7 @@ is hidden and the step is the way in, and once it is on the init is offered nowh
 
 ## Questions
 
-Each field is asked as what it declares: `boolean` as yes or no, `int` and `float` as a number
+Each field is asked as what it declares: `boolean` as yes or no, `integer` and `number` as a number
 checked against `min` and `max`, `array` as one value at a time until an empty answer, everything
 else as text. An answer that will not convert or falls outside the bounds is asked again — the
 same rules the dispatch applies to a command line, applied before a handler runs.
@@ -164,9 +164,9 @@ A field carried in from the command before it is not asked either. It is a `chan
 confirm screen like any other answer.
 
 A field that names something already in the project is offered as a list instead of a text box —
-the commands declared, the deps installed, the adapters, the availables, the routes, the pages,
+the commands declared, the deps installed, the adapters, the bindings, the routes, the pages,
 the docs, the examples, the databases, the themes of `themes.yaml`, the extensions of the
-catalog, and the closed vocabularies (`string`/`boolean`/`int`/`float`, the field types of a
+catalog, and the closed vocabularies (`string`/`boolean`/`integer`/`number`, the field types of a
 table, the http methods, the compile targets, the schema formats, the keys `--clear` takes
 off). Those lists are read from the project at
 `--path`, not from the binary running the interview.
@@ -222,11 +222,11 @@ builds for itself; the interview writes nothing.
 
 ## The contract behind it
 
-Questions are asked through [`deps.Interviewer`](../PublicApi/doc.md), which says nothing about
+Questions are asked through [`deps.InterviewDeps`](../PublicApi/doc.md), which says nothing about
 how one is presented. The adapter answers with an arrow-key menu when stdin is a terminal it can
 put in raw mode, and with a numbered list read line by line when it is not — a pipe, a file, CI
 or Windows. It is installable in any project:
 
 ```bash
-agnos add-dep interviewer
+agnos add-dep interviewdeps
 ```

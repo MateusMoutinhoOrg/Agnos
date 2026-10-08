@@ -1,10 +1,10 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
 	"fmt"
 
-	opinatedagnosserver "{{.Module}}/sandbox/deps/OpinatedAgnosServer"
-	serializables "{{.Module}}/sandbox/deps/serializables"
+	opinionatedagnosserver "{{.Module}}/sandbox/deps/OpinionatedAgnosServer"
+	serializabledeps "{{.Module}}/sandbox/deps/serializabledeps"
 	"{{.Module}}/sandbox/deps/serverdeps"
 )
 
@@ -17,7 +17,7 @@ import (
 // whatever went wrong. It returns the message as an error, so a Handle* file
 // answers and reports in one line. The status the chain reads is the one
 // written here, never the one returned.
-func writeError(serializer serializables.Sandbox, response serverdeps.Response, status int, field string, message string) error {
+func writeError(serializer serializabledeps.Contract, response serverdeps.Response, status int, field string, message string) error {
 	body := serializer.CreateObject()
 	body.AddItemToObject("error", message)
 	body.AddItemToObject("field", field)
@@ -30,7 +30,7 @@ func writeError(serializer serializables.Sandbox, response serverdeps.Response, 
 }
 
 // writeJSON answers with one document serialized as JSON.
-func writeJSON(serializer serializables.Sandbox, response serverdeps.Response, status int, document *serializables.SerializibleObject) error {
+func writeJSON(serializer serializabledeps.Contract, response serverdeps.Response, status int, document *serializabledeps.SerializableObject) error {
 	response.SetHeader("Content-Type", "application/json")
 	response.SetStatus(status)
 	return response.Write([]byte(serializer.SerializeToJson(document)))
@@ -76,7 +76,7 @@ func tracked(response serverdeps.Response) (serverdeps.Response, func() int) {
 	}
 	wrapper.Write = func(body []byte) error {
 		if status == 0 {
-			wrapper.SetStatus(opinatedagnosserver.StatusOk)
+			wrapper.SetStatus(opinionatedagnosserver.StatusOK)
 		}
 		return response.Write(body)
 	}

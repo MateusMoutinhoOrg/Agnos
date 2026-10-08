@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -46,7 +46,7 @@ const projectPropsType = "Project"
 // Project: every field it declared is still promoted, so props.User reads
 // the same. And a package left with no part at all is given an empty
 // project.go, the place the project declares its own fields.
-func generatePropsAggregate(sandbox *api.Sandbox, io *smartio.SmartIO, props propsAggregate, module string) error {
+func generatePropsAggregate(sandbox *api.Sandbox, io *stagedfs.StagedFS, props propsAggregate, module string) error {
 	dest := props.Dir + "/" + props.File
 	project := props.Dir + "/" + projectPropsFile
 
@@ -72,27 +72,4 @@ func generatePropsAggregate(sandbox *api.Sandbox, io *smartio.SmartIO, props pro
 
 	vars["Structs"] = structs
 	return utils.RenderTemplateToDest(sandbox, io, props.Template, vars, dest)
-}
-
-// migrateHandWrittenProps moves a <File> without the generated marker to
-// project.go, `type <Type> struct` renamed `type Project struct` and its doc
-// comment with it. A project.go already there is never overwritten: the two
-// are the project's, and which one wins is for it to say.
-func migrateHandWrittenProps(sandbox *api.Sandbox, io *smartio.SmartIO, props propsAggregate, dest string, project string) error {
-	content, err := io.ReadFile(dest)
-	if err != nil {
-		return nil
-	}
-	text := string(content)
-	if sandbox.Deps.Stringsdeps.Contains(text, generatedMarker) {
-		return nil
-	}
-	if _, err := io.ReadFile(project); err == nil {
-		return sandbox.Deps.Std.Errorf("%s was written by hand and %s exists too: move the fields of %s into %s, then remove %s — the build generates it", dest, project, props.Type, project, dest)
-	}
-
-	text = sandbox.Deps.Stringsdeps.ReplaceAll(text, "type "+props.Type+" struct", "type "+projectPropsType+" struct")
-	text = sandbox.Deps.Stringsdeps.ReplaceAll(text, "// "+props.Type+" is ", "// "+projectPropsType+" is ")
-	sandbox.Deps.Std.Log("build: moved %s to %s; %s now embeds its fields\n", dest, project, props.Type)
-	return io.WriteFileOverwrite(project, []byte(text))
 }

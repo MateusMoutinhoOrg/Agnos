@@ -2,7 +2,7 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
 )
 
 // The json-schema helpers below are to a route's `body` what the field helpers
@@ -16,7 +16,7 @@ var RouteBodyTypes = []string{"none", "raw", "text", "json", "form"}
 // RouteBodyType normalizes a body type, taking the aliases the parser takes
 // ("bytes" for raw, "string" for text) and refusing anything else.
 func RouteBodyType(sandbox *api.Sandbox, raw string) (string, error) {
-	switch sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) {
+	switch sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw)) {
 	case routeconf.BodyNone:
 		return routeconf.BodyNone, nil
 	case "raw", "bytes":
@@ -28,7 +28,7 @@ func RouteBodyType(sandbox *api.Sandbox, raw string) (string, error) {
 	case "form":
 		return "form", nil
 	}
-	return "", sandbox.Deps.Std.Errorf("unknown body type %q (use %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteBodyTypes, ", "))
+	return "", sandbox.Deps.StdDeps.Errorf("unknown body type %q (use %s)", raw, sandbox.Deps.StringsDeps.Join(RouteBodyTypes, ", "))
 }
 
 // RouteSchemaFormats is every `format` a string property may declare.
@@ -37,7 +37,7 @@ var RouteSchemaFormats = []string{"email", "uuid", "date-time", "uri"}
 // RouteSchemaFormat normalizes a --format, listing the accepted values when it
 // is not one of them.
 func RouteSchemaFormat(sandbox *api.Sandbox, raw string) (string, error) {
-	format := sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw))
+	format := sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw))
 	if format == "" {
 		return "", nil
 	}
@@ -46,19 +46,19 @@ func RouteSchemaFormat(sandbox *api.Sandbox, raw string) (string, error) {
 			return format, nil
 		}
 	}
-	return "", sandbox.Deps.Std.Errorf("unknown format %q (use %s)", raw, sandbox.Deps.Stringsdeps.Join(RouteSchemaFormats, ", "))
+	return "", sandbox.Deps.StdDeps.Errorf("unknown format %q (use %s)", raw, sandbox.Deps.StringsDeps.Join(RouteSchemaFormats, ", "))
 }
 
 // RouteSchemaKind normalizes the --type of a body property: the four field
 // types a request line carries, plus "object" — which a body has and a header
 // or a query key cannot.
 func RouteSchemaKind(sandbox *api.Sandbox, raw string) (string, error) {
-	if sandbox.Deps.Stringsdeps.ToLower(sandbox.Deps.Stringsdeps.TrimSpace(raw)) == "object" {
+	if sandbox.Deps.StringsDeps.ToLower(sandbox.Deps.StringsDeps.TrimSpace(raw)) == "object" {
 		return "object", nil
 	}
-	kind, ok := FieldType(sandbox, raw)
+	kind, ok := RouteFieldType(sandbox, raw)
 	if !ok {
-		return "", sandbox.Deps.Std.Errorf("unknown type %q (use string, boolean, int, float or object)", raw)
+		return "", sandbox.Deps.StdDeps.Errorf("unknown type %q (use string, boolean, int, float or object)", raw)
 	}
 	return kind, nil
 }
@@ -82,7 +82,7 @@ func RouteSchemaType(kind string) string {
 // SplitSchemaPath breaks a dotted property path ("address.city") into the
 // segments it names.
 func SplitSchemaPath(sandbox *api.Sandbox, name string) []string {
-	return sandbox.Deps.Stringsdeps.Split(RouteFieldName(sandbox, name), ".")
+	return sandbox.Deps.StringsDeps.Split(RouteFieldName(sandbox, name), ".")
 }
 
 // SchemaPropertyOf returns the named property of an object schema, or nil.
@@ -125,7 +125,7 @@ func WalkSchemaTo(sandbox *api.Sandbox, root *routeconf.Schema, segments []strin
 
 		child := SchemaObjectOf(property)
 		if child == nil || child.Type != "object" {
-			return nil, sandbox.Deps.Std.Errorf("body property %q is not an object, so nothing can be declared under it", segment)
+			return nil, sandbox.Deps.StdDeps.Errorf("body property %q is not an object, so nothing can be declared under it", segment)
 		}
 		parent = child
 	}
@@ -189,7 +189,7 @@ func DropSchemaProperty(parent *routeconf.Schema, name string) bool {
 // with it, and `set-body-field` rebuilds one with it from the keywords already
 // declared plus the ones being changed — so a property that was edited and one
 // that was declared outright come out the same.
-func RouteBodyPropertySchema(sandbox *api.Sandbox, props api.RouteBodyFieldProps) (*routeconf.Schema, error) {
+func RouteBodyPropertySchema(sandbox *api.Sandbox, props api.AddBodyFieldProps) (*routeconf.Schema, error) {
 	kind, err := RouteSchemaKind(sandbox, props.Type)
 	if err != nil {
 		return nil, err
@@ -203,13 +203,13 @@ func RouteBodyPropertySchema(sandbox *api.Sandbox, props api.RouteBodyFieldProps
 		Type:     RouteSchemaType(kind),
 		Nullable: props.Nullable,
 		Format:   format,
-		Pattern:  sandbox.Deps.Stringsdeps.TrimSpace(props.Pattern),
+		Pattern:  sandbox.Deps.StringsDeps.TrimSpace(props.Pattern),
 		Enum:     props.Enum,
 	}
 	if (leaf.Format != "" || leaf.Pattern != "") && kind != "string" {
-		return nil, sandbox.Deps.Std.Errorf("--format and --pattern only apply to a string property")
+		return nil, sandbox.Deps.StdDeps.Errorf("--format and --pattern only apply to a string property")
 	}
-	if value := sandbox.Deps.Stringsdeps.TrimSpace(props.Const); value != "" {
+	if value := sandbox.Deps.StringsDeps.TrimSpace(props.Const); value != "" {
 		leaf.Const, leaf.HasConst = value, true
 	}
 
@@ -226,22 +226,22 @@ func RouteBodyPropertySchema(sandbox *api.Sandbox, props api.RouteBodyFieldProps
 // applySchemaBounds spells --min/--max as the keywords the property's type
 // uses: minimum/maximum for a number, minLength/maxLength for text. The two
 // exclusive bounds are a number's alone.
-func applySchemaBounds(sandbox *api.Sandbox, schema *routeconf.Schema, kind string, props api.RouteBodyFieldProps) error {
+func applySchemaBounds(sandbox *api.Sandbox, schema *routeconf.Schema, kind string, props api.AddBodyFieldProps) error {
 	numeric := kind == "int" || kind == "float"
 
 	if props.ExclusiveMin != "" || props.ExclusiveMax != "" {
 		if !numeric {
-			return sandbox.Deps.Std.Errorf("--exclusive-min and --exclusive-max only apply to an int or float property")
+			return sandbox.Deps.StdDeps.Errorf("--exclusive-min and --exclusive-max only apply to an int or float property")
 		}
 		if props.ExclusiveMin != "" {
-			value, err := RouteParseBound(sandbox, kind, "exclusive-min", props.ExclusiveMin)
+			value, err := ParseRouteBound(sandbox, kind, "exclusive-min", props.ExclusiveMin)
 			if err != nil {
 				return err
 			}
 			schema.ExclusiveMinimum, schema.HasExclusiveMinimum = value, true
 		}
 		if props.ExclusiveMax != "" {
-			value, err := RouteParseBound(sandbox, kind, "exclusive-max", props.ExclusiveMax)
+			value, err := ParseRouteBound(sandbox, kind, "exclusive-max", props.ExclusiveMax)
 			if err != nil {
 				return err
 			}
@@ -253,21 +253,21 @@ func applySchemaBounds(sandbox *api.Sandbox, schema *routeconf.Schema, kind stri
 		return nil
 	}
 	if !numeric && kind != "string" {
-		return sandbox.Deps.Std.Errorf("min/max do not apply to a %s property", kind)
+		return sandbox.Deps.StdDeps.Errorf("min/max do not apply to a %s property", kind)
 	}
 
 	if kind == "string" {
 		if props.Min != "" {
-			value, err := sandbox.Deps.Stringsdeps.Atoi(props.Min)
+			value, err := sandbox.Deps.StringsDeps.Atoi(props.Min)
 			if err != nil {
-				return sandbox.Deps.Std.Errorf("min must be an int, got %q", props.Min)
+				return sandbox.Deps.StdDeps.Errorf("min must be an int, got %q", props.Min)
 			}
 			schema.MinLength, schema.HasMinLength = value, true
 		}
 		if props.Max != "" {
-			value, err := sandbox.Deps.Stringsdeps.Atoi(props.Max)
+			value, err := sandbox.Deps.StringsDeps.Atoi(props.Max)
 			if err != nil {
-				return sandbox.Deps.Std.Errorf("max must be an int, got %q", props.Max)
+				return sandbox.Deps.StdDeps.Errorf("max must be an int, got %q", props.Max)
 			}
 			schema.MaxLength, schema.HasMaxLength = value, true
 		}
@@ -275,14 +275,14 @@ func applySchemaBounds(sandbox *api.Sandbox, schema *routeconf.Schema, kind stri
 	}
 
 	if props.Min != "" {
-		value, err := RouteParseBound(sandbox, kind, "min", props.Min)
+		value, err := ParseRouteBound(sandbox, kind, "min", props.Min)
 		if err != nil {
 			return err
 		}
 		schema.Minimum, schema.HasMinimum = value, true
 	}
 	if props.Max != "" {
-		value, err := RouteParseBound(sandbox, kind, "max", props.Max)
+		value, err := ParseRouteBound(sandbox, kind, "max", props.Max)
 		if err != nil {
 			return err
 		}
@@ -295,15 +295,15 @@ func applySchemaBounds(sandbox *api.Sandbox, schema *routeconf.Schema, kind stri
 // does not declare. It is the one switch that has to be written even when it
 // is false, so the schema tells "undeclared keys are refused" from "nothing
 // was said".
-func applySchemaObjectKeys(sandbox *api.Sandbox, schema *routeconf.Schema, kind string, props api.RouteBodyFieldProps) error {
+func applySchemaObjectKeys(sandbox *api.Sandbox, schema *routeconf.Schema, kind string, props api.AddBodyFieldProps) error {
 	if !props.AdditionalProperties && !props.NoAdditionalProperties {
 		return nil
 	}
 	if props.AdditionalProperties && props.NoAdditionalProperties {
-		return sandbox.Deps.Std.Errorf("--additional-properties and --no-additional-properties are mutually exclusive")
+		return sandbox.Deps.StdDeps.Errorf("--additional-properties and --no-additional-properties are mutually exclusive")
 	}
 	if kind != "object" {
-		return sandbox.Deps.Std.Errorf("--additional-properties only applies to an object property")
+		return sandbox.Deps.StdDeps.Errorf("--additional-properties only applies to an object property")
 	}
 
 	schema.AdditionalProperties = props.AdditionalProperties
@@ -313,26 +313,26 @@ func applySchemaObjectKeys(sandbox *api.Sandbox, schema *routeconf.Schema, kind 
 
 // applySchemaListKeys wraps the element schema in the array --array asks for,
 // and hangs the three list keywords off the array rather than off the element.
-func applySchemaListKeys(sandbox *api.Sandbox, leaf *routeconf.Schema, props api.RouteBodyFieldProps) (*routeconf.Schema, error) {
+func applySchemaListKeys(sandbox *api.Sandbox, leaf *routeconf.Schema, props api.AddBodyFieldProps) (*routeconf.Schema, error) {
 	if !props.Array {
 		if props.MinItems != "" || props.MaxItems != "" || props.UniqueItems {
-			return nil, sandbox.Deps.Std.Errorf("--min-items, --max-items and --unique-items only apply to an --array property")
+			return nil, sandbox.Deps.StdDeps.Errorf("--min-items, --max-items and --unique-items only apply to an --array property")
 		}
 		return leaf, nil
 	}
 
 	list := &routeconf.Schema{Type: "array", Items: leaf, UniqueItems: props.UniqueItems}
 	if props.MinItems != "" {
-		value, err := sandbox.Deps.Stringsdeps.Atoi(props.MinItems)
+		value, err := sandbox.Deps.StringsDeps.Atoi(props.MinItems)
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("min-items must be an int, got %q", props.MinItems)
+			return nil, sandbox.Deps.StdDeps.Errorf("min-items must be an int, got %q", props.MinItems)
 		}
 		list.MinItems, list.HasMinItems = value, true
 	}
 	if props.MaxItems != "" {
-		value, err := sandbox.Deps.Stringsdeps.Atoi(props.MaxItems)
+		value, err := sandbox.Deps.StringsDeps.Atoi(props.MaxItems)
 		if err != nil {
-			return nil, sandbox.Deps.Std.Errorf("max-items must be an int, got %q", props.MaxItems)
+			return nil, sandbox.Deps.StdDeps.Errorf("max-items must be an int, got %q", props.MaxItems)
 		}
 		list.MaxItems, list.HasMaxItems = value, true
 	}
@@ -347,8 +347,8 @@ func applySchemaListKeys(sandbox *api.Sandbox, leaf *routeconf.Schema, props api
 //
 // Required is not read here: whether a property is demanded is its parent
 // object's to say, not its own.
-func RouteBodyFieldPropsOf(sandbox *api.Sandbox, schema *routeconf.Schema) api.RouteBodyFieldProps {
-	props := api.RouteBodyFieldProps{Type: "string"}
+func RouteBodyFieldPropsOf(sandbox *api.Sandbox, schema *routeconf.Schema) api.AddBodyFieldProps {
+	props := api.AddBodyFieldProps{Type: "string"}
 	if schema == nil {
 		return props
 	}
@@ -358,10 +358,10 @@ func RouteBodyFieldPropsOf(sandbox *api.Sandbox, schema *routeconf.Schema) api.R
 		props.Array = true
 		props.UniqueItems = schema.UniqueItems
 		if schema.HasMinItems {
-			props.MinItems = sandbox.Deps.Stringsdeps.FormatInt(int64(schema.MinItems), 10)
+			props.MinItems = sandbox.Deps.StringsDeps.FormatInt(int64(schema.MinItems), 10)
 		}
 		if schema.HasMaxItems {
-			props.MaxItems = sandbox.Deps.Stringsdeps.FormatInt(int64(schema.MaxItems), 10)
+			props.MaxItems = sandbox.Deps.StringsDeps.FormatInt(int64(schema.MaxItems), 10)
 		}
 		leaf = schema.Items
 	}
@@ -383,10 +383,10 @@ func RouteBodyFieldPropsOf(sandbox *api.Sandbox, schema *routeconf.Schema) api.R
 	}
 
 	if leaf.HasMinLength {
-		props.Min = sandbox.Deps.Stringsdeps.FormatInt(int64(leaf.MinLength), 10)
+		props.Min = sandbox.Deps.StringsDeps.FormatInt(int64(leaf.MinLength), 10)
 	}
 	if leaf.HasMaxLength {
-		props.Max = sandbox.Deps.Stringsdeps.FormatInt(int64(leaf.MaxLength), 10)
+		props.Max = sandbox.Deps.StringsDeps.FormatInt(int64(leaf.MaxLength), 10)
 	}
 	if leaf.HasMinimum {
 		props.Min = RouteBoundText(sandbox, leaf.Minimum)
@@ -424,7 +424,7 @@ func RouteDeclaredKind(kind string) string {
 // RouteBoundText writes a declared bound back as the literal a command line
 // carries it as.
 func RouteBoundText(sandbox *api.Sandbox, value float64) string {
-	return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+	return sandbox.Deps.StringsDeps.FormatFloat(value, 'g', -1, 64)
 }
 
 // SchemaDemands reports whether an object schema lists the named property in
@@ -486,7 +486,7 @@ func CheckFormSchema(sandbox *api.Sandbox, route string, schema *routeconf.Schem
 	if len(violations) == 0 {
 		return nil
 	}
-	return sandbox.Deps.Std.Errorf("route %q declares a form body, whose form-schema is flat: %s", route, sandbox.Deps.Stringsdeps.Join(violations, "; "))
+	return sandbox.Deps.StdDeps.Errorf("route %q declares a form body, whose form-schema is flat: %s", route, sandbox.Deps.StringsDeps.Join(violations, "; "))
 }
 
 // formScalar tells a json-schema type one form field can be converted to.

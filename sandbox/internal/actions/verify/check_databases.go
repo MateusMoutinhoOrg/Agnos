@@ -2,14 +2,14 @@ package verify
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/databaseconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // databaseIdField is the one field name a table may not declare: every
-// <T>Item already carries the record's permanent Id, so a field of that name
+// <T>Record already carries the record's permanent Id, so a field of that name
 // would generate a struct with the same field twice.
 const databaseIdField = "id"
 
@@ -21,7 +21,7 @@ const databaseIdField = "id"
 //
 // A project with no sandbox/internal/databases has no database layer and
 // nothing to check.
-func CheckDatabases(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckDatabases(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	if !io.IsDir(utils.DatabasesDir) {
@@ -36,14 +36,14 @@ func CheckDatabases(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 		violations = append(violations, checkDatabaseFiles(sandbox, io, name)...)
 
-		content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + utils.DatabaseSpecsFile)
+		content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + utils.DatabaseConfFile)
 		if err != nil {
 			continue
 		}
 
 		conf, err := databaseconf.New(sandbox, string(content))
 		if err != nil {
-			violations = append(violations, databaseViolation(name, utils.DatabaseSpecsFile+" does not parse: "+err.Error()))
+			violations = append(violations, databaseViolation(name, utils.DatabaseConfFile+" does not parse: "+err.Error()))
 			continue
 		}
 
@@ -57,10 +57,10 @@ func CheckDatabases(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 
 // checkDatabaseFiles reports a database package missing the declaration or any
 // of the three files a build writes from it.
-func checkDatabaseFiles(sandbox *api.Sandbox, io *smartio.SmartIO, name string) []string {
+func checkDatabaseFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) []string {
 	var violations []string
 
-	for _, file := range []string{utils.DatabaseSpecsFile, "api.go", "new.go", "methods.go"} {
+	for _, file := range []string{utils.DatabaseConfFile, "api.go", "new.go", "methods.go"} {
 		if !io.IsFile(utils.DatabasesDir + "/" + name + "/" + file) {
 			violations = append(violations, databaseViolation(name, "has no "+file))
 		}
@@ -76,7 +76,7 @@ func checkDatabaseDeclaration(sandbox *api.Sandbox, name string, conf *databasec
 	var violations []string
 
 	if conf.Name == "" {
-		violations = append(violations, databaseViolation(name, utils.DatabaseSpecsFile+" declares no name"))
+		violations = append(violations, databaseViolation(name, utils.DatabaseConfFile+" declares no name"))
 	}
 	// One Go record is declared per table and per nested collection, so the
 	// two families share one namespace: two of them spelling the same name
@@ -130,7 +130,7 @@ func checkDatabaseField(sandbox *api.Sandbox, name string, conf *databaseconf.Da
 			violations = append(violations, databaseViolation(name,
 				"declares the link "+where+" targeting "+field.Target+", which is not a table of this database"))
 		}
-	case databaseconf.FieldDatabase:
+	case databaseconf.FieldObject:
 		if len(field.Fields) == 0 {
 			violations = append(violations, databaseViolation(name,
 				"declares the nested collection "+where+" with no `fields`; it would hold records of nothing"))
@@ -139,7 +139,7 @@ func checkDatabaseField(sandbox *api.Sandbox, name string, conf *databaseconf.Da
 
 		nested_names := map[string]bool{}
 		for _, nested := range field.Fields {
-			if nested.Type == databaseconf.FieldDatabase {
+			if nested.Type == databaseconf.FieldObject {
 				violations = append(violations, databaseViolation(name,
 					"nests a collection inside "+where+"; only one level is generated"))
 			}
@@ -165,7 +165,7 @@ func checkDatabaseField(sandbox *api.Sandbox, name string, conf *databaseconf.Da
 // claimRecord reserves the Go record name one table or one nested collection
 // generates, and reports the second claimant of a name.
 func claimRecord(sandbox *api.Sandbox, name string, records map[string]string, declared string, what string) []string {
-	kind := utils.ExportedName(sandbox, declared)
+	kind := utils.GoIdentifier(sandbox, declared)
 	if taken, seen := records[kind]; seen {
 		return []string{databaseViolation(name,
 			what+" and "+taken+" both generate "+kind+"Item; two of them cannot share one record type")}
@@ -179,7 +179,7 @@ func claimRecord(sandbox *api.Sandbox, name string, records map[string]string, d
 // package, so a collision is a compile error — this reports it against the
 // declaration, before the compiler reports it against a generated file nobody
 // wrote.
-func checkDatabaseCustom(sandbox *api.Sandbox, io *smartio.SmartIO, name string, conf *databaseconf.DatabaseConf) []string {
+func checkDatabaseCustom(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *databaseconf.DatabaseConf) []string {
 	custom := utils.DatabasesDir + "/" + name + "/" + utils.DatabaseCustomFile
 	if !io.IsFile(custom) {
 		return nil
@@ -190,7 +190,7 @@ func checkDatabaseCustom(sandbox *api.Sandbox, io *smartio.SmartIO, name string,
 		return nil
 	}
 
-	parsed, err := sandbox.Deps.Goimportsdeps.Parse(string(content))
+	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
 		return []string{databaseViolation(name, utils.DatabaseCustomFile+" is not parsable Go: "+err.Error())}
 	}
@@ -223,31 +223,31 @@ func checkDatabaseCustom(sandbox *api.Sandbox, io *smartio.SmartIO, name string,
 func generatedDatabaseNames(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf) map[string]bool {
 	names := map[string]bool{"New": true}
 
-	claim := func(record string, filtrage bool) {
+	claim := func(record string, filter bool) {
 		names[record+"Item"] = true
 		names[record+"New"] = true
 		names["new"+record+"Fields"] = true
 		names["build"+record+"Item"] = true
-		if filtrage {
-			names[record+"Filtrage"] = true
+		if filter {
+			names[record+"Filter"] = true
 			names["match"+record] = true
 		}
 	}
 
 	for _, table := range conf.Tables {
-		kind := utils.ExportedName(sandbox, table.Name)
+		kind := utils.GoIdentifier(sandbox, table.Name)
 		claim(kind, true)
 		for _, method := range utils.DatabaseMethodNames(sandbox, table) {
 			names[method] = true
 		}
 		for _, field := range table.Fields {
-			if field.Type == databaseconf.FieldDatabase {
-				claim(utils.ExportedName(sandbox, field.Name), false)
+			if field.Type == databaseconf.FieldObject {
+				claim(utils.GoIdentifier(sandbox, field.Name), false)
 			}
 		}
 	}
 
-	names[utils.ExportedName(sandbox, conf.Name)] = true
+	names[utils.GoIdentifier(sandbox, conf.Name)] = true
 	return names
 }
 
@@ -257,7 +257,7 @@ func generatedDatabaseNames(sandbox *api.Sandbox, conf *databaseconf.DatabaseCon
 // DatabaseConf exists the contradiction is gone. The file is what has to be
 // right.
 func checkDatabaseRawFields(sandbox *api.Sandbox, name string, content string) []string {
-	specs, err := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, err := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if err != nil || !specs.IsObject() {
 		return nil
 	}
@@ -301,8 +301,8 @@ func checkDatabaseRawFields(sandbox *api.Sandbox, name string, content string) [
 
 // checkRawDatabaseField reports the contradiction one unparsed field entry may
 // carry.
-func checkRawDatabaseField(sandbox *api.Sandbox, name string, table string, entry *serializables.SerializibleObject) []string {
-	if rawString(entry, "type") != databaseconf.FieldDatabase || !rawBool(entry, "required") {
+func checkRawDatabaseField(sandbox *api.Sandbox, name string, table string, entry *serializabledeps.SerializableObject) []string {
+	if rawString(entry, "type") != databaseconf.FieldObject || !rawBool(entry, "required") {
 		return nil
 	}
 	return []string{databaseViolation(name,
@@ -312,7 +312,7 @@ func checkRawDatabaseField(sandbox *api.Sandbox, name string, table string, entr
 
 // databaseNameOf is the last segment of a listed database directory.
 func databaseNameOf(sandbox *api.Sandbox, path string) string {
-	parts := sandbox.Deps.Stringsdeps.Split(path, "/")
+	parts := sandbox.Deps.StringsDeps.Split(path, "/")
 	return parts[len(parts)-1]
 }
 

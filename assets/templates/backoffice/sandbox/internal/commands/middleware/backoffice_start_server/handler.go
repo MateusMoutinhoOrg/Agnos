@@ -1,13 +1,13 @@
-package backoffice_server
+package backoffice_start_server
 
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/internal/commandprops"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficeguard"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficehttp"
 )
 
-// InternalPureHandler runs in front of `start-server` and answers nothing, so
+// Handle runs in front of `start-server` and answers nothing, so
 // start-server runs after it. It reads the secret that signs the backoffice
 // sessions from the environment — never from the command line — and the two
 // flags the backoffice adds to start-server, onto sandbox.Config, where every
@@ -17,21 +17,21 @@ import (
 //
 // It is a middleware rather than an edit to start-server's own handler, so
 // that file stays the project's and backoffice-purge has nothing to undo in it.
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	secret, generated, err := backofficeauth.ReadSecret(sandbox)
 	if err != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", err.Error())
 	}
 	if generated {
-		sandbox.Deps.Std.Error("warning: %s is not set, so a random secret was generated for this run: every backoffice session ends when the server restarts, and no other instance accepts them; set it to a random secret of at least %d characters (openssl rand -hex 32) to keep them\n", backofficeauth.SecretEnv(sandbox), backofficeauth.MinSecretLength)
+		sandbox.Deps.StdDeps.Eprintf("warning: %s is not set, so a random secret was generated for this run: every backoffice session ends when the server restarts, and no other instance accepts them; set it to a random secret of at least %d characters (openssl rand -hex 32) to keep them\n", backofficeauth.SecretEnv(sandbox), backofficeauth.MinSecretLength)
 	}
 
-	sandbox.Config.Secret = secret
-	sandbox.Config.AllowXForwardedFor = entries.AllowXForwardedFor
-	sandbox.Config.InsecureHttp = entries.InsecureHttp
+	sandbox.Config.SessionSecret = secret
+	sandbox.Config.AllowXForwardedFor = input.AllowXForwardedFor
+	sandbox.Config.InsecureHttp = input.InsecureHttp
 
-	if entries.AllowXForwardedFor && backofficeguard.ListensEverywhere(sandbox, entries.Addr) {
-		sandbox.Deps.Std.Error("warning: X-Forwarded-For is trusted but the server listens on every interface: bind it to the address only the proxy reaches (--addr 127.0.0.1:3000) or firewall the port, or anyone reaching it can forge their ip\n")
+	if input.AllowXForwardedFor && backofficehttp.ListensEverywhere(sandbox, input.Addr) {
+		sandbox.Deps.StdDeps.Eprintf("warning: X-Forwarded-For is trusted but the server listens on every interface: bind it to the address only the proxy reaches (--addr 127.0.0.1:3000) or firewall the port, or anyone reaching it can forge their ip\n")
 	}
 	return nil
 }

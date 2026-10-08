@@ -2,10 +2,10 @@ package list_adapters
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-func ListAdapters(sandbox *api.Sandbox, path string) ([]api.AdapterInfo, error) {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	return ListAdaptersInternal(sandbox, io, path)
+func ListAdapters(sandbox *api.Sandbox, props api.ListAdaptersProps) ([]api.AdapterInfo, error) {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	return ListAdaptersInternal(sandbox, io, props.Path)
 }

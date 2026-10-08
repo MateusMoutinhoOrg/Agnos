@@ -7,16 +7,16 @@ import (
 func New(sandbox *api.Sandbox, content string) (*ExtensionsConf, error) {
 
 	if content == "" {
-		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.StdDeps.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 
 	if !specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("extensions config is not an object")
+		return nil, sandbox.Deps.StdDeps.Errorf("extensions config is not an object")
 	}
 
 	conf := &ExtensionsConf{
@@ -25,7 +25,7 @@ func New(sandbox *api.Sandbox, content string) (*ExtensionsConf, error) {
 
 	keys, keys_err := specs.GetKeys()
 	if keys_err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not get extensions keys")
+		return nil, sandbox.Deps.StdDeps.Errorf("could not get extensions keys")
 	}
 
 	for _, key := range keys {
@@ -36,7 +36,7 @@ func New(sandbox *api.Sandbox, content string) (*ExtensionsConf, error) {
 
 		enabled, bool_err := value_item.GetBool()
 		if bool_err != nil {
-			return nil, sandbox.Deps.Std.Errorf("extension %q is not a bool", key)
+			return nil, sandbox.Deps.StdDeps.Errorf("extension %q is not a bool", key)
 		}
 
 		conf.Extensions = append(conf.Extensions, Extension{

@@ -1,11 +1,11 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: local-install
-category: Core Commands
-help: Builds the project and installs it locally
-long-description: Runs build over the project, then compiles ./cmd/main into /usr/local/bin/<project-name> (~/.local/bin on Windows) so the binary is on PATH.
+category: Core
+description: Runs build over the project, then compiles ./cmd/main into /usr/local/bin/<project-name> (~/.local/bin on Windows) so the binary is on PATH.
 priority: 100
+summary: Build the project and install it locally

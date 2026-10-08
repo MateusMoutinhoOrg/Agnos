@@ -1,10 +1,10 @@
-# `deps.Hashdeps`
+# `deps.HashDeps`
 
 `sandbox/deps/hashdeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the hashing library injected whole as the Deps.Hashdeps field.
+Contract is the hashing library injected whole as the Deps.HashDeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |

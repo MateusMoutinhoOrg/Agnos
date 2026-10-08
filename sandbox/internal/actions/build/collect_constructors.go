@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -35,25 +35,25 @@ type Constructor struct {
 //
 // sandbox/api/sandbox.go takes every entry — the field is the contract, whether
 // or not this repo fills it — while sandbox/new.go takes the ones HasNew marks.
-func CollectConstructors(sandbox *api.Sandbox, io *smartio.SmartIO) []Constructor {
+func CollectConstructors(sandbox *api.Sandbox, io *stagedfs.StagedFS) []Constructor {
 
 	files := io.ListFiles("sandbox/api")
 
 	var constructors []Constructor
 	for _, file := range files {
-		parts := sandbox.Deps.Stringsdeps.Split(file, "/")
+		parts := sandbox.Deps.StringsDeps.Split(file, "/")
 		name := parts[len(parts)-1]
 
-		if utils.IsConstructorExempt(sandbox, name) || !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
+		if utils.IsConstructorExempt(sandbox, name) || !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") {
 			continue
 		}
 
-		baseName := sandbox.Deps.Stringsdeps.TrimSuffix(name, ".go")
+		baseName := sandbox.Deps.StringsDeps.TrimSuffix(name, ".go")
 		if len(baseName) == 0 {
 			continue
 		}
 
-		title := sandbox.Deps.Stringsdeps.ToUpper(baseName[:1]) + baseName[1:]
+		title := sandbox.Deps.StringsDeps.ToUpper(baseName[:1]) + baseName[1:]
 		source := utils.ConstructorSource(io, baseName)
 		constructors = append(constructors, Constructor{
 			Name:    title,

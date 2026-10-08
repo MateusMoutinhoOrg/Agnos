@@ -1,5 +1,5 @@
-name: backofficedb
-prefix: backofficedb
+key-prefix: data/backofficedb
+name: backoffice-db
 tables:
     - fields:
         - name: username
@@ -8,20 +8,20 @@ tables:
         - name: email
           required: true
           type: string
-        - name: passwordhash
+        - name: password-hash
           required: true
           type: string
         - name: role
-          type: int
+          type: integer
         - fields:
-            - name: expiresat
+            - name: expires-at
               required: true
-              type: int
-          name: sessions
-          type: database
-      name: backofficeuser
+              type: integer
+          name: session
+          type: object
+      name: backoffice-user
     - fields:
-        - name: tokensha
+        - name: token-sha256
           required: true
           type: key
         - name: name
@@ -30,16 +30,16 @@ tables:
         - name: prefix
           required: true
           type: string
-        - name: ownerid
-          type: int
-        - name: createdat
-          type: int
-        - name: expiresat
-          type: int
+        - name: owner-id
+          type: integer
+        - name: created-at
+          type: integer
+        - name: expires-at
+          type: integer
         - name: ips
           type: string
-        - name: lastusedat
-          type: int
-        - name: lastusedip
+        - name: last-used-at
+          type: integer
+        - name: last-used-ip
           type: string
-      name: apitoken
+      name: api-token

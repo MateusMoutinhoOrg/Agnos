@@ -58,7 +58,7 @@ type planner struct {
 // copies and crosses with an assignment or a plain conversion.
 func Converters(sandbox *api.Sandbox, shape *Api, local string, remote string) (*Plan, error) {
 	if !IsStruct(shape, "Sandbox") {
-		return nil, sandbox.Deps.Std.Errorf("the remote api declares no Sandbox struct: there is nothing to convert")
+		return nil, sandbox.Deps.StdDeps.Errorf("the remote api declares no Sandbox struct: there is nothing to convert")
 	}
 
 	plan := &planner{sandbox: sandbox, shape: shape, local: local, remote: remote, names: map[string]bool{}}
@@ -138,7 +138,7 @@ func converterBody(plan *planner, expr string, direction string) string {
 		return mapBody(plan, key, inner, direction, destination)
 	}
 
-	plan.err = plan.sandbox.Deps.Std.Errorf("cannot convert %s: only a named struct, a slice, a map, a pointer and a func of convertible types can cross", expr)
+	plan.err = plan.sandbox.Deps.StdDeps.Errorf("cannot convert %s: only a named struct, a slice, a map, a pointer and a func of convertible types can cross", expr)
 	return ""
 }
 

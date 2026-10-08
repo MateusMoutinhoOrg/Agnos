@@ -1,40 +1,40 @@
 package standard
 
 import (
-	OpinatedAgnosCli "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/OpinatedAgnosCli"
-	argvdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/argvdeps"
-	embeddeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/embeddeps"
-	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/goimportsdeps"
-	hashdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/hashdeps"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/interviewer"
-	iodeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/iodeps"
-	reflectdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/reflectdeps"
-	rundeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/rundeps"
-	serializables "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serializables"
-	serverdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/serverdeps"
-	sortdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/sortdeps"
-	std "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/std"
-	stringsdeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/stringsdeps"
-	templatedeps "github.com/MateusMoutinhoOrg/Agnos/adapters/libs/templatedeps"
+	OpinionatedAgnosCli "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/OpinionatedAgnosCli"
+	goembed "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/goembed"
+	nethttpserver "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/nethttpserver"
+	osexecrun "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/osexecrun"
+	osio "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/osio"
+	osstd "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/osstd"
+	sha256hash "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/sha256hash"
+	stdargv "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/stdargv"
+	stdgoimports "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/stdgoimports"
+	stdreflect "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/stdreflect"
+	stdserializable "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/stdserializable"
+	stdsort "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/stdsort"
+	stdstrings "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/stdstrings"
+	texttemplate "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/texttemplate"
+	ttyinterview "github.com/MateusMoutinhoOrg/Agnos/adapters/impls/ttyinterview"
 	deps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps"
 )
 
 func New() deps.Deps {
 	deps := deps.Deps{}
-	OpinatedAgnosCli.Bind(&deps)
-	argvdeps.Bind(&deps)
-	embeddeps.Bind(&deps)
-	goimportsdeps.Bind(&deps)
-	hashdeps.Bind(&deps)
-	interviewer.Bind(&deps)
-	iodeps.Bind(&deps)
-	reflectdeps.Bind(&deps)
-	rundeps.Bind(&deps)
-	serializables.Bind(&deps)
-	serverdeps.Bind(&deps)
-	sortdeps.Bind(&deps)
-	std.Bind(&deps)
-	stringsdeps.Bind(&deps)
-	templatedeps.Bind(&deps)
+	OpinionatedAgnosCli.Bind(&deps)
+	stdargv.Bind(&deps)
+	goembed.Bind(&deps)
+	stdgoimports.Bind(&deps)
+	sha256hash.Bind(&deps)
+	ttyinterview.Bind(&deps)
+	osio.Bind(&deps)
+	stdreflect.Bind(&deps)
+	osexecrun.Bind(&deps)
+	stdserializable.Bind(&deps)
+	nethttpserver.Bind(&deps)
+	stdsort.Bind(&deps)
+	osstd.Bind(&deps)
+	stdstrings.Bind(&deps)
+	texttemplate.Bind(&deps)
 	return deps
 }

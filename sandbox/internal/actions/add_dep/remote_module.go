@@ -3,7 +3,7 @@ package add_dep
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 )
 
 // RemoteModule is one resolved module of the Go module graph: the path it is
@@ -40,7 +40,7 @@ func resolveModule(sandbox *api.Sandbox, path string, module string, version str
 // readModule runs one go command that prints a module as json and reads the
 // three fields the installer needs out of it.
 func readModule(sandbox *api.Sandbox, path string, args []string) (*RemoteModule, error) {
-	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
+	result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{
 		Dir:     path,
 		Program: "go",
 		Args:    args,
@@ -49,12 +49,12 @@ func readModule(sandbox *api.Sandbox, path string, args []string) (*RemoteModule
 		return nil, err
 	}
 	if result.ExitCode != 0 {
-		return nil, sandbox.Deps.Std.Errorf("go %s failed: %s", sandbox.Deps.Stringsdeps.Join(args, " "), result.Output)
+		return nil, sandbox.Deps.StdDeps.Errorf("go %s failed: %s", sandbox.Deps.StringsDeps.Join(args, " "), result.Output)
 	}
 
-	parsed, err := sandbox.Deps.Serializables.ParseJson(result.Output)
+	parsed, err := sandbox.Deps.SerializableDeps.ParseJson(result.Output)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("go %s printed something that is not json: %s", sandbox.Deps.Stringsdeps.Join(args, " "), result.Output)
+		return nil, sandbox.Deps.StdDeps.Errorf("go %s printed something that is not json: %s", sandbox.Deps.StringsDeps.Join(args, " "), result.Output)
 	}
 
 	module := &RemoteModule{
@@ -64,7 +64,7 @@ func readModule(sandbox *api.Sandbox, path string, args []string) (*RemoteModule
 	}
 
 	if module.Dir == "" {
-		return nil, sandbox.Deps.Std.Errorf("go %s reported no source directory for the module", sandbox.Deps.Stringsdeps.Join(args, " "))
+		return nil, sandbox.Deps.StdDeps.Errorf("go %s reported no source directory for the module", sandbox.Deps.StringsDeps.Join(args, " "))
 	}
 
 	return module, nil
@@ -72,7 +72,7 @@ func readModule(sandbox *api.Sandbox, path string, args []string) (*RemoteModule
 
 // jsonString reads one string field of a parsed json object, "" when it is
 // absent or of another type.
-func jsonString(sandbox *api.Sandbox, object *serializables.SerializibleObject, key string) string {
+func jsonString(sandbox *api.Sandbox, object *serializabledeps.SerializableObject, key string) string {
 	item, _ := object.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return ""

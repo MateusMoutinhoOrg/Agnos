@@ -3,14 +3,14 @@ package main
 import (
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
 // The deps-purge example: remove the dependency layer and every installed dep
 //
-// It calls the same action `agnos deps-purge` calls, and writes only inside TestDir.
+// It calls the same action `agnos deps-purge` calls, and writes only inside test-dir.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound
@@ -18,24 +18,24 @@ func main() {
 	module := "Test"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir",
+		Path:        "test-dir",
 		ProjectName: "Test",
 		Module:      &module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepsInit("TestDir"); err != nil {
+	if err := lib.Actions.DepsInit(api.DepsInitProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepsPurge("TestDir"); err != nil {
+	if err := lib.Actions.DepsPurge(api.DepsPurgeProps{Path: "test-dir"}); err != nil {
 		panic(err)
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/sandbox", os.DirFS("TestDir/sandbox")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/sandbox", os.DirFS("test-dir/sandbox")); err != nil {
 		panic(err)
 	}
 
@@ -46,15 +46,15 @@ func main() {
 	}
 }
 
-// copyExtensions puts the project's extensions.yaml into AssertDir at the
+// copyExtensions puts the project's extensions.yaml into assert-dir at the
 // place it holds in the tree.
 func copyExtensions() error {
-	content, err := os.ReadFile("TestDir/AgnosConfig/extensions.yaml")
+	content, err := os.ReadFile("test-dir/AgnosConfig/extensions.yaml")
 	if err != nil {
 		return err
 	}
-	if err := os.MkdirAll("AssertDir/AgnosConfig", 0o755); err != nil {
+	if err := os.MkdirAll("assert-dir/AgnosConfig", 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile("AssertDir/AgnosConfig/extensions.yaml", content, 0o644)
+	return os.WriteFile("assert-dir/AgnosConfig/extensions.yaml", content, 0o644)
 }

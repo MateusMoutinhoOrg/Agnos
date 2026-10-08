@@ -1,10 +1,10 @@
-# `deps.Sortdeps`
+# `deps.SortDeps`
 
 `sandbox/deps/sortdeps`
 
-## `Sandbox`
+## `Contract`
 
-Sandbox is the sorting library injected whole as the Deps.Sortdeps field.
+Contract is the sorting library injected whole as the Deps.SortDeps field.
 
 | Field | Type | Description |
 | --- | --- | --- |

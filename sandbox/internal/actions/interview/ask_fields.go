@@ -2,17 +2,17 @@ package interview
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
-// The declared types a flag or an arg may carry, spelled as entries.yaml
+// The declared types a flag or an arg may carry, spelled as command.yaml
 // spells them — the same four the cli dispatch converts.
 const (
 	typeString  = "string"
 	typeBoolean = "boolean"
-	typeInt     = "int"
-	typeFloat   = "float"
+	typeInteger = "integer"
+	typeNumber  = "number"
 )
 
 // The two fields every agnos command declares and the interview answers for
@@ -69,7 +69,7 @@ func FieldsOf(command api.Command) []Field {
 	fields := []Field{}
 
 	for _, arg := range command.Args {
-		if arg.Trigger.Exist {
+		if arg.Trigger.Set {
 			continue
 		}
 		fields = append(fields, Field{
@@ -106,7 +106,7 @@ func keyName(keys []string) string {
 	return ""
 }
 
-// kebabOf is an Entries id as the name an arg is asked under: "RequestPath"
+// kebabOf is an Input id as the name an arg is asked under: "RequestPath"
 // -> "request-path".
 func kebabOf(id string) string {
 	name := ""
@@ -126,10 +126,10 @@ func kebabOf(id string) string {
 // argTypeName is an arg type as the session's type names spell it.
 func argTypeName(kind api.ArgType) string {
 	switch kind {
-	case api.IntegerArg:
-		return "int"
-	case api.NumberArg:
-		return "float"
+	case api.ArgInteger:
+		return typeInteger
+	case api.ArgNumber:
+		return typeNumber
 	}
 	return "string"
 }
@@ -138,16 +138,16 @@ func argTypeName(kind api.ArgType) string {
 // whether it repeats.
 func flagTypeName(kind api.FlagType) (string, bool) {
 	switch kind {
-	case api.IntegerFlag:
-		return "int", false
-	case api.NumberFlag:
-		return "float", false
-	case api.BooleanFlag:
+	case api.FlagInteger:
+		return typeInteger, false
+	case api.FlagNumber:
+		return typeNumber, false
+	case api.FlagBoolean:
 		return typeBoolean, false
-	case api.StringArrayFlag:
+	case api.FlagStringArray:
 		return "string", true
-	case api.IntegerArrayFlag:
-		return "int", true
+	case api.FlagIntegerArray:
+		return typeInteger, true
 	}
 	return "string", false
 }
@@ -173,7 +173,7 @@ func flagTypeName(kind api.FlagType) (string, bool) {
 // same state it was the first time. Going back past the first question reports
 // false: there is nothing left to correct, so the command is left unrun and the
 // menu comes back.
-func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, session string, carried map[string][]any) (map[string][]any, bool, error) {
+func AskValues(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, session string, carried map[string][]any) (map[string][]any, bool, error) {
 	fields := AskOrder(FieldsOf(command))
 	values := map[string][]any{}
 	asked := []int{}
@@ -193,7 +193,7 @@ func AskValues(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, s
 
 		bound, err := ResolveField(sandbox, io, command, field, values, session)
 		if err != nil {
-			if !sandbox.Deps.Interviewer.Back(err) {
+			if !sandbox.Deps.InterviewDeps.Back(err) {
 				return nil, false, err
 			}
 
@@ -249,7 +249,7 @@ func forgetFrom(values map[string][]any, fields []Field, from int) {
 // ResolveField settles one field: the two the interview answers by itself, and
 // everything else by asking. It is also what the confirm screen calls to
 // change a single answer without walking the whole command again.
-func ResolveField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, field Field, answered map[string][]any, session string) ([]any, error) {
+func ResolveField(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, field Field, answered map[string][]any, session string) ([]any, error) {
 	if AnsweredForYou(command, field) {
 		if field.Id == pathFieldId {
 			return []any{session}, nil
@@ -301,9 +301,9 @@ func AnsweredForYou(command api.Command, field Field) bool {
 // askField picks the question one field is asked as: yes or no for a boolean,
 // a repeated question for an array, one question otherwise — each of them over
 // a menu when the field names something that already exists.
-func askField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, field Field, answered map[string][]any) ([]any, error) {
+func askField(sandbox *api.Sandbox, io *stagedfs.StagedFS, command api.Command, field Field, answered map[string][]any) ([]any, error) {
 	if field.Type == typeBoolean {
-		answer, err := sandbox.Deps.Interviewer.BoolQuestion(questionFor(sandbox, field))
+		answer, err := sandbox.Deps.InterviewDeps.BoolQuestion(questionFor(sandbox, field))
 		if err != nil {
 			return nil, err
 		}
@@ -323,7 +323,7 @@ func askField(sandbox *api.Sandbox, io *smartio.SmartIO, command api.Command, fi
 // choosing a row; an open list and an exhausted one both fall through to text.
 func askScalar(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, error) {
 	if len(offered.Options) > 0 {
-		chosen, err := sandbox.Deps.Interviewer.SingleAlternativeQuestion(
+		chosen, err := sandbox.Deps.InterviewDeps.SingleAlternativeQuestion(
 			questionFor(sandbox, field),
 			menuRows(sandbox, offered, field),
 		)
@@ -351,12 +351,12 @@ func askScalar(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, er
 // unless the field is required, in which case there is nothing to fall back to.
 func askScalarText(sandbox *api.Sandbox, field Field) ([]any, error) {
 	for {
-		answer, err := sandbox.Deps.Interviewer.StrQuestion(questionFor(sandbox, field))
+		answer, err := sandbox.Deps.InterviewDeps.StrQuestion(questionFor(sandbox, field))
 		if err != nil {
 			return nil, err
 		}
 
-		if sandbox.Deps.Stringsdeps.TrimSpace(answer) == "" {
+		if sandbox.Deps.StringsDeps.TrimSpace(answer) == "" {
 			if !field.Required {
 				return []any{}, nil
 			}
@@ -382,7 +382,7 @@ func askScalarText(sandbox *api.Sandbox, field Field) ([]any, error) {
 // until an empty answer when it does not.
 func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, error) {
 	if len(offered.Options) > 0 && !offered.Open {
-		chosen, err := sandbox.Deps.Interviewer.MultipleAlternativeQuestion(
+		chosen, err := sandbox.Deps.InterviewDeps.MultipleAlternativeQuestion(
 			questionFor(sandbox, field),
 			offered.Options,
 		)
@@ -407,12 +407,12 @@ func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, err
 
 	values := []any{}
 	for {
-		answer, err := sandbox.Deps.Interviewer.StrQuestion(arrayQuestionFor(sandbox, field, len(values)))
+		answer, err := sandbox.Deps.InterviewDeps.StrQuestion(arrayQuestionFor(sandbox, field, len(values)))
 		if err != nil {
 			return nil, err
 		}
 
-		if sandbox.Deps.Stringsdeps.TrimSpace(answer) == "" {
+		if sandbox.Deps.StringsDeps.TrimSpace(answer) == "" {
 			if field.Required && len(values) == 0 {
 				notice(sandbox, "%s needs at least one answer", label(field))
 				continue
@@ -439,15 +439,15 @@ func askArray(sandbox *api.Sandbox, field Field, offered suggestion) ([]any, err
 // leaving a field alone, and one for typing a value an open list does not
 // hold. Both say what they do rather than what they are called — the menu is
 // read by someone who has not seen the command before.
-func menuRows(sandbox *api.Sandbox, offered suggestion, field Field) []interviewer.AlternativeOption {
-	rows := []interviewer.AlternativeOption{}
+func menuRows(sandbox *api.Sandbox, offered suggestion, field Field) []interviewdeps.Option {
+	rows := []interviewdeps.Option{}
 	rows = append(rows, offered.Options...)
 
 	if offered.Open {
-		rows = append(rows, interviewer.AlternativeOption{Id: otherOptionId, Msg: "· none of these — let me type it"})
+		rows = append(rows, interviewdeps.Option{Id: otherOptionId, Msg: "· none of these — let me type it"})
 	}
 	if !field.Required {
-		rows = append(rows, interviewer.AlternativeOption{Id: skipOptionId, Msg: skipText(sandbox, field)})
+		rows = append(rows, interviewdeps.Option{Id: skipOptionId, Msg: skipText(sandbox, field)})
 	}
 
 	return rows
@@ -457,7 +457,7 @@ func menuRows(sandbox *api.Sandbox, offered suggestion, field Field) []interview
 // declared default is taken, or nothing is passed at all.
 func skipText(sandbox *api.Sandbox, field Field) string {
 	if field.HasDefault {
-		return sandbox.Deps.Std.Sprintf("· skip it — %q is used", field.Default)
+		return sandbox.Deps.StdDeps.Sprintf("· skip it — %q is used", field.Default)
 	}
 	return "· skip it — leave it unset"
 }
@@ -466,19 +466,19 @@ func skipText(sandbox *api.Sandbox, field Field) string {
 // for, and what happens if it is left alone.
 func questionFor(sandbox *api.Sandbox, field Field) string {
 	question := label(field)
-	if sandbox.Deps.Stringsdeps.TrimSpace(field.Description) != "" {
-		question = sandbox.Deps.Std.Sprintf("%s — %s", question, field.Description)
+	if sandbox.Deps.StringsDeps.TrimSpace(field.Description) != "" {
+		question = sandbox.Deps.StdDeps.Sprintf("%s — %s", question, field.Description)
 	}
-	return sandbox.Deps.Std.Sprintf("%s  (%s)", question, conditionOf(sandbox, field))
+	return sandbox.Deps.StdDeps.Sprintf("%s  (%s)", question, conditionOf(sandbox, field))
 }
 
 // arrayQuestionFor words the repeated question, counting what has been given
 // so far so it is clear the answer is one of several.
 func arrayQuestionFor(sandbox *api.Sandbox, field Field, given int) string {
 	if given == 0 {
-		return sandbox.Deps.Std.Sprintf("%s  (more than one allowed — answer nothing to stop)", questionFor(sandbox, field))
+		return sandbox.Deps.StdDeps.Sprintf("%s  (more than one allowed — answer nothing to stop)", questionFor(sandbox, field))
 	}
-	return sandbox.Deps.Std.Sprintf("%s — one more, or nothing to stop (%d so far)", label(field), given)
+	return sandbox.Deps.StdDeps.Sprintf("%s — one more, or nothing to stop (%d so far)", label(field), given)
 }
 
 // conditionOf is the parenthesis after a question, in the words of someone who
@@ -491,16 +491,16 @@ func conditionOf(sandbox *api.Sandbox, field Field) string {
 	if field.Required {
 		condition += ", required"
 	} else if field.HasDefault {
-		condition = sandbox.Deps.Std.Sprintf("%s, %q if you skip it", condition, field.Default)
+		condition = sandbox.Deps.StdDeps.Sprintf("%s, %q if you skip it", condition, field.Default)
 	} else {
 		condition += ", optional"
 	}
 
 	if field.HasMin {
-		condition = sandbox.Deps.Std.Sprintf("%s, %s or more", condition, numberLabel(sandbox, field.Type, field.Min))
+		condition = sandbox.Deps.StdDeps.Sprintf("%s, %s or more", condition, numberLabel(sandbox, field.Type, field.Min))
 	}
 	if field.HasMax {
-		condition = sandbox.Deps.Std.Sprintf("%s, %s or less", condition, numberLabel(sandbox, field.Type, field.Max))
+		condition = sandbox.Deps.StdDeps.Sprintf("%s, %s or less", condition, numberLabel(sandbox, field.Type, field.Max))
 	}
 
 	return condition
@@ -509,9 +509,9 @@ func conditionOf(sandbox *api.Sandbox, field Field) string {
 // typeWord is a declared type said as the answer it asks for.
 func typeWord(kind string) string {
 	switch kind {
-	case typeInt:
+	case typeInteger:
 		return "whole number"
-	case typeFloat:
+	case typeNumber:
 		return "number"
 	case typeBoolean:
 		return "yes or no"
@@ -534,19 +534,19 @@ func label(field Field) string {
 // readers on api.Command type-assert, so a value bound under the wrong type
 // reads back as the zero value and the handler silently does the wrong thing.
 func convert(sandbox *api.Sandbox, field Field, raw string) (any, bool) {
-	trimmed := sandbox.Deps.Stringsdeps.TrimSpace(raw)
+	trimmed := sandbox.Deps.StringsDeps.TrimSpace(raw)
 
 	switch field.Type {
 	case typeBoolean:
 		return trimmed == "true", true
-	case typeInt:
-		value, err := sandbox.Deps.Stringsdeps.Atoi(trimmed)
+	case typeInteger:
+		value, err := sandbox.Deps.StringsDeps.Atoi(trimmed)
 		if err != nil {
 			return nil, false
 		}
 		return value, true
-	case typeFloat:
-		value, err := sandbox.Deps.Stringsdeps.ParseFloat(trimmed, 64)
+	case typeNumber:
+		value, err := sandbox.Deps.StringsDeps.ParseFloat(trimmed, 64)
 		if err != nil {
 			return nil, false
 		}
@@ -557,7 +557,7 @@ func convert(sandbox *api.Sandbox, field Field, raw string) (any, bool) {
 }
 
 // DefaultValue is a field's declared default in the type the declaration
-// names. entries.yaml spells every default as text, so the conversion the
+// names. command.yaml spells every default as text, so the conversion the
 // dispatch does when it binds one has to be done here too.
 func DefaultValue(sandbox *api.Sandbox, field Field) any {
 	value, ok := convert(sandbox, field, field.Default)
@@ -604,8 +604,8 @@ func numberOf(value any) (float64, bool) {
 
 // numberLabel spells a bound the way its declaration does.
 func numberLabel(sandbox *api.Sandbox, kind string, value float64) string {
-	if kind == typeInt {
-		return sandbox.Deps.Stringsdeps.FormatInt(int64(value), 10)
+	if kind == typeInteger {
+		return sandbox.Deps.StringsDeps.FormatInt(int64(value), 10)
 	}
-	return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+	return sandbox.Deps.StringsDeps.FormatFloat(value, 'g', -1, 64)
 }

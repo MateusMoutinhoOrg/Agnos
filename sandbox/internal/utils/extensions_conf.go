@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/extensionsconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/extensionsconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // ExtensionsConfFile is the declaration saying which generation mechanics this
@@ -11,20 +11,21 @@ import (
 // render: nothing is inferred from the tree on disk.
 const ExtensionsConfFile = "extensions.yaml"
 
-// The extension names. Every mechanic that depends on the sandbox is spelled
-// sandbox-<mechanic>; doc and readme stand on their own because neither needs
-// the sandbox to be generated.
+// The extension names, each the name of the mechanic it turns on and of the
+// <x>-init / <x>-purge pair that owns it. Every one but doc and readme renders
+// into the sandbox and needs it on; those two stand on their own because
+// neither needs the sandbox to be generated.
 const (
-	ExtensionSandbox           = "sandbox"
-	ExtensionSandboxDeps       = "sandbox-deps"
-	ExtensionSandboxCli        = "sandbox-cli"
-	ExtensionSandboxServer     = "sandbox-server"
-	ExtensionSandboxFront      = "sandbox-front"
-	ExtensionSandboxDatabase   = "sandbox-database"
-	ExtensionSandboxExample    = "sandbox-example"
-	ExtensionSandboxBackoffice = "sandbox-backoffice"
-	ExtensionDoc               = "doc"
-	ExtensionReadme            = "readme"
+	ExtensionSandbox    = "sandbox"
+	ExtensionDeps       = "deps"
+	ExtensionCli        = "cli"
+	ExtensionServer     = "server"
+	ExtensionFront      = "front"
+	ExtensionDatabase   = "database"
+	ExtensionExample    = "example"
+	ExtensionBackoffice = "backoffice"
+	ExtensionDoc        = "doc"
+	ExtensionReadme     = "readme"
 )
 
 // ExtensionSpec is one mechanic of the catalog: its key, what a fresh project
@@ -42,30 +43,30 @@ type ExtensionSpec struct {
 func ExtensionCatalog() []ExtensionSpec {
 	return []ExtensionSpec{
 		{ExtensionSandbox, true, "the sandbox core: sandbox/new.go, api/sandbox.go, internal/generated/config"},
-		{ExtensionSandboxDeps, false, "the dependency layer: sandbox/deps/, adapters/, availables"},
-		{ExtensionSandboxCli, false, "the cli layer: cmd/main, help, version and the OpinatedAgnosCli lib"},
-		{ExtensionSandboxServer, false, "the http layer: server/, routeslist/ and the OpinatedAgnosServer lib"},
-		{ExtensionSandboxFront, false, "the front layer: the route serving assets/frontend/ and the OpinatedAgnosFront lib"},
-		{ExtensionSandboxDatabase, false, "the database layer: the declared databases and the OpinatedAgnosDatabase lib"},
-		{ExtensionSandboxExample, true, "the examples/ suite and exec-test"},
-		{ExtensionSandboxBackoffice, false, "the admin backoffice: login, users, API tokens and the /api/admin JSON api"},
+		{ExtensionDeps, false, "the dependency layer: sandbox/deps/, adapters/, bindings"},
+		{ExtensionCli, false, "the cli layer: cmd/main, help, version and the OpinionatedAgnosCli lib"},
+		{ExtensionServer, false, "the http layer: server/, routes/ and the OpinionatedAgnosServer lib"},
+		{ExtensionFront, false, "the front layer: the route serving assets/front/ and the OpinionatedAgnosFront lib"},
+		{ExtensionDatabase, false, "the database layer: the declared databases and the OpinionatedAgnosDatabase lib"},
+		{ExtensionExample, true, "the examples/ suite and run-examples"},
+		{ExtensionBackoffice, false, "the admin backoffice: login, users, API tokens and the /api/admin JSON api"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},
 		{ExtensionReadme, true, "README.md, built from themes.yaml and the doc index"},
 	}
 }
 
 // ExtensionRequires is what one mechanic needs on to have anything to render
-// into: every sandbox-<x> renders into the sandbox, the server layer is opened
+// into: every mechanic but doc and readme renders into the sandbox, the server layer is opened
 // by a command of the cli layer (start-server), and the front layer is served
 // by a route of the server layer.
 func ExtensionRequires(name string) []string {
 	switch name {
-	case ExtensionSandboxServer:
-		return []string{ExtensionSandbox, ExtensionSandboxCli}
-	case ExtensionSandboxFront:
-		return []string{ExtensionSandbox, ExtensionSandboxServer}
-	case ExtensionSandboxBackoffice:
-		return []string{ExtensionSandbox, ExtensionSandboxServer, ExtensionSandboxFront, ExtensionSandboxDatabase}
+	case ExtensionServer:
+		return []string{ExtensionSandbox, ExtensionCli}
+	case ExtensionFront:
+		return []string{ExtensionSandbox, ExtensionServer}
+	case ExtensionBackoffice:
+		return []string{ExtensionSandbox, ExtensionServer, ExtensionFront, ExtensionDatabase}
 	case ExtensionSandbox, ExtensionDoc, ExtensionReadme:
 		return nil
 	}
@@ -106,31 +107,31 @@ func IsExtensionName(name string) bool {
 // ExtensionsConfPath is the project-relative path of the extensions
 // declaration, held in the config directory beside project.yaml.
 func ExtensionsConfPath(sandbox *api.Sandbox) string {
-	return sandbox.Config.ProjectName + "Config/" + ExtensionsConfFile
+	return ConfigDir(sandbox) + "/" + ExtensionsConfFile
 }
 
-// LoadExtensionsConf reads <ProjectName>Config/extensions.yaml back through the
+// LoadExtensionsConf reads AgnosConfig/extensions.yaml back through the
 // transaction-aware io. Like project.yaml it is written once by `agnos start`,
 // so a missing or unparsable file is a hard error: what a project generates is
 // declared, never guessed from the directories it happens to carry.
-func LoadExtensionsConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*extensionsconf.ExtensionsConf, error) {
+func LoadExtensionsConf(sandbox *api.Sandbox, io *stagedfs.StagedFS) (*extensionsconf.ExtensionsConf, error) {
 	rel := ExtensionsConfPath(sandbox)
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
 
 	conf, err := extensionsconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("%s: %w", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("%s: %w", rel, err)
 	}
 	return conf, nil
 }
 
 // SaveExtensionsConf renders conf back over the declaration.
-func SaveExtensionsConf(sandbox *api.Sandbox, io *smartio.SmartIO, conf *extensionsconf.ExtensionsConf) error {
-	return io.WriteFileOverwrite(ExtensionsConfPath(sandbox), []byte(conf.Render()))
+func SaveExtensionsConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, conf *extensionsconf.ExtensionsConf) error {
+	return io.WriteFile(ExtensionsConfPath(sandbox), []byte(conf.Render()))
 }
 
 // NewExtensionsConf is the declaration a fresh project starts with: every key
@@ -161,7 +162,7 @@ func NormalizeExtensions(conf *extensionsconf.ExtensionsConf) bool {
 // ExtensionEnabled reads one key of a project's declaration. It is what an
 // action asks when it needs to know whether a mechanic is on — never the
 // directories that mechanic happens to have written.
-func ExtensionEnabled(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (bool, error) {
+func ExtensionEnabled(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) (bool, error) {
 	conf, err := LoadExtensionsConf(sandbox, io)
 	if err != nil {
 		return false, err
@@ -173,10 +174,10 @@ func ExtensionEnabled(sandbox *api.Sandbox, io *smartio.SmartIO, name string) (b
 // SetExtension flips one key of a project's declaration and writes it back. It
 // is what `enable-extension`, `disable-extension` and every <x>-init / <x>-purge
 // pair go through, so the declaration is never edited by hand.
-func SetExtension(sandbox *api.Sandbox, io *smartio.SmartIO, name string, enabled bool) error {
+func SetExtension(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, enabled bool) error {
 	if !IsExtensionName(name) {
-		return sandbox.Deps.Std.Errorf("unknown extension %q (known: %s)",
-			name, sandbox.Deps.Stringsdeps.Join(ExtensionNames(), ", "))
+		return sandbox.Deps.StdDeps.Errorf("unknown extension %q (known: %s)",
+			name, sandbox.Deps.StringsDeps.Join(ExtensionNames(), ", "))
 	}
 
 	conf, err := LoadExtensionsConf(sandbox, io)
@@ -192,13 +193,13 @@ func SetExtension(sandbox *api.Sandbox, io *smartio.SmartIO, name string, enable
 	if enabled {
 		for _, required := range ExtensionRequires(name) {
 			if !conf.IsEnabled(required) {
-				return sandbox.Deps.Std.Errorf("cannot turn %s on: it needs %s, which is off", name, required)
+				return sandbox.Deps.StdDeps.Errorf("cannot turn %s on: it needs %s, which is off", name, required)
 			}
 		}
 	} else {
 		for _, dependent := range ExtensionDependents(name) {
 			if conf.IsEnabled(dependent) {
-				return sandbox.Deps.Std.Errorf("cannot turn %s off: %s is on and needs it (turn %s off first)", name, dependent, dependent)
+				return sandbox.Deps.StdDeps.Errorf("cannot turn %s off: %s is on and needs it (turn %s off first)", name, dependent, dependent)
 			}
 		}
 	}
@@ -223,13 +224,13 @@ func SetExtension(sandbox *api.Sandbox, io *smartio.SmartIO, name string, enable
 // it back on. It is what a command owned by a mechanic asks before it does
 // anything: a project that declared the mechanic off is not asking agnos to
 // look after those files.
-func RequireExtension(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+func RequireExtension(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) error {
 	enabled, err := ExtensionEnabled(sandbox, io, name)
 	if err != nil {
 		return err
 	}
 	if !enabled {
-		return sandbox.Deps.Std.Errorf("the %s extension is off: turn it on with `agnos enable-extension %s`", name, name)
+		return sandbox.Deps.StdDeps.Errorf("the %s extension is off: turn it on with `agnos enable-extension %s`", name, name)
 	}
 	return nil
 }

@@ -1,17 +1,17 @@
 # The remove-command example: delete a command and unwire its dispatch
 #
-# `agnos` here is this repository's own cli, put on the PATH by `agnos exec-test`.
-# The example writes only inside TestDir.
+# `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
+# The example writes only inside test-dir.
 
-agnos start --path TestDir --project-name Test --module Test -q
-agnos cli-init --path TestDir -q
-agnos add-command greet --help "Greet someone" --category "Core" --path TestDir -q
+agnos start --path test-dir --project-name Test --module Test -q
+agnos cli-init --path test-dir -q
+agnos add-command greet --summary "Greet someone" --category "Core" --path test-dir -q
 
-agnos remove-command greet --path TestDir
+agnos remove-command greet --path test-dir
 
 # What result.yaml records: the paths this example asserts, copied out of
-# TestDir. The lib side copies the same set.
-mkdir -p AssertDir/sandbox/internal/commands
-cp -R TestDir/sandbox/internal/commands/. AssertDir/sandbox/internal/commands/
-mkdir -p AssertDir/docs/Commands
-cp -R TestDir/docs/Commands/. AssertDir/docs/Commands/
+# test-dir. The lib side copies the same set.
+mkdir -p assert-dir/sandbox/internal/commands
+cp -R test-dir/sandbox/internal/commands/. assert-dir/sandbox/internal/commands/
+mkdir -p assert-dir/docs/Commands
+cp -R test-dir/docs/Commands/. assert-dir/docs/Commands/

@@ -7,8 +7,8 @@ builder
 SampleRepo
 blackbox
 front-model
-TestDir
-AssertDir
+test-dir
+assert-dir
 local_test/
 release/
 bugs

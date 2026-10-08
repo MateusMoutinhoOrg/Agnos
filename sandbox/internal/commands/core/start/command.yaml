@@ -1,11 +1,15 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: start
-category: Core Commands
+category: Core
+description: |
+    Scaffolds a new Agnos project in the given directory, creating
+    the required configuration files and folder structure. If no
+    path is provided, the current directory is used.
 examples:
     - start -p my-project -m github.com/you/my-project
     - start -p my-project -m github.com/you/my-project --path ./my-project-dir
@@ -28,9 +32,5 @@ flags:
       keys:
         - --module
         - -m
-help: Initialize a new project in a directory
-long-description: |
-    Scaffolds a new Agnos project in the given directory, creating
-    the required configuration files and folder structure. If no
-    path is provided, the current directory is used.
 priority: 100
+summary: Initialize a new project in a directory

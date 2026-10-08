@@ -4,12 +4,12 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/adapterconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/adapterconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// CheckRemoteDeps is CheckDeplist for a dep copied from another agnos repo:
+// CheckRemoteDeps is CheckDepCatalog for a dep copied from another agnos repo:
 // sandbox/deps/<dep>/ must still be the module's own sandbox/api/, file for
 // file. Nothing else keeps the two in step, so a contract that gained a field
 // upstream would otherwise go on being called through the shape it had when it
@@ -19,7 +19,7 @@ import (
 // go.sum already signs its content, so the comparison is against the cache
 // itself. The check is skipped when the module is not in the cache — it runs
 // with the proxy off, so a verify never reaches the network to answer it.
-func CheckRemoteDeps(sandbox *api.Sandbox, io *smartio.SmartIO, path string) []string {
+func CheckRemoteDeps(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) []string {
 	var violations []string
 
 	for _, adapter := range utils.InstalledAdapters(sandbox, io) {
@@ -47,7 +47,7 @@ func CheckRemoteDeps(sandbox *api.Sandbox, io *smartio.SmartIO, path string) []s
 // cachedModuleDir asks the go toolchain where a module's source is, with the
 // proxy off so the answer can only come from what is already on this machine.
 func cachedModuleDir(sandbox *api.Sandbox, path string, module string) (string, bool) {
-	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
+	result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{
 		Dir:     path,
 		Program: "go",
 		Args:    []string{"list", "-m", "-json", module},
@@ -57,7 +57,7 @@ func cachedModuleDir(sandbox *api.Sandbox, path string, module string) (string, 
 		return "", false
 	}
 
-	parsed, err := sandbox.Deps.Serializables.ParseJson(result.Output)
+	parsed, err := sandbox.Deps.SerializableDeps.ParseJson(result.Output)
 	if err != nil {
 		return "", false
 	}
@@ -81,7 +81,7 @@ func cachedModuleDir(sandbox *api.Sandbox, path string, module string) (string, 
 // Rendering it any other way here would call a correct copy drifted: the
 // stripped Sandbox.Deps field and its import are in the module and never in
 // the copy, so the difference is the install doing its job.
-func checkRemoteCopy(sandbox *api.Sandbox, io *smartio.SmartIO, dep string, dir string) []string {
+func checkRemoteCopy(sandbox *api.Sandbox, io *stagedfs.StagedFS, dep string, dir string) []string {
 	remote, err := add_dep.ReadRemoteApi(sandbox, dir)
 	if err != nil {
 		return []string{"dep " + dep + " could not be compared with the module it was copied from: " + err.Error()}

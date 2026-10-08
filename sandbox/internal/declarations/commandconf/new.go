@@ -2,8 +2,8 @@ package commandconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	serializibles "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/triggerconf"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // DefaultPriority is the rung `add-command` declares a command on, and
@@ -41,15 +41,15 @@ var legacyFieldKeys = []string{"name", "identifiers", "array", "examples"}
 // New parses one command.yaml body into a CommandConf.
 func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
 	if content == "" {
-		return nil, sandbox.Deps.Std.Errorf("content cannot be empty, use NewEmpty instead")
+		return nil, sandbox.Deps.StdDeps.Errorf("content cannot be empty, use NewEmpty instead")
 	}
 
-	specs, parse_error := sandbox.Deps.Serializables.ParseYaml(content)
+	specs, parse_error := sandbox.Deps.SerializableDeps.ParseYaml(content)
 	if parse_error != nil {
 		return nil, parse_error
 	}
 	if !specs.IsObject() {
-		return nil, sandbox.Deps.Std.Errorf("command.yaml is not an object")
+		return nil, sandbox.Deps.StdDeps.Errorf("command.yaml is not an object")
 	}
 
 	conf := NewEmpty(sandbox)
@@ -69,8 +69,8 @@ func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
 	}
 	conf.Examples = readStringArray(specs, "examples")
 	conf.Category = readString(specs, "category")
-	conf.Help = readString(specs, "help")
-	conf.LongDescription = readString(specs, "long-description")
+	conf.Summary = readString(specs, "summary")
+	conf.Description = readString(specs, "description")
 	conf.Hidden = readBool(specs, "hidden")
 
 	for _, key := range legacyKeys {
@@ -100,7 +100,7 @@ func New(sandbox *api.Sandbox, content string) (*CommandConf, error) {
 }
 
 // readArgs parses the `args` sequence, in declaration order.
-func readArgs(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Arg, []string, error) {
+func readArgs(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) ([]Arg, []string, error) {
 	size, err := item.GetArraySize()
 	if err != nil {
 		return nil, nil, err
@@ -135,7 +135,7 @@ func readArgs(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]A
 }
 
 // readFlags parses the `flags` sequence, in declaration order.
-func readFlags(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]Flag, []string, error) {
+func readFlags(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) ([]Flag, []string, error) {
 	size, err := item.GetArraySize()
 	if err != nil {
 		return nil, nil, err
@@ -182,7 +182,7 @@ func readFlags(sandbox *api.Sandbox, item *serializibles.SerializibleObject) ([]
 }
 
 // legacyOf is every key of one arg or flag that only an entries.yaml declared.
-func legacyOf(entry *serializibles.SerializibleObject, list string) []string {
+func legacyOf(entry *serializabledeps.SerializableObject, list string) []string {
 	legacy := []string{}
 	for _, key := range legacyFieldKeys {
 		if item, _ := entry.GetObjectItem(key); item != nil && !item.IsNull() {
@@ -209,7 +209,7 @@ func DefaultKey(sandbox *api.Sandbox, id string) string {
 	return "--" + key
 }
 
-func readString(obj *serializibles.SerializibleObject, key string) string {
+func readString(obj *serializabledeps.SerializableObject, key string) string {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return ""
@@ -221,7 +221,7 @@ func readString(obj *serializibles.SerializibleObject, key string) string {
 	return value
 }
 
-func readInt(obj *serializibles.SerializibleObject, key string) int {
+func readInt(obj *serializabledeps.SerializableObject, key string) int {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return 0
@@ -233,7 +233,7 @@ func readInt(obj *serializibles.SerializibleObject, key string) int {
 	return int(value)
 }
 
-func readBool(obj *serializibles.SerializibleObject, key string) bool {
+func readBool(obj *serializabledeps.SerializableObject, key string) bool {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || item.IsNull() {
 		return false
@@ -247,7 +247,7 @@ func readBool(obj *serializibles.SerializibleObject, key string) bool {
 
 // readNumber reads a scalar yaml int or float as a float64, reporting whether
 // a usable numeric value was found.
-func readNumber(item *serializibles.SerializibleObject) (float64, bool) {
+func readNumber(item *serializabledeps.SerializableObject) (float64, bool) {
 	if item.IsInt() {
 		value, err := item.GetInt()
 		if err != nil {
@@ -265,7 +265,7 @@ func readNumber(item *serializibles.SerializibleObject) (float64, bool) {
 	return 0, false
 }
 
-func readStringArray(obj *serializibles.SerializibleObject, key string) []string {
+func readStringArray(obj *serializabledeps.SerializableObject, key string) []string {
 	item, _ := obj.GetObjectItem(key)
 	if item == nil || !item.IsArray() {
 		return []string{}
@@ -291,7 +291,7 @@ func readStringArray(obj *serializibles.SerializibleObject, key string) []string
 
 // anyToString renders a scalar yaml value as the text a default is spelled
 // with in the generated Go literal.
-func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) string {
+func anyToString(sandbox *api.Sandbox, item *serializabledeps.SerializableObject) string {
 	if item.IsString() {
 		value, _ := item.GetString()
 		return value
@@ -304,11 +304,11 @@ func anyToString(sandbox *api.Sandbox, item *serializibles.SerializibleObject) s
 	}
 	if item.IsInt() {
 		value, _ := item.GetInt()
-		return sandbox.Deps.Stringsdeps.FormatInt(value, 10)
+		return sandbox.Deps.StringsDeps.FormatInt(value, 10)
 	}
 	if item.IsFloat() {
 		value, _ := item.GetFloat()
-		return sandbox.Deps.Stringsdeps.FormatFloat(value, 'g', -1, 64)
+		return sandbox.Deps.StringsDeps.FormatFloat(value, 'g', -1, 64)
 	}
 	return ""
 }

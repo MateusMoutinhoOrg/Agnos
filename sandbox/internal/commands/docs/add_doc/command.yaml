@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,7 +10,13 @@ args:
       id: Name
       required: true
       start: 1
-category: Documentation
+category: Docs
+description: |-
+    Creates docs/<name>/ with a doc.md stub and the doc.yaml declaring it,
+    then runs build so README.md's index and the parent's Index.md list it.
+    A first-level doc needs at least one --theme of themes.yaml; a nested name
+    (docs/<Parent>/<Name>) creates a sub-doc, which takes no theme. Refuses to
+    overwrite an existing doc.
 examples:
     - add-doc HandleReports --theme development --description "How a report is written and regenerated"
     - add-doc PublicApi/api.AddDoc --description "The AddDoc action of the sandbox api"
@@ -27,11 +33,5 @@ flags:
         - --description
         - -d
       required: true
-help: Scaffold a new doc directory under docs/
-long-description: |-
-    Creates docs/<name>/ with a doc.md stub and the props.yaml declaring it,
-    then runs build so README.md's index and the parent's Index.md list it.
-    A first-level doc needs at least one --theme of themes.yaml; a nested name
-    (docs/<Parent>/<Name>) creates a sub-doc, which takes no theme. Refuses to
-    overwrite an existing doc.
 priority: 100
+summary: Scaffold a new doc directory under docs/

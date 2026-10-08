@@ -348,7 +348,7 @@
 
       {{if .Error}}<div class="alert" role="alert">{{html .Error}}</div>{{end}}
 
-      <form action="/admin/create-backoffice-api-token" method="POST">
+      <form action="/admin/add-backoffice-api-token" method="POST">
         <div class="form-group">
           <label for="name">Name</label>
           <input type="text" id="name" name="name" value="{{html .Name}}" required maxlength="100" autocomplete="off" placeholder="What is this token for?">
@@ -384,6 +384,6 @@
       </form>
     </div>
   </main>
-  <script src="/admin/backoffice.js" defer></script>
+  <script src="/backoffice/backoffice.js" defer></script>
 </body>
 </html>

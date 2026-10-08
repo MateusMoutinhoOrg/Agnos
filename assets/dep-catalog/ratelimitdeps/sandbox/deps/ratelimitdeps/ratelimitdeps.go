@@ -1,7 +1,7 @@
 package ratelimitdeps
 
 // This package is the sandbox's *copy* of the api a rate limiter exposes —
-// the same mechanic as std and randdeps, for a reason of its own: a limiter
+// the same mechanic as stddeps and randdeps, for a reason of its own: a limiter
 // is state every request of the process shares, written by requests served at
 // the same time, and the sandbox may not import `sync` to guard it. The
 // contract is restated here, and the adapter — which lives outside the
@@ -12,9 +12,9 @@ package ratelimitdeps
 // window, and the first hit after the window closes opens a new one, back
 // at one. Counters live in memory, so a restart forgets them all.
 
-// Sandbox is the rate limiter injected whole as the Deps.Ratelimitdeps field.
+// Contract is the rate limiter injected whole as the Deps.RatelimitDeps field.
 // Every function is safe to call from requests served concurrently.
-type Sandbox struct {
+type Contract struct {
 	// Hit records one hit under key, in a window of windowSeconds, and
 	// returns how many hits the window holds with it included.
 	Hit func(key string, windowSeconds int64) int

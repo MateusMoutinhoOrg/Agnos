@@ -2,8 +2,8 @@ package import_body
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -19,7 +19,7 @@ import (
 // per key, the objects and the lists around them, and, with --infer-format,
 // the four formats a string may spell. Every bound after that is
 // set-body-field's.
-func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteBodyImportProps) error {
+func ImportBodyInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.ImportBodyProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
 		return err
@@ -38,7 +38,7 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 		conf.Body.ContentType = routeconf.DefaultJsonContentType
 	}
 	if routeconf.SchemaKeyOf(conf.Body.Type) == "" {
-		return sandbox.Deps.Std.Errorf("route %q declares a %q body, which carries no schema (`set-body --type json` or `--type form` first)", props.Route, conf.Body.Type)
+		return sandbox.Deps.StdDeps.Errorf("route %q declares a %q body, which carries no schema (`set-body --type json` or `--type form` first)", props.Route, conf.Body.Type)
 	}
 	if conf.Body.Schema == nil || props.Replace {
 		conf.Body.Schema = &routeconf.Schema{Type: "object"}
@@ -50,20 +50,20 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 		return err
 	}
 	if inferred.Type != "object" {
-		return sandbox.Deps.Std.Errorf("an example payload is a json object: a body schema's root is the object its keys are declared in")
+		return sandbox.Deps.StdDeps.Errorf("an example payload is a json object: a body schema's root is the object its keys are declared in")
 	}
 
-	sandbox.Deps.Std.Log("import-body reading %s from the example \n", utils.RouteConfPath(sandbox, io, props.Route))
+	sandbox.Deps.StdDeps.Logf("import-body reading %s from the example \n", utils.RouteConfPath(sandbox, io, props.Route))
 
 	added, skipped := mergeSchema(sandbox, conf.Body.Schema, inferred, "")
 	for _, name := range added {
-		sandbox.Deps.Std.Log("import-body adding %s \n", name)
+		sandbox.Deps.StdDeps.Logf("import-body adding %s \n", name)
 	}
 	for _, name := range skipped {
-		sandbox.Deps.Std.Log("import-body leaving %s as it is: already declared \n", name)
+		sandbox.Deps.StdDeps.Logf("import-body leaving %s as it is: already declared \n", name)
 	}
 	if len(added) == 0 {
-		return sandbox.Deps.Std.Errorf("the example declares no property this route does not already have (--replace starts the schema over)")
+		return sandbox.Deps.StdDeps.Errorf("the example declares no property this route does not already have (--replace starts the schema over)")
 	}
 	if conf.Body.Type == "form" {
 		if err := utils.CheckFormSchema(sandbox, props.Route, conf.Body.Schema); err != nil {
@@ -76,25 +76,25 @@ func ImportBodyInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.Rou
 
 // readExample is the payload itself: the document typed on the command line,
 // or the file named instead of it. The file is read off the host rather than
-// through the project's SmartIO — an example payload is something the person
+// through the project's StagedFS — an example payload is something the person
 // has lying about, not a file of the project being edited.
-func readExample(sandbox *api.Sandbox, props api.RouteBodyImportProps) (string, error) {
-	inline := sandbox.Deps.Stringsdeps.TrimSpace(props.Json)
-	file := sandbox.Deps.Stringsdeps.TrimSpace(props.File)
+func readExample(sandbox *api.Sandbox, props api.ImportBodyProps) (string, error) {
+	inline := sandbox.Deps.StringsDeps.TrimSpace(props.Json)
+	file := sandbox.Deps.StringsDeps.TrimSpace(props.File)
 
 	if inline != "" && file != "" {
-		return "", sandbox.Deps.Std.Errorf("--json and --file are two ways of giving the same example: pass one of them")
+		return "", sandbox.Deps.StdDeps.Errorf("--json and --file are two ways of giving the same example: pass one of them")
 	}
 	if inline != "" {
 		return inline, nil
 	}
 	if file == "" {
-		return "", sandbox.Deps.Std.Errorf("import-body needs an example payload: --json '{...}' or --file payload.json")
+		return "", sandbox.Deps.StdDeps.Errorf("import-body needs an example payload: --json '{...}' or --file payload.json")
 	}
 
-	content, err := sandbox.Deps.Iodeps.ReadFile(file)
+	content, err := sandbox.Deps.IoDeps.ReadFile(file)
 	if err != nil {
-		return "", sandbox.Deps.Std.Errorf("could not read the example payload at %q", file)
+		return "", sandbox.Deps.StdDeps.Errorf("could not read the example payload at %q", file)
 	}
 	return string(content), nil
 }

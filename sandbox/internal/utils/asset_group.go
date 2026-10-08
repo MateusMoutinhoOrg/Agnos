@@ -2,8 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/extensionsconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/extensionsconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // AssetGroup is one renderable directory of assets/. Name is both the
@@ -11,8 +11,8 @@ import (
 // the set of extensions that must all be enabled for it to render.
 //
 // A mechanic's own group is named after its extension and requires only that
-// one (assets/sandbox-cli renders when sandbox-cli is on). A doc group is
-// named doc-<a>-<b> and requires doc plus each sandbox-<x> it names, because a
+// one (assets/cli renders when cli is on). A doc group is
+// named doc-<a>-<b> and requires doc plus each <x> it names, because a
 // layer's pages only exist when both the docs and that layer do.
 type AssetGroup struct {
 	Name     string
@@ -28,23 +28,23 @@ type AssetGroup struct {
 
 // AssetGroups is every group a build may render, in render order. assets/start
 // is not here: it is written once by `start` and is not a mechanic. Neither
-// are sandbox-front and sandbox-database: their code is the OpinatedAgnosFront
-// and OpinatedAgnosDatabase libs, installed by their -init, so each mechanic
+// are front and database: their code is the OpinionatedAgnosFront
+// and OpinionatedAgnosDatabase libs, installed by their -init, so each mechanic
 // renders its pages and nothing else.
 func AssetGroups() []AssetGroup {
 	return []AssetGroup{
 		{ExtensionSandbox, []string{ExtensionSandbox}, true},
-		{ExtensionSandboxDeps, []string{ExtensionSandboxDeps}, true},
-		{ExtensionSandboxCli, []string{ExtensionSandboxCli}, true},
-		{ExtensionSandboxServer, []string{ExtensionSandboxServer}, true},
+		{ExtensionDeps, []string{ExtensionDeps}, true},
+		{ExtensionCli, []string{ExtensionCli}, true},
+		{ExtensionServer, []string{ExtensionServer}, true},
 		{ExtensionDoc, []string{ExtensionDoc}, false},
-		{"doc-cli", []string{ExtensionDoc, ExtensionSandboxCli}, false},
-		{"doc-server", []string{ExtensionDoc, ExtensionSandboxServer}, false},
-		{"doc-front", []string{ExtensionDoc, ExtensionSandboxFront}, false},
-		{"doc-database", []string{ExtensionDoc, ExtensionSandboxDatabase}, false},
-		{"doc-backoffice", []string{ExtensionDoc, ExtensionSandboxBackoffice}, false},
-		{"doc-example", []string{ExtensionDoc, ExtensionSandboxExample}, false},
-		{"doc-example-cli", []string{ExtensionDoc, ExtensionSandboxExample, ExtensionSandboxCli}, false},
+		{"doc-cli", []string{ExtensionDoc, ExtensionCli}, false},
+		{"doc-server", []string{ExtensionDoc, ExtensionServer}, false},
+		{"doc-front", []string{ExtensionDoc, ExtensionFront}, false},
+		{"doc-database", []string{ExtensionDoc, ExtensionDatabase}, false},
+		{"doc-backoffice", []string{ExtensionDoc, ExtensionBackoffice}, false},
+		{"doc-example", []string{ExtensionDoc, ExtensionExample}, false},
+		{"doc-example-cli", []string{ExtensionDoc, ExtensionExample, ExtensionCli}, false},
 		{ExtensionReadme, []string{ExtensionReadme}, false},
 	}
 }
@@ -79,7 +79,7 @@ func DocGroups(sandbox *api.Sandbox, conf *extensionsconf.ExtensionsConf) []stri
 		if !GroupEnabled(conf, group) {
 			continue
 		}
-		if group.Name == ExtensionDoc || sandbox.Deps.Stringsdeps.HasPrefix(group.Name, ExtensionDoc+"-") {
+		if group.Name == ExtensionDoc || sandbox.Deps.StringsDeps.HasPrefix(group.Name, ExtensionDoc+"-") {
 			groups = append(groups, group.Name)
 		}
 	}
@@ -111,7 +111,7 @@ func ExtensionFiles(sandbox *api.Sandbox, name string) ([]string, error) {
 	var paths []string
 
 	for _, group := range GroupsRequiring(name) {
-		files, err := sandbox.Deps.Embeddeps.ListFilesRecursively(group)
+		files, err := sandbox.Deps.EmbedDeps.ListFilesRecursively(group)
 		if err != nil {
 			return nil, err
 		}
@@ -127,7 +127,7 @@ func ExtensionFiles(sandbox *api.Sandbox, name string) ([]string, error) {
 // collector output those templates need.
 //
 // A mechanic with no code group renders nothing here.
-func RenderExtensionCode(sandbox *api.Sandbox, io *smartio.SmartIO, name string) error {
+func RenderExtensionCode(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) error {
 	for _, group := range AssetGroups() {
 		if group.Name != name || !group.Code {
 			continue

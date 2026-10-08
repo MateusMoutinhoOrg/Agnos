@@ -3,16 +3,16 @@ package remove_flag
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	buildAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/build"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // RemoveFlag drops one flag declaration from
-// sandbox/internal/commands/<command>/entries.yaml, then runs build so the
+// sandbox/internal/commands/<category>/<command>/command.yaml, then runs build so the
 // generated new.go forgets it.
-func RemoveFlag(sandbox *api.Sandbox, path string, command string, name string) error {
-	io := smartio.New(sandbox, path, sandbox.Config.ProjectName)
-	if err := RemoveFlagInternal(sandbox, io, command, name); err != nil {
+func RemoveFlag(sandbox *api.Sandbox, props api.RemoveFlagProps) error {
+	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
+	if err := RemoveFlagInternal(sandbox, io, props.Command, props.Name); err != nil {
 		return err
 	}
-	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: path, Runtime: api.RuntimeNone})
+	return buildAction.PersistAndBuild(sandbox, io, api.BuildProps{Path: props.Path, Runtime: api.RuntimeNone})
 }

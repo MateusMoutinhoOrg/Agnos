@@ -1,12 +1,12 @@
-package availableconf
+package bindingconf
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
 
-func BindMethods(sandbox *api.Sandbox, available_conf *AvailableConf) {
-	available_conf.Has = func(adapter string) bool {
-		for _, candidate := range available_conf.Adapters {
+func BindMethods(sandbox *api.Sandbox, binding_conf *BindingConf) {
+	binding_conf.Has = func(adapter string) bool {
+		for _, candidate := range binding_conf.Adapters {
 			if candidate == adapter {
 				return true
 			}
@@ -14,30 +14,30 @@ func BindMethods(sandbox *api.Sandbox, available_conf *AvailableConf) {
 		return false
 	}
 
-	available_conf.Add = func(adapter string) bool {
-		if available_conf.Has(adapter) {
+	binding_conf.Add = func(adapter string) bool {
+		if binding_conf.Has(adapter) {
 			return false
 		}
-		available_conf.Adapters = append(available_conf.Adapters, adapter)
-		sandbox.Deps.Sortdeps.Strings(available_conf.Adapters)
+		binding_conf.Adapters = append(binding_conf.Adapters, adapter)
+		sandbox.Deps.SortDeps.Strings(binding_conf.Adapters)
 		return true
 	}
 
-	available_conf.Remove = func(adapter string) bool {
+	binding_conf.Remove = func(adapter string) bool {
 		kept := []string{}
-		for _, candidate := range available_conf.Adapters {
+		for _, candidate := range binding_conf.Adapters {
 			if candidate != adapter {
 				kept = append(kept, candidate)
 			}
 		}
-		if len(kept) == len(available_conf.Adapters) {
+		if len(kept) == len(binding_conf.Adapters) {
 			return false
 		}
-		available_conf.Adapters = kept
+		binding_conf.Adapters = kept
 		return true
 	}
 
-	available_conf.Render = func() string {
-		return Render(sandbox, available_conf)
+	binding_conf.Render = func() string {
+		return Render(sandbox, binding_conf)
 	}
 }

@@ -1,11 +1,11 @@
 package argvdeps
 
-// Sandbox is the argv-parser constructor injected whole as the Deps.ArgvLib
-// field — the same mechanic as requestdeps.Sandbox. A parser is bound to one
+// Contract is the argv-parser constructor injected whole as the Deps.ArgvDeps
+// field — the same mechanic as requestdeps.Contract. A parser is bound to one
 // argument vector, so it is created per call rather than injected once: what
 // the sandbox holds is this one-field struct, and the adapter — which lives
 // outside the sandbox — fills New over a concrete argv-parser library.
-type Sandbox struct {
+type Contract struct {
 	// New builds an argv parser bound to the given arguments.
 	New func(args []string) Parser
 }

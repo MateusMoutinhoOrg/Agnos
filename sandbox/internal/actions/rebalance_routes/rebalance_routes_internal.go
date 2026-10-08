@@ -2,7 +2,7 @@ package rebalance_routes
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -14,15 +14,15 @@ const healthRoute = "health"
 // Step, and so on. Two routes that shared a
 // rung ran by name, and still do, each on a rung of its own; what changes is
 // that --before and --after have room again.
-func RebalanceRoutesInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RebalanceRoutesProps) error {
+func RebalanceRoutesInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.RebalanceRoutesProps) error {
 	if props.Step < 1 {
-		return sandbox.Deps.Std.Errorf("--step %d is below 1: the rungs have to be apart", props.Step)
+		return sandbox.Deps.StdDeps.Errorf("--step %d is below 1: the rungs have to be apart", props.Step)
 	}
 	if err := utils.RequireProject(sandbox, io); err != nil {
 		return err
 	}
 	if !io.IsDir(utils.RoutesDir) {
-		return sandbox.Deps.Std.Errorf("the project has no server layer: run server-init first")
+		return sandbox.Deps.StdDeps.Errorf("the project has no server layer: run server-init first")
 	}
 
 	chain, err := utils.LoadRouteChain(sandbox, io)
@@ -39,7 +39,7 @@ func RebalanceRoutesInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props ap
 		if entry.Conf.Priority == rung {
 			continue
 		}
-		sandbox.Deps.Std.Log("rebalance-routes %s: %d -> %d \n", utils.RouteIdentifier(sandbox, entry.Name), entry.Conf.Priority, rung)
+		sandbox.Deps.StdDeps.Logf("rebalance-routes %s: %d -> %d \n", utils.RouteName(sandbox, entry.Name), entry.Conf.Priority, rung)
 		entry.Conf.Priority = rung
 		if err := utils.SaveRouteConf(sandbox, io, entry.Name, entry.Conf); err != nil {
 			return err

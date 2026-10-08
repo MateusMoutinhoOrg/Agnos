@@ -1,25 +1,25 @@
-package backofficedb
+package backoffice_db
 
 import (
 	api "{{.Module}}/sandbox/api"
 )
 
-// RemoveBackofficeuserSessions deletes one sessions record of one
-// backofficeuser record. The declaration generates Add and List for a nested
-// collection but no Remove, so it is written here. Removing a record that is
-// already gone is not an error.
-func RemoveBackofficeuserSessions(sandbox *api.Sandbox, self *Backofficedb, parent_id int64, id int64) error {
-	schema, err := sandbox.Deps.OpinatedAgnosDatabase.Schema(self.handle, "backofficeuser")
+// RemoveBackofficeUserSession deletes one session of one backoffice-user
+// record. The declaration generates Add and List for a nested collection but no
+// Remove, so it is written here. Removing a session that is already gone is not
+// an error.
+func RemoveBackofficeUserSession(sandbox *api.Sandbox, db *BackofficeDb, userId int64, sessionId int64) error {
+	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(db.handle, "backoffice-user")
 	if err != nil {
 		return err
 	}
-	parent, ok := schema.FindById(parent_id)
+	user, ok := schema.FindById(userId)
 	if !ok {
-		return sandbox.Deps.Std.Errorf("backofficeuser %d not found", parent_id)
+		return sandbox.Deps.StdDeps.Errorf("backoffice-user %d not found", userId)
 	}
-	for _, item := range parent.ListAll("sessions") {
-		if item.Id == id {
-			return sandbox.Deps.OpinatedAgnosDatabase.Fail(item.Remove())
+	for _, item := range user.ListAll("session") {
+		if item.Id == sessionId {
+			return sandbox.Deps.OpinionatedAgnosDatabase.Fail(item.Remove())
 		}
 	}
 	return nil

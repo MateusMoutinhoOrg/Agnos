@@ -1,18 +1,18 @@
-package security_headers
+package backoffice_security_headers
 
 import (
 	"{{.Module}}/sandbox/api"
 	"{{.Module}}/sandbox/deps/serverdeps"
 	"{{.Module}}/sandbox/internal/routeprops"
-	"{{.Module}}/sandbox/internal/server/backoffice/backofficeguard"
+	"{{.Module}}/sandbox/internal/server/backoffice/backofficehttp"
 )
 
-// InternalPureHandler runs in front of every ANY /admin and /api/admin path,
-// on a lower rung of the chain than the authentication middlewares: it is a
-// middleware. It sets backofficeguard.SecurityHeaders and declines; setting a header
+// Handle runs in front of every ANY /admin and /api/admin path,
+// on a lower rung of the chain than the backoffice-session-auth and backoffice-api-token-auth middlewares: it is a
+// middleware. It sets backofficehttp.SecurityHeaders and declines; setting a header
 // answers nothing, so whichever route or Handle* file answers the request
 // next — a page, a JSON document, a 401 — carries them.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
-	backofficeguard.SecurityHeaders(sandbox, response)
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
+	backofficehttp.SecurityHeaders(sandbox, response)
 	return nil
 }

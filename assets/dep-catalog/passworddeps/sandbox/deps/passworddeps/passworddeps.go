@@ -12,9 +12,9 @@ package passworddeps
 // out is slow on purpose, carries a random salt of its own and names the
 // parameters it was derived with, so Verify reads them back from it.
 
-// Sandbox is the password hashing library injected whole as the
-// Deps.Passworddeps field.
-type Sandbox struct {
+// Contract is the password hashing library injected whole as the
+// Deps.PasswordDeps field.
+type Contract struct {
 	// Hash derives a hash of password to store, over a fresh random salt,
 	// spelled with everything Verify needs to check a password against it.
 	// The error reports a random source that could not be read.

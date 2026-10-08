@@ -6,15 +6,15 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	install_error := addAdapterAction.AddAdapter(sandbox, api.AddAdapterProps{
-		Path:      props.Path,
-		Adapter:   entries.Adapter,
-		Available: entries.Available,
+		Path:    props.Path,
+		Adapter: input.Name,
+		Binding: input.Binding,
 	})
 
 	if install_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", install_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", install_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

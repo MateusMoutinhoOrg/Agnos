@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -11,6 +11,6 @@ import (
 // GenerateDocIndexes, which writes docs/Index/<theme-id>.md and one Index.md
 // per doc that has sub-docs. A project with no docs/ directory yields an empty
 // slice.
-func CollectDocs(sandbox *api.Sandbox, io *smartio.SmartIO) ([]utils.Doc, error) {
+func CollectDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]utils.Doc, error) {
 	return utils.CollectDocTree(sandbox, io)
 }

@@ -3,10 +3,10 @@
 Declare a new database in the project
 
 ```bash
-agnos add-database <Name> [--prefix <prefix>] [--help] [--path <path>] [--quiet]
+agnos add-database <Name> [--key-prefix <key-prefix>] [--help] [--path <path>] [--quiet]
 ```
 
-Writes sandbox/internal/databases/<name>/specs.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: 'agnos add-table' declares the first one.
+Writes sandbox/internal/databases/<name>/database.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: 'agnos add-table' declares the first one.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -14,18 +14,18 @@ Writes sandbox/internal/databases/<name>/specs.yaml and runs build, which genera
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--prefix` | string |  | the key prefix every record is written under (defaults to the database's own name) | — |
+| `--key-prefix` | string |  | the key prefix every record is written under (defaults to the database's own name) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
-agnos add-database app-database --prefix app
+agnos add-database app-database --key-prefix app
 ```
 
-Database System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Database · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

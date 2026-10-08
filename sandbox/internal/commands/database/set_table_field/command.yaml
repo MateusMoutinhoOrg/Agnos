@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,7 +10,8 @@ args:
       id: Name
       required: true
       start: 1
-category: Database System
+category: Database
+description: 'Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again.'
 examples:
     - set-table-field link --database app-database --table url --required
 flags:
@@ -20,11 +21,11 @@ flags:
     - description: the table the field is declared on
       id: Table
       required: true
-    - description: the nested database field the field sits inside, instead of the table itself
+    - description: the nested object field the field sits inside, instead of the table itself
       id: Parent
     - description: the name the field is stored under from now on
       id: Rename
-    - description: 'the field type it takes on: key, string, int, float, link or database'
+    - description: 'the field type it takes on: key, string, integer, number, link or object'
       id: Type
     - description: an insert must carry this field
       id: Required
@@ -34,6 +35,5 @@ flags:
     - description: 'a key to take off again: required or target (repeatable)'
       id: Clear
       type: string-array
-help: Rewrite one declared field of a table
-long-description: 'Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again.'
 priority: 100
+summary: Rewrite one declared field of a table

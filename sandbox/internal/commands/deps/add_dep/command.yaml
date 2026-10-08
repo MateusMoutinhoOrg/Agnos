@@ -1,16 +1,17 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: add-dep
-    - description: the dep to install from assets/deplist
+    - description: the dep to install from assets/dep-catalog
       end: 1
-      id: Dep
+      id: Name
       required: true
       start: 1
-category: Deps System
+category: Deps
+description: Renders the contract of assets/dep-catalog/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every binding.
 examples:
     - add-dep embeddeps
     - add-dep embeddeps --path ./my-project
@@ -19,8 +20,7 @@ flags:
       id: Adapter
     - description: the name the copied contract takes under sandbox/deps/ (remote deps only; defaults to the last segment of the module path)
       id: As
-    - description: the available of the remote repo the generated shim builds its sandbox from
-      id: RemoteAvailable
-help: Installs one dep of the embedded catalog into the project
-long-description: Renders the contract of assets/deplist/<dep> and the adapter that fills it, then calls build. The adapter is the dep's default-adapter unless --adapter names another; it is enrolled in every available.
+    - description: the binding of the remote repo the generated shim builds its sandbox from
+      id: RemoteBinding
 priority: 100
+summary: Install one dep of the embedded catalog into the project

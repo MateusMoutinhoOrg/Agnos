@@ -3,7 +3,7 @@ package main
 import (
 	"os"
 
-	"github.com/MateusMoutinhoOrg/Agnos/adapters/availables/standard"
+	"github.com/MateusMoutinhoOrg/Agnos/adapters/bindings/standard"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 )
@@ -11,8 +11,8 @@ import (
 // The set-dep example: re-copy a remote dep after its contract moved
 //
 // It calls the same action `agnos set-dep` calls, and writes only inside
-// TestDir. The setup is the one in add-remote-dep: TestDir/remote is the repo
-// being installed and TestDir/app the consumer, wired with a `replace` so the
+// test-dir. The setup is the one in add-remote-dep: test-dir/remote is the repo
+// being installed and test-dir/app the consumer, wired with a `replace` so the
 // pair can be developed side by side. Here the remote contract then gains a
 // field, and SetDep is what carries it across — the copy and the generated shim
 // together.
@@ -25,35 +25,35 @@ func main() {
 	app_module := "example/app"
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir/remote",
+		Path:        "test-dir/remote",
 		ProjectName: "Remote",
 		Module:      &remote_module,
 	}); err != nil {
 		panic(err)
 	}
 
-	write("TestDir/remote/sandbox/api/greeter.go", greeterBefore)
+	write("test-dir/remote/sandbox/api/greeter.go", greeterBefore)
 
-	if err := lib.Actions.Build(api.BuildProps{Path: "TestDir/remote", Runtime: api.RuntimeGo}); err != nil {
+	if err := lib.Actions.Build(api.BuildProps{Path: "test-dir/remote", Runtime: api.RuntimeGo}); err != nil {
 		panic(err)
 	}
 
 	if err := lib.Actions.Start(api.StartProps{
-		Path:        "TestDir/app",
+		Path:        "test-dir/app",
 		ProjectName: "App",
 		Module:      &app_module,
 	}); err != nil {
 		panic(err)
 	}
 
-	if err := lib.Actions.DepsInit("TestDir/app"); err != nil {
+	if err := lib.Actions.DepsInit(api.DepsInitProps{Path: "test-dir/app"}); err != nil {
 		panic(err)
 	}
 
-	appendTo("TestDir/app/go.mod", "\nrequire example/remote v0.0.1\n\nreplace example/remote => ../remote\n")
+	appendTo("test-dir/app/go.mod", "\nrequire example/remote v0.0.1\n\nreplace example/remote => ../remote\n")
 
 	if err := lib.Actions.AddDep(api.AddDepProps{
-		Path: "TestDir/app",
+		Path: "test-dir/app",
 		Dep:  "example/remote",
 		As:   "remote",
 	}); err != nil {
@@ -61,14 +61,14 @@ func main() {
 	}
 
 	// The remote contract moves: one more field on the props it takes.
-	write("TestDir/remote/sandbox/api/greeter.go", greeterAfter)
+	write("test-dir/remote/sandbox/api/greeter.go", greeterAfter)
 
-	if err := lib.Actions.Build(api.BuildProps{Path: "TestDir/remote", Runtime: api.RuntimeGo}); err != nil {
+	if err := lib.Actions.Build(api.BuildProps{Path: "test-dir/remote", Runtime: api.RuntimeGo}); err != nil {
 		panic(err)
 	}
 
 	if err := lib.Actions.SetDep(api.SetDepProps{
-		Path:    "TestDir/app",
+		Path:    "test-dir/app",
 		Dep:     "remote",
 		Version: "v0.0.1",
 	}); err != nil {
@@ -76,11 +76,11 @@ func main() {
 	}
 
 	// What result.yaml records: the paths this example asserts, copied out of
-	// TestDir. The cli side copies the same set.
-	if err := os.CopyFS("AssertDir/sandbox/deps", os.DirFS("TestDir/app/sandbox/deps")); err != nil {
+	// test-dir. The cli side copies the same set.
+	if err := os.CopyFS("assert-dir/sandbox/deps", os.DirFS("test-dir/app/sandbox/deps")); err != nil {
 		panic(err)
 	}
-	if err := os.CopyFS("AssertDir/adapters", os.DirFS("TestDir/app/adapters")); err != nil {
+	if err := os.CopyFS("assert-dir/adapters", os.DirFS("test-dir/app/adapters")); err != nil {
 		panic(err)
 	}
 }

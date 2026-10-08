@@ -6,10 +6,10 @@ package randdeps
 // may not appear inside it. The contract is restated here, and the adapter —
 // which lives outside the sandbox — is what fills it.
 
-// Sandbox is the random source injected whole as the Deps.Randdeps field.
+// Contract is the random source injected whole as the Deps.RandDeps field.
 // Every byte it hands out comes from the operating system's cryptographically
 // secure generator, so what it answers may be used as a secret.
-type Sandbox struct {
+type Contract struct {
 	// Hex returns bytes random bytes, lower-case hexadecimal — a string twice
 	// bytes long. The error reports a generator that could not be read.
 	Hex func(bytes int) (string, error)

@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,13 +10,13 @@ args:
       id: Name
       required: true
       start: 1
-category: Server System
+category: Server
+description: 'Drops one property of the body json-schema, named by the same dotted path add-body-field declared it with, and unlists it from its parent''s required set. The build renders only: dropping a property may leave hand-written code referring to what is gone.'
 examples:
     - remove-body-field address.city --route create-user
 flags:
     - description: the route (identifier or package name) the property is declared on
       id: Route
       required: true
-help: Delete one property of a route's body json- or form-schema
-long-description: 'Drops one property of the body json-schema, named by the same dotted path add-body-field declared it with, and unlists it from its parent''s required set. The build renders only: dropping a property may leave hand-written code referring to what is gone.'
 priority: 100
+summary: Delete one property of a route's body json- or form-schema

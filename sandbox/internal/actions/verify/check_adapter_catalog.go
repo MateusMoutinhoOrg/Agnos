@@ -2,34 +2,34 @@ package verify
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// adapterlistDir is the tree `add-dep` renders the implementation half
+// adapterCatalogDir is the tree `add-dep` renders the implementation half
 // from: one directory per installable adapter, each holding its adapter.yaml
 // beside a mirror of the layout it is rendered into.
-const adapterlistDir = "assets/" + utils.AdapterlistGroup
+const adapterCatalogDir = "assets/" + utils.AdapterCatalogGroup
 
-// CheckAdapterlist is CheckDeplist for the other half of the catalog: every
+// CheckAdapterCatalog is CheckDepCatalog for the other half of the catalog: every
 // installable adapter must stay byte-identical to the copy this project runs
 // on. The adapter.yaml is the one asset that does not sit at the path it
 // installs to — it declares the package rather than belonging to the mirror —
 // so it is compared against the copy install writes into the package.
 //
-// A project with no assets/adapterlist has nothing to check.
-func CheckAdapterlist(sandbox *api.Sandbox, io *smartio.SmartIO, module string) []string {
+// A project with no assets/adapter-catalog has nothing to check.
+func CheckAdapterCatalog(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) []string {
 	var violations []string
 
-	if !io.IsDir(adapterlistDir) {
+	if !io.IsDir(adapterCatalogDir) {
 		return violations
 	}
 
-	for _, dir := range io.ListDirs(adapterlistDir) {
+	for _, dir := range io.ListDirs(adapterCatalogDir) {
 		adapter := lastSegment(sandbox, dir)
 
 		for _, asset := range io.ListFilesRecursively(dir) {
-			relative := sandbox.Deps.Stringsdeps.TrimPrefix(asset, dir+"/")
+			relative := sandbox.Deps.StringsDeps.TrimPrefix(asset, dir+"/")
 
 			target := relative
 			if relative == utils.AdapterConfFile {

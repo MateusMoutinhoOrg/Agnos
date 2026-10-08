@@ -2,7 +2,7 @@ package add_path
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -10,7 +10,7 @@ import (
 // into `paths` and writes the file back. Every entry of `paths` has to match
 // for the route to run, so where it lands only changes the order route.yaml
 // and the docs read in.
-func AddPathInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RoutePathProps) error {
+func AddPathInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.AddPathProps) error {
 	conf, err := utils.LoadRouteConf(sandbox, io, props.Route)
 	if err != nil {
 		return err
@@ -26,11 +26,11 @@ func AddPathInternal(sandbox *api.Sandbox, io *smartio.SmartIO, props api.RouteP
 		return err
 	}
 	if utils.RouteIdTaken(conf, path.Id, "") {
-		return sandbox.Deps.Std.Errorf("route %q already has an Entries field named %q", props.Route, path.Id)
+		return sandbox.Deps.StdDeps.Errorf("route %q already has an Input field named %q", props.Route, path.Id)
 	}
 
-	sandbox.Deps.Std.Log("add-path adding %s to %s \n", path.Id, utils.RouteConfPath(sandbox, io, props.Route))
+	sandbox.Deps.StdDeps.Logf("add-path adding %s to %s \n", path.Id, utils.RouteConfPath(sandbox, io, props.Route))
 
-	conf.Paths = utils.InsertRoutePath(conf.Paths, path, position)
+	conf.Paths = utils.InsertAt(conf.Paths, path, position)
 	return utils.SaveRouteConf(sandbox, io, props.Route, conf)
 }

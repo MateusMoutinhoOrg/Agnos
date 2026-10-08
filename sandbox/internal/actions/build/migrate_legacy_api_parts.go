@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -24,15 +24,15 @@ var legacyApiParts = [][2]string{
 //
 // It runs before anything reads sandbox/api/, so the part is never taken for
 // a contract of the Sandbox, nor dropped from the aggregate it belongs to.
-func MigrateLegacyApiParts(sandbox *api.Sandbox, io *smartio.SmartIO) ([]string, error) {
+func MigrateLegacyApiParts(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]string, error) {
 	var moved []string
 	for _, file := range io.ListFiles(legacyPropsDir) {
 		name := lastSegmentOf(sandbox, file)
 		for _, pair := range legacyApiParts {
-			if !sandbox.Deps.Stringsdeps.HasPrefix(name, pair[0]) || !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") {
+			if !sandbox.Deps.StringsDeps.HasPrefix(name, pair[0]) || !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") {
 				continue
 			}
-			unit := sandbox.Deps.Stringsdeps.TrimSuffix(sandbox.Deps.Stringsdeps.TrimPrefix(name, pair[0]), ".go")
+			unit := sandbox.Deps.StringsDeps.TrimSuffix(sandbox.Deps.StringsDeps.TrimPrefix(name, pair[0]), ".go")
 			dest := legacyPropsDir + "/" + unit + pair[1]
 			if unit == "" || io.IsFile(dest) {
 				continue
@@ -42,7 +42,7 @@ func MigrateLegacyApiParts(sandbox *api.Sandbox, io *smartio.SmartIO) ([]string,
 			if err != nil {
 				return nil, err
 			}
-			if err := io.WriteFileOverwrite(dest, content); err != nil {
+			if err := io.WriteFile(dest, content); err != nil {
 				return nil, err
 			}
 			io.RemoveDir(file)

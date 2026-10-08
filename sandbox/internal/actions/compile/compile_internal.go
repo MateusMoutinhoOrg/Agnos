@@ -43,19 +43,19 @@ func CompileInternal(sandbox *api.Sandbox, path string, names []string) error {
 		t := targets[name]
 		output := "release/" + t.Output
 
-		sandbox.Deps.Std.Log("compile %s: go build -o %s ./cmd/main (GOOS=%s GOARCH=%s) \n", name, output, t.GOOS, t.GOARCH)
+		sandbox.Deps.StdDeps.Logf("compile %s: go build -o %s ./cmd/main (GOOS=%s GOARCH=%s) \n", name, output, t.GOOS, t.GOARCH)
 
-		result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
+		result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{
 			Dir:     path,
 			Program: "go",
 			Args:    []string{"build", "-o", output, "./cmd/main"},
 			Env:     []string{"CGO_ENABLED=0", "GOOS=" + t.GOOS, "GOARCH=" + t.GOARCH},
 		})
 		if err != nil {
-			return sandbox.Deps.Std.Errorf("compile %s: could not run go build: %w", name, err)
+			return sandbox.Deps.StdDeps.Errorf("compile %s: could not run go build: %w", name, err)
 		}
 		if result.ExitCode != 0 {
-			return sandbox.Deps.Std.Errorf("compile %s: go build failed:\n%s", name, result.Output)
+			return sandbox.Deps.StdDeps.Errorf("compile %s: go build failed:\n%s", name, result.Output)
 		}
 	}
 	return nil
@@ -82,7 +82,7 @@ func Outputs(sandbox *api.Sandbox, requested []string) ([]string, error) {
 // written order is kept. An empty request is a usage error.
 func resolveTargets(sandbox *api.Sandbox, requested []string) ([]string, error) {
 	if len(requested) == 0 {
-		return nil, sandbox.Deps.Std.Errorf("compile: at least one --target is required (or --target all)")
+		return nil, sandbox.Deps.StdDeps.Errorf("compile: at least one --target is required (or --target all)")
 	}
 
 	for _, name := range requested {
@@ -95,7 +95,7 @@ func resolveTargets(sandbox *api.Sandbox, requested []string) ([]string, error) 
 	resolved := []string{}
 	for _, name := range requested {
 		if _, ok := targets[name]; !ok {
-			return nil, sandbox.Deps.Std.Errorf("compile: unknown target %q (accepted: linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, all)", name)
+			return nil, sandbox.Deps.StdDeps.Errorf("compile: unknown target %q (accepted: linux86, linuxarm64, linuxi32, mac86, macarm64, windows86, windowsi32, all)", name)
 		}
 		if seen[name] {
 			continue

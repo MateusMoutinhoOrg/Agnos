@@ -1,7 +1,7 @@
-package opinatedagnosserver
+package opinionatedagnosserver
 
 import (
-	serializables "{{.Module}}/sandbox/deps/serializables"
+	serializabledeps "{{.Module}}/sandbox/deps/serializabledeps"
 )
 
 // The readers below are what the generated bindBody functions of every route
@@ -11,7 +11,7 @@ import (
 // reader never reports: what it cannot read was optional.
 
 // readString returns the named property as text.
-func readString(object *serializables.SerializibleObject, key string) string {
+func readString(object *serializabledeps.SerializableObject, key string) string {
 	item := childOf(object, key)
 	if item == nil || !item.IsString() {
 		return ""
@@ -24,7 +24,7 @@ func readString(object *serializables.SerializibleObject, key string) string {
 }
 
 // readInt returns the named property as an int.
-func readInt(object *serializables.SerializibleObject, key string) int {
+func readInt(object *serializabledeps.SerializableObject, key string) int {
 	value, ok := numberValue(childOrNull(object, key))
 	if !ok {
 		return 0
@@ -33,7 +33,7 @@ func readInt(object *serializables.SerializibleObject, key string) int {
 }
 
 // readFloat returns the named property as a float64.
-func readFloat(object *serializables.SerializibleObject, key string) float64 {
+func readFloat(object *serializabledeps.SerializableObject, key string) float64 {
 	value, ok := numberValue(childOrNull(object, key))
 	if !ok {
 		return 0
@@ -42,7 +42,7 @@ func readFloat(object *serializables.SerializibleObject, key string) float64 {
 }
 
 // readBool returns the named property as a bool.
-func readBool(object *serializables.SerializibleObject, key string) bool {
+func readBool(object *serializabledeps.SerializableObject, key string) bool {
 	item := childOf(object, key)
 	if item == nil || !item.IsBool() {
 		return false
@@ -56,7 +56,7 @@ func readBool(object *serializables.SerializibleObject, key string) bool {
 
 // readObject returns the named property as a document to read further, or nil
 // when it is absent.
-func readObject(object *serializables.SerializibleObject, key string) *serializables.SerializibleObject {
+func readObject(object *serializabledeps.SerializableObject, key string) *serializabledeps.SerializableObject {
 	item := childOf(object, key)
 	if item == nil || !item.IsObject() {
 		return nil
@@ -66,7 +66,7 @@ func readObject(object *serializables.SerializibleObject, key string) *serializa
 
 // readItems returns the named property's items, in order, for an array of any
 // kind. An absent property yields no items.
-func readItems(object *serializables.SerializibleObject, key string) []*serializables.SerializibleObject {
+func readItems(object *serializabledeps.SerializableObject, key string) []*serializabledeps.SerializableObject {
 	item := childOf(object, key)
 	if item == nil || !item.IsArray() {
 		return nil
@@ -75,7 +75,7 @@ func readItems(object *serializables.SerializibleObject, key string) []*serializ
 	if err != nil {
 		return nil
 	}
-	items := make([]*serializables.SerializibleObject, 0, size)
+	items := make([]*serializabledeps.SerializableObject, 0, size)
 	for i := 0; i < size; i++ {
 		entry := item.GetArrayItem(i)
 		if entry == nil {
@@ -87,7 +87,7 @@ func readItems(object *serializables.SerializibleObject, key string) []*serializ
 }
 
 // itemString reads one array item as text.
-func itemString(item *serializables.SerializibleObject) string {
+func itemString(item *serializabledeps.SerializableObject) string {
 	if item == nil || !item.IsString() {
 		return ""
 	}
@@ -99,7 +99,7 @@ func itemString(item *serializables.SerializibleObject) string {
 }
 
 // itemInt reads one array item as an int.
-func itemInt(item *serializables.SerializibleObject) int {
+func itemInt(item *serializabledeps.SerializableObject) int {
 	value, ok := numberValue(itemOrNull(item))
 	if !ok {
 		return 0
@@ -108,7 +108,7 @@ func itemInt(item *serializables.SerializibleObject) int {
 }
 
 // itemFloat reads one array item as a float64.
-func itemFloat(item *serializables.SerializibleObject) float64 {
+func itemFloat(item *serializabledeps.SerializableObject) float64 {
 	value, ok := numberValue(itemOrNull(item))
 	if !ok {
 		return 0
@@ -117,7 +117,7 @@ func itemFloat(item *serializables.SerializibleObject) float64 {
 }
 
 // itemBool reads one array item as a bool.
-func itemBool(item *serializables.SerializibleObject) bool {
+func itemBool(item *serializabledeps.SerializableObject) bool {
 	if item == nil || !item.IsBool() {
 		return false
 	}
@@ -130,7 +130,7 @@ func itemBool(item *serializables.SerializibleObject) bool {
 
 // childOf returns the named property of object, or nil when either the object
 // or the property is absent.
-func childOf(object *serializables.SerializibleObject, key string) *serializables.SerializibleObject {
+func childOf(object *serializabledeps.SerializableObject, key string) *serializabledeps.SerializableObject {
 	if object == nil || !object.IsObject() {
 		return nil
 	}
@@ -143,7 +143,7 @@ func childOf(object *serializables.SerializibleObject, key string) *serializable
 
 // childOrNull is childOf for the numeric readers, which take a node rather
 // than an object and a key.
-func childOrNull(object *serializables.SerializibleObject, key string) *serializables.SerializibleObject {
+func childOrNull(object *serializabledeps.SerializableObject, key string) *serializabledeps.SerializableObject {
 	item := childOf(object, key)
 	if item == nil {
 		return nullNode()
@@ -153,7 +153,7 @@ func childOrNull(object *serializables.SerializibleObject, key string) *serializ
 
 // itemOrNull stands a missing array item in for a null one, so the numeric
 // readers never take a nil.
-func itemOrNull(item *serializables.SerializibleObject) *serializables.SerializibleObject {
+func itemOrNull(item *serializabledeps.SerializableObject) *serializabledeps.SerializableObject {
 	if item == nil {
 		return nullNode()
 	}
@@ -162,8 +162,8 @@ func itemOrNull(item *serializables.SerializibleObject) *serializables.Serializi
 
 // nullNode is the stand-in a reader falls back to: a node that is of no kind,
 // so every reader answers with its zero value.
-func nullNode() *serializables.SerializibleObject {
-	return &serializables.SerializibleObject{
+func nullNode() *serializabledeps.SerializableObject {
+	return &serializabledeps.SerializableObject{
 		IsInt:   func() bool { return false },
 		IsFloat: func() bool { return false },
 	}

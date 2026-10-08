@@ -2,7 +2,7 @@ package build
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -17,7 +17,7 @@ const databasePagesDir = utils.DocsDir + "/Databases"
 //
 // A page whose database is gone is removed here, so the directory holds the
 // databases that are declared now and no page nothing links to.
-func GenerateDatabasePages(sandbox *api.Sandbox, io *smartio.SmartIO, docs []DatabaseDoc) error {
+func GenerateDatabasePages(sandbox *api.Sandbox, io *stagedfs.StagedFS, docs []DatabaseDoc) error {
 	written := map[string]bool{}
 
 	for _, doc := range docs {
@@ -44,7 +44,7 @@ func databasePageFile(sandbox *api.Sandbox, name string) (string, error) {
 	file := name + docPageExt
 
 	if file == utils.DocFile || file == utils.DocIndexFile {
-		return "", sandbox.Deps.Std.Errorf(
+		return "", sandbox.Deps.StdDeps.Errorf(
 			"database %s cannot be documented: its page would be %s/%s, which is the doc's own %s",
 			name, databasePagesDir, file, file)
 	}

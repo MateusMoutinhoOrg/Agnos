@@ -6,33 +6,33 @@ is the whole of what `build` reads to decide what to render — nothing is infer
 directories the project happens to carry.
 
 ```yaml
+backoffice: false
+cli: true
+database: false
+deps: true
 doc: true
+example: true
+front: false
 readme: true
 sandbox: true
-sandbox-backoffice: false
-sandbox-cli: true
-sandbox-database: false
-sandbox-deps: true
-sandbox-example: true
-sandbox-front: false
-sandbox-server: false
+server: false
 ```
 
 | Key | What {{.GeneratorName}} generates and looks after |
 |---|---|
 | `sandbox` | the core: `sandbox/new.go`, `sandbox/api/sandbox.go`, `sandbox/constructors/<x>/constructor.go`, `sandbox/api/config.go`, `sandbox/internal/generated/config/new.go` |
-| `sandbox-deps` | `sandbox/deps/deps.go`, each available's `new.go`; `add-dep` and the rest of the dependency commands |
-| `sandbox-cli` | `cmd/main`, `help`, `version`, `sandbox/api/{cli,command,trigger}.go` and the `OpinatedAgnosCli` lib — the dispatch; `add-command` and the rest |
-| `sandbox-server` | `sandbox/internal/{server,routeslist}`, `sandbox/api/{server,route}.go` and the `OpinatedAgnosServer` lib; `add-route` and the rest |
-| `sandbox-front` | the `OpinatedAgnosFront` lib and the `frontend` route serving `assets/frontend/`; `add-page` and `remove-page` |
-| `sandbox-database` | `sandbox/internal/databases` and the `OpinatedAgnosDatabase` lib; `add-database`, `add-table`, `add-table-field` and the rest |
-| `sandbox-example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `exec-test`, `update-test` |
-| `sandbox-backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backofficedb`, `add-backoffice-user`), and the key turns on its doc. Needs `sandbox-server`, `sandbox-front` and `sandbox-database` |
+| `deps` | `sandbox/deps/deps.go`, each binding's `new.go`; `add-dep` and the rest of the dependency commands |
+| `cli` | `cmd/main`, `help`, `version`, `sandbox/api/{cli,command,trigger}.go` and the `OpinionatedAgnosCli` lib — the dispatch; `add-command` and the rest |
+| `server` | `sandbox/internal/{server,routes}`, `sandbox/api/{server,route}.go` and the `OpinionatedAgnosServer` lib; `add-route` and the rest |
+| `front` | the `OpinionatedAgnosFront` lib and the `front` route serving `assets/front/`; `add-page` and `remove-page` |
+| `database` | `sandbox/internal/databases` and the `OpinionatedAgnosDatabase` lib; `add-database`, `add-table`, `add-table-field` and the rest |
+| `example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `run-examples`, `update-example` |
+| `backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backoffice-db`, `add-backoffice-user`), and the key turns on its doc. Needs `server`, `front` and `database` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |
 | `readme` | `README.md`, built from `{{.ConfigDir}}/docs/ReadmeHeader.md` and the doc index |
 
-Everything that renders into the sandbox is spelled `sandbox-<mechanic>` and needs `sandbox`
-on. `doc` and `readme` stand on their own.
+Everything that renders into the sandbox needs `sandbox` on. `doc` and `readme` stand on
+their own.
 
 ## Turning one on and off
 
@@ -48,13 +48,13 @@ touch it. Deleting those files is what an `<x>-purge` is for — and that is the
 that writes the `false`:
 {{ if .HasCli }}
 ```bash
-{{.GeneratorName}} cli-init                         # sandbox-cli: true, plus the deps the layer needs
-{{.GeneratorName}} cli-purge                        # removes the files and writes sandbox-cli: false
+{{.GeneratorName}} cli-init                         # cli: true, plus the deps the layer needs
+{{.GeneratorName}} cli-purge                        # removes the files and writes cli: false
 ```
 {{ else }}
 ```bash
-{{.GeneratorName}} deps-init                        # sandbox-deps: true
-{{.GeneratorName}} deps-purge                       # removes the files and writes sandbox-deps: false
+{{.GeneratorName}} deps-init                        # deps: true
+{{.GeneratorName}} deps-purge                       # removes the files and writes deps: false
 ```
 {{ end }}
 A mechanic that needs another one gets it: `server-init` runs `cli-init` first when the

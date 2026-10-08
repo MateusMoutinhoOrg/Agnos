@@ -2,13 +2,13 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/docpropsconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/themesconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/docconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/themesconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // DocsDir is the documentation tree of a project: one directory per doc, each
-// holding doc.md + props.yaml and, recursively, its sub-docs.
+// holding doc.md + doc.yaml and, recursively, its sub-docs.
 const DocsDir = "docs"
 
 // DocsIndexName is the reserved first-level name docs/Index/ once held: the
@@ -20,14 +20,14 @@ const DocsIndexName = "Index"
 // DocIndexFile is the index a doc directory gets when it has sub-docs.
 const DocIndexFile = "Index.md"
 
-// DocFile and DocPropsFile are the two files every doc directory holds.
+// DocFile and DocConfFile are the two files every doc directory holds.
 const (
-	DocFile      = "doc.md"
-	DocPropsFile = "props.yaml"
+	DocFile     = "doc.md"
+	DocConfFile = "doc.yaml"
 )
 
 // Doc is one node of the documentation tree: a directory holding doc.md and
-// props.yaml, plus the sub-docs nested under it. Any other file in the
+// doc.yaml, plus the sub-docs nested under it. Any other file in the
 // directory is an asset and is ignored.
 type Doc struct {
 	// Dir is the doc's own directory name ("PublicApi"); Path is its
@@ -44,77 +44,77 @@ type Doc struct {
 	Subdocs []Doc
 }
 
-// LoadThemesConf reads <ProjectName>Config/themes.yaml through the
+// LoadThemesConf reads AgnosConfig/themes.yaml through the
 // transaction-aware io. Like project.yaml it is written by `agnos start`, so a
 // missing or unparsable file is a hard error rather than an empty fallback.
-func LoadThemesConf(sandbox *api.Sandbox, io *smartio.SmartIO) (*themesconf.ThemesConf, error) {
-	rel := sandbox.Config.ProjectName + "Config/themes.yaml"
+func LoadThemesConf(sandbox *api.Sandbox, io *stagedfs.StagedFS) (*themesconf.ThemesConf, error) {
+	rel := ConfigDir(sandbox) + "/themes.yaml"
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
 
 	return themesconf.New(sandbox, string(content))
 }
 
-// LoadDocProps reads and parses one doc directory's props.yaml. A missing or
+// LoadDocConf reads and parses one doc directory's doc.yaml. A missing or
 // unparsable file is an error: the doc tree is indexed from these files, so a
 // doc without them cannot be listed anywhere.
-func LoadDocProps(sandbox *api.Sandbox, io *smartio.SmartIO, doc_path string) (*docpropsconf.DocPropsConf, error) {
-	rel := doc_path + "/" + DocPropsFile
+func LoadDocConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, docPath string) (*docconf.DocConf, error) {
+	rel := docPath + "/" + DocConfFile
 
 	content, err := io.ReadFile(rel)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("%s is missing", rel)
+		return nil, sandbox.Deps.StdDeps.Errorf("%s is missing", rel)
 	}
 
-	conf, err := docpropsconf.New(sandbox, string(content))
+	conf, err := docconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("%s: %w", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("%s: %w", rel, err)
 	}
 	return conf, nil
 }
 
 // CollectDocTree walks docs/ and returns its first-level docs, each carrying
 // its sub-docs recursively. Every directory is a doc — the reserved first-level
-// Index/ aside — so a missing props.yaml is an error. A project with no docs/
+// Index/ aside — so a missing doc.yaml is an error. A project with no docs/
 // directory yields an empty tree and no error.
-func CollectDocTree(sandbox *api.Sandbox, io *smartio.SmartIO) ([]Doc, error) {
+func CollectDocTree(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]Doc, error) {
 	if !io.IsDir(DocsDir) {
 		return nil, nil
 	}
 	return collectDocsIn(sandbox, io, DocsDir, true)
 }
 
-// collectDocsIn collects the docs directly under parent_path. first_level
+// collectDocsIn collects the docs directly under parentPath. firstLevel
 // marks the docs/ directory itself, where Index/ is reserved.
-func collectDocsIn(sandbox *api.Sandbox, io *smartio.SmartIO, parent_path string, first_level bool) ([]Doc, error) {
+func collectDocsIn(sandbox *api.Sandbox, io *stagedfs.StagedFS, parentPath string, firstLevel bool) ([]Doc, error) {
 	var docs []Doc
 
-	for _, dir := range io.ListDirs(parent_path) {
+	for _, dir := range io.ListDirs(parentPath) {
 		name := LastSegment(sandbox, dir)
 		if name == "" {
 			continue
 		}
-		if first_level && name == DocsIndexName {
+		if firstLevel && name == DocsIndexName {
 			continue
 		}
 
-		doc_path := parent_path + "/" + name
-		props, err := LoadDocProps(sandbox, io, doc_path)
+		docPath := parentPath + "/" + name
+		props, err := LoadDocConf(sandbox, io, docPath)
 		if err != nil {
 			return nil, err
 		}
 
-		subdocs, err := collectDocsIn(sandbox, io, doc_path, false)
+		subdocs, err := collectDocsIn(sandbox, io, docPath, false)
 		if err != nil {
 			return nil, err
 		}
 
 		doc := Doc{
 			Dir:         name,
-			Path:        doc_path,
+			Path:        docPath,
 			Name:        props.Name,
 			Description: props.Description,
 			Themes:      props.Themes,
@@ -136,7 +136,7 @@ func collectDocsIn(sandbox *api.Sandbox, io *smartio.SmartIO, parent_path string
 // SortDocs orders docs the way every index lists them: by `order`, then by
 // name. A doc with no `order` comes after every ordered one.
 func SortDocs(sandbox *api.Sandbox, docs []Doc) {
-	sandbox.Deps.Sortdeps.SliceStable(docs, func(i, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(docs, func(i, j int) bool {
 		left, right := docs[i], docs[j]
 		if left.HasOrder != right.HasOrder {
 			return left.HasOrder
@@ -154,8 +154,8 @@ func SortDocs(sandbox *api.Sandbox, docs []Doc) {
 // result is the doc's path relative to docs/.
 func DocSegments(sandbox *api.Sandbox, name string) []string {
 	var segments []string
-	for _, segment := range sandbox.Deps.Stringsdeps.Split(sandbox.Deps.Stringsdeps.TrimSpace(name), "/") {
-		segment = sandbox.Deps.Stringsdeps.TrimSpace(segment)
+	for _, segment := range sandbox.Deps.StringsDeps.Split(sandbox.Deps.StringsDeps.TrimSpace(name), "/") {
+		segment = sandbox.Deps.StringsDeps.TrimSpace(segment)
 		if segment != "" {
 			segments = append(segments, segment)
 		}
@@ -170,12 +170,12 @@ func DocSegments(sandbox *api.Sandbox, name string) []string {
 func ValidateDocName(sandbox *api.Sandbox, name string) error {
 	segments := DocSegments(sandbox, name)
 	if len(segments) == 0 {
-		return sandbox.Deps.Std.Errorf("a doc needs a name")
+		return sandbox.Deps.StdDeps.Errorf("a doc needs a name")
 	}
 
 	for index, segment := range segments {
 		if index == 0 && segment == DocsIndexName {
-			return sandbox.Deps.Std.Errorf("invalid doc name %q: %s is reserved", name, DocsIndexName)
+			return sandbox.Deps.StdDeps.Errorf("invalid doc name %q: %s is reserved", name, DocsIndexName)
 		}
 		for _, letter := range segment {
 			valid := (letter >= 'a' && letter <= 'z') ||
@@ -183,7 +183,7 @@ func ValidateDocName(sandbox *api.Sandbox, name string) error {
 				(letter >= '0' && letter <= '9') ||
 				letter == '.' || letter == '-' || letter == '_'
 			if !valid {
-				return sandbox.Deps.Std.Errorf(
+				return sandbox.Deps.StdDeps.Errorf(
 					"invalid doc name %q: only letters, digits, dots, dashes, underscores and / are allowed (it becomes the directory %s)",
 					name, DocDir(sandbox, name))
 			}
@@ -195,7 +195,7 @@ func ValidateDocName(sandbox *api.Sandbox, name string) error {
 // DocDir is the project-relative directory holding a doc
 // ("PublicApi/api.Actions" -> "docs/PublicApi/api.Actions").
 func DocDir(sandbox *api.Sandbox, name string) string {
-	return DocsDir + "/" + sandbox.Deps.Stringsdeps.Join(DocSegments(sandbox, name), "/")
+	return DocsDir + "/" + sandbox.Deps.StringsDeps.Join(DocSegments(sandbox, name), "/")
 }
 
 // DocParentDir is the project-relative directory holding a doc's parent — the
@@ -205,7 +205,7 @@ func DocParentDir(sandbox *api.Sandbox, name string) string {
 	if len(segments) < 2 {
 		return DocsDir
 	}
-	return DocsDir + "/" + sandbox.Deps.Stringsdeps.Join(segments[:len(segments)-1], "/")
+	return DocsDir + "/" + sandbox.Deps.StringsDeps.Join(segments[:len(segments)-1], "/")
 }
 
 // DocTitle is the human-readable name a new doc is declared with: its last
@@ -219,12 +219,12 @@ func DocTitle(sandbox *api.Sandbox, name string) string {
 	}
 	title := segments[len(segments)-1]
 
-	if sandbox.Deps.Stringsdeps.ContainsAny(title, ".-_ ") {
+	if sandbox.Deps.StringsDeps.ContainsAny(title, ".-_ ") {
 		return title
 	}
 
 	// A word starts where a lowercase letter or a digit is followed by an
-	// uppercase one, so an acronym stays whole ("SmartIO" -> "Smart IO").
+	// uppercase one, so an acronym stays whole ("StagedFS" -> "Smart IO").
 	out := ""
 	letters := []rune(title)
 	for index, letter := range letters {
@@ -242,6 +242,6 @@ func DocTitle(sandbox *api.Sandbox, name string) string {
 // LastSegment is the final element of a project-relative path
 // ("docs/PublicApi" -> "PublicApi").
 func LastSegment(sandbox *api.Sandbox, path string) string {
-	parts := sandbox.Deps.Stringsdeps.Split(path, "/")
+	parts := sandbox.Deps.StringsDeps.Split(path, "/")
 	return parts[len(parts)-1]
 }

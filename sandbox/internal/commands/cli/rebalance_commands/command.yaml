@@ -1,16 +1,16 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
         value: rebalance-commands
-category: Cli System
+category: Cli
 flags:
     - default: "10"
       description: how many rungs apart two commands land (defaults to 10)
       id: Step
       min: 1
       type: integer
-help: Lay the cli chain down again with room between its rungs
 priority: 100
+summary: Lay the cli chain down again with room between its rungs

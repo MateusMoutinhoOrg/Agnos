@@ -1,4 +1,4 @@
-description: "Every exported symbol of {{.Name}}, generated from the contract sources and their doc comments"
+description: "Every exported symbol of {{.ProjectName}}, generated from the contract sources and their doc comments"
 name: "PublicApi"
 order: 2
 themes:

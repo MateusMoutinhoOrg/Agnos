@@ -1,6 +1,6 @@
 package deps
-{{if .DepsLibs}}
-import ({{range .DepsLibs}}
+{{if .DepLibs}}
+import ({{range .DepLibs}}
 	{{.Name}} "{{$.Module}}/sandbox/deps/{{.Name}}"{{end}}
 )
 {{end}}
@@ -8,7 +8,7 @@ import ({{range .DepsLibs}}
 // per sub-contract directory of sandbox/deps/. An adapter fills the fields; the
 // sandbox only calls them, which is what keeps it free of OS packages.
 type Deps struct {
-{{- range .DepsLibs}}
-	{{.Title}} {{.Name}}.Sandbox
+{{- range .DepLibs}}
+	{{.Title}} {{.Name}}.{{.Type}}
 {{- end}}
 }

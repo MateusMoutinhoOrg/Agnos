@@ -1,0 +1,30 @@
+# `run-examples`
+
+Run the project's examples and check them against their goldens
+
+```bash
+agnos run-examples [--only <only>] [--update] [--help] [--path <path>] [--quiet]
+```
+
+Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project's own cli in front of the PATH. Every run starts from a removed test-dir and a removed assert-dir, and what it produced - the merged output, the exit status and the sha256 of every file the example copied out of test-dir into assert-dir - is compared against the example's result.yaml, or written there when that golden does not exist yet. An example that copied nothing out fails: it asserted nothing. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.
+
+| Flag | Type | Default | Description | From |
+| --- | --- | --- | --- | --- |
+| `--only` | string |  | run a single example by name, both sides (defaults to every example) | — |
+| `--update` | boolean |  | rewrite every golden result.yaml with what this run produced instead of comparing | — |
+| `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
+
+| Runs in front of it | When |
+| --- | --- |
+| [`help-flag`](help-flag.md) | always |
+| [`project-flags`](project-flags.md) | always |
+
+```bash
+agnos run-examples
+agnos run-examples --only start
+agnos run-examples --update
+```
+
+Examples · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

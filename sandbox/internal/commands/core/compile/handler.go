@@ -6,14 +6,14 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	compile_error := compileAction.Compile(sandbox, api.CompileProps{
 		Path:    props.Path,
-		Targets: entries.Target,
+		Targets: input.Target,
 	})
 
 	if compile_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", compile_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", compile_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

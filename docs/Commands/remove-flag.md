@@ -6,7 +6,7 @@ Remove a flag from a command's command.yaml
 agnos remove-flag <Name> --command <command> [--help] [--path <path>] [--quiet]
 ```
 
-Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and entries.go follow it.
+Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and input.go follow it.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -16,17 +16,17 @@ Drops one flag declaration (matched by its name, its id or one of its keys) from
 | --- | --- | --- | --- | --- |
 | `--command`, `-c` | string, required |  | the command (a verb or its package name) that owns the flag | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
-| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project](project.md) |
-| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project](project.md) |
+| `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
+| `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |
 
 | Runs in front of it | When |
 | --- | --- |
 | [`help-flag`](help-flag.md) | always |
-| [`project`](project.md) | always |
+| [`project-flags`](project-flags.md) | always |
 
 ```bash
 agnos remove-flag output --command exec
 agnos remove-flag out --command exec
 ```
 
-Cli System · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)
+Cli · [every command](doc.md) · [CommandYaml](../CommandYaml/doc.md)

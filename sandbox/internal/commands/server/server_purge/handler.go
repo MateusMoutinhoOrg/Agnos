@@ -6,11 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commandprops"
 )
 
-func InternalPureHandler(sandbox *api.Sandbox, props *commandprops.CommandProps, entries *Entries, response *api.CommandResponse) error {
-	purge_error := serverPurgeAction.ServerPurge(sandbox, props.Path)
+func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
+	purge_error := serverPurgeAction.ServerPurge(sandbox, api.ServerPurgeProps{Path: props.Path})
 
 	if purge_error != nil {
-		return sandbox.Deps.OpinatedAgnosCli.Fail(api.ExitFailure, "", purge_error.Error())
+		return sandbox.Deps.OpinionatedAgnosCli.Fail(api.ExitFailure, "", purge_error.Error())
 	}
 	response.SetStatus(api.ExitOk)
 	return nil

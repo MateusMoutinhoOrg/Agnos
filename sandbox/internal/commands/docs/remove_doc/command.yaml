@@ -1,6 +1,6 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
@@ -10,14 +10,14 @@ args:
       id: Name
       required: true
       start: 1
-category: Documentation
-examples:
-    - remove-doc HandleReports
-    - remove-doc PublicApi/api.AddDoc --path ./my-project
-help: Delete a doc directory from docs/
-long-description: |-
-    Deletes docs/<name>/ (doc.md, props.yaml, its assets and every sub-doc
+category: Docs
+description: |-
+    Deletes docs/<name>/ (doc.md, doc.yaml, its assets and every sub-doc
     nested under it) and runs build so the indexes that listed it are rewritten
     without it. A theme left with no docs simply stops rendering a section in
     README.md; it is not an error, so themes.yaml can keep it.
+examples:
+    - remove-doc HandleReports
+    - remove-doc PublicApi/api.AddDoc --path ./my-project
 priority: 100
+summary: Delete a doc directory from docs/

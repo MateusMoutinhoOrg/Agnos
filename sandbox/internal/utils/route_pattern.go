@@ -2,7 +2,8 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/triggerconf"
 )
 
 // RoutePattern is what one --pattern compiles to: the entries of `paths` it
@@ -27,13 +28,13 @@ type RoutePattern struct {
 // the pattern fixes the segment count, so /get-article/{article} does not run
 // for /get-article/42/extra. "/" alone is the root.
 func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error) {
-	text := sandbox.Deps.Stringsdeps.TrimSpace(raw)
-	if !sandbox.Deps.Stringsdeps.HasPrefix(text, "/") {
-		return RoutePattern{}, sandbox.Deps.Std.Errorf("--pattern %q has to start with /", raw)
+	text := sandbox.Deps.StringsDeps.TrimSpace(raw)
+	if !sandbox.Deps.StringsDeps.HasPrefix(text, "/") {
+		return RoutePattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q has to start with /", raw)
 	}
 
 	segments := []string{}
-	for _, segment := range sandbox.Deps.Stringsdeps.Split(text, "/") {
+	for _, segment := range sandbox.Deps.StringsDeps.Split(text, "/") {
 		if segment != "" {
 			segments = append(segments, segment)
 		}
@@ -41,11 +42,11 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 
 	if len(segments) == 0 {
 		return RoutePattern{Paths: []routeconf.Path{{
-			Id:      "Route",
+			Id:      RoutePathIdOf(sandbox, "/"),
 			Start:   0,
 			End:     routeconf.LastSegment,
 			Type:    routeconf.DefaultPathType,
-			Trigger: routeconf.Trigger{Exists: true, Type: "equal", Value: "/"},
+			Trigger: triggerconf.Trigger{Set: true, Type: "equal", Value: "/"},
 		}}}, nil
 	}
 
@@ -56,10 +57,10 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 	}
 	claim := func(id string, index int) (string, error) {
 		if id == "" {
-			return "", sandbox.Deps.Std.Errorf("--pattern %q names an empty capture at segment %d", raw, index)
+			return "", sandbox.Deps.StdDeps.Errorf("--pattern %q names an empty capture at segment %d", raw, index)
 		}
 		if taken[id] {
-			return "", sandbox.Deps.Std.Errorf("--pattern %q binds %s twice, or one Entries already carries", raw, id)
+			return "", sandbox.Deps.StdDeps.Errorf("--pattern %q binds %s twice, or one Input already carries", raw, id)
 		}
 		taken[id] = true
 		return id, nil
@@ -71,10 +72,10 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 		if len(literal) == 0 {
 			return nil
 		}
-		value := "/" + sandbox.Deps.Stringsdeps.Join(literal, "/")
-		id := RouteEntryId(sandbox, sandbox.Deps.Stringsdeps.Join(literal, "-"))
+		value := "/" + sandbox.Deps.StringsDeps.Join(literal, "/")
+		id := RoutePathIdOf(sandbox, value)
 		if id == "" || id[0] < 'A' || id[0] > 'Z' || taken[id] {
-			id = "Seg" + sandbox.Deps.Stringsdeps.FormatInt(int64(literal_start), 10)
+			id = "Seg" + sandbox.Deps.StringsDeps.FormatInt(int64(literal_start), 10)
 		}
 		id, err := claim(id, literal_start)
 		if err != nil {
@@ -85,16 +86,16 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 			Start:   literal_start,
 			End:     end,
 			Type:    routeconf.DefaultPathType,
-			Trigger: routeconf.Trigger{Exists: true, Type: "equal", Value: value},
+			Trigger: triggerconf.Trigger{Set: true, Type: "equal", Value: value},
 		})
 		literal, literal_start = []string{}, -1
 		return nil
 	}
 
 	for index, segment := range segments {
-		if !sandbox.Deps.Stringsdeps.HasPrefix(segment, "{") {
-			if sandbox.Deps.Stringsdeps.Contains(segment, "{") || sandbox.Deps.Stringsdeps.Contains(segment, "}") {
-				return RoutePattern{}, sandbox.Deps.Std.Errorf("--pattern %q mixes text and a capture in the segment %q: a capture is a whole segment", raw, segment)
+		if !sandbox.Deps.StringsDeps.HasPrefix(segment, "{") {
+			if sandbox.Deps.StringsDeps.Contains(segment, "{") || sandbox.Deps.StringsDeps.Contains(segment, "}") {
+				return RoutePattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q mixes text and a capture in the segment %q: a capture is a whole segment", raw, segment)
 			}
 			if literal_start < 0 {
 				literal_start = index
@@ -106,16 +107,16 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 		if err := flush(index - 1); err != nil {
 			return RoutePattern{}, err
 		}
-		if !sandbox.Deps.Stringsdeps.HasSuffix(segment, "}") {
-			return RoutePattern{}, sandbox.Deps.Std.Errorf("--pattern %q opens a capture it does not close: %q", raw, segment)
+		if !sandbox.Deps.StringsDeps.HasSuffix(segment, "}") {
+			return RoutePattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q opens a capture it does not close: %q", raw, segment)
 		}
 		inner := segment[1 : len(segment)-1]
 
-		if sandbox.Deps.Stringsdeps.HasPrefix(inner, "*") {
+		if sandbox.Deps.StringsDeps.HasPrefix(inner, "*") {
 			if index != len(segments)-1 {
-				return RoutePattern{}, sandbox.Deps.Std.Errorf("--pattern %q puts %s before the end: a {*…} capture takes the rest of the path", raw, segment)
+				return RoutePattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q puts %s before the end: a {*…} capture takes the rest of the path", raw, segment)
 			}
-			id, err := claim(RouteEntryId(sandbox, inner[1:]), index)
+			id, err := claim(GoIdentifier(sandbox, inner[1:]), index)
 			if err != nil {
 				return RoutePattern{}, err
 			}
@@ -127,14 +128,14 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 		}
 
 		name, kind := inner, routeconf.DefaultPathType
-		if parts := sandbox.Deps.Stringsdeps.Split(inner, ":"); len(parts) == 2 {
-			name, kind = parts[0], sandbox.Deps.Stringsdeps.ToLower(parts[1])
+		if parts := sandbox.Deps.StringsDeps.Split(inner, ":"); len(parts) == 2 {
+			name, kind = parts[0], sandbox.Deps.StringsDeps.ToLower(parts[1])
 		}
 		if !contains(routeconf.PathTypes, kind) {
-			return RoutePattern{}, sandbox.Deps.Std.Errorf("--pattern %q declares the unknown type %q (use one of %s)",
-				raw, kind, sandbox.Deps.Stringsdeps.Join(routeconf.PathTypes, ", "))
+			return RoutePattern{}, sandbox.Deps.StdDeps.Errorf("--pattern %q declares the unknown type %q (use one of %s)",
+				raw, kind, sandbox.Deps.StringsDeps.Join(routeconf.PathTypes, ", "))
 		}
-		id, err := claim(RouteEntryId(sandbox, name), index)
+		id, err := claim(GoIdentifier(sandbox, name), index)
 		if err != nil {
 			return RoutePattern{}, err
 		}
@@ -145,4 +146,32 @@ func CompileRoutePattern(sandbox *api.Sandbox, raw string) (RoutePattern, error)
 		return RoutePattern{}, err
 	}
 	return compiled, nil
+}
+
+// RootPathId is the id of a path that reads the whole request path and names
+// no word of it: a trigger of "/" alone.
+const RootPathId = "Root"
+
+// RoutePathIdOf is the Input field a path whose trigger is text binds to: the
+// words of the trigger joined into one exported Go name — /api/products binds
+// ApiProducts, ^/(api/)?admin(/|$) binds ApiAdmin — and Root when the trigger
+// names no word. It is the one rule add-route --trigger and a literal run of
+// --pattern both spell a path's id with, so the id says what the path reads.
+func RoutePathIdOf(sandbox *api.Sandbox, text string) string {
+	words := sandbox.Deps.StringsDeps.FieldsFunc(text, func(r rune) bool {
+		return !((r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || (r >= '0' && r <= '9'))
+	})
+	id := GoIdentifier(sandbox, sandbox.Deps.StringsDeps.Join(words, "-"))
+	if id == "" {
+		return RootPathId
+	}
+	if id[0] < 'A' || id[0] > 'Z' {
+		return "Path" + id
+	}
+	for _, reserved := range RouteReservedIds {
+		if id == reserved {
+			return id + "Path"
+		}
+	}
+	return id
 }

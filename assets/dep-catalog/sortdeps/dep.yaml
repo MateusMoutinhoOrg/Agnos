@@ -1,4 +1,4 @@
-default-adapter: sortdeps
-field: Sortdeps
+default-adapter: stdsort
+field: SortDeps
 help: Sort a string slice, or any slice by a less function
 name: sortdeps

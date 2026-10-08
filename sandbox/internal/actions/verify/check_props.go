@@ -2,7 +2,7 @@ package verify
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -16,7 +16,7 @@ var configOwnFields = []string{"ProjectName", "Version"}
 // one struct per file, so the parts are written by different hands (the
 // project, backoffice-init), and Go only refuses the ambiguous selector where a
 // handler reads it.
-func CheckProps(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckProps(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	check := func(aggregate string, dir string, accept func(name string) bool, own []string) {
@@ -50,11 +50,11 @@ var sandboxOwnFields = []string{"Deps", "Config"}
 // each is declared by the part of whoever owns it, so without this the project
 // fails in the compiler on a name it never declared.
 //
-// A contract a mechanic ships (sandbox-cli's cli.go) is skipped: the mechanic
+// A contract a mechanic ships (cli's cli.go) is skipped: the mechanic
 // ships the part declaring its field beside it (clisandbox.go), and a build
 // renders both — the check would otherwise refuse the very build that writes
 // that part into a tree older than it.
-func CheckContractFields(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckContractFields(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	if !io.IsDir("sandbox/api") {
 		return nil
 	}
@@ -76,19 +76,19 @@ func CheckContractFields(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
 	var violations []string
 	for _, file := range io.ListFiles("sandbox/api") {
 		name := lastSegment(sandbox, file)
-		if !sandbox.Deps.Stringsdeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
+		if !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
 			continue
 		}
-		base := sandbox.Deps.Stringsdeps.TrimSuffix(name, ".go")
+		base := sandbox.Deps.StringsDeps.TrimSuffix(name, ".go")
 		if !io.IsFile(utils.ConstructorSource(io, base)+"/new.go") || shippedByGroup(sandbox, name) {
 			continue
 		}
-		field := sandbox.Deps.Stringsdeps.ToUpper(base[:1]) + base[1:]
+		field := sandbox.Deps.StringsDeps.ToUpper(base[:1]) + base[1:]
 		if declared[field] {
 			continue
 		}
 		violations = append(violations, file+" is a contract no part of api.Sandbox declares a field for; add `"+
-			field+" "+field+"` to UserSandbox in sandbox/api/"+utils.UserSandboxFile)
+			field+" "+field+"` to ProjectSandbox in sandbox/api/"+utils.ProjectSandboxFile)
 	}
 	return violations
 }
@@ -100,7 +100,7 @@ func shippedByGroup(sandbox *api.Sandbox, name string) bool {
 		if !group.Code {
 			continue
 		}
-		if _, err := sandbox.Deps.Embeddeps.ReadFile(group.Name + "/sandbox/api/" + name); err == nil {
+		if _, err := sandbox.Deps.EmbedDeps.ReadFile(group.Name + "/sandbox/api/" + name); err == nil {
 			return true
 		}
 	}

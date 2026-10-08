@@ -1,11 +1,11 @@
-cli-output: "add-arg adding Who to sandbox/internal/commands/greet/command.yaml \nbuild started with path TestDir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
+cli-output: "add-arg adding Who to sandbox/internal/commands/core/greet/command.yaml \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \n"
 exit-code: 0
 tree:
-    - file: sandbox/internal/commands/greet/InternalPureHandler.go
-      sha: e559891705796277b6df4540f262d760e1d20e26ecd03c6fcd66478c4960f154
-    - file: sandbox/internal/commands/greet/command.yaml
-      sha: 2a6004da8ef9813d40ed10e2f7796b4305357a7107d11edadb2497800e59129e
-    - file: sandbox/internal/commands/greet/entries.go
-      sha: eef17ecb071597ca835db4690fdd6697943f845da10f374aabb1bca87cca3a69
-    - file: sandbox/internal/commands/greet/new.go
-      sha: cca6bed4c7a0cbea4e8404f371f12d68d3973c5af855b4db5ea65024aa0f8dbc
+    - file: sandbox/internal/commands/core/greet/command.yaml
+      sha: e432b0469f5ddea6ea8497489f9fadb336aee1ce7addd0a3a84f33822ba9642e
+    - file: sandbox/internal/commands/core/greet/handler.go
+      sha: 7459e32a2e71c4454b90f8d071c9c8a1f780f00bc892b4a6cac7bbaba189960a
+    - file: sandbox/internal/commands/core/greet/input.go
+      sha: 5afddf3b13fa2ccdbed62b2bc6660546a51a36711001c09dd213224cd60dd357
+    - file: sandbox/internal/commands/core/greet/new.go
+      sha: adfe7e0aeded5438d551266f42f11fa062a44e6936556de7070d68c1a0a86237

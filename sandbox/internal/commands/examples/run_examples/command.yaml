@@ -1,21 +1,21 @@
 args:
     - end: 0
-      id: Command
+      id: Verb
       start: 0
       trigger:
         type: equal
-        value: exec-test
+        value: run-examples
 category: Examples
+description: 'Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project''s own cli in front of the PATH. Every run starts from a removed test-dir and a removed assert-dir, and what it produced - the merged output, the exit status and the sha256 of every file the example copied out of test-dir into assert-dir - is compared against the example''s result.yaml, or written there when that golden does not exist yet. An example that copied nothing out fails: it asserted nothing. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.'
 examples:
-    - exec-test
-    - exec-test --only start
-    - exec-test --update
+    - run-examples
+    - run-examples --only start
+    - run-examples --update
 flags:
     - description: run a single example by name, both sides (defaults to every example)
       id: Only
     - description: rewrite every golden result.yaml with what this run produced instead of comparing
       id: Update
       type: boolean
-help: Run the project's examples and check them against their goldens
-long-description: 'Runs every example of examples/cli/ and examples/lib/ in alphabetical order, cli side first, each with its own directory as the working directory and the project''s own cli in front of the PATH. Every run starts from a removed TestDir and a removed AssertDir, and what it produced - the merged output, the exit status and the sha256 of every file the example copied out of TestDir into AssertDir - is compared against the example''s result.yaml, or written there when that golden does not exist yet. An example that copied nothing out fails: it asserted nothing. An example declared on both sides must leave the same tree and exit the same way: the cli is only a wrapper over the lib.'
 priority: 100
+summary: Run the project's examples and check them against their goldens

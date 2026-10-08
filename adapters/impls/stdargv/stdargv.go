@@ -1,4 +1,4 @@
-package argvdeps
+package stdargv
 
 import (
 	"fmt"
@@ -13,11 +13,11 @@ import (
 // timestampLayout is the format every Timestamp getter parses values with.
 const timestampLayout = time.RFC3339
 
-// Bind fills deps.Deps.Argvdeps.New with the per-call argv parser below. A
+// Bind fills deps.Deps.ArgvDeps.New with the per-call argv parser below. A
 // parser is bound to one argument vector, so what the contract holds is a
 // constructor rather than an already-built parser.
 func Bind(deps *deps.Deps) {
-	deps.Argvdeps.New = newParser
+	deps.ArgvDeps.New = newParser
 }
 
 // newParser builds one argv parser over args. The returned value carries the

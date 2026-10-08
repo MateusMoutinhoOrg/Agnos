@@ -8,24 +8,24 @@ import (
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeusers"
 )
 
-// InternalPureHandler answers POST /api/admin/list-backoffice-users, open to
+// Handle answers POST /api/admin/list-backoffice-users, open to
 // every backoffice user, with one page of the users the search and role
 // filters keep. Every field of the body is optional, and the body itself: an
 // absent page is the first one, an absent or out-of-range limit is
 // backofficeusers.DefaultLimit or MaxLimit.
-func InternalPureHandler(sandbox *api.Sandbox, props *routeprops.RouteProps, entries *Entries, response *serverdeps.Response) error {
+func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == nil {
-		return sandbox.Deps.OpinatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
 	listing, err := backofficeusers.List(sandbox, backofficeusers.Query{
-		Search: entries.Body.Search,
-		Role:   entries.Body.Role,
-		Page:   entries.Body.Page,
-		Limit:  entries.Body.Limit,
+		Search: input.Body.Search,
+		Role:   input.Body.Role,
+		Page:   input.Body.Page,
+		Limit:  input.Body.Limit,
 	})
 	if err != nil {
 		return err
 	}
-	return sandbox.Deps.OpinatedAgnosServer.WriteJSON(sandbox.Deps.Serializables, *response, api.StatusOk, backofficeapi.Listing(sandbox, listing))
+	return sandbox.Deps.OpinionatedAgnosServer.WriteJSON(sandbox.Deps.SerializableDeps, *response, api.StatusOK, backofficeapi.UserListJSON(sandbox, listing))
 }

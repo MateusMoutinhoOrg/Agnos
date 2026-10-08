@@ -1,10 +1,10 @@
-package exec_tests
+package run_examples
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/projectconf"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/resultconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/projectconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/resultconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
@@ -13,9 +13,9 @@ import (
 // an example.sh runs this tree's ./cmd/main and never an installed binary.
 // release/ is the project's git-ignored binary directory, which is exactly
 // what this is.
-const aliasDir = "release/exec-test"
+const aliasDir = "release/run-examples"
 
-// volatileFiles and volatileDirs are the AssertDir paths left out of a
+// volatileFiles and volatileDirs are the assert-dir paths left out of a
 // result's tree. An example that reaches the Go runtime (`start` runs `build`,
 // which runs `go mod tidy` and `go build`) writes a go.sum holding whatever the
 // module proxy resolved that day and binaries under release/: neither is a
@@ -30,13 +30,13 @@ type exampleRun struct {
 	Dir  string
 }
 
-// ExecTestInternal runs every planned example, compares what it produced with
+// RunExamplesInternal runs every planned example, compares what it produced with
 // its golden result.yaml (or writes that golden), and reports how many
 // examples failed. An example present on both sides is run through the cli
 // first and then through the lib, and the two runs are cross-checked: the cli
 // is a wrapper over the lib, so they must leave the same tree and exit the
 // same way.
-func ExecTestInternal(sandbox *api.Sandbox, path string, only string, update bool) error {
+func RunExamplesInternal(sandbox *api.Sandbox, path string, only string, update bool) error {
 	root, err := projectRoot(sandbox, path)
 	if err != nil {
 		return err
@@ -86,11 +86,11 @@ func ExecTestInternal(sandbox *api.Sandbox, path string, only string, update boo
 		}
 	}
 
-	sandbox.Deps.Std.Log("exec-test done: %d examples, %d cross-checks, %d failed \n", len(runs), len(crossed), len(failed))
+	sandbox.Deps.StdDeps.Logf("run-examples done: %d examples, %d cross-checks, %d failed \n", len(runs), len(crossed), len(failed))
 
 	if len(failed) > 0 {
-		return sandbox.Deps.Std.Errorf("exec-test: %d of %d checks failed: %s",
-			len(failed), len(runs)+len(crossed), sandbox.Deps.Stringsdeps.Join(failed, ", "))
+		return sandbox.Deps.StdDeps.Errorf("run-examples: %d of %d checks failed: %s",
+			len(failed), len(runs)+len(crossed), sandbox.Deps.StringsDeps.Join(failed, ", "))
 	}
 	return nil
 }
@@ -99,7 +99,7 @@ func ExecTestInternal(sandbox *api.Sandbox, path string, only string, update boo
 // by name, cli before lib. `only` narrows the plan to one name — both sides of
 // it — and is a usage error when no side declares that name.
 func planRuns(sandbox *api.Sandbox, path string, only string) ([]exampleRun, error) {
-	only = sandbox.Deps.Stringsdeps.TrimSpace(only)
+	only = sandbox.Deps.StringsDeps.TrimSpace(only)
 
 	names := []string{}
 	seen := map[string]bool{}
@@ -114,12 +114,12 @@ func planRuns(sandbox *api.Sandbox, path string, only string) ([]exampleRun, err
 			}
 		}
 	}
-	sandbox.Deps.Sortdeps.Strings(names)
+	sandbox.Deps.SortDeps.Strings(names)
 
 	if only != "" {
 		if !seen[only] {
-			return nil, sandbox.Deps.Std.Errorf("exec-test: no example named %q (declared: %s)",
-				only, sandbox.Deps.Stringsdeps.Join(names, ", "))
+			return nil, sandbox.Deps.StdDeps.Errorf("run-examples: no example named %q (declared: %s)",
+				only, sandbox.Deps.StringsDeps.Join(names, ", "))
 		}
 		names = []string{only}
 	}
@@ -136,18 +136,18 @@ func planRuns(sandbox *api.Sandbox, path string, only string) ([]exampleRun, err
 }
 
 // listExamples lists one side's example names, sorted. It reads disk directly:
-// exec-test opens no SmartIO, so nothing here is filtered or buffered.
+// run-examples opens no StagedFS, so nothing here is filtered or buffered.
 func listExamples(sandbox *api.Sandbox, path string, side string) []string {
 	dir := join(sandbox, path, utils.ExampleSideDir(side))
-	if !sandbox.Deps.Iodeps.IsDir(dir) {
+	if !sandbox.Deps.IoDeps.IsDir(dir) {
 		return nil
 	}
 
 	var names []string
-	for _, entry := range sandbox.Deps.Iodeps.ListDirs(dir) {
+	for _, entry := range sandbox.Deps.IoDeps.ListDirs(dir) {
 		names = append(names, utils.LastSegment(sandbox, entry))
 	}
-	sandbox.Deps.Sortdeps.Strings(names)
+	sandbox.Deps.SortDeps.Strings(names)
 	return names
 }
 
@@ -173,26 +173,26 @@ func crossCheckedNames(runs []exampleRun) []string {
 	return both
 }
 
-// execExample runs one example from scratch: its TestDir and AssertDir are
+// execExample runs one example from scratch: its test-dir and assert-dir are
 // removed straight off disk (no buffer to persist), the example is executed
 // with its own directory as the working directory, and what it produced is
 // gathered into a result — the exit status and merged output of the run, plus
-// every file it copied out of TestDir into AssertDir.
+// every file it copied out of test-dir into assert-dir.
 func execExample(sandbox *api.Sandbox, path string, root string, prefix []string, run exampleRun) (*resultconf.ResultConf, error) {
 	dir := join(sandbox, path, run.Dir)
 
-	sandbox.Deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleTestDir)
-	sandbox.Deps.Iodeps.RemoveDir(dir + "/" + utils.ExampleAssertDir)
+	sandbox.Deps.IoDeps.RemoveDir(dir + "/" + utils.ExampleTestDir)
+	sandbox.Deps.IoDeps.RemoveDir(dir + "/" + utils.ExampleAssertDir)
 
 	program, args := invocation(run.Side)
-	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{
+	result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{
 		Dir:        dir,
 		Program:    program,
 		Args:       args,
 		PathPrefix: prefix,
 	})
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("exec-test %s/%s: could not run %s: %w", run.Side, run.Name, program, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("run-examples %s/%s: could not run %s: %w", run.Side, run.Name, program, err)
 	}
 
 	conf := resultconf.NewEmpty(sandbox)
@@ -203,7 +203,7 @@ func execExample(sandbox *api.Sandbox, path string, root string, prefix []string
 		conf.AddTreeEntry(entry.File, entry.Sha)
 	}
 
-	sandbox.Deps.Std.Log("exec-test %s/%s: exit %d, %d files \n", run.Side, run.Name, conf.ExitCode, len(conf.Tree))
+	sandbox.Deps.StdDeps.Logf("run-examples %s/%s: exit %d, %d files \n", run.Side, run.Name, conf.ExitCode, len(conf.Tree))
 	return conf, nil
 }
 
@@ -216,35 +216,35 @@ func invocation(side string) (string, []string) {
 	return "go", []string{"run", utils.ExampleLibFile}
 }
 
-// treeOf is every file inside one example's AssertDir, ordered by path
+// treeOf is every file inside one example's assert-dir, ordered by path
 // relative to that directory and carrying the sha256 of its content. A file
 // that cannot be read is recorded with an empty sha rather than aborting the
 // suite: the comparison then reports it like any other divergence.
 func treeOf(sandbox *api.Sandbox, assert_dir string) []resultconf.TreeEntry {
 	var entries []resultconf.TreeEntry
 
-	for _, file := range sandbox.Deps.Iodeps.ListFilesRecursively(assert_dir) {
-		name := sandbox.Deps.Stringsdeps.TrimPrefix(sandbox.Deps.Stringsdeps.TrimPrefix(file, assert_dir), "/")
+	for _, file := range sandbox.Deps.IoDeps.ListFilesRecursively(assert_dir) {
+		name := sandbox.Deps.StringsDeps.TrimPrefix(sandbox.Deps.StringsDeps.TrimPrefix(file, assert_dir), "/")
 		if name == "" || isVolatile(sandbox, name) {
 			continue
 		}
 
-		content, err := sandbox.Deps.Iodeps.ReadFile(file)
+		content, err := sandbox.Deps.IoDeps.ReadFile(file)
 		if err != nil {
 			entries = append(entries, resultconf.TreeEntry{File: name})
 			continue
 		}
 
-		entries = append(entries, resultconf.TreeEntry{File: name, Sha: sandbox.Deps.Hashdeps.Sha256Hex(content)})
+		entries = append(entries, resultconf.TreeEntry{File: name, Sha: sandbox.Deps.HashDeps.Sha256Hex(content)})
 	}
 
-	sandbox.Deps.Sortdeps.SliceStable(entries, func(i, j int) bool {
+	sandbox.Deps.SortDeps.SliceStable(entries, func(i, j int) bool {
 		return entries[i].File < entries[j].File
 	})
 	return entries
 }
 
-// isVolatile reports whether an AssertDir-relative path is one the tree leaves
+// isVolatile reports whether an assert-dir-relative path is one the tree leaves
 // out (see volatileFiles / volatileDirs).
 func isVolatile(sandbox *api.Sandbox, name string) bool {
 	for _, file := range volatileFiles {
@@ -253,7 +253,7 @@ func isVolatile(sandbox *api.Sandbox, name string) bool {
 		}
 	}
 	for _, dir := range volatileDirs {
-		if sandbox.Deps.Stringsdeps.HasPrefix(name, dir) {
+		if sandbox.Deps.StringsDeps.HasPrefix(name, dir) {
 			return true
 		}
 	}
@@ -265,12 +265,12 @@ func isVolatile(sandbox *api.Sandbox, name string) bool {
 // absolute path, timestamp or resolved version left in the output belongs to
 // the machine that ran it, and the example carrying it is not a valid one.
 func normalize(sandbox *api.Sandbox, output string, dir string) string {
-	output = sandbox.Deps.Stringsdeps.ReplaceAll(output, "\r\n", "\n")
-	return sandbox.Deps.Stringsdeps.ReplaceAll(output, dir, "<dir>")
+	output = sandbox.Deps.StringsDeps.ReplaceAll(output, "\r\n", "\n")
+	return sandbox.Deps.StringsDeps.ReplaceAll(output, dir, "<dir>")
 }
 
 // emptyAssertDir is what one example is told when it copied nothing out of its
-// TestDir. Without it a forgotten copy is a green run asserting nothing at all.
+// test-dir. Without it a forgotten copy is a green run asserting nothing at all.
 func emptyAssertDir(run exampleRun) string {
 	return "assert-dir: " + run.Dir + "/" + utils.ExampleAssertDir +
 		" is empty — an example ends by copying out of " + utils.ExampleTestDir + " what it asserts"
@@ -285,9 +285,9 @@ func checkGolden(sandbox *api.Sandbox, path string, run exampleRun, produced *re
 	rel := run.Dir + "/" + utils.ExampleResultFile
 	golden_path := join(sandbox, path, rel)
 
-	if !sandbox.Deps.Iodeps.IsFile(golden_path) {
-		sandbox.Deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
-		return nil, sandbox.Deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
+	if !sandbox.Deps.IoDeps.IsFile(golden_path) {
+		sandbox.Deps.StdDeps.Logf("run-examples %s/%s: writing %s \n", run.Side, run.Name, rel)
+		return nil, sandbox.Deps.IoDeps.WriteFile(golden_path, []byte(produced.Render()))
 	}
 
 	golden, err := loadGolden(sandbox, run, golden_path)
@@ -303,21 +303,21 @@ func checkGolden(sandbox *api.Sandbox, path string, run exampleRun, produced *re
 		return divergences, nil
 	}
 
-	sandbox.Deps.Std.Log("exec-test %s/%s: writing %s \n", run.Side, run.Name, rel)
+	sandbox.Deps.StdDeps.Logf("run-examples %s/%s: writing %s \n", run.Side, run.Name, rel)
 	reportUpdate(sandbox, divergences)
-	return nil, sandbox.Deps.Iodeps.WriteFile(golden_path, []byte(produced.Render()))
+	return nil, sandbox.Deps.IoDeps.WriteFile(golden_path, []byte(produced.Render()))
 }
 
 // loadGolden reads and parses one example's result.yaml.
 func loadGolden(sandbox *api.Sandbox, run exampleRun, golden_path string) (*resultconf.ResultConf, error) {
-	content, err := sandbox.Deps.Iodeps.ReadFile(golden_path)
+	content, err := sandbox.Deps.IoDeps.ReadFile(golden_path)
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("exec-test %s/%s: could not read %s: %w", run.Side, run.Name, golden_path, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("run-examples %s/%s: could not read %s: %w", run.Side, run.Name, golden_path, err)
 	}
 
 	golden, err := resultconf.New(sandbox, string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("exec-test %s/%s: %s: %w", run.Side, run.Name, golden_path, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("run-examples %s/%s: %s: %w", run.Side, run.Name, golden_path, err)
 	}
 	return golden, nil
 }
@@ -327,11 +327,11 @@ func loadGolden(sandbox *api.Sandbox, run exampleRun, golden_path string) (*resu
 // one: an update is progress, and --quiet silences progress.
 func reportUpdate(sandbox *api.Sandbox, divergences []string) {
 	if len(divergences) == 0 {
-		sandbox.Deps.Std.Log("  unchanged \n")
+		sandbox.Deps.StdDeps.Logf("  unchanged \n")
 		return
 	}
 	for _, line := range divergences {
-		sandbox.Deps.Std.Log("  %s \n", line)
+		sandbox.Deps.StdDeps.Logf("  %s \n", line)
 	}
 }
 
@@ -363,8 +363,8 @@ func diffOutput(sandbox *api.Sandbox, expected string, got string) []string {
 		return nil
 	}
 
-	expected_lines := sandbox.Deps.Stringsdeps.Split(expected, "\n")
-	got_lines := sandbox.Deps.Stringsdeps.Split(got, "\n")
+	expected_lines := sandbox.Deps.StringsDeps.Split(expected, "\n")
+	got_lines := sandbox.Deps.StringsDeps.Split(got, "\n")
 
 	lines := []string{"cli-output:"}
 	for index := 0; index < len(expected_lines) || index < len(got_lines); index++ {
@@ -419,7 +419,7 @@ func diffTree(sandbox *api.Sandbox, expected []resultconf.TreeEntry, got []resul
 	if len(lines) == 0 {
 		return nil
 	}
-	sandbox.Deps.Sortdeps.Strings(lines)
+	sandbox.Deps.SortDeps.Strings(lines)
 	return append([]string{"tree:"}, lines...)
 }
 
@@ -436,9 +436,9 @@ func shasOf(entries []resultconf.TreeEntry) map[string]string {
 // error channel, not the log one: --quiet silences progress, never the reason
 // a run failed.
 func report(sandbox *api.Sandbox, label string, divergences []string) {
-	sandbox.Deps.Std.Error("exec-test %s: FAILED\n", label)
+	sandbox.Deps.StdDeps.Eprintf("run-examples %s: FAILED\n", label)
 	for _, line := range divergences {
-		sandbox.Deps.Std.Error("  %s\n", line)
+		sandbox.Deps.StdDeps.Eprintf("  %s\n", line)
 	}
 }
 
@@ -447,14 +447,14 @@ func report(sandbox *api.Sandbox, label string, divergences []string) {
 // as the working directory, so the alias and the output normalization both
 // need the answer a child `pwd` gives.
 func projectRoot(sandbox *api.Sandbox, path string) (string, error) {
-	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{Dir: path, Program: "pwd"})
+	result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{Dir: path, Program: "pwd"})
 	if err != nil {
-		return "", sandbox.Deps.Std.Errorf("exec-test: could not resolve %s: %w", path, err)
+		return "", sandbox.Deps.StdDeps.Errorf("run-examples: could not resolve %s: %w", path, err)
 	}
 	if result.ExitCode != 0 {
-		return "", sandbox.Deps.Std.Errorf("exec-test: could not resolve %s:\n%s", path, result.Output)
+		return "", sandbox.Deps.StdDeps.Errorf("run-examples: could not resolve %s:\n%s", path, result.Output)
 	}
-	return sandbox.Deps.Stringsdeps.TrimRight(result.Output, "\r\n"), nil
+	return sandbox.Deps.StringsDeps.TrimRight(result.Output, "\r\n"), nil
 }
 
 // writeCliAlias writes the executable an example types — named after the
@@ -465,7 +465,7 @@ func projectRoot(sandbox *api.Sandbox, path string) (string, error) {
 // installed release. A project with no cli has nothing to alias and gets no
 // prefix.
 func writeCliAlias(sandbox *api.Sandbox, path string, root string) ([]string, error) {
-	if !sandbox.Deps.Iodeps.IsDir(join(sandbox, path, "cmd/main")) {
+	if !sandbox.Deps.IoDeps.IsDir(join(sandbox, path, "cmd/main")) {
 		return nil, nil
 	}
 
@@ -474,43 +474,43 @@ func writeCliAlias(sandbox *api.Sandbox, path string, root string) ([]string, er
 		return nil, err
 	}
 
-	alias := aliasDir + "/" + conf.Name
+	alias := aliasDir + "/" + conf.ProjectName
 	script := "#!/bin/sh\nexec go run " + root + "/cmd/main \"$@\"\n"
 
-	if err := sandbox.Deps.Iodeps.WriteFile(join(sandbox, path, alias), []byte(script)); err != nil {
+	if err := sandbox.Deps.IoDeps.WriteFile(join(sandbox, path, alias), []byte(script)); err != nil {
 		return nil, err
 	}
 
 	// The filesystem contract writes content, not a mode, and a PATH entry
 	// only answers to an executable file.
-	result, err := sandbox.Deps.Rundeps.Run(rundeps.RunProps{Dir: path, Program: "chmod", Args: []string{"755", alias}})
+	result, err := sandbox.Deps.RunDeps.Run(rundeps.RunProps{Dir: path, Program: "chmod", Args: []string{"755", alias}})
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("exec-test: could not make %s executable: %w", alias, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("run-examples: could not make %s executable: %w", alias, err)
 	}
 	if result.ExitCode != 0 {
-		return nil, sandbox.Deps.Std.Errorf("exec-test: could not make %s executable:\n%s", alias, result.Output)
+		return nil, sandbox.Deps.StdDeps.Errorf("run-examples: could not make %s executable:\n%s", alias, result.Output)
 	}
 
 	return []string{root + "/" + aliasDir}, nil
 }
 
-// loadProjectConf reads the project.yaml the alias is named after. exec-test
-// opens no SmartIO, so it reads the file straight off disk.
+// loadProjectConf reads the project.yaml the alias is named after. run-examples
+// opens no StagedFS, so it reads the file straight off disk.
 func loadProjectConf(sandbox *api.Sandbox, path string) (*projectconf.ProjectConf, error) {
-	rel := sandbox.Config.ProjectName + "Config/project.yaml"
+	rel := utils.ProjectConfPath(sandbox)
 
-	content, err := sandbox.Deps.Iodeps.ReadFile(join(sandbox, path, rel))
+	content, err := sandbox.Deps.IoDeps.ReadFile(join(sandbox, path, rel))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
+		return nil, sandbox.Deps.StdDeps.Errorf("could not read %s: run `agnos start` first (%w)", rel, err)
 	}
 	return projectconf.New(sandbox, string(content))
 }
 
 // join is the project-relative path helper this action needs in place of the
-// SmartIO boundary it does without: "" and "." mean the current directory, so
+// StagedFS boundary it does without: "" and "." mean the current directory, so
 // they add no prefix.
 func join(sandbox *api.Sandbox, path string, rel string) string {
-	path = sandbox.Deps.Stringsdeps.TrimSuffix(sandbox.Deps.Stringsdeps.TrimSpace(path), "/")
+	path = sandbox.Deps.StringsDeps.TrimSuffix(sandbox.Deps.StringsDeps.TrimSpace(path), "/")
 	if path == "" || path == "." {
 		return rel
 	}

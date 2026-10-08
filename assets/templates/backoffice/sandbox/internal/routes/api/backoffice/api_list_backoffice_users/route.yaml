@@ -19,7 +19,6 @@ body:
 category: Backoffice Users API
 examples:
     - 'curl -X POST localhost:3000/api/admin/list-backoffice-users -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"search":"ana","role":"viewer","page":1,"limit":20}'''
-help: Lists backoffice users, filtered and paginated
 methods:
     - POST
 paths:
@@ -32,3 +31,4 @@ paths:
 priority: 100
 response-type: application/json
 segments: 3
+summary: Lists backoffice users, filtered and paginated

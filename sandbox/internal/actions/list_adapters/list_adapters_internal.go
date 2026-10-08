@@ -2,15 +2,15 @@ package list_adapters
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // ListAdaptersInternal returns one row per adapter the project can reach: every
 // adapter of the embedded catalog, plus every one installed that the catalog
 // does not have — a generated shim is only ever in the second group.
-func ListAdaptersInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string) ([]api.AdapterInfo, error) {
-	sandbox.Deps.Std.Log("list-adapters started with path %s \n", path)
+func ListAdaptersInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) ([]api.AdapterInfo, error) {
+	sandbox.Deps.StdDeps.Logf("list-adapters started with path %s \n", path)
 
 	catalog, err := utils.CatalogAdapters(sandbox)
 	if err != nil {
@@ -44,15 +44,15 @@ func ListAdaptersInternal(sandbox *api.Sandbox, io *smartio.SmartIO, path string
 }
 
 // adapterInfo fills one row with what the project holds of that adapter: an
-// installed package, and the availables binding it.
-func adapterInfo(sandbox *api.Sandbox, io *smartio.SmartIO, name string, dep string, help string, module string, origin string) api.AdapterInfo {
+// installed package, and the bindings that bind it.
+func adapterInfo(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, dep string, help string, module string, origin string) api.AdapterInfo {
 	return api.AdapterInfo{
-		Name:       name,
-		Dep:        dep,
-		Help:       help,
-		Module:     module,
-		Origin:     origin,
-		Installed:  io.IsDir(utils.AdapterDir(name)),
-		Availables: utils.AvailablesBinding(sandbox, io, name),
+		Name:      name,
+		Dep:       dep,
+		Help:      help,
+		Module:    module,
+		Origin:    origin,
+		Installed: io.IsDir(utils.AdapterDir(name)),
+		Bindings:  utils.BindingsUsing(sandbox, io, name),
 	}
 }

@@ -1,19 +1,19 @@
 package deps
 
 import (
-	OpinatedAgnosCli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinatedAgnosCli"
+	OpinionatedAgnosCli "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/OpinionatedAgnosCli"
 	argvdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/argvdeps"
 	embeddeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/embeddeps"
 	goimportsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	hashdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/hashdeps"
-	interviewer "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewer"
+	interviewdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/interviewdeps"
 	iodeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/iodeps"
 	reflectdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/reflectdeps"
 	rundeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/rundeps"
-	serializables "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializables"
+	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 	serverdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serverdeps"
 	sortdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/sortdeps"
-	std "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/std"
+	stddeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/stddeps"
 	stringsdeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/stringsdeps"
 	templatedeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/templatedeps"
 )
@@ -22,19 +22,19 @@ import (
 // per sub-contract directory of sandbox/deps/. An adapter fills the fields; the
 // sandbox only calls them, which is what keeps it free of OS packages.
 type Deps struct {
-	OpinatedAgnosCli OpinatedAgnosCli.Sandbox
-	Argvdeps         argvdeps.Sandbox
-	Embeddeps        embeddeps.Sandbox
-	Goimportsdeps    goimportsdeps.Sandbox
-	Hashdeps         hashdeps.Sandbox
-	Interviewer      interviewer.Sandbox
-	Iodeps           iodeps.Sandbox
-	Reflectdeps      reflectdeps.Sandbox
-	Rundeps          rundeps.Sandbox
-	Serializables    serializables.Sandbox
-	Serverdeps       serverdeps.Sandbox
-	Sortdeps         sortdeps.Sandbox
-	Std              std.Sandbox
-	Stringsdeps      stringsdeps.Sandbox
-	Templatedeps     templatedeps.Sandbox
+	OpinionatedAgnosCli OpinionatedAgnosCli.Contract
+	ArgvDeps            argvdeps.Contract
+	EmbedDeps           embeddeps.Contract
+	GoimportsDeps       goimportsdeps.Contract
+	HashDeps            hashdeps.Contract
+	InterviewDeps       interviewdeps.Contract
+	IoDeps              iodeps.Contract
+	ReflectDeps         reflectdeps.Contract
+	RunDeps             rundeps.Contract
+	SerializableDeps    serializabledeps.Contract
+	ServerDeps          serverdeps.Contract
+	SortDeps            sortdeps.Contract
+	StdDeps             stddeps.Contract
+	StringsDeps         stringsdeps.Contract
+	TemplateDeps        templatedeps.Contract
 }

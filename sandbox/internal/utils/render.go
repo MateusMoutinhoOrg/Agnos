@@ -3,7 +3,7 @@ package utils
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/templatedeps"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 )
 
 // templateFuncs is the FuncMap every template rendered through this package is
@@ -24,21 +24,21 @@ import (
 // returns its contents verbatim, without any template rendering. Use it to
 // embed a file that is not itself a template (a LICENSE, a fixed snippet). A
 // missing file is a hard error.
-func templateFuncs(sandbox *api.Sandbox, io *smartio.SmartIO, vars interface{}) map[string]any {
+func templateFuncs(sandbox *api.Sandbox, io *stagedfs.StagedFS, vars interface{}) map[string]any {
 	return map[string]any{
-		"render": func(project_path string) (string, error) {
-			content, err := io.ReadFile(project_path)
+		"render": func(projectPath string) (string, error) {
+			content, err := io.ReadFile(projectPath)
 			if err != nil {
 				return "", err
 			}
-			rendered, err := renderTemplate(sandbox, io, baseName(sandbox, project_path), content, vars)
+			rendered, err := renderTemplate(sandbox, io, baseName(sandbox, projectPath), content, vars)
 			if err != nil {
 				return "", err
 			}
 			return string(rendered), nil
 		},
-		"copy": func(project_path string) (string, error) {
-			content, err := io.ReadFile(project_path)
+		"copy": func(projectPath string) (string, error) {
+			content, err := io.ReadFile(projectPath)
 			if err != nil {
 				return "", err
 			}
@@ -51,16 +51,16 @@ func templateFuncs(sandbox *api.Sandbox, io *smartio.SmartIO, vars interface{}) 
 // without writing anything. It is what a caller needs when it has to read a
 // value out of an asset the build is about to write — the doc props of a
 // generated doc, say — rather than render that asset to its destination.
-func RenderTemplate(sandbox *api.Sandbox, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
+func RenderTemplate(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, src []byte, vars interface{}) ([]byte, error) {
 	return renderTemplate(sandbox, io, name, src, vars)
 }
 
 // renderTemplate parses src as a Go text/template named name and executes it
-// over vars, with templateFuncs available. It is the single rendering path for
+// over vars, with templateFuncs binding. It is the single rendering path for
 // this package: RenderTemplateToDest and RenderGroup both go through it, so the
 // `render` native function is available in every asset template.
-func renderTemplate(sandbox *api.Sandbox, io *smartio.SmartIO, name string, src []byte, vars interface{}) ([]byte, error) {
-	rendered, err := sandbox.Deps.Templatedeps.Render(templatedeps.RenderProps{
+func renderTemplate(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, src []byte, vars interface{}) ([]byte, error) {
+	rendered, err := sandbox.Deps.TemplateDeps.Render(templatedeps.RenderProps{
 		Name:   name,
 		Source: string(src),
 		Vars:   vars,
@@ -75,7 +75,7 @@ func renderTemplate(sandbox *api.Sandbox, io *smartio.SmartIO, name string, src 
 // baseName is the last slash-separated segment of an asset path, the name a
 // template is reported under when it fails to parse or execute.
 func baseName(sandbox *api.Sandbox, path string) string {
-	segments := sandbox.Deps.Stringsdeps.Split(path, "/")
+	segments := sandbox.Deps.StringsDeps.Split(path, "/")
 	return segments[len(segments)-1]
 }
 
@@ -87,38 +87,38 @@ func baseName(sandbox *api.Sandbox, path string) string {
 // compiler would refuse means the declaration is wrong, and the build stops
 // before writing it — whatever runtime was asked for.
 func formatIfGo(sandbox *api.Sandbox, dest string, content []byte) ([]byte, error) {
-	if !sandbox.Deps.Stringsdeps.HasSuffix(dest, ".go") {
+	if !sandbox.Deps.StringsDeps.HasSuffix(dest, ".go") {
 		return content, nil
 	}
 
-	formatted, err := sandbox.Deps.Goimportsdeps.Format(string(content))
+	formatted, err := sandbox.Deps.GoimportsDeps.Format(string(content))
 	if err != nil {
-		return nil, sandbox.Deps.Std.Errorf("could not render %s, it is not valid Go: %s", dest, err.Error())
+		return nil, sandbox.Deps.StdDeps.Errorf("could not render %s, it is not valid Go: %s", dest, err.Error())
 	}
 
 	return []byte(formatted), nil
 }
 
 // RenderTemplateToDest renders one asset as a Go text/template over vars and
-// writes the result to dest_path. A Go destination is formatted first (see
+// writes the result to destPath. A Go destination is formatted first (see
 // formatIfGo).
-func RenderTemplateToDest(sandbox *api.Sandbox, io *smartio.SmartIO, template_path string, vars interface{}, dest_path string) error {
+func RenderTemplateToDest(sandbox *api.Sandbox, io *stagedfs.StagedFS, templatePath string, vars interface{}, destPath string) error {
 
-	src, err := sandbox.Deps.Embeddeps.ReadFile(template_path)
+	src, err := sandbox.Deps.EmbedDeps.ReadFile(templatePath)
 	if err != nil {
 		return err
 	}
 
-	content, err := renderTemplate(sandbox, io, baseName(sandbox, template_path), src, vars)
+	content, err := renderTemplate(sandbox, io, baseName(sandbox, templatePath), src, vars)
 	if err != nil {
 		return err
 	}
 
-	formatted, err := formatIfGo(sandbox, dest_path, content)
+	formatted, err := formatIfGo(sandbox, destPath, content)
 	if err != nil {
 		return err
 	}
-	err = io.WriteFileOverwrite(dest_path, formatted)
+	err = io.WriteFile(destPath, formatted)
 	if err != nil {
 		return err
 	}
@@ -132,7 +132,7 @@ func RenderTemplateToDest(sandbox *api.Sandbox, io *smartio.SmartIO, template_pa
 // vars) is written to sandbox/new.go. Every file in the group is rendered with the
 // same vars, and every file may call the `render` native function (see
 // templateFuncs) to embed another template of the target project.
-func RenderGroup(sandbox *api.Sandbox, io *smartio.SmartIO, group string, vars interface{}) error {
+func RenderGroup(sandbox *api.Sandbox, io *stagedfs.StagedFS, group string, vars interface{}) error {
 	return RenderGroupExcept(sandbox, io, group, vars, nil)
 }
 
@@ -141,18 +141,18 @@ func RenderGroup(sandbox *api.Sandbox, io *smartio.SmartIO, group string, vars i
 // catalogs carry their declaration at the root of the group — a file that
 // describes the package rather than one the package installs — so it is
 // rendered nowhere.
-func RenderGroupExcept(sandbox *api.Sandbox, io *smartio.SmartIO, group string, vars interface{}, except []string) error {
+func RenderGroupExcept(sandbox *api.Sandbox, io *stagedfs.StagedFS, group string, vars interface{}, except []string) error {
 
-	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively(group)
+	files, err := sandbox.Deps.EmbedDeps.ListFilesRecursively(group)
 	if err != nil {
 		return err
 	}
 
 	for _, file := range files {
-		if containsPath(except, file) {
+		if contains(except, file) {
 			continue
 		}
-		src, err := sandbox.Deps.Embeddeps.ReadFile(group + "/" + file)
+		src, err := sandbox.Deps.EmbedDeps.ReadFile(group + "/" + file)
 		if err != nil {
 			return err
 		}
@@ -166,24 +166,13 @@ func RenderGroupExcept(sandbox *api.Sandbox, io *smartio.SmartIO, group string, 
 		if err != nil {
 			return err
 		}
-		err = io.WriteFileOverwrite(file, formatted)
+		err = io.WriteFile(file, formatted)
 		if err != nil {
 			return err
 		}
 	}
 
 	return nil
-}
-
-// containsPath reports whether paths holds path, the membership test
-// RenderGroupExcept skips an asset with.
-func containsPath(paths []string, path string) bool {
-	for _, candidate := range paths {
-		if candidate == path {
-			return true
-		}
-	}
-	return false
 }
 
 // RenderTemplateTree writes every file under assets/<tree> to the path it holds
@@ -194,8 +183,8 @@ func containsPath(paths []string, path string) bool {
 // Every file is rendered over vars like any template, except those under
 // <tree>/<raw>: those are the project's own runtime templates (the backoffice's
 // html pages are text/template sources themselves), copied byte for byte.
-func RenderTemplateTree(sandbox *api.Sandbox, io *smartio.SmartIO, tree string, raw string, vars interface{}) ([]string, error) {
-	files, err := sandbox.Deps.Embeddeps.ListFilesRecursively(tree)
+func RenderTemplateTree(sandbox *api.Sandbox, io *stagedfs.StagedFS, tree string, raw string, vars interface{}) ([]string, error) {
+	files, err := sandbox.Deps.EmbedDeps.ListFilesRecursively(tree)
 	if err != nil {
 		return nil, err
 	}
@@ -203,17 +192,17 @@ func RenderTemplateTree(sandbox *api.Sandbox, io *smartio.SmartIO, tree string, 
 	var written []string
 	for _, file := range files {
 		if _, err := io.ReadFile(file); err == nil {
-			sandbox.Deps.Std.Log("%s already exists, keeping it \n", file)
+			sandbox.Deps.StdDeps.Logf("%s already exists, keeping it \n", file)
 			continue
 		}
 
-		src, err := sandbox.Deps.Embeddeps.ReadFile(tree + "/" + file)
+		src, err := sandbox.Deps.EmbedDeps.ReadFile(tree + "/" + file)
 		if err != nil {
 			return nil, err
 		}
 
 		content := src
-		if !sandbox.Deps.Stringsdeps.HasPrefix(file, raw+"/") {
+		if !sandbox.Deps.StringsDeps.HasPrefix(file, raw+"/") {
 			content, err = renderTemplate(sandbox, io, baseName(sandbox, file), src, vars)
 			if err != nil {
 				return nil, err
@@ -224,26 +213,11 @@ func RenderTemplateTree(sandbox *api.Sandbox, io *smartio.SmartIO, tree string, 
 			}
 		}
 
-		if err := io.WriteFileOverwrite(file, content); err != nil {
+		if err := io.WriteFile(file, content); err != nil {
 			return nil, err
 		}
 		written = append(written, file)
 	}
 
 	return written, nil
-}
-
-// SecretEnvName is the environment variable a project named name reads its
-// secret from: the name upper-cased, every byte but a letter or a digit turned
-// into "_", then "_SECRET" — MEUSITE_SECRET for meusite. The backoffice's
-// SecretEnv spells the same rule at runtime from api.Config.ProjectName; this
-// is the copy the docs render from.
-func SecretEnvName(sandbox *api.Sandbox, name string) string {
-	upper := []byte(sandbox.Deps.Stringsdeps.ToUpper(name))
-	for i, char := range upper {
-		if !(char >= 'A' && char <= 'Z') && !(char >= '0' && char <= '9') {
-			upper[i] = '_'
-		}
-	}
-	return string(upper) + "_SECRET"
 }

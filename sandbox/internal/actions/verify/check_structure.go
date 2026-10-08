@@ -2,23 +2,23 @@ package verify
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/smartio"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // CheckStructure enforces that every item of
-// <ProjectName>Config/structure.yaml still names something on disk. The
+// AgnosConfig/structure.yaml still names something on disk. The
 // declaration is what docs/Structure is rendered from, so an item left behind
 // by a deleted file — a ghost spec — would publish a tree the project no
 // longer has.
 //
 // An item marked `dir: true` must be a directory and any other must be a file.
 // An item whose path holds a pattern character stands for a family of paths
-// ("libs/<lib>/<lib>.go"), so the literal part of its path is checked instead:
+// ("impls/<adapter>/<adapter>.go"), so the literal part of its path is checked instead:
 // the family may be empty, but the directory it would live in has to exist.
 //
 // A project with no structure.yaml describes nothing and has nothing to check.
-func CheckStructure(sandbox *api.Sandbox, io *smartio.SmartIO) []string {
+func CheckStructure(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	if !io.IsFile(utils.StructureConfPath(sandbox)) {

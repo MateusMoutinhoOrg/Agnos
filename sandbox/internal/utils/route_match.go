@@ -2,10 +2,10 @@ package utils
 
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
-	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/parsables/routeconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/routeconf"
 )
 
-// The matcher below is the generated sandbox/internal/generated/server/route/IsActionable.go
+// The matcher below is the OpinionatedAgnosServer lib's matches.go
 // read against a route.yaml instead of an api.Route, so explain-route can say
 // which routes a request reaches without a server. The two are kept one for
 // one — a change to one is a change to the other, and the explain-route
@@ -35,43 +35,43 @@ type RouteMatch struct {
 // MatchRouteRequest runs one route's declaration against one request.
 func MatchRouteRequest(sandbox *api.Sandbox, conf *routeconf.RouteConf, request RouteRequest) RouteMatch {
 	segments := []string{}
-	for _, segment := range sandbox.Deps.Stringsdeps.Split(request.Path, "/") {
+	for _, segment := range sandbox.Deps.StringsDeps.Split(request.Path, "/") {
 		if segment != "" {
 			segments = append(segments, segment)
 		}
 	}
 
 	if conf.HasSegments && len(segments) != conf.Segments {
-		return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("the route takes %d segments, the path has %d", conf.Segments, len(segments))}
+		return RouteMatch{Reason: sandbox.Deps.StdDeps.Sprintf("the route takes %d segments, the path has %d", conf.Segments, len(segments))}
 	}
 
 	for _, path := range conf.Paths {
 		text, ok := routePathSlice(sandbox, segments, path)
 		if !ok {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("path %s: the request has no segment %d", path.Id, path.Start)}
+			return RouteMatch{Reason: sandbox.Deps.StdDeps.Sprintf("path %s: the request has no segment %d", path.Id, path.Start)}
 		}
 		if !routePathConverts(sandbox, path, text) {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("path %s: %q is not a valid %s", path.Id, sandbox.Deps.Stringsdeps.TrimPrefix(text, "/"), path.Type)}
+			return RouteMatch{Reason: sandbox.Deps.StdDeps.Sprintf("path %s: %q is not a valid %s", path.Id, sandbox.Deps.StringsDeps.TrimPrefix(text, "/"), path.Type)}
 		}
-		if path.Trigger.Exists && !MatchTrigger(sandbox, path.Trigger, text, true) {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("path %s: %q fails %s", path.Id, text, DescribeTrigger(sandbox, path.Trigger))}
+		if path.Trigger.Set && !MatchTrigger(sandbox, path.Trigger, text, true) {
+			return RouteMatch{Reason: sandbox.Deps.StdDeps.Sprintf("path %s: %q fails %s", path.Id, text, DescribeTrigger(sandbox, path.Trigger))}
 		}
 	}
 
 	if !routeAccepts(conf, request.Method) {
-		return RouteMatch{MethodMismatch: true, Reason: sandbox.Deps.Std.Sprintf("the method %s is not one of %s", request.Method, sandbox.Deps.Stringsdeps.Join(conf.Methods, ", "))}
+		return RouteMatch{MethodMismatch: true, Reason: sandbox.Deps.StdDeps.Sprintf("the method %s is not one of %s", request.Method, sandbox.Deps.StringsDeps.Join(conf.Methods, ", "))}
 	}
 
 	for _, parameter := range conf.Parameters {
-		if !parameter.Trigger.Exists {
+		if !parameter.Trigger.Set {
 			continue
 		}
 		values := routeParameterValues(sandbox, parameter, request)
 		if len(values) == 0 {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("parameter %s: absent, and it declares a trigger", parameter.Id)}
+			return RouteMatch{Reason: sandbox.Deps.StdDeps.Sprintf("parameter %s: absent, and it declares a trigger", parameter.Id)}
 		}
 		if !MatchTrigger(sandbox, parameter.Trigger, values[0], false) {
-			return RouteMatch{Reason: sandbox.Deps.Std.Sprintf("parameter %s: %q fails %s", parameter.Id, values[0], DescribeTrigger(sandbox, parameter.Trigger))}
+			return RouteMatch{Reason: sandbox.Deps.StdDeps.Sprintf("parameter %s: %q fails %s", parameter.Id, values[0], DescribeTrigger(sandbox, parameter.Trigger))}
 		}
 	}
 
@@ -80,20 +80,20 @@ func MatchRouteRequest(sandbox *api.Sandbox, conf *routeconf.RouteConf, request 
 		values := routeParameterValues(sandbox, parameter, request)
 		if len(values) == 0 {
 			if parameter.Required {
-				match.Failure = sandbox.Deps.Std.Sprintf("400, required parameter %q is missing", parameter.Key)
+				match.Failure = sandbox.Deps.StdDeps.Sprintf("400, required parameter %q is missing", parameter.Key)
 				return match
 			}
 			continue
 		}
 		if !routeParameterConverts(sandbox, parameter, values) {
-			match.Failure = sandbox.Deps.Std.Sprintf("400, parameter %q is not a valid %s", parameter.Key, parameter.Type)
+			match.Failure = sandbox.Deps.StdDeps.Sprintf("400, parameter %q is not a valid %s", parameter.Key, parameter.Type)
 			return match
 		}
 	}
 	return match
 }
 
-// routePathSlice is PathSlice of the generated IsActionable.go.
+// routePathSlice is PathSlice of the OpinionatedAgnosCli lib's matches.go.
 func routePathSlice(sandbox *api.Sandbox, segments []string, path routeconf.Path) (string, bool) {
 	end := path.End
 	if end < 0 {
@@ -105,31 +105,31 @@ func routePathSlice(sandbox *api.Sandbox, segments []string, path routeconf.Path
 	if path.Start < 0 || path.Start > end || end >= len(segments) {
 		return "", false
 	}
-	return "/" + sandbox.Deps.Stringsdeps.Join(segments[path.Start:end+1], "/"), true
+	return "/" + sandbox.Deps.StringsDeps.Join(segments[path.Start:end+1], "/"), true
 }
 
-// routeUuidPattern is uuidPattern of the generated IsActionable.go.
+// routeUuidPattern is uuidPattern of the OpinionatedAgnosCli lib's matches.go.
 const routeUuidPattern = `^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$`
 
-// routePathConverts is PathValue of the generated IsActionable.go, reduced to
+// routePathConverts is PathValue of the OpinionatedAgnosCli lib's matches.go, reduced to
 // whether the slice converts.
 func routePathConverts(sandbox *api.Sandbox, path routeconf.Path, text string) bool {
-	segment := sandbox.Deps.Stringsdeps.TrimPrefix(text, "/")
+	segment := sandbox.Deps.StringsDeps.TrimPrefix(text, "/")
 	switch path.Type {
 	case "integer":
-		_, err := sandbox.Deps.Stringsdeps.Atoi(segment)
+		_, err := sandbox.Deps.StringsDeps.Atoi(segment)
 		return err == nil
 	case "number":
-		_, err := sandbox.Deps.Stringsdeps.ParseFloat(segment, 64)
+		_, err := sandbox.Deps.StringsDeps.ParseFloat(segment, 64)
 		return err == nil
 	case "uuid":
-		matched, err := sandbox.Deps.Stringsdeps.MatchPattern(routeUuidPattern, segment)
+		matched, err := sandbox.Deps.StringsDeps.MatchPattern(routeUuidPattern, segment)
 		return err == nil && matched
 	}
 	return true
 }
 
-// routeAccepts is acceptsMethod of the generated IsActionable.go.
+// routeAccepts is acceptsMethod of the OpinionatedAgnosCli lib's matches.go.
 func routeAccepts(conf *routeconf.RouteConf, method string) bool {
 	for _, accepted := range conf.Methods {
 		if accepted == method || accepted == routeconf.AnyMethod {
@@ -139,16 +139,16 @@ func routeAccepts(conf *routeconf.RouteConf, method string) bool {
 	return false
 }
 
-// routeParameterValues is ParameterValues of the generated IsActionable.go.
+// routeParameterValues is ParameterValues of the OpinionatedAgnosCli lib's matches.go.
 func routeParameterValues(sandbox *api.Sandbox, parameter routeconf.Parameter, request RouteRequest) []string {
 	array := parameter.Type == "string-array" || parameter.Type == "integer-array"
-	for _, font := range parameter.Fonts {
+	for _, source := range parameter.Sources {
 		raws := []string{}
-		switch font {
+		switch source {
 		case "header":
-			raw := request.Headers[sandbox.Deps.Stringsdeps.ToLower(parameter.Key)]
+			raw := request.Headers[sandbox.Deps.StringsDeps.ToLower(parameter.Key)]
 			if array {
-				raws = sandbox.Deps.Stringsdeps.Split(raw, ",")
+				raws = sandbox.Deps.StringsDeps.Split(raw, ",")
 			} else {
 				raws = []string{raw}
 			}
@@ -163,7 +163,7 @@ func routeParameterValues(sandbox *api.Sandbox, parameter routeconf.Parameter, r
 
 		values := []string{}
 		for _, raw := range raws {
-			if value := sandbox.Deps.Stringsdeps.TrimSpace(raw); value != "" {
+			if value := sandbox.Deps.StringsDeps.TrimSpace(raw); value != "" {
 				values = append(values, value)
 			}
 		}
@@ -175,20 +175,20 @@ func routeParameterValues(sandbox *api.Sandbox, parameter routeconf.Parameter, r
 }
 
 // routeParameterConverts reports whether the values a parameter brought bind
-// to its type, as parseValue of the generated RequestHandler.go reads them.
+// to its type, as parseValue of the generated Run.go reads them.
 func routeParameterConverts(sandbox *api.Sandbox, parameter routeconf.Parameter, values []string) bool {
 	for _, value := range values {
 		switch parameter.Type {
 		case "integer", "integer-array":
-			if _, err := sandbox.Deps.Stringsdeps.Atoi(value); err != nil {
+			if _, err := sandbox.Deps.StringsDeps.Atoi(value); err != nil {
 				return false
 			}
 		case "number":
-			if _, err := sandbox.Deps.Stringsdeps.ParseFloat(value, 64); err != nil {
+			if _, err := sandbox.Deps.StringsDeps.ParseFloat(value, 64); err != nil {
 				return false
 			}
 		case "boolean":
-			lower := sandbox.Deps.Stringsdeps.ToLower(value)
+			lower := sandbox.Deps.StringsDeps.ToLower(value)
 			if lower != "true" && lower != "false" && lower != "1" && lower != "0" {
 				return false
 			}
@@ -201,13 +201,13 @@ func routeParameterConverts(sandbox *api.Sandbox, parameter routeconf.Parameter,
 }
 
 // RouteMiddlewareReach crosses one route with another that runs on a lower
-// rung — a middleware in front of it — the way MiddlewareReach crosses two
+// rung — a middleware in front of it — the way CommandMiddlewareReach crosses two
 // commands: whether it runs in front of every request of the route (its
 // methods take the route's, every path trigger holds on the route's literal
 // segments), may run (a trigger reads a segment the route captures, or a
 // regex), or never does; and, when one of its parameters declares a trigger,
 // the condition that adds.
-func RouteMiddlewareReach(sandbox *api.Sandbox, middleware *routeconf.RouteConf, route *routeconf.RouteConf) (Reach, string) {
+func RouteMiddlewareReach(sandbox *api.Sandbox, middleware *routeconf.RouteConf, route *routeconf.RouteConf) (MiddlewareReach, string) {
 	if middleware.Priority >= route.Priority {
 		return NoReach, ""
 	}
@@ -228,7 +228,7 @@ func RouteMiddlewareReach(sandbox *api.Sandbox, middleware *routeconf.RouteConf,
 
 	words := routeLiteralSegments(sandbox, route)
 	for _, path := range middleware.Paths {
-		if !path.Trigger.Exists {
+		if !path.Trigger.Set {
 			continue
 		}
 		switch routeTriggerReach(sandbox, path, words) {
@@ -241,14 +241,14 @@ func RouteMiddlewareReach(sandbox *api.Sandbox, middleware *routeconf.RouteConf,
 
 	conditions := []string{}
 	for _, parameter := range middleware.Parameters {
-		if parameter.Trigger.Exists {
+		if parameter.Trigger.Set {
 			conditions = append(conditions, parameter.Key+" "+DescribeTrigger(sandbox, parameter.Trigger))
 		}
 	}
 	if len(conditions) == 0 {
 		return reach, ""
 	}
-	return reach, "only when " + sandbox.Deps.Stringsdeps.Join(conditions, " and ")
+	return reach, "only when " + sandbox.Deps.StringsDeps.Join(conditions, " and ")
 }
 
 // routeMethodsMeet reports whether two routes share a method they answer.
@@ -273,11 +273,11 @@ func routeLiteralSegments(sandbox *api.Sandbox, route *routeconf.RouteConf) map[
 	words := map[int]string{}
 	for _, path := range route.Paths {
 		literal := path.Trigger.Type == "equal" || path.Trigger.Type == "prefix"
-		if !path.Trigger.Exists || path.Trigger.Negate || path.Trigger.IgnoreCase || !literal {
+		if !path.Trigger.Set || path.Trigger.Negate || path.Trigger.IgnoreCase || !literal {
 			continue
 		}
 		offset := 0
-		for _, segment := range sandbox.Deps.Stringsdeps.Split(path.Trigger.Value, "/") {
+		for _, segment := range sandbox.Deps.StringsDeps.Split(path.Trigger.Value, "/") {
 			if segment == "" {
 				continue
 			}
@@ -292,7 +292,7 @@ func routeLiteralSegments(sandbox *api.Sandbox, route *routeconf.RouteConf) map[
 
 // routeTriggerReach is triggerReach for a path of a middleware route, over the
 // route's literal segments.
-func routeTriggerReach(sandbox *api.Sandbox, path routeconf.Path, words map[int]string) Reach {
+func routeTriggerReach(sandbox *api.Sandbox, path routeconf.Path, words map[int]string) MiddlewareReach {
 	trigger := path.Trigger
 	if trigger.Type == "regex" {
 		return MayRun
@@ -312,14 +312,14 @@ func routeTriggerReach(sandbox *api.Sandbox, path routeconf.Path, words map[int]
 		complete = false
 	}
 
-	text := "/" + sandbox.Deps.Stringsdeps.Join(known, "/")
+	text := "/" + sandbox.Deps.StringsDeps.Join(known, "/")
 	if complete {
 		return boolReach(MatchTrigger(sandbox, trigger, text, true))
 	}
 
 	if trigger.Type == "prefix" && !trigger.Negate {
 		value := []string{}
-		for _, segment := range sandbox.Deps.Stringsdeps.Split(trigger.Value, "/") {
+		for _, segment := range sandbox.Deps.StringsDeps.Split(trigger.Value, "/") {
 			if segment != "" {
 				value = append(value, segment)
 			}

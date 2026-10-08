@@ -25,10 +25,9 @@ body:
     required: true
     type: json
 category: Backoffice Users API
+description: A new password ends every session of the user and revokes every API token of theirs, the token this request carries included when a root changes their own password.
 examples:
-    - 'curl -X POST localhost:3000/api/admin/root/edit-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":2,"username":"ana","email":"ana@example.com","role":"root"}'''
-help: Edits a backoffice user; a missing or blank password keeps the current one
-long-description: A new password ends every session of the user and revokes every API token of theirs, the token this request carries included when a root changes their own password.
+    - 'curl -X POST localhost:3000/api/admin/root/set-backoffice-user -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":2,"username":"ana","email":"ana@example.com","role":"root"}'''
 methods:
     - POST
 paths:
@@ -37,7 +36,8 @@ paths:
       start: 0
       trigger:
         type: equal
-        value: /api/admin/root/edit-backoffice-user
+        value: /api/admin/root/set-backoffice-user
 priority: 100
 response-type: application/json
 segments: 4
+summary: Edits a backoffice user; a missing or blank password keeps the current one
