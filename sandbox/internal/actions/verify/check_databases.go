@@ -13,11 +13,18 @@ import (
 // would generate a struct with the same field twice.
 const databaseIdField = "id"
 
+// databaseReservedObjects are the names an `object` field may not take: the
+// store keys a nested collection under {record}/{field}, beside the record's
+// own {record}/position and {record}/values, so Databases.New refuses a
+// Props whose nested collection takes either one.
+var databaseReservedObjects = []string{"position", "values"}
+
 // CheckDatabases enforces the shape the database layer's generators read by
 // convention: the four generated files of a database package, a parsable
 // declaration, links that point at a table, nested collections that hold
-// fields and nest no further, and a hand-written methods_custom.go that does
-// not redeclare anything the build writes.
+// fields, nest no further and take no name the store reserves, a key prefix
+// the store accepts, and a hand-written methods_custom.go that does not
+// redeclare anything the build writes.
 //
 // A project with no sandbox/internal/databases has no database layer and
 // nothing to check.
@@ -78,6 +85,12 @@ func checkDatabaseDeclaration(sandbox *api.Sandbox, name string, conf *databasec
 	if conf.Name == "" {
 		violations = append(violations, databaseViolation(name, utils.DatabaseConfFile+" declares no name"))
 	}
+	for _, segment := range sandbox.Deps.StringsDeps.Split(conf.KeyPrefix, "/") {
+		if segment == "." || segment == ".." {
+			violations = append(violations, databaseViolation(name,
+				"declares the key-prefix "+conf.KeyPrefix+", which holds a \""+segment+"\" segment; the store refuses it"))
+		}
+	}
 	// One Go record is declared per table and per nested collection, so the
 	// two families share one namespace: two of them spelling the same name
 	// would generate the same struct twice.
@@ -136,6 +149,12 @@ func checkDatabaseField(sandbox *api.Sandbox, name string, conf *databaseconf.Da
 				"declares the nested collection "+where+" with no `fields`; it would hold records of nothing"))
 		}
 		violations = append(violations, claimRecord(sandbox, name, records, field.Name, "the nested collection "+where)...)
+		for _, reserved := range databaseReservedObjects {
+			if field.Name == reserved {
+				violations = append(violations, databaseViolation(name,
+					"declares the nested collection "+where+"; "+reserved+" is a key every record already holds"))
+			}
+		}
 
 		nested_names := map[string]bool{}
 		for _, nested := range field.Fields {

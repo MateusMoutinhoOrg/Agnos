@@ -122,7 +122,7 @@ func databaseTableData(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, ta
 	}
 }
 
-// databaseItemData is one field as the databasedeps.Item literal reads it, its
+// databaseItemData is one field as the databasedeps.Field literal reads it, its
 // nested collection included.
 func databaseItemData(sandbox *api.Sandbox, field databaseconf.Field) map[string]any {
 	nested := make([]map[string]any, 0, len(field.Fields))
@@ -139,7 +139,7 @@ func databaseItemData(sandbox *api.Sandbox, field databaseconf.Field) map[string
 	}
 }
 
-// databaseItemConst is the databasedeps.Item type constant one declared type is
+// databaseItemConst is the databasedeps.Field type constant one declared type is
 // written as.
 func databaseItemConst(kind string) string {
 	switch kind {
@@ -152,7 +152,7 @@ func databaseItemConst(kind string) string {
 	case databaseconf.FieldLink:
 		return "databasedeps.Link"
 	case databaseconf.FieldObject:
-		return "databasedeps.Database"
+		return "databasedeps.Nested"
 	}
 	return "databasedeps.String"
 }

@@ -47,7 +47,7 @@ var retiredReplacements = map[string]string{
 	GeneratedDir + "/routeio":      "sandbox.Deps.OpinionatedAgnosServer: Fail, FailWithCause, FailureOf, WriteError, WriteJSON, WriteText, Redirect, ValidateSchema, ValidateForm and the Read*/Item* readers; route.Request and route.Response for RequestOf and ResponseOf",
 	GeneratedDir + "/server/route": "sandbox.Deps.OpinionatedAgnosServer.NewRoute()",
 	GeneratedDir + "/frontio":      "sandbox.Deps.OpinionatedAgnosFront: Resolve, SafePath, ExtensionOf, ContentTypeOf, and the constants of sandbox/deps/OpinionatedAgnosFront",
-	GeneratedDir + "/databaseio":   "sandbox.Deps.OpinionatedAgnosDatabase: Fail, Schema, ReadString, ReadInt, ReadFloat, TextMatches, IntInRange, FloatInRange",
+	GeneratedDir + "/databaseio":   "sandbox.Deps.OpinionatedAgnosDatabase: Fail, Collection, ReadString, ReadInt, ReadFloat, TextMatches, IntInRange, FloatInRange",
 }
 
 // RetiredReplacement is what replaced one retired generated package, named by

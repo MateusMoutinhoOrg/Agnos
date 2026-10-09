@@ -12,7 +12,7 @@ import (
 // dep rather than from the catalog: it is a repo, not a contract agnos carries.
 // The version is pinned here so every project this init touches installs the
 // same one, and `agnos set-dep database --version <v>` moves it afterwards.
-const KeepModule = "github.com/MateusMoutinhoOrg/Keep@v0.0.7"
+const KeepModule = "github.com/MateusMoutinhoOrg/Keep@v0.10.0"
 
 // DatabaseDep is the name the copied contract lands under. The generated code
 // names it, so it is the one spelling database-init may install it as.

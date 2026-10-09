@@ -322,6 +322,8 @@ Routes, roles and the API are in [Backoffice](../Backoffice/doc.md).
   **(verify)**
 - No table declares a field named `id`: every record already carries its permanent one.
   **(verify)**
+- No `object` field is named `position` or `values`, and no `key-prefix` holds a `.` or `..`
+  segment: the store refuses either, and every method of that database would fail. **(verify)**
 
 Every key of a declaration is in [Databases](../Databases/doc.md).
 {{ end }}

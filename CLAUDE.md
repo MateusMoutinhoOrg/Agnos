@@ -129,7 +129,8 @@ editing only the rendered copy is undone in silence.
 - Any new path worth naming gets an entry in `AgnosConfig/structure.yaml`; `verify` fails on an
   entry whose path does not exist.
 - A database's `link` field names a `target` that is a table of the same database, an `object`
-  field carries `fields` and nests no further, and no table declares a field named `id`.
+  field carries `fields` and nests no further, and no table declares a field named `id`, nor
+  an `object` named `position` or `values` (Keep reserves both).
   `remove-database` refuses a package carrying a `methods_custom.go`.
 - Every `route.yaml` declares `methods` (or `ANY` alone), `priority` and `response-type`;
   `add-route` writes `100`, `10` for a `--middleware`. A path reads the segments `start`..`end`

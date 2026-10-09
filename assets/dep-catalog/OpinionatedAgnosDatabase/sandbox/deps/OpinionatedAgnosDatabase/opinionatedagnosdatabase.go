@@ -25,18 +25,19 @@ type Contract struct {
 	// sandbox carries. A nil *databasedeps.Error is success and answers nil.
 	Fail func(failure *databasedeps.Error) error
 
-	// Schema resolves one collection of a handle by name. A name the handle
-	// does not declare is an error rather than a nil instance.
-	Schema func(handle databasedeps.DatabaseHandle, name string) (databasedeps.SchemaInstance, error)
+	// Collection resolves one collection of a database by name. A name the
+	// database does not declare, or a database Databases.New refused, is an
+	// error rather than a zero collection.
+	Collection func(database databasedeps.Database, name string) (databasedeps.Collection, error)
 
 	// ReadString reads one Key or String field of a record.
-	ReadString func(item databasedeps.SchemaItem, field string) (string, error)
+	ReadString func(record databasedeps.Record, field string) (string, error)
 
 	// ReadInt reads one Int or Link field of a record.
-	ReadInt func(item databasedeps.SchemaItem, field string) (int64, error)
+	ReadInt func(record databasedeps.Record, field string) (int64, error)
 
 	// ReadFloat reads one Float field of a record.
-	ReadFloat func(item databasedeps.SchemaItem, field string) (float64, error)
+	ReadFloat func(record databasedeps.Record, field string) (float64, error)
 
 	// TextMatches is the filter a generated <T>Filter applies to one text
 	// field: an empty needle passes everything, so a zero value turns the

@@ -16,7 +16,7 @@ type DatabaseMethod struct {
 	Kind string
 	// Name is the exported Go name of the method.
 	Name string
-	// Table is the collection it reaches, as GetSchema names it.
+	// Table is the collection it reaches, as Database.Collection names it.
 	Table string
 	// Type is the Go record name of that table.
 	Type string

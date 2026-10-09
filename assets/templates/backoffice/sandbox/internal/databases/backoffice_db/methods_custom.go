@@ -9,18 +9,27 @@ import (
 // Remove, so it is written here. Removing a session that is already gone is not
 // an error.
 func RemoveBackofficeUserSession(sandbox *api.Sandbox, db *BackofficeDb, userId int64, sessionId int64) error {
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(db.handle, "backoffice-user")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(db.database, "backoffice-user")
 	if err != nil {
 		return err
 	}
-	user, ok := schema.FindById(userId)
+	user, ok, failure := collection.FindByID(userId)
+	if failure != nil {
+		return sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
 	if !ok {
 		return sandbox.Deps.StdDeps.Errorf("backoffice-user %d not found", userId)
 	}
-	for _, item := range user.ListAll("session") {
-		if item.Id == sessionId {
-			return sandbox.Deps.OpinionatedAgnosDatabase.Fail(item.Remove())
-		}
+	sessions, failure := user.Nested("session")
+	if failure != nil {
+		return sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
 	}
-	return nil
+	session, ok, failure := sessions.FindByID(sessionId)
+	if failure != nil {
+		return sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
+	if !ok {
+		return nil
+	}
+	return sandbox.Deps.OpinionatedAgnosDatabase.Fail(session.Remove())
 }

@@ -41,13 +41,13 @@ type {{.Type}}Filter struct {
 }
 {{ end }}
 {{- end }}
-// {{.Type}} is the {{.DatabaseName}} database: the handle it was built over and one
-// function field per generated method. Building one is free — it touches no
-// key and creates nothing until the first record is written — so whoever needs
-// it calls New on the spot instead of reading it off the Sandbox.
+// {{.Type}} is the {{.DatabaseName}} database: the store database it was built over and
+// one function field per generated method. Building one is free — it touches
+// no key and creates nothing until the first record is written — so whoever
+// needs it calls New on the spot instead of reading it off the Sandbox.
 type {{.Type}} struct {
-	sandbox *api.Sandbox
-	handle  databasedeps.DatabaseHandle
+	sandbox  *api.Sandbox
+	database databasedeps.Database
 {{ range .Methods }}
 	// {{.Name}} {{.Help}}.
 	{{.Name}} func({{.Params}}) {{.Results}}

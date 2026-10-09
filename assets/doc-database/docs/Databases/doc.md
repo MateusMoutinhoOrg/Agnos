@@ -51,13 +51,13 @@ tables:
 | Key | What it says |
 | --- | --- |
 | `name` | the database's own name; the directory is that name with dashes turned into underscores |
-| `key-prefix` | `Props.Path`, the key prefix every record is written under |
+| `key-prefix` | `Props.Path`, the key prefix every record is written under; no `.` or `..` segment |
 | `tables[].name` | one collection of records; every method it generates is spelled after it |
 | `tables[].fields[].name` | one field of that collection |
 | `tables[].fields[].type` | `key`, `string`, `integer`, `number`, `link` or `object` |
 | `tables[].fields[].required` | an insert must carry it; ignored on an `object` field |
 | `tables[].fields[].target` | the table a `link` points at — required there, empty everywhere else |
-| `tables[].fields[].fields` | the fields of a nested `object`, one level deep |
+| `tables[].fields[].fields` | the fields of a nested `object`, one level deep; an `object` is never named `position` or `values` |
 
 ## The methods
 
@@ -75,7 +75,8 @@ tables:
 | an `object` field | `Add<T><Sub>(parentId int64, props <T><Sub>Input) (<T><Sub>Record, error)`, `List<T><Sub>s(parentId int64) ([]<T><Sub>Record, error)` |
 
 **A `Find` is born of a `key` field alone.** It is the only field the storage indexes, so it is
-the only one a direct lookup reaches. A `string`, `integer` or `number` field is reached through
+the only one a direct lookup reaches. A `key` is unique without regard to case: `Ana` and `ana`
+are one value. A `string`, `integer` or `number` field is reached through
 `List<T>s` and nowhere else: generating a `Find<T>By<Field>` that scans the whole table would
 sell a scan with the face of an indexed lookup. `<T>Filter` therefore covers **every** plain
 field — text takes `<Field>StartsWith` and `<Field>Equals`, a number takes `<Field>Min` and

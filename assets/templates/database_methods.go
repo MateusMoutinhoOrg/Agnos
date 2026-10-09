@@ -16,59 +16,67 @@ import (
 // {{.Name}} {{.Help}}.
 func {{.Name}}(sandbox *api.Sandbox, self *{{$.Type}}{{ with .Params }}, {{ . }}{{ end }}) {{.Results}} {
 {{- if eq .Kind "add" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return {{.Record}}Record{}, err
 	}
-	item, failure := schema.NewItem(new{{.Record}}Fields(props))
+	record, failure := collection.Insert(new{{.Record}}Fields(props))
 	if failure != nil {
 		return {{.Record}}Record{}, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
 	}
-	return build{{.Record}}Record(sandbox, item)
+	return build{{.Record}}Record(sandbox, record)
 {{- else if eq .Kind "findById" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", err.Error())
 		return {{.Record}}Record{}, false
 	}
-	item, ok := schema.FindById(id)
+	record, ok, failure := collection.FindByID(id)
+	if failure != nil {
+		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure).Error())
+		return {{.Record}}Record{}, false
+	}
 	if !ok {
 		return {{.Record}}Record{}, false
 	}
-	built, err := build{{.Record}}Record(sandbox, item)
+	built, err := build{{.Record}}Record(sandbox, record)
 	if err != nil {
 		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", err.Error())
 		return {{.Record}}Record{}, false
 	}
 	return built, true
 {{- else if eq .Kind "findByKey" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", err.Error())
 		return {{.Record}}Record{}, false
 	}
-	item, ok := schema.FindByKey("{{.Field}}", value)
+	record, ok, failure := collection.FindByKey("{{.Field}}", value)
+	if failure != nil {
+		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure).Error())
+		return {{.Record}}Record{}, false
+	}
 	if !ok {
 		return {{.Record}}Record{}, false
 	}
-	built, err := build{{.Record}}Record(sandbox, item)
+	built, err := build{{.Record}}Record(sandbox, record)
 	if err != nil {
 		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", err.Error())
 		return {{.Record}}Record{}, false
 	}
 	return built, true
 {{- else if eq .Kind "list" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return nil, err
 	}
-	items, failure := schema.ListAll()
+	records, failure := collection.ListAll()
 	if failure != nil {
 		return nil, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
 	}
 	kept := []{{.Record}}Record{}
-	for _, item := range items {
-		built, err := build{{.Record}}Record(sandbox, item)
+	for _, record := range records {
+		built, err := build{{.Record}}Record(sandbox, record)
 		if err != nil {
 			return nil, err
 		}
@@ -79,17 +87,17 @@ func {{.Name}}(sandbox *api.Sandbox, self *{{$.Type}}{{ with .Params }}, {{ . }}
 	}
 	return kept, nil
 {{- else if eq .Kind "page" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return nil, err
 	}
-	items, failure := schema.List(offset+1, limit)
+	records, failure := collection.List(offset+1, limit)
 	if failure != nil {
 		return nil, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
 	}
 	page := []{{.Record}}Record{}
-	for _, item := range items {
-		built, err := build{{.Record}}Record(sandbox, item)
+	for _, record := range records {
+		built, err := build{{.Record}}Record(sandbox, record)
 		if err != nil {
 			return nil, err
 		}
@@ -97,46 +105,60 @@ func {{.Name}}(sandbox *api.Sandbox, self *{{$.Type}}{{ with .Params }}, {{ . }}
 	}
 	return page, nil
 {{- else if eq .Kind "count" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return 0, err
 	}
-	items, failure := schema.ListAll()
+	records, failure := collection.ListAll()
 	if failure != nil {
 		return 0, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
 	}
-	return len(items), nil
+	return len(records), nil
 {{- else if eq .Kind "update" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return err
 	}
-	item, ok := schema.FindById(id)
+	record, ok, failure := collection.FindByID(id)
+	if failure != nil {
+		return sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
 	if !ok {
 		return sandbox.Deps.StdDeps.Errorf("{{.Table}} %d not found", id)
 	}
-	return sandbox.Deps.OpinionatedAgnosDatabase.Fail(item.Update("{{.Field}}", value))
+	return sandbox.Deps.OpinionatedAgnosDatabase.Fail(record.Update("{{.Field}}", value))
 {{- else if eq .Kind "remove" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return err
 	}
-	item, ok := schema.FindById(id)
+	record, ok, failure := collection.FindByID(id)
+	if failure != nil {
+		return sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
 	if !ok {
 		return sandbox.Deps.StdDeps.Errorf("{{.Table}} %d not found", id)
 	}
-	return sandbox.Deps.OpinionatedAgnosDatabase.Fail(item.Remove())
+	return sandbox.Deps.OpinionatedAgnosDatabase.Fail(record.Remove())
 {{- else if eq .Kind "getLink" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", err.Error())
 		return {{.Record}}Record{}, false
 	}
-	item, ok := schema.FindById(id)
+	record, ok, failure := collection.FindByID(id)
+	if failure != nil {
+		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure).Error())
+		return {{.Record}}Record{}, false
+	}
 	if !ok {
 		return {{.Record}}Record{}, false
 	}
-	linked, ok := item.GetLink("{{.Field}}")
+	linked, ok, failure := record.GetLink("{{.Field}}")
+	if failure != nil {
+		sandbox.Deps.StdDeps.Logf("{{.Name}}: %s \n", sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure).Error())
+		return {{.Record}}Record{}, false
+	}
 	if !ok {
 		return {{.Record}}Record{}, false
 	}
@@ -147,31 +169,41 @@ func {{.Name}}(sandbox *api.Sandbox, self *{{$.Type}}{{ with .Params }}, {{ . }}
 	}
 	return built, true
 {{- else if eq .Kind "addSub" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return {{.Record}}Record{}, err
 	}
-	parent, ok := schema.FindById(parentId)
-	if !ok {
-		return {{.Record}}Record{}, sandbox.Deps.StdDeps.Errorf("{{.Table}} %d not found", parentId)
-	}
-	item, failure := parent.NewSubItem("{{.Field}}", new{{.Record}}Fields(props))
+	parent, ok, failure := collection.FindByID(parentId)
 	if failure != nil {
 		return {{.Record}}Record{}, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
 	}
-	return build{{.Record}}Record(sandbox, item)
+	if !ok {
+		return {{.Record}}Record{}, sandbox.Deps.StdDeps.Errorf("{{.Table}} %d not found", parentId)
+	}
+	record, failure := parent.InsertNested("{{.Field}}", new{{.Record}}Fields(props))
+	if failure != nil {
+		return {{.Record}}Record{}, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
+	return build{{.Record}}Record(sandbox, record)
 {{- else if eq .Kind "listSub" }}
-	schema, err := sandbox.Deps.OpinionatedAgnosDatabase.Schema(self.handle, "{{.Table}}")
+	collection, err := sandbox.Deps.OpinionatedAgnosDatabase.Collection(self.database, "{{.Table}}")
 	if err != nil {
 		return nil, err
 	}
-	parent, ok := schema.FindById(parentId)
+	parent, ok, failure := collection.FindByID(parentId)
+	if failure != nil {
+		return nil, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
 	if !ok {
 		return nil, sandbox.Deps.StdDeps.Errorf("{{.Table}} %d not found", parentId)
 	}
+	records, failure := parent.ListNested("{{.Field}}")
+	if failure != nil {
+		return nil, sandbox.Deps.OpinionatedAgnosDatabase.Fail(failure)
+	}
 	nested := []{{.Record}}Record{}
-	for _, item := range parent.ListAll("{{.Field}}") {
-		built, err := build{{.Record}}Record(sandbox, item)
+	for _, record := range records {
+		built, err := build{{.Record}}Record(sandbox, record)
 		if err != nil {
 			return nil, err
 		}
@@ -194,11 +226,11 @@ func new{{.Type}}Fields(props {{.Type}}Input) map[string]any {
 // build{{.Type}}Record reads one stored {{.Name}} record back into its Go form.
 // Every conversion is checked, so a value of the wrong type is an error rather
 // than a panic.
-func build{{.Type}}Record(sandbox *api.Sandbox, item databasedeps.SchemaItem) ({{.Type}}Record, error) {
-	built := {{.Type}}Record{Id: item.Id}
+func build{{.Type}}Record(sandbox *api.Sandbox, record databasedeps.Record) ({{.Type}}Record, error) {
+	built := {{.Type}}Record{Id: record.ID}
 {{- range .Fields }}
 
-	value{{.Go}}, err := sandbox.Deps.OpinionatedAgnosDatabase.{{.Reader}}(item, "{{.Name}}")
+	value{{.Go}}, err := sandbox.Deps.OpinionatedAgnosDatabase.{{.Reader}}(record, "{{.Name}}")
 	if err != nil {
 		return built, err
 	}

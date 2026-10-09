@@ -1,6 +1,6 @@
 package databaseconf
 
-// The field types a table may declare, one for one the databasedeps.Item kinds the
+// The field types a table may declare, each one a databasedeps.Field kind the
 // Keep contract carries. They are the whole vocabulary of a database.yaml: a
 // `type` outside this list is refused by the parser rather than generated into
 // a method nothing can call.

@@ -11,11 +11,11 @@ import (
 
 // Bind fills deps.Deps.OpinionatedAgnosDatabase with the readers and filters
 // every generated methods.go shares. Nothing here holds a dep: every function
-// is handed the handle, the record or the value it reads.
+// is handed the database, the record or the value it reads.
 func Bind(deps *deps.Deps) {
 	deps.OpinionatedAgnosDatabase = opinionatedagnosdatabase.Contract{
 		Fail:         fail,
-		Schema:       schema,
+		Collection:   collection,
 		ReadString:   readString,
 		ReadInt:      readInt,
 		ReadFloat:    readFloat,
@@ -31,27 +31,31 @@ func fail(failure *databasedeps.Error) error {
 	if failure == nil {
 		return nil
 	}
-	if failure.Key != "" {
-		return fmt.Errorf("%s: %s", failure.Key, failure.Message)
+	if failure.Field != "" {
+		return fmt.Errorf("%s: %s", failure.Field, failure.Message)
 	}
 	return fmt.Errorf("%s", failure.Message)
 }
 
-// schema resolves one collection of a handle by name. A name the Props does
-// not declare is an error rather than a nil instance: a generated method names
-// a table its own database.yaml declared, so this only fires on a handle built
-// from another declaration.
-func schema(handle databasedeps.DatabaseHandle, name string) (databasedeps.SchemaInstance, error) {
-	schema, ok := handle.GetSchema(name)
-	if !ok {
-		return schema, fmt.Errorf("this database declares no table %q", name)
+// collection resolves one collection of a database by name. A name the Props
+// does not declare is an error rather than a zero collection: a generated
+// method names a table its own database.yaml declared, so this only fires on a
+// database built from another declaration. A database Databases.New refused is
+// the zero Database, whose Collection is nil, and is an error too.
+func collection(database databasedeps.Database, name string) (databasedeps.Collection, error) {
+	if database.Collection == nil {
+		return databasedeps.Collection{}, fmt.Errorf("this database was never built: Databases.New refused its Props")
 	}
-	return schema, nil
+	collection, ok := database.Collection(name)
+	if !ok {
+		return collection, fmt.Errorf("this database declares no table %q", name)
+	}
+	return collection, nil
 }
 
 // readString reads one Key or String field of a record.
-func readString(item databasedeps.SchemaItem, field string) (string, error) {
-	raw, failure := read(item, field)
+func readString(record databasedeps.Record, field string) (string, error) {
+	raw, failure := read(record, field)
 	if failure != nil {
 		return "", failure
 	}
@@ -66,8 +70,8 @@ func readString(item databasedeps.SchemaItem, field string) (string, error) {
 }
 
 // readInt reads one Int or Link field of a record.
-func readInt(item databasedeps.SchemaItem, field string) (int64, error) {
-	raw, failure := read(item, field)
+func readInt(record databasedeps.Record, field string) (int64, error) {
+	raw, failure := read(record, field)
 	if failure != nil {
 		return 0, failure
 	}
@@ -82,8 +86,8 @@ func readInt(item databasedeps.SchemaItem, field string) (int64, error) {
 }
 
 // readFloat reads one Float field of a record.
-func readFloat(item databasedeps.SchemaItem, field string) (float64, error) {
-	raw, failure := read(item, field)
+func readFloat(record databasedeps.Record, field string) (float64, error) {
+	raw, failure := read(record, field)
 	if failure != nil {
 		return 0, failure
 	}
@@ -99,12 +103,12 @@ func readFloat(item databasedeps.SchemaItem, field string) (float64, error) {
 
 // read is the one call every reader shares: the stored value, or nil when the
 // record carries none for that field.
-func read(item databasedeps.SchemaItem, field string) (any, error) {
-	raw, failure := item.Get(field)
+func read(record databasedeps.Record, field string) (any, error) {
+	raw, failure := record.Get(field)
 	if failure == nil {
 		return raw, nil
 	}
-	if failure.Type == databasedeps.NotFound {
+	if failure.Type == databasedeps.NoValue {
 		return nil, nil
 	}
 	return nil, fail(failure)

@@ -30,15 +30,15 @@ tree:
     - file: sandbox/internal/commands/middleware/backoffice_start_server/new.go
       sha: d9e29f0c9d291be6ec66f4bfa3e70cbb89f207634a6dfa99c26df037fc1ae7d9
     - file: sandbox/internal/databases/backoffice_db/api.go
-      sha: 98cba40a32cd467158d6ebedde8d051d3b519236eda1e310f9721bff856f50fb
+      sha: f75317337e5f5c170ca356a676f0d5c3c59f06e077272733d708d52eb962505d
     - file: sandbox/internal/databases/backoffice_db/database.yaml
       sha: c053a10a82f24d685cfc2e87346e67f144bc785fe19f63fea3616d5f34ebd112
     - file: sandbox/internal/databases/backoffice_db/methods.go
-      sha: 13f175eed46e6910aa4fc43627725a94e3680f0600fde9d44eed7757058a136c
+      sha: f5d309880e74951c9235f2ae38263cb596542541ab5bf09baed800f8041eeb52
     - file: sandbox/internal/databases/backoffice_db/methods_custom.go
-      sha: 4005d64e3f677a1b33b412cd2a4a7e7ca5d6f389d53764b0ea0f0fedbbe23c00
+      sha: 943874dd36e6d3dc6d951fc4fbab61e1d3caf9001b1e4598e9aea499ef40ce83
     - file: sandbox/internal/databases/backoffice_db/new.go
-      sha: 1a2d86561a768ca74f981268300a4cde0bbbcee81ee9b65f17b7f132a514e6e0
+      sha: fd091cfa90b33727dab0575a3bbb98346646d7c3e73ad534dc26fe0d54cf865d
     - file: sandbox/internal/routeprops/backoffice.go
       sha: 891b54b6014f3511c46e6fc07305da85c6546f0876cab39f09ad76417635662a
     - file: sandbox/internal/routeprops/routeprops.go
