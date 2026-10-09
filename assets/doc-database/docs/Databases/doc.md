@@ -54,7 +54,7 @@ tables:
 | `key-prefix` | `Props.Path`, the key prefix every record is written under; no `.` or `..` segment |
 | `tables[].name` | one collection of records; every method it generates is spelled after it |
 | `tables[].fields[].name` | one field of that collection |
-| `tables[].fields[].type` | `key`, `string`, `integer`, `number`, `link` or `object` |
+| `tables[].fields[].type` | `key`, `string`, `integer`, `number`, `bytes`, `link` or `object` |
 | `tables[].fields[].required` | an insert must carry it; ignored on an `object` field |
 | `tables[].fields[].target` | the table a `link` points at — required there, empty everywhere else |
 | `tables[].fields[].fields` | the fields of a nested `object`, one level deep; an `object` is never named `position` or `values` |
@@ -79,8 +79,11 @@ the only one a direct lookup reaches. A `key` is unique without regard to case: 
 are one value. A `string`, `integer` or `number` field is reached through
 `List<T>s` and nowhere else: generating a `Find<T>By<Field>` that scans the whole table would
 sell a scan with the face of an indexed lookup. `<T>Filter` therefore covers **every** plain
-field — text takes `<Field>StartsWith` and `<Field>Equals`, a number takes `<Field>Min` and
-`<Field>Max`, and a zero value turns its own filter off.
+field — text takes `<Field>StartsWith` and `<Field>Equals`, a `bytes` field the same pair as
+`[]byte`, a number takes `<Field>Min` and `<Field>Max`, and a zero value turns its own filter off.
+
+**A `bytes` field is a `[]byte`, stored exactly as given** — no text encoding, so a file, an
+image or a hash comes back byte for byte. Like a `string` it carries no index.
 
 Three rules hold for every generated method:
 

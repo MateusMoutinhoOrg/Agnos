@@ -30,9 +30,9 @@ type {{.Type}}Input struct {
 // zero value turns its own filter off.
 type {{.Type}}Filter struct {
 {{- range .Fields }}
-{{- if .IsText }}
-	{{.Go}}StartsWith string
-	{{.Go}}Equals     string
+{{- if or .IsText .IsBytes }}
+	{{.Go}}StartsWith {{.GoType}}
+	{{.Go}}Equals     {{.GoType}}
 {{- else }}
 	{{.Go}}Min {{.GoType}}
 	{{.Go}}Max {{.GoType}}

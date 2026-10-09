@@ -25,7 +25,7 @@ flags:
       id: Parent
     - description: the name the field is stored under from now on
       id: Rename
-    - description: 'the field type it takes on: key, string, integer, number, link or object'
+    - description: 'the field type it takes on: key, string, integer, number, bytes, link or object'
       id: Type
     - description: an insert must carry this field
       id: Required

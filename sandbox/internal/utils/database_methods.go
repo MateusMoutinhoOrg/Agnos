@@ -44,6 +44,8 @@ func DatabaseGoType(kind string) string {
 		return "int64"
 	case databaseconf.FieldNumber:
 		return "float64"
+	case databaseconf.FieldBytes:
+		return "[]byte"
 	}
 	return "string"
 }

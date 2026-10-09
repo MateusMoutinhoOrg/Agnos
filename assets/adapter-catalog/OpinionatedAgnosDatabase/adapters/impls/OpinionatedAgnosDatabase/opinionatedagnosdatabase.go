@@ -1,6 +1,7 @@
 package opinionatedagnosdatabase
 
 import (
+	"bytes"
 	"fmt"
 	"strings"
 
@@ -19,7 +20,9 @@ func Bind(deps *deps.Deps) {
 		ReadString:   readString,
 		ReadInt:      readInt,
 		ReadFloat:    readFloat,
+		ReadBytes:    readBytes,
 		TextMatches:  textMatches,
+		BytesMatches: bytesMatches,
 		IntInRange:   intInRange,
 		FloatInRange: floatInRange,
 	}
@@ -101,6 +104,23 @@ func readFloat(record databasedeps.Record, field string) (float64, error) {
 	return value, nil
 }
 
+// readBytes reads one Bytes field of a record. The store hands back a copy
+// of its own, so the slice is the caller's to write into.
+func readBytes(record databasedeps.Record, field string) ([]byte, error) {
+	raw, failure := read(record, field)
+	if failure != nil {
+		return nil, failure
+	}
+	if raw == nil {
+		return nil, nil
+	}
+	value, ok := raw.([]byte)
+	if !ok {
+		return nil, mistyped(field, "bytes")
+	}
+	return value, nil
+}
+
 // read is the one call every reader shares: the stored value, or nil when the
 // record carries none for that field.
 func read(record databasedeps.Record, field string) (any, error) {
@@ -127,6 +147,18 @@ func textMatches(value string, starts_with string, equals string) bool {
 		return false
 	}
 	if starts_with != "" && !strings.HasPrefix(value, starts_with) {
+		return false
+	}
+	return true
+}
+
+// bytesMatches is textMatches for a binary field, compared byte for byte: an
+// empty needle passes everything.
+func bytesMatches(value []byte, starts_with []byte, equals []byte) bool {
+	if len(equals) > 0 && !bytes.Equal(value, equals) {
+		return false
+	}
+	if len(starts_with) > 0 && !bytes.HasPrefix(value, starts_with) {
 		return false
 	}
 	return true

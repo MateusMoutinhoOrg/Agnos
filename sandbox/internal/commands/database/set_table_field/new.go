@@ -107,7 +107,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the field type it takes on: key, string, integer, number, link or object",
+			Description: "the field type it takes on: key, string, integer, number, bytes, link or object",
 		},
 		{
 			Id:          "Required",

@@ -15,6 +15,9 @@ const (
 	FieldInteger = "integer"
 	// FieldNumber is a plain floating-point field, carried as a float64.
 	FieldNumber = "number"
+	// FieldBytes is a plain binary field, carried as a []byte and stored
+	// exactly as given — a file, an image, a hash comes back byte for byte.
+	FieldBytes = "bytes"
 	// FieldLink is a reference to a record of the table its Target names,
 	// stored as that record's id and resolved by Get<T><Field>.
 	FieldLink = "link"
@@ -25,7 +28,7 @@ const (
 
 // FieldTypes is every type a field may declare, in the order the doc and the
 // error messages spell them.
-var FieldTypes = []string{FieldKey, FieldString, FieldInteger, FieldNumber, FieldLink, FieldObject}
+var FieldTypes = []string{FieldKey, FieldString, FieldInteger, FieldNumber, FieldBytes, FieldLink, FieldObject}
 
 // Field is one column of a table as database.yaml declares it. Target is filled
 // on a link alone and names the table it points at; Fields is filled on a

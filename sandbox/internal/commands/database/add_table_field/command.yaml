@@ -24,7 +24,7 @@ flags:
     - description: the nested object field the new field goes inside, instead of the table itself
       id: Parent
     - default: string
-      description: 'the field type: key, string, integer, number, link or object'
+      description: 'the field type: key, string, integer, number, bytes, link or object'
       id: Type
     - description: an insert must carry this field
       id: Required

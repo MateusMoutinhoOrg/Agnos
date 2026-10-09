@@ -55,6 +55,7 @@ func main() {
 	fields := []api.AddTableFieldProps{
 		{Table: "user", Name: "email", Type: "key", Required: true},
 		{Table: "user", Name: "name", Type: "string"},
+		{Table: "user", Name: "avatar", Type: "bytes"},
 		{Table: "url", Name: "alias", Type: "key", Required: true},
 		{Table: "url", Name: "link", Type: "string", Required: true},
 		{Table: "url", Name: "redirects", Type: "integer"},

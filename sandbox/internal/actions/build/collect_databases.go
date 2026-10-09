@@ -149,6 +149,8 @@ func databaseItemConst(kind string) string {
 		return "databasedeps.Int"
 	case databaseconf.FieldNumber:
 		return "databasedeps.Float"
+	case databaseconf.FieldBytes:
+		return "databasedeps.Bytes"
 	case databaseconf.FieldLink:
 		return "databasedeps.Link"
 	case databaseconf.FieldObject:
@@ -190,6 +192,7 @@ func databaseFieldData(sandbox *api.Sandbox, field databaseconf.Field) map[strin
 		"IsText":  utils.DatabaseGoType(field.Type) == "string",
 		"IsInt":   utils.DatabaseGoType(field.Type) == "int64",
 		"IsFloat": utils.DatabaseGoType(field.Type) == "float64",
+		"IsBytes": utils.DatabaseGoType(field.Type) == "[]byte",
 	}
 }
 
@@ -219,6 +222,8 @@ func databaseReader(kind string) string {
 		return "ReadInt"
 	case "float64":
 		return "ReadFloat"
+	case "[]byte":
+		return "ReadBytes"
 	}
 	return "ReadString"
 }

@@ -39,10 +39,17 @@ type Contract struct {
 	// ReadFloat reads one Float field of a record.
 	ReadFloat func(record databasedeps.Record, field string) (float64, error)
 
+	// ReadBytes reads one Bytes field of a record, byte for byte.
+	ReadBytes func(record databasedeps.Record, field string) ([]byte, error)
+
 	// TextMatches is the filter a generated <T>Filter applies to one text
 	// field: an empty needle passes everything, so a zero value turns the
 	// filter off.
 	TextMatches func(value string, startsWith string, equals string) bool
+
+	// BytesMatches is TextMatches for a binary field, compared byte for
+	// byte: an empty needle passes everything.
+	BytesMatches func(value []byte, startsWith []byte, equals []byte) bool
 
 	// IntInRange is TextMatches for a whole-number field: a zero bound is no
 	// bound.

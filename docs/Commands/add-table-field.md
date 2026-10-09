@@ -17,7 +17,7 @@ Appends one field to a table of the database's database.yaml and runs build. Wha
 | `--database` | string, required |  | the database (identifier or package name) the field is declared on | — |
 | `--table` | string, required |  | the table the field is declared on | — |
 | `--parent` | string |  | the nested object field the new field goes inside, instead of the table itself | — |
-| `--type` | string | `string` | the field type: key, string, integer, number, link or object | — |
+| `--type` | string | `string` | the field type: key, string, integer, number, bytes, link or object | — |
 | `--required` | boolean |  | an insert must carry this field | — |
 | `--target` | string |  | the table a link points at (only with --type link) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |

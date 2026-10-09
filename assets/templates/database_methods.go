@@ -248,6 +248,10 @@ func match{{.Type}}(sandbox *api.Sandbox, item {{.Type}}Record, filter {{.Type}}
 	if !sandbox.Deps.OpinionatedAgnosDatabase.TextMatches(item.{{.Go}}, filter.{{.Go}}StartsWith, filter.{{.Go}}Equals) {
 		return false
 	}
+{{- else if .IsBytes }}
+	if !sandbox.Deps.OpinionatedAgnosDatabase.BytesMatches(item.{{.Go}}, filter.{{.Go}}StartsWith, filter.{{.Go}}Equals) {
+		return false
+	}
 {{- else if .IsInt }}
 	if !sandbox.Deps.OpinionatedAgnosDatabase.IntInRange(item.{{.Go}}, filter.{{.Go}}Min, filter.{{.Go}}Max) {
 		return false

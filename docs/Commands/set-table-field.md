@@ -18,7 +18,7 @@ Rewrites one declared field in place and runs build. It is add-table-field appli
 | `--table` | string, required |  | the table the field is declared on | — |
 | `--parent` | string |  | the nested object field the field sits inside, instead of the table itself | — |
 | `--rename` | string |  | the name the field is stored under from now on | — |
-| `--type` | string |  | the field type it takes on: key, string, integer, number, link or object | — |
+| `--type` | string |  | the field type it takes on: key, string, integer, number, bytes, link or object | — |
 | `--required` | boolean |  | an insert must carry this field | — |
 | `--target` | string |  | the table a link points at (only with --type link) | — |
 | `--clear` | string-array |  | a key to take off again: required or target (repeatable) | — |

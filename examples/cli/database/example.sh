@@ -24,6 +24,7 @@ agnos add-table url --database app-database --path test-dir -q
 # plain field an Update and a place in the table's filter.
 agnos add-table-field email --database app-database --table user --type key --required --path test-dir -q
 agnos add-table-field name --database app-database --table user --type string --path test-dir -q
+agnos add-table-field avatar --database app-database --table user --type bytes --path test-dir -q
 
 agnos add-table-field alias --database app-database --table url --type key --required --path test-dir -q
 agnos add-table-field link --database app-database --table url --type string --required --path test-dir -q
