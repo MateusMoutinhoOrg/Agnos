@@ -23,6 +23,7 @@ paths:
       start: 4
       type: integer
 priority: 100
+private: true
 response-type: application/json
 segments: 5
 summary: Lists every file of a snapshot, or the ones whose path starts with a prefix, as its path below the --database folder and the sha of its content

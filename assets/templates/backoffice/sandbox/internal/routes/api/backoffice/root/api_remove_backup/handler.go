@@ -12,8 +12,8 @@ import (
 // Handle answers POST /api/admin/root/remove-backup: the
 // snapshot whose id the body names is deleted with its list of files; the
 // contents only it held stay stored until optimize-backup-storage runs. A
-// snapshot that does not exist answers 404, and another backup job running
-// 409.
+// snapshot that does not exist answers 404, the safety copy of a restore
+// that has not finished 400, and another backup job running 409.
 func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	if props.User == nil {
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
@@ -26,6 +26,8 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 	switch outcome {
 	case snapshots.OutcomeNotFound:
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusNotFound, "id", "that snapshot does not exist")
+	case snapshots.OutcomeNotReady:
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusBadRequest, "id", "that snapshot is the safety copy of a restore that has not finished, and cannot be deleted until it ends")
 	case snapshots.OutcomeBusy:
 		return sandbox.Deps.OpinionatedAgnosServer.WriteError(sandbox.Deps.SerializableDeps, *response, api.StatusConflict, "", backofficesnapshots.BusyMessage)
 	}

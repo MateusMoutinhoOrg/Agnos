@@ -8,7 +8,7 @@ tree:
     - file: assets/front/index.html
       sha: 747d5e46c1b49715716825a0c28b39aaaeb1f643582bfdb7b332c2aa5dd0af51
     - file: sandbox/deps/OpinionatedAgnosFront/opinionatedagnosfront.go
-      sha: 34b525ddfed93bc652fc5959a7609aaf39d002e164e145e7010c11104ba802a4
+      sha: 2db365fcf112d05e4d34453f41c8092682f21b904e84fecb86a7bc78a289dc41
     - file: sandbox/internal/routes/front/generated.input.go
       sha: 5bba93dd6e4c56c65b3bcbb0ea9483fc7f7453c36749ccbe0fbd88d821abf6f0
     - file: sandbox/internal/routes/front/generated.new.go

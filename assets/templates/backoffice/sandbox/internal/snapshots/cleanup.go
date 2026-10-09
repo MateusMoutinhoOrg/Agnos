@@ -6,8 +6,10 @@ import (
 )
 
 // Remove deletes the snapshot of id with every one of its (path, sha) pairs,
-// answering OutcomeOk, OutcomeNotFound, or OutcomeBusy while a job runs — one
-// may be creating, restoring or uploading that very snapshot. Its blobs stay:
+// answering OutcomeOk, OutcomeNotFound, OutcomeNotReady for a StatusRollback
+// one — the only copy of what DataDir held before a restore that has not
+// finished — or OutcomeBusy while a job runs — one may be creating, restoring
+// or uploading that very snapshot. Its blobs stay:
 // another snapshot may hold the same contents, and StartOptimize is what
 // removes the ones none holds anymore.
 func Remove(sandbox *api.Sandbox, id int64) (string, error) {
@@ -20,6 +22,9 @@ func Remove(sandbox *api.Sandbox, id int64) (string, error) {
 	snapshot, ok := db.FindSnapshotById(id)
 	if !ok {
 		return OutcomeNotFound, nil
+	}
+	if snapshot.Status == StatusRollback {
+		return OutcomeNotReady, nil
 	}
 	if err := db.RemoveSnapshot(id); err != nil {
 		return "", err

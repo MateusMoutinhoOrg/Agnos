@@ -15,6 +15,7 @@ paths:
       start: 4
       type: integer
 priority: 100
+private: true
 response-type: application/zip
 segments: 5
 summary: Downloads a snapshot as a zip archive

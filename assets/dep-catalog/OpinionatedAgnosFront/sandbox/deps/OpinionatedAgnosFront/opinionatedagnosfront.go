@@ -44,7 +44,9 @@ type Contract struct {
 	// SafePath turns a request path into the path relative to Root it names,
 	// and reports false on anything that could climb out of it: "." and
 	// ".." segments, an empty segment, and a backslash or a NUL inside one.
-	// A leading and a trailing slash are dropped; "" names Root itself.
+	// A segment starting with "." — a dotfile, .env or .git — is refused
+	// too, but for .well-known at the root. A leading and a trailing slash
+	// are dropped; "" names Root itself.
 	SafePath func(requested string) (string, bool)
 
 	// ExtensionOf returns the extension of the last segment of a path, dot

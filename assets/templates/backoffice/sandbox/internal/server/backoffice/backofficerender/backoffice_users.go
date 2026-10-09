@@ -77,6 +77,8 @@ func noticeOf(sandbox *api.Sandbox, code string) Notice {
 		return Notice{Text: "That user no longer exists.", Kind: "error"}
 	case backofficeusers.NoticeSelf:
 		return Notice{Text: "You cannot remove your own account.", Kind: "error"}
+	case backofficeusers.NoticeNotRoot:
+		return Notice{Text: "You are no longer a root user, so nothing was removed.", Kind: "error"}
 	}
 	return Notice{}
 }

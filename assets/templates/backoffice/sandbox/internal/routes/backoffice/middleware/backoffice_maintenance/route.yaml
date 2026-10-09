@@ -1,0 +1,20 @@
+category: Middleware
+methods:
+    - ANY
+parameters:
+    - description: the method of the request, set by the server and never by the client
+      sources:
+        - header
+      id: XRequestMethod
+      key: x-request-method
+      type: string
+paths:
+    - end: -1
+      id: Root
+      start: 0
+      trigger:
+        type: prefix
+        value: /
+priority: 6
+response-type: application/json
+summary: Answers 503 to every request while a restore writes the databases, and to every write while a snapshot reads them

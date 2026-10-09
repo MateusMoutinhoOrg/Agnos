@@ -3,11 +3,11 @@ methods:
     - ANY
 paths:
     - end: -1
-      id: ApiAdmin
+      id: Root
       start: 0
       trigger:
-        type: regex
-        value: ^/(api/)?admin(/|$)
+        type: prefix
+        value: /
 priority: 8
 response-type: text/plain
-summary: Sends the security headers on every /admin and /api/admin response
+summary: Sends the security headers on every /admin and /api/admin response, and the basic ones on every other

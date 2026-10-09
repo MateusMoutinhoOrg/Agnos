@@ -96,6 +96,7 @@ body:
 | `paths` | The slices of the request path it reads. Required and never empty |
 | `parameters` | The values it reads from the query string and the headers |
 | `category`, `summary`, `description`, `examples`, `hidden` | As in [CommandYaml](../CommandYaml/doc.md#command-keys); feeds [Routes](../Routes/doc.md) |
+| `private` | `true` leaves the route out of `/openapi.json`, still in [Routes](../Routes/doc.md) and dispatched. `{{.GeneratorName}} set-route <name> --private` / `--public`{{ if .HasBackoffice }}. The backoffice's routes carry it{{ end }} |
 | `body` | The request body, one object rather than a sequence |
 
 `method`, `headers`, `params` and the `identifier` / `name` spelling of `paths` are the older
@@ -217,7 +218,7 @@ calls the handler by reflection, since every route's `Input` is a type of its ow
 | `type` | `none` (default, no `ReadBody` at all), `raw` (`[]byte`), `text` (`string`), `json`, `form` (`map[string][]string`, `application/x-www-form-urlencoded`) |
 | `required` | An absent or empty body is `400` |
 | `max-bytes` | A longer body is `413`. Default `1048576` |
-| `content-type` | A divergent one is `415`. Default `application/json` for `json`, `application/x-www-form-urlencoded` for `form` |
+| `content-type` | A divergent one is `415`, compared without its parameters (`; charset=...`) and regardless of case; a body sent with no `Content-Type` is `415` too. Default `application/json` for `json`, `application/x-www-form-urlencoded` for `form` |
 | `json-schema` | A subset of JSON Schema, only with `type: json` |
 | `form-schema` | The same subset held flat, only with `type: form` — see [Form schema](#form-schema) |
 

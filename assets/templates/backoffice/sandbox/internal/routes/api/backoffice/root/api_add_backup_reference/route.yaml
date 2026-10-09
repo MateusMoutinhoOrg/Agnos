@@ -30,6 +30,7 @@ paths:
         type: equal
         value: /api/admin/root/add-backup-reference
 priority: 100
+private: true
 response-type: application/json
 segments: 4
 summary: Adds to an open snapshot one file whose content add-backup-blob already stored, by its sha; a path it already holds is replaced

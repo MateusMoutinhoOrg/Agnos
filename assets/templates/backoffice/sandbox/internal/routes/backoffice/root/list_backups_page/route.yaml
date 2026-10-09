@@ -22,6 +22,7 @@ paths:
         type: equal
         value: /admin/root/list-backups
 priority: 100
+private: true
 response-type: text/html
 segments: 3
 summary: Lists every snapshot of the databases, or the ones whose name starts with a prefix, with the controls that take, download, upload and restore one

@@ -199,6 +199,28 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
 			Description: "an usage example for the route (repeatable)",
 		},
+		{
+			Id:          "Private",
+			Keys:        []string{"--private"},
+			Type:        api.FlagBoolean,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
+			Description: "leave the route out of /openapi.json, still listed in docs/Routes and dispatched",
+		},
+		{
+			Id:          "Public",
+			Keys:        []string{"--public"},
+			Type:        api.FlagBoolean,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
+			Description: "list the route in /openapi.json again",
+		},
 	}
 
 	self.Handle = func(props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {

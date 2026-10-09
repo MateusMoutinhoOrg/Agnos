@@ -333,7 +333,7 @@ AddRouteProps describes one route to scaffold. Trigger is the whole-path value i
 
 ## `SetRouteProps`
 
-SetRouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Methods replace the whole list when any is given; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch. Priority is the rung the route runs on, and HasPriority is what tells a priority declared as zero from one not given at all; Before and After name another route to land one rung below or above instead. Segments is the segment count the request path has to have, read when HasSegments is set. Clear takes "segments" off again.
+SetRouteProps carries the route-level keys of route.yaml that set-route may rewrite. Empty strings leave the current value alone; Methods replace the whole list when any is given; Examples are appended (deduplicated), and Hidden / Visible are the two sides of one switch, and Private / Public the two of another. Priority is the rung the route runs on, and HasPriority is what tells a priority declared as zero from one not given at all; Before and After name another route to land one rung below or above instead. Segments is the segment count the request path has to have, read when HasSegments is set. Clear takes "segments" off again.
 
 | Field | Type |
 | --- | --- |
@@ -346,6 +346,8 @@ SetRouteProps carries the route-level keys of route.yaml that set-route may rewr
 | `Description` | `string` |
 | `Hidden` | `bool` |
 | `Visible` | `bool` |
+| `Private` | `bool` |
+| `Public` | `bool` |
 | `Priority` | `int` |
 | `HasPriority` | `bool` |
 | `Before` | `string` |

@@ -9,6 +9,7 @@ paths:
         type: equal
         value: /admin/logout
 priority: 100
+private: true
 response-type: text/html
 segments: 2
 summary: Ends the current session

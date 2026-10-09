@@ -70,9 +70,10 @@ type Request struct {
 	GetPath func() string
 	// GetHeader returns the first value of the named header, matched
 	// without regard to case, or "" when it is absent. "Host" answers what
-	// GetHost does, and "X-Client-Ip" what GetClientIp does — never what the
-	// client sent under that name. "X-Forwarded-For" answers every value it
-	// was sent with, joined by ", ".
+	// GetHost does, "X-Client-Ip" what GetClientIp does and
+	// "X-Request-Method" what GetMethod does — never what the client sent
+	// under either name. "X-Forwarded-For" answers every value it was sent
+	// with, joined by ", ".
 	GetHeader func(key string) string
 	// GetHeaders returns every header of the request, each name in its
 	// canonical spelling ("Content-Type") with every value it was sent with.

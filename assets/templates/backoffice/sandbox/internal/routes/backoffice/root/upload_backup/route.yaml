@@ -14,6 +14,7 @@ paths:
         type: equal
         value: /admin/root/upload-backup
 priority: 100
+private: true
 response-type: application/json
 segments: 3
 summary: Stores a zip archive a download built as a new snapshot

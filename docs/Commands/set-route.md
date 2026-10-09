@@ -3,7 +3,7 @@
 Rewrite the route-level keys of a route.yaml
 
 ```bash
-agnos set-route <Name> [--method <method>...] [--response-type <response-type>] [--summary <summary>] [--category <category>] [--description <description>] [--hidden] [--visible] [--priority <priority>] [--before <before>] [--after <after>] [--segments <segments>] [--clear <clear>...] [--example <example>...] [--help] [--path <path>] [--quiet]
+agnos set-route <Name> [--method <method>...] [--response-type <response-type>] [--summary <summary>] [--category <category>] [--description <description>] [--hidden] [--visible] [--priority <priority>] [--before <before>] [--after <after>] [--segments <segments>] [--clear <clear>...] [--example <example>...] [--private] [--public] [--help] [--path <path>] [--quiet]
 ```
 
 Overwrites methods, response-type, priority, segments, summary, category, description, hidden and examples on one route. Empty options leave the current value alone; --method replaces the whole list; --example appends; --before and --after place the route one rung from another; --clear takes a key off.
@@ -27,6 +27,8 @@ Overwrites methods, response-type, priority, segments, summary, category, descri
 | `--segments` | integer | `-1` | how many segments the request path has to have for the route to run | — |
 | `--clear` | string-array |  | a key to take off: segments (repeatable) | — |
 | `--example` | string-array |  | an usage example for the route (repeatable) | — |
+| `--private` | boolean |  | leave the route out of /openapi.json, still listed in docs/Routes and dispatched | — |
+| `--public` | boolean |  | list the route in /openapi.json again | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |

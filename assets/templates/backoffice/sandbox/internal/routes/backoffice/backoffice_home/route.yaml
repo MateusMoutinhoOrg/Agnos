@@ -9,6 +9,7 @@ paths:
         type: equal
         value: /admin/home
 priority: 100
+private: true
 response-type: text/html
 segments: 2
 summary: Shows the backoffice home page to the signed-in user

@@ -20,5 +20,5 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 	if !ok {
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusNotFound, "id", "that user does not exist")
 	}
-	return sandbox.Deps.OpinionatedAgnosServer.WriteJSON(sandbox.Deps.SerializableDeps, *response, api.StatusOK, backofficeapi.UserResponseJSON(sandbox, user))
+	return sandbox.Deps.OpinionatedAgnosServer.WriteJSON(sandbox.Deps.SerializableDeps, *response, api.StatusOK, backofficeapi.UserResponseJSON(sandbox, backofficeusers.Masked(sandbox, props.User, user)))
 }

@@ -109,6 +109,7 @@ func New(sandbox *api.Sandbox, content string) (*RouteConf, error) {
 	conf.Summary = readString(specs, "summary")
 	conf.Description = readString(specs, "description")
 	conf.Hidden = readBool(specs, "hidden")
+	conf.Private = readBool(specs, "private")
 
 	for _, key := range legacyKeys {
 		if item, _ := specs.GetObjectItem(key); item != nil && !item.IsNull() {

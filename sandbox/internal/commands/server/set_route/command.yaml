@@ -53,5 +53,11 @@ flags:
     - description: an usage example for the route (repeatable)
       id: Example
       type: string-array
+    - description: leave the route out of /openapi.json, still listed in docs/Routes and dispatched
+      id: Private
+      type: boolean
+    - description: list the route in /openapi.json again
+      id: Public
+      type: boolean
 priority: 100
 summary: Rewrite the route-level keys of a route.yaml

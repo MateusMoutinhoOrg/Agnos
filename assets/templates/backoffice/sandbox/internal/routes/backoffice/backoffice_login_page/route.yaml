@@ -1,0 +1,15 @@
+category: Backoffice
+methods:
+    - GET
+paths:
+    - end: 1
+      id: AdminLogin
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/login
+priority: 100
+private: true
+response-type: text/html
+segments: 2
+summary: Shows the sign-in form

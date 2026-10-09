@@ -9,6 +9,7 @@ paths:
         type: equal
         value: /admin/root/optimize-backup-storage
 priority: 100
+private: true
 response-type: text/html
 segments: 3
 summary: Starts removing every stored content no snapshot holds anymore, and answers at once

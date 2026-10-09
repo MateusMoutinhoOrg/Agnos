@@ -46,7 +46,7 @@ func backupSnapshotNoticeOf(sandbox *api.Sandbox, code string) Notice {
 	case backofficesnapshots.NoticeCreating:
 		return Notice{Text: "Snapshot started. It is listed as creating until every database is copied, and this page refreshes until then.", Kind: "ok"}
 	case backofficesnapshots.NoticeRestoring:
-		return Notice{Text: "Restore started. A pre-restore snapshot of the current data is taken first, then every database is replaced: you may be signed out when it ends.", Kind: "ok"}
+		return Notice{Text: "Restore started. A pre-restore snapshot of the current data is taken first, then every database but the backoffice users and tokens — unless you ticked the box — is replaced, and the site answers 503 until it ends. If it fails, the pre-restore snapshot is put back.", Kind: "ok"}
 	case backofficesnapshots.NoticeUploaded:
 		return Notice{Text: "Snapshot uploaded. It can be downloaded or restored now.", Kind: "ok"}
 	case backofficesnapshots.NoticeRemoved:
@@ -58,7 +58,7 @@ func backupSnapshotNoticeOf(sandbox *api.Sandbox, code string) Notice {
 	case backofficesnapshots.NoticeNotFound:
 		return Notice{Text: "That snapshot no longer exists.", Kind: "error"}
 	case backofficesnapshots.NoticeNotReady:
-		return Notice{Text: "That snapshot is not ready: only a finished snapshot can be downloaded or restored.", Kind: "error"}
+		return Notice{Text: "That snapshot is not ready: only a finished snapshot can be downloaded or restored, and the safety copy of a restore that has not finished cannot be deleted.", Kind: "error"}
 	case backofficesnapshots.NoticeInvalidName:
 		return Notice{Text: "That name cannot be used: a snapshot name is 1 to 100 letters, digits, '.', '_' or '-', starting with a letter or a digit.", Kind: "error"}
 	case backofficesnapshots.NoticeNameTaken:

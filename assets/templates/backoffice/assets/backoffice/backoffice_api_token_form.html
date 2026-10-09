@@ -373,9 +373,15 @@
           <label for="ips">Allowed IPs <span style="color: var(--text-muted); font-weight: 400;">(optional)</span></label>
           <input type="text" id="ips" name="ips" value="{{html .Ips}}" autocomplete="off" spellcheck="false" placeholder="Any IP">
           <div class="hint ip-hint">
-            <span>Separate several with commas. Leave it blank to accept the token from any IP.</span>
+            <span>Separate several with commas; a range is written in CIDR notation (10.0.0.0/8). Leave it blank to accept the token from any IP.</span>
             {{if .ClientIp}}<button type="button" class="btn btn-small" id="use-my-ip" data-ip="{{html .ClientIp}}">Add my IP (<code>{{html .ClientIp}}</code>)</button>{{end}}
           </div>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Your password</label>
+          <input type="password" id="password" name="password" required maxlength="1024" autocomplete="current-password">
+          <p class="hint">A token acts as you until it expires, so creating one asks for your password again.</p>
         </div>
 
         <div class="form-actions">

@@ -18,5 +18,6 @@ paths:
       id: Path
       start: 5
 priority: 100
+private: true
 response-type: application/octet-stream
 summary: Downloads one file of a snapshot, at the path below the --database folder the address ends with

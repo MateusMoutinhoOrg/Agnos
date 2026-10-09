@@ -9,6 +9,7 @@ paths:
         type: equal
         value: /admin/root/add-backoffice-user
 priority: 100
+private: true
 response-type: text/html
 segments: 3
 summary: Shows the form that adds a backoffice user
