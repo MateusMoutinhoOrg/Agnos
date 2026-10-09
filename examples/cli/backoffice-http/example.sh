@@ -39,6 +39,7 @@ echo "GET /admin/login: $(status "$base/admin/login")" > $out
 # Sign in: the cookie is sent to /admin alone.
 curl -s -D headers.txt -c cookies.txt -o /dev/null -H "$origin" --data-urlencode "username=admin" --data-urlencode "password=$password" "$base/admin/login"
 echo "session cookie: $(grep -i '^set-cookie' headers.txt | grep -o 'Path=[^;]*')" >> $out
+echo "GET /admin signed in: $(curl -s -o /dev/null -w '%{http_code} %{redirect_url}' -b cookies.txt "$base/admin" | sed "s|$base||")" >> $out
 
 # An API token: the password is asked again.
 echo "token without password: $(status -b cookies.txt -H "$origin" -d 'name=t0&expiration=30' "$base/admin/add-backoffice-api-token")" >> $out

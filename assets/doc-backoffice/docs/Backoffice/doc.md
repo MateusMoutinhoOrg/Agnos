@@ -61,7 +61,7 @@ Middlewares run lowest priority first; a page answers or the chain goes on.
 | `backoffice-api-token-auth` | 10 | `/api/admin` | `Authorization: Bearer <token>` → `props.User`, `props.ApiToken` |
 | `backoffice-api-root-guard` | 11 | `/api/admin/root` | `403` to a non-root |
 
-Pages (`/admin/...`): `login` (GET form, POST), `logout` (POST), `home`, `list-backoffice-users`,
+Pages (`/admin/...`): `login` (GET form, POST), `logout` (POST), `home` (`/admin` itself `303`s there), `list-backoffice-users`,
 `list-backoffice-api-tokens`, `add-backoffice-api-token` (GET form, POST), `revoke-backoffice-api-token/{id}` (POST);
 root only (`/admin/root/...`): `add-backoffice-user` (GET form, POST), `set-backoffice-user/{id}` (GET form, POST),
 `remove-backoffice-user/{id}` (POST), and the backups (`list-backups`…, in [Backups](../Backups/doc.md)). Each is one route per method, named after the surface it

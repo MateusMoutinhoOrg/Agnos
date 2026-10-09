@@ -6,7 +6,7 @@ tree:
     - file: AgnosConfig/extensions.yaml
       sha: ad88787e76ecea85e6f9c8b18923e967366b0af1b17a02b93bf13c8e9c7145c2
     - file: docs/Backoffice/doc.md
-      sha: 52fde2341578b8ba8b00d33ccc58af8807deb1d9fad0761ea7ffb48f563e2198
+      sha: dca03e58c42fa53d5f48231382e350d9d37cb8918f33063e960588f3d4ff1483
     - file: docs/Backoffice/doc.yaml
       sha: c8c38250ca432b712583efccd6276e9edad1a7eed19e418f4828705bb69271d9
     - file: docs/Backups/doc.md
