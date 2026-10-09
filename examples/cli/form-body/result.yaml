@@ -10,7 +10,7 @@ cli-output: |
       category  Auth
       priority  100
       response  application/json
-      chain     #2 of 2, after health
+      chain     #2 of 3, after health, before openapi
 
     paths
       Login                segments 0..-1  equal "/login"

@@ -4,7 +4,7 @@ cli-output: |
       category  Users
       priority  100
       response  application/json
-      chain     #1 of 2, before health
+      chain     #1 of 3, before health
 
     paths
       Users                segments 0..-1  prefix "/users/"

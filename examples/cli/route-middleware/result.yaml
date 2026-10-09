@@ -4,16 +4,18 @@ cli-output: |
     2    99        ANY      /admin/*                             admin-guard
     3    100       GET      /admin/*                             admin
     4    100       GET      /health                              health
+    5    100       GET      /openapi.json                        openapi
     #    priority  methods  pattern                              route
     1    10        ANY      /*                                   access-log
     2    20        ANY      /admin/*                             admin-guard
     3    30        GET      /admin/*                             admin
     4    100       GET      /health                              health
+    5    100       GET      /openapi.json                        openapi
     ANY /admin/*
       category  Middleware
       priority  20
       response  text/plain
-      chain     #2 of 4, after access-log, before admin
+      chain     #2 of 5, after access-log, before admin
 
     paths
       Admin                segments 0..-1  prefix "/admin"
@@ -22,7 +24,7 @@ cli-output: |
 exit-code: 0
 tree:
     - file: sandbox/internal/generated/server/new.go
-      sha: cedeafadff74f1e8047ca5a044f29d0a5a8b67f9f43e2a885cea01ea55692d39
+      sha: 27a185cf078a63df5fbf60cc36847a043ffc252d37f8c77e03cdfaf700f49f76
     - file: sandbox/internal/routes/access_log/handler.go
       sha: f8ee6ed3064a8ac7eb023f9a0615aebe29df64eb49979480b91dd72f171659fc
     - file: sandbox/internal/routes/access_log/route.yaml

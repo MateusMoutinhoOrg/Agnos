@@ -17,3 +17,11 @@ tree:
       sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
     - file: sandbox/internal/routes/health/route.yaml
       sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc
+    - file: sandbox/internal/routes/openapi/handler.go
+      sha: cc4037b0832cc89b11ff70ffc841da149000360a5abf0c55fc30cad246eac28e
+    - file: sandbox/internal/routes/openapi/input.go
+      sha: bdcec6138e6e4283b7ef1d03beec025843103fc6d1cc8da91c7414e6551704d8
+    - file: sandbox/internal/routes/openapi/new.go
+      sha: d82e8e75c93b2cf8386bb7796c74bccf075666472c4adf340ee6c0966f8a9c5d
+    - file: sandbox/internal/routes/openapi/route.yaml
+      sha: 22b7b95d54b8967b959216e5edcfba85a241667414182b923367443b41ed77e9

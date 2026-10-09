@@ -8,12 +8,16 @@ tree:
     - file: docs/Routes/create_user.md
       sha: 895baead50463572ca73e2fd2c86f623d6560cb644fa53219fde4a591fe2dee2
     - file: docs/Routes/doc.md
-      sha: e6e80d83b0e99181f7ab6ee92cdee1286a84741a69860ddecf9b3451738a535b
+      sha: 88f6cfb401783044ff1300db1ccf5819555150b96d27b852e63a40c5da1c0294
     - file: docs/Routes/doc.yaml
-      sha: 242d51317effdda8d579535d8db0e6b5f6836de052ea43f3f3b310dd553e9137
+      sha: 21cc473cdf63035a250fede2242d64b8f5029a0de9bd22cc740ceccf6d81566a
     - file: docs/Routes/get_article.md
       sha: 386aaa38b7332a0c38e60b2961f6fe12d06bf0cdacd0952520e8707a7c08e2d7
     - file: docs/Routes/health.md
       sha: 2cb16a78753fcf8f8a8b20d3ad6b1e94dcc8ebab567da5c5f5bd7e5e0f62ac95
     - file: docs/Routes/images.md
       sha: 48affa7da75ca498a4462a5c2ee50f3965ff2aee679f6ba694e7d11230062534
+    - file: docs/Routes/openapi.json
+      sha: 65f3cd4ec4b62bd91e33997f05cf5315a56d91322bf53464bdc377067798bae1
+    - file: docs/Routes/openapi.md
+      sha: e437be0a02f3eac18f792998fddef00ab629d61dd373d4a192f7f7b2da5e3f08

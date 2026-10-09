@@ -4,7 +4,7 @@ cli-output: |
       priority  100
       segments  2
       response  application/json
-      chain     #2 of 4, after files, before get-comment
+      chain     #2 of 5, after files, before get-comment
 
     paths
       GetArticle           segments 0..0  equal "/get-article"
@@ -16,7 +16,7 @@ cli-output: |
       priority  100
       segments  4
       response  application/json
-      chain     #3 of 4, after get-article, before health
+      chain     #3 of 5, after get-article, before health
 
     paths
       Users                segments 0..0  equal "/users"
@@ -29,7 +29,7 @@ cli-output: |
       category  Routes
       priority  100
       response  application/json
-      chain     #1 of 4, before get-article
+      chain     #1 of 5, before get-article
 
     paths
       Files                segments 0..0  equal "/files"
