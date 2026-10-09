@@ -378,3 +378,26 @@ before it is written.
 
 A `Handle*` file answers a failure and never raises one: a failure raised from inside one comes
 back to it.
+
+## OpenAPI
+
+`{{.GeneratorName}} build` renders every visible `route.yaml` into one OpenAPI 3.0.3 document,
+`docs/Routes/openapi.json`, and bakes the same bytes into the generated `openapi` route, which
+answers `GET /openapi.json` with `Access-Control-Allow-Origin: *`. Neither is edited: a
+declaration changes them.
+
+| `route.yaml` | OpenAPI |
+|---|---|
+| a visible route, `methods` not `ANY` | one operation per method, in run order; `operationId` the route's name (`-<method>` with several), `tags` its `category` |
+| `methods: [ANY]` | no operation — a middleware. The `parameters` of one that always runs in front of a route join that route's operation |
+| two routes drawing one path and method | the one running last |
+| `equal` / `prefix` path | literal segments; a prefix is listed at the prefix, and its description says the addresses under it are answered too |
+| capture, `one-of`, `text-prefix`, `suffix`, `regex` path | `{<id>}` path parameter: typed (`uuid` a `string` of format `uuid`), `enum` for `one-of`, `pattern` for `regex`, the rule in words otherwise |
+| a negated trigger, a slot no path reaches | a sentence of the description; `{segment<N>}` |
+| parameter | `in` its first source; `required` when `required` or triggered; `default`; `example` the value the route page sends; `enum` / `pattern` from an `equal`, `one-of` or `regex` trigger |
+| header `authorization` | an `apiKey` security scheme named after the route reading it, required when the parameter is |
+| header `accept`, `content-type` | left out — OpenAPI ignores them |
+| `body` | `requestBody` under its `content-type`, or `application/json`, `application/x-www-form-urlencoded`, `text/plain`, `application/octet-stream` by type; the json sample of the route page as `example` |
+| `json-schema`, `form-schema` | the same keywords; `const` as a one-value `enum`, a numeric `exclusiveMinimum` / `exclusiveMaximum` as the boolean over `minimum` / `maximum`, `type: null` as `nullable` |
+| statuses | the ones the route page lists; `200` in `response-type`, every failure the `Error` schema `{error, field}` |
+| `project.yaml` | `info.title` the project name, `info.version` its version (`unversioned` with none) |

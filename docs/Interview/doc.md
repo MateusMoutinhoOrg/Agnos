@@ -96,7 +96,7 @@ is marked `★`; the rest are offers.
 | `backoffice-init` | `backoffice` is off | |
 | `deps-init` | `deps` is off | |
 
-`help`, `version`, `health`, `front` and `index` are what an init scaffolds, so they never count as
+`help`, `version`, `health`, `openapi`, `front` and `index` are what an init scaffolds, so they never count as
 units the project declared itself; neither does any route, command or database `backoffice-init`
 wrote (`utils.BackofficeUnits`).
 

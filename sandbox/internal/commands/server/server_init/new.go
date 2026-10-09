@@ -24,7 +24,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "server-init"
 	self.Category = "Server"
 	self.Summary = "Add the http server layer to the project"
-	self.Description = "Installs the deps the server layer needs — the OpinionatedAgnosServer lib, its request chain, among them — renders sandbox/internal/server and the built-in health route, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it."
+	self.Description = "Installs the deps the server layer needs — the OpinionatedAgnosServer lib, its request chain, among them — renders sandbox/internal/server and the built-in health and openapi routes, and writes the start-server command. A project with no cli layer is given one first: a server needs a command that starts it."
 	self.Examples = []string{"server-init", "server-init --path ./my-project"}
 	self.Hidden = false
 

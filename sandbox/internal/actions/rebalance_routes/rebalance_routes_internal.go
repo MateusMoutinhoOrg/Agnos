@@ -6,9 +6,6 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// healthRoute is the route build renders itself.
-const healthRoute = "health"
-
 // RebalanceRoutesInternal gives every route a rung of its own, Step apart and
 // in the order the chain runs them now: the first on Step, the next on twice
 // Step, and so on. Two routes that shared a
@@ -32,7 +29,7 @@ func RebalanceRoutesInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props 
 
 	rung := 0
 	for _, entry := range chain {
-		if entry.Name == healthRoute {
+		if utils.IsGeneratedRoute(sandbox, entry.Name) {
 			continue
 		}
 		rung += props.Step

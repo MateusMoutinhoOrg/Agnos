@@ -1,0 +1,15 @@
+methods:
+  - GET
+priority: 100
+response-type: application/json
+paths:
+  - id: OpenApi
+    start: 0
+    end: -1
+    trigger:
+      type: equal
+      value: /openapi.json
+category: Server
+summary: Answers the OpenAPI document of every route, to import into Postman or open in Swagger UI
+examples:
+  - curl localhost:3000/openapi.json

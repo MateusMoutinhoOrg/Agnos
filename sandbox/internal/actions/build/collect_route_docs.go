@@ -116,17 +116,14 @@ const (
 	routeDocSampleFile     = "my-file"
 )
 
-// routeDocEntry is one declared route, read once for every crossing.
-type routeDocEntry struct {
-	name string
-	conf *routeconf.RouteConf
-}
-
-// routeDocInherited is one parameter a route in front of another reads, and
-// whether that route runs on every request of this one — only then is a
-// value it requires one this route's requests have to send.
+// routeDocInherited is one parameter a route in front of another reads, the
+// route reading it and its page, and whether that route runs on every request
+// of this one — only then is a value it requires one this route's requests
+// have to send.
 type routeDocInherited struct {
 	parameter routeconf.Parameter
+	from      string
+	fromPage  string
 	always    bool
 }
 
@@ -144,7 +141,7 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]RouteDocGr
 	var groups []RouteDocGroup
 	index := map[string]int{}
 
-	entries := []routeDocEntry{}
+	entries := []utils.RouteChainEntry{}
 	for _, unit := range utils.RouteDirs(sandbox, io) {
 		content, err := io.ReadFile(unit.Dir + "/" + utils.RouteConfFile)
 		if err != nil {
@@ -155,18 +152,15 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]RouteDocGr
 		if err != nil {
 			return nil, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, utils.RouteConfFile, err)
 		}
-		entries = append(entries, routeDocEntry{name: unit.Name, conf: conf})
+		entries = append(entries, utils.RouteChainEntry{Name: unit.Name, Dir: unit.Dir, Conf: conf})
 	}
 
 	for _, current := range entries {
-		if current.conf.Hidden {
+		if current.Conf.Hidden {
 			continue
 		}
 
-		category := current.conf.Category
-		if category == "" {
-			category = routeDocOther
-		}
+		category := routeDocCategory(current.Conf)
 
 		position, seen := index[category]
 		if !seen {
@@ -181,12 +175,21 @@ func CollectRouteDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]RouteDocGr
 	return groups, nil
 }
 
+// routeDocCategory is the section a route is listed under: its declared
+// category, or routeDocOther.
+func routeDocCategory(conf *routeconf.RouteConf) string {
+	if conf.Category == "" {
+		return routeDocOther
+	}
+	return conf.Category
+}
+
 // routeDoc turns one parsed declaration into its page, crossed with every
 // other route of the project.
-func routeDoc(sandbox *api.Sandbox, current routeDocEntry, entries []routeDocEntry) RouteDoc {
-	conf := current.conf
+func routeDoc(sandbox *api.Sandbox, current utils.RouteChainEntry, entries []utils.RouteChainEntry) RouteDoc {
+	conf := current.Conf
 	doc := RouteDoc{
-		Name:        current.name,
+		Name:        current.Name,
 		Method:      sandbox.Deps.StringsDeps.Join(conf.Methods, ", "),
 		Pattern:     conf.Pattern(),
 		Summary:     docCell(sandbox, conf.Summary),
@@ -203,31 +206,12 @@ func routeDoc(sandbox *api.Sandbox, current routeDocEntry, entries []routeDocEnt
 		doc.Parameters = append(doc.Parameters, routeDocParameter(sandbox, parameter, true))
 	}
 
-	inherited := []routeDocInherited{}
-	for _, other := range entries {
-		if other.name == current.name || other.conf.Hidden {
-			continue
-		}
-		reach, condition := utils.RouteMiddlewareReach(sandbox, other.conf, conf)
-		if reach == utils.NoReach {
-			continue
-		}
-		name := utils.RouteName(sandbox, other.name)
-		page := other.name + docPageExt
-		doc.Middlewares = append(doc.Middlewares, RouteDocReach{
-			Name:      name,
-			Page:      page,
-			Condition: routeReachCondition(reach, condition),
-		})
-		if reach != utils.Runs {
-			continue
-		}
-		for _, parameter := range other.conf.Parameters {
-			field := routeDocParameter(sandbox, parameter, false)
-			field.From, field.FromPage = name, page
-			doc.Parameters = append(doc.Parameters, field)
-			inherited = append(inherited, routeDocInherited{parameter: parameter, always: condition == ""})
-		}
+	middlewares, inherited := routeDocCrossings(sandbox, current, entries)
+	doc.Middlewares = middlewares
+	for _, other := range inherited {
+		field := routeDocParameter(sandbox, other.parameter, false)
+		field.From, field.FromPage = other.from, other.fromPage
+		doc.Parameters = append(doc.Parameters, field)
 	}
 
 	doc.Requests = routeDocRequests(sandbox, conf, inherited)
@@ -238,6 +222,37 @@ func routeDoc(sandbox *api.Sandbox, current routeDocEntry, entries []routeDocEnt
 	}
 	doc.Statuses = routeDocStatuses(sandbox, conf, inherited)
 	return doc
+}
+
+// routeDocCrossings crosses one route with every other visible one: the routes
+// on a lower rung whose triggers may hold on it, and the parameters of the ones
+// sure to run in front of it, which a request of it reads as well.
+func routeDocCrossings(sandbox *api.Sandbox, current utils.RouteChainEntry, entries []utils.RouteChainEntry) ([]RouteDocReach, []routeDocInherited) {
+	middlewares := []RouteDocReach{}
+	inherited := []routeDocInherited{}
+	for _, other := range entries {
+		if other.Name == current.Name || other.Conf.Hidden {
+			continue
+		}
+		reach, condition := utils.RouteMiddlewareReach(sandbox, other.Conf, current.Conf)
+		if reach == utils.NoReach {
+			continue
+		}
+		name := utils.RouteName(sandbox, other.Name)
+		page := other.Name + docPageExt
+		middlewares = append(middlewares, RouteDocReach{
+			Name:      name,
+			Page:      page,
+			Condition: routeReachCondition(reach, condition),
+		})
+		if reach != utils.Runs {
+			continue
+		}
+		for _, parameter := range other.Conf.Parameters {
+			inherited = append(inherited, routeDocInherited{parameter: parameter, from: name, fromPage: page, always: condition == ""})
+		}
+	}
+	return middlewares, inherited
 }
 
 // routeReachCondition is the cell a crossing is worded with: "" when the
@@ -1035,7 +1050,7 @@ func routeDocJsonLeaf(sandbox *api.Sandbox, schema *routeconf.Schema) string {
 	quoted := schema.Type == "string" || schema.Type == ""
 	literal := func(value string) string {
 		if quoted {
-			return strings.Quote(value)
+			return routeDocJsonQuote(sandbox, value)
 		}
 		return value
 	}
@@ -1075,7 +1090,7 @@ func routeDocJsonLeaf(sandbox *api.Sandbox, schema *routeconf.Schema) string {
 	if schema.HasMaxLength && len(text) > schema.MaxLength {
 		text = text[:schema.MaxLength]
 	}
-	return strings.Quote(text)
+	return routeDocJsonQuote(sandbox, text)
 }
 
 // routeDocBounded moves value inside a number's bounds; step is how far past
@@ -1123,11 +1138,36 @@ func routeDocJsonText(sandbox *api.Sandbox, node *routeDocJson, indent string, p
 	for index, child := range node.Children {
 		text := routeDocJsonText(sandbox, child, inner, pretty)
 		if node.Object {
-			text = sandbox.Deps.StringsDeps.Quote(node.Keys[index]) + colon + text
+			text = routeDocJsonQuote(sandbox, node.Keys[index]) + colon + text
 		}
 		items = append(items, inner+text)
 	}
 	return opening + newline + sandbox.Deps.StringsDeps.Join(items, separator+newline) + newline + indent + closing
+}
+
+// routeDocJsonQuote is a text as a json string: a quote, a backslash and every
+// control character escaped, everything else as it is.
+func routeDocJsonQuote(sandbox *api.Sandbox, text string) string {
+	quoted := []byte{'"'}
+	for index := 0; index < len(text); index++ {
+		char := text[index]
+		switch {
+		case char == '"' || char == '\\':
+			quoted = append(quoted, '\\', char)
+		case char == '\n':
+			quoted = append(quoted, '\\', 'n')
+		case char == '\r':
+			quoted = append(quoted, '\\', 'r')
+		case char == '\t':
+			quoted = append(quoted, '\\', 't')
+		case char < 0x20 || char == 0x7f:
+			hex := sandbox.Deps.StringsDeps.FormatInt(int64(char), 16)
+			quoted = append(quoted, []byte("\\u"+sandbox.Deps.StringsDeps.Repeat("0", 4-len(hex))+hex)...)
+		default:
+			quoted = append(quoted, char)
+		}
+	}
+	return string(append(quoted, '"'))
 }
 
 // routeDocStatuses is every status this route itself answers with, in plain

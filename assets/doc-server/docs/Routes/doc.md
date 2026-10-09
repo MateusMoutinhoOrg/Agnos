@@ -28,6 +28,19 @@ it prints the address it took. Change it to wherever your server runs.
 {{- end }}
 {{- end }}
 
+## Postman, Swagger and other tools
+
+[openapi.json](openapi.json) holds every route below as an OpenAPI 3.0 document, and the running
+server answers the same file at `/openapi.json`:
+
+- **Postman**: *Import*, then pick the file or paste `http://localhost:3000/openapi.json`. Every
+  route lands in a folder named after its section.
+- **Swagger UI**, or any tool that reads OpenAPI: open `http://localhost:3000/openapi.json`.
+
+A route that runs in front of others for every method — a check of a token, for example — is
+not listed on its own there: what it reads is listed on each route it guards, and a token sent
+as `Authorization` is the document's sign-in.
+
 ## When something goes wrong
 
 | Status | Means |
@@ -48,9 +61,9 @@ it is one value, which one:
 {"error": "required parameter 'authorization' is missing", "field": "authorization"}
 ```
 
-For developers: each page is generated on every build from
-`sandbox/internal/routes/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md)); hidden routes
-are left out. `{{.GeneratorName}} list-routes` prints the routes in the order they run, and
+For developers: each page, and `openapi.json`, is generated on every build from
+`sandbox/internal/routes/<name>/route.yaml` ([RouteYaml](../RouteYaml/doc.md#openapi)); hidden
+routes are left out. `{{.GeneratorName}} list-routes` prints the routes in the order they run, and
 `{{.GeneratorName}} explain-route <METHOD> <path>` which ones a request reaches. The error answers are
 the eight files of `sandbox/internal/server/errors/` ([RouteYaml](../RouteYaml/doc.md#failures)).
 {{- else }}

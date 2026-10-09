@@ -117,6 +117,19 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		return err
 	}
 
+	// The routes the server group writes itself are declared the same way:
+	// their route.yaml is rendered before the routes are collected, so a
+	// project whose server group just gained one collects it in this build.
+	if hasServer {
+		if err := GenerateBuiltinRouteYamls(sandbox, io, map[string]interface{}{
+			"Module":        module_conf.Module,
+			"ProjectName":   project_conf.ProjectName,
+			"GeneratorName": generatorName(sandbox),
+		}); err != nil {
+			return err
+		}
+	}
+
 	// The server layer's mirror of CollectCommands: one entry per declared
 	// route, already ordered for matching so the dispatch only has to range
 	// over Server.Routes.
@@ -188,6 +201,17 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 	route_docs, err := CollectRouteDocs(sandbox, io)
 	if err != nil {
 		return err
+	}
+
+	// The OpenAPI document is rendered from the same declarations docs/Routes
+	// is, once: docs/Routes/openapi.json holds it and the generated openapi
+	// route answers it, so both are always the same bytes.
+	open_api := ""
+	if hasServer {
+		open_api, err = CollectOpenApi(sandbox, io, project_conf.ProjectName, project_conf.Version)
+		if err != nil {
+			return err
+		}
 	}
 
 	// docs/Databases is rendered from the database declarations themselves, the
@@ -273,6 +297,7 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		"CommandDocs":         command_docs,
 		"Routes":              routes,
 		"RouteDocs":           route_docs,
+		"OpenApi":             open_api,
 		"Databases":           databases,
 		"DatabaseDocs":        database_docs,
 		"Themes":              themes_conf.Themes,

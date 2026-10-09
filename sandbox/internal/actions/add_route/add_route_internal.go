@@ -53,8 +53,8 @@ func AddRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.Add
 	identifier := utils.RouteName(sandbox, name)
 	pkg := utils.RoutePackage(sandbox, name)
 
-	if pkg == "health" {
-		return sandbox.Deps.StdDeps.Errorf("the health route is generated and cannot be declared")
+	if utils.IsGeneratedRoute(sandbox, name) {
+		return sandbox.Deps.StdDeps.Errorf("the %s route is generated and cannot be declared", pkg)
 	}
 
 	group, err := utils.UnitGroup(sandbox, props.Dir)

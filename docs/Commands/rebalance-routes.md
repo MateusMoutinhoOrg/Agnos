@@ -6,7 +6,7 @@ Lay the chain down again with room between its rungs
 agnos rebalance-routes [--step <step>] [--help] [--path <path>] [--quiet]
 ```
 
-Gives every route a priority of its own, --step apart, in the order the chain runs them now, so --before and --after have room again. The generated health route keeps its rung.
+Gives every route a priority of its own, --step apart, in the order the chain runs them now, so --before and --after have room again. The generated health and openapi routes keep their rung.
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |

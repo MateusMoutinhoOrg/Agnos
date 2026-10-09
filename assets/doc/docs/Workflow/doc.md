@@ -159,7 +159,7 @@ rewrites: they are where a 404, a 405, a 401 or a 500 is worded.
 ## Add the server layer
 
 ```bash
-{{.GeneratorName}} server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
+{{.GeneratorName}} server-init      # serverdeps, signaldeps, sandbox/internal/server, the health and openapi routes, start-server
 {{ if .HasAssets }}<name>{{ else }}{{.ProjectName}}{{ end }} start-server  # listens on the first free port of 3000..4000
 ```
 

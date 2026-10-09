@@ -69,10 +69,12 @@
 | `sandbox/internal/generated/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute`, and `Server.Serve`, which hands the server to `OpinionatedAgnosServer.Main` |
 | `sandbox/deps/OpinionatedAgnosServer/`, `adapters/impls/OpinionatedAgnosServer/` | `server-init` | once, like any dep. The request chain, the binder, the json-schema validator and the writers every route runs through |
 | `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
+| `sandbox/internal/routes/openapi/{route.yaml,handler.go}` | `build` | always. `handler.go` holds the OpenAPI document `docs/Routes/openapi.json` holds |
 | `sandbox/internal/routes/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, a 1:1 image of `route.yaml` |
 | `sandbox/internal/routes/<name>/input.go` | `build` | always. `Input`, and the `ReadBody` a body calls for |
 | `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `doc.yaml` |
 | `docs/Routes/<route>.md` | `build` | always. One page per visible route; `docs/Routes/doc.md` indexes them |
+| `docs/Routes/openapi.json` | `build` | always. The OpenAPI 3.0.3 document of every visible route, the one `GET /openapi.json` answers |
 | `sandbox/internal/routes/<name>/route.yaml` | `add-route` | once, then rewritten by `set-route` / `add-path` / `add-parameter` / `set-body` / `add-body-field` / `import-body`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/server/start_server/{command.yaml,handler.go}` | `server-init` | once |

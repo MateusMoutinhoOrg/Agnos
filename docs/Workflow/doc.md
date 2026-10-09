@@ -75,7 +75,7 @@ next build.
 ## Add the server layer
 
 ```bash
-agnos server-init      # serverdeps, signaldeps, sandbox/internal/server, the health route, start-server
+agnos server-init      # serverdeps, signaldeps, sandbox/internal/server, the health and openapi routes, start-server
 <name> start-server  # listens on the first free port of 3000..4000
 ```
 

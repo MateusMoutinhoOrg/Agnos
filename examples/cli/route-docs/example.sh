@@ -1,5 +1,6 @@
 # The route-docs example: the pages docs/Routes generates for whoever calls the
-# server — plain words, and curl requests that run as they are
+# server — plain words, and curl requests that run as they are — and the
+# OpenAPI document beside them, openapi.json, that Postman and Swagger import
 #
 # `agnos` here is this repository's own cli, put on the PATH by `agnos run-examples`.
 # The example writes only inside test-dir.

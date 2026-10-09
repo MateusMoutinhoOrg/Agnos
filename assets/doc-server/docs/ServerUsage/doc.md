@@ -19,10 +19,11 @@ a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yam
 ## Bring it up
 
 ```bash
-{{.GeneratorName}} server-init  # serverdeps, signaldeps, the server layer, the health route, start-server
+{{.GeneratorName}} server-init  # serverdeps, signaldeps, the server layer, the health and openapi routes, start-server
 {{.ProjectName}} start-server  # listens on the first free port of 3000..4000; Ctrl+C shuts it down gracefully
 {{.ProjectName}} start-server --addr 4000:5000 --read-timeout-ms 30000 --shutdown-timeout-ms 5000
 curl localhost:3000/health
+curl localhost:3000/openapi.json  # the OpenAPI document of every route, docs/Routes/openapi.json
 ```
 
 `--addr` is a port (`8080`), a range the server takes the first free port of (`4000:5000`), either

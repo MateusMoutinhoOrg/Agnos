@@ -38,7 +38,12 @@ func FindUnitDirs(sandbox *api.Sandbox, io *stagedfs.StagedFS, root string, mark
 // one holds marker. Two units sharing a name is a violation verify reports;
 // the first the walk meets answers until it is fixed.
 func FindUnitDir(sandbox *api.Sandbox, io *stagedfs.StagedFS, root string, marker string, pkg string) (string, bool) {
-	for _, unit := range FindUnitDirs(sandbox, io, root, marker) {
+	return FindUnitDirIn(FindUnitDirs(sandbox, io, root, marker), pkg)
+}
+
+// FindUnitDirIn is FindUnitDir over units already listed.
+func FindUnitDirIn(units []UnitDir, pkg string) (string, bool) {
+	for _, unit := range units {
 		if unit.Name == pkg {
 			return unit.Dir, true
 		}

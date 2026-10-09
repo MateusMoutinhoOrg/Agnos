@@ -86,7 +86,7 @@ var extensionInit = map[string]string{
 }
 
 // scaffoldedUnits are the units an init writes for itself: help and version
-// from assets/cli/, health from assets/server/, and the
+// from assets/cli/, health and openapi from assets/server/, and the
 // front route and the index page front-init scaffolds. A layer holding
 // nothing else has no unit of its own yet — which is what makes "declare its first one" the step after its
 // init, instead of a step no project ever sees.
@@ -94,6 +94,7 @@ var scaffoldedUnits = map[string]bool{
 	"help":    true,
 	"version": true,
 	"health":  true,
+	"openapi": true,
 	"front":   true,
 	"index":   true,
 }

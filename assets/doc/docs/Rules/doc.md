@@ -214,6 +214,11 @@ makes each kind of change is in [Workflow](../Workflow/doc.md).
 - `methods`, `priority` and `response-type` are required on every route; `priority` is never
   negative, and `methods` holds known methods only — or `ANY`, alone. `segments`, when
   declared, is at least `1`; a `phase` key is an old declaration. **(verify)**
+- `health` and `openapi` are routes `build` renders itself, rung `100`: `add-route`,
+  `remove-route` and `rename-route` refuse their names and `rebalance-routes` leaves their rung.
+  `openapi` answers `docs/Routes/openapi.json`, rendered from every visible `route.yaml`; an `ANY`
+  route is no operation there, only parameters of the routes it always runs in front of
+  ([RouteYaml](../RouteYaml/doc.md#openapi)).
 - `add-route` lands a route on rung `100` and a `--middleware` on `10`, so a guard goes in front
   of the routes it guards without renumbering them; `--before` / `--after` place one next to
   another, and `rebalance-routes` makes room again.
@@ -371,8 +376,8 @@ Never `fmt.Printf`. {{ if not .HasAssets }}A generated cli declares no `--quiet`
 {{- if .HasServer }}
 - [Routes](../Routes/doc.md) is the exception: it is read by whoever calls the server, a person,
   so it speaks plain words and every page carries requests that run as they are. It is
-  generated from each `route.yaml`: a `summary`, a `description` or an `examples` entry is what
-  changes a page.
+  generated from each `route.yaml`, `openapi.json` beside it included: a `summary`, a
+  `description` or an `examples` entry is what changes a page.
 {{- end }}
 - Say a rule once, in this page, and link to it. Links are relative to the file that carries
   them: `../X/doc.md` inside `docs/`, `docs/X/doc.md` in `README.md` and `ReadmeHeader.md`.

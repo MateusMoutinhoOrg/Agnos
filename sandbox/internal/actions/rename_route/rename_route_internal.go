@@ -16,7 +16,7 @@ var generatedRouteFiles = []string{"new.go", "input.go"}
 // folder it leaves empty. Name may be the current one when only the folder
 // changes. The route.yaml moves as it is: nothing in it names the package.
 //
-// The generated health route is refused.
+// The generated health and openapi routes are refused.
 func RenameRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.RenameRouteProps) error {
 	if err := utils.ValidateRouteName(sandbox, props.Route); err != nil {
 		return err
@@ -28,8 +28,10 @@ func RenameRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.
 	oldPkg := utils.RoutePackage(sandbox, props.Route)
 	newPkg := utils.RoutePackage(sandbox, props.Name)
 
-	if oldPkg == "health" || newPkg == "health" {
-		return sandbox.Deps.StdDeps.Errorf("the health route is generated and cannot be renamed")
+	for _, pkg := range []string{oldPkg, newPkg} {
+		if utils.IsGeneratedRoute(sandbox, pkg) {
+			return sandbox.Deps.StdDeps.Errorf("the %s route is generated and cannot be renamed", pkg)
+		}
 	}
 	old_dir, found := utils.FindUnitDir(sandbox, io, utils.RoutesDir, utils.RouteConfFile, oldPkg)
 	if !found {

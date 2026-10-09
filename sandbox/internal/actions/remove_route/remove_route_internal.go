@@ -9,14 +9,14 @@ import (
 // RemoveRouteInternal deletes every file of the route's directory — in whatever
 // folder it sits — plus the directory itself, and every folder the removal
 // leaves empty. One holding another route below it is refused, and so is the
-// generated health route: it is rendered by build, not declared.
+// generated health and openapi routes: they are rendered by build, not declared.
 func RemoveRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) error {
 	if err := utils.ValidateRouteName(sandbox, name); err != nil {
 		return err
 	}
 	pkg := utils.RoutePackage(sandbox, name)
-	if pkg == "health" {
-		return sandbox.Deps.StdDeps.Errorf("the health route is generated and cannot be removed")
+	if utils.IsGeneratedRoute(sandbox, name) {
+		return sandbox.Deps.StdDeps.Errorf("the %s route is generated and cannot be removed", pkg)
 	}
 
 	dir := utils.RouteDir(sandbox, io, name)

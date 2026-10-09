@@ -56,9 +56,36 @@ const RoutesDir = "sandbox/internal/routes"
 // directory a route.
 const RouteConfFile = "route.yaml"
 
-// RouteDirs is every route declared under RoutesDir, at any depth.
+// GeneratedRoutes is every route the server group renders itself, each at the
+// top of RoutesDir: health, which answers that the server is up, and openapi,
+// which answers the OpenAPI document of every route. No verb declares, removes,
+// renames or renumbers one of them.
+func GeneratedRoutes() []string {
+	return []string{"health", "openapi"}
+}
+
+// IsGeneratedRoute reports whether a user-typed route name spells one of
+// GeneratedRoutes.
+func IsGeneratedRoute(sandbox *api.Sandbox, name string) bool {
+	return contains(GeneratedRoutes(), RoutePackage(sandbox, name))
+}
+
+// RouteDirs is every route declared under RoutesDir, at any depth. A
+// generated route whose route.yaml is still pending in the transaction — the
+// first build after the server group gained it — is listed too, so the build
+// that renders it also renders its new.go and input.go.
 func RouteDirs(sandbox *api.Sandbox, io *stagedfs.StagedFS) []UnitDir {
-	return FindUnitDirs(sandbox, io, RoutesDir, RouteConfFile)
+	units := FindUnitDirs(sandbox, io, RoutesDir, RouteConfFile)
+	for _, name := range GeneratedRoutes() {
+		if _, found := FindUnitDirIn(units, name); found {
+			continue
+		}
+		dir := RoutesDir + "/" + name
+		if _, err := io.ReadFile(dir + "/" + RouteConfFile); err == nil {
+			units = append(units, UnitDir{Name: name, Dir: dir})
+		}
+	}
+	return units
 }
 
 // RouteDir is the project-relative directory holding the route named, in

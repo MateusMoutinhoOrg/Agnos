@@ -6,7 +6,7 @@
 
 1. Read `go.mod`, `AgnosConfig/project.yaml` and `AgnosConfig/extensions.yaml` (hard error if either is missing). Fill any catalog key the declaration lacks with its default and write it back. `HasSandbox`, `HasDeps`, `HasCli`, `HasServer`, `HasFront`, `HasDatabase`, `HasExample`, `HasDoc` and `HasReadme` are read straight off those keys — nothing is inferred from a directory. `HasAssets` is the one exception and stays a probe (`assets/sandbox/` exists — the project is itself an agnos-style generator, so its docs name its templates and its own bootstrap).
 2. Load `themes.yaml`; `CollectDocs`, merge in `CollectGeneratedDocs` (the docs the enabled groups themselves write — listings read disk, so on a first build they are not there yet), then `GenerateSubdocIndexes` (one `Index.md` per doc with sub-docs; deletes `docs/Index/` left by older versions), which `HasDoc` gates.
-3. If `HasCli`: write `info/help/command.yaml` if missing, then `CollectCommands`, then one `new.go` and `input.go` per command.
+3. If `HasCli`: write `info/help/command.yaml` if missing, then `CollectCommands`, then one `new.go` and `input.go` per command. If `HasServer`: `GenerateBuiltinRouteYamls` renders the `route.yaml` of every `utils.GeneratedRoutes` (`health`, `openapi`) into the transaction, and `utils.RouteDirs` lists one still pending, so a server group that just gained a route collects it — and renders its `new.go` and `input.go` — in the same build.
 4. Collectors, then the per-unit generators (`GenerateBindingNewFiles`, `GenerateCommandNew`, `GenerateRouteNew`, `GenerateDatabaseNew`, each behind its own key), then `utils.RenderGroup` over `utils.RenderableGroups(extensions)` — see [Asset groups](#asset-groups).
 
 | Collector | Lists | Var | Feeds |
@@ -24,6 +24,7 @@
 | `CollectDepContracts` | `sandbox/deps/<x>/*.go`, same parse | `DepContracts` (`Name`, `Title`, `Files`) | `docs/PublicApi/doc.md` |
 | `CollectRoutes` | `routes/<x>/route.yaml` | `Routes` (the declaration itself: `RouteName`, `Methods`, `ResponseType`, `Paths`, `Parameters`, `Body`, `SchemaJson`, `BodyStructs`), **ordered to run**: `Priority`, then name | `route_new.go`, `route_input.go`, `internal/generated/server/new.go` |
 | `CollectRouteDocs` | `routes/<x>/route.yaml` (visible ones), grouped by category in first-seen order, each crossed with the routes in front of it | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Summary`, `Description`, `Address`/`Parameters` as table rows, `Body` with its schema rows and a json sample, `Requests` as generated `curl` calls, `Examples`, `Statuses`, `Middlewares`) — plain words, for whoever calls the server | `docs/Routes/doc.md`, `GenerateRoutePages` |
+| `CollectOpenApi` | the same declarations, in run order, each crossed with the routes in front of it | `OpenApi` (one OpenAPI 3.0.3 document as text, a `routeDocJson` tree printed by `routeDocJsonText`; mapping in [RouteYaml](../../assets/doc-server/docs/RouteYaml/doc.md#openapi)) | `docs/Routes/openapi.json`, the `openapi` route's `handler.go` |
 | `CollectCommandDocs` | `commands/<category>/<x>/command.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Summary`, `Description`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
 | `CollectDatabases` | `databases/<x>/database.yaml` | `Databases` (per database: `DatabaseName`, `Package`, `Type`, `KeyPrefix`, `Tables` as `databasedeps.Item` literals, `Records` as the Go structs, `Methods` with `Kind`, `Params`, `Results`, `Args`) | `GenerateDatabaseNew` -> `databases/<x>/{api.go,new.go,methods.go}` |
 | `CollectDatabaseDocs` | `databases/<x>/database.yaml` | `DatabaseDocs` (per database: `Tables` with their fields as table rows, `Methods` with the whole signature) | `docs/Databases/doc.md`, `GenerateDatabasePages` |
@@ -45,10 +46,10 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `sandbox` | `sandbox` | `sandbox/new.go`, `api/{sandbox,config}.go` (embedding every struct of `api/<x>sandbox.go` / `api/<x>config.go`; native: `Deps`, `Config`), `internal/generated/config/new.go` |
 | `deps` | `deps` | `sandbox/deps/deps.go` |
 | `cli` | `cli` | `cmd/main`, `api/{cli,command,trigger,clisandbox}.go` (aliases of `OpinionatedAgnosCli`), `internal/generated/cli/new.go` (the registry), `info/help`, `info/version`, `middleware/help_flag` |
-| `server` | `server` | `api/{server,route,serversandbox}.go` (aliases of `OpinionatedAgnosServer`), `internal/generated/server/new.go` (the registry), the health route |
+| `server` | `server` | `api/{server,route,serversandbox}.go` (aliases of `OpinionatedAgnosServer`), `internal/generated/server/new.go` (the registry), the health and openapi routes |
 | `doc` | `doc` | `docs/{Adapters,DepList,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
 | `doc-cli` | `doc` + `cli` | `docs/{CliInstall,Commands}` |
-| `doc-server` | `doc` + `server` | `docs/{RouteYaml,Routes,ServerUsage}` |
+| `doc-server` | `doc` + `server` | `docs/{RouteYaml,Routes,ServerUsage}`, `docs/Routes/openapi.json` |
 | `doc-front` | `doc` + `front` | `docs/FrontUsage` |
 | `doc-database` | `doc` + `database` | `docs/Databases` |
 | `doc-backoffice` | `doc` + `backoffice` | `docs/Backoffice`. The backoffice has no code group: `backoffice-init` writes `assets/templates/backoffice/**` once |
