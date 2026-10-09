@@ -1,0 +1,5 @@
+cli-output: "GET /admin/login: 200\nsession cookie: Path=/admin\ntoken without password: 400\nGET /api/admin/me: 200\n30 wrong sign-ins at once: 401 x10 429 x20 \na 64 KiB sign-in: 413\na json body without Content-Type: 415\nGET /.env: 404\n/admin in /openapi.json: 0\nnosniff on /: 1\nafter restore, the revoked token: 401\nafter restore, data/app: 1 2 3 \nclose of a file under a file: 400\nafter a failed restore, GET /api/admin/me: 200\nafter a failed restore, data/app: 1 2 3 \nafter a failed restore, the log: 1\n"
+exit-code: 0
+tree:
+    - file: http.txt
+      sha: 07bba4635ea6cc2da1dc83c51b12c4824710153cd8cde3ec0961562faa95973c

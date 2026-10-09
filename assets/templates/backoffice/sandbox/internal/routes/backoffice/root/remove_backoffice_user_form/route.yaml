@@ -13,6 +13,7 @@ paths:
       start: 3
       type: integer
 priority: 100
+private: true
 response-type: text/html
 segments: 4
 summary: Removes a backoffice user and every session of it

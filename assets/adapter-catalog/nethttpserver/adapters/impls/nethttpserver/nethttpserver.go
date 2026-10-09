@@ -106,6 +106,8 @@ func newRequest(request *http.Request) serverdeps.Request {
 				return request.Host
 			case ClientIpHeader:
 				return clientIp(request)
+			case MethodHeader:
+				return request.Method
 			case ForwardedForHeader:
 				return strings.Join(request.Header.Values(ForwardedForHeader), ", ")
 			}
@@ -117,6 +119,7 @@ func newRequest(request *http.Request) serverdeps.Request {
 				headers[key] = append([]string{}, values...)
 			}
 			headers[ClientIpHeader] = []string{clientIp(request)}
+			headers[MethodHeader] = []string{request.Method}
 			return headers
 		},
 		GetHost: func() string {
@@ -160,6 +163,12 @@ func newRequest(request *http.Request) serverdeps.Request {
 // never read off the request: what a client sends under that name is dropped,
 // so a route may declare it as a header parameter and trust what it binds.
 const ClientIpHeader = "X-Client-Ip"
+
+// MethodHeader is the header GetHeader answers the request's method under.
+// Like ClientIpHeader it is never read off the request, so a route — a
+// middleware on every method above all — may declare it as a header
+// parameter and tell a read from a write.
+const MethodHeader = "X-Request-Method"
 
 // ForwardedForHeader is the header a reverse proxy appends the ip it was
 // reached from to. GetHeader answers every line of it joined by commas, the

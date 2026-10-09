@@ -38,6 +38,7 @@ paths:
         type: equal
         value: /api/admin/root/set-backoffice-user
 priority: 100
+private: true
 response-type: application/json
 segments: 4
 summary: Edits a backoffice user; a missing or blank password keeps the current one

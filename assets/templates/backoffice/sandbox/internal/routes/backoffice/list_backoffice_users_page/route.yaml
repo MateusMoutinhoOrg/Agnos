@@ -42,6 +42,7 @@ paths:
         type: equal
         value: /admin/list-backoffice-users
 priority: 100
+private: true
 response-type: text/html
 segments: 2
 summary: Lists backoffice users, filtered and paginated

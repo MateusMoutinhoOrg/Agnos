@@ -28,6 +28,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `add-path-range` |  | [example.sh](../../examples/cli/add-path-range/example.sh) |
 | `add-remote-dep` |  | [example.sh](../../examples/cli/add-remote-dep/example.sh) |
 | `add-route` |  | [example.sh](../../examples/cli/add-route/example.sh) |
+| `backoffice-http` |  | [example.sh](../../examples/cli/backoffice-http/example.sh) |
 | `backoffice-init` |  | [example.sh](../../examples/cli/backoffice-init/example.sh) |
 | `backoffice-purge` |  | [example.sh](../../examples/cli/backoffice-purge/example.sh) |
 | `build` | regenerate every generated file of a project | [example.sh](../../examples/cli/build/example.sh) |

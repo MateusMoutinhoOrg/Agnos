@@ -32,6 +32,14 @@ const PrefixLength = len(TokenPrefix) + 8
 // MaxNameLength is the most characters a token name may have.
 const MaxNameLength = 100
 
+// LastUsedResolution is how many seconds a token's last use may lag: its
+// last-used-at is written at most once in that time.
+const LastUsedResolution = 60
+
+// MaxDaysForViewer is the longest a token of a user who is not a root may
+// last: such a user cannot create one that never expires.
+const MaxDaysForViewer = 90
+
 // DaySeconds is how many seconds a day of an expiration lasts.
 const DaySeconds = 24 * 60 * 60
 
@@ -144,12 +152,19 @@ func IpList(sandbox *api.Sandbox, token backoffice_db.ApiTokenRecord) []string {
 	return sandbox.Deps.StringsDeps.Split(token.Ips, ",")
 }
 
+// issuing holds a token while a token is named and stored, so two requests at
+// the same time cannot both give one owner's tokens the same name.
+var issuing = make(chan struct{}, 1)
+
 // Add issues a new token for owner, as fields describe it. It answers a
 // message for the form when fields are refused; once the token is stored, it
 // answers the token itself — the one time it is ever shown — and its record.
 func Add(sandbox *api.Sandbox, owner backoffice_db.BackofficeUserRecord, fields Fields) (string, backoffice_db.ApiTokenRecord, string, error) {
 	none := backoffice_db.ApiTokenRecord{}
 	now := nowSeconds(sandbox)
+
+	issuing <- struct{}{}
+	defer func() { <-issuing }()
 
 	name := sandbox.Deps.StringsDeps.TrimSpace(fields.Name)
 	message, err := validateName(sandbox, owner, name)
@@ -159,6 +174,9 @@ func Add(sandbox *api.Sandbox, owner backoffice_db.BackofficeUserRecord, fields 
 	expiresAt, message := expirationOf(sandbox, fields, now)
 	if message != "" {
 		return "", none, message, nil
+	}
+	if !isRoot(sandbox, owner) && (expiresAt == 0 || expiresAt > now+MaxDaysForViewer*DaySeconds) {
+		return "", none, sandbox.Deps.StdDeps.Sprintf("Only a root user can create a token that lasts more than %d days or never expires.", MaxDaysForViewer), nil
 	}
 	ips, message, err := normalizeIps(sandbox, fields.Ips)
 	if err != nil || message != "" {
@@ -252,8 +270,9 @@ func RemoveOfOwner(sandbox *api.Sandbox, ownerId int64) error {
 // Resolve answers the user token acts as and its record, for a request that
 // came from the client ip ip, or false when token is not an API token, is
 // unknown — revoked included —, has expired, is not accepted from ip, or its
-// user no longer exists. A token it accepts is marked as last used now, from
-// ip.
+// user no longer exists. A token it accepts is marked as last used from ip,
+// and now — written only when the ip changed or LastUsedResolution passed
+// since the last mark, so a busy token costs no write per request.
 func Resolve(sandbox *api.Sandbox, token string, ip string) (backoffice_db.BackofficeUserRecord, backoffice_db.ApiTokenRecord, bool, error) {
 	noUser := backoffice_db.BackofficeUserRecord{}
 	noToken := backoffice_db.ApiTokenRecord{}
@@ -275,29 +294,33 @@ func Resolve(sandbox *api.Sandbox, token string, ip string) (backoffice_db.Backo
 		return noUser, noToken, false, nil
 	}
 
-	err := db.SetApiTokenLastUsedAt(item.Id, now)
-	if err != nil {
-		return noUser, noToken, false, err
+	if item.LastUsedIp != ip {
+		err := db.SetApiTokenLastUsedIp(item.Id, ip)
+		if err != nil {
+			return noUser, noToken, false, err
+		}
+		item.LastUsedIp = ip
 	}
-	err = db.SetApiTokenLastUsedIp(item.Id, ip)
-	if err != nil {
-		return noUser, noToken, false, err
+	if now-item.LastUsedAt >= LastUsedResolution {
+		err := db.SetApiTokenLastUsedAt(item.Id, now)
+		if err != nil {
+			return noUser, noToken, false, err
+		}
+		item.LastUsedAt = now
 	}
-	item.LastUsedAt = now
-	item.LastUsedIp = ip
 	return user, item, true, nil
 }
 
 // accepts tells whether token may be used from the client ip ip: any ip when
-// it lists none, one of its own otherwise.
+// it lists none, one it lists — an address, or a range in CIDR notation —
+// otherwise. Addresses are compared as parsed, never as spelled.
 func accepts(sandbox *api.Sandbox, token backoffice_db.ApiTokenRecord, ip string) bool {
 	allowed := IpList(sandbox, token)
 	if len(allowed) == 0 {
 		return true
 	}
-	ip = sandbox.Deps.StringsDeps.ToLower(ip)
 	for _, candidate := range allowed {
-		if candidate == ip {
+		if backofficehttp.IpMatches(sandbox, candidate, ip) {
 			return true
 		}
 	}
@@ -356,9 +379,10 @@ func expirationOf(sandbox *api.Sandbox, fields Fields, now int64) (int64, string
 }
 
 // normalizeIps is the ips field of a token for the list the form sent, or a
-// message for the form when one entry is not an ip: entries are separated by
-// commas, trimmed, lower-cased, stripped of empties and duplicates, and joined
-// back by commas. "" is a token accepted from any ip.
+// message for the form when one entry is neither an ip nor a CIDR range:
+// entries are separated by commas, trimmed, written in their canonical form
+// (2001:db8::1 for 2001:0DB8:0::1), stripped of empties and duplicates, and
+// joined back by commas. "" is a token accepted from any ip.
 func normalizeIps(sandbox *api.Sandbox, list string) (string, string, error) {
 	strings := sandbox.Deps.StringsDeps
 	kept := []string{}
@@ -368,13 +392,14 @@ func normalizeIps(sandbox *api.Sandbox, list string) (string, string, error) {
 		if ip == "" || seen[ip] {
 			continue
 		}
-		valid, err := backofficehttp.IsIp(sandbox, ip)
-		if err != nil {
-			return "", "", err
-		}
+		canonical, valid := backofficehttp.CanonicalIpOrRange(sandbox, ip)
 		if !valid {
-			return "", sandbox.Deps.StdDeps.Sprintf("%s is not a valid IP address.", ip), nil
+			return "", sandbox.Deps.StdDeps.Sprintf("%s is not a valid IP address or CIDR range.", ip), nil
 		}
+		if seen[canonical] {
+			continue
+		}
+		ip = canonical
 		seen[ip] = true
 		kept = append(kept, ip)
 	}

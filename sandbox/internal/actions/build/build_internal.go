@@ -167,14 +167,6 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		return err
 	}
 
-	// docs/PublicApi/doc.md is rendered from the contract sources themselves,
-	// so the public surface and its description are always the ones the code
-	// declares. `verify` keeps those sources parsable and commented.
-	public_api, err := CollectPublicApi(sandbox, io)
-	if err != nil {
-		return err
-	}
-
 	dep_contracts, err := CollectDepContracts(sandbox, io)
 	if err != nil {
 		return err
@@ -310,10 +302,28 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		"DatabaseDocs":        database_docs,
 		"Themes":              themes_conf.Themes,
 		"DocIndex":            CollectDocIndex(sandbox, docs, themes_conf.Themes),
-		"PublicApi":           public_api,
 		"Structure":           structure,
 		"DepContracts":        dep_contracts,
 	}
+
+	// docs/PublicApi/doc.md is rendered from the contract sources themselves,
+	// so the public surface and its description are always the ones the code
+	// declares. `verify` keeps those sources parsable and commented. They are
+	// read once every file of sandbox/api this build writes is rendered — the
+	// aggregates embedding a part an init just added among them — so the pages
+	// describe the tree this build leaves, not the one it found.
+	var api_sources []string
+	if hasSandbox {
+		api_sources, err = GenerateApiSources(sandbox, io, utils.RenderableGroups(extensions_conf), vars)
+		if err != nil {
+			return err
+		}
+	}
+	public_api, err := CollectPublicApi(sandbox, io, api_sources)
+	if err != nil {
+		return err
+	}
+	vars["PublicApi"] = public_api
 
 	// The per-unit generators: one generated.new.go per declared binding,
 	// command and route, each owned by the mechanic that declares the unit.

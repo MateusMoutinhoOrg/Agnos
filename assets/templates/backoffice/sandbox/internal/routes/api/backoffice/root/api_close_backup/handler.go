@@ -13,7 +13,8 @@ import (
 // snapshot whose id the body names turns ready — downloadable and restorable,
 // taking no file anymore — once every content its files name is stored, and
 // is answered 200 as {"snapshot": ...}. A snapshot that does not exist answers
-// 404, one that is not open or holds no file 400, and one naming a content that
+// 404, one that is not open, holds no file or a file at a path others need as
+// a folder 400, and one naming a content that
 // is not stored 400 with the path of that file; it stays open. Another backup
 // job running answers 409.
 func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
@@ -32,6 +33,8 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusBadRequest, "id", backofficesnapshots.NotOpenMessage)
 	case snapshots.OutcomeEmpty:
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusBadRequest, "id", backofficesnapshots.EmptyMessage)
+	case snapshots.OutcomeConflict:
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusBadRequest, "id", "the snapshot holds a file at "+missing+" and others inside it as a folder: no restore could write both, so remove one of them first")
 	case snapshots.OutcomeBlobMissing:
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusBadRequest, "id", "the content of "+missing+" is not stored: add that file again, then close the snapshot")
 	case snapshots.OutcomeBusy:

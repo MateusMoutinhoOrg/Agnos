@@ -6,11 +6,12 @@ package goembed
 // assets — which is what the conversion helpers below exist for.
 //
 // Everything here is outside the sandbox, which is what makes the `embed`
-// directive and the io/fs walk legal: the sandbox only ever sees the three
-// function fields of embeddeps.Contract.
+// directive and the io/fs walk legal: the sandbox only ever sees the function
+// fields of embeddeps.Contract.
 
 import (
 	"bytes"
+	htmltemplate "html/template"
 	"io/fs"
 	"path"
 	"text/template"
@@ -89,6 +90,21 @@ func Bind(deps *deps.Deps) {
 				return nil, err
 			}
 			t, err := template.New(path.Base(requested)).Parse(string(content))
+			if err != nil {
+				return nil, err
+			}
+			var buf bytes.Buffer
+			if err := t.Execute(&buf, vars); err != nil {
+				return nil, err
+			}
+			return buf.Bytes(), nil
+		},
+		RenderHTMLTemplate: func(requested string, vars interface{}) ([]byte, error) {
+			content, err := assets.Files.ReadFile(assetPath(requested))
+			if err != nil {
+				return nil, err
+			}
+			t, err := htmltemplate.New(path.Base(requested)).Parse(string(content))
 			if err != nil {
 				return nil, err
 			}

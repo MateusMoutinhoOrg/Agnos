@@ -24,6 +24,8 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 	switch notice {
 	case backofficeusers.NoticeSelf:
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusForbidden, "id", "you cannot remove your own account")
+	case backofficeusers.NoticeNotRoot:
+		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusForbidden, "", "you are no longer a root user")
 	case backofficeusers.NoticeNotFound:
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusNotFound, "id", "that user does not exist")
 	}

@@ -53,7 +53,7 @@ func CollectOpenApi(sandbox *api.Sandbox, io *stagedfs.StagedFS, title string, v
 
 	for _, current := range chain {
 		conf := current.Conf
-		if conf.Hidden || routeDocContains(conf.Methods, routeconf.AnyMethod) {
+		if conf.Hidden || conf.Private || routeDocContains(conf.Methods, routeconf.AnyMethod) {
 			continue
 		}
 

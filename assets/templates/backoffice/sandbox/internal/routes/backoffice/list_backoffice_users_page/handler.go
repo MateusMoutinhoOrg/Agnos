@@ -22,6 +22,7 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 		Role:   input.Role,
 		Page:   input.Page,
 		Limit:  input.Limit,
+		Viewer: props.User,
 	})
 	if err != nil {
 		return err

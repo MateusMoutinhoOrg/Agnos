@@ -16,15 +16,17 @@ import (
 // the backoffice page, not revoked, not expired, and allowed from the client
 // ip this request came from — puts the user it belongs to on props.User and
 // the token on props.ApiToken and declines, so the route after it runs.
-// Anything else is refused with a 401 in JSON. Once the client ip sent
-// backofficethrottle.MaxTokenFailuresPerIp invalid tokens, every token it
+// Anything else is refused with a 401 in JSON. Every token is counted against
+// the client ip before it is checked, and taken back once it proves valid, so
+// requests sent at the same time cannot all slip under the limit; once the ip
+// sent backofficethrottle.MaxTokenFailuresPerIp invalid tokens, every token it
 // sends is refused with a 429, unchecked, until the window closes. The
 // session cookie is never
 // read here, so a browser carrying one cannot be made to call these routes by
 // another site, and the api issues no token of its own.
 func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
 	token := backofficeauth.BearerToken(sandbox, input.Authorization)
-	if token != "" && !backofficethrottle.TokenAllowed(sandbox, props.ClientIp) {
+	if token != "" && !backofficethrottle.ReserveToken(sandbox, props.ClientIp) {
 		response.SetHeader("Retry-After", backofficethrottle.RetryAfter(sandbox))
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusTooManyRequests, "authorization", "too many invalid tokens from this ip, try again later")
 	}
@@ -33,14 +35,11 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 		return err
 	}
 	if ok {
+		backofficethrottle.TokenSucceeded(sandbox, props.ClientIp)
 		props.User = &user
 		props.ApiToken = &apiToken
 		return nil
 	}
-	if token != "" {
-		backofficethrottle.TokenFailed(sandbox, props.ClientIp)
-	}
-
 	response.SetHeader("WWW-Authenticate", "Bearer")
 	if token == "" {
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "authorization", "send an API token, created on "+backofficeapitokens.ListPath+", in the Authorization header, after Bearer")

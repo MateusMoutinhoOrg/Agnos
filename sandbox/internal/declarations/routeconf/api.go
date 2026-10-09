@@ -120,7 +120,11 @@ type RouteConf struct {
 	Description string
 	Examples    []string
 	Hidden      bool
-	Body        Body
+	// Private leaves the route out of the OpenAPI document the server
+	// answers on /openapi.json, keeping it in docs/Routes: what an
+	// unauthenticated caller reads stays the public surface.
+	Private bool
+	Body    Body
 	// Legacy lists every key of a pre-routes declaration found in the
 	// file (`method`, `headers`, `params`), which verify reports by name.
 	Legacy []string

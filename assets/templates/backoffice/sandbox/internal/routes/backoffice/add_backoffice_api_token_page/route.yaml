@@ -9,6 +9,7 @@ paths:
         type: equal
         value: /admin/add-backoffice-api-token
 priority: 100
+private: true
 response-type: text/html
 segments: 2
 summary: Shows the form that creates an API token

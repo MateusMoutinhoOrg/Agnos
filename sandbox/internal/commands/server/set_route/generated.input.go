@@ -25,4 +25,6 @@ type Input struct {
 	Segments     int      `id:"Segments"`
 	Clear        []string `id:"Clear"`
 	Example      []string `id:"Example"`
+	Private      bool     `id:"Private"`
+	Public       bool     `id:"Public"`
 }

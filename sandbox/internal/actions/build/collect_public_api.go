@@ -12,10 +12,19 @@ import (
 // the generated docs/PublicApi/doc.md. generated.sandbox.go comes first (it is the root
 // struct, one field per contract), the rest in listing order. Only exported
 // declarations are kept: what is unexported is unreachable from a caller, so
-// it is not public api.
-func CollectPublicApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string]any, error) {
+// it is not public api. rendered names the files of sandbox/api this build
+// wrote: a listing reads disk, so one written for the first time is added
+// from there.
+func CollectPublicApi(sandbox *api.Sandbox, io *stagedfs.StagedFS, rendered []string) ([]map[string]any, error) {
 
-	files := utils.DropSuperseded(sandbox, goFilesOf(sandbox, io, "sandbox/api"))
+	files := goFilesOf(sandbox, io, "sandbox/api")
+	for _, file := range rendered {
+		if sandbox.Deps.StringsDeps.HasSuffix(file, ".go") {
+			files = utils.AppendUnique(files, []string{file})
+		}
+	}
+	sandbox.Deps.SortDeps.Strings(files)
+	files = utils.DropSuperseded(sandbox, files)
 	isRoot := func(file string) bool { return utils.SourceName(sandbox, lastSegmentOf(sandbox, file)) == "sandbox.go" }
 	sandbox.Deps.SortDeps.SliceStable(files, func(i int, j int) bool {
 		return isRoot(files[i]) && !isRoot(files[j])

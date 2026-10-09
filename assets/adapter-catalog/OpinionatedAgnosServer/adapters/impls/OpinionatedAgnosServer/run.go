@@ -191,6 +191,25 @@ func typeMessage(kind opinionatedagnosserver.ParameterType) string {
 	return "is not valid"
 }
 
+// acceptsMediaType tells whether content_type, the Content-Type a request
+// carries, is the media type route's body declares: compared without its
+// parameters (";charset=utf-8") and without regard to case, never as a mere
+// prefix. A request without one is accepted only when it carries no body
+// either — no Content-Length above 0 and no Transfer-Encoding — so a route
+// whose body is optional still takes a bare request, and a body is never read
+// as a type nobody said it was.
+func acceptsMediaType(route *opinionatedagnosserver.Route, request serverdeps.Request, content_type string) bool {
+	if content_type == "" {
+		length := request.GetHeader("Content-Length")
+		return (length == "" || length == "0") && request.GetHeader("Transfer-Encoding") == ""
+	}
+	media_type := content_type
+	if cut := strings.Index(media_type, ";"); cut >= 0 {
+		media_type = media_type[:cut]
+	}
+	return strings.EqualFold(strings.TrimSpace(media_type), route.Body.ContentType)
+}
+
 // checkBody enforces what the body's declaration settles before a byte of it is
 // read: the media type and the length the request itself declares. The body is
 // the route's ReadBody's to read.
@@ -201,7 +220,7 @@ func (server_run *run) checkBody(route *opinionatedagnosserver.Route, request se
 
 	if route.Body.ContentType != "" {
 		content_type := request.GetHeader("Content-Type")
-		if content_type != "" && !strings.HasPrefix(content_type, route.Body.ContentType) {
+		if !acceptsMediaType(route, request, content_type) {
 			return false, server_run.raise(route, opinionatedagnosserver.StatusUnsupportedMediaType, "",
 				fmt.Sprintf("this route accepts only a body of type %s", route.Body.ContentType), "")
 		}

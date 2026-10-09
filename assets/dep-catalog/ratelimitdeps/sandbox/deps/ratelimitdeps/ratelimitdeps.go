@@ -10,7 +10,10 @@ package ratelimitdeps
 // A counter is named by a key the caller chooses ("login-ip:203.0.113.7")
 // and counts hits within a fixed window: the first hit of a key opens its
 // window, and the first hit after the window closes opens a new one, back
-// at one. Counters live in memory, so a restart forgets them all.
+// at one. Counters live in memory, so a restart forgets them all, and each
+// process keeps its own: two instances behind one load balancer each allow
+// the full limit. An adapter bounds how many keys it holds, so keys a client
+// invents never exhaust memory; a key evicted to make room starts over.
 
 // Contract is the rate limiter injected whole as the Deps.RatelimitDeps field.
 // Every function is safe to call from requests served concurrently.
@@ -25,4 +28,11 @@ type Contract struct {
 
 	// Reset forgets every hit of key.
 	Reset func(key string)
+
+	// Undo takes back one hit of key from its open window, so an attempt
+	// recorded with Hit before it was checked — the only way a limit holds
+	// against requests served at the same time — can be withdrawn once it
+	// turned out not to count. A key with no open window, or none left,
+	// stays as it is.
+	Undo func(key string)
 }

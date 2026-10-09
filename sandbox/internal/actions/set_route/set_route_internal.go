@@ -21,6 +21,9 @@ func SetRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.Set
 	if props.Hidden && props.Visible {
 		return sandbox.Deps.StdDeps.Errorf("--hidden and --visible are mutually exclusive")
 	}
+	if props.Private && props.Public {
+		return sandbox.Deps.StdDeps.Errorf("--private and --public are mutually exclusive")
+	}
 
 	changed := false
 	if len(props.Methods) > 0 {
@@ -81,11 +84,17 @@ func SetRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.Set
 	if props.Visible {
 		conf.Hidden, changed = false, true
 	}
+	if props.Private {
+		conf.Private, changed = true, true
+	}
+	if props.Public {
+		conf.Private, changed = false, true
+	}
 	if len(props.Examples) > 0 {
 		conf.Examples, changed = utils.AppendUnique(conf.Examples, props.Examples), true
 	}
 	if !changed {
-		return sandbox.Deps.StdDeps.Errorf("set-route: nothing to change (pass --method, --response-type, --priority, --before, --after, --segments, --clear, --help, --category, --description, --hidden, --visible or --example)")
+		return sandbox.Deps.StdDeps.Errorf("set-route: nothing to change (pass --method, --response-type, --priority, --before, --after, --segments, --clear, --help, --category, --description, --hidden, --visible, --private, --public or --example)")
 	}
 
 	sandbox.Deps.StdDeps.Logf("set-route updating %s \n", utils.RouteConfPath(sandbox, io, props.Route))

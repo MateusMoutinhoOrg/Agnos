@@ -357,9 +357,9 @@
         <div class="form-group">
           <label for="password">Password</label>
           {{if .PasswordRequired}}
-          <input type="password" id="password" name="password" required minlength="8" autocomplete="new-password" placeholder="At least 8 characters">
+          <input type="password" id="password" name="password" required minlength="12" maxlength="1024" autocomplete="new-password" placeholder="At least 12 characters">
           {{else}}
-          <input type="password" id="password" name="password" minlength="8" autocomplete="new-password" placeholder="Leave blank to keep the current one">
+          <input type="password" id="password" name="password" minlength="12" maxlength="1024" autocomplete="new-password" placeholder="Leave blank to keep the current one">
           {{end}}
         </div>
 

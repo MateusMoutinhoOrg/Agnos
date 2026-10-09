@@ -570,7 +570,8 @@
               <div class="row-actions">
                 {{if .IsReady}}
                 <a class="btn btn-small" href="/admin/root/download-backup/{{.Id}}">Download</a>
-                <form action="/admin/root/restore-backup/{{.Id}}" method="POST" data-confirm="Restore the snapshot {{html .Name}}? Every database is replaced by it, after a pre-restore snapshot of the current data. You may be signed out.">
+                <form action="/admin/root/restore-backup/{{.Id}}" method="POST" data-confirm="Restore the snapshot {{html .Name}}? Every database is replaced by it, after a pre-restore snapshot of the current data, and the site answers 503 until it ends. Backoffice users and API tokens are kept as they are unless you ticked the box: restoring them brings back revoked tokens, removed users and old passwords.">
+                  <label class="muted"><input type="checkbox" name="include-backoffice" value="true"> users &amp; tokens</label>
                   <button type="submit" class="btn btn-small btn-danger"{{if $.Busy}} disabled{{end}}>Restore</button>
                 </form>
                 {{else}}

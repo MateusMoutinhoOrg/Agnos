@@ -23,6 +23,7 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 		Role:   input.Body.Role,
 		Page:   input.Body.Page,
 		Limit:  input.Body.Limit,
+		Viewer: props.User,
 	})
 	if err != nil {
 		return err

@@ -16,6 +16,7 @@ paths:
         type: equal
         value: /admin/list-backoffice-api-tokens
 priority: 100
+private: true
 response-type: text/html
 segments: 2
 summary: Lists your API tokens, or every user's for a root

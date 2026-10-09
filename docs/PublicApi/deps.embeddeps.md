@@ -12,5 +12,6 @@ Contract is the embedded-asset library injected whole as the Deps.EmbedDeps fiel
 | `ListFiles` | `func(path string) ([]string, error)` | ListFiles returns the names of the assets directly inside the given directory, in lexical order, relative to that directory. Nested directories are not descended into and are not reported. The root itself is addressed as ".". |
 | `ListFilesRecursively` | `func(path string) ([]string, error)` | ListFilesRecursively returns every asset at or below the given directory, in lexical order, as slash-separated paths relative to that directory — "templates/invoice.tmpl" and not just "invoice.tmpl". Directories are never reported, only the files inside them. |
 | `RenderTemplate` | `func(path string, vars interface{}) ([]byte, error)` | RenderTemplate reads the template from path, renders it using the given variables, and returns the resulting byte slice. |
+| `RenderHTMLTemplate` | `func(path string, vars interface{}) ([]byte, error)` | RenderHTMLTemplate is RenderTemplate for an HTML page: every value is escaped for the context it lands in — text, an attribute, a url, a script — so a value nobody escaped by hand can never become markup. |
 
 [every contract](doc.md)

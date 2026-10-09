@@ -18,11 +18,15 @@ body:
                 type: string
             name:
                 type: string
+            password:
+                maxLength: 1024
+                type: string
         required:
             - expiration
             - name
+            - password
         type: object
-    max-bytes: 1048576
+    max-bytes: 16384
     required: true
     type: form
 category: Backoffice API Tokens
@@ -36,6 +40,7 @@ paths:
         type: equal
         value: /admin/add-backoffice-api-token
 priority: 100
+private: true
 response-type: text/html
 segments: 2
 summary: Creates an API token and shows it once

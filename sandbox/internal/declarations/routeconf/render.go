@@ -33,6 +33,9 @@ func Render(sandbox *api.Sandbox, conf *RouteConf) string {
 	if conf.Hidden {
 		obj.AddItemToObject("hidden", true)
 	}
+	if conf.Private {
+		obj.AddItemToObject("private", true)
+	}
 	if conf.Body.Type != BodyNone {
 		obj.AddItemToObject("body", bodyObject(sandbox, conf.Body))
 	}

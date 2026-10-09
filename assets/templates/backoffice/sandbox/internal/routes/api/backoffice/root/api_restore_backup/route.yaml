@@ -4,15 +4,17 @@ body:
         properties:
             id:
                 type: integer
+            include-backoffice:
+                type: boolean
         required:
             - id
         type: object
-    max-bytes: 1048576
+    max-bytes: 4096
     required: true
     type: json
 category: Backoffice Backups API
 examples:
-    - 'curl -X POST localhost:3000/api/admin/root/restore-backup -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":1}'''
+    - 'curl -X POST localhost:3000/api/admin/root/restore-backup -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":1,"include-backoffice":false}'''
 methods:
     - POST
 paths:
@@ -23,6 +25,8 @@ paths:
         type: equal
         value: /api/admin/root/restore-backup
 priority: 100
+private: true
 response-type: application/json
 segments: 4
+description: 'The backoffice''s own users, sessions and API tokens (backofficedb) are kept as they are unless include-backoffice is true: an older copy would bring back revoked tokens, closed sessions, removed users and old passwords. A restore that fails, or that the process stopped in the middle of, puts the pre-restore snapshot back; every request is answered 503 while it runs.'
 summary: Starts putting a snapshot back over every database, after a pre-restore snapshot of them, and answers 202 at once

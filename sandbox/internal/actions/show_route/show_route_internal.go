@@ -64,6 +64,9 @@ func routeHead(sandbox *api.Sandbox, conf *routeconf.RouteConf) []string {
 	if conf.Hidden {
 		lines = append(lines, branch+"hidden")
 	}
+	if conf.Private {
+		lines = append(lines, branch+"private")
+	}
 
 	return lines
 }

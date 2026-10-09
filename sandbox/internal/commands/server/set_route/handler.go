@@ -26,6 +26,8 @@ func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input
 		Description:  input.Description,
 		Hidden:       input.Hidden,
 		Visible:      input.Visible,
+		Private:      input.Private,
+		Public:       input.Public,
 		Examples:     input.Example,
 	})
 	if set_error != nil {

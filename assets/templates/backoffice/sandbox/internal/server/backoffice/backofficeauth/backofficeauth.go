@@ -33,6 +33,11 @@ func SecretEnv(sandbox *api.Sandbox) string {
 // MinSecretLength is the fewest characters the secret may have.
 const MinSecretLength = 32
 
+// MinSecretDistinct is the fewest different characters the secret may hold:
+// a run of one character, or of a handful, carries next to no randomness
+// whatever its length. A secret openssl rand -hex 32 makes holds 16.
+const MinSecretDistinct = 10
+
 // GeneratedSecretBytes is how many random bytes the secret ReadSecret
 // generates carries, in hex — twice MinSecretLength.
 const GeneratedSecretBytes = 32
@@ -92,7 +97,8 @@ func nowSeconds(sandbox *api.Sandbox) int64 {
 // environment variable. Unset or empty, it is GeneratedSecretBytes random
 // bytes generated for this run alone, and the bool is true: it lives only in
 // memory, so every session ends when the server restarts. A value shorter
-// than MinSecretLength is refused, saying how to set it, rather than replaced,
+// than MinSecretLength, or holding fewer than MinSecretDistinct different
+// characters, is refused, saying how to set it, rather than replaced,
 // so a mistyped secret never turns into a generated one in silence.
 func ReadSecret(sandbox *api.Sandbox) (string, bool, error) {
 	env := SecretEnv(sandbox)
@@ -103,6 +109,13 @@ func ReadSecret(sandbox *api.Sandbox) (string, bool, error) {
 	}
 	if len(secret) < MinSecretLength {
 		return "", false, sandbox.Deps.StdDeps.Errorf("the %s environment variable holds fewer than %d characters: set it to a random secret (openssl rand -hex 32), or unset it to have one generated for each run; it signs the backoffice sessions", env, MinSecretLength)
+	}
+	distinct := map[rune]bool{}
+	for _, char := range secret {
+		distinct[char] = true
+	}
+	if len(distinct) < MinSecretDistinct {
+		return "", false, sandbox.Deps.StdDeps.Errorf("the %s environment variable holds fewer than %d different characters, so it is easy to guess whatever its length: set it to a random secret (openssl rand -hex 32), or unset it to have one generated for each run; it signs the backoffice sessions", env, MinSecretDistinct)
 	}
 	return secret, false, nil
 }
@@ -130,18 +143,38 @@ func FindUserByUsernameOrEmail(sandbox *api.Sandbox, login string) (backoffice_d
 	return backoffice_db.BackofficeUserRecord{}, false, nil
 }
 
+// MaxConcurrentPasswordChecks is how many sign-ins may hash a password at
+// once. A check costs a deliberately slow hash, so a flood of sign-ins — from
+// as many ips as an attacker has — waits its turn here instead of taking every
+// core of the machine from the rest of the server.
+const MaxConcurrentPasswordChecks = 4
+
+// checking holds one token per password check running.
+var checking = make(chan struct{}, MaxConcurrentPasswordChecks)
+
 // Authenticate answers the user whose login (username or email) and password
 // match, or false when either does not. A login that names nobody still costs
 // one password hash, so how long a refusal takes never tells an unknown login
 // from a wrong password.
 func Authenticate(sandbox *api.Sandbox, login string, password string) (backoffice_db.BackofficeUserRecord, bool, error) {
-	none := backoffice_db.BackofficeUserRecord{}
-	user, ok, err := FindUserByUsernameOrEmail(sandbox, login)
+	user, found, err := FindUserByUsernameOrEmail(sandbox, login)
 	if err != nil {
-		return none, false, err
+		return backoffice_db.BackofficeUserRecord{}, false, err
 	}
-	if !ok {
-		_, err = HashPassword(sandbox, password)
+	return CheckPassword(sandbox, user, found, password)
+}
+
+// CheckPassword answers user when found and password is theirs, false
+// otherwise. A user not found still costs one password hash, so how long a
+// refusal takes never tells an unknown login from a wrong password. At most
+// MaxConcurrentPasswordChecks run at once; the rest wait their turn.
+func CheckPassword(sandbox *api.Sandbox, user backoffice_db.BackofficeUserRecord, found bool, password string) (backoffice_db.BackofficeUserRecord, bool, error) {
+	checking <- struct{}{}
+	defer func() { <-checking }()
+
+	none := backoffice_db.BackofficeUserRecord{}
+	if !found {
+		_, err := HashPassword(sandbox, password)
 		return none, false, err
 	}
 	match, err := sandbox.Deps.PasswordDeps.Verify(user.PasswordHash, password)
@@ -179,16 +212,22 @@ func IssueSessionJWT(sandbox *api.Sandbox, user backoffice_db.BackofficeUserReco
 	}, sandbox.Config.SessionSecret)
 }
 
+// CookiePath is the only path the browser sends the session cookie to: the
+// backoffice pages. A page of the application, under any other path, never
+// carries it, so a script injected there cannot ride the session; the
+// /api/admin routes read an API token, never the cookie.
+const CookiePath = "/admin"
+
 // SessionCookie is the Set-Cookie value carrying token: HttpOnly,
-// SameSite=Strict, Secure unless start-server serves plain http, on every
-// path, expiring with the token.
+// SameSite=Strict, Secure unless start-server serves plain http, sent only to
+// CookiePath, expiring with the token.
 func SessionCookie(sandbox *api.Sandbox, token string) string {
-	return sandbox.Deps.StdDeps.Sprintf("%s=%s; Path=/; Max-Age=%d; HttpOnly; SameSite=Strict%s", CookieName, token, SessionSeconds, secureAttribute(sandbox))
+	return sandbox.Deps.StdDeps.Sprintf("%s=%s; Path="+CookiePath+"; Max-Age=%d; HttpOnly; SameSite=Strict%s", CookieName, token, SessionSeconds, secureAttribute(sandbox))
 }
 
 // ClearedCookie is the Set-Cookie value that removes the session cookie.
 func ClearedCookie(sandbox *api.Sandbox) string {
-	return sandbox.Deps.StdDeps.Sprintf("%s=; Path=/; Max-Age=0; HttpOnly; SameSite=Strict%s", CookieName, secureAttribute(sandbox))
+	return sandbox.Deps.StdDeps.Sprintf("%s=; Path="+CookiePath+"; Max-Age=0; HttpOnly; SameSite=Strict%s", CookieName, secureAttribute(sandbox))
 }
 
 // secureAttribute is the Secure attribute of the session cookie, which keeps

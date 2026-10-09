@@ -76,8 +76,8 @@ func manifest(sandbox *api.Sandbox, snapshot backup.SnapshotRecord, files int) [
 // The archive is checked first, and an archive that is not one a snapshot
 // can be read from answers OutcomeRefused with why in refused: one that is
 // not a zip, unpacks past MaxUnpackedBytes, holds an entry outside
-// ArchiveDataDir, a path SafePath refuses or the same path twice, or no file
-// at all. Storing it is a job — an optimize running beside it could remove a
+// ArchiveDataDir, a path SafePath refuses, the same path twice, a file at a
+// path other entries need as a folder, or no file at all. Storing it is a job — an optimize running beside it could remove a
 // blob it is about to name — so while another one runs it answers
 // OutcomeBusy and stores nothing.
 func Import(sandbox *api.Sandbox, archive []byte) (snapshot backup.SnapshotRecord, outcome string, refused string, err error) {
@@ -150,6 +150,13 @@ func unpack(sandbox *api.Sandbox, archive []byte) (files []archivedeps.File, nam
 	}
 	if len(files) == 0 {
 		return nil, "", 0, "the archive holds no file under " + ArchiveDataDir, nil
+	}
+	paths := []string{}
+	for _, file := range files {
+		paths = append(paths, file.Path)
+	}
+	if clash := Conflict(sandbox, paths); clash != "" {
+		return nil, "", 0, "the entry " + strings.Quote(ArchiveDataDir+clash) + " is a file, and other entries sit inside it as a folder: no restore could write both", nil
 	}
 
 	valid, err := ValidName(sandbox, name)

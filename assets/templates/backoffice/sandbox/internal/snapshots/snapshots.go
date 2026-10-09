@@ -45,6 +45,12 @@ const (
 	// time until Close turns it StatusReady. It is never restored nor
 	// downloaded whole, and a server that stops leaves it open.
 	StatusOpen = "open"
+	// StatusRollback is the pre-restore snapshot of a restore that has not
+	// finished: what DataDir held before it began. A restore that fails, or
+	// the next start after one the process stopped in the middle of, puts it
+	// back and turns it StatusReady. It is never restored, downloaded nor
+	// removed by hand while it holds this status.
+	StatusRollback = "rollback"
 )
 
 // The outcomes StartRestore, Export, Import and Remove answer with.
@@ -81,6 +87,9 @@ const (
 	OutcomeFileNotFound = "file-not-found"
 	// OutcomeBlobMissing is a sha no stored content has.
 	OutcomeBlobMissing = "blob-missing"
+	// OutcomeConflict is a close of a snapshot holding a file at a path
+	// another of its files needs as a folder: no restore could write both.
+	OutcomeConflict = "conflict"
 )
 
 // MaxArchiveBytes is the largest archive an upload may send.
@@ -123,6 +132,16 @@ func Busy(sandbox *api.Sandbox) bool {
 	return len(jobs) > 0
 }
 
+// creating holds a token while a snapshot reads DataDir file by file.
+var creating = make(chan struct{}, 1)
+
+// Creating tells whether a snapshot is reading DataDir: a request that may
+// write a database is refused until it ends, so every file of the snapshot is
+// taken at the same instant.
+func Creating(sandbox *api.Sandbox) bool {
+	return len(creating) > 0
+}
+
 // nowSeconds is the current instant in Unix seconds.
 func nowSeconds(sandbox *api.Sandbox) int64 {
 	return sandbox.Deps.StdDeps.Now() / 1_000_000_000
@@ -152,8 +171,10 @@ func StartCreate(sandbox *api.Sandbox, name string) (snapshot backup.SnapshotRec
 		release(sandbox)
 		return backup.SnapshotRecord{}, outcome, err
 	}
+	creating <- struct{}{}
 	go func() {
 		defer release(sandbox)
+		defer func() { <-creating }()
 		finish(sandbox, db, snapshot)
 	}()
 	return snapshot, OutcomeOk, nil
@@ -372,18 +393,29 @@ func List(sandbox *api.Sandbox, prefix string) ([]backup.SnapshotRecord, error) 
 	return listed, nil
 }
 
-// StartRecover runs RecoverInterrupted on a goroutine holding the job token,
-// so no snapshot or restore starts before the ones a stopped process left
-// are marked, and writes on stderr what it marked. It does not wait: a
-// process killed while writing leaves its write lease behind, and the first
-// write after it waits until that lease expires — up to a minute the server
-// would otherwise spend not listening.
+// StartRecover runs RecoverRestores and RecoverInterrupted on a goroutine
+// holding the job token, so no snapshot or restore starts before what a
+// stopped process left is dealt with, and writes on stderr what it did. While
+// a restore the last run did not finish is put back, every request is refused
+// with a 503 (Restoring). It does not wait: a process killed while writing
+// leaves its write lease behind, and the first write after it waits until
+// that lease expires — up to a minute the server would otherwise spend not
+// listening.
 func StartRecover(sandbox *api.Sandbox) {
 	if !acquire(sandbox) {
 		return
 	}
+	restoring <- struct{}{}
 	go func() {
 		defer release(sandbox)
+		rolledBack, err := RecoverRestores(sandbox)
+		<-restoring
+		if err != nil {
+			sandbox.Deps.StdDeps.Eprintf("warning: a restore the last run did not finish could not be undone: %s; it is tried again at the next start\n", err.Error())
+		}
+		for _, name := range rolledBack {
+			sandbox.Deps.StdDeps.Eprintf("warning: the last run stopped in the middle of a restore; %s was put back as it was before it, from snapshot %s: run the restore again\n", DataDir(sandbox), name)
+		}
 		interrupted, err := RecoverInterrupted(sandbox)
 		if err != nil {
 			sandbox.Deps.StdDeps.Eprintf("warning: the snapshots left creating by the last run could not be marked failed: %s\n", err.Error())

@@ -49,4 +49,9 @@ type Contract struct {
 	// RenderTemplate reads the template from path, renders it using the given variables,
 	// and returns the resulting byte slice.
 	RenderTemplate func(path string, vars interface{}) ([]byte, error)
+
+	// RenderHTMLTemplate is RenderTemplate for an HTML page: every value is
+	// escaped for the context it lands in — text, an attribute, a url, a
+	// script — so a value nobody escaped by hand can never become markup.
+	RenderHTMLTemplate func(path string, vars interface{}) ([]byte, error)
 }

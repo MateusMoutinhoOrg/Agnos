@@ -19,6 +19,7 @@ paths:
         type: equal
         value: /admin/root/create-backup
 priority: 100
+private: true
 response-type: text/html
 segments: 3
 summary: 'Starts a snapshot of every database, under the name the form gives or one after the current instant, and answers at once: it is taken in the background'

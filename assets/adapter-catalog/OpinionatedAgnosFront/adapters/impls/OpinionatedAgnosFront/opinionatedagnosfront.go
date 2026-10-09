@@ -45,13 +45,18 @@ func resolve(embedded embeddeps.Contract, requested string) (string, []byte, boo
 	return "", nil, false
 }
 
+// wellKnown is the one dot-named directory served, at the root of the tree
+// alone: RFC 8615's home of acme challenges, security.txt and the like.
+const wellKnown = ".well-known"
+
 // safePath turns a request path into the path relative to Root it names, and
 // reports false on anything that could climb out of it. The path is
 // attacker-controlled, and the embed adapter cleans what it is handed, so
 // "/../asset.go" would otherwise reach a file outside Root. A segment names
 // one entry of the tree and nothing else: "." and ".." are the two spellings
 // that move rather than name, and a backslash or a NUL inside one means the
-// request was encoded to hide something from the dispatch's split. A leading
+// request was encoded to hide something from the dispatch's split. A segment
+// starting with "." is refused too, but for a leading wellKnown. A leading
 // and a trailing slash are dropped; "" names Root itself.
 func safePath(requested string) (string, bool) {
 	trimmed := strings.Trim(requested, "/")
@@ -60,8 +65,14 @@ func safePath(requested string) (string, bool) {
 	}
 
 	segments := strings.Split(trimmed, "/")
-	for _, segment := range segments {
+	for index, segment := range segments {
 		if segment == "" || segment == "." || segment == ".." {
+			return "", false
+		}
+		// A dotfile — .env, .git/, .DS_Store — copied into the tree by
+		// mistake is never served; .well-known, the one directory the web
+		// names with a dot on purpose, is.
+		if strings.HasPrefix(segment, ".") && !(index == 0 && segment == wellKnown) {
 			return "", false
 		}
 		if strings.ContainsAny(segment, "\\\x00") {

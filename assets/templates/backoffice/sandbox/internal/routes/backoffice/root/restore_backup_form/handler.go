@@ -10,7 +10,8 @@ import (
 
 // Handle answers POST /admin/root/restore-backup/{id}: the
 // snapshot starts being put back over every database — after a pre-restore
-// snapshot of them — and the browser is sent to the list at once, with the
+// snapshot of them; the backoffice's own users and tokens only when the form
+// ticks include-backoffice — and the browser is sent to the list at once, with the
 // outcome. Only a ready snapshot is restored, and never while another job
 // runs.
 func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
@@ -18,7 +19,7 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
-	outcome, err := snapshots.StartRestore(sandbox, int64(input.Id))
+	outcome, err := snapshots.StartRestore(sandbox, int64(input.Id), input.Body.IncludeBackoffice)
 	if err != nil {
 		return err
 	}

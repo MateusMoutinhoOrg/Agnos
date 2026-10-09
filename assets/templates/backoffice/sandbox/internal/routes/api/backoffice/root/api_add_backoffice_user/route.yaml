@@ -35,6 +35,7 @@ paths:
         type: equal
         value: /api/admin/root/add-backoffice-user
 priority: 100
+private: true
 response-type: application/json
 segments: 4
 summary: Adds a backoffice user

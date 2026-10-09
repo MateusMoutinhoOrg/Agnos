@@ -11,7 +11,8 @@ import (
 
 // Handle answers POST /api/admin/root/restore-backup: the
 // snapshot whose id the body names starts being put back over every database
-// — after a pre-restore snapshot of them — and 202 is answered at once. A
+// — after a pre-restore snapshot of them; the backoffice's own users and
+// tokens only when include-backoffice is true — and 202 is answered at once. A
 // snapshot that does not exist answers 404, one that is not ready 400, and
 // another backup job running 409.
 func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error {
@@ -19,7 +20,7 @@ func Handle(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, re
 		return sandbox.Deps.OpinionatedAgnosServer.Fail(api.StatusUnauthorized, "", "no authenticated user")
 	}
 
-	outcome, err := snapshots.StartRestore(sandbox, int64(input.Body.Id))
+	outcome, err := snapshots.StartRestore(sandbox, int64(input.Body.Id), input.Body.IncludeBackoffice)
 	if err != nil {
 		return err
 	}

@@ -1,3 +1,12 @@
+body:
+    content-type: application/x-www-form-urlencoded
+    form-schema:
+        properties:
+            include-backoffice:
+                type: boolean
+        type: object
+    max-bytes: 4096
+    type: form
 category: Backoffice Backups
 methods:
     - POST
@@ -13,6 +22,7 @@ paths:
       start: 3
       type: integer
 priority: 100
+private: true
 response-type: text/html
 segments: 4
 summary: Starts putting a snapshot back over every database, after a pre-restore snapshot of them, and answers at once

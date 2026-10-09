@@ -143,7 +143,8 @@ func AddReference(sandbox *api.Sandbox, id int64, path string, sha string) (back
 // Close turns the open snapshot of id StatusReady, once every content its
 // files name is stored, and removes the pairs a later one at the same path
 // replaced. The outcome is OutcomeOk, OutcomeNotFound, OutcomeNotOpen,
-// OutcomeEmpty for a snapshot holding no file, OutcomeBlobMissing with the
+// OutcomeEmpty for a snapshot holding no file, OutcomeConflict with the path
+// of a file another one needs as a folder as missing, OutcomeBlobMissing with the
 // path whose content is not stored as missing, or OutcomeBusy; the snapshot
 // stays open unless OutcomeOk.
 func Close(sandbox *api.Sandbox, id int64) (snapshot backup.SnapshotRecord, outcome string, missing string, err error) {
@@ -164,6 +165,13 @@ func Close(sandbox *api.Sandbox, id int64) (snapshot backup.SnapshotRecord, outc
 	kept, replaced := latest(sandbox, contents)
 	if len(kept) == 0 {
 		return snapshot, OutcomeEmpty, "", nil
+	}
+	paths := []string{}
+	for _, file := range kept {
+		paths = append(paths, file.Path)
+	}
+	if clash := Conflict(sandbox, paths); clash != "" {
+		return snapshot, OutcomeConflict, clash, nil
 	}
 	for _, file := range kept {
 		stored, err := backup.HasBlob(sandbox, db, file.Sha)

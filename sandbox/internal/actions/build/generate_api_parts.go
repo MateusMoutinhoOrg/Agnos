@@ -44,3 +44,30 @@ func GenerateApiParts(sandbox *api.Sandbox, io *stagedfs.StagedFS, groups []stri
 	}
 	return written, nil
 }
+
+// GenerateApiSources renders every file of sandbox/api an enabled group
+// carries — the parts and the aggregates generated.sandbox.go and
+// generated.config.go that embed them — over vars, ahead of every other
+// asset, and returns the paths it wrote. docs/PublicApi is read off these
+// sources, so it is read after them: a part an init just added shows in the
+// aggregate's page on that same build. The group renders the same assets
+// again later over the same vars, to the same bytes.
+func GenerateApiSources(sandbox *api.Sandbox, io *stagedfs.StagedFS, groups []string, vars map[string]interface{}) ([]string, error) {
+	var written []string
+	for _, group := range groups {
+		files, err := sandbox.Deps.EmbedDeps.ListFilesRecursively(group)
+		if err != nil {
+			return nil, err
+		}
+		for _, file := range files {
+			if file != apiPartsDir+"/"+lastSegmentOf(sandbox, file) {
+				continue
+			}
+			if err := utils.RenderTemplateToDest(sandbox, io, group+"/"+file, vars, file); err != nil {
+				return nil, err
+			}
+			written = append(written, file)
+		}
+	}
+	return written, nil
+}
