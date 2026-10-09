@@ -132,6 +132,11 @@ editing only the rendered copy is undone in silence.
   field carries `fields` and nests no further, and no table declares a field named `id`, nor
   an `object` named `position` or `values` (Keep reserves both).
   `remove-database` refuses a package carrying a `methods_custom.go`.
+- A database's `key-prefix` is a folder inside `sandbox.Config.DatabaseDir`, which the generated
+  `database_dir` middleware reads from `--database` (default `data`) on every command line. The
+  store (Keep) resolves every key under the directory the program runs from and escapes any byte
+  but `a-z0-9-_`, so `--database` is a relative path of such segments, enforced by its `pattern`;
+  `verify` refuses a `key-prefix` starting with `data/`, a declaration from before the flag.
 - Every `route.yaml` declares `methods` (or `ANY` alone), `priority` and `response-type`;
   `add-route` writes `100`, `10` for a `--middleware`. A path reads the segments `start`..`end`
   (inclusive, `-1` the last) into `Input.<id>` in its `type` (`string`, `integer`, `number`,
@@ -226,7 +231,8 @@ field is reached through `List<T>s` and its filter.
 infers a mechanic from a directory being present. Ten keys: `sandbox`, `deps`,
 `cli`, `server`, `front`, `database`, `backoffice`,
 `example`, `doc`, `readme`. `backoffice` generates nothing: `backoffice-init`
-writes `assets/templates/backoffice/**` once and the key gates its doc. `false`
+writes `assets/templates/backoffice/**` once — the backups included: the `backup` database,
+`sandbox/internal/snapshots/` and the `*-backup*` routes — and the key gates its doc. `false`
 means **stop generating**, never **delete**: what the mechanic wrote stays and becomes the
 project's, and removing it is what `<x>-purge` does.
 

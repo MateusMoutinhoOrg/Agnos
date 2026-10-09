@@ -20,9 +20,13 @@ import (
 // methods_custom.go goes with them. It is hand-written, and that is exactly
 // why: it is Go in a package whose other three files are about to be gone, so
 // leaving it behind would leave the project not compiling.
+//
+// So does the --database middleware: database-cli installs its command.yaml
+// and handler.go, and the build writes new.go and input.go beside them.
 var databaseDirs = []string{
 	utils.DatabasesDir,
 	utils.DocsDir + "/Databases",
+	utils.DatabaseDirMiddleware,
 }
 
 // DatabasePurgeInternal removes from the target project every file that the

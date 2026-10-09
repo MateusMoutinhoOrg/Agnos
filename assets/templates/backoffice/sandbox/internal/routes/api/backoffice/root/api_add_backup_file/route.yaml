@@ -1,0 +1,27 @@
+body:
+    content-type: application/octet-stream
+    max-bytes: 268435456
+    required: true
+    type: raw
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/add-backup-file/1/backofficedb/backoffice-user/1/values/username -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/octet-stream'' --data-binary @data/backofficedb/backoffice-user/1/values/username'
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootAddBackupFile
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/add-backup-file
+    - end: 4
+      id: Id
+      start: 4
+      type: integer
+    - end: -1
+      id: Path
+      start: 5
+priority: 100
+response-type: application/json
+summary: Stores the body as one file of an open snapshot, at the path below the --database folder the address ends with; a path it already holds is replaced

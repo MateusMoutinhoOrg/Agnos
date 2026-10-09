@@ -5,6 +5,7 @@ import (
 	"{{.Module}}/sandbox/internal/commandprops"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficeauth"
 	"{{.Module}}/sandbox/internal/server/backoffice/backofficehttp"
+	"{{.Module}}/sandbox/internal/snapshots"
 )
 
 // Handle runs in front of `start-server` and answers nothing, so
@@ -13,7 +14,8 @@ import (
 // flags the backoffice adds to start-server, onto sandbox.Config, where every
 // route reads them. With no secret set it generates one for the run and warns
 // that sessions end at the next restart; with one too short the server does
-// not start.
+// not start. A snapshot the last run left being created is marked failed, in the
+// background, since no job of this run will finish it.
 //
 // It is a middleware rather than an edit to start-server's own handler, so
 // that file stays the project's and backoffice-purge has nothing to undo in it.
@@ -33,5 +35,7 @@ func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input
 	if input.AllowXForwardedFor && backofficehttp.ListensEverywhere(sandbox, input.Addr) {
 		sandbox.Deps.StdDeps.Eprintf("warning: X-Forwarded-For is trusted but the server listens on every interface: bind it to the address only the proxy reaches (--addr 127.0.0.1:3000) or firewall the port, or anyone reaching it can forge their ip\n")
 	}
+
+	snapshots.StartRecover(sandbox)
 	return nil
 }

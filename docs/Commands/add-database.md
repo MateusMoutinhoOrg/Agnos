@@ -14,7 +14,7 @@ Writes sandbox/internal/databases/<name>/database.yaml and runs build, which gen
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |
-| `--key-prefix` | string |  | the key prefix every record is written under (defaults to the database's own name) | — |
+| `--key-prefix` | string |  | the key prefix every record is written under, a path inside the --database folder (defaults to the database's own name) | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |

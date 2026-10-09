@@ -276,6 +276,7 @@
         <a href="/admin/home" class="active">Home</a>
         <a href="/admin/list-backoffice-users">Users</a>
         <a href="/admin/list-backoffice-api-tokens">API tokens</a>
+        {{if .IsRoot}}<a href="/admin/root/list-backups">Backups</a>{{end}}
       </nav>
     </div>
     <div class="who">
@@ -338,6 +339,18 @@
           <a class="btn" href="/admin/add-backoffice-api-token">New token</a>
         </div>
       </article>
+
+      {{if .IsRoot}}
+      <article class="card">
+        <h2>Backups</h2>
+        <p class="muted">
+          Snapshot every database, download a snapshot as a zip, upload one back or restore one over the current data.
+        </p>
+        <div class="links">
+          <a class="btn btn-primary" href="/admin/root/list-backups">View backups</a>
+        </div>
+      </article>
+      {{end}}
     </section>
   </main>
 </body>

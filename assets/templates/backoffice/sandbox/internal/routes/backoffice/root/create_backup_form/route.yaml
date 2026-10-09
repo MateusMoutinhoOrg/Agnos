@@ -1,0 +1,24 @@
+body:
+    content-type: application/x-www-form-urlencoded
+    form-schema:
+        properties:
+            name:
+                maxLength: 100
+                type: string
+        type: object
+    max-bytes: 1048576
+    type: form
+category: Backoffice Backups
+methods:
+    - POST
+paths:
+    - end: 2
+      id: AdminRootCreateBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/create-backup
+priority: 100
+response-type: text/html
+segments: 3
+summary: 'Starts a snapshot of every database, under the name the form gives or one after the current instant, and answers at once: it is taken in the background'

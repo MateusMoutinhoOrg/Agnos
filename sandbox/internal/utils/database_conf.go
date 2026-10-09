@@ -14,6 +14,16 @@ import (
 // layer's mirror of sandbox/internal/routes.
 const DatabasesDir = "sandbox/internal/databases"
 
+// DefaultDatabaseDir is the folder every database of a project lives under
+// when no --database says otherwise, the api.DefaultDatabaseDir the database
+// group renders: a key-prefix is a path inside it, so one spelled under it
+// (data/<x>) is a declaration from before --database.
+const DefaultDatabaseDir = "data"
+
+// DatabaseDirMiddleware is the cli middleware database-cli renders, which
+// reads --database in front of every command line.
+const DatabaseDirMiddleware = "sandbox/internal/commands/middleware/database_dir"
+
 // DatabaseConfFile is the declaration every database directory carries, the
 // whole of what its api.go, new.go and methods.go are generated from.
 const DatabaseConfFile = "database.yaml"

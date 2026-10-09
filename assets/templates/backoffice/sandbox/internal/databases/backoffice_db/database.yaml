@@ -1,4 +1,4 @@
-key-prefix: data/backofficedb
+key-prefix: backofficedb
 name: backoffice-db
 tables:
     - fields:

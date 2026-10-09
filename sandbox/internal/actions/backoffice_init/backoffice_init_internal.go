@@ -13,11 +13,15 @@ import (
 // backofficeDeps are the catalog contracts the backoffice calls into beyond
 // the ones its layers install. serverdeps is among them although server-init
 // installs it: installing it again renders the catalog's current copy, the
-// one answering GetClientIp, over an older one.
+// one answering GetClientIp, over an older one. archivedeps and iodeps are the
+// backups': the zip a snapshot travels as, and the --database folder a
+// snapshot is read from and a restore writes to.
 var backofficeDeps = []string{
+	"archivedeps",
 	"embeddeps",
 	"envdeps",
 	"hashdeps",
+	"iodeps",
 	"jwtdeps",
 	"passworddeps",
 	"randdeps",
@@ -156,25 +160,40 @@ func unitOf(sandbox *api.Sandbox, file string) (string, string, string) {
 	return sandbox.Deps.StringsDeps.Join(parts[:len(parts)-1], "/"), parts[len(parts)-2], last
 }
 
-// ignoreStore appends the backoffice's store — the directory its database
-// writes to, in the directory the server runs from — to .gitignore, once. The
-// users and their password hashes live there, so it is never committed.
+// ignoreStore appends the backoffice's stores — the directories its
+// databases write to while --database is left at its default — to
+// .gitignore, once each. The users, their password hashes and every snapshot
+// of them live there, so neither is ever committed.
 func ignoreStore(sandbox *api.Sandbox, io *stagedfs.StagedFS) error {
-	entry := "/" + utils.BackofficeStore
-
 	content, err := io.ReadFile(gitignoreFile)
 	if err != nil {
 		content = nil
 	}
-	for _, line := range sandbox.Deps.StringsDeps.Split(string(content), "\n") {
-		if sandbox.Deps.StringsDeps.TrimSpace(line) == entry {
-			return nil
+	text := string(content)
+
+	for _, store := range []string{utils.BackofficeStore, utils.BackupStore} {
+		entry := "/" + store
+		if ignored(sandbox, text, entry) {
+			continue
 		}
+		if text != "" && !sandbox.Deps.StringsDeps.HasSuffix(text, "\n") {
+			text += "\n"
+		}
+		text += entry + "\n"
 	}
 
-	text := string(content)
-	if text != "" && !sandbox.Deps.StringsDeps.HasSuffix(text, "\n") {
-		text += "\n"
+	if text == string(content) {
+		return nil
 	}
-	return io.WriteFile(gitignoreFile, []byte(text+entry+"\n"))
+	return io.WriteFile(gitignoreFile, []byte(text))
+}
+
+// ignored tells whether text, a .gitignore, already holds entry as a line.
+func ignored(sandbox *api.Sandbox, text string, entry string) bool {
+	for _, line := range sandbox.Deps.StringsDeps.Split(text, "\n") {
+		if sandbox.Deps.StringsDeps.TrimSpace(line) == entry {
+			return true
+		}
+	}
+	return false
 }

@@ -63,7 +63,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			HasDefault:  false,
 			Pattern:     "",
 			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
-			Description: "the key prefix every record is written under (defaults to the database's own name)",
+			Description: "the key prefix every record is written under, a path inside the --database folder (defaults to the database's own name)",
 		},
 	}
 

@@ -1,0 +1,18 @@
+category: Backoffice Backups
+methods:
+    - POST
+paths:
+    - end: 2
+      id: AdminRootRestoreBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/restore-backup
+    - end: 3
+      id: Id
+      start: 3
+      type: integer
+priority: 100
+response-type: text/html
+segments: 4
+summary: Starts putting a snapshot back over every database, after a pre-restore snapshot of them, and answers at once

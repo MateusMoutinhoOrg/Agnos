@@ -1,0 +1,16 @@
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/optimize-backup-storage -H "Authorization: Bearer $TOKEN"'
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootOptimizeBackupStorage
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/optimize-backup-storage
+priority: 100
+response-type: application/json
+segments: 4
+summary: Starts removing every stored content no snapshot holds anymore, and answers 202 at once

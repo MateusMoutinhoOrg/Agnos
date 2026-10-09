@@ -30,6 +30,23 @@ A database is not a surface of `sandbox/api/`: its methods are typed by table, s
 `<db>.New(sandbox)`, which touches no key — building one is free and creates nothing until the
 first record is written.
 
+## Where the data lives
+
+Every database lives in one folder, `data` unless a command line says otherwise:
+`<project> start-server --database var/app` writes every database under `./var/app`. The folder is
+relative to the directory the program runs from, its segments lower-case letters, digits, `-` and
+`_` — the store resolves every key under that directory and spells any other character escaped,
+so `--database` refuses anything else. A database's `key-prefix` is a folder inside it
+(`data/app` for `key-prefix: app`).
+
+| Piece | What |
+| --- | --- |
+| `sandbox/api/databaseconfig.go` | generated: `sandbox.Config.DatabaseDir`, and `api.DefaultDatabaseDir` (`data`), the value `NewConfig` starts it at |
+| `sandbox/internal/commands/middleware/database_dir/` | generated while `cli` is on: a middleware in front of every command line that reads `--database` into `sandbox.Config.DatabaseDir`; no command declares `--database` itself |
+
+A `key-prefix` under `data/` is a declaration from before `--database`: it would now read
+`data/data/<x>`, so `verify` refuses it — write `<x>`.
+
 ## database.yaml
 
 ```yaml
@@ -51,7 +68,7 @@ tables:
 | Key | What it says |
 | --- | --- |
 | `name` | the database's own name; the directory is that name with dashes turned into underscores |
-| `key-prefix` | `Props.Path`, the key prefix every record is written under; no `.` or `..` segment |
+| `key-prefix` | the folder, inside the `--database` folder, every record is written under; no `.` or `..` segment, never `data/…` |
 | `tables[].name` | one collection of records; every method it generates is spelled after it |
 | `tables[].fields[].name` | one field of that collection |
 | `tables[].fields[].type` | `key`, `string`, `integer`, `number`, `bytes`, `link` or `object` |

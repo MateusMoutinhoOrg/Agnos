@@ -15,7 +15,7 @@ description: 'Writes sandbox/internal/databases/<name>/database.yaml and runs bu
 examples:
     - add-database app-database --key-prefix app
 flags:
-    - description: the key prefix every record is written under (defaults to the database's own name)
+    - description: the key prefix every record is written under, a path inside the --database folder (defaults to the database's own name)
       id: KeyPrefix
 priority: 100
 summary: Declare a new database in the project

@@ -1,0 +1,23 @@
+priority: 6
+strict: false
+args:
+  - id: Verb
+    start: 0
+    end: -1
+    trigger: { type: prefix, value: "" }
+flags:
+  - id: Database
+    default: data
+    pattern: '^[a-z0-9_-]+(/[a-z0-9_-]+)*/?$'
+    description: the folder every database lives under, relative to where the command runs, lower-case letters, digits, - and _ (defaults to data)
+category: Middleware
+summary: Read --database in front of every command
+description: |-
+  Runs in front of every command line and answers none of them. It reads
+  --database into sandbox.Config.DatabaseDir, the folder every database's
+  key-prefix is a path inside, so `start-server --database var/app` keeps
+  every database there. The folder is relative to the directory the command
+  runs from, its segments lower-case letters, digits, - and _: the store
+  resolves every key under that directory and spells any other character
+  escaped, so only such a path names the same folder on disk. No command
+  declares the flag itself.

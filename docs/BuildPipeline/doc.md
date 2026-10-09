@@ -39,7 +39,8 @@ Template vars: `Module`, `ProjectName` (the project being generated, as `project
 `assets/<group>/` is one group; the group's name is the condition under which `build` renders
 it, and `utils.AssetGroups()` is the whole list. A group named after an extension renders when
 that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `<a>`,
-`<b>` it names are on. `assets/start/` is outside this: it is written once, by `start`.
+`<b>` it names are on, and one named `<a>-<b>` (`database-cli`) when `<a>` and `<b>` are.
+`assets/start/` is outside this: it is written once, by `start`.
 
 | Group | Renders when | Holds |
 |---|---|---|
@@ -47,18 +48,27 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `deps` | `deps` | `sandbox/deps/deps.go` |
 | `cli` | `cli` | `cmd/main`, `api/{cli,command,trigger,clisandbox}.go` (aliases of `OpinionatedAgnosCli`), `internal/generated/cli/new.go` (the registry), `info/help`, `info/version`, `middleware/help_flag` |
 | `server` | `server` | `api/{server,route,serversandbox}.go` (aliases of `OpinionatedAgnosServer`), `internal/generated/server/new.go` (the registry), the health and openapi routes |
+| `database` | `database` | `api/databaseconfig.go`: `Config.DatabaseDir`, the folder every key-prefix is a path inside, and `DefaultDatabaseDir` (`data`), which `config/new.go` starts it at |
+| `database-cli` | `database` + `cli` | `middleware/database_dir`: reads `--database` into `Config.DatabaseDir` in front of every command line |
 | `doc` | `doc` | `docs/{Adapters,DepList,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
 | `doc-cli` | `doc` + `cli` | `docs/{CliInstall,Commands}` |
 | `doc-server` | `doc` + `server` | `docs/{RouteYaml,Routes,ServerUsage}`, `docs/Routes/openapi.json` |
 | `doc-front` | `doc` + `front` | `docs/FrontUsage` |
 | `doc-database` | `doc` + `database` | `docs/Databases` |
-| `doc-backoffice` | `doc` + `backoffice` | `docs/Backoffice`. The backoffice has no code group: `backoffice-init` writes `assets/templates/backoffice/**` once |
+| `doc-backoffice` | `doc` + `backoffice` | `docs/{Backoffice,Backups}`. The backoffice has no code group: `backoffice-init` writes `assets/templates/backoffice/**` once |
 | `doc-example` | `doc` + `example` | `docs/LibExamples` |
 | `doc-example-cli` | `doc` + `example` + `cli` | `docs/CliExamples` |
 | `readme` | `readme` | `README.md` |
 
-`front` and `database` have no code group: their code is the `OpinionatedAgnosFront`
-and `OpinionatedAgnosDatabase` libs their `-init` installs, so they render their pages alone.
+`front` has no code group: its code is the `OpinionatedAgnosFront` lib `front-init` installs, so
+it renders its pages alone. `database`'s code is the `OpinionatedAgnosDatabase` lib the same way;
+its groups hold only where the data lives (`database`, `database-cli`).
+
+A code group is rendered ahead of the build by `utils.RenderExtensionCode`, which `SetExtension`
+calls when a key turns on: every code group requiring that key whose requirements are now all on —
+so `database-cli` lands on `database-init` with the cli on and on `cli-init` with the database on,
+before the build's collectors read its `command.yaml`. The build renders groups after its
+collectors, so a change to a group's `command.yaml` reaches its generated `new.go` one build later.
 
 The code every project shares — the dispatch, the binders, the matchers, json-schema, the file
 layer, the database readers — is not rendered at all: it is the four `OpinionatedAgnos<X>` catalog

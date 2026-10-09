@@ -11,15 +11,19 @@ agnos backoffice-init --path test-dir
 # What result.yaml records: the paths this example asserts, copied out of
 # test-dir. The backoffice's parts of RouteProps and of api.Config are files of
 # their own, embedded by the generated aggregates beside them; the database
-# is the backoffice's own; docs/Backoffice names the secret, TEST_BACKOFFICE_SECRET for
-# a project named Test; .gitignore keeps the store out.
+# and the backup one are the backoffice's own, the snapshots read every other
+# database of the --database folder; docs/Backoffice names the secret, TEST_BACKOFFICE_SECRET for
+# a project named Test; .gitignore keeps both stores out.
 for dir in \
 	sandbox/internal/routeprops \
 	sandbox/internal/commands/backoffice \
 	sandbox/internal/commands/middleware/backoffice_start_server \
 	sandbox/internal/databases/backoffice_db \
+	sandbox/internal/databases/backup \
 	sandbox/internal/server/backoffice/backofficeauth \
-	docs/Backoffice; do
+	sandbox/internal/snapshots \
+	docs/Backoffice \
+	docs/Backups; do
 	mkdir -p assert-dir/$dir
 	cp -R test-dir/$dir/. assert-dir/$dir/
 done

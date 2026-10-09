@@ -47,9 +47,9 @@ func ExtensionCatalog() []ExtensionSpec {
 		{ExtensionCli, false, "the cli layer: cmd/main, help, version and the OpinionatedAgnosCli lib"},
 		{ExtensionServer, false, "the http layer: server/, routes/ and the OpinionatedAgnosServer lib"},
 		{ExtensionFront, false, "the front layer: the route serving assets/front/ and the OpinionatedAgnosFront lib"},
-		{ExtensionDatabase, false, "the database layer: the declared databases and the OpinionatedAgnosDatabase lib"},
+		{ExtensionDatabase, false, "the database layer: the declared databases, --database and the OpinionatedAgnosDatabase lib"},
 		{ExtensionExample, true, "the examples/ suite and run-examples"},
-		{ExtensionBackoffice, false, "the admin backoffice: login, users, API tokens and the /api/admin JSON api"},
+		{ExtensionBackoffice, false, "the admin backoffice: login, users, API tokens, backups and the /api/admin JSON api"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},
 		{ExtensionReadme, true, "README.md, built from themes.yaml and the doc index"},
 	}

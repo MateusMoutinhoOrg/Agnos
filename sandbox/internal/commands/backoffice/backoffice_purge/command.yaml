@@ -6,7 +6,7 @@ args:
         type: equal
         value: backoffice-purge
 category: Backoffice
-description: 'Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./data/backofficedb store holding the users: removing data is left to you.'
+description: 'Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./data/backofficedb and ./data/backup stores holding the users and their backups: removing data is left to you.'
 examples:
     - backoffice-purge
 priority: 100

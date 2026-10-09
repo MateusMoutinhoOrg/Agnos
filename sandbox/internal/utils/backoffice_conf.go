@@ -21,27 +21,43 @@ const BackofficeRawDir = "assets"
 // own databases are never touched.
 const BackofficeDatabase = "backoffice_db"
 
-// BackofficeStore is the directory the backoffice's database writes to, under
-// the directory the server runs from: its key-prefix, kept apart from the
-// package so a search for one never lands in the other.
-const BackofficeStore = "data/backofficedb"
+// BackofficeStore is the directory the backoffice's database writes to while
+// --database is left at its default: its key-prefix, backofficedb, inside
+// DefaultDatabaseDir, kept apart from the package so a search for one never
+// lands in the other.
+const BackofficeStore = DefaultDatabaseDir + "/backofficedb"
+
+// BackupDatabase is the database backoffice-init declares for its backups:
+// the snapshots of every other database of the --database folder. It is the
+// backoffice's alone, like BackofficeDatabase.
+const BackupDatabase = "backup"
+
+// BackupStore is the directory BackupDatabase writes to while --database is
+// left at its default. A snapshot never holds it, and a restore never touches
+// it.
+const BackupStore = DefaultDatabaseDir + "/" + BackupDatabase
 
 // BackofficeDirs are the directories the backoffice owns whole: its packages,
-// its database package and its pages. Everything else it wrote is either a
+// its database packages and its pages. Everything else it wrote is either a
 // route or a command — removed by name, wherever it was moved — or one file.
 var BackofficeDirs = []string{
 	"sandbox/internal/server/backoffice",
+	"sandbox/internal/snapshots",
 	DatabasesDir + "/" + BackofficeDatabase,
+	DatabasesDir + "/" + BackupDatabase,
 	"assets/backoffice",
 }
 
 // BackofficeUnits is every unit backoffice-init declares — each route and
-// command of BackofficeTree, and BackofficeDatabase — under both spellings a
-// unit is named by (add_backoffice_user, add-backoffice-user). A count of what
-// the project declared itself leaves them out, the way it leaves out what any
-// other init scaffolds.
+// command of BackofficeTree, BackofficeDatabase and BackupDatabase — under
+// both spellings a unit is named by (add_backoffice_user, add-backoffice-user).
+// A count of what the project declared itself leaves them out, the way it
+// leaves out what any other init scaffolds.
 func BackofficeUnits(sandbox *api.Sandbox) map[string]bool {
-	units := map[string]bool{BackofficeDatabase: true, sandbox.Deps.StringsDeps.ReplaceAll(BackofficeDatabase, "_", "-"): true}
+	units := map[string]bool{
+		BackofficeDatabase: true, sandbox.Deps.StringsDeps.ReplaceAll(BackofficeDatabase, "_", "-"): true,
+		BackupDatabase: true,
+	}
 
 	files, err := sandbox.Deps.EmbedDeps.ListFilesRecursively(BackofficeTree)
 	if err != nil {

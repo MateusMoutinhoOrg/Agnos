@@ -27,16 +27,20 @@ type AssetGroup struct {
 }
 
 // AssetGroups is every group a build may render, in render order. assets/start
-// is not here: it is written once by `start` and is not a mechanic. Neither
-// are front and database: their code is the OpinionatedAgnosFront
-// and OpinionatedAgnosDatabase libs, installed by their -init, so each mechanic
-// renders its pages and nothing else.
+// is not here: it is written once by `start` and is not a mechanic. Neither is
+// front: its code is the OpinionatedAgnosFront lib, installed by front-init, so
+// it renders its pages and nothing else. The database layer's code is the
+// OpinionatedAgnosDatabase lib too; what it renders is its part of api.Config
+// (database) and, with a cli to read it from, the --database middleware
+// (database-cli).
 func AssetGroups() []AssetGroup {
 	return []AssetGroup{
 		{ExtensionSandbox, []string{ExtensionSandbox}, true},
 		{ExtensionDeps, []string{ExtensionDeps}, true},
 		{ExtensionCli, []string{ExtensionCli}, true},
 		{ExtensionServer, []string{ExtensionServer}, true},
+		{ExtensionDatabase, []string{ExtensionDatabase}, true},
+		{"database-cli", []string{ExtensionDatabase, ExtensionCli}, true},
 		{ExtensionDoc, []string{ExtensionDoc}, false},
 		{"doc-cli", []string{ExtensionDoc, ExtensionCli}, false},
 		{"doc-server", []string{ExtensionDoc, ExtensionServer}, false},
@@ -121,15 +125,24 @@ func ExtensionFiles(sandbox *api.Sandbox, name string) ([]string, error) {
 	return paths, nil
 }
 
-// RenderExtensionCode renders the code group one mechanic owns into an already
-// open transaction, ahead of the build that follows. Everything else the
-// mechanic writes — its pages above all — is left to that build, which has the
-// collector output those templates need.
+// RenderExtensionCode renders, into an already open transaction and ahead of
+// the build that follows, every code group turning one mechanic on turns on:
+// each one that requires it and whose requirements the declaration now holds
+// all on — its own, and one shared with another layer already on (database-cli
+// renders on database-init with the cli on, and on cli-init with the database
+// on). Everything else the mechanic writes — its pages above all — is left to
+// that build, which has the collector output those templates need.
 //
 // A mechanic with no code group renders nothing here.
 func RenderExtensionCode(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) error {
+	conf, err := LoadExtensionsConf(sandbox, io)
+	if err != nil {
+		return err
+	}
+	NormalizeExtensions(conf)
+
 	for _, group := range AssetGroups() {
-		if group.Name != name || !group.Code {
+		if !group.Code || !contains(group.Requires, name) || !GroupEnabled(conf, group) {
 			continue
 		}
 
@@ -138,9 +151,11 @@ func RenderExtensionCode(sandbox *api.Sandbox, io *stagedfs.StagedFS, name strin
 			return err
 		}
 
-		return RenderGroup(sandbox, io, group.Name, map[string]interface{}{
+		if err := RenderGroup(sandbox, io, group.Name, map[string]interface{}{
 			"Module": module_conf.Module,
-		})
+		}); err != nil {
+			return err
+		}
 	}
 
 	return nil

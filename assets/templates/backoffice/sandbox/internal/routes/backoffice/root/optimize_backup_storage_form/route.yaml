@@ -1,0 +1,14 @@
+category: Backoffice Backups
+methods:
+    - POST
+paths:
+    - end: 2
+      id: AdminRootOptimizeBackupStorage
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/optimize-backup-storage
+priority: 100
+response-type: text/html
+segments: 3
+summary: Starts removing every stored content no snapshot holds anymore, and answers at once

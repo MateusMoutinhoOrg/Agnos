@@ -91,6 +91,13 @@ func checkDatabaseDeclaration(sandbox *api.Sandbox, name string, conf *databasec
 				"declares the key-prefix "+conf.KeyPrefix+", which holds a \""+segment+"\" segment; the store refuses it"))
 		}
 	}
+	// A key-prefix is a path inside the --database folder, data by default,
+	// so one spelled under data/ is an old declaration: it would now read as
+	// data/data/<x>, and every record written before would go unseen.
+	if sandbox.Deps.StringsDeps.HasPrefix(conf.KeyPrefix, utils.DefaultDatabaseDir+"/") {
+		violations = append(violations, databaseViolation(name,
+			"declares the key-prefix "+conf.KeyPrefix+", an old declaration: a key-prefix is a path inside the --database folder ("+utils.DefaultDatabaseDir+" by default), so write "+sandbox.Deps.StringsDeps.TrimPrefix(conf.KeyPrefix, utils.DefaultDatabaseDir+"/")+" in "+utils.DatabaseConfFile))
+	}
 	// One Go record is declared per table and per nested collection, so the
 	// two families share one namespace: two of them spelling the same name
 	// would generate the same struct twice.

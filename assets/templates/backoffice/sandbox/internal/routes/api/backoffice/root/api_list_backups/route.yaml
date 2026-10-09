@@ -1,0 +1,24 @@
+category: Backoffice Backups API
+examples:
+    - 'curl localhost:3000/api/admin/root/list-backups -H "Authorization: Bearer $TOKEN"'
+    - 'curl "localhost:3000/api/admin/root/list-backups?prefix=daily-" -H "Authorization: Bearer $TOKEN"'
+methods:
+    - GET
+parameters:
+    - description: keeps only the snapshots whose name starts with it
+      id: Prefix
+      key: prefix
+      sources:
+        - query
+      type: string
+paths:
+    - end: 3
+      id: ApiAdminRootListBackups
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/list-backups
+priority: 100
+response-type: application/json
+segments: 4
+summary: Lists every snapshot, or the ones whose name starts with a prefix, newest first, and whether a backup job is running

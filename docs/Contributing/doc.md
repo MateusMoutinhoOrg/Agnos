@@ -70,7 +70,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | Declaration package | `declarations/commandconf/` | `declarations/routeconf/` | — (`routeconf`) | `declarations/databaseconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | — | `collect_databases.go`, `collect_database_docs.go` |
 | Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_server_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
-| Asset groups | `assets/cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/server/`, `assets/doc-server/` | `assets/doc-front/` | `assets/doc-database/` |
+| Asset groups | `assets/cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/server/`, `assets/doc-server/` | `assets/doc-front/` | `assets/database/` (`Config.DatabaseDir`), `assets/database-cli/` (`--database`), `assets/doc-database/` |
 | Catalog | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosCli/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosServer/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosFront/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosDatabase/` |
 | Extension key | `cli` | `server` | `front` | `database` |
 | Init / purge | `cli-init` / `cli-purge` | `server-init` / `server-purge` | `front-init` / `front-purge` | `database-init` / `database-purge` |
@@ -79,7 +79,7 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 
 A layer is an extension, so adding one is [Add an extension](#add-an-extension) plus the rows above. A layer whose init needs another layer calls the other one's `<X>InitInternal` on the *same* open StagedFS — `server_init` does that with `cli_init`, `front_init` with `server_init` — so there is no intermediate `Persist` and no intermediate `build`. The dep installs are the exception: `<X>InitInternal` writes nothing to `go.mod`, so a composing init calls the other's exported `InstallDeps` first.
 
-`<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders the mechanic's code group into the same transaction, and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole — its `sandbox/constructors/<x>/` included, since that package names what is being removed — then writes the key back as `false`.
+`<X>InitInternal` renders no group of its own: it flips the key with `utils.SetExtension`, which renders every code group the key turns on into the same transaction — its own, and an `<a>-<b>` one whose other layer is already on — and the follow-up `build` renders the rest. `<X>PurgeInternal` removes `utils.ExtensionFiles(sandbox, <key>)` — every group the mechanic owns, its pages included — plus the directories the layer owns whole — its `sandbox/constructors/<x>/` included, since that package names what is being removed — then writes the key back as `false`.
 
 ### The opinionated libs
 
@@ -128,8 +128,8 @@ The matcher exists twice: the `OpinionatedAgnosServer` lib's `matches.go` reads 
 (a file already there is kept), and every file is the project's from then on. The key gates
 `doc-backoffice` and `HasBackoffice` alone. Under the tree, `assets/` is copied verbatim — the
 pages are the project's runtime `text/template` sources — and every other file is rendered over
-`Module`, `Name`, `GeneratorName`, `SecretEnv`, so a literal `{{` in a ported Go file is
-escaped (`{{"{{"}}`). `backoffice-purge` reads the same tree to know what to remove: a route or a
+`Module`, `ProjectName`, `GeneratorName`, `SecretEnv`, so a literal `{{` in a ported Go file is
+escaped (`{{"{{"}}`, or spaced: `[]T{ {A: 1} }`, which the format step joins back). `backoffice-purge` reads the same tree to know what to remove: a route or a
 command whole, by name; `utils.BackofficeDirs` whole; any other file alone.
 
 It edits no file the project wrote. What it needs from one goes in a file of its own that a
@@ -174,7 +174,7 @@ Neither `dep.yaml` nor `adapter.yaml` is part of the mirror: the first is instal
 
 ## Add a template or collector
 
-- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). The groups are in [Asset groups](../BuildPipeline/doc.md#asset-groups); a new one is a new extension. A scaffold that renders to a file which is itself a template escapes its own braces (`{{ "{{ .Title }}" }}`), or the outer render eats them. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/doc/docs/GeneratedFiles/doc.md`.
+- Template: `assets/<group>/<target path>`, a `text/template` over the vars in [BuildPipeline](../BuildPipeline/doc.md#buildinternal). The groups are in [Asset groups](../BuildPipeline/doc.md#asset-groups); a new one is a new extension, or an `<a>-<b>` group of two that are on together (`database-cli`). A scaffold that renders to a file which is itself a template escapes its own braces (`{{ "{{ .Title }}" }}`), or the outer render eats them. Single-destination scaffolds go in `assets/templates/` and are rendered with `utils.RenderTemplateToDest`. Add a row for the new destination to `assets/doc/docs/GeneratedFiles/doc.md`.
 - Collector: `sandbox/internal/actions/build/collect_<x>.go`, `func Collect<X>(sandbox, io) []string` listing one dir and title-casing the last segment; add `"<X>": Collect<X>(sandbox, io)` to the vars map in `build_internal.go`. A collector that has to look inside Go sources reads them through `sandbox.Deps.GoimportsDeps.Parse`, returning `([]map[string]any, error)` like `CollectPublicApi`.
 - Page generator: a doc that grows with the project is split into one page per unit instead of one page that holds them all, so a lookup costs the unit asked about. `sandbox/internal/actions/build/generate_<x>_pages.go` renders `assets/templates/<x>_page.md` once per unit into `docs/<Doc>/<unit>.md`, and the doc's own `doc.md` becomes the index that links them. A page is an asset of the doc directory, not a sub-doc: `CollectDocTree` walks directories, so a plain `.md` beside `doc.md` is ignored by the index and by `verify`, exactly as the generated `Index.md` is. The collector names the page (`CommandDoc`'s identifier, `PublicApiPageOf`, `DepContractPageOf`) so the index link and the written file cannot disagree, and the generator ends by calling `removeStaleDocPages`, which drops every page this build did not write. `docs/Commands/`, `docs/Routes/` and `docs/PublicApi/` work this way. A layer whose purge owns the doc directory must list it among the directories it owns whole (`cliDirs`, `serverDirs`): the asset group installs only `doc.md` and `doc.yaml`, so removing those two alone leaves a directory of pages with no `doc.yaml`, which every later build reads as a doc that fails to load.
 - Bootstrap twice; the second run must change nothing.

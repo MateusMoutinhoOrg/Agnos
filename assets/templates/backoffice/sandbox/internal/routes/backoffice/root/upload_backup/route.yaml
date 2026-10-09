@@ -1,0 +1,19 @@
+body:
+    content-type: application/zip
+    max-bytes: 268435456
+    required: true
+    type: raw
+category: Backoffice Backups
+methods:
+    - POST
+paths:
+    - end: 2
+      id: AdminRootUploadBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/upload-backup
+priority: 100
+response-type: application/json
+segments: 3
+summary: Stores a zip archive a download built as a new snapshot

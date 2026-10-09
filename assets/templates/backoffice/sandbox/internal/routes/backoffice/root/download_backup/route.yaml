@@ -1,0 +1,18 @@
+category: Backoffice Backups
+methods:
+    - GET
+paths:
+    - end: 2
+      id: AdminRootDownloadBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/download-backup
+    - end: 3
+      id: Id
+      start: 3
+      type: integer
+priority: 100
+response-type: application/zip
+segments: 4
+summary: Downloads a snapshot as a zip archive

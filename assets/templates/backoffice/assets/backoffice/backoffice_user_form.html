@@ -315,6 +315,7 @@
         <a href="/admin/home">Home</a>
         <a href="/admin/list-backoffice-users" class="active">Users</a>
         <a href="/admin/list-backoffice-api-tokens">API tokens</a>
+        {{if .Viewer.IsRoot}}<a href="/admin/root/list-backups">Backups</a>{{end}}
       </nav>
     </div>
     <div class="who">

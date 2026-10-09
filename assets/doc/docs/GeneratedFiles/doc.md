@@ -89,11 +89,15 @@
 | `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
 | `sandbox/internal/databases/<db>/database.yaml` | `add-database` | once, then rewritten by `add-table` / `add-table-field` / `set-table-field` and their inverses — never by hand |
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
+| `sandbox/api/databaseconfig.go` | `build` | always. The database layer's part of `api.Config`: `DatabaseDir`, and `DefaultDatabaseDir` (`data`) |
+{{- if .HasCli }}
+| `sandbox/internal/commands/middleware/database_dir/{command.yaml,handler.go}` | `build` | always. The middleware reading `--database` in front of every command line |
+{{- end }}
 {{- end }}
 {{- if .HasBackoffice }}
-| `docs/Backoffice/` | `build` | always. Both `doc.md` and `doc.yaml` |
-| `sandbox/internal/server/backoffice/**`, `sandbox/internal/databases/backoffice_db/{database.yaml,methods_custom.go}` | `backoffice-init` | once. Then the project's; `backoffice-purge` removes them |
-| the backoffice's `route.yaml` + `handler.go` under `sandbox/internal/routes/{admin,api/admin,client_ip,security_headers}` | `backoffice-init` | once. Then edited like any route |
+| `docs/Backoffice/`, `docs/Backups/` | `build` | always. Both `doc.md` and `doc.yaml` of each |
+| `sandbox/internal/server/backoffice/**`, `sandbox/internal/snapshots/**`, `sandbox/internal/databases/{backoffice_db,backup}/{database.yaml,methods_custom.go}` | `backoffice-init` | once. Then the project's; `backoffice-purge` removes them |
+| the backoffice's `route.yaml` + `handler.go` under `sandbox/internal/routes/{backoffice,api/backoffice}/**` | `backoffice-init` | once. Then edited like any route |
 | `sandbox/internal/commands/{backoffice/add_backoffice_user,middleware/backoffice_start_server}/{command.yaml,handler.go}` | `backoffice-init` | once. Then edited like any command |
 | `sandbox/internal/routeprops/backoffice.go`, `sandbox/api/backofficeconfig.go` | `backoffice-init` | once. The backoffice's part of `RouteProps` and of `api.Config` |
 | `assets/backoffice/*.html`, `assets/front/backoffice/backoffice.js` | `backoffice-init` | once. Copied verbatim: the pages are the project's runtime templates |

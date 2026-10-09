@@ -1,0 +1,28 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            id:
+                type: integer
+        required:
+            - id
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: json
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/restore-backup -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":1}'''
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootRestoreBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/restore-backup
+priority: 100
+response-type: application/json
+segments: 4
+summary: Starts putting a snapshot back over every database, after a pre-restore snapshot of them, and answers 202 at once

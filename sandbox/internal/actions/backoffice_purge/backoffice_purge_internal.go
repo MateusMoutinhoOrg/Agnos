@@ -23,9 +23,9 @@ const legacyBackofficeConfig = "sandbox/api/userconfig_backoffice.go"
 // had one.
 //
 // The layers the backoffice stood on — server, front, database — are left in
-// place, and so are the deps it installed: other code may use them. So is the
-// store on disk, ./data/backofficedb: it holds the users, and removing data is not
-// a purge's to do.
+// place, and so are the deps it installed: other code may use them. So are
+// the stores on disk, ./data/backofficedb and ./data/backup by default: they
+// hold the users and their snapshots, and removing data is not a purge's to do.
 func BackofficePurgeInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) error {
 	sandbox.Deps.StdDeps.Logf("backoffice-purge started with path %s \n", path)
 
@@ -87,7 +87,7 @@ func BackofficePurgeInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path s
 		}
 	}
 
-	sandbox.Deps.StdDeps.Logf("backoffice-purge kept ./%s, the store holding the users: remove it by hand if you mean to\n", utils.BackofficeDatabase)
+	sandbox.Deps.StdDeps.Logf("backoffice-purge kept ./%s and ./%s, the stores holding the users and their backups (under --database, data by default): remove them by hand if you mean to\n", utils.BackofficeStore, utils.BackupStore)
 
 	return utils.SetExtension(sandbox, io, utils.ExtensionBackoffice, false)
 }

@@ -24,7 +24,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "backoffice-purge"
 	self.Category = "Backoffice"
 	self.Summary = "Remove the admin backoffice from the project"
-	self.Description = "Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./data/backofficedb store holding the users: removing data is left to you."
+	self.Description = "Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./data/backofficedb and ./data/backup stores holding the users and their backups: removing data is left to you."
 	self.Examples = []string{"backoffice-purge"}
 	self.Hidden = false
 

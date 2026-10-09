@@ -14,13 +14,14 @@ in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 | `OpinionatedAgnosDatabase` | `OpinionatedAgnosDatabase` | `OpinionatedAgnosDatabase` | the `databasedeps` dep | The readers and filters every generated `methods.go` shares. Installed by `database-init` |
 | `OpinionatedAgnosFront` | `OpinionatedAgnosFront` | `OpinionatedAgnosFront` | `strings`, the `embeddeps` dep | The file layer of `assets/front/`: which file a path names, kept inside the tree, and its media type. Installed by `front-init` |
 | `OpinionatedAgnosServer` | `OpinionatedAgnosServer` | `OpinionatedAgnosServer` | `strings`, `strconv`, `regexp`, `sort`, `reflect` | The server mechanic: the route types `api/{server,route}.go` alias, the request chain, binding, json-schema, the writers. Installed by `server-init` |
+| `archivedeps` | `ArchiveDeps` | `ziparchive` | `archive/zip` | Pack files into a zip and unpack one, in memory; `Unzip` refuses an archive past a size once uncompressed. Installed by `backoffice-init` |
 | `argvdeps` | `ArgvDeps` | `stdargv` | `strings`, `strconv`, `time` | Per-call argv parser. Installed by `cli-init` |
 | `embeddeps` | `EmbedDeps` | `goembed` + `assets/asset.go` | `embed`, `text/template` | Read and render files compiled into the binary |
 | `envdeps` | `EnvDeps` | `osenv` | `os` | Read an environment variable — how a secret reaches the process without travelling in argv or a file. Installed by `backoffice-init` |
 | `goimportsdeps` | `GoimportsDeps` | `stdgoimports` | `go/parser` | Go source reader (package, imports, declarations) |
 | `hashdeps` | `HashDeps` | `sha256hash` | `crypto/sha256`, `encoding/hex` | SHA-256 of a byte slice, lower-case hex |
 | `interviewdeps` | `InterviewDeps` | `ttyinterview` | `os`, `os/exec`, `bufio` | Ask a person a question and get the answer back typed. Arrow-key menus over stdin in raw mode, numbered prompts where there is no terminal |
-| `iodeps` | `IoDeps` | `osio` | `os`, `path/filepath` | Filesystem. `WriteFile` creates parents; `RemoveDir` removes files too; `Join`/`Dir` build host paths |
+| `iodeps` | `IoDeps` | `osio` | `os`, `path/filepath` | Filesystem. `WriteFile` creates parents; `RemoveDir` removes files too; `Join`/`Dir` build host paths. Installed by `backoffice-init` |
 | `jwtdeps` | `JwtDeps` | `golangjwt` | `github.com/golang-jwt/jwt/v5` | Sign and check HS256 JSON Web Tokens; claims are flat builtins (`Id`, `Subject`, `IssuedAt`, `ExpiresAt`, `Ip`). Installed by `backoffice-init` |
 | `passworddeps` | `PasswordDeps` | `pbkdf2password` | `crypto/pbkdf2` | Salted PBKDF2-HMAC-SHA256 password hashes (600k iterations) and their constant-time check. Installed by `backoffice-init` |
 | `randdeps` | `RandDeps` | `cryptorand` | `crypto/rand`, `encoding/hex` | Cryptographically secure random bytes, lower-case hex. Installed by `backoffice-init` |

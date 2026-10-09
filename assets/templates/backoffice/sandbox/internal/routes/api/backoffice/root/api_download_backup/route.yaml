@@ -1,0 +1,20 @@
+category: Backoffice Backups API
+examples:
+    - 'curl -o snapshot.zip localhost:3000/api/admin/root/download-backup/1 -H "Authorization: Bearer $TOKEN"'
+methods:
+    - GET
+paths:
+    - end: 3
+      id: ApiAdminRootDownloadBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/download-backup
+    - end: 4
+      id: Id
+      start: 4
+      type: integer
+priority: 100
+response-type: application/zip
+segments: 5
+summary: Downloads a snapshot as a zip archive

@@ -1,0 +1,27 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            name:
+                maxLength: 100
+                type: string
+        type: object
+    max-bytes: 1048576
+    type: json
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/create-empty-backup -H "Authorization: Bearer $TOKEN"'
+    - 'curl -X POST localhost:3000/api/admin/root/create-empty-backup -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"name":"manual-nightly"}'''
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootCreateEmptyBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/create-empty-backup
+priority: 100
+response-type: application/json
+segments: 4
+summary: Records an empty open snapshot, under the name given or one after the current instant, that files are then added to one by one until it is closed

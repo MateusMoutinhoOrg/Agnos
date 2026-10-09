@@ -4,9 +4,9 @@ cli-output: |
     cli                off  the cli layer: cmd/main, help, version and the OpinionatedAgnosCli lib
     server             off  the http layer: server/, routes/ and the OpinionatedAgnosServer lib
     front              off  the front layer: the route serving assets/front/ and the OpinionatedAgnosFront lib
-    database           off  the database layer: the declared databases and the OpinionatedAgnosDatabase lib
+    database           off  the database layer: the declared databases, --database and the OpinionatedAgnosDatabase lib
     example            on   the examples/ suite and run-examples
-    backoffice         off  the admin backoffice: login, users, API tokens and the /api/admin JSON api
+    backoffice         off  the admin backoffice: login, users, API tokens, backups and the /api/admin JSON api
     doc                on   the docs/ tree and its Index.md files
     readme             on   README.md, built from themes.yaml and the doc index
 exit-code: 0

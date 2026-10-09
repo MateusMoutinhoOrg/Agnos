@@ -39,6 +39,48 @@
     });
   }
 
+  // The snapshot upload form: the server reads no multipart body, so the
+  // file is sent as the whole body of the request, and the list is reloaded
+  // with the outcome — or the reason it was refused is shown.
+  var upload = document.getElementById('snapshot-upload');
+  if (upload) {
+    upload.addEventListener('submit', function (event) {
+      event.preventDefault();
+      var file = document.getElementById('snapshot-file').files[0];
+      var button = document.getElementById('snapshot-upload-button');
+      var error = document.getElementById('upload-error');
+      if (!file) {
+        return;
+      }
+      var fail = function (message) {
+        error.textContent = message;
+        error.hidden = false;
+        button.disabled = false;
+        button.textContent = 'Upload';
+      };
+      error.hidden = true;
+      button.disabled = true;
+      button.textContent = 'Uploading…';
+      fetch(upload.action, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/zip' },
+        body: file
+      }).then(function (response) {
+        if (response.ok) {
+          location.href = '/admin/root/list-backups?notice=uploaded';
+          return;
+        }
+        return response.json().then(function (body) {
+          fail(body.error || 'The upload was refused.');
+        }, function () {
+          fail('The upload was refused (' + response.status + ').');
+        });
+      }, function () {
+        fail('The upload could not reach the server.');
+      });
+    });
+  }
+
   // The token just created: select it on focus, copy it, and spell the
   // example request against this server.
   var origin = document.getElementById('origin');

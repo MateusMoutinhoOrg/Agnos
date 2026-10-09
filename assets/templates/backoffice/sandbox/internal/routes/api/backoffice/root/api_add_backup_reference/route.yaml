@@ -1,0 +1,35 @@
+body:
+    content-type: application/json
+    json-schema:
+        properties:
+            id:
+                type: integer
+            path:
+                maxLength: 4096
+                type: string
+            sha:
+                type: string
+        required:
+            - id
+            - path
+            - sha
+        type: object
+    max-bytes: 1048576
+    required: true
+    type: json
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/add-backup-reference -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/json'' -d ''{"id":1,"path":"backofficedb/backoffice-user/1/values/username","sha":"<sha add-backup-blob answered>"}'''
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootAddBackupReference
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/add-backup-reference
+priority: 100
+response-type: application/json
+segments: 4
+summary: Adds to an open snapshot one file whose content add-backup-blob already stored, by its sha; a path it already holds is replaced

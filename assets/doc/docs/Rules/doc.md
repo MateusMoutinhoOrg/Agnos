@@ -298,8 +298,12 @@ How a path is resolved, and a bundler's build, is in [FrontUsage](../FrontUsage/
   for the run and warns: every session ends at a restart.
 - Its records live in `backoffice-db`, a database of its own; the project's databases are never
   touched. `./data/backofficedb` is gitignored and survives a purge.
+- Its backups live in `backup`, a database of its own, `./data/backup`, gitignored and kept by a
+  purge: a snapshot holds every other folder of the `--database` folder, and a restore replaces
+  them, never `backup` itself. Every backup route is root only, and one backup job runs at a time.
 
-Routes, roles and the API are in [Backoffice](../Backoffice/doc.md).
+Routes, roles and the API are in [Backoffice](../Backoffice/doc.md); backups in
+[Backups](../Backups/doc.md).
 {{ end }}{{ if .HasDatabase }}
 ## Databases
 
@@ -329,6 +333,10 @@ Routes, roles and the API are in [Backoffice](../Backoffice/doc.md).
   **(verify)**
 - No `object` field is named `position` or `values`, and no `key-prefix` holds a `.` or `..`
   segment: the store refuses either, and every method of that database would fail. **(verify)**
+- Every database lives in the `--database` folder (`data` by default), relative to where the
+  program runs; a `key-prefix` is a folder inside it, so none starts with `data/`. **(verify)**
+  `--database` is read by a generated middleware in front of every command line: no command
+  declares a flag of that name.
 
 Every key of a declaration is in [Databases](../Databases/doc.md).
 {{ end }}

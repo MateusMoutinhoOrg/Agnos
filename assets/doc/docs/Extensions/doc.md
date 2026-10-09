@@ -25,9 +25,9 @@ server: false
 | `cli` | `cmd/main`, `help`, `version`, `sandbox/api/{cli,command,trigger}.go` and the `OpinionatedAgnosCli` lib — the dispatch; `add-command` and the rest |
 | `server` | `sandbox/internal/{server,routes}`, `sandbox/api/{server,route}.go` and the `OpinionatedAgnosServer` lib; `add-route` and the rest |
 | `front` | the `OpinionatedAgnosFront` lib and the `front` route serving `assets/front/`; `add-page` and `remove-page` |
-| `database` | `sandbox/internal/databases` and the `OpinionatedAgnosDatabase` lib; `add-database`, `add-table`, `add-table-field` and the rest |
+| `database` | `sandbox/internal/databases` and the `OpinionatedAgnosDatabase` lib; `add-database`, `add-table`, `add-table-field` and the rest; `sandbox/api/databaseconfig.go` and, with a cli, the `--database` middleware |
 | `example` | the `examples/` suite; `add-cli-example`, `add-lib-example`, `run-examples`, `update-example` |
-| `backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backoffice-db`, `add-backoffice-user`), and the key turns on its doc. Needs `server`, `front` and `database` |
+| `backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backoffice-db`, the `backup` database and its snapshots, `add-backoffice-user`), and the key turns on its doc. Needs `server`, `front` and `database` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |
 | `readme` | `README.md`, built from `{{.ConfigDir}}/docs/ReadmeHeader.md` and the doc index |
 

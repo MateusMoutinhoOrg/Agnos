@@ -6,7 +6,7 @@ Remove the admin backoffice from the project
 agnos backoffice-purge [--help] [--path <path>] [--quiet]
 ```
 
-Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./data/backofficedb store holding the users: removing data is left to you.
+Removes every file backoffice-init wrote, with the files the build generated beside them, then rebuilds. The server, front and database layers stay, and so do the deps it installed and the ./data/backofficedb and ./data/backup stores holding the users and their backups: removing data is left to you.
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |

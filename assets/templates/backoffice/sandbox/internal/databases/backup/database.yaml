@@ -1,0 +1,31 @@
+key-prefix: backup
+name: backup
+tables:
+    - fields:
+        - name: sha
+          required: true
+          type: key
+        - name: value
+          required: true
+          type: bytes
+      name: blob
+    - fields:
+        - name: name
+          required: true
+          type: key
+        - name: data
+          required: true
+          type: integer
+        - fields:
+            - name: path
+              required: true
+              type: string
+            - name: sha
+              required: true
+              type: string
+          name: content
+          type: object
+        - name: status
+          required: true
+          type: string
+      name: snapshot

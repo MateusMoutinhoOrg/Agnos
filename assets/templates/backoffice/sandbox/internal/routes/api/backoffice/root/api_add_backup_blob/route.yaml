@@ -1,0 +1,21 @@
+body:
+    content-type: application/octet-stream
+    max-bytes: 268435456
+    required: true
+    type: raw
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/add-backup-blob -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/octet-stream'' --data-binary @data/backofficedb/backoffice-user/1/values/username'
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootAddBackupBlob
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/add-backup-blob
+priority: 100
+response-type: application/json
+segments: 4
+summary: Stores the body as one content of the backups, once whatever the number of snapshots that will name it, and answers its sha to reference it by

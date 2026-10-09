@@ -1,7 +1,8 @@
 # Backoffice
 
 An admin area over http: a login, backoffice users with a `root` or `viewer` role, sessions,
-API tokens, and `/api/admin`, the JSON twin of the pages. `{{.GeneratorName}} backoffice-init`
+API tokens, [Backups](../Backups/doc.md) of every database, and `/api/admin`, the JSON twin of the
+pages. `{{.GeneratorName}} backoffice-init`
 wrote every file of it once; each one is the project's from then on.
 
 ## Run it
@@ -37,7 +38,8 @@ secret and both flags onto `sandbox.Config` (`api.BackofficeConfig`,
 | `sandbox/internal/server/backoffice/backofficehttp/` | client ip, security headers, same-origin |
 | `sandbox/internal/server/backoffice/backofficerender/` | the pages, from `assets/backoffice/*.html` |
 | `sandbox/internal/server/backoffice/backofficeapi/` | the JSON documents of `/api/admin` |
-| `sandbox/internal/databases/backoffice_db/` | `backoffice-user` (+ nested `session`) and `api-token`; the store is `./data/backofficedb`, gitignored |
+| `sandbox/internal/databases/backoffice_db/` | `backoffice-user` (+ nested `session`) and `api-token`; the store is `./data/backofficedb` (inside `--database`), gitignored |
+| `sandbox/internal/snapshots/`, `sandbox/internal/databases/backup/`, `sandbox/internal/server/backoffice/backofficesnapshots/` | the [Backups](../Backups/doc.md); the store is `./data/backup`, gitignored |
 | `sandbox/internal/routeprops/backoffice.go` | `props.ClientIp`, `props.User`, `props.Session`, `props.ApiToken` |
 | `sandbox/internal/commands/backoffice/`, `sandbox/internal/commands/middleware/` | `add-backoffice-user`; `backoffice-start-server`, the middleware in front of `start-server` |
 | `assets/backoffice/*.html`, `assets/front/backoffice/backoffice.js` | page templates (`text/template`, values escaped with `html`) and their script |
@@ -59,7 +61,7 @@ Middlewares run lowest priority first; a page answers or the chain goes on.
 Pages (`/admin/...`): `login` (POST), `logout` (POST), `home`, `list-backoffice-users`,
 `list-backoffice-api-tokens`, `add-backoffice-api-token` (GET form, POST), `revoke-backoffice-api-token/{id}` (POST);
 root only (`/admin/root/...`): `add-backoffice-user` (GET form, POST), `set-backoffice-user/{id}` (GET form, POST),
-`remove-backoffice-user/{id}` (POST). Each is one route per method, named after the surface it
+`remove-backoffice-user/{id}` (POST), and the backups (`list-backups`…, in [Backups](../Backups/doc.md)). Each is one route per method, named after the surface it
 answers: `backoffice-home`, `backoffice-login`, `list-backoffice-users-page` (GET html),
 `add-backoffice-user-form` (POST html). An action answers `303` to its list with a `?notice=`.
 
@@ -90,5 +92,5 @@ shows which route answers.
   confirm a form with `data-confirm`, never an `on*` attribute.
 - Everything is named `backoffice*`, so application users can take the plain names later.
 
-`{{.GeneratorName}} backoffice-purge` removes every file above and keeps the layers, the deps and
-`./data/backofficedb`.
+`{{.GeneratorName}} backoffice-purge` removes every file above and keeps the layers, the deps,
+`./data/backofficedb` and `./data/backup`.

@@ -62,6 +62,8 @@ assets/                                         Go text/templates embedded by as
   deps/                                         rendered when `deps` is on
   cli/                                          rendered when `cli` is on
   server/                                       rendered when `server` is on
+  database/                                     rendered when `database` is on
+  database-cli/                                 rendered when `database` and `cli` are on
   readme/                                       rendered when `readme` is on
   doc/                                          rendered when `doc` is on
   doc-<x>/                                      rendered when `doc` and every `<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)

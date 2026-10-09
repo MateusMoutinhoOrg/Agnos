@@ -38,8 +38,11 @@ func main() {
 		"sandbox/internal/commands/backoffice",
 		"sandbox/internal/commands/middleware/backoffice_start_server",
 		"sandbox/internal/databases/backoffice_db",
+		"sandbox/internal/databases/backup",
 		"sandbox/internal/server/backoffice/backofficeauth",
+		"sandbox/internal/snapshots",
 		"docs/Backoffice",
+		"docs/Backups",
 	} {
 		copyTree("test-dir/"+dir, "assert-dir/"+dir)
 	}

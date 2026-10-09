@@ -1,0 +1,27 @@
+category: Backoffice Backups
+methods:
+    - GET
+parameters:
+    - description: the outcome code of the last action on a snapshot
+      id: Notice
+      key: notice
+      sources:
+        - query
+      type: string
+    - description: keeps only the snapshots whose name starts with it
+      id: Prefix
+      key: prefix
+      sources:
+        - query
+      type: string
+paths:
+    - end: 2
+      id: AdminRootListBackups
+      start: 0
+      trigger:
+        type: equal
+        value: /admin/root/list-backups
+priority: 100
+response-type: text/html
+segments: 3
+summary: Lists every snapshot of the databases, or the ones whose name starts with a prefix, with the controls that take, download, upload and restore one

@@ -1,0 +1,4 @@
+default-adapter: ziparchive
+field: ArchiveDeps
+help: Pack and unpack zip archives in memory
+name: archivedeps

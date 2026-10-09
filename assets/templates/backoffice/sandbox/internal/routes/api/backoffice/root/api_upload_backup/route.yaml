@@ -1,0 +1,21 @@
+body:
+    content-type: application/zip
+    max-bytes: 268435456
+    required: true
+    type: raw
+category: Backoffice Backups API
+examples:
+    - 'curl -X POST localhost:3000/api/admin/root/upload-backup -H "Authorization: Bearer $TOKEN" -H ''Content-Type: application/zip'' --data-binary @snapshot.zip'
+methods:
+    - POST
+paths:
+    - end: 3
+      id: ApiAdminRootUploadBackup
+      start: 0
+      trigger:
+        type: equal
+        value: /api/admin/root/upload-backup
+priority: 100
+response-type: application/json
+segments: 4
+summary: Stores a zip archive a download built as a new snapshot
