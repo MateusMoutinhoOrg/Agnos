@@ -7,7 +7,7 @@ import (
 )
 
 // SetFlag rewrites one flag of sandbox/internal/commands/<command>/command.yaml,
-// then runs build so the command's new.go and input.go follow it.
+// then runs build so the command's generated.new.go and generated.input.go follow it.
 func SetFlag(sandbox *api.Sandbox, props api.SetFlagProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := SetFlagInternal(sandbox, io, props); err != nil {

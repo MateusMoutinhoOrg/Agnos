@@ -23,7 +23,7 @@ done
 
 for file in \
 	AgnosConfig/extensions.yaml \
-	sandbox/api/config.go; do
+	sandbox/api/generated.config.go; do
 	mkdir -p assert-dir/$(dirname $file)
 	cp test-dir/$file assert-dir/$file
 done

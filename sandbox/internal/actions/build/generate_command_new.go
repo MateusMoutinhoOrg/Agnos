@@ -9,9 +9,9 @@ import (
 // GenerateCommandNew renders assets/templates/command_new.go and
 // command_input.go once per command into the directory it sits in under
 // sandbox/internal/commands:
-// new.go, the api.Command that package declares, derived from its
-// command.yaml, which sandbox/internal/generated/cli/new.go collects into
-// Cli.Commands; and input.go, the Input its Handle is handed.
+// generated.new.go, the api.Command that package declares, derived from its
+// command.yaml, which sandbox/internal/cli/generated.new.go collects into
+// Cli.Commands; and generated.input.go, the Input its Handle is handed.
 func GenerateCommandNew(sandbox *api.Sandbox, io *stagedfs.StagedFS, commands []map[string]any, module string) error {
 	for _, command := range commands {
 		name, _ := command["CommandName"].(string)
@@ -23,10 +23,10 @@ func GenerateCommandNew(sandbox *api.Sandbox, io *stagedfs.StagedFS, commands []
 			vars[key] = value
 		}
 		dir, _ := command["Dir"].(string)
-		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_new.go", vars, dir+"/new.go"); err != nil {
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_new.go", vars, dir+"/"+utils.GeneratedFile(sandbox, utils.UnitNewFile)); err != nil {
 			return err
 		}
-		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_input.go", vars, dir+"/input.go"); err != nil {
+		if err := utils.RenderTemplateToDest(sandbox, io, "templates/command_input.go", vars, dir+"/"+utils.GeneratedFile(sandbox, utils.UnitInputFile)); err != nil {
 			return err
 		}
 	}

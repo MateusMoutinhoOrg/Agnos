@@ -15,9 +15,9 @@ tree:
       sha: dc2bb6deeaa61f717dc01d8c7185200bb51e92f0febd0c8009872be5df5a9193
     - file: sandbox/internal/commands/core/greet/command.yaml
       sha: 87d091165da134f5dd9be13d2d2158dcb25d34fd3a5e275227acb3b89cd08892
+    - file: sandbox/internal/commands/core/greet/generated.input.go
+      sha: 8fe1d185fc2264e26ca5792b17bd92996f0a497dfb03703b36e6da411d8d5255
+    - file: sandbox/internal/commands/core/greet/generated.new.go
+      sha: 589371f3246cbf29c9812d1c134a6a0b724018a3953a693663527cd37bdc2d22
     - file: sandbox/internal/commands/core/greet/handler.go
       sha: 7459e32a2e71c4454b90f8d071c9c8a1f780f00bc892b4a6cac7bbaba189960a
-    - file: sandbox/internal/commands/core/greet/input.go
-      sha: eaeaf7fef09269b41172762488097a47b6ac63acfd6817f015f68c1512b0befa
-    - file: sandbox/internal/commands/core/greet/new.go
-      sha: c6d3bb71f037a1c3aaf4b7281001dd5117ecacca80abdec6acd807a7a6cabcaf

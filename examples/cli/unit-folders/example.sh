@@ -26,9 +26,9 @@ agnos remove-route login --path test-dir
 # What result.yaml records: the declarations where they now sit, and the
 # generated dispatch importing each from its own folder.
 mkdir -p assert-dir/sandbox/internal/routes/api/users assert-dir/sandbox/internal/commands/ops/cloud/deploy
-mkdir -p assert-dir/sandbox/internal/generated/server assert-dir/sandbox/internal/generated/cli
+mkdir -p assert-dir/sandbox/internal/server assert-dir/sandbox/internal/cli
 cp test-dir/sandbox/internal/routes/api/users/route.yaml assert-dir/sandbox/internal/routes/api/users/route.yaml
 cp test-dir/sandbox/internal/commands/ops/cloud/deploy/command.yaml assert-dir/sandbox/internal/commands/ops/cloud/deploy/command.yaml
-cp test-dir/sandbox/internal/generated/server/new.go assert-dir/sandbox/internal/generated/server/new.go
-cp test-dir/sandbox/internal/generated/cli/new.go assert-dir/sandbox/internal/generated/cli/new.go
+cp test-dir/sandbox/internal/server/generated.new.go assert-dir/sandbox/internal/server/generated.new.go
+cp test-dir/sandbox/internal/cli/generated.new.go assert-dir/sandbox/internal/cli/generated.new.go
 ls test-dir/sandbox/internal/routes

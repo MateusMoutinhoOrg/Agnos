@@ -15,48 +15,48 @@ tree:
       sha: 76453b6bb59d9078749aff03b3f83e9497679991f63943a9dfa9c9aa99fa6fa3
     - file: sandbox/api/backofficeconfig.go
       sha: 335b9265082586fa950a9963efe0ecad7aa84f664e53b094bd80ec4743b9a96c
-    - file: sandbox/api/config.go
-      sha: 90af8f2e809489d9665d3b8bfea7ee0c27c587416759824be2cf470f7b6f767b
+    - file: sandbox/api/generated.config.go
+      sha: b503f33b7e1a1229c91c1ceed4859e232ac9ef693ee1657af8482cf7bf9f4103
     - file: sandbox/internal/commands/backoffice/add_backoffice_user/command.yaml
       sha: bf5cfc65727388de21ebd749af2e762107b0ccfe602f9e07af43a1f536c82d6e
+    - file: sandbox/internal/commands/backoffice/add_backoffice_user/generated.input.go
+      sha: 38ec2b93f6545edb8831cfdecbc25410a2f35309f80f819d70ed28566761006b
+    - file: sandbox/internal/commands/backoffice/add_backoffice_user/generated.new.go
+      sha: 988ff971eb5bb39eb94c9b1e3ab1fc134e3507fd4ea5480dd8e4c0b613ab033f
     - file: sandbox/internal/commands/backoffice/add_backoffice_user/handler.go
       sha: 2f167666c032e41e98c349a314243d608852f0633d7aeb0289eb28e1a1420b9a
-    - file: sandbox/internal/commands/backoffice/add_backoffice_user/input.go
-      sha: 841cb9e76699bed8aece72700924d748a8ab8c361fe2bec3700d295409dd02c9
-    - file: sandbox/internal/commands/backoffice/add_backoffice_user/new.go
-      sha: 670a10beb5d611a94159947ab8f742ed386fa247060747bae535fd3d831ab5f5
     - file: sandbox/internal/commands/middleware/backoffice_start_server/command.yaml
       sha: 66b47bdab0c3758c2b1f27ba894f23c79870bceaa5402f38347181b74e711c14
+    - file: sandbox/internal/commands/middleware/backoffice_start_server/generated.input.go
+      sha: 89c4b05db295ec0d4c1e1f1224efc04e25f2dc416bd4137fe712b6a960624232
+    - file: sandbox/internal/commands/middleware/backoffice_start_server/generated.new.go
+      sha: c258c397a3eafee0693fec793a3d76ae012cd1a206953120456e334c7a97228f
     - file: sandbox/internal/commands/middleware/backoffice_start_server/handler.go
       sha: b937e0a16dc0c5686065498b8c0a351540ec3b882fc9c6e24a8566ef10b7f23b
-    - file: sandbox/internal/commands/middleware/backoffice_start_server/input.go
-      sha: 2ddcbd9f8836b56f450329e7440ab817d825e2fd4f1e6b6c557b013d60910193
-    - file: sandbox/internal/commands/middleware/backoffice_start_server/new.go
-      sha: d9e29f0c9d291be6ec66f4bfa3e70cbb89f207634a6dfa99c26df037fc1ae7d9
-    - file: sandbox/internal/databases/backoffice_db/api.go
-      sha: f75317337e5f5c170ca356a676f0d5c3c59f06e077272733d708d52eb962505d
     - file: sandbox/internal/databases/backoffice_db/database.yaml
       sha: b3e8a89ea3a53687a195295a91b598a3b2c1c644d4eb5e9028802d56521416fe
-    - file: sandbox/internal/databases/backoffice_db/methods.go
-      sha: f5d309880e74951c9235f2ae38263cb596542541ab5bf09baed800f8041eeb52
+    - file: sandbox/internal/databases/backoffice_db/generated.api.go
+      sha: 6d28456bfc554728dfef605ffd9cba7d689a32eb5e6386517aa8afb981608ec9
+    - file: sandbox/internal/databases/backoffice_db/generated.methods.go
+      sha: e65153e90a00801a6daa08b1aea43a13cd94a0dccad0ae2dc07915c9c2b6aedc
+    - file: sandbox/internal/databases/backoffice_db/generated.new.go
+      sha: 0c441df224f568b9347fe04aca39a7a606b1af459bd04eba1130732ca4191da1
     - file: sandbox/internal/databases/backoffice_db/methods_custom.go
       sha: 943874dd36e6d3dc6d951fc4fbab61e1d3caf9001b1e4598e9aea499ef40ce83
-    - file: sandbox/internal/databases/backoffice_db/new.go
-      sha: b2222296052f826249e993905879b64754af23dd958c47c0d69c443c229530b1
-    - file: sandbox/internal/databases/backup/api.go
-      sha: 68478b09698d9b5458c16e9ed9b8f5aa5720afc4ba5251d476e96553948e2b48
     - file: sandbox/internal/databases/backup/database.yaml
       sha: 3187613be990fcd0e9958962519d05ccb8195a983be86def3dd13d19e5c7be00
-    - file: sandbox/internal/databases/backup/methods.go
-      sha: 0e9deb27321b530c19f4f46440df61cd6613edb7e826f90ffe1b9e110b0c5ac6
+    - file: sandbox/internal/databases/backup/generated.api.go
+      sha: ebf0fa651859dfad7c4031f687972a9cedca56b719ab8fc1a4f2983b4ebbbb61
+    - file: sandbox/internal/databases/backup/generated.methods.go
+      sha: 87ab5dc368b2ea81ce31301f4d9a2812cbef10e9ad56ce1fec1242a29bb471ca
+    - file: sandbox/internal/databases/backup/generated.new.go
+      sha: bfc27f18689e557567e0d2e553c39e7a73886b640134239d9aaf712cdd7bb079
     - file: sandbox/internal/databases/backup/methods_custom.go
       sha: 5413a511191d38a61186abc4ad0db486cfc10215be528b7b18559fa02e345338
-    - file: sandbox/internal/databases/backup/new.go
-      sha: d36ce2d52d2d508796c56df4456b1ed11755a2e3a2a0ca4add568114f49c5294
     - file: sandbox/internal/routeprops/backoffice.go
       sha: 891b54b6014f3511c46e6fc07305da85c6546f0876cab39f09ad76417635662a
-    - file: sandbox/internal/routeprops/routeprops.go
-      sha: 43891dd235d8c3500702f3dbdbf4c357cbe6a0ffca414190861437289209369c
+    - file: sandbox/internal/routeprops/generated.routeprops.go
+      sha: 76c9d5696addff1968d2321d8d369a6adb48bce48452ff23ea2ffcdb9cf8060f
     - file: sandbox/internal/server/backoffice/backofficeauth/backofficeauth.go
       sha: 3fc76aefa81bb1cc0140ecf740fcabc7306a26d9970198be82bf074bc954f637
     - file: sandbox/internal/snapshots/archive.go

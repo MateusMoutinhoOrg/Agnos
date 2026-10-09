@@ -11,7 +11,7 @@ import (
 const OpinionatedPrefix = "OpinionatedAgnos"
 
 // The four opinionated libs, one per mechanic that has code: what used to be
-// generated under sandbox/internal/generated/ for that mechanic, outside the
+// generated under sandbox/internal/generated/ (LegacyGeneratedDir) for that mechanic, outside the
 // sandbox, installed by its -init.
 const (
 	OpinionatedAgnosCli      = OpinionatedPrefix + "Cli"

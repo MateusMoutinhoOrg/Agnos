@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Cli
-description: Drops one arg declaration from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and input.go follow it.
+description: Drops one arg declaration from sandbox/internal/commands/<command>/command.yaml and runs build so the command's generated.new.go and generated.input.go follow it.
 examples:
     - remove-arg file --command exec
 flags:

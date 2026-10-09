@@ -6,7 +6,7 @@ import (
 )
 
 // Constructor fills Sandbox.{{.ContractName}}, building it with the
-// New{{.ContractName}} of {{.Source}}. sandbox/new.go calls it
+// New{{.ContractName}} of {{.Source}}. sandbox/generated.new.go calls it
 // once, along with the Constructor of every other package under
 // sandbox/constructors/.
 //

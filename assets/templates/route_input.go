@@ -52,7 +52,7 @@ const BodySchema = {{printf "%q" .SchemaJson}}
 {{- if .HasBody}}
 
 // ReadBody reads, validates and converts the request body of one bound route.
-// The generic Run calls it — through the ReadBody new.go closes over
+// The generic Run calls it — through the ReadBody generated.new.go closes over
 // the sandbox — before Handle runs, and binds what it returns onto
 // Input.Body; a middleware in front of this route may still refuse a request
 // before a byte of it is read.

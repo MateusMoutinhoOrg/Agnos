@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Deps
-description: 'Removes adapters/bindings/<name>/ whole. The standard binding is refused: cmd/main/main.go imports it.'
+description: 'Removes adapters/bindings/<name>/ whole. The standard binding is refused: cmd/main/generated.main.go imports it.'
 examples:
     - remove-binding lambda
 priority: 100

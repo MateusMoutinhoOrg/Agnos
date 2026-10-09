@@ -9,7 +9,7 @@ Three units, and the relation between them is declared, never inferred.
 | **binding** | a selection: exactly one adapter per dep | `adapters/bindings/<name>/` | any number per project |
 
 `adapters/impls/` is what the project **has**. `adapters/bindings/<name>/binding.yaml` is
-which of them **wins** for each field. `cmd/main/main.go` imports one binding — `standard` —
+which of them **wins** for each field. `cmd/main/generated.main.go` imports one binding — `standard` —
 and that import is the whole of how a program picks its implementations.
 
 ## The invariant
@@ -31,7 +31,7 @@ origin: catalog
 the stdlib — and it is what `add-dep` and `add-adapter` put in `go.mod`, filed under the
 adapter that actually imports it. `origin` is `catalog` for one the catalogue installs.
 
-`adapters/bindings/<name>/binding.yaml` lists the winners, and `new.go` beside it is
+`adapters/bindings/<name>/binding.yaml` lists the winners, and `generated.new.go` beside it is
 generated from that list:
 
 ```yaml
@@ -117,6 +117,6 @@ is stored: the cache is immutable per version and `go.sum` already signs it.
 |---|---|
 | `agnos remove-adapter <adapter>` | a binding still binds it (point that binding elsewhere first), or the generator wrote it as the shim of a remote dep |
 | `agnos remove-dep <dep>` | an adapter still fills it — `--with-adapters` takes them all |
-| `agnos remove-binding <name>` | it is `standard`: `cmd/main/main.go` imports it |
+| `agnos remove-binding <name>` | it is `standard`: `cmd/main/generated.main.go` imports it |
 
 Both refusals name what is holding the unit, so the answer is in the message.

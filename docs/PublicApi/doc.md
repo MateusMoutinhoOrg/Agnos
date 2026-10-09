@@ -23,15 +23,15 @@ struct of function fields, filled by a binder.
 
 | Page | Declares |
 | --- | --- |
-| [`sandbox/api/sandbox.go`](api.sandbox.md) | `Sandbox` |
+| [`sandbox/api/generated.sandbox.go`](api.sandbox.md) | `Sandbox` |
 | [`sandbox/api/actions.go`](api.actions.md) | `RuntimeGo`, `RuntimeNone`, `DefaultRoutePriority`, `DefaultMiddlewarePriority`, `BuildProps`, `CompileProps`, `StartProps`, `RunExamplesProps`, `AddDepProps`, `SetDepProps`, `RemoveDepProps`, `AddAdapterProps`, `SetAdapterProps`, `ExtensionInfo`, `DepInfo`, `AdapterInfo`, `AddFlagProps`, `AddArgProps`, `SetArgProps`, `SetFlagProps`, `AddCommandProps`, `RenameCommandProps`, `RebalanceCommandsProps`, `ExplainCommandProps`, `SetCommandProps`, `AddRouteProps`, `SetRouteProps`, `RenameRouteProps`, `RebalanceRoutesProps`, `ExplainRouteProps`, `AddTableFieldProps`, `RemoveTableFieldProps`, `SetTableFieldProps`, `AddPathProps`, `SetPathProps`, `AddParameterProps`, `SetParameterProps`, `SetBodyProps`, `AddBodyFieldProps`, `SetBodyFieldProps`, `ImportBodyProps`, `AddPageProps`, `AddDocProps`, `VerifyProps`, `EnableExtensionProps`, `DisableExtensionProps`, `ListExtensionsProps`, `DepsInitProps`, `DepsPurgeProps`, `ListDepsProps`, `RemoveAdapterProps`, `ListAdaptersProps`, `AddBindingProps`, `RemoveBindingProps`, `CliInitProps`, `CliPurgeProps`, `RemoveCommandProps`, `ListCommandsProps`, `ShowCommandProps`, `RemoveFlagProps`, `RemoveArgProps`, `ServerInitProps`, `ServerPurgeProps`, `RemoveRouteProps`, `RemovePathProps`, `RemoveParameterProps`, `RemoveBodyFieldProps`, `ShowRouteProps`, `ListRoutesProps`, `DatabaseInitProps`, `DatabasePurgeProps`, `AddDatabaseProps`, `RemoveDatabaseProps`, `AddTableProps`, `RemoveTableProps`, `ShowDatabaseProps`, `FrontInitProps`, `FrontPurgeProps`, `BackofficeInitProps`, `BackofficePurgeProps`, `RemovePageProps`, `RemoveDocProps`, `AddCliExampleProps`, `RemoveCliExampleProps`, `AddLibExampleProps`, `RemoveLibExampleProps`, `UpdateExampleProps`, `InterviewProps`, `Actions` |
-| [`sandbox/api/cli.go`](api.cli.md) | `ExitOk`, `ExitFailure`, `ExitUsage`, `Cli` |
-| [`sandbox/api/clisandbox.go`](api.clisandbox.md) | `CliSandbox` |
-| [`sandbox/api/command.go`](api.command.md) | `ArgString`, `ArgInteger`, `ArgNumber`, `ArgUuid`, `FlagString`, `FlagInteger`, `FlagNumber`, `FlagBoolean`, `FlagStringArray`, `FlagIntegerArray`, `FailureHandler`, `FailureNotFound`, `FailureBadUsage`, `FailureUnknownFlag`, `FailureUnexpectedArg`, `ArgType`, `CommandArg`, `FlagType`, `CommandFlag`, `CommandResponse`, `CommandFailureKind`, `CommandFailure`, `Command` |
-| [`sandbox/api/config.go`](api.config.md) | `Config` |
+| [`sandbox/api/generated.cli.go`](api.cli.md) | `ExitOk`, `ExitFailure`, `ExitUsage`, `Cli` |
+| [`sandbox/api/generated.clisandbox.go`](api.clisandbox.md) | `CliSandbox` |
+| [`sandbox/api/generated.command.go`](api.command.md) | `ArgString`, `ArgInteger`, `ArgNumber`, `ArgUuid`, `FlagString`, `FlagInteger`, `FlagNumber`, `FlagBoolean`, `FlagStringArray`, `FlagIntegerArray`, `FailureHandler`, `FailureNotFound`, `FailureBadUsage`, `FailureUnknownFlag`, `FailureUnexpectedArg`, `ArgType`, `CommandArg`, `FlagType`, `CommandFlag`, `CommandResponse`, `CommandFailureKind`, `CommandFailure`, `Command` |
+| [`sandbox/api/generated.config.go`](api.config.md) | `Config` |
+| [`sandbox/api/generated.trigger.go`](api.trigger.md) | `TriggerEqual`, `TriggerPrefix`, `TriggerTextPrefix`, `TriggerSuffix`, `TriggerRegex`, `TriggerOneOf`, `TriggerType`, `Trigger` |
 | [`sandbox/api/projectconfig.go`](api.projectconfig.md) | `ProjectConfig` |
 | [`sandbox/api/projectsandbox.go`](api.projectsandbox.md) | `ProjectSandbox` |
-| [`sandbox/api/trigger.go`](api.trigger.md) | `TriggerEqual`, `TriggerPrefix`, `TriggerTextPrefix`, `TriggerSuffix`, `TriggerRegex`, `TriggerOneOf`, `TriggerType`, `Trigger` |
 
 ## Dependency contracts
 

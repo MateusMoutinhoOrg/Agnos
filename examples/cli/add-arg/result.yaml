@@ -3,9 +3,9 @@ exit-code: 0
 tree:
     - file: sandbox/internal/commands/core/greet/command.yaml
       sha: e432b0469f5ddea6ea8497489f9fadb336aee1ce7addd0a3a84f33822ba9642e
+    - file: sandbox/internal/commands/core/greet/generated.input.go
+      sha: 258b47a9026a5bc37c362616aa4c2deb9f90fc04fcfa11450f879131c264f927
+    - file: sandbox/internal/commands/core/greet/generated.new.go
+      sha: dd6a239e9854a68b9ab662189f9191d7655d730e220ba34e622970a5d72cbf71
     - file: sandbox/internal/commands/core/greet/handler.go
       sha: 7459e32a2e71c4454b90f8d071c9c8a1f780f00bc892b4a6cac7bbaba189960a
-    - file: sandbox/internal/commands/core/greet/input.go
-      sha: 5afddf3b13fa2ccdbed62b2bc6660546a51a36711001c09dd213224cd60dd357
-    - file: sandbox/internal/commands/core/greet/new.go
-      sha: adfe7e0aeded5438d551266f42f11fa062a44e6936556de7070d68c1a0a86237

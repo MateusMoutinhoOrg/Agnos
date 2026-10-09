@@ -21,7 +21,7 @@ const routeHandlerName = "Handle"
 const routeHandlerFile = "handler.go"
 
 // routeHandlerParams is the canonical Handle signature the
-// generated new.go closes over: the sandbox, the request's shared RouteProps,
+// generated.new.go closes over: the sandbox, the request's shared RouteProps,
 // the route's own Input and the response being written.
 var routeHandlerParams = []string{"*api.Sandbox", "*routeprops.RouteProps", "*Input", "*serverdeps.Response"}
 
@@ -59,7 +59,7 @@ func CheckRoutes(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	patterns := map[string]string{}
 
 	violations = append(violations, CheckUnitTree(sandbox, io, routesDir, utils.RouteConfFile, "route",
-		[]string{"new.go", "input.go", routeHandlerFile})...)
+		utils.GeneratedNames(sandbox, utils.UnitNewFile, utils.UnitInputFile, routeHandlerFile))...)
 
 	for _, unit := range utils.RouteDirs(sandbox, io) {
 		dir := unit.Dir
@@ -101,25 +101,35 @@ func CheckRoutes(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 }
 
 // checkRouteFiles reports a route package missing any of the four files every
-// route has: the declaration, the two generated files and the hand-written
-// handler.
+// route has: the declaration, the two generated files (generated.new.go and
+// generated.input.go, or their old names on a tree no build has moved yet)
+// and the hand-written handler (generated.handler.go for a route a group
+// renders whole).
 func checkRouteFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []string {
 	var violations []string
 
-	for _, file := range []string{"route.yaml", "new.go", "input.go", routeHandlerFile} {
-		if !io.IsFile(dir + "/" + file) {
-			violations = append(violations, routeViolation(dir, "has no "+file))
+	if !io.IsFile(dir + "/route.yaml") {
+		violations = append(violations, routeViolation(dir, "has no route.yaml"))
+	}
+	for _, file := range []string{utils.UnitNewFile, utils.UnitInputFile} {
+		if utils.GeneratedPath(sandbox, io, dir, file) == "" {
+			violations = append(violations, routeViolation(dir, "has no "+utils.GeneratedFile(sandbox, file)))
 		}
 	}
 
-	content, err := io.ReadFile(dir + "/" + routeHandlerFile)
+	handler := utils.GeneratedPath(sandbox, io, dir, routeHandlerFile)
+	if handler == "" {
+		return append(violations, routeViolation(dir, "has no "+routeHandlerFile))
+	}
+	handlerFile := lastSegment(sandbox, handler)
+	content, err := io.ReadFile(handler)
 	if err != nil {
 		return violations
 	}
 
 	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
-		return append(violations, routeViolation(dir, routeHandlerFile+" is not parsable Go: "+err.Error()))
+		return append(violations, routeViolation(dir, handlerFile+" is not parsable Go: "+err.Error()))
 	}
 
 	for _, function := range parsed.Functions {
@@ -130,12 +140,12 @@ func checkRouteFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []
 			return violations
 		}
 		return append(violations, routeViolation(dir,
-			routeHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
+			handlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
 				routeHandlerName+"(sandbox *api.Sandbox, props *routeprops.RouteProps, input *Input, response *serverdeps.Response) error"+
 				legacyPropsHint(function, legacyRoutePropsParam, utils.RoutePropsDir)))
 	}
 
-	return append(violations, routeViolation(dir, routeHandlerFile+" exports no "+routeHandlerName))
+	return append(violations, routeViolation(dir, handlerFile+" exports no "+routeHandlerName))
 }
 
 // isRouteHandler reports whether one parsed declaration is the route handler:

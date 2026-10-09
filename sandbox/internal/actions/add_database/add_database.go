@@ -8,7 +8,7 @@ import (
 
 // AddDatabase writes the declaration of a new database under
 // sandbox/internal/databases/<name>/database.yaml, then runs build as a follow-up
-// step so its api.go, new.go and methods.go are generated for it.
+// step so its generated.api.go, generated.new.go and generated.methods.go are generated for it.
 func AddDatabase(sandbox *api.Sandbox, props api.AddDatabaseProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddDatabaseInternal(sandbox, io, props.Name, props.KeyPrefix); err != nil {

@@ -6,7 +6,8 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// GenerateRouteProps rewrites sandbox/internal/routeprops/routeprops.go — the
+// GenerateRouteProps rewrites
+// sandbox/internal/routeprops/generated.routeprops.go — the
 // RouteProps one request's chain of routes shares, handed to every
 // Handle as its first argument — as the embedding of every part
 // the package declares beside it: project.go, the project's own, and one file

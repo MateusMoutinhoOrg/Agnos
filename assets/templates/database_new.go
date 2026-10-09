@@ -11,7 +11,7 @@ import (
 )
 
 // New builds the {{.DatabaseName}} database from the Props its database.yaml declares and
-// closes every method of methods.go over it. Its key-prefix is a path inside
+// closes every method of generated.methods.go over it. Its key-prefix is a path inside
 // sandbox.Config.DatabaseDir, the folder --database names. It touches no key:
 // a database is a value over a prefix, so building one creates nothing until
 // the first record is written. Props that Databases.New refuses are reported on stderr,

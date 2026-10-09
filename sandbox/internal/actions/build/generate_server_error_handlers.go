@@ -7,13 +7,13 @@ import (
 )
 
 // errorsDir holds the project's own answer to every way a request can end
-// without a route answering it, beside the generated dispatch of
-// sandbox/internal/generated/server.
+// without a route answering it, beside the generated registry
+// sandbox/internal/server/generated.new.go.
 const errorsDir = "sandbox/internal/server/errors"
 
 // errorHandlerFiles is one file per failure the dispatch can raise, in the
-// order the generated sandbox/internal/generated/server/new.go switches on them. Each
-// holds one handler with the route handler's own signature.
+// order sandbox/internal/server/generated.new.go switches on them. Each holds
+// one handler with the route handler's own signature.
 var errorHandlerFiles = []string{
 	"handle_not_found.go",
 	"handle_method_not_allowed.go",
@@ -26,7 +26,7 @@ var errorHandlerFiles = []string{
 }
 
 // GenerateServerErrorHandlers renders assets/templates/server_handle_*.go into
-// sandbox/internal/server/errors/ — the eight handlers the generated new.go
+// sandbox/internal/server/errors/ — the eight handlers the generated.new.go
 // hands a failure to, one per status.
 //
 // It is written **once**, the same way a constructor is. A handler already on
@@ -37,7 +37,7 @@ var errorHandlerFiles = []string{
 //
 // Writing them here rather than in server-init is what carries a project that
 // ran server-init before they existed: the next build fills in what is
-// missing, and the generated new.go always has something to call.
+// missing, and the generated.new.go always has something to call.
 func GenerateServerErrorHandlers(sandbox *api.Sandbox, io *stagedfs.StagedFS, module string) error {
 	for _, handler := range errorHandlerFiles {
 		dest := errorsDir + "/" + handler

@@ -73,7 +73,7 @@ func IsGeneratedRoute(sandbox *api.Sandbox, name string) bool {
 // RouteDirs is every route declared under RoutesDir, at any depth. A
 // generated route whose route.yaml is still pending in the transaction — the
 // first build after the server group gained it — is listed too, so the build
-// that renders it also renders its new.go and input.go.
+// that renders it also renders its generated.new.go and generated.input.go.
 func RouteDirs(sandbox *api.Sandbox, io *stagedfs.StagedFS) []UnitDir {
 	units := FindUnitDirs(sandbox, io, RoutesDir, RouteConfFile)
 	for _, name := range GeneratedRoutes() {
@@ -144,7 +144,7 @@ func GoIdentifier(sandbox *api.Sandbox, raw string) string {
 }
 
 // ValidateEntryId reports whether id — the Input field the name raw typed on
-// the command line becomes — is one the generated input.go can spell: an
+// the command line becomes — is one the generated.input.go can spell: an
 // ASCII letter first, then ASCII letters and digits. It runs before anything is
 // written, so a name the Go compiler would refuse never reaches a declaration.
 func ValidateEntryId(sandbox *api.Sandbox, kind string, raw string, id string) error {
@@ -167,7 +167,7 @@ func ValidateEntryId(sandbox *api.Sandbox, kind string, raw string, id string) e
 	return nil
 }
 
-// RouteReservedIds are the Input fields the generated input.go spells
+// RouteReservedIds are the Input fields the generated.input.go spells
 // itself — FullRoute on every route, Body on one declaring a body — so no
 // path or parameter may take them.
 var RouteReservedIds = []string{"FullRoute", "Body"}

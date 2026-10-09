@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Server
-description: Declares one value a route reads and runs build so the route's new.go and input.go pick it up. It is read under its name from the first of its --source that brings it, converted to its --type and bound to Input.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.
+description: Declares one value a route reads and runs build so the route's generated.new.go and generated.input.go pick it up. It is read under its name from the first of its --source that brings it, converted to its --type and bound to Input.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.
 examples:
     - add-parameter page --route list-users --type number --default 1
     - add-parameter authorization --route admin --source header --trigger Bearer --trigger-type prefix

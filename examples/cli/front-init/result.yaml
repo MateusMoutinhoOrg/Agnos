@@ -9,11 +9,11 @@ tree:
       sha: 747d5e46c1b49715716825a0c28b39aaaeb1f643582bfdb7b332c2aa5dd0af51
     - file: sandbox/deps/OpinionatedAgnosFront/opinionatedagnosfront.go
       sha: 34b525ddfed93bc652fc5959a7609aaf39d002e164e145e7010c11104ba802a4
+    - file: sandbox/internal/routes/front/generated.input.go
+      sha: 5bba93dd6e4c56c65b3bcbb0ea9483fc7f7453c36749ccbe0fbd88d821abf6f0
+    - file: sandbox/internal/routes/front/generated.new.go
+      sha: bd1d69c16fe89a09c46190e72557090a720d1b807b042d3cde7366f3fb166b29
     - file: sandbox/internal/routes/front/handler.go
       sha: 413982a78f6cae3ec4c8ba0bcadf3a8747fb212ddd0a4f4bb30ed15f7e50a63b
-    - file: sandbox/internal/routes/front/input.go
-      sha: bfbb988997584c4a9181432facefe51234edf43a4cf70d89b3159d5d83b4c4e4
-    - file: sandbox/internal/routes/front/new.go
-      sha: 6b4ee978b67bf5a86e187e740a57b5093ff4775eaa3b98f77702e2e6edb59231
     - file: sandbox/internal/routes/front/route.yaml
       sha: 8ffd75b2d6b2851f34b5628867b4dc5a22047f555b0f670d4eb2bf168b6561d9

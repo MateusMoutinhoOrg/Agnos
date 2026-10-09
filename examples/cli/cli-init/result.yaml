@@ -3,37 +3,47 @@ exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
       sha: 50218e4cc11314565ddead0f62c27d4a378f3a174e73fdea1b928835bc89d202
-    - file: cmd/main/main.go
-      sha: 3255a7e61d8e60710592b90a821fe7101e3cf9930ea0d6c170dac3f60bd8fa35
+    - file: cmd/main/generated.main.go
+      sha: 84deecde12beb76e6af544509e315f8d94fe0e29124878ae9ce33cc9bd640268
     - file: sandbox/constructors/cli/constructor.go
-      sha: 5f8aad8a9b82a7b79f9ea0e62219d06c173438701521c687c14029a9ff4efd7c
+      sha: 166450a577bc601645d0dda4fb9f1cb33b1026215148ceca58a6181d82fe0ef6
     - file: sandbox/constructors/config/constructor.go
-      sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
+      sha: 02134dcf3e013f15ae99e6d719672580d3b2da4fd3b2d42de928d8f3efbdba58
+    - file: sandbox/generated.new.go
+      sha: f1d1993bd9b8c8430f6682f1d983ef85f90e25a23b9b35942cc44ca5cdb359d9
+    - file: sandbox/internal/cli/errors/handle_bad_usage.go
+      sha: 69d8c283e44fda56049eae61649fd9a1f1c3c61d508c50f87458d2c1883f14bc
+    - file: sandbox/internal/cli/errors/handle_failure.go
+      sha: 09ec24a61e48616d42c80d2be704c0d7dc918b29412910b5c0747427e9c7e019
+    - file: sandbox/internal/cli/errors/handle_not_found.go
+      sha: f7242e4c26e5e455e75ed58b86f94e1204dc48431af3c0d695dc75354b9488aa
+    - file: sandbox/internal/cli/errors/handle_unexpected_arg.go
+      sha: a4d19363441d33885dcb47ca1c24d783c94542798174452d1bfad1c9f2adc178
+    - file: sandbox/internal/cli/errors/handle_unknown_flag.go
+      sha: 55c0e780d1ec4972bb7b297aeb273f47aaad3f680e4a85f20d34be1634542712
+    - file: sandbox/internal/cli/generated.new.go
+      sha: fc0c784fcbb94fa604173e478cb3b65a52a696b608434603570f74eb23e2954c
     - file: sandbox/internal/commands/info/help/command.yaml
-      sha: 9b8324034cd88bd140cc6f35bb16117302c548b28601a5b1e598a4afed2f3206
-    - file: sandbox/internal/commands/info/help/handler.go
-      sha: a8cd392d00ce64bac3038853ebcd6492ab56d3dc557d0b232e4eae1f9936f716
-    - file: sandbox/internal/commands/info/help/input.go
-      sha: cb66f850a4f62cc7be9893c16e00a3d7597a127a9d811ced4128f03f5cd7c983
-    - file: sandbox/internal/commands/info/help/new.go
-      sha: 0a7365732df439caa8e42b797fd870dc2cdb4796d7f62277fc3951f58e103da3
+      sha: 6171629c6420c8e2a657f37bd6cfe6b45cf549897d2acf25a3d0b7a92d695e78
+    - file: sandbox/internal/commands/info/help/generated.handler.go
+      sha: 7c7f898c2bd83a47966afbf9222a7eaa5723eb78721a509208c965287c12085b
+    - file: sandbox/internal/commands/info/help/generated.input.go
+      sha: ff5528dec9d03237e86bf6ea930cf97f98b518543f54f48649189cd08ee0d2ce
+    - file: sandbox/internal/commands/info/help/generated.new.go
+      sha: 2a8f647ce01d5b12ecadfdb1f584eb91281dd52b96d513a9ecaf6d84223a1330
     - file: sandbox/internal/commands/info/version/command.yaml
       sha: fb869cf0471a41e752def92267e298b29607af7a975903a259fc23372cd347f8
-    - file: sandbox/internal/commands/info/version/handler.go
-      sha: 28861974ff38e247c46efe6acd32ed79c9ab11ea556529691f7d8890dfd015bc
-    - file: sandbox/internal/commands/info/version/input.go
-      sha: dccf4ac553814f92b94db5a4efc236614dac46f60f0653a05b1a44401d1535a1
-    - file: sandbox/internal/commands/info/version/new.go
-      sha: ebe67688153aabda3b278ed2787daf2b40b3b6529fbae6c45009c8990ff8dbc5
+    - file: sandbox/internal/commands/info/version/generated.handler.go
+      sha: f2ed3a122b656f72b9d53f12701eb0fe5dea34220696ca8d15e5322c5a190e07
+    - file: sandbox/internal/commands/info/version/generated.input.go
+      sha: f9dcce873fbf7458da51371b104c089273f60aa737a8691cca0110e298558cd2
+    - file: sandbox/internal/commands/info/version/generated.new.go
+      sha: 48b160b381948bad97241c76c70ac1d7e38ae60994f8830afb5cb04d0fdd1657
     - file: sandbox/internal/commands/middleware/help_flag/command.yaml
       sha: c544a63b225e57366c7d07b346da0586e273ff4a3cb02a43b9f96fd6c1bb4ede
-    - file: sandbox/internal/commands/middleware/help_flag/handler.go
-      sha: a3fe8e61ee344d48a65fd4a4ab8c7c40b884c9f1452ca7c08fdeb0846a848de8
-    - file: sandbox/internal/commands/middleware/help_flag/input.go
-      sha: 60ca5134acdc26b137d405ebae2c59a6b42cbff33f0dc73bfe7c07e738f97a80
-    - file: sandbox/internal/commands/middleware/help_flag/new.go
-      sha: 20af068a7607550f29fcbf5b0d1c0625c9f1502a53d8770169ce3b5e86cbbcbf
-    - file: sandbox/internal/generated/cli/new.go
-      sha: 7d99c61ab264bbb1c76af49b6637908f6d2a9f802a6f3be7ec1fbba887f31ef6
-    - file: sandbox/new.go
-      sha: f6087a30367cb642f01f7dc51e823627ddb9f474c8b2002fca644ce37d51ce44
+    - file: sandbox/internal/commands/middleware/help_flag/generated.handler.go
+      sha: 9e806451da48eedddca1cf709e28fd1ec893969d69c8fdce8c2a8a903c2aa20c
+    - file: sandbox/internal/commands/middleware/help_flag/generated.input.go
+      sha: 752244cbe0ae78ff568c4b80728c2b285aafc8a62475e06423d58dfbc0278d58
+    - file: sandbox/internal/commands/middleware/help_flag/generated.new.go
+      sha: 31546f98d3c624c90e80e635d9d62785a75ca4bf73f562e873038e66dc338187

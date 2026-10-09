@@ -14,7 +14,7 @@ import (
 //
 // The front route is the one directory the front layer owns whole, looked
 // up by name since it may have been moved to a folder: removing its files one
-// by one would leave the generated new.go and input.go behind with no
+// by one would leave the generated.new.go and generated.input.go behind with no
 // route.yaml and no handler.go next to them, and its handler names
 // the OpinionatedAgnosFront lib, so leaving it behind would hand back a tree that
 // does not serve what it says. What it serves does not go with it — assets/front/ is the

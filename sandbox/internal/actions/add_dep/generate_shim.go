@@ -36,7 +36,7 @@ type ShimProps struct {
 	HasDeps bool
 }
 
-// GenerateShim writes adapters/impls/<dep>/<dep>.go: the adapter that builds the
+// GenerateShim writes adapters/impls/<dep>/generated.<dep>.go: the adapter that builds the
 // remote sandbox out of the remote repo's own adapters and hands it over as the
 // local contract, plus the converters that carry every value between the two
 // copies of the api.
@@ -67,5 +67,5 @@ func GenerateShim(sandbox *api.Sandbox, io *stagedfs.StagedFS, remote *apishape.
 	}
 
 	return utils.RenderTemplateToDest(sandbox, io, "templates/remote_shim.go", vars,
-		utils.AdapterDir(props.Dep)+"/"+props.Dep+".go")
+		utils.AdapterDir(props.Dep)+"/"+utils.GeneratedFile(sandbox, props.Dep+".go"))
 }

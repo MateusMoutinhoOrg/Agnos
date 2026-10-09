@@ -19,7 +19,7 @@ const helpCommandYaml = "sandbox/internal/commands/info/help/command.yaml"
 //
 // It must run before CollectCommands, so the declaration is already in the
 // transaction when the collector reads it and help flows through the same
-// new.go / Cli.Commands generation as any other command.
+// generated.new.go / Cli.Commands generation as any other command.
 func GenerateHelpCommandYaml(sandbox *api.Sandbox, io *stagedfs.StagedFS, vars map[string]interface{}) error {
 	if io.Exists(helpCommandYaml) {
 		return nil

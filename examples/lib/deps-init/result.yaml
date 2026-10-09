@@ -5,7 +5,7 @@ tree:
       sha: d4ba3ceebe4712af4091e01920464a1706cc545249028ce272e76031b9ab683a
     - file: adapters/bindings/standard/binding.yaml
       sha: 3a150d843a1c249764e0a44169bca6e40c86178e9e910d7f5538acfdb606d9a8
-    - file: adapters/bindings/standard/new.go
-      sha: ccd6a67cccf8e841a864c82967167d0f74c0eff72f6c489c0b9e8a242c37817b
-    - file: sandbox/deps/deps.go
-      sha: 7da1577bfa460f6e1bacac113232b5d87cee11124e468c69d39747e62b25c349
+    - file: adapters/bindings/standard/generated.new.go
+      sha: 896c3bbf0218af4f9fd1f4a2053b1f244561b96f065809cfd907c093dd5ea8d4
+    - file: sandbox/deps/generated.deps.go
+      sha: f646253bccea1e8c74931a891a09b422d4828ea9fd66d396d21d1be6ef0b6792

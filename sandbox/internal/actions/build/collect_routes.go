@@ -14,9 +14,9 @@ const routesDir = utils.RoutesDir
 
 // CollectRoutes reads every route.yaml under sandbox/internal/routes — a
 // directory holding one is a route, at any depth — and
-// returns one data map per route, for the generated new.go and input.go of
+// returns one data map per route, for the generated.new.go and generated.input.go of
 // that route and the {{range .Routes}} loop of
-// sandbox/internal/generated/server/new.go. It is the server layer's
+// sandbox/internal/server/generated.new.go. It is the server layer's
 // CollectCommands: what the map holds is the declaration itself, which the
 // dispatch reads back off Server.Routes at runtime.
 //
@@ -98,7 +98,7 @@ func schemaUnknownKeys(schema *routeconf.Schema) []string {
 	return unknown
 }
 
-// routeData is one route as the generated new.go and input.go read it. Dir
+// routeData is one route as the generated.new.go and generated.input.go read it. Dir
 // is the project-relative directory the route sits in, which the generated
 // server imports it from.
 func routeData(sandbox *api.Sandbox, unit utils.UnitDir, conf *routeconf.RouteConf) map[string]any {
@@ -277,8 +277,8 @@ func parameterGoType(kind string) string {
 	return "string"
 }
 
-// bodyData is the route's body declaration as the generated new.go and
-// input.go read it.
+// bodyData is the route's body declaration as the generated.new.go and
+// generated.input.go read it.
 func bodyData(sandbox *api.Sandbox, conf *routeconf.RouteConf) map[string]any {
 	body := conf.Body
 	return map[string]any{
@@ -330,7 +330,7 @@ func bodyIsObject(body routeconf.Body) bool {
 }
 
 // bodyStructs flattens the declared json- or form-schema into the Go structs the
-// generated input.go declares: Body for the root object, Body<Path> for a
+// generated.input.go declares: Body for the root object, Body<Path> for a
 // nested object and Body<Path>Item for the object an array holds.
 func bodyStructs(sandbox *api.Sandbox, conf *routeconf.RouteConf) []map[string]any {
 	if !bodyIsObject(conf.Body) {

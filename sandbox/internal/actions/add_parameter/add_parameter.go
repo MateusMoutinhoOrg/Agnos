@@ -8,7 +8,7 @@ import (
 
 // AddParameter inserts one entry into the `parameters` of
 // sandbox/internal/routes/<route>/route.yaml, then runs build as a
-// follow-up step so the route's new.go and input.go pick it up.
+// follow-up step so the route's generated.new.go and generated.input.go pick it up.
 func AddParameter(sandbox *api.Sandbox, props api.AddParameterProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddParameterInternal(sandbox, io, props); err != nil {

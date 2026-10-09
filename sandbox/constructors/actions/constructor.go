@@ -6,7 +6,7 @@ import (
 )
 
 // Constructor fills Sandbox.Actions, building it with the
-// NewActions of sandbox/internal/actions. sandbox/new.go calls it
+// NewActions of sandbox/internal/actions. sandbox/generated.new.go calls it
 // once, along with the Constructor of every other package under
 // sandbox/constructors/.
 //

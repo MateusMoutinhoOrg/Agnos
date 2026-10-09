@@ -15,7 +15,7 @@ agnos add-arg times --command greet --type integer --default 1 --description "ho
 ```
 
 Write the one hand-written file, `sandbox/internal/commands/demo/greet/handler.go`
-(`add-command` wrote a stub; `build` generated `input.go` beside it):
+(`add-command` wrote a stub; `build` generated `generated.input.go` beside it):
 
 ```go
 package greet

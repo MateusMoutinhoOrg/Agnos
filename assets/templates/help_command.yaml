@@ -1,6 +1,6 @@
 # Written once by `{{.GeneratorName}} build`, then the project's.
-# `help` is a command like any other (command.yaml + a generated new.go and
-# input.go + handler.go); the only difference is that
+# `help` is a command like any other (command.yaml + generated.new.go,
+# generated.input.go and a handler); the only difference is that
 # {{.GeneratorName}} writes all of them, instead of the user writing two.
 priority: 100
 args:

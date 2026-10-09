@@ -67,9 +67,13 @@ func CheckDatabases(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 func checkDatabaseFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string) []string {
 	var violations []string
 
-	for _, file := range []string{utils.DatabaseConfFile, "api.go", "new.go", "methods.go"} {
-		if !io.IsFile(utils.DatabasesDir + "/" + name + "/" + file) {
-			violations = append(violations, databaseViolation(name, "has no "+file))
+	dir := utils.DatabasesDir + "/" + name
+	if !io.IsFile(dir + "/" + utils.DatabaseConfFile) {
+		violations = append(violations, databaseViolation(name, "has no "+utils.DatabaseConfFile))
+	}
+	for _, file := range []string{"api.go", "new.go", "methods.go"} {
+		if utils.GeneratedPath(sandbox, io, dir, file) == "" {
+			violations = append(violations, databaseViolation(name, "has no "+utils.GeneratedFile(sandbox, file)))
 		}
 	}
 

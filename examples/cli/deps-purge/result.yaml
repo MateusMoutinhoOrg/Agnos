@@ -3,17 +3,17 @@ exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
       sha: 319c9b3d71bf11004d735b767c3d2207b5e818d5e857cc84db33dd00c3e194ab
-    - file: sandbox/api/config.go
-      sha: fadc7d71721b64243cc68bd60de5f8e036944c395f05d0193474b45de2b0db50
+    - file: sandbox/api/generated.config.go
+      sha: 4777297cbbc8906858dd04c9e1c12aa5a5a5a4b3033739fb1b515e905987ac3e
+    - file: sandbox/api/generated.sandbox.go
+      sha: 52956856b3e5a6a923c3ec8527a0d340c6c8758aae05c392369083b2edc6f81a
     - file: sandbox/api/projectconfig.go
       sha: bd9f02f6b26190a0571b68695b5ce5e1607566706b08aa71dd4e2fa87537e720
     - file: sandbox/api/projectsandbox.go
-      sha: c6c792665ba659b91ba5fcb7ba1cd7c6cab22573741770911cb1f6cffafb34b3
-    - file: sandbox/api/sandbox.go
-      sha: 81d71cd1f22e0f1c014c51cc9cf2de5fc90d2aa2b187bce85558e0f148d3c736
+      sha: ea782dd77b61c81e855de4df90535e2b826e666f9b61f963cda21940f51ed16f
     - file: sandbox/constructors/config/constructor.go
-      sha: dfd2804a75f24e669187d0c1d67ac147fb8a852e53d854c82cb1b6a18e5159d7
-    - file: sandbox/internal/generated/config/new.go
-      sha: 5ee0bdef453f2f59d85612467d1771e3d970d8f4aa0dc1c22cf10c3de82d637f
-    - file: sandbox/new.go
-      sha: f847863fac092efbf9dd16653c97f93915d670927b1d14b8a7570e57540f835e
+      sha: 02134dcf3e013f15ae99e6d719672580d3b2da4fd3b2d42de928d8f3efbdba58
+    - file: sandbox/generated.new.go
+      sha: d3fa790f42104daed9d39661babdd5342edfa664206f626212f10d2d2121a567
+    - file: sandbox/internal/config/generated.new.go
+      sha: 77b18a195b7b81ee84fb6d75dd3770de370a8f348e931f3bac6492fa4e0f8ba9

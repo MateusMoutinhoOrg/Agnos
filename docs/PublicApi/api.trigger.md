@@ -1,4 +1,4 @@
-# `sandbox/api/trigger.go`
+# `sandbox/api/generated.trigger.go`
 
 | Constant | Value | Description |
 | --- | --- | --- |

@@ -110,7 +110,9 @@ func GroupsRequiring(name string) []string {
 // ExtensionFiles is every group-relative path the groups one mechanic owns
 // would install. It is what an <x>-purge removes: the asset groups only name
 // the files they write, so this is the exact inverse of what a build renders
-// for that mechanic.
+// for that mechanic. A generated file is named twice — generated.<name>, and
+// <name> as a build before GeneratedPrefix wrote it — so a purge leaves
+// neither behind.
 func ExtensionFiles(sandbox *api.Sandbox, name string) ([]string, error) {
 	var paths []string
 
@@ -119,7 +121,13 @@ func ExtensionFiles(sandbox *api.Sandbox, name string) ([]string, error) {
 		if err != nil {
 			return nil, err
 		}
-		paths = append(paths, files...)
+		for _, file := range files {
+			paths = append(paths, file)
+			if IsGeneratedFile(sandbox, file) {
+				base := baseName(sandbox, file)
+				paths = append(paths, sandbox.Deps.StringsDeps.TrimSuffix(file, base)+SourceName(sandbox, base))
+			}
+		}
 	}
 
 	return paths, nil

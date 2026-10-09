@@ -50,8 +50,8 @@ edit. Every key is in [Extensions](../Extensions/doc.md).
 ```
 
 `add-command` writes `sandbox/internal/commands/[<--dir>/]<name>/command.yaml` (the declaration) and a
-stub `handler.go` (yours), then generates `new.go` — the `api.Command` that joins
-`Cli.Commands` — and `input.go`, the `Input` it is handed. Every key these editors write is
+stub `handler.go` (yours), then generates `generated.new.go` — the `api.Command` that joins
+`Cli.Commands` — and `generated.input.go`, the `Input` it is handed. Every key these editors write is
 in [CommandYaml](../CommandYaml/doc.md); never edit `command.yaml` by hand.
 
 Then write `handler.go` — the whole hand-written half of a command:
@@ -76,7 +76,7 @@ next build.
 ## Add the CLI layer
 
 ```bash
-{{.GeneratorName}} cli-init     # sandbox/internal/generated/cli, cmd/main, help, version and help-flag, stddeps + argvdeps + stringsdeps + OpinionatedAgnosCli
+{{.GeneratorName}} cli-init     # sandbox/internal/cli, cmd/main, help, version and help-flag, stddeps + argvdeps + stringsdeps + OpinionatedAgnosCli
 ```
 
 From there `{{.GeneratorName}} add-command <name> --summary "..." --category "..."` declares a command and
@@ -113,8 +113,8 @@ From there `{{.GeneratorName}} add-command <name> --summary "..." --category "..
 `add-route` writes `sandbox/internal/routes/[<--dir>/]<name>/route.yaml` (the declaration, `priority`
 and `response-type` always included — `100` for a route, `10` for a `--middleware`) and a stub
 `handler.go` (yours), then
-generates `new.go` — the `api.Route` that lands in `Server.Routes`, a 1:1 image of the yaml —
-and `input.go` — the `Input` the handler is handed.
+generates `generated.new.go` — the `api.Route` that lands in `Server.Routes`, a 1:1 image of the
+yaml — and `generated.input.go` — the `Input` the handler is handed.
 One editor per place the declaration holds something, so every key of
 [RouteYaml](../RouteYaml/doc.md) is reachable from the command line and `route.yaml` is never
 edited by hand. `add-body-field` takes a dotted path (`address.city`) and creates the objects
@@ -206,8 +206,8 @@ again, leaving `assets/front/` alone.
 ```
 
 `set-table-field` and the `remove-` half of each pair are the inverses. Every command rewrites
-`sandbox/internal/databases/<db>/database.yaml` and runs `build`, which regenerates `api.go`,
-`new.go` and `methods.go` from it — the records, the insert structs, the filter and the body
+`sandbox/internal/databases/<db>/database.yaml` and runs `build`, which regenerates `generated.api.go`,
+`generated.new.go` and `generated.methods.go` from it — the records, the insert structs, the filter and the body
 of every method.
 
 Then call it from wherever needs it:
@@ -262,8 +262,8 @@ declaration, no generated counterpart — write the package and run `build`.
 ## Add a surface to the sandbox api
 
 The api is what a Go caller gets back from `sandbox.New` (see [LibUsage](../LibUsage/doc.md)).
-Two hand-written places, then `build` regenerates `sandbox/api/sandbox.go` and
-`sandbox/new.go` around them:
+Two hand-written places, then `build` regenerates `sandbox/api/generated.sandbox.go` and
+`sandbox/generated.new.go` around them:
 
 1. `sandbox/api/<x>.go` — the contract: `type <X> struct { ... }` of function fields, named
    after the file, every declaration doc-commented (those comments render
@@ -272,12 +272,12 @@ Two hand-written places, then `build` regenerates `sandbox/api/sandbox.go` and
    field of the contract, with the implementation beside it.
 
 `build` then writes `sandbox/constructors/<x>/constructor.go` — `sandbox.<X> =
-<x>.New<X>(sandbox)` — **once**, and `sandbox/new.go` calls it. From there the constructor is
+<x>.New<X>(sandbox)` — **once**, and `sandbox/generated.new.go` calls it. From there the constructor is
 yours: wrap the implementation, decorate the contract, or build a different one entirely.
 
 ## Construct a field yourself
 
-`sandbox/new.go` is one `<x>.Constructor(&self)` per directory of `sandbox/constructors/`, so
+`sandbox/generated.new.go` is one `<x>.Constructor(&self)` per directory of `sandbox/constructors/`, so
 adding a directory is adding a call. Write `sandbox/constructors/<x>/constructor.go` with
 `func Constructor(sandbox *api.Sandbox)` in `package <x>`, run `build`, and it is wired — the
 same way a generated one is, and with no generated file to fight over. Editing a constructor
@@ -358,7 +358,7 @@ prints what it changes before writing. Details in [LibExamples](../LibExamples/d
 {{- if .HasBackoffice }}
 | `sandbox/internal/server/backoffice/**`, `assets/backoffice/*.html` | the backoffice behaves or looks otherwise |
 {{- end }}
-| `sandbox/internal/<pkg>/*.go` (never under `generated/`) | logic worth reusing |
+| `sandbox/internal/<pkg>/*.go` (never named `generated.*`) | logic worth reusing |
 | `sandbox/api/<x>.go` + `sandbox/internal/<x>/new.go` | a new api surface |
 | `sandbox/constructors/<x>/constructor.go` | how a field of the `Sandbox` is built |
 | `sandbox/deps/<x>/<x>.go` + `adapters/impls/<x>/<x>.go` + its `adapter.yaml` | a new dependency |
@@ -375,6 +375,11 @@ hand-written import of them with its replacement — `cliio.Fail(sandbox, …)` 
 `sandbox.Deps.OpinionatedAgnosCli.Fail(…)`, `routeio.RequestOf(route)` is `route.Request`, a `Handle*`
 logs and then calls `OpinionatedAgnosServer.WriteError(sandbox.Deps.SerializableDeps, …)`, and
 `start-server` calls `sandbox.Server.Serve` rather than `server.Main`.
+
+A project built before the `generated.` prefix needs nothing done by hand: its next `build`
+writes every generated Go file as `generated.<name>.go` (a remote dep's copy and shim included),
+drops the old name beside it, moves `sandbox/internal/generated/{cli,server,config}` to
+`sandbox/internal/<x>/` and rewrites the import of each in the project's own files.
 
 ## Ship
 {{ if .HasCli }}

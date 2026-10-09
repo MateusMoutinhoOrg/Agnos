@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Deps
-description: Creates adapters/bindings/<name>/binding.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --binding.
+description: Creates adapters/bindings/<name>/binding.yaml as a copy of the standard selection, so it starts filling every field, and build generates its generated.new.go. Point it at another adapter with set-adapter --binding.
 examples:
     - add-binding lambda
 priority: 100

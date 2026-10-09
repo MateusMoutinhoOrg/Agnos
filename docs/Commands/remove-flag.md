@@ -6,7 +6,7 @@ Remove a flag from a command's command.yaml
 agnos remove-flag <Name> --command <command> [--help] [--path <path>] [--quiet]
 ```
 
-Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go and input.go follow it.
+Drops one flag declaration (matched by its name, its id or one of its keys) from sandbox/internal/commands/<command>/command.yaml and runs build so the command's generated.new.go and generated.input.go follow it.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

@@ -33,6 +33,7 @@ func VerifyInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) er
 	violations = append(violations, CheckDatabases(sandbox, io)...)
 	violations = append(violations, CheckDocs(sandbox, io)...)
 	violations = append(violations, CheckStructure(sandbox, io)...)
+	violations = append(violations, CheckGenerated(sandbox, io)...)
 
 	if len(violations) == 0 {
 		sandbox.Deps.StdDeps.Logf("verify passed\n")

@@ -90,9 +90,14 @@ func checkRemoteCopy(sandbox *api.Sandbox, io *stagedfs.StagedFS, dep string, di
 	var violations []string
 
 	for _, file := range remote.Files {
-		target := utils.ContractsDir + "/" + dep + "/" + file.Name
+		target := add_dep.RemoteCopyPath(sandbox, dep, file.Name)
 
 		installed, err := io.ReadFile(target)
+		if err != nil && io.IsFile(utils.ContractsDir+"/"+dep+"/"+file.Name) {
+			// A copy an install before utils.GeneratedPrefix wrote: the
+			// next build moves it to target (MigrateGeneratedNames).
+			continue
+		}
 		if err != nil {
 			violations = append(violations, target+" is missing, but the module it was copied from declares it"+
 				" (run `agnos set-dep "+dep+" --version <version>`)")

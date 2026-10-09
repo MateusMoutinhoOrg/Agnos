@@ -9,8 +9,8 @@ import (
 
 // CollectCommands reads every command.yaml under sandbox/internal/commands — a
 // directory holding one is a command, at any depth — and returns one data map per command, in run order — lowest `priority` first,
-// then by name — for the generated new.go and input.go of each command and
-// the {{range .Commands}} loop of sandbox/internal/generated/cli/new.go.
+// then by name — for the generated.new.go and generated.input.go of each command and
+// the {{range .Commands}} loop of sandbox/internal/cli/generated.new.go.
 // What the map holds is the declaration itself: the dispatch and the help
 // screens read it back off Cli.Commands at runtime. `help` is collected like
 // every other command: its command.yaml is written by GenerateHelpCommandYaml
@@ -55,7 +55,7 @@ func sortCommands(sandbox *api.Sandbox, commands []map[string]any) {
 	})
 }
 
-// commandData is one command as the generated new.go and input.go read it.
+// commandData is one command as the generated.new.go and generated.input.go read it.
 // Dir is the project-relative directory the command sits in, which the
 // generated cli imports it from.
 func commandData(sandbox *api.Sandbox, unit utils.UnitDir, conf *commandconf.CommandConf) map[string]any {

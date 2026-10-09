@@ -11,8 +11,8 @@ agnos server-init --path test-dir
 # test-dir. sandbox/internal/commands/server/start_server proves the implicit cli-init
 # ran: a server needs a command that starts it.
 mkdir -p assert-dir/sandbox/api
-cp test-dir/sandbox/api/server.go assert-dir/sandbox/api/server.go
-cp test-dir/sandbox/api/route.go assert-dir/sandbox/api/route.go
+cp test-dir/sandbox/api/generated.server.go assert-dir/sandbox/api/generated.server.go
+cp test-dir/sandbox/api/generated.route.go assert-dir/sandbox/api/generated.route.go
 mkdir -p assert-dir/sandbox/internal/server
 cp -R test-dir/sandbox/internal/server/. assert-dir/sandbox/internal/server/
 mkdir -p assert-dir/sandbox/internal/routes

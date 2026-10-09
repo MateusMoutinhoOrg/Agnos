@@ -15,8 +15,8 @@ const legacyBackofficeConfig = "sandbox/api/userconfig_backoffice.go"
 // any directory the removal left empty and turns the mechanic off.
 //
 // What it removes is read off BackofficeTree itself, so it is exactly what
-// init installs: a route or a command goes whole — its generated new.go and
-// input.go with it — by name, from whatever folder it was moved to; the
+// init installs: a route or a command goes whole — its generated.new.go and
+// generated.input.go with it — by name, from whatever folder it was moved to; the
 // backoffice's packages, database and pages go whole (BackofficeDirs); every
 // other file goes alone. Nothing the project wrote is touched: RouteProps and
 // api.Config lose their backoffice part with its file, and start-server never

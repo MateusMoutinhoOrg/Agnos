@@ -12,12 +12,12 @@ import (
 const BindingsDir = "adapters/bindings"
 
 // BindingConfFile is the declaration of one binding. A binding
-// directory that has one gets its new.go generated from it; one that has none
+// directory that has one gets its generated.new.go generated from it; one that has none
 // is a hand-written mix and is left alone.
 const BindingConfFile = "binding.yaml"
 
 // StandardBinding is the binding every project starts with, the one
-// cmd/main/main.go imports and the one an install writes into unless the
+// cmd/main/generated.main.go imports and the one an install writes into unless the
 // caller names another.
 const StandardBinding = "standard"
 
@@ -92,7 +92,7 @@ func DeclaredBindings(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 // one, because the invariant is that every binding fills every field of Deps:
 // a contract installed into a project and bound by no binding is a nil func
 // waiting to panic. A project with no declared binding gets the standard
-// one, which is what cmd/main/main.go imports.
+// one, which is what cmd/main/generated.main.go imports.
 func EnrollAdapter(sandbox *api.Sandbox, io *stagedfs.StagedFS, adapter string) error {
 	bindings := DeclaredBindings(sandbox, io)
 	if len(bindings) == 0 {
@@ -206,7 +206,7 @@ func BindingsUsing(sandbox *api.Sandbox, io *stagedfs.StagedFS, adapter string) 
 // ValidateBindingName rejects a name that could not be a directory under
 // adapters/bindings/ and a Go package clause at the same time — the same
 // check ValidateCommandName makes, for the same reason: the name is
-// propagated straight into `package <name>` of the generated new.go.
+// propagated straight into `package <name>` of the generated.new.go.
 func ValidateBindingName(sandbox *api.Sandbox, binding string) error {
 	if binding == "" {
 		return sandbox.Deps.StdDeps.Errorf("a binding needs a name")

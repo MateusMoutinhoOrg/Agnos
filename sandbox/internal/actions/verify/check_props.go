@@ -44,14 +44,15 @@ func CheckProps(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 var sandboxOwnFields = []string{"Deps", "Config"}
 
 // CheckContractFields reports every contract of sandbox/api/ a package builds
-// — sandbox/internal/<x>/new.go, or the one level down utils.ConstructorSource
+// — sandbox/internal/<x>/, or the one level down utils.ConstructorSource
 // finds — that no part of api.Sandbox declares a field for. Its constructor
 // writes sandbox.<X>, and api.Sandbox holds no field per contract any more:
 // each is declared by the part of whoever owns it, so without this the project
 // fails in the compiler on a name it never declared.
 //
-// A contract a mechanic ships (cli's cli.go) is skipped: the mechanic
-// ships the part declaring its field beside it (clisandbox.go), and a build
+// A contract a mechanic ships (cli's generated.cli.go) is skipped: the
+// mechanic ships the part declaring its field beside it
+// (generated.clisandbox.go), and a build
 // renders both — the check would otherwise refuse the very build that writes
 // that part into a tree older than it.
 func CheckContractFields(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
@@ -75,12 +76,12 @@ func CheckContractFields(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 
 	var violations []string
 	for _, file := range io.ListFiles("sandbox/api") {
-		name := lastSegment(sandbox, file)
+		name := utils.SourceName(sandbox, lastSegment(sandbox, file))
 		if !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
 			continue
 		}
 		base := sandbox.Deps.StringsDeps.TrimSuffix(name, ".go")
-		if !io.IsFile(utils.ConstructorSource(io, base)+"/new.go") || shippedByGroup(sandbox, name) {
+		if utils.ConstructorNewFile(sandbox, io, utils.ConstructorSource(sandbox, io, base)) == "" || shippedByGroup(sandbox, name) {
 			continue
 		}
 		field := sandbox.Deps.StringsDeps.ToUpper(base[:1]) + base[1:]
@@ -100,8 +101,10 @@ func shippedByGroup(sandbox *api.Sandbox, name string) bool {
 		if !group.Code {
 			continue
 		}
-		if _, err := sandbox.Deps.EmbedDeps.ReadFile(group.Name + "/sandbox/api/" + name); err == nil {
-			return true
+		for _, shipped := range utils.GeneratedNames(sandbox, utils.SourceName(sandbox, name)) {
+			if _, err := sandbox.Deps.EmbedDeps.ReadFile(group.Name + "/sandbox/api/" + shipped); err == nil {
+				return true
+			}
 		}
 	}
 	return false

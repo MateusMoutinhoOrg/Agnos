@@ -25,7 +25,7 @@ exit-code: 0
 tree:
     - file: docs/Routes/login.md
       sha: 7c61e073cf66158c2fc0eacfdd841878bcd2effe967c8358849adc96efbef3c7
-    - file: sandbox/internal/routes/login/input.go
-      sha: edff48124c77734ce700ad851e720c56fc9a1bedd5c43491ca0c8e2bcd2b9cab
+    - file: sandbox/internal/routes/login/generated.input.go
+      sha: e4879728db9dcfd68150941bcb850e16c3428fc7aba89144a6e5bf54a1c252e1
     - file: sandbox/internal/routes/login/route.yaml
       sha: 8f031e84990a75052c3607e572b4388640d38ed917911dd595f34c3a0d615110

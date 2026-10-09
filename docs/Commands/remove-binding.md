@@ -6,7 +6,7 @@ Delete one binding
 agnos remove-binding <Name> [--help] [--path <path>] [--quiet]
 ```
 
-Removes adapters/bindings/<name>/ whole. The standard binding is refused: cmd/main/main.go imports it.
+Removes adapters/bindings/<name>/ whole. The standard binding is refused: cmd/main/generated.main.go imports it.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

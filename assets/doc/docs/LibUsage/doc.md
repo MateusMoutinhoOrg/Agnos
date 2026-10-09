@@ -110,7 +110,7 @@ exposing the same `Bind(deps *deps.Deps)` entry point:
 
 Starting from `standard.New()` is the safe default: an unfilled field is a nil func that
 panics on first call. For a permanent mix, write your own
-`adapters/bindings/<name>/new.go` binding only the libs you want — `standard/new.go` is
+`adapters/bindings/<name>/generated.new.go` binding only the libs you want — `standard/generated.new.go` is
 regenerated on every build, while other directories under `bindings/` are left alone.
 {{end}}
 `sandbox/api` is pure contract and `sandbox/` never touches the OS, so both are safe to import

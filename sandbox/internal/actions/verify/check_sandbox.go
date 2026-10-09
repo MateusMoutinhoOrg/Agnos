@@ -8,9 +8,10 @@ import (
 )
 
 // sandboxAllowedDirs is the fixed set of sub-directories the sandbox/ tree may
-// contain; sandboxAllowedFiles is the fixed set of loose files.
+// contain; sandboxAllowedFiles is the fixed set of loose files — new.go is
+// generated.new.go as a build before utils.GeneratedPrefix wrote it.
 var sandboxAllowedDirs = []string{"api", "constructors", "deps", "internal"}
-var sandboxAllowedFiles = []string{"new.go"}
+var sandboxAllowedFiles = []string{"generated.new.go", "new.go"}
 
 // CheckSandbox runs every sandbox-layer rule and returns one string per
 // violation, in a stable order.
@@ -50,10 +51,11 @@ func checkSandboxUserApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
 	for _, pair := range userApiFiles {
-		if !io.IsFile("sandbox/api/"+pair[0]) || io.IsFile("sandbox/api/"+pair[1]) {
+		aggregate := utils.GeneratedPath(sandbox, io, "sandbox/api", pair[0])
+		if aggregate == "" || io.IsFile("sandbox/api/"+pair[1]) {
 			continue
 		}
-		violations = append(violations, "sandbox/api/"+pair[1]+" is missing; sandbox/api/"+pair[0]+
+		violations = append(violations, "sandbox/api/"+pair[1]+" is missing; "+aggregate+
 			" embeds the api."+pair[2]+" it declares and only start writes it — write it by hand, `type "+pair[2]+" struct{}` will do")
 	}
 
@@ -61,7 +63,7 @@ func checkSandboxUserApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 }
 
 // checkSandboxContents enforces that sandbox/ holds only the api, constructors,
-// deps and internal directories plus a loose new.go.
+// deps and internal directories plus a loose generated.new.go.
 func checkSandboxContents(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
@@ -77,7 +79,7 @@ func checkSandboxContents(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string 
 		name := lastSegment(sandbox, file)
 		if !contains(sandboxAllowedFiles, name) {
 			violations = append(violations, "sandbox/ contains unexpected file "+name+
-				" (allowed: new.go)")
+				" (allowed: generated.new.go)")
 		}
 	}
 
@@ -114,7 +116,7 @@ func checkSandboxImports(sandbox *api.Sandbox, io *stagedfs.StagedFS, module str
 }
 
 // checkRetiredImports names, for a file importing a package of
-// sandbox/internal/generated/ that the OpinionatedAgnos libs replaced, what
+// utils.LegacyGeneratedDir that the OpinionatedAgnos libs replaced, what
 // replaced it. The build has already removed the package, so the import is a
 // hand-written file — a Handle*, a handler, a methods_custom.go — written
 // against an older agnos, and the replacement is the whole of its migration.
@@ -123,7 +125,7 @@ func checkRetiredImports(sandbox *api.Sandbox, io *stagedfs.StagedFS, module str
 
 	for _, file := range goFilesUnder(sandbox, io, "sandbox") {
 		for _, imp := range fileImports(sandbox, io, file) {
-			if !isUnder(imp, module+"/"+utils.GeneratedDir) {
+			if !isUnder(imp, module+"/"+utils.LegacyGeneratedDir) {
 				continue
 			}
 			replacement, retired := utils.RetiredReplacement(imp[len(module)+1:])
@@ -224,27 +226,28 @@ func isInOpinionatedContract(sandbox *api.Sandbox, file string) bool {
 }
 
 // checkSandboxConstructors enforces that the package building a contract builds
-// it under the one name the generated constructor calls: sandbox/api/<x>.go is
-// a field of the Sandbox, so sandbox/internal/<x>/new.go — or the one level
-// down utils.ConstructorSource finds — declares New<X>.
+// it under the one name the generated constructor calls: sandbox/api/<x>.go
+// (or generated.<x>.go) is a field of the Sandbox, so sandbox/internal/<x>/ —
+// or the one level down utils.ConstructorSource finds — declares New<X>, in a
+// generated.new.go or a hand-written new.go.
 //
-// A contract with no sandbox/internal/<x>/new.go passes. Such a field is one
+// A contract with neither passes. Such a field is one
 // this repo does not fill — an api published for a consumer to install, say —
 // and no constructor package is written for it.
 func checkSandboxConstructors(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string
 
-	for _, file := range io.ListFiles("sandbox/api") {
-		name := lastSegment(sandbox, file)
+	for _, file := range utils.DropSuperseded(sandbox, io.ListFiles("sandbox/api")) {
+		name := utils.SourceName(sandbox, lastSegment(sandbox, file))
 		if !sandbox.Deps.StringsDeps.HasSuffix(name, ".go") || utils.IsConstructorExempt(sandbox, name) {
 			continue
 		}
 
 		base := sandbox.Deps.StringsDeps.TrimSuffix(name, ".go")
 		constructor := "New" + sandbox.Deps.StringsDeps.ToUpper(base[:1]) + base[1:]
-		newFile := utils.ConstructorSource(io, base) + "/new.go"
+		newFile := utils.ConstructorNewFile(sandbox, io, utils.ConstructorSource(sandbox, io, base))
 
-		if !io.IsFile(newFile) {
+		if newFile == "" {
 			continue
 		}
 		if !declaresFunc(sandbox, io, newFile, constructor) {
@@ -257,7 +260,7 @@ func checkSandboxConstructors(sandbox *api.Sandbox, io *stagedfs.StagedFS) []str
 	return violations
 }
 
-// checkSandboxConstructorPackages enforces the shape sandbox/new.go is
+// checkSandboxConstructorPackages enforces the shape sandbox/generated.new.go is
 // rendered against: every directory under sandbox/constructors/ carries a
 // constructor.go declaring Constructor, because new.go imports that directory
 // by its own name and calls exactly that function on it.
@@ -275,12 +278,12 @@ func checkSandboxConstructorPackages(sandbox *api.Sandbox, io *stagedfs.StagedFS
 		if !io.IsFile(file) {
 			violations = append(violations, utils.ConstructorDir(name)+" has no "+utils.ConstructorFile+
 				"; every package under "+utils.ConstructorsDir+
-				"/ declares the Constructor(sandbox) that sandbox/new.go calls")
+				"/ declares the Constructor(sandbox) that sandbox/generated.new.go calls")
 			continue
 		}
 		if !declaresFunc(sandbox, io, file, "Constructor") {
 			violations = append(violations,
-				file+" does not declare Constructor; it is what sandbox/new.go calls to fill the "+
+				file+" does not declare Constructor; it is what sandbox/generated.new.go calls to fill the "+
 					"field this package owns")
 		}
 	}

@@ -25,5 +25,5 @@ agnos show-route files --path test-dir
 for route in get_article get_comment files; do
   mkdir -p assert-dir/sandbox/internal/routes/$route
   cp test-dir/sandbox/internal/routes/$route/route.yaml assert-dir/sandbox/internal/routes/$route/route.yaml
-  cp test-dir/sandbox/internal/routes/$route/input.go assert-dir/sandbox/internal/routes/$route/input.go
+  cp test-dir/sandbox/internal/routes/$route/generated.input.go assert-dir/sandbox/internal/routes/$route/generated.input.go
 done

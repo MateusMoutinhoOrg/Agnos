@@ -7,10 +7,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// generatedCommandFiles are the files of a command package every build
-// writes, so a rename leaves them behind for the follow-up build to write
-// again.
-var generatedCommandFiles = []string{"new.go", "input.go"}
+// generatedCommandFiles are the files of a command package every build writes,
+// under the names a build before utils.GeneratedPrefix wrote them: a rename
+// leaves them behind for the follow-up build to write again, as it does every
+// generated.* file.
+var generatedCommandFiles = []string{utils.UnitNewFile, utils.UnitInputFile}
 
 // RenameCommandInternal moves every hand-written file of the command's
 // directory to <folder>/<name>/ — its own folder, or the one --dir names —
@@ -75,7 +76,7 @@ func RenameCommandInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props ap
 
 	for _, file := range io.ListFilesRecursively(old_dir) {
 		relative := sandbox.Deps.StringsDeps.TrimPrefix(file, old_dir+"/")
-		if isGenerated(relative) {
+		if isGenerated(sandbox, relative) {
 			continue
 		}
 		content, err := io.ReadFile(file)
@@ -113,7 +114,10 @@ func renameVerb(sandbox *api.Sandbox, conf *commandconf.CommandConf, old_verb st
 }
 
 // isGenerated reports a file of the package the follow-up build writes again.
-func isGenerated(relative string) bool {
+func isGenerated(sandbox *api.Sandbox, relative string) bool {
+	if utils.IsGeneratedFile(sandbox, relative) && !sandbox.Deps.StringsDeps.Contains(relative, "/") {
+		return true
+	}
 	for _, generated := range generatedCommandFiles {
 		if relative == generated {
 			return true

@@ -8,8 +8,8 @@ import (
 
 // AddCommand scaffolds a new command package under
 // sandbox/internal/commands/<name>/ — a hand-written command.yaml and a stub
-// handler.go — then runs build as a follow-up step so its new.go
-// and input.go — the api.Command that lands in Cli.Commands — are generated
+// handler.go — then runs build as a follow-up step so its generated.new.go
+// and generated.input.go — the api.Command that lands in Cli.Commands — are generated
 // for it.
 func AddCommand(sandbox *api.Sandbox, props api.AddCommandProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)

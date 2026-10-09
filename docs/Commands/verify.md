@@ -6,7 +6,7 @@ Check the project keeps the sandbox/adapter schema
 agnos verify [--runtime <runtime>] [--help] [--path <path>] [--quiet]
 ```
 
-Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, deps, internal and new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps imports nothing external, every sandbox/api file has the sandbox/internal/<x>/new.go that builds it, and adapters/ holds only bindings and libs. `agnos build` runs this as a gate unless --unsafe is passed.
+Verifies the structural rules the harness depends on: sandbox/ imports stay inside sandbox/, sandbox/ holds only api, deps, internal and generated.new.go, sandbox/api imports nothing but sandbox/deps and sandbox/deps imports nothing external, every sandbox/api file has the sandbox/internal/<x>/ package whose New<X> builds it, every generated.*.go opens with its Code generated header, and adapters/ holds only bindings and libs. `agnos build` runs this as a gate unless --unsafe is passed.
 
 | Flag | Type | Default | Description | From |
 | --- | --- | --- | --- | --- |

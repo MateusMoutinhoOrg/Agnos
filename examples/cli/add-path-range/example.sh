@@ -17,5 +17,5 @@ agnos add-path rest --route static --start 1 --end -1 --path test-dir
 # 0, the second reads segment 1 to the last. The lib side copies the same set.
 mkdir -p assert-dir/sandbox/internal/routes/static
 cp test-dir/sandbox/internal/routes/static/route.yaml assert-dir/sandbox/internal/routes/static/route.yaml
-cp test-dir/sandbox/internal/routes/static/new.go assert-dir/sandbox/internal/routes/static/new.go
-cp test-dir/sandbox/internal/routes/static/input.go assert-dir/sandbox/internal/routes/static/input.go
+cp test-dir/sandbox/internal/routes/static/generated.new.go assert-dir/sandbox/internal/routes/static/generated.new.go
+cp test-dir/sandbox/internal/routes/static/generated.input.go assert-dir/sandbox/internal/routes/static/generated.input.go

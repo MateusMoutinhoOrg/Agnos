@@ -6,16 +6,16 @@ tree:
     - file: docs/Databases/app_database.md
       sha: c1d206f58e89dad717a1a7ec6689fa5c801eb7b5a9e657ff0c482c55cd4e05ea
     - file: docs/Databases/doc.md
-      sha: 10d0449bbbbf38b023d50021e798ae0a6ac2ae97b5607e7af29d7b9eb0821f27
+      sha: eebf7d6c06ff74817ef1ea04013114c2302b8d6a076caceba0c003254841ef68
     - file: docs/Databases/doc.yaml
       sha: 6ef97e2279573c6dedfadd7e9d18e0dd43e08614b0cf2ba02f3b364749088cf2
     - file: sandbox/deps/OpinionatedAgnosDatabase/opinionatedagnosdatabase.go
-      sha: f39657db5d21bd4e156997ec7385b42c5ec75cf6cd7f5784bb83336d73b116d7
-    - file: sandbox/internal/databases/app_database/api.go
-      sha: d3b804aff2f8834a00612b4b2a99d0c5a85ec79001de0f7274ef423ecb0e4104
+      sha: 4492ce8cbed3c73fc7990e1eac3618a7a98d2b9cf49d6c77c0af5b98e1418601
     - file: sandbox/internal/databases/app_database/database.yaml
       sha: 178438d27d53fc22f90dfb81b2f4f4913feec984ae5bd037db418757379da1b8
-    - file: sandbox/internal/databases/app_database/methods.go
-      sha: b59dcd020f824e80d1c52fe23fa43bf2e5e418257ef975bed248434ca4cbc9f9
-    - file: sandbox/internal/databases/app_database/new.go
-      sha: edb0ca7137cfbad7fb8b28f402e1cb43df8098073bb0b3026daef2397975b24d
+    - file: sandbox/internal/databases/app_database/generated.api.go
+      sha: fd3e6e8aab15638c589b9a28f23c0c1077818577ae3002f2ce44484ed6cf2eb0
+    - file: sandbox/internal/databases/app_database/generated.methods.go
+      sha: 0ce6e7726f358ad3f30780bdf1a99d457413cf901270fdbfb3106caa07dbb6e2
+    - file: sandbox/internal/databases/app_database/generated.new.go
+      sha: 437d1b03b23824ec5240cebfa0442b4ff707667b0f56c2928c238dcf933d07b2

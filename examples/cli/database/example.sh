@@ -6,7 +6,7 @@
 # `database-init` installs the store as a remote dep and the
 # OpinionatedAgnosDatabase lib over it, and turns the mechanic on. It scaffolds no database: which tables a
 # project wants is a declaration, so every table below is declared by hand and
-# api.go, new.go and methods.go are generated from that declaration alone.
+# generated.api.go, generated.new.go and generated.methods.go are generated from that declaration alone.
 
 agnos start --path test-dir --project-name Test --module Test -q
 

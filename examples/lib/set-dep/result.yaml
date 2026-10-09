@@ -3,21 +3,21 @@ exit-code: 0
 tree:
     - file: adapters/bindings/standard/binding.yaml
       sha: c47436e286fa8e3c76565b464080774687d73b588ca9969d469b37e69b236469
-    - file: adapters/bindings/standard/new.go
-      sha: b1d9c94e729e6f0300abf3e381662de93eba8a9e9b6e6beb7628ebcd3eb02faa
+    - file: adapters/bindings/standard/generated.new.go
+      sha: 701a2e2474fe8f11cc3e6307f782ab72c07d8469a8028f13c0d666cb6e2bb1dd
     - file: adapters/impls/remote/adapter.yaml
       sha: d58cb68975c85535463524a4f0f903e6113372272a5c1b5f61689336ab7d99b0
-    - file: adapters/impls/remote/remote.go
-      sha: 7756f22d7b8e8a739045f08805644cdbce6fb5a8854091b70cbf7efb3bafc808
-    - file: sandbox/deps/deps.go
-      sha: 7f0b218c4e305490f6cea71621d013dbca6064af381e6f16a7f41fa0a535ad58
-    - file: sandbox/deps/remote/config.go
-      sha: 9bf0ffef8c649e9a6b9849022cac33c5d91bc41697171e832d17914733815c29
-    - file: sandbox/deps/remote/greeter.go
-      sha: 7e9ff865e2bb0e38400b846c8c6cf1fe7f35dc52f38bbb6d6b7fd3214a65a2fb
-    - file: sandbox/deps/remote/projectconfig.go
-      sha: 5182264d78626f1d3151e928b9d59feeca32b04e7d286d90e84c39b096ec7bf7
-    - file: sandbox/deps/remote/projectsandbox.go
-      sha: 2b9d40b5aee297a7e8a16a599246adf47e1f3319fdc350788dcec7fb4809d749
-    - file: sandbox/deps/remote/sandbox.go
-      sha: 9fb8372af095a5ea6fe18615a0d7d0e0b040a1d645d41e5ec768b2bec0e0a91f
+    - file: adapters/impls/remote/generated.remote.go
+      sha: 85b093a6ed41ec2b55f7269fae2314bfb52ca9705eae4b6b3f343d6150c6c6f0
+    - file: sandbox/deps/generated.deps.go
+      sha: 9ca80f802b8a30fdaa31fd59e0942dfb5b71e6817298f7635c3338ec43368662
+    - file: sandbox/deps/remote/generated.config.go
+      sha: 9cafd1adc80e4f4ffe04ce6a91ad3685abb4a1b981fdad1b5984d71c8a515aff
+    - file: sandbox/deps/remote/generated.greeter.go
+      sha: 797a56ebe60b5eb292e16f1088528d0c8007584ea7112195bc923ed9a1338116
+    - file: sandbox/deps/remote/generated.projectconfig.go
+      sha: 7e17b3727de566a4cca6c8f166a353f244877d9934e2ecb74504b742d671cdd1
+    - file: sandbox/deps/remote/generated.projectsandbox.go
+      sha: b03f105563a1ec2882e51cee6223133511edd93a180816b7706692eadf2aa606
+    - file: sandbox/deps/remote/generated.sandbox.go
+      sha: f3677228648995bdfc1e679b07006b3e712cef80baf1c1589e802f0644032827

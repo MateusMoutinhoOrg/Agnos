@@ -8,7 +8,7 @@ import (
 
 // AddPath inserts one entry into the `paths` of
 // sandbox/internal/routes/<route>/route.yaml, then runs build as a
-// follow-up step so the route's new.go and input.go pick it up.
+// follow-up step so the route's generated.new.go and generated.input.go pick it up.
 func AddPath(sandbox *api.Sandbox, props api.AddPathProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := AddPathInternal(sandbox, io, props); err != nil {

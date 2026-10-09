@@ -2,7 +2,7 @@
 
 A **database** is `sandbox/internal/databases/<db>/`, declared by `database.yaml` and generated
 whole from it — the same relation `commands/<x>/command.yaml` and `routes/<x>/route.yaml` have
-with the `new.go` they render.
+with the `generated.new.go` they render.
 {{ if .DatabaseDocs }}
 | Database | Package | Keys under |
 | --- | --- | --- |
@@ -20,9 +20,9 @@ on the next build.
 | File | Written by |
 | --- | --- |
 | `database.yaml` | `add-database`, `add-table`, `add-table-field` and their editors — never by hand |
-| `api.go` | generated: `<T>Record`, `<T>Input`, `<T>Filter`, and the `<Db>` struct of function fields |
-| `new.go` | generated: the `databasedeps.Props` and the wiring of each function field |
-| `methods.go` | generated: the body of every method |
+| `generated.api.go` | generated: `<T>Record`, `<T>Input`, `<T>Filter`, and the `<Db>` struct of function fields |
+| `generated.new.go` | generated: the `databasedeps.Props` and the wiring of each function field |
+| `generated.methods.go` | generated: the body of every method |
 | `methods_custom.go` | **hand-written** — the only escape; no build reads it or rewrites it |
 
 A database is not a surface of `sandbox/api/`: its methods are typed by table, so there is no
@@ -41,7 +41,7 @@ so `--database` refuses anything else. A database's `key-prefix` is a folder ins
 
 | Piece | What |
 | --- | --- |
-| `sandbox/api/databaseconfig.go` | generated: `sandbox.Config.DatabaseDir`, and `api.DefaultDatabaseDir` (`data`), the value `NewConfig` starts it at |
+| `sandbox/api/generated.databaseconfig.go` | generated: `sandbox.Config.DatabaseDir`, and `api.DefaultDatabaseDir` (`data`), the value `NewConfig` starts it at |
 | `sandbox/internal/commands/middleware/database_dir/` | generated while `cli` is on: a middleware in front of every command line that reads `--database` into `sandbox.Config.DatabaseDir`; no command declares `--database` itself |
 
 A `key-prefix` under `data/` is a declaration from before `--database`: it would now read
@@ -106,7 +106,7 @@ Three rules hold for every generated method:
 
 - **A search answers `(<T>Record, bool)`, a write answers `error`.** What failed is an error, what
   is absent is a `false` — never one `nil` standing for both.
-- **`sandbox *api.Sandbox` comes first**, in every function of `methods.go`.
+- **`sandbox *api.Sandbox` comes first**, in every function of `generated.methods.go`.
 - **No type assertion without `ok`.** Every stored value is converted in the comma-ok form, so a
   value of the wrong type is an error and never a panic.
 

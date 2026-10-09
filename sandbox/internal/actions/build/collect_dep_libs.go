@@ -35,7 +35,7 @@ func collectLibDirs(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []m
 }
 
 // CollectDepLibs returns one entry per sandbox/deps sub-contract directory,
-// for the {{range .DepLibs}} loop in sandbox/deps/deps.go. Type is the root
+// for the {{range .DepLibs}} loop in sandbox/deps/generated.deps.go. Type is the root
 // type of the contract: Contract for every one the catalog or a hand writes,
 // Sandbox for a remote dep, which keeps the name of the api it was copied
 // from.

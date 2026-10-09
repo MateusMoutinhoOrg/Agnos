@@ -7,7 +7,7 @@ import (
 )
 
 // RebalanceRoutes lays the chain down again with room between its rungs, then
-// runs build so every generated new.go carries its new priority.
+// runs build so every generated.new.go carries its new priority.
 func RebalanceRoutes(sandbox *api.Sandbox, props api.RebalanceRoutesProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := RebalanceRoutesInternal(sandbox, io, props); err != nil {

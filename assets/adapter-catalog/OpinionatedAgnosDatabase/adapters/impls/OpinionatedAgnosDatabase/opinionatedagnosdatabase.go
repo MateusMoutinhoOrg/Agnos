@@ -11,7 +11,7 @@ import (
 )
 
 // Bind fills deps.Deps.OpinionatedAgnosDatabase with the readers and filters
-// every generated methods.go shares. Nothing here holds a dep: every function
+// every generated.methods.go shares. Nothing here holds a dep: every function
 // is handed the database, the record or the value it reads.
 func Bind(deps *deps.Deps) {
 	deps.OpinionatedAgnosDatabase = opinionatedagnosdatabase.Contract{

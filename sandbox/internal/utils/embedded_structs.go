@@ -39,6 +39,8 @@ func CollectEmbeddedStructs(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir str
 		}
 	}
 
+	files = DropSuperseded(sandbox, files)
+
 	var structs []EmbeddedStruct
 	for _, file := range files {
 		name := baseName(sandbox, file)
@@ -120,9 +122,10 @@ func ConfigParts(sandbox *api.Sandbox) func(name string) bool {
 }
 
 // AllBut returns an accept func for CollectEmbeddedStructs taking every file
-// except the aggregate itself.
+// except the aggregate itself, under either name a tree holds it by:
+// generated.<aggregate>, or <aggregate> as an older build wrote it.
 func AllBut(aggregate string) func(name string) bool {
 	return func(name string) bool {
-		return name != aggregate
+		return name != aggregate && name != GeneratedPrefix+aggregate
 	}
 }

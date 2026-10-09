@@ -8,14 +8,14 @@ import (
 
 // cliDirs are the directories the cli layer owns whole. The asset group only
 // names the files it installs, so removing those one by one would leave the
-// generated neighbours behind — a command's new.go with no command.yaml
+// generated neighbours behind — a command's generated.new.go with no command.yaml
 // and no handler.go next to it. The cli layer is generated from end to end,
 // so purging it means dropping these directories entirely.
 //
 // sandbox/constructors/cli goes with them: it is what fills Sandbox.Cli, and
 // it names the package being removed. It is written once and may since have
 // been edited, so it is dropped with the layer it belongs to rather than left
-// behind for sandbox/new.go to keep calling.
+// behind for sandbox/generated.new.go to keep calling.
 //
 // docs/Commands is one of them for the same reason: the asset group installs
 // its doc.md and doc.yaml, but the build writes one page per command beside
@@ -30,7 +30,7 @@ import (
 // sandbox/internal/commandprops is one of them: every command names it, so it
 // goes with them.
 var cliDirs = []string{
-	utils.GeneratedDir + "/cli",
+	utils.LegacyGeneratedDir + "/cli",
 	"sandbox/internal/cli",
 	"sandbox/internal/commands",
 	utils.CommandPropsDir,

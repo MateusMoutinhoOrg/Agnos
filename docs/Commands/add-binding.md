@@ -6,7 +6,7 @@ Declare one further binding
 agnos add-binding <Name> [--help] [--path <path>] [--quiet]
 ```
 
-Creates adapters/bindings/<name>/binding.yaml as a copy of the standard selection, so it starts filling every field, and build generates its new.go. Point it at another adapter with set-adapter --binding.
+Creates adapters/bindings/<name>/binding.yaml as a copy of the standard selection, so it starts filling every field, and build generates its generated.new.go. Point it at another adapter with set-adapter --binding.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

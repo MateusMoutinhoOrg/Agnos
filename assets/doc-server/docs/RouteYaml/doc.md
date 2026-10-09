@@ -2,9 +2,9 @@
 
 `sandbox/internal/routes/[<folder>/]<name>/route.yaml` declares one http route — the file is
 what makes its directory a route, at any depth. `{{.GeneratorName}} build`
-generates two files beside it: `new.go`, the `api.Route` that lands in `Server.Routes` — a 1:1
+generates two files beside it: `generated.new.go`, the `api.Route` that lands in `Server.Routes` — a 1:1
 image of the yaml, built on `Deps.OpinionatedAgnosServer.NewRoute` — and
-`input.go`, the `Input` struct the route's `Handle` is handed, plus the
+`generated.input.go`, the `Input` struct the route's `Handle` is handed, plus the
 `ReadBody` its body calls for. The dispatch is the `OpinionatedAgnosServer` lib's `Main`:
 it reads every request against those declarations, and nothing about a route is spelled
 in Go anywhere else.
@@ -12,7 +12,7 @@ in Go anywhere else.
 | File | Owner |
 |---|---|
 | `route.yaml` | the editors below |
-| `new.go`, `input.go` | every build |
+| `generated.new.go`, `generated.input.go` | every build |
 | `handler.go` | written once by `{{.GeneratorName}} add-route`, then the project's |
 
 Grow the file with the editors of [Workflow](../Workflow/doc.md#change-the-route-surface) — one
@@ -187,7 +187,7 @@ GET /admin  Authorization: Bearer abc       this route
 
 ## Input and `Handle`
 
-`input.go` declares one struct, every field tagged with the id `Run` fills it by:
+`generated.input.go` declares one struct, every field tagged with the id `Run` fills it by:
 
 ```go
 type Input struct {
@@ -263,7 +263,7 @@ body:
 ## Generated `ReadBody`
 
 `ReadBody(sandbox *api.Sandbox, route *api.Route)` is generated into the route's own
-`input.go`, and `new.go` hands it to `Route.ReadBody`: the dispatch calls it before the handler
+`generated.input.go`, and `generated.new.go` hands it to `Route.ReadBody`: the dispatch calls it before the handler
 runs and binds what it returns onto `Input.Body`, in what its `body.type` declares:
 
 | `body.type` | Returns |

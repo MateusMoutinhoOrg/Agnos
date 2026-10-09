@@ -1,4 +1,4 @@
-# `sandbox/api/config.go`
+# `sandbox/api/generated.config.go`
 
 ## `Config`
 

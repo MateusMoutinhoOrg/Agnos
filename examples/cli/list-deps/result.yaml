@@ -3,13 +3,13 @@ exit-code: 0
 tree:
     - file: adapters/bindings/standard/binding.yaml
       sha: d6e1c9babef84a5bf3ed2f8df74c8e69dc0d5d72adb45e7db6615945a42a65c0
-    - file: adapters/bindings/standard/new.go
-      sha: 025af3c333ec022131ced514ca2394d4d27f2dde12f17ebae58d6a7b1a28de9b
+    - file: adapters/bindings/standard/generated.new.go
+      sha: 020e4ca917cfd409b648887a9dafef1967a8b3b959fc9d828426f76d5460ce11
     - file: adapters/impls/osio/adapter.yaml
       sha: 0b3ef0528bd457d42a7a4ce53e9245602775f1f39015e9f34e4d2dcbddafd792
     - file: adapters/impls/osio/osio.go
       sha: 84e6b98d8e00133a54e86012f2b46cc644f34cf9a2c680b4d2eaac5705d93fd9
-    - file: sandbox/deps/deps.go
-      sha: 558c161ab7c2fc0cca330b1bc7dfa7a43163e522111d07037a16eb68cbda5f84
+    - file: sandbox/deps/generated.deps.go
+      sha: 77f77350369f1516bb0d42bb7251db6c55ccee85c5511803e5ba751e3ec025d6
     - file: sandbox/deps/iodeps/iodeps.go
       sha: b4fe45bad8cedc80c420d8b876c271bba43933ce3ccf56c239d431dc792b6a20

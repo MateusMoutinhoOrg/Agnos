@@ -6,7 +6,7 @@ args:
         type: equal
         value: database-init
 category: Database
-description: 'Installs the store the database layer is built over as a remote dep under sandbox/deps/databasedeps, the OpinionatedAgnosDatabase lib every generated methods.go reads it through, and turns the database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so ''agnos add-database'' is the step that follows.'
+description: 'Installs the store the database layer is built over as a remote dep under sandbox/deps/databasedeps, the OpinionatedAgnosDatabase lib every generated.methods.go reads it through, and turns the database mechanic on. It scaffolds no database of its own: which tables a project wants is a declaration, so ''agnos add-database'' is the step that follows.'
 examples:
     - database-init
     - database-init --path ./my-project

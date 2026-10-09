@@ -6,7 +6,7 @@ Declare a new database in the project
 agnos add-database <Name> [--key-prefix <key-prefix>] [--help] [--path <path>] [--quiet]
 ```
 
-Writes sandbox/internal/databases/<name>/database.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: 'agnos add-table' declares the first one.
+Writes sandbox/internal/databases/<name>/database.yaml and runs build, which generates generated.api.go, generated.new.go and generated.methods.go beside it. A database is born with no tables: 'agnos add-table' declares the first one.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

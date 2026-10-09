@@ -15,8 +15,8 @@ import (
 // `agnos add-table` and `agnos add-table-field` call, and writes only inside
 // test-dir. DatabaseInit installs the store as a remote dep and turns the
 // mechanic on; it scaffolds no database, because which tables a project wants
-// is a declaration — so every table below is declared here and api.go, new.go
-// and methods.go are generated from that declaration alone.
+// is a declaration — so every table below is declared here and generated.api.go,
+// generated.new.go and generated.methods.go are generated from that declaration alone.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound

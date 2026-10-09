@@ -6,7 +6,7 @@ Rename one route
 agnos rename-route <Route> <Name> [--dir <dir>] [--help] [--path <path>] [--quiet]
 ```
 
-Moves the route's directory to <name>/ in the folder it sits in — or in the one --dir names, / for the top — rewriting the package clause of every hand-written Go file, drops every folder that leaves empty, and runs build so new.go, input.go and the server's route list follow it. <name> may be the current one when only the folder changes. A page is refused: remove-page and add-page own its html.
+Moves the route's directory to <name>/ in the folder it sits in — or in the one --dir names, / for the top — rewriting the package clause of every hand-written Go file, drops every folder that leaves empty, and runs build so generated.new.go, generated.input.go and the server's route list follow it. <name> may be the current one when only the folder changes. A page is refused: remove-page and add-page own its html.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

@@ -134,8 +134,8 @@ func ReadRemoteApi(sandbox *api.Sandbox, dir string) (*apishape.Api, error) {
 }
 
 // CopyRemoteApi writes the remote contract into sandbox/deps/<name>/, one file
-// per file, with nothing changed but the package clause and the dependency
-// wiring — which is what makes the copy legible as the thing it is, doc
+// per file (RemoteCopyPath), with nothing changed but the package clause, the
+// dependency wiring and the generated header — which is what makes the copy legible as the thing it is, doc
 // comments and all.
 func CopyRemoteApi(sandbox *api.Sandbox, io *stagedfs.StagedFS, remote *apishape.Api, name string) error {
 	for _, file := range remote.Files {
@@ -144,7 +144,7 @@ func CopyRemoteApi(sandbox *api.Sandbox, io *stagedfs.StagedFS, remote *apishape
 			return sandbox.Deps.StdDeps.Errorf("%s could not be formatted after the package clause was rewritten: %w", file.Name, err)
 		}
 
-		if err := io.WriteFile(utils.ContractsDir+"/"+name+"/"+file.Name, []byte(formatted)); err != nil {
+		if err := utils.WriteGenerated(sandbox, io, RemoteCopyPath(sandbox, name, file.Name), []byte(formatted)); err != nil {
 			return err
 		}
 	}
@@ -154,7 +154,7 @@ func CopyRemoteApi(sandbox *api.Sandbox, io *stagedfs.StagedFS, remote *apishape
 
 // RenderRemoteFile is the single rendering of one remote contract file into a
 // consumer's sandbox/deps/<name>/: the package clause rewritten, the dependency
-// wiring stripped, then formatted. The install writes what it returns and the
+// wiring stripped, the generated header put on top, then formatted. The install writes what it returns and the
 // drift check compares against what it returns, so the two can never disagree
 // about what a copy of that file looks like — a check that rendered the file
 // its own way would report every copy as drifted the moment stripDepsWiring
@@ -166,7 +166,13 @@ func RenderRemoteFile(sandbox *api.Sandbox, remote *apishape.Api, file apishape.
 	content = stripDepsWiring(sandbox, content)
 	content = stripMechanicFields(sandbox, remote, content)
 
-	return sandbox.Deps.GoimportsDeps.Format(content)
+	return sandbox.Deps.GoimportsDeps.Format(utils.WithGeneratedHeader(sandbox, content))
+}
+
+// RemoteCopyPath is where one file of a remote contract is copied to:
+// sandbox/deps/<name>/generated.<file>, since set-dep rewrites it whole.
+func RemoteCopyPath(sandbox *api.Sandbox, name string, file string) string {
+	return utils.ContractsDir + "/" + name + "/" + utils.GeneratedFile(sandbox, file)
 }
 
 // splitModuleSpec cuts "<module>@<version>" apart. A spec with no version
@@ -202,7 +208,7 @@ func baseName(sandbox *api.Sandbox, path string) string {
 // a package it does not have.
 //
 // The removal is by line because that is the shape the field is written in:
-// sandbox/api/sandbox.go is generated, so the field is always its own line and
+// sandbox/api/generated.sandbox.go is generated, so the field is always its own line and
 // the import always its own. An import block left holding nothing goes with
 // them, since gofmt keeps an empty one.
 func stripDepsWiring(sandbox *api.Sandbox, content string) string {

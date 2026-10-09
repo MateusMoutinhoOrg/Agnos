@@ -70,7 +70,7 @@ func CommandPackage(sandbox *api.Sandbox, name string) string {
 const CommandsDir = "sandbox/internal/commands"
 
 // CommandConfFile is the declaration of one command, beside its generated
-// new.go and input.go and its hand-written handler.go, and what
+// generated.new.go and generated.input.go and its hand-written handler.go, and what
 // makes its directory a command.
 const CommandConfFile = "command.yaml"
 
@@ -154,7 +154,7 @@ func SaveCommandConf(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, c
 	return io.WriteFile(CommandConfPath(sandbox, io, name), []byte(conf.Render()))
 }
 
-// CommandReservedIds are the Input fields the generated input.go spells
+// CommandReservedIds are the Input fields the generated.input.go spells
 // itself, so no arg or flag may take them.
 var CommandReservedIds = []string{"FullCommand"}
 

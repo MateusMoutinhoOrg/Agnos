@@ -3,73 +3,73 @@ exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
       sha: 33d84dec8898adc7015a0325ff68b6c7ee3be650e9de1aead9c3f76e90028d21
-    - file: sandbox/api/config.go
-      sha: 44783565a27580bd5e43714455f2c3b82e370b8f78c2b7749b3b556a0c349784
+    - file: sandbox/api/generated.config.go
+      sha: d0ff9eae54a897d4374bdd6fa68e6e351fce4e8e0881a49cc5ba8aeb2f41c9fd
     - file: sandbox/internal/commands/info/help/command.yaml
-      sha: 9b8324034cd88bd140cc6f35bb16117302c548b28601a5b1e598a4afed2f3206
-    - file: sandbox/internal/commands/info/help/handler.go
-      sha: a8cd392d00ce64bac3038853ebcd6492ab56d3dc557d0b232e4eae1f9936f716
-    - file: sandbox/internal/commands/info/help/input.go
-      sha: cb66f850a4f62cc7be9893c16e00a3d7597a127a9d811ced4128f03f5cd7c983
-    - file: sandbox/internal/commands/info/help/new.go
-      sha: 0a7365732df439caa8e42b797fd870dc2cdb4796d7f62277fc3951f58e103da3
+      sha: 6171629c6420c8e2a657f37bd6cfe6b45cf549897d2acf25a3d0b7a92d695e78
+    - file: sandbox/internal/commands/info/help/generated.handler.go
+      sha: 7c7f898c2bd83a47966afbf9222a7eaa5723eb78721a509208c965287c12085b
+    - file: sandbox/internal/commands/info/help/generated.input.go
+      sha: ff5528dec9d03237e86bf6ea930cf97f98b518543f54f48649189cd08ee0d2ce
+    - file: sandbox/internal/commands/info/help/generated.new.go
+      sha: 2a8f647ce01d5b12ecadfdb1f584eb91281dd52b96d513a9ecaf6d84223a1330
     - file: sandbox/internal/commands/info/version/command.yaml
       sha: fb869cf0471a41e752def92267e298b29607af7a975903a259fc23372cd347f8
-    - file: sandbox/internal/commands/info/version/handler.go
-      sha: 28861974ff38e247c46efe6acd32ed79c9ab11ea556529691f7d8890dfd015bc
-    - file: sandbox/internal/commands/info/version/input.go
-      sha: dccf4ac553814f92b94db5a4efc236614dac46f60f0653a05b1a44401d1535a1
-    - file: sandbox/internal/commands/info/version/new.go
-      sha: ebe67688153aabda3b278ed2787daf2b40b3b6529fbae6c45009c8990ff8dbc5
+    - file: sandbox/internal/commands/info/version/generated.handler.go
+      sha: f2ed3a122b656f72b9d53f12701eb0fe5dea34220696ca8d15e5322c5a190e07
+    - file: sandbox/internal/commands/info/version/generated.input.go
+      sha: f9dcce873fbf7458da51371b104c089273f60aa737a8691cca0110e298558cd2
+    - file: sandbox/internal/commands/info/version/generated.new.go
+      sha: 48b160b381948bad97241c76c70ac1d7e38ae60994f8830afb5cb04d0fdd1657
     - file: sandbox/internal/commands/middleware/database_dir/command.yaml
       sha: c3a6c83393eced2cc7d9dd129f8f1e27589e91d034d2d716c6568f7ab67aba73
-    - file: sandbox/internal/commands/middleware/database_dir/handler.go
-      sha: 3c60f5d66adfb2a3dc6faa9a664c7d3f12adc778d84081dec769b9549b843193
-    - file: sandbox/internal/commands/middleware/database_dir/input.go
-      sha: 0eb5f840b684b44d10f3e55d6c39286dfbdd3fb5c92003410fc0e96aac3df7ef
-    - file: sandbox/internal/commands/middleware/database_dir/new.go
-      sha: 6a7dfce426366304aea9e3a9716fd93fcc75137dc7cf647297909953ba3ac05c
+    - file: sandbox/internal/commands/middleware/database_dir/generated.handler.go
+      sha: c6770d427da01c87cf2add076757d3ab907d6a5264c00c7a9a9bdd17c856c24e
+    - file: sandbox/internal/commands/middleware/database_dir/generated.input.go
+      sha: 2aaaf8962b082cc8c0764cba59b4a40aaab655e822aa6c484b0bef97e686f918
+    - file: sandbox/internal/commands/middleware/database_dir/generated.new.go
+      sha: 4cdc81b4d672217f9e3bb089dcb91a783d02de7c6fa28e3a7d0367e9dfaf20eb
     - file: sandbox/internal/commands/middleware/help_flag/command.yaml
       sha: c544a63b225e57366c7d07b346da0586e273ff4a3cb02a43b9f96fd6c1bb4ede
-    - file: sandbox/internal/commands/middleware/help_flag/handler.go
-      sha: a3fe8e61ee344d48a65fd4a4ab8c7c40b884c9f1452ca7c08fdeb0846a848de8
-    - file: sandbox/internal/commands/middleware/help_flag/input.go
-      sha: 60ca5134acdc26b137d405ebae2c59a6b42cbff33f0dc73bfe7c07e738f97a80
-    - file: sandbox/internal/commands/middleware/help_flag/new.go
-      sha: 20af068a7607550f29fcbf5b0d1c0625c9f1502a53d8770169ce3b5e86cbbcbf
+    - file: sandbox/internal/commands/middleware/help_flag/generated.handler.go
+      sha: 9e806451da48eedddca1cf709e28fd1ec893969d69c8fdce8c2a8a903c2aa20c
+    - file: sandbox/internal/commands/middleware/help_flag/generated.input.go
+      sha: 752244cbe0ae78ff568c4b80728c2b285aafc8a62475e06423d58dfbc0278d58
+    - file: sandbox/internal/commands/middleware/help_flag/generated.new.go
+      sha: 31546f98d3c624c90e80e635d9d62785a75ca4bf73f562e873038e66dc338187
     - file: sandbox/internal/commands/server/start_server/command.yaml
       sha: fc65fe5d0c3f9c36d4680492089e6952d770bae284b9764bbdad37104618a07d
+    - file: sandbox/internal/commands/server/start_server/generated.input.go
+      sha: 756f257811ad090d9e35a294a670e8e0956bdf2304fc4fd444034da5352d2314
+    - file: sandbox/internal/commands/server/start_server/generated.new.go
+      sha: f17be9df55b4863bbd43fa2588022799f2a5877ae8738a3f9b3266708eb614b0
     - file: sandbox/internal/commands/server/start_server/handler.go
       sha: aa8330f9ce2ca884d884d8d581e79e235428adf067d463f42a45df0d53f0d44e
-    - file: sandbox/internal/commands/server/start_server/input.go
-      sha: 8cb490ebcafe7eca48f4b13b4859f27d9d79105e8db5bc202ec0f6ed8013dffe
-    - file: sandbox/internal/commands/server/start_server/new.go
-      sha: 10ba4868041276f3f2875baf28e0168eef608147bd2efa6b788374fa27a53631
+    - file: sandbox/internal/routeprops/generated.routeprops.go
+      sha: 8ea23e5e3a1a8f500d8222d70684c4621d836ca72f1c59f6c17fcb1f648840c8
     - file: sandbox/internal/routeprops/project.go
       sha: 4b166b0973356e4ce4ca0a7e753d1e1cb028b78e02fb0837bf576f3c176fbccf
-    - file: sandbox/internal/routeprops/routeprops.go
-      sha: fcadbe4f5cd93b1cbf2e4d0c072533c7523845b5051ac66a27549df2f2607f31
+    - file: sandbox/internal/routes/front/generated.input.go
+      sha: 5bba93dd6e4c56c65b3bcbb0ea9483fc7f7453c36749ccbe0fbd88d821abf6f0
+    - file: sandbox/internal/routes/front/generated.new.go
+      sha: bd1d69c16fe89a09c46190e72557090a720d1b807b042d3cde7366f3fb166b29
     - file: sandbox/internal/routes/front/handler.go
       sha: 413982a78f6cae3ec4c8ba0bcadf3a8747fb212ddd0a4f4bb30ed15f7e50a63b
-    - file: sandbox/internal/routes/front/input.go
-      sha: bfbb988997584c4a9181432facefe51234edf43a4cf70d89b3159d5d83b4c4e4
-    - file: sandbox/internal/routes/front/new.go
-      sha: 6b4ee978b67bf5a86e187e740a57b5093ff4775eaa3b98f77702e2e6edb59231
     - file: sandbox/internal/routes/front/route.yaml
       sha: 8ffd75b2d6b2851f34b5628867b4dc5a22047f555b0f670d4eb2bf168b6561d9
-    - file: sandbox/internal/routes/health/handler.go
-      sha: 6d4c4a70d0c2603fca8927074472f441afe2fef1d56b975299c95c811557135f
-    - file: sandbox/internal/routes/health/input.go
-      sha: a311ad839a2f9a2a89ec777404f785e0d69ec2dd2fb6869c17976385cf6c0c6b
-    - file: sandbox/internal/routes/health/new.go
-      sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
+    - file: sandbox/internal/routes/health/generated.handler.go
+      sha: f50a14aa3d232fb6ce19a1201fc88ba918279acd5c5b67df589f28a78e8423d4
+    - file: sandbox/internal/routes/health/generated.input.go
+      sha: 1de855f3e71a8d571b647c32f39bf26dd923d9a081d15c59ad241fe5f97c3e02
+    - file: sandbox/internal/routes/health/generated.new.go
+      sha: 08f90988b8e12ad7e363c10a2b53fcd67dc401626aaa8499f91d51a624ab3e46
     - file: sandbox/internal/routes/health/route.yaml
       sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc
-    - file: sandbox/internal/routes/openapi/handler.go
-      sha: 84f08637c33ed45244522f3f56deb31c3afce1aa791c5f2d7f18aed70819387d
-    - file: sandbox/internal/routes/openapi/input.go
-      sha: bdcec6138e6e4283b7ef1d03beec025843103fc6d1cc8da91c7414e6551704d8
-    - file: sandbox/internal/routes/openapi/new.go
-      sha: d82e8e75c93b2cf8386bb7796c74bccf075666472c4adf340ee6c0966f8a9c5d
+    - file: sandbox/internal/routes/openapi/generated.handler.go
+      sha: 99145603971bd8714467e29356392db5e57dd76b5085c52cb45b21f8d7b650ec
+    - file: sandbox/internal/routes/openapi/generated.input.go
+      sha: 70652730fbf9ce28fd085f7d9619492aa8d3dedf3695a0e409eb0e37fe583423
+    - file: sandbox/internal/routes/openapi/generated.new.go
+      sha: 089bd56b0171674201aa0b5d387d49c3171453250960757971154a1767c722f4
     - file: sandbox/internal/routes/openapi/route.yaml
       sha: 22b7b95d54b8967b959216e5edcfba85a241667414182b923367443b41ed77e9

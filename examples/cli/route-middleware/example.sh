@@ -29,12 +29,12 @@ agnos rename-route admin-guard admin-auth --path test-dir -q
 agnos show-route admin-auth --path test-dir
 
 # What result.yaml records: the declarations, the two middleware stubs, and the
-# generated server/new.go — the run order, and the eight handlers beside it.
+# generated server/generated.new.go — the run order, and the eight handlers beside it.
 for route in admin admin_auth access_log; do
   mkdir -p assert-dir/sandbox/internal/routes/$route
   cp test-dir/sandbox/internal/routes/$route/route.yaml assert-dir/sandbox/internal/routes/$route/route.yaml
 done
 cp test-dir/sandbox/internal/routes/admin_auth/handler.go assert-dir/sandbox/internal/routes/admin_auth/handler.go
 cp test-dir/sandbox/internal/routes/access_log/handler.go assert-dir/sandbox/internal/routes/access_log/handler.go
-mkdir -p assert-dir/sandbox/internal/generated/server
-cp test-dir/sandbox/internal/generated/server/new.go assert-dir/sandbox/internal/generated/server/new.go
+mkdir -p assert-dir/sandbox/internal/server
+cp test-dir/sandbox/internal/server/generated.new.go assert-dir/sandbox/internal/server/generated.new.go

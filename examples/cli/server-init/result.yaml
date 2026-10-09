@@ -3,32 +3,32 @@ exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
       sha: 648a95a7bd347beffd2cec2a787bc5003210d1daba355d47cee3bbf55687ad04
-    - file: sandbox/api/route.go
-      sha: 75f7626e94242318858b417223ed8bed83e0f10f5f1ccfe32af9d1de87db67f2
-    - file: sandbox/api/server.go
-      sha: d4a03415df1c534a6947170e1f94d28fe5e2c4391862aab173c04716f28a6137
+    - file: sandbox/api/generated.route.go
+      sha: 17d306cc26676fa21f941a3dd3d22461d05f63926d8cbceaf320b0e9ec48ea44
+    - file: sandbox/api/generated.server.go
+      sha: c71ab47343bcb0a41c9403ddcb93475459292f583683d635800e444db26a45b0
     - file: sandbox/internal/commands/server/start_server/command.yaml
       sha: fc65fe5d0c3f9c36d4680492089e6952d770bae284b9764bbdad37104618a07d
+    - file: sandbox/internal/commands/server/start_server/generated.input.go
+      sha: 756f257811ad090d9e35a294a670e8e0956bdf2304fc4fd444034da5352d2314
+    - file: sandbox/internal/commands/server/start_server/generated.new.go
+      sha: f17be9df55b4863bbd43fa2588022799f2a5877ae8738a3f9b3266708eb614b0
     - file: sandbox/internal/commands/server/start_server/handler.go
       sha: aa8330f9ce2ca884d884d8d581e79e235428adf067d463f42a45df0d53f0d44e
-    - file: sandbox/internal/commands/server/start_server/input.go
-      sha: 8cb490ebcafe7eca48f4b13b4859f27d9d79105e8db5bc202ec0f6ed8013dffe
-    - file: sandbox/internal/commands/server/start_server/new.go
-      sha: 10ba4868041276f3f2875baf28e0168eef608147bd2efa6b788374fa27a53631
-    - file: sandbox/internal/routes/health/handler.go
-      sha: 6d4c4a70d0c2603fca8927074472f441afe2fef1d56b975299c95c811557135f
-    - file: sandbox/internal/routes/health/input.go
-      sha: a311ad839a2f9a2a89ec777404f785e0d69ec2dd2fb6869c17976385cf6c0c6b
-    - file: sandbox/internal/routes/health/new.go
-      sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
+    - file: sandbox/internal/routes/health/generated.handler.go
+      sha: f50a14aa3d232fb6ce19a1201fc88ba918279acd5c5b67df589f28a78e8423d4
+    - file: sandbox/internal/routes/health/generated.input.go
+      sha: 1de855f3e71a8d571b647c32f39bf26dd923d9a081d15c59ad241fe5f97c3e02
+    - file: sandbox/internal/routes/health/generated.new.go
+      sha: 08f90988b8e12ad7e363c10a2b53fcd67dc401626aaa8499f91d51a624ab3e46
     - file: sandbox/internal/routes/health/route.yaml
       sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc
-    - file: sandbox/internal/routes/openapi/handler.go
-      sha: cc4037b0832cc89b11ff70ffc841da149000360a5abf0c55fc30cad246eac28e
-    - file: sandbox/internal/routes/openapi/input.go
-      sha: bdcec6138e6e4283b7ef1d03beec025843103fc6d1cc8da91c7414e6551704d8
-    - file: sandbox/internal/routes/openapi/new.go
-      sha: d82e8e75c93b2cf8386bb7796c74bccf075666472c4adf340ee6c0966f8a9c5d
+    - file: sandbox/internal/routes/openapi/generated.handler.go
+      sha: c22f5ef223978a7ccbc2daac82217a02628c09d5ece947a6d45e66c41869f801
+    - file: sandbox/internal/routes/openapi/generated.input.go
+      sha: 70652730fbf9ce28fd085f7d9619492aa8d3dedf3695a0e409eb0e37fe583423
+    - file: sandbox/internal/routes/openapi/generated.new.go
+      sha: 089bd56b0171674201aa0b5d387d49c3171453250960757971154a1767c722f4
     - file: sandbox/internal/routes/openapi/route.yaml
       sha: 22b7b95d54b8967b959216e5edcfba85a241667414182b923367443b41ed77e9
     - file: sandbox/internal/server/errors/handle_bad_request.go
@@ -47,3 +47,5 @@ tree:
       sha: d237040497a5bb505d4df17207cdabdb1b64af477fdeb363c924fc8479a6b151
     - file: sandbox/internal/server/errors/handle_unsupported_media_type.go
       sha: 5ab2ce7ca11316c3f3ba746e02143672b7a1af34d3d87356ed1b0c54beff0461
+    - file: sandbox/internal/server/generated.new.go
+      sha: 3589bc738d3f43f4e3f6f6027e117ab275e8bb56c20643a43e428c5f5405c61c

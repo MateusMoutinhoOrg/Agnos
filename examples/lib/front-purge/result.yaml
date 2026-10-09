@@ -9,19 +9,19 @@ tree:
       sha: 7aba9c317d045289cd1cbc1228d11e321a26f39757bc253c9ca525d8668eeaa4
     - file: assets/front/index.html
       sha: 747d5e46c1b49715716825a0c28b39aaaeb1f643582bfdb7b332c2aa5dd0af51
-    - file: sandbox/internal/routes/health/handler.go
-      sha: 6d4c4a70d0c2603fca8927074472f441afe2fef1d56b975299c95c811557135f
-    - file: sandbox/internal/routes/health/input.go
-      sha: a311ad839a2f9a2a89ec777404f785e0d69ec2dd2fb6869c17976385cf6c0c6b
-    - file: sandbox/internal/routes/health/new.go
-      sha: 5c38d17b41d447ac9279255b29b3027395300c733bd9f5875dab4b927adfe104
+    - file: sandbox/internal/routes/health/generated.handler.go
+      sha: f50a14aa3d232fb6ce19a1201fc88ba918279acd5c5b67df589f28a78e8423d4
+    - file: sandbox/internal/routes/health/generated.input.go
+      sha: 1de855f3e71a8d571b647c32f39bf26dd923d9a081d15c59ad241fe5f97c3e02
+    - file: sandbox/internal/routes/health/generated.new.go
+      sha: 08f90988b8e12ad7e363c10a2b53fcd67dc401626aaa8499f91d51a624ab3e46
     - file: sandbox/internal/routes/health/route.yaml
       sha: b3a5360c4b5e5a46a57cb5f3216255df8fd3b5c0c0a550f3f8d182fec171e6dc
-    - file: sandbox/internal/routes/openapi/handler.go
-      sha: cc4037b0832cc89b11ff70ffc841da149000360a5abf0c55fc30cad246eac28e
-    - file: sandbox/internal/routes/openapi/input.go
-      sha: bdcec6138e6e4283b7ef1d03beec025843103fc6d1cc8da91c7414e6551704d8
-    - file: sandbox/internal/routes/openapi/new.go
-      sha: d82e8e75c93b2cf8386bb7796c74bccf075666472c4adf340ee6c0966f8a9c5d
+    - file: sandbox/internal/routes/openapi/generated.handler.go
+      sha: c22f5ef223978a7ccbc2daac82217a02628c09d5ece947a6d45e66c41869f801
+    - file: sandbox/internal/routes/openapi/generated.input.go
+      sha: 70652730fbf9ce28fd085f7d9619492aa8d3dedf3695a0e409eb0e37fe583423
+    - file: sandbox/internal/routes/openapi/generated.new.go
+      sha: 089bd56b0171674201aa0b5d387d49c3171453250960757971154a1767c722f4
     - file: sandbox/internal/routes/openapi/route.yaml
       sha: 22b7b95d54b8967b959216e5edcfba85a241667414182b923367443b41ed77e9

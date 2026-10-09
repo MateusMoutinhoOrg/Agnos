@@ -6,7 +6,7 @@ Declare one value a route reads from the query string or the headers
 agnos add-parameter <Name> --route <route> [--type <type>] [--source <source>...] [--required] [--default <default>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--description <description>] [--example <example>...] [--position <position>] [--help] [--path <path>] [--quiet]
 ```
 
-Declares one value a route reads and runs build so the route's new.go and input.go pick it up. It is read under its name from the first of its --source that brings it, converted to its --type and bound to Input.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.
+Declares one value a route reads and runs build so the route's generated.new.go and generated.input.go pick it up. It is read under its name from the first of its --source that brings it, converted to its --type and bound to Input.<Name>; a missing --required one is answered 400 before the handler runs, and one with a --trigger only lets the route run when it matches.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

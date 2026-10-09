@@ -18,5 +18,5 @@ agnos add-body-field email --route create-user --required --format email --path 
 # api.Route build generated from it. The lib side copies the same set.
 mkdir -p assert-dir/sandbox/internal/routes/create_user
 cp test-dir/sandbox/internal/routes/create_user/route.yaml assert-dir/sandbox/internal/routes/create_user/route.yaml
-cp test-dir/sandbox/internal/routes/create_user/new.go assert-dir/sandbox/internal/routes/create_user/new.go
-cp test-dir/sandbox/internal/routes/create_user/input.go assert-dir/sandbox/internal/routes/create_user/input.go
+cp test-dir/sandbox/internal/routes/create_user/generated.new.go assert-dir/sandbox/internal/routes/create_user/generated.new.go
+cp test-dir/sandbox/internal/routes/create_user/generated.input.go assert-dir/sandbox/internal/routes/create_user/generated.input.go

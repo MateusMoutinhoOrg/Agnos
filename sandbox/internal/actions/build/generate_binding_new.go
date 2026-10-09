@@ -7,7 +7,7 @@ import (
 )
 
 // GenerateBindingNewFiles renders assets/templates/binding_new.go once per
-// declared binding into adapters/bindings/<name>/new.go — the New() that
+// declared binding into adapters/bindings/<name>/generated.new.go — the New() that
 // binds exactly the adapters that binding.yaml selects. A binding with no
 // declaration is a hand-written mix and is not touched.
 func GenerateBindingNewFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, bindings []map[string]any, module string) error {
@@ -22,7 +22,7 @@ func GenerateBindingNewFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, bindin
 			vars[key] = value
 		}
 
-		dest := utils.BindingDir(name) + "/new.go"
+		dest := utils.BindingDir(name) + "/" + utils.GeneratedFile(sandbox, "new.go")
 		if err := utils.RenderTemplateToDest(sandbox, io, "templates/binding_new.go", vars, dest); err != nil {
 			return err
 		}

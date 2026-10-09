@@ -7,7 +7,7 @@ import (
 )
 
 // DatabaseInitInternal turns the database mechanic on in the project's
-// declaration. The code every generated methods.go shares is the
+// declaration. The code every generated.methods.go shares is the
 // OpinionatedAgnosDatabase lib, installed with the store, and the databases
 // themselves are rendered by the follow-up build.
 //

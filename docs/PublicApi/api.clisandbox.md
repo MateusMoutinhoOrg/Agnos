@@ -1,4 +1,4 @@
-# `sandbox/api/clisandbox.go`
+# `sandbox/api/generated.clisandbox.go`
 
 ## `CliSandbox`
 

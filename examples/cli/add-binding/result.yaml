@@ -3,12 +3,12 @@ exit-code: 0
 tree:
     - file: adapters/bindings/lambda/binding.yaml
       sha: a991a7b5d61cbe6b63371da37b14fd3d144dd73f10681b7bb2d6d12b327cc871
-    - file: adapters/bindings/lambda/new.go
-      sha: 03f3c8b2ad4d02a22eccf3173ac60151a54107582876288a7186b0c256dd102c
+    - file: adapters/bindings/lambda/generated.new.go
+      sha: 18c8ce8cf40230c86e17c362c80da6670db462a7d412aba961f2e4edec1c2f27
     - file: adapters/bindings/standard/binding.yaml
       sha: a991a7b5d61cbe6b63371da37b14fd3d144dd73f10681b7bb2d6d12b327cc871
-    - file: adapters/bindings/standard/new.go
-      sha: 7d4a0a7b69990f43da5091be4d0ee5799a09994725dfa2605ad25628bab35ad2
+    - file: adapters/bindings/standard/generated.new.go
+      sha: af81e05e3caad401b3b66a6cb614919f179cc3ef06d75e52d3c5acc1ae83fd23
     - file: adapters/impls/stdsort/adapter.yaml
       sha: ca2624a58f5742ef4ce9e54e6d82fe34e8a06fca4d58c78c213d4f6aaf5d4486
     - file: adapters/impls/stdsort/stdsort.go

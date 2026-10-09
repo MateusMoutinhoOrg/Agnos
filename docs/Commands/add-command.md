@@ -6,7 +6,7 @@ Scaffold a new command package in the project
 agnos add-command <Name> --summary <summary> [--category <category>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--pattern <pattern>] [--middleware] [--priority <priority>] [--before <before>] [--after <after>] [--dir <dir>] [--help] [--path <path>] [--quiet]
 ```
 
-Creates <name>/ under the folder of its --category in sandbox/internal/commands — commands/core/<name> for Core — or under the folder --dir names there, with a hand-written command.yaml and a stub handler.go, then runs build so new.go, input.go and the dispatch pick it up. A directory is a command by holding a command.yaml, at any depth; a name is unique across every folder. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses a name another command already carries.
+Creates <name>/ under the folder of its --category in sandbox/internal/commands — commands/core/<name> for Core — or under the folder --dir names there, with a hand-written command.yaml and a stub handler.go, then runs build so generated.new.go, generated.input.go and the dispatch pick it up. A directory is a command by holding a command.yaml, at any depth; a name is unique across every folder. Its first arg answers to <name> on segment 0 — or to --trigger, or what --pattern compiles to; a --middleware runs in front of every command line and declines. Refuses a name another command already carries.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

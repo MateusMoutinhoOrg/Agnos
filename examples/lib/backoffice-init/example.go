@@ -49,7 +49,7 @@ func main() {
 	for _, file := range []string{
 		".gitignore",
 		"AgnosConfig/extensions.yaml",
-		"sandbox/api/config.go",
+		"sandbox/api/generated.config.go",
 		"sandbox/api/backofficeconfig.go",
 	} {
 		copyFile("test-dir/"+file, "assert-dir/"+file)

@@ -3,8 +3,8 @@ exit-code: 0
 tree:
     - file: adapters/bindings/standard/binding.yaml
       sha: a991a7b5d61cbe6b63371da37b14fd3d144dd73f10681b7bb2d6d12b327cc871
-    - file: adapters/bindings/standard/new.go
-      sha: 7d4a0a7b69990f43da5091be4d0ee5799a09994725dfa2605ad25628bab35ad2
+    - file: adapters/bindings/standard/generated.new.go
+      sha: af81e05e3caad401b3b66a6cb614919f179cc3ef06d75e52d3c5acc1ae83fd23
     - file: adapters/impls/reflectsort/adapter.yaml
       sha: 5d5c98be9b69a44dfcbc057e35268050fbab62e26d0ae8d04c416d168ffba747
     - file: adapters/impls/reflectsort/reflectsort.go

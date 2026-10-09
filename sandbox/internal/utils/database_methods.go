@@ -6,12 +6,12 @@ import (
 )
 
 // DatabaseMethod is one method a table generates, spelled once for the three
-// places that need it: api.go declares the function field, new.go closes over
-// the function, methods.go writes its body and docs/Databases prints its
+// places that need it: generated.api.go declares the function field, generated.new.go closes over
+// the function, generated.methods.go writes its body and docs/Databases prints its
 // signature. Params, Results and Args are the signature itself, so none of
 // those four derives it a second time.
 type DatabaseMethod struct {
-	// Kind is which body methods.go writes: add, findById, findByKey, list,
+	// Kind is which body generated.methods.go writes: add, findById, findByKey, list,
 	// page, count, update, remove, getLink, addSub or listSub.
 	Kind string
 	// Name is the exported Go name of the method.
@@ -30,7 +30,7 @@ type DatabaseMethod struct {
 	Params string
 	// Results is the result list.
 	Results string
-	// Args is Params reduced to the names, for the closure of new.go.
+	// Args is Params reduced to the names, for the closure of generated.new.go.
 	Args string
 	// Help is the one line the doc comment and docs/Databases print.
 	Help string
@@ -61,14 +61,14 @@ func DatabaseMethodNames(sandbox *api.Sandbox, table databaseconf.Table) []strin
 	return names
 }
 
-// DatabaseMethods is every method one table generates, in the order api.go
-// declares them, new.go wires them and docs/Databases prints them. The set is
+// DatabaseMethods is every method one table generates, in the order generated.api.go
+// declares them, generated.new.go wires them and docs/Databases prints them. The set is
 // derived from the fields alone: a Find is born of a `key` field because that
 // is the only one the database indexes, a Get of a `link`, and the pair
 // Add/List of a nested collection.
 //
 // Each entry carries its own signature — Params, Results and the Args the
-// closure of new.go calls through with — so the three templates spell one
+// closure of generated.new.go calls through with — so the three templates spell one
 // method the same way without deriving it three times.
 func DatabaseMethods(sandbox *api.Sandbox, table databaseconf.Table) []DatabaseMethod {
 	kind := GoIdentifier(sandbox, table.Name)

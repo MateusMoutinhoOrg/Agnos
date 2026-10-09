@@ -9,9 +9,9 @@ a route what `sandbox/internal/commands/<name>/` is to a command, and `route.yam
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` |
 | Dispatch, matcher and binder | the `OpinionatedAgnosCli` lib: `Main` | the `OpinionatedAgnosServer` lib: `Main` |
 | Declared unit | `commands/<name>/command.yaml` | `routes/<name>/route.yaml` |
-| Generated declaration | `new.go` -> `NewCommand`, `input.go` -> `Input` | `new.go` -> `NewRoute`, `input.go` -> `Input` |
+| Generated declaration | `generated.new.go` -> `NewCommand`, `generated.input.go` -> `Input` | `generated.new.go` -> `NewRoute`, `generated.input.go` -> `Input` |
 | Surface on the sandbox | `Cli.Commands` | `Server.Routes` |
-| Built by | `sandbox/internal/generated/cli/new.go` | `sandbox/internal/generated/server/new.go` |
+| Built by | `sandbox/internal/cli/generated.new.go` | `sandbox/internal/server/generated.new.go` |
 | Hand-written half | `handler.go` -> `Handle` | `handler.go` -> `Handle` |
 | Answer to bad input | `sandbox/internal/cli/errors/handle_*.go`, yours | `sandbox/internal/server/errors/handle_*.go`, yours |
 | Install / remove | `cli-init` / `cli-purge` | `server-init` / `server-purge` |
@@ -70,8 +70,8 @@ for them).
 
 `add-route` writes `route.yaml` (the declaration — `priority` and `response-type` always
 included, and either the paths `--pattern` compiles to or one path reading the whole
-request path against `--trigger`, named after its words — `/api/products` reads into `ApiProducts`) and a stub `handler.go` (yours); `build` generates `new.go`, the `api.Route` that lands in
-`Server.Routes`, and `input.go`, the `Input` the handler is handed. One editor per place the
+request path against `--trigger`, named after its words — `/api/products` reads into `ApiProducts`) and a stub `handler.go` (yours); `build` generates `generated.new.go`, the `api.Route` that lands in
+`Server.Routes`, and `generated.input.go`, the `Input` the handler is handed. One editor per place the
 declaration holds something — `add-path`, `add-parameter`, `set-body`, `add-body-field`,
 `set-route`, each with its `remove-` inverse — so every key of [RouteYaml](../RouteYaml/doc.md)
 is reachable from the command line and `route.yaml` is never edited by hand.

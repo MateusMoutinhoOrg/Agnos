@@ -1097,7 +1097,7 @@ type Actions struct {
 	AddBinding func(props AddBindingProps) error
 
 	// RemoveBinding deletes one binding. The standard one is refused: it
-	// is what cmd/main/main.go imports.
+	// is what cmd/main/generated.main.go imports.
 	RemoveBinding func(props RemoveBindingProps) error
 
 	// CliInit adds the CLI layer (cmd/main, the dispatcher and the help and

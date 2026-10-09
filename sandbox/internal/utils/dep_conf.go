@@ -69,7 +69,7 @@ const (
 )
 
 // DepField is the Deps field a contract directory fills, the same spelling
-// sandbox/deps/deps.go is generated with: the directory title-cased, with a
+// sandbox/deps/generated.deps.go is generated with: the directory title-cased, with a
 // trailing "deps" spelled as its own word — argvdeps fills ArgvDeps,
 // OpinionatedAgnosCli fills OpinionatedAgnosCli.
 func DepField(sandbox *api.Sandbox, dep string) string {

@@ -28,5 +28,5 @@ agnos show-route login --path test-dir
 # ReadBody build generated from it, and the page the route's callers read.
 mkdir -p assert-dir/sandbox/internal/routes/login assert-dir/docs/Routes
 cp test-dir/sandbox/internal/routes/login/route.yaml assert-dir/sandbox/internal/routes/login/route.yaml
-cp test-dir/sandbox/internal/routes/login/input.go assert-dir/sandbox/internal/routes/login/input.go
+cp test-dir/sandbox/internal/routes/login/generated.input.go assert-dir/sandbox/internal/routes/login/generated.input.go
 cp test-dir/docs/Routes/login.md assert-dir/docs/Routes/login.md

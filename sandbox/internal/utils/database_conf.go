@@ -25,7 +25,7 @@ const DefaultDatabaseDir = "data"
 const DatabaseDirMiddleware = "sandbox/internal/commands/middleware/database_dir"
 
 // DatabaseConfFile is the declaration every database directory carries, the
-// whole of what its api.go, new.go and methods.go are generated from.
+// whole of what its generated.api.go, generated.new.go and generated.methods.go are generated from.
 const DatabaseConfFile = "database.yaml"
 
 // DatabaseCustomFile is the one file of a database package agnos never writes

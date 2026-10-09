@@ -6,7 +6,7 @@ Add one slice of the request path to a route
 agnos add-path <Name> --route <route> [--start <start>] [--end <end>] [--type <type>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--description <description>] [--position <position>] [--help] [--path <path>] [--quiet]
 ```
 
-Inserts one entry into the route's paths and runs build so the route's new.go and input.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Input.<Id>, and — with --trigger — only lets the route run when the text matches.
+Inserts one entry into the route's paths and runs build so the route's generated.new.go and generated.input.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Input.<Id>, and — with --trigger — only lets the route run when the text matches.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

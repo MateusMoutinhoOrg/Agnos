@@ -2,7 +2,7 @@
 
 `sandbox/internal/commands/[<folder>/]<name>/command.yaml` declares one command — the file is
 what makes its directory a command, at any depth. `{{.GeneratorName}} build`
-generates `new.go` (the `api.Command` that lands in `Cli.Commands`) and `input.go` (the `Input`
+generates `generated.new.go` (the `api.Command` that lands in `Cli.Commands`) and `generated.input.go` (the `Input`
 its handler is handed) from it. Grow it with `add-arg` / `add-flag` / `set-command` and their
 `set-` / `remove-` pairs ([Workflow](../Workflow/doc.md#change-the-command-surface)), not by hand:
 the editors re-render it with keys in alphabetical order and drop comments.

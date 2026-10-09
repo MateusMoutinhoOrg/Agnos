@@ -13,7 +13,7 @@ import (
 // symbol the current contract dropped, so a tree still carrying it would not
 // compile; it is removed on every build.
 var retiredCliFiles = []string{
-	utils.GeneratedDir + "/cli/main.go",
+	utils.LegacyGeneratedDir + "/cli/main.go",
 	"sandbox/internal/commands/help/entries.yaml",
 	"sandbox/internal/commands/version/entries.yaml",
 	"docs/EntriesYaml/doc.md",
@@ -21,7 +21,8 @@ var retiredCliFiles = []string{
 	"docs/EntriesYaml/Index.md",
 }
 
-// GenerateCommandProps rewrites sandbox/internal/commandprops/commandprops.go
+// GenerateCommandProps rewrites
+// sandbox/internal/commandprops/generated.commandprops.go
 // — the CommandProps one command line's chain of commands shares, handed to
 // every Handle as its first argument — as the embedding of every
 // part the package declares beside it, the way GenerateRouteProps does for

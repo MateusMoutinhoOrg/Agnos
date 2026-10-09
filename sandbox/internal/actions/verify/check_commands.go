@@ -43,7 +43,7 @@ func CheckCommands(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	}
 
 	violations = append(violations, CheckUnitTree(sandbox, io, commandsDir, utils.CommandConfFile, "command",
-		append([]string{"new.go", "input.go", utils.CommandHandlerFile}, legacyCommandFiles...))...)
+		append(utils.GeneratedNames(sandbox, utils.UnitNewFile, utils.UnitInputFile, utils.CommandHandlerFile), legacyCommandFiles...))...)
 
 	patterns := map[string]string{}
 	for _, unit := range utils.CommandDirs(sandbox, io) {
@@ -86,24 +86,35 @@ func CheckCommands(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 }
 
 // checkCommandFiles reports a command package missing any of the four files
-// every command has, and a handler with another signature than the one the
+// every command has — command.yaml, generated.new.go, generated.input.go and
+// handler.go (generated.handler.go for a command a group renders whole; the
+// two generated ones under their old names on a tree no build has moved yet)
+// — and a handler with another signature than the one the
 // dispatch calls.
 func checkCommandFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) []string {
 	var violations []string
 
-	for _, file := range []string{utils.CommandConfFile, "new.go", "input.go", utils.CommandHandlerFile} {
-		if !io.IsFile(dir + "/" + file) {
-			violations = append(violations, commandViolation(dir, "has no "+file))
+	if !io.IsFile(dir + "/" + utils.CommandConfFile) {
+		violations = append(violations, commandViolation(dir, "has no "+utils.CommandConfFile))
+	}
+	for _, file := range []string{utils.UnitNewFile, utils.UnitInputFile} {
+		if utils.GeneratedPath(sandbox, io, dir, file) == "" {
+			violations = append(violations, commandViolation(dir, "has no "+utils.GeneratedFile(sandbox, file)))
 		}
 	}
 
-	content, err := io.ReadFile(dir + "/" + utils.CommandHandlerFile)
+	handler := utils.GeneratedPath(sandbox, io, dir, utils.CommandHandlerFile)
+	if handler == "" {
+		return append(violations, commandViolation(dir, "has no "+utils.CommandHandlerFile))
+	}
+	handlerFile := lastSegment(sandbox, handler)
+	content, err := io.ReadFile(handler)
 	if err != nil {
 		return violations
 	}
 	parsed, err := sandbox.Deps.GoimportsDeps.Parse(string(content))
 	if err != nil {
-		return append(violations, commandViolation(dir, utils.CommandHandlerFile+" is not parsable Go: "+err.Error()))
+		return append(violations, commandViolation(dir, handlerFile+" is not parsable Go: "+err.Error()))
 	}
 
 	for _, function := range parsed.Functions {
@@ -114,11 +125,11 @@ func checkCommandFiles(sandbox *api.Sandbox, io *stagedfs.StagedFS, dir string) 
 			return violations
 		}
 		return append(violations, commandViolation(dir,
-			utils.CommandHandlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
+			handlerFile+" declares "+routeHandlerName+" with another signature; the dispatch calls "+
 				routeHandlerName+"(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error"+
 				legacyPropsHint(function, legacyCommandPropsParam, utils.CommandPropsDir)))
 	}
-	return append(violations, commandViolation(dir, utils.CommandHandlerFile+" exports no "+routeHandlerName))
+	return append(violations, commandViolation(dir, handlerFile+" exports no "+routeHandlerName))
 }
 
 // isCommandHandler reports whether one parsed declaration is the command

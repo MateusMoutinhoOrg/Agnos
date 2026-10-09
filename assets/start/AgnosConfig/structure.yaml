@@ -7,7 +7,7 @@ sandbox:
   dir: true
   description: "closed: imports nothing outside sandbox/, no OS packages"
   children:
-    new.go:
+    generated.new.go:
       order: 1
       gen: true
       description: New(deps) *api.Sandbox, one <x>.New<X> per api/ file

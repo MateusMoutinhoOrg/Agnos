@@ -29,16 +29,16 @@ agnos show-route admin --path test-dir
 # six handlers that answer every failure.
 mkdir -p assert-dir/sandbox/internal/routes/logger
 cp test-dir/sandbox/internal/routes/logger/route.yaml assert-dir/sandbox/internal/routes/logger/route.yaml
-cp test-dir/sandbox/internal/routes/logger/new.go assert-dir/sandbox/internal/routes/logger/new.go
+cp test-dir/sandbox/internal/routes/logger/generated.new.go assert-dir/sandbox/internal/routes/logger/generated.new.go
 mkdir -p assert-dir/sandbox/internal/routes/hello
 cp test-dir/sandbox/internal/routes/hello/route.yaml assert-dir/sandbox/internal/routes/hello/route.yaml
 mkdir -p assert-dir/sandbox/internal/routes/admin
 cp test-dir/sandbox/internal/routes/admin/route.yaml assert-dir/sandbox/internal/routes/admin/route.yaml
-cp test-dir/sandbox/internal/routes/admin/new.go assert-dir/sandbox/internal/routes/admin/new.go
+cp test-dir/sandbox/internal/routes/admin/generated.new.go assert-dir/sandbox/internal/routes/admin/generated.new.go
 
-# server/new.go is where the run order shows: the routes are laid down lowest
+# server/generated.new.go is where the run order shows: the routes are laid down lowest
 # priority first, and beside them the switch that reaches the six handlers.
-mkdir -p assert-dir/sandbox/internal/generated/server assert-dir/sandbox/internal/server/errors
-cp test-dir/sandbox/internal/generated/server/new.go assert-dir/sandbox/internal/generated/server/new.go
+mkdir -p assert-dir/sandbox/internal/server assert-dir/sandbox/internal/server/errors
+cp test-dir/sandbox/internal/server/generated.new.go assert-dir/sandbox/internal/server/generated.new.go
 cp test-dir/sandbox/internal/server/errors/handle_not_found.go assert-dir/sandbox/internal/server/errors/handle_not_found.go
 cp test-dir/sandbox/internal/server/errors/handle_method_not_allowed.go assert-dir/sandbox/internal/server/errors/handle_method_not_allowed.go

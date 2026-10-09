@@ -60,7 +60,7 @@ func main() {
 	// segment 0, the second reads segment 1 to the last — the same set the
 	// cli side copies.
 	copy_out := map[string][]string{
-		"sandbox/internal/routes/static": {"route.yaml", "new.go", "input.go"},
+		"sandbox/internal/routes/static": {"route.yaml", "generated.new.go", "generated.input.go"},
 	}
 	for dir, files := range copy_out {
 		if err := os.MkdirAll("assert-dir/"+dir, 0o755); err != nil {

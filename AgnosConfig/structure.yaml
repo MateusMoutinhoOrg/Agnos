@@ -26,7 +26,7 @@ sandbox:
   dir: true
   description: "closed: imports nothing outside sandbox/, no OS packages"
   children:
-    new.go:
+    generated.new.go:
       order: 1
       gen: true
       description: New(deps) *api.Sandbox, one <x>.Constructor(&self) per constructors/ dir
@@ -35,26 +35,26 @@ sandbox:
       dir: true
       description: contracts only; imports nothing but sandbox/deps, for Sandbox.Deps, and the OpinionatedAgnos<X> contracts it aliases
       children:
-        sandbox.go:
+        generated.sandbox.go:
           order: 1
           gen: true
           description: Sandbox struct, one field per api/ file
         actions.go:
           order: 2
           description: Actions struct + props structs + Runtime consts
-        cli.go:
+        generated.cli.go:
           order: 3
           gen: true
           description: Cli + exit consts, aliases of the OpinionatedAgnosCli contract
-        command.go:
+        generated.command.go:
           order: 4
           gen: true
           description: Command/CommandFlag/CommandArg/CommandResponse/CommandFailure, aliases of the OpinionatedAgnosCli contract
-        config.go:
+        generated.config.go:
           order: 5
           gen: true
           description: Config struct, the project's own name and version
-        trigger.go:
+        generated.trigger.go:
           order: 6
           gen: true
           description: Trigger/TriggerType, the condition a route and a command match on; aliases of the OpinionatedAgnosCli contract
@@ -71,7 +71,7 @@ sandbox:
       dir: true
       description: contracts; each <x>/ imports nothing at all, an OpinionatedAgnos<X>/ nothing but other contracts
       children:
-        deps.go:
+        generated.deps.go:
           order: 1
           gen: true
           description: Deps struct, one <Field> <dir>.Contract per dir
@@ -86,24 +86,18 @@ sandbox:
       dir: true
       description: the logic; unreachable from outside the sandbox
       children:
-        generated:
+        config/generated.new.go:
           order: 1
-          dir: true
           gen: true
-          description: every package the build rewrites whole — the registries and config; never edited by hand
-          children:
-            config/new.go:
-              order: 1
-              gen: true
-              description: "NewConfig(sandbox) api.Config: ProjectName, Version"
-            cli/new.go:
-              order: 2
-              gen: true
-              description: "NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.Main, which hands the line to Deps.OpinionatedAgnosCli.Main"
+          description: "NewConfig(sandbox) api.Config: ProjectName, Version"
+        cli/generated.new.go:
+          order: 2
+          gen: true
+          description: "NewCli(sandbox) api.Cli: Cli.Commands in run order + Cli.Fail + Cli.Main, which hands the line to Deps.OpinionatedAgnosCli.Main"
         commands/<name>:
           order: 4
           dir: true
-          description: command.yaml (decl), new.go + input.go (gen), handler.go (hand); under the folder of its category (core/, cli/, server/, middleware/, …) — the command.yaml is what makes a dir a command
+          description: command.yaml (decl), generated.new.go + generated.input.go (gen), handler.go (hand); under the folder of its category (core/, cli/, server/, middleware/, …) — the command.yaml is what makes a dir a command
         actions/new.go:
           order: 5
           description: "NewActions(sandbox) api.Actions: one assignment per action"
@@ -116,7 +110,7 @@ sandbox:
           description: "collectors: list one dir, title-case names"
         actions/build/generate_*.go:
           order: 8
-          description: new.go + input.go per command and per route, help's command.yaml, doc indexes
+          description: generated.new.go + generated.input.go per command and per route, help's command.yaml, doc indexes
         actions/verify/check_*.go:
           order: 9
           description: one rule set per file, each returns []string
@@ -154,7 +148,7 @@ adapters:
     bindings/<name>/binding.yaml:
       order: 4
       description: which adapters this binding binds, one per Deps field  (bindingconf)
-    bindings/<name>/new.go:
+    bindings/<name>/generated.new.go:
       order: 5
       gen: true
       description: New() deps.Deps calling the Bind of every adapter declared; a binding with no binding.yaml is hand-written and left alone
@@ -219,7 +213,7 @@ assets:
       order: 14
       dir: true
       description: the tree backoffice-init writes once, at the path each file holds in it; assets/ under it is copied verbatim
-cmd/main/main.go:
+cmd/main/generated.main.go:
   order: 5
   gen: true
   description: standard.New() -> sandbox.New -> Main(os.Args[1:])

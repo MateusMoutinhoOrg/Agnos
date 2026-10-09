@@ -8,8 +8,8 @@ import (
 )
 
 // CollectDatabases reads every sandbox/internal/databases/<db>/database.yaml and
-// returns one data map per database, for the generated api.go, new.go and
-// methods.go of that package. It is the database layer's CollectRoutes: what
+// returns one data map per database, for the generated.api.go, generated.new.go and
+// generated.methods.go of that package. It is the database layer's CollectRoutes: what
 // the map holds is the declaration itself, turned into the records and the
 // methods the three templates spell — nothing here is a Go rendering of the
 // storage.
@@ -73,8 +73,8 @@ func checkDatabaseSchema(sandbox *api.Sandbox, name string, conf *databaseconf.D
 }
 
 // databaseData is one database as the three templates read it: the package it
-// declares, the records it holds, the schema literal new.go builds, and the
-// methods api.go declares, new.go wires and methods.go writes the bodies of.
+// declares, the records it holds, the schema literal generated.new.go builds, and the
+// methods generated.api.go declares, generated.new.go wires and generated.methods.go writes the bodies of.
 func databaseData(sandbox *api.Sandbox, name string, conf *databaseconf.DatabaseConf) map[string]any {
 	tables := make([]map[string]any, 0, len(conf.Tables))
 	records := []map[string]any{}
@@ -108,7 +108,7 @@ func databaseData(sandbox *api.Sandbox, name string, conf *databaseconf.Database
 	}
 }
 
-// databaseTableData is one table as the schema literal of new.go reads it.
+// databaseTableData is one table as the schema literal of generated.new.go reads it.
 func databaseTableData(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, table databaseconf.Table) map[string]any {
 	items := make([]map[string]any, 0, len(table.Fields))
 	for _, field := range table.Fields {
@@ -197,7 +197,7 @@ func databaseFieldData(sandbox *api.Sandbox, field databaseconf.Field) map[strin
 }
 
 // databaseMethodData is one derived method as the three templates read it.
-// The signature comes across whole, so api.go, new.go and methods.go spell one
+// The signature comes across whole, so generated.api.go, generated.new.go and generated.methods.go spell one
 // method the same way.
 func databaseMethodData(method utils.DatabaseMethod) map[string]any {
 	return map[string]any{

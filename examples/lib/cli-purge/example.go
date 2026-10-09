@@ -39,7 +39,7 @@ func main() {
 		panic(err)
 	}
 
-	// The purge takes sandbox/constructors/cli with the layer, so new.go
+	// The purge takes sandbox/constructors/cli with the layer, so generated.new.go
 	// comes out of the following build calling nothing at all.
 	if err := copyNewGo(); err != nil {
 		panic(err)
@@ -68,15 +68,15 @@ func copyExtensions() error {
 	return os.WriteFile("assert-dir/AgnosConfig/extensions.yaml", content, 0o644)
 }
 
-// copyNewGo puts the project's sandbox/new.go into assert-dir at the place it
+// copyNewGo puts the project's sandbox/generated.new.go into assert-dir at the place it
 // holds in the tree.
 func copyNewGo() error {
-	content, err := os.ReadFile("test-dir/sandbox/new.go")
+	content, err := os.ReadFile("test-dir/sandbox/generated.new.go")
 	if err != nil {
 		return err
 	}
 	if err := os.MkdirAll("assert-dir/sandbox", 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile("assert-dir/sandbox/new.go", content, 0o644)
+	return os.WriteFile("assert-dir/sandbox/generated.new.go", content, 0o644)
 }

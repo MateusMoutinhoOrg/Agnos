@@ -14,7 +14,7 @@ type databaseGeneratedFile struct {
 }
 
 // databaseGeneratedFiles is the three files of a database package a build
-// writes, in render order. methods_custom.go is not here and never will be: it
+// writes, in render order, named before utils.GeneratedPrefix. methods_custom.go is not here and never will be: it
 // is the one file of the package agnos neither reads nor rewrites.
 var databaseGeneratedFiles = []databaseGeneratedFile{
 	{"api.go", "templates/database_api.go"},
@@ -23,9 +23,9 @@ var databaseGeneratedFiles = []databaseGeneratedFile{
 }
 
 // GenerateDatabaseNew renders the whole generated half of every declared
-// database: api.go (the records and the struct of function fields), new.go
-// (the databasedeps.Props and the wiring) and methods.go (the body of every
-// method), each from its own template under assets/templates.
+// database: generated.api.go (the records and the struct of function
+// fields), generated.new.go (the databasedeps.Props and the wiring) and
+// generated.methods.go (the body of every method), each from its own template under assets/templates.
 //
 // It is the database layer's GenerateRouteNew, only wider: a route declares
 // one generated file and a database three, because a database has no generic
@@ -48,7 +48,7 @@ func GenerateDatabaseNew(sandbox *api.Sandbox, io *stagedfs.StagedFS, databases 
 		}
 
 		for _, file := range databaseGeneratedFiles {
-			dest := utils.DatabasesDir + "/" + pkg + "/" + file.Name
+			dest := utils.DatabasesDir + "/" + pkg + "/" + utils.GeneratedFile(sandbox, file.Name)
 			if err := utils.RenderTemplateToDest(sandbox, io, file.Template, vars, dest); err != nil {
 				return err
 			}

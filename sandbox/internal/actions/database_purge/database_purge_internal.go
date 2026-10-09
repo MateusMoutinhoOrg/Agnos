@@ -9,7 +9,7 @@ import (
 
 // databaseDirs are the directories the database layer owns whole. The asset
 // group only names the files it installs, so removing those one by one would
-// leave the generated neighbours behind — a database's api.go with no
+// leave the generated neighbours behind — a database's generated.api.go with no
 // database.yaml next to it.
 //
 // docs/Databases is one of them: the doc group installs its doc.md and
@@ -22,7 +22,7 @@ import (
 // leaving it behind would leave the project not compiling.
 //
 // So does the --database middleware: database-cli installs its command.yaml
-// and handler.go, and the build writes new.go and input.go beside them.
+// and handler.go, and the build writes generated.new.go and generated.input.go beside them.
 var databaseDirs = []string{
 	utils.DatabasesDir,
 	utils.DocsDir + "/Databases",

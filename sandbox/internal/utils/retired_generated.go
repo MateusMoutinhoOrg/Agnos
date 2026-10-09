@@ -15,25 +15,25 @@ import (
 // carrying it would not compile.
 var retiredGenerated = map[string][]string{
 	ExtensionCli: {
-		GeneratedDir + "/cli/cli",
+		LegacyGeneratedDir + "/cli/cli",
 		CommandsDir + "/help",
 		CommandsDir + "/version",
 		CommandsDir + "/help_flag",
-		GeneratedDir + "/cli/command",
-		GeneratedDir + "/cliio",
-		GeneratedDir + "/trigger",
+		LegacyGeneratedDir + "/cli/command",
+		LegacyGeneratedDir + "/cliio",
+		LegacyGeneratedDir + "/trigger",
 	},
 	ExtensionServer: {
-		GeneratedDir + "/server/server",
-		GeneratedDir + "/server/route",
-		GeneratedDir + "/routeio",
-		GeneratedDir + "/trigger",
+		LegacyGeneratedDir + "/server/server",
+		LegacyGeneratedDir + "/server/route",
+		LegacyGeneratedDir + "/routeio",
+		LegacyGeneratedDir + "/trigger",
 	},
 	ExtensionFront: {
-		GeneratedDir + "/frontio",
+		LegacyGeneratedDir + "/frontio",
 	},
 	ExtensionDatabase: {
-		GeneratedDir + "/databaseio",
+		LegacyGeneratedDir + "/databaseio",
 	},
 }
 
@@ -41,13 +41,13 @@ var retiredGenerated = map[string][]string{
 // place — the message verify answers an import of it with, which is the whole
 // of the migration a project's hand-written files need.
 var retiredReplacements = map[string]string{
-	GeneratedDir + "/cliio":        "sandbox.Deps.OpinionatedAgnosCli: Fail, FailWithCause, FailureOf",
-	GeneratedDir + "/cli/command":  "sandbox.Deps.OpinionatedAgnosCli.NewCommand()",
-	GeneratedDir + "/trigger":      "sandbox.Deps.OpinionatedAgnosCli.MatchTrigger",
-	GeneratedDir + "/routeio":      "sandbox.Deps.OpinionatedAgnosServer: Fail, FailWithCause, FailureOf, WriteError, WriteJSON, WriteText, Redirect, ValidateSchema, ValidateForm and the Read*/Item* readers; route.Request and route.Response for RequestOf and ResponseOf",
-	GeneratedDir + "/server/route": "sandbox.Deps.OpinionatedAgnosServer.NewRoute()",
-	GeneratedDir + "/frontio":      "sandbox.Deps.OpinionatedAgnosFront: Resolve, SafePath, ExtensionOf, ContentTypeOf, and the constants of sandbox/deps/OpinionatedAgnosFront",
-	GeneratedDir + "/databaseio":   "sandbox.Deps.OpinionatedAgnosDatabase: Fail, Collection, ReadString, ReadInt, ReadFloat, TextMatches, IntInRange, FloatInRange",
+	LegacyGeneratedDir + "/cliio":        "sandbox.Deps.OpinionatedAgnosCli: Fail, FailWithCause, FailureOf",
+	LegacyGeneratedDir + "/cli/command":  "sandbox.Deps.OpinionatedAgnosCli.NewCommand()",
+	LegacyGeneratedDir + "/trigger":      "sandbox.Deps.OpinionatedAgnosCli.MatchTrigger",
+	LegacyGeneratedDir + "/routeio":      "sandbox.Deps.OpinionatedAgnosServer: Fail, FailWithCause, FailureOf, WriteError, WriteJSON, WriteText, Redirect, ValidateSchema, ValidateForm and the Read*/Item* readers; route.Request and route.Response for RequestOf and ResponseOf",
+	LegacyGeneratedDir + "/server/route": "sandbox.Deps.OpinionatedAgnosServer.NewRoute()",
+	LegacyGeneratedDir + "/frontio":      "sandbox.Deps.OpinionatedAgnosFront: Resolve, SafePath, ExtensionOf, ContentTypeOf, and the constants of sandbox/deps/OpinionatedAgnosFront",
+	LegacyGeneratedDir + "/databaseio":   "sandbox.Deps.OpinionatedAgnosDatabase: Fail, Collection, ReadString, ReadInt, ReadFloat, TextMatches, IntInRange, FloatInRange",
 }
 
 // RetiredReplacement is what replaced one retired generated package, named by

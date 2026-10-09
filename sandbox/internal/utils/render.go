@@ -100,8 +100,8 @@ func formatIfGo(sandbox *api.Sandbox, dest string, content []byte) ([]byte, erro
 }
 
 // RenderTemplateToDest renders one asset as a Go text/template over vars and
-// writes the result to destPath. A Go destination is formatted first (see
-// formatIfGo).
+// writes the result to destPath through WriteGenerated: a Go destination is
+// formatted, and a generated one (GeneratedPrefix) carries GeneratedHeader.
 func RenderTemplateToDest(sandbox *api.Sandbox, io *stagedfs.StagedFS, templatePath string, vars interface{}, destPath string) error {
 
 	src, err := sandbox.Deps.EmbedDeps.ReadFile(templatePath)
@@ -114,22 +114,14 @@ func RenderTemplateToDest(sandbox *api.Sandbox, io *stagedfs.StagedFS, templateP
 		return err
 	}
 
-	formatted, err := formatIfGo(sandbox, destPath, content)
-	if err != nil {
-		return err
-	}
-	err = io.WriteFile(destPath, formatted)
-	if err != nil {
-		return err
-	}
-
-	return nil
+	return WriteGenerated(sandbox, io, destPath, content)
 }
 
 // RenderGroup renders every asset under assets/<group> as a Go text/template
-// and writes each result to the path it holds inside the group. An asset at
-// assets/sandbox/sandbox/new.go rendered with RenderGroup(deps, io, "sandbox",
-// vars) is written to sandbox/new.go. Every file in the group is rendered with the
+// and writes each result to the path it holds inside the group, through
+// WriteGenerated. An asset at assets/sandbox/sandbox/generated.new.go rendered
+// with RenderGroup(deps, io, "sandbox", vars) is written to
+// sandbox/generated.new.go. Every file in the group is rendered with the
 // same vars, and every file may call the `render` native function (see
 // templateFuncs) to embed another template of the target project.
 func RenderGroup(sandbox *api.Sandbox, io *stagedfs.StagedFS, group string, vars interface{}) error {
@@ -162,12 +154,7 @@ func RenderGroupExcept(sandbox *api.Sandbox, io *stagedfs.StagedFS, group string
 			return err
 		}
 
-		formatted, err := formatIfGo(sandbox, file, content)
-		if err != nil {
-			return err
-		}
-		err = io.WriteFile(file, formatted)
-		if err != nil {
+		if err := WriteGenerated(sandbox, io, file, content); err != nil {
 			return err
 		}
 	}

@@ -8,7 +8,7 @@ import (
 
 // RemoveArg drops one positional arg declaration from
 // sandbox/internal/commands/<category>/<command>/command.yaml, then runs build so the
-// generated new.go forgets it.
+// generated.new.go forgets it.
 func RemoveArg(sandbox *api.Sandbox, props api.RemoveArgProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := RemoveArgInternal(sandbox, io, props.Command, props.Name); err != nil {

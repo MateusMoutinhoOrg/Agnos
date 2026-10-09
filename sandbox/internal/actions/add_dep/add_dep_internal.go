@@ -22,7 +22,7 @@ import (
 // yet, and a binding that leaves one empty is a nil func waiting to panic.
 func AddDepInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.AddDepProps) error {
 	// Installing a dep is asking for the dependency layer, so the mechanic
-	// that renders sandbox/deps/deps.go is turned on here rather than being
+	// that renders sandbox/deps/generated.deps.go is turned on here rather than being
 	// inferred later from the directory this install is about to create.
 	if err := utils.SetExtension(sandbox, io, utils.ExtensionDeps, true); err != nil {
 		return err

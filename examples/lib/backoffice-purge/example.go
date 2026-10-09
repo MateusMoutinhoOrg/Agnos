@@ -46,7 +46,7 @@ func main() {
 	}
 	for _, file := range []string{
 		"AgnosConfig/extensions.yaml",
-		"sandbox/api/config.go",
+		"sandbox/api/generated.config.go",
 	} {
 		copyFile("test-dir/"+file, "assert-dir/"+file)
 	}

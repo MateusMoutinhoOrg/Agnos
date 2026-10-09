@@ -10,10 +10,10 @@ in [PublicApi](../PublicApi/doc.md#dependency-contracts).
 
 | Dep | `Deps` field | Adapters | Backed by | Provides |
 |---|---|---|---|---|
-| `OpinionatedAgnosCli` | `OpinionatedAgnosCli` | `OpinionatedAgnosCli` | `strings`, `strconv`, `regexp`, `reflect` | The cli mechanic: the command types `api/{cli,command,trigger}.go` alias, the dispatch chain, binding, failures, triggers. Installed by `cli-init` |
-| `OpinionatedAgnosDatabase` | `OpinionatedAgnosDatabase` | `OpinionatedAgnosDatabase` | the `databasedeps` dep | The readers and filters every generated `methods.go` shares. Installed by `database-init` |
+| `OpinionatedAgnosCli` | `OpinionatedAgnosCli` | `OpinionatedAgnosCli` | `strings`, `strconv`, `regexp`, `reflect` | The cli mechanic: the command types `api/generated.{cli,command,trigger}.go` alias, the dispatch chain, binding, failures, triggers. Installed by `cli-init` |
+| `OpinionatedAgnosDatabase` | `OpinionatedAgnosDatabase` | `OpinionatedAgnosDatabase` | the `databasedeps` dep | The readers and filters every `generated.methods.go` shares. Installed by `database-init` |
 | `OpinionatedAgnosFront` | `OpinionatedAgnosFront` | `OpinionatedAgnosFront` | `strings`, the `embeddeps` dep | The file layer of `assets/front/`: which file a path names, kept inside the tree, and its media type. Installed by `front-init` |
-| `OpinionatedAgnosServer` | `OpinionatedAgnosServer` | `OpinionatedAgnosServer` | `strings`, `strconv`, `regexp`, `sort`, `reflect` | The server mechanic: the route types `api/{server,route}.go` alias, the request chain, binding, json-schema, the writers. Installed by `server-init` |
+| `OpinionatedAgnosServer` | `OpinionatedAgnosServer` | `OpinionatedAgnosServer` | `strings`, `strconv`, `regexp`, `sort`, `reflect` | The server mechanic: the route types `api/generated.{server,route}.go` alias, the request chain, binding, json-schema, the writers. Installed by `server-init` |
 | `archivedeps` | `ArchiveDeps` | `ziparchive` | `archive/zip` | Pack files into a zip and unpack one, in memory; `Unzip` refuses an archive past a size once uncompressed. Installed by `backoffice-init` |
 | `argvdeps` | `ArgvDeps` | `stdargv` | `strings`, `strconv`, `time` | Per-call argv parser. Installed by `cli-init` |
 | `embeddeps` | `EmbedDeps` | `goembed` + `assets/asset.go` | `embed`, `text/template` | Read and render files compiled into the binary |

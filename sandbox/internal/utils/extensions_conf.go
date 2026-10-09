@@ -42,7 +42,7 @@ type ExtensionSpec struct {
 // its Default by NormalizeExtensions.
 func ExtensionCatalog() []ExtensionSpec {
 	return []ExtensionSpec{
-		{ExtensionSandbox, true, "the sandbox core: sandbox/new.go, api/sandbox.go, internal/generated/config"},
+		{ExtensionSandbox, true, "the sandbox core: sandbox/generated.new.go, api/generated.sandbox.go, internal/config/generated.new.go"},
 		{ExtensionDeps, false, "the dependency layer: sandbox/deps/, adapters/, bindings"},
 		{ExtensionCli, false, "the cli layer: cmd/main, help, version and the OpinionatedAgnosCli lib"},
 		{ExtensionServer, false, "the http layer: server/, routes/ and the OpinionatedAgnosServer lib"},

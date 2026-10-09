@@ -15,13 +15,13 @@
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
 {{- end }}
 {{- if .HasSandbox }}
-| `sandbox/new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
-| `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/new.go`. Then yours — write your own package there and `new.go` calls it too |
-| `sandbox/api/sandbox.go` | `build` | always. Every struct of `sandbox/api/<x>sandbox.go` embedded, plus `Config` and `Deps` while the project carries the deps layer |
-| `sandbox/api/config.go` | `build` | always. The `Config` contract: every struct of `sandbox/api/<x>config.go` embedded, `ProjectName`, `Version` |
+| `sandbox/generated.new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
+| `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/{generated.new.go,new.go}`. Then yours — write your own package there and `generated.new.go` calls it too |
+| `sandbox/api/generated.sandbox.go` | `build` | always. Every struct of `sandbox/api/<x>sandbox.go` embedded, plus `Config` and `Deps` while the project carries the deps layer |
+| `sandbox/api/generated.config.go` | `build` | always. The `Config` contract: every struct of `sandbox/api/<x>config.go` embedded, `ProjectName`, `Version` |
 | `sandbox/api/projectsandbox.go` | `start` | once. `api.ProjectSandbox`, embedded in `api.Sandbox` — declare the project's own fields of the sandbox there |
 | `sandbox/api/projectconfig.go` | `start` | once. `api.ProjectConfig`, embedded in `api.Config` — declare the project's own config fields there |
-| `sandbox/internal/generated/config/new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
+| `sandbox/internal/config/generated.new.go` | `build` | always. `NewConfig`, filled with `ProjectName` and `Version` from `project.yaml` |
 {{- end }}
 {{- if .HasDoc }}
 | `docs/{Requirements,Workflow,Rules,Extensions,Structure,DepList,GeneratedFiles,LibUsage,PublicApi}/` | `build` | always. Both `doc.md` and `doc.yaml` |
@@ -32,17 +32,17 @@
 | `docs/LibExamples/` | `build` | always. Both `doc.md` and `doc.yaml` |
 {{- end }}
 {{- if .HasDeps }}
-| `sandbox/deps/deps.go` | `build` | always. One `<Field> <dir>.Contract` per dir of `sandbox/deps/` (`<dir>.Sandbox` for a remote dep, which keeps the name of the api it copies) |
-| `adapters/bindings/<name>/new.go` | `build` | always. One `<adapter>.Bind(&deps)` per entry of that binding's `binding.yaml`; a binding with no `binding.yaml` is hand-written and left alone |
+| `sandbox/deps/generated.deps.go` | `build` | always. One `<Field> <dir>.Contract` per dir of `sandbox/deps/` (`<dir>.Sandbox` for a remote dep, which keeps the name of the api it copies) |
+| `adapters/bindings/<name>/generated.new.go` | `build` | always. One `<adapter>.Bind(&deps)` per entry of that binding's `binding.yaml`; a binding with no `binding.yaml` is hand-written and left alone |
 {{- end }}
 | `adapters/bindings/<name>/binding.yaml` | `deps-init` | once, then rewritten by `add-dep` / `remove-dep` — never by hand |
 | `sandbox/deps/<dep>/*.go`, `adapters/impls/<adapter>/*.go` | `add-dep` | once |
 | `adapters/impls/<adapter>/adapter.yaml` | `add-dep` | once |
-| `sandbox/deps/<dep>/*.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; a copy of that module's `sandbox/api/` |
-| `adapters/impls/<dep>/<dep>.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; the generated shim |
+| `sandbox/deps/<dep>/generated.*.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; a copy of that module's `sandbox/api/` |
+| `adapters/impls/<dep>/generated.<dep>.go` of a remote dep | `add-dep <module>` | rewritten by `set-dep`; the generated shim |
 | `assets/asset.go` | `add-dep embeddeps` | once |
 {{- if .HasCli }}
-| `cmd/main/main.go` | `build` | always |
+| `cmd/main/generated.main.go` | `build` | always |
 {{- if .HasDoc }}
 | `docs/{CliInstall,Commands}/` | `build` | always. Both `doc.md` and `doc.yaml` |
 | `docs/Commands/<command>.md` | `build` | always. One page per visible command; `docs/Commands/doc.md` indexes them |
@@ -50,28 +50,28 @@
 {{- if and .HasDoc .HasExample }}
 | `docs/CliExamples/` | `build` | always. Both `doc.md` and `doc.yaml` |
 {{- end }}
-| `sandbox/api/{cli,command,trigger}.go` | `build` | always. Aliases of the `OpinionatedAgnosCli` contract's types |
-| `sandbox/api/clisandbox.go` | `build` | always. `api.CliSandbox`, the part of `api.Sandbox` holding `Cli` |
-| `sandbox/internal/generated/cli/new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand`, and `Cli.Main`, which hands the line to `OpinionatedAgnosCli.Main` |
+| `sandbox/api/generated.{cli,command,trigger}.go` | `build` | always. Aliases of the `OpinionatedAgnosCli` contract's types |
+| `sandbox/api/generated.clisandbox.go` | `build` | always. `api.CliSandbox`, the part of `api.Sandbox` holding `Cli` |
+| `sandbox/internal/cli/generated.new.go` | `build` | always. `NewCli` builds `Cli.Commands` from every command's `NewCommand`, and `Cli.Main`, which hands the line to `OpinionatedAgnosCli.Main` |
 | `sandbox/deps/OpinionatedAgnosCli/`, `adapters/impls/OpinionatedAgnosCli/` | `cli-init` | once, like any dep. The dispatch, the binder, the matcher and the failures every command runs through |
-| `sandbox/internal/commands/{info/help,info/version,middleware/help_flag}/{command.yaml,handler.go}` | `build` | always |
-| `sandbox/internal/commands/<name>/new.go` | `build` | always. `NewCommand`, that command's `api.Command`, a 1:1 image of `command.yaml` |
-| `sandbox/internal/commands/<name>/input.go` | `build` | always. `Input`, one field per arg and flag |
+| `sandbox/internal/commands/{info/help,info/version,middleware/help_flag}/{command.yaml,generated.handler.go}` | `build` | always |
+| `sandbox/internal/commands/<name>/generated.new.go` | `build` | always. `NewCommand`, that command's `api.Command`, a 1:1 image of `command.yaml` |
+| `sandbox/internal/commands/<name>/generated.input.go` | `build` | always. `Input`, one field per arg and flag |
 | `sandbox/internal/commands/<name>/command.yaml` | `add-command` | once, then rewritten by `add-flag` / `add-arg` / `set-command`, their `set-` editors and their inverses — never by hand |
 | `sandbox/internal/commands/<name>/handler.go` | `add-command` | once. A stub; the command's whole hand-written half |
 | `sandbox/internal/cli/errors/handle_*.go` | `build` | once. Five files, one per failure — what this project answers when no command does |
-| `sandbox/internal/commandprops/commandprops.go` | `build` | always. `commandprops.CommandProps`, what one command line's chain of commands shares: every struct of the package embedded |
+| `sandbox/internal/commandprops/generated.commandprops.go` | `build` | always. `commandprops.CommandProps`, what one command line's chain of commands shares: every struct of the package embedded |
 | `sandbox/internal/commandprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `CommandProps` |
 {{- end }}
 {{- if .HasServer }}
-| `sandbox/api/{server.go,route.go}` | `build` | always. Aliases of the `OpinionatedAgnosServer` contract's types |
-| `sandbox/api/serversandbox.go` | `build` | always. `api.ServerSandbox`, the part of `api.Sandbox` holding `Server` |
-| `sandbox/internal/generated/server/new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute`, and `Server.Serve`, which hands the server to `OpinionatedAgnosServer.Main` |
+| `sandbox/api/generated.{server,route}.go` | `build` | always. Aliases of the `OpinionatedAgnosServer` contract's types |
+| `sandbox/api/generated.serversandbox.go` | `build` | always. `api.ServerSandbox`, the part of `api.Sandbox` holding `Server` |
+| `sandbox/internal/server/generated.new.go` | `build` | always. `NewServer` builds `Server.Routes` from every route's `NewRoute`, and `Server.Serve`, which hands the server to `OpinionatedAgnosServer.Main` |
 | `sandbox/deps/OpinionatedAgnosServer/`, `adapters/impls/OpinionatedAgnosServer/` | `server-init` | once, like any dep. The request chain, the binder, the json-schema validator and the writers every route runs through |
-| `sandbox/internal/routes/health/{route.yaml,handler.go}` | `build` | always |
-| `sandbox/internal/routes/openapi/{route.yaml,handler.go}` | `build` | always. `handler.go` holds the OpenAPI document `docs/Routes/openapi.json` holds |
-| `sandbox/internal/routes/<name>/new.go` | `build` | always. `NewRoute`, that route's `api.Route`, a 1:1 image of `route.yaml` |
-| `sandbox/internal/routes/<name>/input.go` | `build` | always. `Input`, and the `ReadBody` a body calls for |
+| `sandbox/internal/routes/health/{route.yaml,generated.handler.go}` | `build` | always |
+| `sandbox/internal/routes/openapi/{route.yaml,generated.handler.go}` | `build` | always. `generated.handler.go` holds the OpenAPI document `docs/Routes/openapi.json` holds |
+| `sandbox/internal/routes/<name>/generated.new.go` | `build` | always. `NewRoute`, that route's `api.Route`, a 1:1 image of `route.yaml` |
+| `sandbox/internal/routes/<name>/generated.input.go` | `build` | always. `Input`, and the `ReadBody` a body calls for |
 | `docs/{RouteYaml,Routes,ServerUsage}/` | `build` | always. Both `doc.md` and `doc.yaml` |
 | `docs/Routes/<route>.md` | `build` | always. One page per visible route; `docs/Routes/doc.md` indexes them |
 | `docs/Routes/openapi.json` | `build` | always. The OpenAPI 3.0.3 document of every visible route, the one `GET /openapi.json` answers |
@@ -79,19 +79,19 @@
 | `sandbox/internal/routes/<name>/handler.go` | `add-route` | once. A stub; the route's whole hand-written half |
 | `sandbox/internal/commands/server/start_server/{command.yaml,handler.go}` | `server-init` | once |
 | `sandbox/internal/server/errors/handle_*.go` | `build` | once. Eight files, one per failure — what this project answers when no route does |
-| `sandbox/internal/routeprops/routeprops.go` | `build` | always. `routeprops.RouteProps`, what one request's chain of routes shares: every struct of the package embedded |
+| `sandbox/internal/routeprops/generated.routeprops.go` | `build` | always. `routeprops.RouteProps`, what one request's chain of routes shares: every struct of the package embedded |
 | `sandbox/internal/routeprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `RouteProps` — declare them there |
 {{- end }}
 {{- if .HasDatabase }}
-| `sandbox/deps/OpinionatedAgnosDatabase/`, `adapters/impls/OpinionatedAgnosDatabase/` | `database-init` | once, like any dep. The readers and filters every `methods.go` shares |
-| `sandbox/internal/databases/<db>/{api.go,new.go,methods.go}` | `build` | always. The records, the `databasedeps.Props` and the body of every method, all from `database.yaml` |
+| `sandbox/deps/OpinionatedAgnosDatabase/`, `adapters/impls/OpinionatedAgnosDatabase/` | `database-init` | once, like any dep. The readers and filters every `generated.methods.go` shares |
+| `sandbox/internal/databases/<db>/generated.{api,new,methods}.go` | `build` | always. The records, the `databasedeps.Props` and the body of every method, all from `database.yaml` |
 | `docs/Databases/` | `build` | always. Both `doc.md` and `doc.yaml` |
 | `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
 | `sandbox/internal/databases/<db>/database.yaml` | `add-database` | once, then rewritten by `add-table` / `add-table-field` / `set-table-field` and their inverses — never by hand |
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
-| `sandbox/api/databaseconfig.go` | `build` | always. The database layer's part of `api.Config`: `DatabaseDir`, and `DefaultDatabaseDir` (`data`) |
+| `sandbox/api/generated.databaseconfig.go` | `build` | always. The database layer's part of `api.Config`: `DatabaseDir`, and `DefaultDatabaseDir` (`data`) |
 {{- if .HasCli }}
-| `sandbox/internal/commands/middleware/database_dir/{command.yaml,handler.go}` | `build` | always. The middleware reading `--database` in front of every command line |
+| `sandbox/internal/commands/middleware/database_dir/{command.yaml,generated.handler.go}` | `build` | always. The middleware reading `--database` in front of every command line |
 {{- end }}
 {{- end }}
 {{- if .HasBackoffice }}
@@ -119,7 +119,9 @@
 | `examples/<side>/<name>/result.yaml` | `run-examples` | on `update-example <name>`, on `--update` or when absent — never by hand |
 {{- end }}
 
-Everything under `sandbox/internal/generated/` is `always`. Everything not listed is yours:
+Every Go file named `generated.<name>.go` is `always` and opens with
+`// Code generated by {{.GeneratorName}}. DO NOT EDIT.`; a Go file without the prefix is never
+rewritten. Everything not listed is yours:
 `sandbox/internal/<pkg>/`, the contracts under `sandbox/api/`
 and `sandbox/deps/` that you write, their `sandbox/internal/<x>/new.go` and `adapters/impls/`
 halves, and any

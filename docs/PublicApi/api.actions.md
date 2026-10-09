@@ -1038,7 +1038,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `SetAdapter` | `func(props SetAdapterProps) error` | SetAdapter changes which adapter fills one dep's field in one binding, the only place that choice is recorded. |
 | `ListAdapters` | `func(props ListAdaptersProps) ([]AdapterInfo, error)` | ListAdapters returns one row per adapter, of the embedded catalog and of the project, with the bindings that bind each one. |
 | `AddBinding` | `func(props AddBindingProps) error` | AddBinding creates one further binding, seeded with the standard binding's selection so it starts filling every field. |
-| `RemoveBinding` | `func(props RemoveBindingProps) error` | RemoveBinding deletes one binding. The standard one is refused: it is what cmd/main/main.go imports. |
+| `RemoveBinding` | `func(props RemoveBindingProps) error` | RemoveBinding deletes one binding. The standard one is refused: it is what cmd/main/generated.main.go imports. |
 | `CliInit` | `func(props CliInitProps) error` | CliInit adds the CLI layer (cmd/main, the dispatcher and the help and version commands) to a project that has none. |
 | `CliPurge` | `func(props CliPurgeProps) error` | CliPurge removes the CLI layer and every command declared in it. |
 | `AddCommand` | `func(props AddCommandProps) error` | AddCommand declares a new command: its command.yaml, its generated new.go and input.go, and an handler.go to fill in. |

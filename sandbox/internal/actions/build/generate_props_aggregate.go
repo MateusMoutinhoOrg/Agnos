@@ -16,7 +16,8 @@ const generatedMarker = "do not edit by hand"
 type propsAggregate struct {
 	// Dir is the package's project-relative directory.
 	Dir string
-	// File is the aggregate's file name inside Dir.
+	// File is the aggregate's file name inside Dir, before
+	// utils.GeneratedPrefix.
 	File string
 	// Type is the aggregate's type name: RouteProps, CommandProps.
 	Type string
@@ -33,7 +34,7 @@ const projectPropsFile = "project.go"
 // projectPropsType is the struct projectPropsFile declares.
 const projectPropsType = "Project"
 
-// generatePropsAggregate rewrites <Dir>/<File> as the struct embedding every
+// generatePropsAggregate rewrites <Dir>/generated.<File> as the struct embedding every
 // exported struct of every other file of the package, sorted by name.
 //
 // A part is a file of its own so that a mechanic — backoffice-init writing
@@ -42,15 +43,16 @@ const projectPropsType = "Project"
 // one the build rewrites.
 //
 // Two steps run first. A <File> an older build wrote once, and the project
-// may have typed since, is moved to project.go with its struct renamed
+// may have typed since, is moved to project.go (one the build wrote, marked,
+// is dropped when generated.<File> is written) with its struct renamed
 // Project: every field it declared is still promoted, so props.User reads
 // the same. And a package left with no part at all is given an empty
 // project.go, the place the project declares its own fields.
 func generatePropsAggregate(sandbox *api.Sandbox, io *stagedfs.StagedFS, props propsAggregate, module string) error {
-	dest := props.Dir + "/" + props.File
+	dest := props.Dir + "/" + utils.GeneratedFile(sandbox, props.File)
 	project := props.Dir + "/" + projectPropsFile
 
-	if err := migrateHandWrittenProps(sandbox, io, props, dest, project); err != nil {
+	if err := migrateHandWrittenProps(sandbox, io, props, props.Dir+"/"+props.File, project); err != nil {
 		return err
 	}
 

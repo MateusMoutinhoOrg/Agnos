@@ -6,7 +6,7 @@ Add a flag to a command's command.yaml
 agnos add-flag <Name> [--key <key>...] --command <command> [--type <type>] [--description <description>] [--default <default>] [--required] [--min <min>] [--max <max>] [--position <position>] [--enum <enum>...] [--pattern <pattern>] [--trigger <trigger>] [--trigger-type <trigger-type>] [--trigger-negate] [--trigger-ignore-case] [--help] [--path <path>] [--quiet]
 ```
 
-Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its input.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
+Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's generated.new.go declares it and its generated.input.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

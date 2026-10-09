@@ -10,7 +10,7 @@ type DepConf struct {
 	Name string
 
 	// Field is the Deps field the contract fills, the title-cased Name that
-	// sandbox/deps/deps.go is generated with.
+	// sandbox/deps/generated.deps.go is generated with.
 	Field string
 
 	// Help is the one-line description `list-deps` prints.

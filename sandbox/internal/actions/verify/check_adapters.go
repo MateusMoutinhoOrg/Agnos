@@ -180,7 +180,7 @@ func checkBindingCoverage(sandbox *api.Sandbox, io *stagedfs.StagedFS, binding s
 // checkAdapterMentions is the coverage question a project with no declared
 // binding can still answer: does some adapter mention each contract's Deps
 // field at all. The field name is the title-cased contract directory, the same
-// spelling sandbox/deps/deps.go is generated with, and a binder fills it either
+// spelling sandbox/deps/generated.deps.go is generated with, and a binder fills it either
 // whole or field by field — both mention it.
 func checkAdapterMentions(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	var violations []string

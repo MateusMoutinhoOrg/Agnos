@@ -13,9 +13,9 @@ agnos cli-purge --path test-dir
 mkdir -p assert-dir/sandbox/internal
 cp -R test-dir/sandbox/internal/. assert-dir/sandbox/internal/
 
-# The purge takes sandbox/constructors/cli with the layer, so new.go comes out
+# The purge takes sandbox/constructors/cli with the layer, so generated.new.go comes out
 # of the following build calling nothing at all.
-cp test-dir/sandbox/new.go assert-dir/sandbox/new.go
+cp test-dir/sandbox/generated.new.go assert-dir/sandbox/generated.new.go
 mkdir -p assert-dir/docs
 cp -R test-dir/docs/. assert-dir/docs/
 

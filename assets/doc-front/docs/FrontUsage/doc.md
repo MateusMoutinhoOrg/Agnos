@@ -69,7 +69,7 @@ names no file is then answered with `index.html`. A missing `/app.js` still gets
 | `sandbox/deps/OpinionatedAgnosFront/`, `adapters/impls/OpinionatedAgnosFront/` | `front-init` | once, like any dep |
 | `docs/FrontUsage/` | `build` | always |
 | `sandbox/internal/routes/front/{route.yaml,handler.go}` | `front-init` | once |
-| `sandbox/internal/routes/front/{new.go,input.go}` | `build` | always |
+| `sandbox/internal/routes/front/generated.{new,input}.go` | `build` | always |
 | `assets/front/index.html` | `front-init` | once, kept if already there |
 | `assets/front/404.html` | `front-init` | once, kept if already there |
 | `assets/front/<page>.html` | `add-page` | once, refused if already there |

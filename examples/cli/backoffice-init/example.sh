@@ -31,7 +31,7 @@ done
 for file in \
 	.gitignore \
 	AgnosConfig/extensions.yaml \
-	sandbox/api/config.go \
+	sandbox/api/generated.config.go \
 	sandbox/api/backofficeconfig.go; do
 	mkdir -p assert-dir/$(dirname $file)
 	cp test-dir/$file assert-dir/$file

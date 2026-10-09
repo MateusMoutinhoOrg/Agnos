@@ -7,7 +7,7 @@ import (
 )
 
 // SetArg rewrites one arg of sandbox/internal/commands/<command>/command.yaml,
-// then runs build so the command's new.go and input.go follow it.
+// then runs build so the command's generated.new.go and generated.input.go follow it.
 func SetArg(sandbox *api.Sandbox, props api.SetArgProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := SetArgInternal(sandbox, io, props); err != nil {

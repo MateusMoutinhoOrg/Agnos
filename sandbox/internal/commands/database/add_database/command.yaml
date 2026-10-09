@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Database
-description: 'Writes sandbox/internal/databases/<name>/database.yaml and runs build, which generates api.go, new.go and methods.go beside it. A database is born with no tables: ''agnos add-table'' declares the first one.'
+description: 'Writes sandbox/internal/databases/<name>/database.yaml and runs build, which generates generated.api.go, generated.new.go and generated.methods.go beside it. A database is born with no tables: ''agnos add-table'' declares the first one.'
 examples:
     - add-database app-database --key-prefix app
 flags:

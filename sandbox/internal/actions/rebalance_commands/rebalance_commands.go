@@ -7,7 +7,7 @@ import (
 )
 
 // RebalanceCommands lays the chain down again Step rungs apart, then runs build
-// so every new.go carries its new priority.
+// so every generated.new.go carries its new priority.
 func RebalanceCommands(sandbox *api.Sandbox, props api.RebalanceCommandsProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)
 	if err := RebalanceCommandsInternal(sandbox, io, props); err != nil {

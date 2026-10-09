@@ -16,7 +16,7 @@ args:
       required: true
       start: 2
 category: Cli
-description: Moves the command's directory to <name>/ in the folder it sits in — or in the one --dir names, / for the top — rewriting the package clause of every hand-written Go file and pointing the verb at the new name when it was the old one, drops every folder that leaves empty, and runs build so new.go, input.go and the dispatch follow it. <name> may be the current one when only the folder changes. help, version and help-flag are generated and refused.
+description: Moves the command's directory to <name>/ in the folder it sits in — or in the one --dir names, / for the top — rewriting the package clause of every hand-written Go file and pointing the verb at the new name when it was the old one, drops every folder that leaves empty, and runs build so generated.new.go, generated.input.go and the dispatch follow it. <name> may be the current one when only the folder changes. help, version and help-flag are generated and refused.
 flags:
     - description: the folder under sandbox/internal/commands the command moves to, / for the top (defaults to the folder it sits in)
       id: Dir

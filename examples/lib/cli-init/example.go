@@ -34,15 +34,15 @@ func main() {
 	if err := os.CopyFS("assert-dir/cmd", os.DirFS("test-dir/cmd")); err != nil {
 		panic(err)
 	}
-	if err := os.CopyFS("assert-dir/sandbox/internal/generated/cli", os.DirFS("test-dir/sandbox/internal/generated/cli")); err != nil {
+	if err := os.CopyFS("assert-dir/sandbox/internal/cli", os.DirFS("test-dir/sandbox/internal/cli")); err != nil {
 		panic(err)
 	}
 	if err := os.CopyFS("assert-dir/sandbox/internal/commands", os.DirFS("test-dir/sandbox/internal/commands")); err != nil {
 		panic(err)
 	}
 
-	// The constructor the layer brought with it, and the new.go that calls
-	// it: sandbox/new.go is one call per directory of sandbox/constructors/,
+	// The constructor the layer brought with it, and the generated.new.go that calls
+	// it: sandbox/generated.new.go is one call per directory of sandbox/constructors/,
 	// so this is the whole of how Sandbox.Cli comes to be filled.
 	if err := os.CopyFS("assert-dir/sandbox/constructors", os.DirFS("test-dir/sandbox/constructors")); err != nil {
 		panic(err)
@@ -71,15 +71,15 @@ func copyExtensions() error {
 	return os.WriteFile("assert-dir/AgnosConfig/extensions.yaml", content, 0o644)
 }
 
-// copyNewGo puts the project's sandbox/new.go into assert-dir at the place it
+// copyNewGo puts the project's sandbox/generated.new.go into assert-dir at the place it
 // holds in the tree.
 func copyNewGo() error {
-	content, err := os.ReadFile("test-dir/sandbox/new.go")
+	content, err := os.ReadFile("test-dir/sandbox/generated.new.go")
 	if err != nil {
 		return err
 	}
 	if err := os.MkdirAll("assert-dir/sandbox", 0o755); err != nil {
 		return err
 	}
-	return os.WriteFile("assert-dir/sandbox/new.go", content, 0o644)
+	return os.WriteFile("assert-dir/sandbox/generated.new.go", content, 0o644)
 }

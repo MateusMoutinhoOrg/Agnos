@@ -6,7 +6,7 @@ import (
 
 // This package is the contract of an *opinionated* lib: unlike every other dep,
 // which restates a library's raw capability and nothing more, it carries the
-// agnos database mechanic itself — what every generated methods.go shares:
+// agnos database mechanic itself — what every generated.methods.go shares:
 // resolving a table, reading a stored value in the type its declaration names,
 // turning a store failure into an error, and the filters a <T>Filter
 // applies.
@@ -15,7 +15,7 @@ import (
 // was never written reads as the zero value of its type, while a value of the
 // wrong Go type is an error, so a malformed record can never panic a
 // generated method. What stays in the project is each database's database.yaml,
-// the api.go, new.go and methods.go generated from it, and its
+// the generated.api.go, generated.new.go and generated.methods.go generated from it, and its
 // methods_custom.go.
 
 // Contract is the database lib injected whole as the

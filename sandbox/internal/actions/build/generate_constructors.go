@@ -8,14 +8,14 @@ import (
 
 // GenerateConstructors renders assets/templates/constructor.go into
 // sandbox/constructors/<x>/constructor.go once per contract of sandbox/api/
-// that has a new.go to call, at utils.ConstructorSource — the Constructor(sandbox)
+// that has a New<X> to call, at utils.ConstructorSource — the Constructor(sandbox)
 // that fills Sandbox.<X>.
 //
 // It is written **once**. A constructor already on disk is left exactly as it
 // is, however far it has drifted from what this template renders: how a field
 // of the Sandbox is built is the project's to change, and rewriting the file
 // every build is precisely what kept it from being. What every build does own
-// is sandbox/new.go, which calls whatever packages are there.
+// is sandbox/generated.new.go, which calls whatever packages are there.
 func GenerateConstructors(sandbox *api.Sandbox, io *stagedfs.StagedFS, constructors []Constructor, module string) error {
 	for _, constructor := range constructors {
 		if !constructor.HasNew {

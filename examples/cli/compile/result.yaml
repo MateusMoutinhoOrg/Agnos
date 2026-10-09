@@ -1,5 +1,5 @@
 cli-output: "compile started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./cmd/... ./sandbox/... ./adapters/... \ncompile linux86: go build -o release/linux86.out ./cmd/main (GOOS=linux GOARCH=amd64) \n"
 exit-code: 0
 tree:
-    - file: cmd/main/main.go
-      sha: 3255a7e61d8e60710592b90a821fe7101e3cf9930ea0d6c170dac3f60bd8fa35
+    - file: cmd/main/generated.main.go
+      sha: 84deecde12beb76e6af544509e315f8d94fe0e29124878ae9ce33cc9bd640268

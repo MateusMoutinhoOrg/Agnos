@@ -4,18 +4,19 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/goimportsdeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
 // CollectPublicApi parses every file of sandbox/api through the Go parser dep
 // and returns one rich data map per file, for the {{range .PublicApi}} loop in
-// the generated docs/PublicApi/doc.md. sandbox.go comes first (it is the root
+// the generated docs/PublicApi/doc.md. generated.sandbox.go comes first (it is the root
 // struct, one field per contract), the rest in listing order. Only exported
 // declarations are kept: what is unexported is unreachable from a caller, so
 // it is not public api.
 func CollectPublicApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string]any, error) {
 
-	files := goFilesOf(sandbox, io, "sandbox/api")
-	isRoot := func(file string) bool { return lastSegmentOf(sandbox, file) == "sandbox.go" }
+	files := utils.DropSuperseded(sandbox, goFilesOf(sandbox, io, "sandbox/api"))
+	isRoot := func(file string) bool { return utils.SourceName(sandbox, lastSegmentOf(sandbox, file)) == "sandbox.go" }
 	sandbox.Deps.SortDeps.SliceStable(files, func(i int, j int) bool {
 		return isRoot(files[i]) && !isRoot(files[j])
 	})
@@ -28,7 +29,7 @@ func CollectPublicApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string
 		}
 
 		group := fileData(sandbox, file, parsed)
-		group["Name"] = titleOf(sandbox, sandbox.Deps.StringsDeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go"))
+		group["Name"] = titleOf(sandbox, sandbox.Deps.StringsDeps.TrimSuffix(utils.SourceName(sandbox, lastSegmentOf(sandbox, file)), ".go"))
 		group["Page"] = PublicApiPageOf(sandbox, file)
 		group["Symbols"] = identifierList(sandbox, declaredSymbols(group))
 		groups = append(groups, group)
@@ -38,11 +39,12 @@ func CollectPublicApi(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string
 }
 
 // PublicApiPageOf is the file one contract of sandbox/api is documented in,
-// named after the source itself ("sandbox/api/actions.go" -> "api.actions.md")
-// and relative to the docs/PublicApi directory that indexes it. The index link
-// and the generated page are spelled here and nowhere else.
+// named after the source itself ("sandbox/api/actions.go" -> "api.actions.md",
+// "sandbox/api/generated.cli.go" -> "api.cli.md") and relative to the
+// docs/PublicApi directory that indexes it. The index link and the generated
+// page are spelled here and nowhere else.
 func PublicApiPageOf(sandbox *api.Sandbox, file string) string {
-	base := sandbox.Deps.StringsDeps.TrimSuffix(lastSegmentOf(sandbox, file), ".go")
+	base := sandbox.Deps.StringsDeps.TrimSuffix(utils.SourceName(sandbox, lastSegmentOf(sandbox, file)), ".go")
 	return "api." + base + ".md"
 }
 

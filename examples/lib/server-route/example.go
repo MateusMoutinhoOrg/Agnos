@@ -81,7 +81,7 @@ func main() {
 	if err := os.MkdirAll(assert_dir, 0o755); err != nil {
 		panic(err)
 	}
-	for _, file := range []string{"route.yaml", "new.go", "input.go"} {
+	for _, file := range []string{"route.yaml", "generated.new.go", "generated.input.go"} {
 		content, err := os.ReadFile("test-dir/sandbox/internal/routes/create_user/" + file)
 		if err != nil {
 			panic(err)

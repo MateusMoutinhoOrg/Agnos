@@ -60,6 +60,14 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		io.CreateDir("sandbox/internal")
 	}
 
+	// The packages an older build rendered under sandbox/internal/generated/
+	// live at sandbox/internal/<x>/ now, beside what the project writes: a
+	// generated file says so by its own name (generated.new.go). What the
+	// project wrote that imports one is pointed at the new path first.
+	if err := MigrateGeneratedNames(sandbox, io, module_conf.Module, extensions_conf.IsEnabled); err != nil {
+		return err
+	}
+
 	// A props struct an older build wrote into sandbox/api/ is moved to its
 	// own package first: from here on nothing reads it as a contract.
 	if err := MigrateLegacyProps(sandbox, io, hasCli, hasServer); err != nil {
@@ -74,7 +82,7 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 
 	// The contracts of sandbox/api/ and the packages that build them. The
 	// first is one field of the Sandbox each; the second is the call list
-	// sandbox/new.go is rendered from, and it is wider than the first — a
+	// sandbox/generated.new.go is rendered from, and it is wider than the first — a
 	// constructor the project wrote itself is in it too.
 	constructors := CollectConstructors(sandbox, io)
 
@@ -307,8 +315,8 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		"DepContracts":        dep_contracts,
 	}
 
-	// The per-unit generators: one new.go per declared binding, command and
-	// route, each owned by the mechanic that declares the unit.
+	// The per-unit generators: one generated.new.go per declared binding,
+	// command and route, each owned by the mechanic that declares the unit.
 	if hasDeps {
 		if err := GenerateBindingNewFiles(sandbox, io, bindings, module_conf.Module); err != nil {
 			return err
@@ -361,12 +369,14 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 	}
 
 	// What an older build wrote under sandbox/internal/generated/ and the
-	// OpinionatedAgnos libs replaced, dropped for every mechanic that is on.
+	// OpinionatedAgnos libs replaced, dropped for every mechanic that is on,
+	// and the directory itself once nothing is left in it.
 	for _, extension := range []string{utils.ExtensionCli, utils.ExtensionServer, utils.ExtensionFront, utils.ExtensionDatabase} {
 		if extensions_conf.IsEnabled(extension) {
 			utils.RemoveRetiredGenerated(sandbox, io, extension)
 		}
 	}
+	RemoveEmptyLegacyGeneratedDir(sandbox, io)
 
 	if hasServer {
 		if err := GenerateRouteNew(sandbox, io, routes, module_conf.Module); err != nil {

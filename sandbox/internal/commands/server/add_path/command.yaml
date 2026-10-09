@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Server
-description: Inserts one entry into the route's paths and runs build so the route's new.go and input.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Input.<Id>, and — with --trigger — only lets the route run when the text matches.
+description: Inserts one entry into the route's paths and runs build so the route's generated.new.go and generated.input.go pick it up. A path reads the request segments from --start to --end (both inclusive, -1 the last one) as '/' followed by them joined by '/', binds that text to Input.<Id>, and — with --trigger — only lets the route run when the text matches.
 examples:
     - add-path tenant --route create-user --start 1 --end 1
     - add-path version --route api --start 0 --end 0 --trigger /v1

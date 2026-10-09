@@ -12,7 +12,8 @@ import (
 // by a deleted file — a ghost spec — would publish a tree the project no
 // longer has.
 //
-// An item marked `dir: true` must be a directory and any other must be a file.
+// An item marked `dir: true` must be a directory and any other must be a file
+// — the generated.<name> beside it standing for a <name> the build writes.
 // An item whose path holds a pattern character stands for a family of paths
 // ("impls/<adapter>/<adapter>.go"), so the literal part of its path is checked instead:
 // the family may be empty, but the directory it would live in has to exist.
@@ -47,12 +48,20 @@ func CheckStructure(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 			continue
 		}
 
-		if !io.IsFile(node.Path) {
+		if !io.IsFile(node.Path) && !io.IsFile(generatedAlias(sandbox, node.Path)) {
 			violations = append(violations, ghostSpec(sandbox, node.Path, "there is no such file"))
 		}
 	}
 
 	return violations
+}
+
+// generatedAlias is the path a file item names once a build writes it under
+// utils.GeneratedPrefix: sandbox/generated.new.go, which start describes, is
+// sandbox/generated.new.go.
+func generatedAlias(sandbox *api.Sandbox, path string) string {
+	name := lastSegment(sandbox, path)
+	return sandbox.Deps.StringsDeps.TrimSuffix(path, name) + utils.GeneratedFile(sandbox, name)
 }
 
 // ghostSpec words one violation the same way for every kind of missing item.

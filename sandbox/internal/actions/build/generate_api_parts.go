@@ -13,7 +13,7 @@ const apiPartsDir = "sandbox/api"
 // GenerateApiParts renders, ahead of every other asset, each part of
 // api.Sandbox or api.Config an enabled group carries — cli's
 // clisandbox.go, server's serversandbox.go — and returns the paths it
-// wrote. sandbox/api/sandbox.go and config.go are rendered from the parts the
+// wrote. sandbox/api/generated.sandbox.go and config.go are rendered from the parts the
 // build collects, and the collection lists disk: on a project's first build
 // the parts the groups write in the same transaction would be missed without
 // this.

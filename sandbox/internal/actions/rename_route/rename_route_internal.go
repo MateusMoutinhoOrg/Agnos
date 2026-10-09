@@ -6,9 +6,11 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
 
-// generatedRouteFiles are the files of a route package every build writes, so
-// a rename leaves them behind for the follow-up build to write again.
-var generatedRouteFiles = []string{"new.go", "input.go"}
+// generatedRouteFiles are the files of a route package every build writes,
+// under the names a build before utils.GeneratedPrefix wrote them: a rename
+// leaves them behind for the follow-up build to write again, as it does every
+// generated.* file.
+var generatedRouteFiles = []string{utils.UnitNewFile, utils.UnitInputFile}
 
 // RenameRouteInternal moves every hand-written file of the route's directory
 // to <folder>/<name>/ — its own folder, or the one --dir names — rewriting the
@@ -67,7 +69,7 @@ func RenameRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.
 
 	for _, file := range io.ListFilesRecursively(old_dir) {
 		relative := sandbox.Deps.StringsDeps.TrimPrefix(file, old_dir+"/")
-		if isGenerated(relative) {
+		if isGenerated(sandbox, relative) {
 			continue
 		}
 		content, err := io.ReadFile(file)
@@ -91,7 +93,10 @@ func RenameRouteInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, props api.
 }
 
 // isGenerated reports a file of the package the follow-up build writes again.
-func isGenerated(relative string) bool {
+func isGenerated(sandbox *api.Sandbox, relative string) bool {
+	if utils.IsGeneratedFile(sandbox, relative) && !sandbox.Deps.StringsDeps.Contains(relative, "/") {
+		return true
+	}
 	for _, generated := range generatedRouteFiles {
 		if relative == generated {
 			return true

@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Cli
-description: Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's new.go declares it and its input.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
+description: Appends one flag declaration to sandbox/internal/commands/<command>/command.yaml and runs build so the command's generated.new.go declares it and its generated.input.go carries the field. Without --key the flag answers to --<name>. Refuses a name or a key the command already uses.
 examples:
     - add-flag output --key --out --key -o --required --command exec
     - add-flag verbose --type boolean --description 'print every step' --command exec

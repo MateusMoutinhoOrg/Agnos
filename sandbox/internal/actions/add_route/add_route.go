@@ -8,8 +8,8 @@ import (
 
 // AddRoute scaffolds a new route package under
 // sandbox/internal/routes/<name>/ — a declared route.yaml and a stub
-// handler.go — then runs build as a follow-up step so its new.go —
-// the api.Route that lands in Server.Routes — and its input.go are
+// handler.go — then runs build as a follow-up step so its generated.new.go —
+// the api.Route that lands in Server.Routes — and its generated.input.go are
 // generated for it.
 func AddRoute(sandbox *api.Sandbox, props api.AddRouteProps) error {
 	io := stagedfs.New(sandbox, props.Path, sandbox.Config.ProjectName)

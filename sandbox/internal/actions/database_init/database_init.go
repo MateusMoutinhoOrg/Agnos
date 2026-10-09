@@ -39,7 +39,7 @@ func InstallDeps(sandbox *api.Sandbox, path string) error {
 		return err
 	}
 
-	// The readers and filters every generated methods.go shares: their
+	// The readers and filters every generated.methods.go shares: their
 	// contract imports the store's, so they are installed after it.
 	return addDepAction.AddDep(sandbox, api.AddDepProps{Path: path, Dep: utils.OpinionatedAgnosDatabase})
 }

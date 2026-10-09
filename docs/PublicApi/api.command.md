@@ -1,4 +1,4 @@
-# `sandbox/api/command.go`
+# `sandbox/api/generated.command.go`
 
 | Constant | Value | Description |
 | --- | --- | --- |
