@@ -301,6 +301,11 @@ Each run that reaches the go runtime pays a `go mod tidy` + `go build`, so prefe
 `<name>` on both sides must leave the same tree and exit the same way. `docs/CliExamples/doc.md`
 has the rest.
 
+**Status: pre-beta.** A project scaffolded by an earlier release must keep building on the next
+one: no rename or removal of a command, flag, declaration key or exported contract without
+keeping the old one working, or `verify` naming the migration. `docs/Contributing/doc.md#breaking-changes`
+is the table; an unavoidable break is named in the release.
+
 Release: bump `version` in `AgnosConfig/project.yaml`, then `build` + `run-examples --update` (the
 bumped version renders into `docs/Requirements/doc.md`, so every golden holding that page moves),
 then `agnos publish`.

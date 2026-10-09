@@ -12,12 +12,12 @@ A Go CLI that **scaffolds and regenerates other Go CLIs** — each one a closed,
 </p>
 
 > [!WARNING]
-> **Under Development (Status: Alpha)**
+> **Under Development (Status: Pre-Beta)**
 >
 > - **Expected Beta:** end of October
 > - **Expected Stable:** end of 2026
 >
-> Its patterns, commands and generated output change frequently and without notice. Using it is **not recommended** unless you are an experienced developer or team comfortable reading the source, tracking breaking changes, and fixing generated code by hand.
+> From pre-beta on, breaking changes are avoided: a change to a declaration's schema, a command's flags, a public contract or the generated output keeps existing projects building, and one that cannot is named in its release notes. Patterns may still change before stable, so pin a version and read the release notes before upgrading.
 
 ---
 

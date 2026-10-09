@@ -15,6 +15,20 @@ go build -o release/bootstrap.bin ./cmd/main
 
 Release: bump `version` in `AgnosConfig/project.yaml`, then `./release/bootstrap.bin build` and `./release/bootstrap.bin run-examples --update` — the bumped version is rendered into `docs/Requirements/doc.md`, so every golden carrying that page moves — then `agnos publish` (or `agnos compile --target all` for the binaries alone).
 
+## Breaking changes
+
+Agnos is **pre-beta**: a project scaffolded by an earlier release must keep building after `agnos build` on the next one. Before a change, ask whether it breaks an existing project:
+
+| Breaks | Instead |
+|---|---|
+| renaming or removing a command, flag or arg | keep the old spelling working beside the new one |
+| renaming, removing or retyping a key of `extensions.yaml`, `command.yaml`, `route.yaml`, `database.yaml` or `project.yaml` | read the old key too, or let `verify` name it with the fix |
+| changing an exported symbol of `sandbox/api/`, `sandbox/deps/` or an `OpinionatedAgnos*` lib | add beside it; a removal waits for a deprecation |
+| changing the signature of a hand-written file (`handler.go`, `handle_*.go`, `methods_custom.go`, `project*.go`) | never: `build` does not rewrite it |
+| moving or renaming a generated path a project's own code imports | keep the old path |
+
+A break that cannot be avoided is named in the release: what changed and the command or edit that migrates a project.
+
 ## Add an action
 
 1. `sandbox/internal/actions/<name>/<name>_internal.go`: `func <Name>Internal(sandbox, io *stagedfs.StagedFS, ...) error`. Project-relative paths only. Log via `sandbox.Deps.StdDeps.Logf`, fail via `sandbox.Deps.StdDeps.Errorf`, never `Printf`.
