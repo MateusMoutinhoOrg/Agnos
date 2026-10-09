@@ -11,6 +11,6 @@ import (
 func NewConfig(sandbox *api.Sandbox) api.Config {
 	return api.Config{
 		ProjectName: "agnos",
-		Version:     "v0.15.1",
+		Version:     "v0.16.0",
 	}
 }
