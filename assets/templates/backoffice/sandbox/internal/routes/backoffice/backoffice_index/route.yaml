@@ -1,0 +1,15 @@
+category: Backoffice
+methods:
+    - GET
+paths:
+    - end: 0
+      id: Admin
+      start: 0
+      trigger:
+        type: equal
+        value: /admin
+priority: 100
+private: true
+response-type: text/html
+segments: 1
+summary: Sends the signed-in user to the backoffice home page
