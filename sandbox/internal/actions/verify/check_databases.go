@@ -4,6 +4,7 @@ import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	serializabledeps "github.com/MateusMoutinhoOrg/Agnos/sandbox/deps/serializabledeps"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/migrationconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -24,7 +25,8 @@ var databaseReservedObjects = []string{"position", "values"}
 // declaration, links that point at a table, nested collections that hold
 // fields, nest no further and take no name the store reserves, a key prefix
 // the store accepts, and a hand-written methods_custom.go that does not
-// redeclare anything the build writes.
+// redeclare anything the build writes, and a migrations folder holding every
+// version the declaration went through and nothing else.
 //
 // A project with no sandbox/internal/databases has no database layer and
 // nothing to check.
@@ -34,6 +36,8 @@ func CheckDatabases(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 	if !io.IsDir(utils.DatabasesDir) {
 		return violations
 	}
+
+	violations = append(violations, checkMigrationDeps(sandbox, io)...)
 
 	for _, dir := range io.ListDirs(utils.DatabasesDir) {
 		name := databaseNameOf(sandbox, dir)
@@ -57,6 +61,7 @@ func CheckDatabases(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
 		violations = append(violations, checkDatabaseDeclaration(sandbox, name, conf)...)
 		violations = append(violations, checkDatabaseRawFields(sandbox, name, string(content))...)
 		violations = append(violations, checkDatabaseCustom(sandbox, io, name, conf)...)
+		violations = append(violations, checkDatabaseVersions(sandbox, io, name, conf)...)
 	}
 
 	return violations
@@ -102,6 +107,11 @@ func checkDatabaseDeclaration(sandbox *api.Sandbox, name string, conf *databasec
 		violations = append(violations, databaseViolation(name,
 			"declares the key-prefix "+conf.KeyPrefix+", an old declaration: a key-prefix is a path inside the --database folder ("+utils.DefaultDatabaseDir+" by default), so write "+sandbox.Deps.StringsDeps.TrimPrefix(conf.KeyPrefix, utils.DefaultDatabaseDir+"/")+" in "+utils.DatabaseConfFile))
 	}
+	// A migration copies and moves the key-prefix as a folder of the
+	// --database folder, beside the two it works in.
+	if err := utils.ValidateDatabaseKeyPrefix(sandbox, conf.KeyPrefix); err != nil && !sandbox.Deps.StringsDeps.HasPrefix(conf.KeyPrefix, utils.DefaultDatabaseDir+"/") {
+		violations = append(violations, databaseViolation(name, "declares a key-prefix migrate-database cannot move: "+err.Error()))
+	}
 	// One Go record is declared per table and per nested collection, so the
 	// two families share one namespace: two of them spelling the same name
 	// would generate the same struct twice.
@@ -113,6 +123,10 @@ func checkDatabaseDeclaration(sandbox *api.Sandbox, name string, conf *databasec
 			violations = append(violations, databaseViolation(name, "declares the table "+table.Name+" twice"))
 		}
 		tables[table.Name] = true
+		if table.Name == utils.DatabaseVersionTable {
+			violations = append(violations, databaseViolation(name,
+				"declares the table "+table.Name+"; every database already records the version of its data under that name"))
+		}
 		violations = append(violations, claimRecord(sandbox, name, records, table.Name, "the table "+table.Name)...)
 
 		fields := map[string]bool{}
@@ -349,4 +363,109 @@ func databaseNameOf(sandbox *api.Sandbox, path string) string {
 // databaseViolation words one violation the same way for every rule.
 func databaseViolation(name string, reason string) string {
 	return utils.DatabasesDir + "/" + name + " " + reason
+}
+
+// checkDatabaseVersions enforces the migrations folder a declaration's
+// version reads: a version of at least 1, the frozen schema of every past
+// version and the operations of every version past the first — each one
+// parsable, and the schemas all under the same name and key-prefix, since a
+// migration moves the data of one folder — a hand-written step only for a
+// version that has operations, and no other file.
+func checkDatabaseVersions(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *databaseconf.DatabaseConf) []string {
+	var violations []string
+
+	if conf.Version < 1 {
+		return []string{databaseViolation(name, utils.DatabaseConfFile+" declares the version "+formatVersion(sandbox, conf.Version)+"; the first version is 1")}
+	}
+
+	expected := map[string]bool{}
+	for version := 1; version <= conf.Version; version++ {
+		if version < conf.Version {
+			file := utils.DatabaseVersionFile(sandbox, version, ".yaml")
+			expected[file] = true
+			violations = append(violations, checkFrozenSchema(sandbox, io, name, conf, version)...)
+		}
+		if version > 1 {
+			file := utils.DatabaseVersionFile(sandbox, version, ".ops.yaml")
+			expected[file] = true
+			expected[utils.DatabaseVersionFile(sandbox, version, ".go")] = true
+			content, err := io.ReadFile(utils.DatabaseOpsPath(sandbox, name, version))
+			if err != nil {
+				violations = append(violations, databaseViolation(name,
+					"is at version "+formatVersion(sandbox, conf.Version)+" and has no "+utils.DatabaseMigrationsDir+"/"+file+": nothing says how the data reaches version "+formatVersion(sandbox, version)))
+				continue
+			}
+			if _, err := migrationconf.New(sandbox, string(content)); err != nil {
+				violations = append(violations, databaseViolation(name, utils.DatabaseMigrationsDir+"/"+file+" does not parse: "+err.Error()))
+			}
+		}
+	}
+
+	folder := utils.DatabasesDir + "/" + name + "/" + utils.DatabaseMigrationsDir
+	if !io.IsDir(folder) {
+		return violations
+	}
+	for _, path := range io.ListFiles(folder) {
+		file := databaseNameOf(sandbox, path)
+		if !expected[file] {
+			violations = append(violations, databaseViolation(name,
+				"holds "+utils.DatabaseMigrationsDir+"/"+file+", which no version of "+utils.DatabaseConfFile+" (at "+formatVersion(sandbox, conf.Version)+") reads"))
+		}
+	}
+	return violations
+}
+
+// checkFrozenSchema enforces one past version's frozen declaration: it
+// parses, it says the version it is the schema of, and it names the same
+// database under the same key-prefix.
+func checkFrozenSchema(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *databaseconf.DatabaseConf, version int) []string {
+	file := utils.DatabaseMigrationsDir + "/" + utils.DatabaseVersionFile(sandbox, version, ".yaml")
+	content, err := io.ReadFile(utils.DatabasesDir + "/" + name + "/" + file)
+	if err != nil {
+		return []string{databaseViolation(name,
+			"is at version "+formatVersion(sandbox, conf.Version)+" and has no "+file+": version "+formatVersion(sandbox, version)+" has no schema to migrate its data from")}
+	}
+	frozen, err := databaseconf.New(sandbox, string(content))
+	if err != nil {
+		return []string{databaseViolation(name, file+" does not parse: "+err.Error())}
+	}
+
+	var violations []string
+	if frozen.Version != version {
+		violations = append(violations, databaseViolation(name, file+" declares the version "+formatVersion(sandbox, frozen.Version)+", not "+formatVersion(sandbox, version)))
+	}
+	if frozen.Name != conf.Name || frozen.KeyPrefix != conf.KeyPrefix {
+		violations = append(violations, databaseViolation(name,
+			file+" declares "+frozen.Name+" under the key-prefix "+frozen.KeyPrefix+"; every version of a database keeps its name and its key-prefix"))
+	}
+	return violations
+}
+
+// checkMigrationDeps enforces the contracts migrate-database and the
+// database-version guard are built on: an OpinionatedAgnosDatabase lib that
+// carries the engine, and an iodeps that renames and copies a folder. A
+// project that gained the database layer before migrations has an older copy
+// of both, which database-init installs again.
+func checkMigrationDeps(sandbox *api.Sandbox, io *stagedfs.StagedFS) []string {
+	lib := utils.ContractsDir + "/" + utils.OpinionatedAgnosDatabase + "/" + sandbox.Deps.StringsDeps.ToLower(utils.OpinionatedAgnosDatabase) + ".go"
+	contracts := [][2]string{
+		{lib, "Migrate func("},
+		{utils.ContractsDir + "/iodeps/iodeps.go", "Rename func("},
+	}
+
+	var violations []string
+	for _, contract := range contracts {
+		content, err := io.ReadFile(contract[0])
+		if err == nil && sandbox.Deps.StringsDeps.Contains(string(content), contract[1]) {
+			continue
+		}
+		violations = append(violations, contract[0]+" predates database migrations, which every generated.migrations.go is read by: run `"+
+			sandbox.Deps.StringsDeps.ToLower(sandbox.Config.ProjectName)+" database-init` again to install it as it is now")
+	}
+	return violations
+}
+
+// formatVersion spells a version number in a violation.
+func formatVersion(sandbox *api.Sandbox, version int) string {
+	return sandbox.Deps.StringsDeps.FormatInt(int64(version), 10)
 }

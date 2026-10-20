@@ -26,7 +26,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "add-table-field <Name>"
 	self.Category = "Database"
 	self.Summary = "Declare one field on a table of a database"
-	self.Description = "Appends one field to a table of the database's database.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, an object the Add/List pair for the collection nested under each record, and every plain field a Set and a place in the table's filter."
+	self.Description = "Appends one field to a table of the database's database.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, an object the Add/List pair for the collection nested under each record, and every plain field a Set and a place in the table's filter. An optional field reads as empty on every record stored before it; a --required one opens a version of the data, whose migration fills the records already stored from --default or from the hand-written step --fill-by-hand writes, and refuses to finish while one holds no value."
 	self.Examples = []string{"add-table-field alias --database app-database --table url --type key --required"}
 	self.Hidden = false
 
@@ -121,6 +121,28 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Pattern:     "",
 			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
 			Description: "the table a link points at (only with --type link)",
+		},
+		{
+			Id:          "Default",
+			Keys:        []string{"--default"},
+			Type:        api.FlagString,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
+			Description: "the value the migration gives every record already stored that holds none, for a --required field (never a key's)",
+		},
+		{
+			Id:          "FillByHand",
+			Keys:        []string{"--fill-by-hand"},
+			Type:        api.FlagBoolean,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
+			Description: "write the version's hand-written step, migrations/v<N>.go, to fill a --required field instead of a --default",
 		},
 	}
 

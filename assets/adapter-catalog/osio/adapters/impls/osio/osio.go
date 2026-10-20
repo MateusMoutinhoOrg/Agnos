@@ -1,6 +1,8 @@
 package osio
 
 import (
+	"fmt"
+	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
@@ -40,6 +42,16 @@ func Bind(deps *deps.Deps) {
 		RemoveDir: func(path string) {
 			_ = os.RemoveAll(path)
 		},
+		Rename: func(from string, to string) error {
+			if _, err := os.Lstat(to); err == nil {
+				return fmt.Errorf("cannot move %s to %s: the destination already exists", from, to)
+			}
+			if err := os.MkdirAll(filepath.Dir(to), 0755); err != nil {
+				return err
+			}
+			return os.Rename(from, to)
+		},
+		Copy: copyTree,
 		ListDirs: func(path string) []string {
 			var dirs []string
 			entries, err := os.ReadDir(path)
@@ -114,4 +126,52 @@ func Bind(deps *deps.Deps) {
 			return os.UserHomeDir()
 		},
 	}
+}
+
+// copyTree copies the file or directory at from to to, every file of a
+// directory at any depth, each one keeping its permissions — a store that
+// keeps its files private keeps them private in the copy.
+func copyTree(from string, to string) error {
+	return filepath.WalkDir(from, func(path string, entry fs.DirEntry, err error) error {
+		if err != nil {
+			return err
+		}
+		relative, err := filepath.Rel(from, path)
+		if err != nil {
+			return err
+		}
+		target := filepath.Join(to, relative)
+		info, err := entry.Info()
+		if err != nil {
+			return err
+		}
+		if entry.IsDir() {
+			return os.MkdirAll(target, info.Mode().Perm())
+		}
+		if !info.Mode().IsRegular() {
+			return nil
+		}
+		return copyFile(path, target, info.Mode().Perm())
+	})
+}
+
+// copyFile copies one regular file, creating the directory it lands in.
+func copyFile(from string, to string, mode fs.FileMode) error {
+	if err := os.MkdirAll(filepath.Dir(to), 0755); err != nil {
+		return err
+	}
+	source, err := os.Open(from)
+	if err != nil {
+		return err
+	}
+	defer source.Close()
+	target, err := os.OpenFile(to, os.O_WRONLY|os.O_CREATE|os.O_TRUNC, mode)
+	if err != nil {
+		return err
+	}
+	if _, err := io.Copy(target, source); err != nil {
+		target.Close()
+		return err
+	}
+	return target.Close()
 }

@@ -34,6 +34,7 @@ func ShowDatabaseInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, database 
 	lines := []string{
 		sandbox.Deps.StdDeps.Sprintf("%s  %s", utils.GoIdentifier(sandbox, conf.Name), utils.DatabaseDir(sandbox, database)),
 		sandbox.Deps.StdDeps.Sprintf("%skeys under  %s", branch, conf.KeyPrefix),
+		sandbox.Deps.StdDeps.Sprintf("%sdata at     version %d", branch, conf.Version),
 	}
 
 	if len(conf.Tables) == 0 {

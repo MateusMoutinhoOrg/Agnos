@@ -20,4 +20,6 @@ type Input struct {
 	Required    bool     `id:"Required"`
 	Target      string   `id:"Target"`
 	Clear       []string `id:"Clear"`
+	Default     string   `id:"Default"`
+	FillByHand  bool     `id:"FillByHand"`
 }

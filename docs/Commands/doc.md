@@ -54,6 +54,7 @@ lists the flags of the middlewares in front of it too.
 | Command | Does |
 | --- | --- |
 | [`add-database`](add-database.md) | Declare a new database in the project |
+| [`add-database-migration`](add-database-migration.md) | Open the next version of a database for a hand-written step |
 | [`add-table`](add-table.md) | Declare one collection of records on a database |
 | [`add-table-field`](add-table-field.md) | Declare one field on a table of a database |
 | [`database-init`](database-init.md) | Add the database layer to the project |

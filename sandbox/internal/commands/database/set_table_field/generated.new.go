@@ -26,7 +26,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "set-table-field <Name>"
 	self.Category = "Database"
 	self.Summary = "Rewrite one declared field of a table"
-	self.Description = "Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again."
+	self.Description = "Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again. A rename, a type some stored value may not read as, or a field made required opens a version of the data, whose migration moves, converts and fills what the records already stored hold."
 	self.Examples = []string{"set-table-field link --database app-database --table url --required"}
 	self.Hidden = false
 
@@ -143,6 +143,28 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 			Pattern:     "",
 			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
 			Description: "a key to take off again: required or target (repeatable)",
+		},
+		{
+			Id:          "Default",
+			Keys:        []string{"--default"},
+			Type:        api.FlagString,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
+			Description: "the value the migration gives every record already stored that holds none, for a field this edit makes required (never a key's)",
+		},
+		{
+			Id:          "FillByHand",
+			Keys:        []string{"--fill-by-hand"},
+			Type:        api.FlagBoolean,
+			Required:    false,
+			Default:     "",
+			HasDefault:  false,
+			Pattern:     "",
+			Trigger:     api.Trigger{Set: false, Type: api.TriggerEqual, Value: "", Negate: false, IgnoreCase: false},
+			Description: "write the version's hand-written step, migrations/v<N>.go, to fill a field this edit makes required instead of a --default",
 		},
 	}
 

@@ -8,16 +8,18 @@ import (
 
 func Handle(sandbox *api.Sandbox, props *commandprops.CommandProps, input *Input, response *api.CommandResponse) error {
 	set_error := setTableFieldAction.SetTableField(sandbox, api.SetTableFieldProps{
-		Path:     props.Path,
-		Database: input.Database,
-		Table:    input.Table,
-		Parent:   input.Parent,
-		Name:     input.Name,
-		Rename:   input.Rename,
-		Type:     input.Type,
-		Required: input.Required,
-		Target:   input.Target,
-		Clear:    input.Clear,
+		Path:       props.Path,
+		Database:   input.Database,
+		Table:      input.Table,
+		Parent:     input.Parent,
+		Name:       input.Name,
+		Rename:     input.Rename,
+		Type:       input.Type,
+		Required:   input.Required,
+		Target:     input.Target,
+		Clear:      input.Clear,
+		Default:    input.Default,
+		FillByHand: input.FillByHand,
 	})
 
 	if set_error != nil {

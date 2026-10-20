@@ -26,7 +26,7 @@
 | `CollectRouteDocs` | `routes/<x>/route.yaml` (visible ones), grouped by category in first-seen order, each crossed with the routes in front of it | `RouteDocs` (per category: `Routes` with `Method`, `Pattern`, `Summary`, `Description`, `Address`/`Parameters` as table rows, `Body` with its schema rows and a json sample, `Requests` as generated `curl` calls, `Examples`, `Statuses`, `Middlewares`) — plain words, for whoever calls the server | `docs/Routes/doc.md`, `GenerateRoutePages` |
 | `CollectOpenApi` | the same declarations, in run order, each crossed with the routes in front of it | `OpenApi` (one OpenAPI 3.0.3 document as text, a `routeDocJson` tree printed by `routeDocJsonText`; mapping in [RouteYaml](../../assets/doc-server/docs/RouteYaml/doc.md#openapi)) | `docs/Routes/openapi.json`, the `openapi` route's `handler.go` |
 | `CollectCommandDocs` | `commands/<category>/<x>/command.yaml` (visible ones), grouped by category in first-seen order | `CommandDocs` (per category: `Commands` with `Identifier`, `Aliases`, `Summary`, `Description`, `Usage`, `Flags`/`Args` as table rows, `Examples`) | `docs/Commands/doc.md` |
-| `CollectDatabases` | `databases/<x>/database.yaml` | `Databases` (per database: `DatabaseName`, `Package`, `Type`, `KeyPrefix`, `Tables` as `databasedeps.Item` literals, `Records` as the Go structs, `Methods` with `Kind`, `Params`, `Results`, `Args`) | `GenerateDatabaseNew` -> `databases/<x>/generated.{api,new,methods}.go` |
+| `CollectDatabases` | `databases/<x>/database.yaml`, `databases/<x>/migrations/v<N>.{yaml,ops.yaml,go}` | `Databases` (per database: `DatabaseName`, `Package`, `Type`, `KeyPrefix`, `Tables` as `databasedeps.Item` literals, `Records` as the Go structs, `Methods` with `Kind`, `Params`, `Results`, `Args`, and `Version`, `Versions` — per version its `Tables`, `Ops`, `HasStep` — and `HasSteps`) | `GenerateDatabaseNew` -> `databases/<x>/generated.{api,new,methods,migrations}.go`; `databases/generated.migrations.go` |
 | `CollectDatabaseDocs` | `databases/<x>/database.yaml` | `DatabaseDocs` (per database: `Tables` with their fields as table rows, `Methods` with the whole signature) | `docs/Databases/doc.md`, `GenerateDatabasePages` |
 | `CollectStructure` | `AgnosConfig/structure.yaml` (structureconf) | `Structure` (one `Line` per item, depth-indented and padded to a common description column) | `docs/Structure/doc.md` |
 
@@ -50,8 +50,8 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 | `deps` | `deps` | `sandbox/deps/generated.deps.go` |
 | `cli` | `cli` | `cmd/main`, `api/generated.{cli,command,trigger,clisandbox}.go` (aliases of `OpinionatedAgnosCli`), `internal/cli/generated.new.go` (the registry), `info/help`, `info/version`, `middleware/help_flag` |
 | `server` | `server` | `api/generated.{server,route,serversandbox}.go` (aliases of `OpinionatedAgnosServer`), `internal/server/generated.new.go` (the registry), the health and openapi routes |
-| `database` | `database` | `api/generated.databaseconfig.go`: `Config.DatabaseDir`, the folder every key-prefix is a path inside, and `DefaultDatabaseDir` (`data`), which `config/generated.new.go` starts it at |
-| `database-cli` | `database` + `cli` | `middleware/database_dir`: reads `--database` into `Config.DatabaseDir` in front of every command line |
+| `database` | `database` | `api/generated.databaseconfig.go`: `Config.DatabaseDir`, the folder every key-prefix is a path inside, and `DefaultDatabaseDir` (`data`), which `config/generated.new.go` starts it at; `internal/databases/generated.migrations.go`, the registry of every database's `Migrations` |
+| `database-cli` | `database` + `cli` | `middleware/database_dir`: reads `--database` into `Config.DatabaseDir` in front of every command line; `middleware/database_version` (rung `7`): refuses data at another version; `database/migrate_database`: the project's `migrate-database` |
 | `doc` | `doc` | `docs/{Adapters,DepList,Extensions,GeneratedFiles,LibUsage,PublicApi,Requirements,Rules,Structure,Workflow}` |
 | `doc-cli` | `doc` + `cli` | `docs/{CliInstall,Commands}` |
 | `doc-server` | `doc` + `server` | `docs/{RouteYaml,Routes,ServerUsage}`, `docs/Routes/openapi.json` |
@@ -64,7 +64,8 @@ that extension is on; a group named `doc-<a>-<b>` renders when `doc` and every `
 
 `front` has no code group: its code is the `OpinionatedAgnosFront` lib `front-init` installs, so
 it renders its pages alone. `database`'s code is the `OpinionatedAgnosDatabase` lib the same way;
-its groups hold only where the data lives (`database`, `database-cli`).
+its groups hold only where the data lives and the two commands over its migration engine
+(`database`, `database-cli`).
 
 A code group is rendered ahead of the build by `utils.RenderExtensionCode`, which `SetExtension`
 calls when a key turns on: every code group requiring that key whose requirements are now all on —

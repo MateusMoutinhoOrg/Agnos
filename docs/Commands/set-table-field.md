@@ -3,10 +3,10 @@
 Rewrite one declared field of a table
 
 ```bash
-agnos set-table-field <Name> --database <database> --table <table> [--parent <parent>] [--rename <rename>] [--type <type>] [--required] [--target <target>] [--clear <clear>...] [--help] [--path <path>] [--quiet]
+agnos set-table-field <Name> --database <database> --table <table> [--parent <parent>] [--rename <rename>] [--type <type>] [--required] [--target <target>] [--clear <clear>...] [--default <default>] [--fill-by-hand] [--help] [--path <path>] [--quiet]
 ```
 
-Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again.
+Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again. A rename, a type some stored value may not read as, or a field made required opens a version of the data, whose migration moves, converts and fills what the records already stored hold.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |
@@ -22,6 +22,8 @@ Rewrites one declared field in place and runs build. It is add-table-field appli
 | `--required` | boolean |  | an insert must carry this field | — |
 | `--target` | string |  | the table a link points at (only with --type link) | — |
 | `--clear` | string-array |  | a key to take off again: required or target (repeatable) | — |
+| `--default` | string |  | the value the migration gives every record already stored that holds none, for a field this edit makes required (never a key's) | — |
+| `--fill-by-hand` | boolean |  | write the version's hand-written step, migrations/v<N>.go, to fill a field this edit makes required instead of a --default | — |
 | `--help`, `-h` | boolean |  | Print the help of the command this command line is for | [help-flag](help-flag.md) |
 | `--path` | string | `.` | the dir holding the project (defaults to the current directory) | [project-flags](project-flags.md) |
 | `--quiet`, `-q` | boolean |  | Quiets the cli output | [project-flags](project-flags.md) |

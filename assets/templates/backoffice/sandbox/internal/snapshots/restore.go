@@ -203,15 +203,18 @@ func Conflict(sandbox *api.Sandbox, paths []string) string {
 	return ""
 }
 
-// write removes every database directory of DataDir but BackupDir — and
-// BackofficeDir, unless includeBackoffice — and writes every one of contents
-// in their place.
+// write removes every database directory of DataDir but BackupDir, the
+// migrationDirs — and BackofficeDir, unless includeBackoffice — and writes
+// every one of contents in their place.
 func write(sandbox *api.Sandbox, db *backup.Backup, contents []backup.SnapshotContentRecord, includeBackoffice bool) error {
 	io := sandbox.Deps.IoDeps
 	root := DataDir(sandbox)
 	kept := map[string]bool{io.Join(root, BackupDir): true}
 	if !includeBackoffice {
 		kept[io.Join(root, BackofficeDir)] = true
+	}
+	for _, dir := range migrationDirs {
+		kept[io.Join(root, dir)] = true
 	}
 	for _, dir := range io.ListDirs(root) {
 		if !kept[dir] {

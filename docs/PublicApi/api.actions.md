@@ -392,7 +392,7 @@ ExplainRouteProps describes one request to run against the declared routes witho
 
 ## `AddTableFieldProps`
 
-AddTableFieldProps describes one field to add to a table of a database's database.yaml. Table is the table it lands in and Parent the nested collection inside that table, "" for a field of the table itself. Type is one of key, string, int, float, link or database; Target names the table a link points at and belongs to a link alone.
+AddTableFieldProps describes one field to add to a table of a database's database.yaml. Table is the table it lands in and Parent the nested collection inside that table, "" for a field of the table itself. Type is one of key, string, int, float, link or database; Target names the table a link points at and belongs to a link alone. A required field changes what the data already stored has to hold, so it opens a version: Default is the value the migration fills the records holding none with, and FillByHand writes the version's hand-written step instead.
 
 | Field | Type |
 | --- | --- |
@@ -404,6 +404,8 @@ AddTableFieldProps describes one field to add to a table of a database's databas
 | `Type` | `string` |
 | `Required` | `bool` |
 | `Target` | `string` |
+| `Default` | `string` |
+| `FillByHand` | `bool` |
 
 ## `RemoveTableFieldProps`
 
@@ -419,7 +421,7 @@ RemoveTableFieldProps names one field to drop from a table of a database's datab
 
 ## `SetTableFieldProps`
 
-SetTableFieldProps describes the change set-table-field applies to one field a table already declares. Name is the field as it is declared now and Rename the spelling it takes on ("" leaves it alone); Type and Target overwrite what is there when they are given, and an empty one leaves it as it is. Clear is how a key is taken off again — "required" or "target" — because an empty string cannot say "unset this" and "leave it alone" at once.
+SetTableFieldProps describes the change set-table-field applies to one field a table already declares. Name is the field as it is declared now and Rename the spelling it takes on ("" leaves it alone); Type and Target overwrite what is there when they are given, and an empty one leaves it as it is. Clear is how a key is taken off again — "required" or "target" — because an empty string cannot say "unset this" and "leave it alone" at once. Default and FillByHand are AddTableFieldProps' own, for a field this edit makes required.
 
 | Field | Type |
 | --- | --- |
@@ -433,6 +435,8 @@ SetTableFieldProps describes the change set-table-field applies to one field a t
 | `Required` | `bool` |
 | `Target` | `string` |
 | `Clear` | `[]string` |
+| `Default` | `string` |
+| `FillByHand` | `bool` |
 
 ## `AddPathProps`
 
@@ -904,6 +908,15 @@ RemoveTableProps describes one RemoveTable run: Path is the directory holding th
 | `Database` | `string` |
 | `Name` | `string` |
 
+## `AddDatabaseMigrationProps`
+
+AddDatabaseMigrationProps describes one AddDatabaseMigration run: Path is the directory holding the project; Database the database to open the next version of.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+| `Database` | `string` |
+
 ## `ShowDatabaseProps`
 
 ShowDatabaseProps describes one ShowDatabase run: Path is the directory holding the project; Name the database to print.
@@ -1087,6 +1100,7 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `AddTableField` | `func(props AddTableFieldProps) error` | AddTableField declares one field on a table, or on a nested collection of it. |
 | `SetTableField` | `func(props SetTableFieldProps) error` | SetTableField rewrites one field a table already declares. |
 | `RemoveTableField` | `func(props RemoveTableFieldProps) error` | RemoveTableField deletes one declared field from a table. |
+| `AddDatabaseMigration` | `func(props AddDatabaseMigrationProps) error` | AddDatabaseMigration opens the next version of a database with no operation of its own and writes its hand-written step, for a change of the stored data no editing command makes: a seed, a field computed from others. |
 | `ShowDatabase` | `func(props ShowDatabaseProps) ([]string, error)` | ShowDatabase renders one database's whole declaration — its tables, their fields and the methods each table generates — as the lines of a tree, ready to print. |
 | `FrontInit` | `func(props FrontInitProps) error` | FrontInit adds the front layer (the OpinionatedAgnosFront lib, the route serving every file of assets/front and that tree's index.html) to a project that has none, installing the server layer first when it is missing. |
 | `FrontPurge` | `func(props FrontPurgeProps) error` | FrontPurge removes the front layer and the front route, leaving assets/front/ untouched. |

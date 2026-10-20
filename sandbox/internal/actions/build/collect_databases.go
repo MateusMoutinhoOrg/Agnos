@@ -3,6 +3,7 @@ package build
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/migrationconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -40,7 +41,16 @@ func CollectDatabases(sandbox *api.Sandbox, io *stagedfs.StagedFS) ([]map[string
 			return nil, err
 		}
 
-		databases = append(databases, databaseData(sandbox, name, conf))
+		data := databaseData(sandbox, name, conf)
+		versions, has_steps, err := databaseVersionsData(sandbox, io, name, conf)
+		if err != nil {
+			return nil, err
+		}
+		data["Version"] = conf.Version
+		data["Versions"] = versions
+		data["HasSteps"] = has_steps
+
+		databases = append(databases, data)
 	}
 
 	return databases, nil
@@ -226,4 +236,102 @@ func databaseReader(kind string) string {
 		return "ReadBytes"
 	}
 	return "ReadString"
+}
+
+// databaseVersionsData is every version of one database as its
+// generated.migrations.go spells it, the first one first: the schema of each —
+// frozen in migrations/v<N>.yaml for a past one, the declaration itself for
+// the last — the operations of every one past the first, and whether a
+// hand-written migrations/v<N>.go goes with it. The second result reports a
+// database with at least one such step, which is what imports its migrations
+// package.
+func databaseVersionsData(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, conf *databaseconf.DatabaseConf) ([]map[string]any, bool, error) {
+	versions := []map[string]any{}
+	has_steps := false
+
+	for version := 1; version <= conf.Version; version++ {
+		tables := conf.Tables
+		if version < conf.Version {
+			frozen, err := loadFrozenSchema(sandbox, io, name, version)
+			if err != nil {
+				return nil, false, err
+			}
+			tables = frozen.Tables
+		}
+
+		data := map[string]any{
+			"Version":  version,
+			"Tables":   databaseTablesData(sandbox, conf, tables),
+			"Ops":      []map[string]any{},
+			"HasStep":  false,
+			"Function": utils.DatabaseStepFunction(sandbox, version),
+		}
+
+		if version > 1 {
+			ops, err := loadVersionOps(sandbox, io, name, version)
+			if err != nil {
+				return nil, false, err
+			}
+			data["Ops"] = ops
+			if io.IsFile(utils.DatabaseStepPath(sandbox, name, version)) {
+				data["HasStep"] = true
+				has_steps = true
+			}
+		}
+
+		versions = append(versions, data)
+	}
+
+	return versions, has_steps, nil
+}
+
+// loadFrozenSchema reads the declaration one past version froze.
+func loadFrozenSchema(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, version int) (*databaseconf.DatabaseConf, error) {
+	path := utils.DatabaseSchemaPath(sandbox, name, version)
+	content, err := io.ReadFile(path)
+	if err != nil {
+		return nil, sandbox.Deps.StdDeps.Errorf("%s is missing: version %d of the database's data has no schema to migrate it from", path, version)
+	}
+	frozen, err := databaseconf.New(sandbox, string(content))
+	if err != nil {
+		return nil, sandbox.Deps.StdDeps.Errorf("%s: %w", path, err)
+	}
+	return frozen, nil
+}
+
+// loadVersionOps reads the operations of one version, as the template spells
+// them.
+func loadVersionOps(sandbox *api.Sandbox, io *stagedfs.StagedFS, name string, version int) ([]map[string]any, error) {
+	path := utils.DatabaseOpsPath(sandbox, name, version)
+	content, err := io.ReadFile(path)
+	if err != nil {
+		return nil, sandbox.Deps.StdDeps.Errorf("%s is missing: nothing says how the data reaches version %d", path, version)
+	}
+	conf, err := migrationconf.New(sandbox, string(content))
+	if err != nil {
+		return nil, sandbox.Deps.StdDeps.Errorf("%s: %w", path, err)
+	}
+
+	ops := make([]map[string]any, 0, len(conf.Ops))
+	for _, op := range conf.Ops {
+		ops = append(ops, map[string]any{
+			"Kind":    op.Kind,
+			"Table":   op.Table,
+			"Parent":  op.Parent,
+			"Field":   op.Field,
+			"Type":    op.Type,
+			"To":      op.To,
+			"Default": op.Default,
+		})
+	}
+	return ops, nil
+}
+
+// databaseTablesData is a list of tables as a schema literal reads them.
+func databaseTablesData(sandbox *api.Sandbox, conf *databaseconf.DatabaseConf, tables []databaseconf.Table) []map[string]any {
+	data := make([]map[string]any, 0, len(tables))
+	for _, table := range tables {
+		data = append(data, databaseTableData(sandbox, conf, table))
+	}
+	return data
 }

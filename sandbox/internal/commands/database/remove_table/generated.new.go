@@ -26,7 +26,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "remove-table <Name>"
 	self.Category = "Database"
 	self.Summary = "Delete one collection from a database"
-	self.Description = "Drops one table from the database's database.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first."
+	self.Description = "Drops one table from the database's database.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first. It opens a version of the data whose migration deletes every record the table already stored."
 	self.Examples = []string{"remove-table url --database app-database"}
 	self.Hidden = false
 

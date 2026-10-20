@@ -86,8 +86,11 @@ Every request with its curl is in [Routes](../Routes/doc.md).
 - Search: `prefix` keeps the snapshots whose name starts with it, case-sensitive, its surrounding
   spaces trimmed; empty keeps every one. Naming snapshots by a scheme (`daily-…`, `before-…`) is
   what makes a prefix find a family of them.
-- A snapshot is every file of every folder of the `--database` folder but `backup`; the store's
-  temporary (`.…`) and `*.keeplock` files are left out. `{{.ProjectName}} start-server --database var/app`
+- A snapshot is every file of every folder of the `--database` folder but `backup`,
+  `agnos-migrating` and `agnos-pre-migration`; the store's temporary (`.…`) and `*.keeplock`
+  files are left out. The version each database's data is at is a table of it (`agnos-version`),
+  so it is snapshotted and restored with the data: a restored older one is refused until
+  `{{.ProjectName}} migrate-database` brings it up. `{{.ProjectName}} start-server --database var/app`
   snapshots and restores `./var/app`.
 - Create, restore and optimize answer at once and run on a goroutine after the route returns. Every
   job — those three, an upload, a delete and every write by hand — runs one at a time: a second one
@@ -105,8 +108,8 @@ Every request with its curl is in [Routes](../Routes/doc.md).
 - Restore: the target is read again under the job lock (a delete that ended before cannot be
   missed), every file of it checked — its path, its blob, no path a folder of another — and one
   holding no file refused. Then a `pre-restore-<ts>` snapshot of the current data is taken and
-  marked `rollback`, and only then is every folder of the `--database` folder but `backup` and
-  `backofficedb` replaced. A write that fails puts `pre-restore-<ts>` back at once; a process that
+  marked `rollback`, and only then is every folder of the `--database` folder but `backup`,
+  `backofficedb` and the two migration folders replaced. A write that fails puts `pre-restore-<ts>` back at once; a process that
   stops mid-restore — an interrupt, a kill, a crash — has it put back by the next `start-server`,
   before anything else is answered. Only the `5` newest ready `pre-restore-<ts>` are kept.
 - `backofficedb` — the backoffice users, sessions and API tokens — is restored only with

@@ -1,0 +1,37 @@
+cli-output: |
+    == a step that fails
+    people: migrating to version 3
+    people: version 3: the seed is not written yet (the data in data/people was not touched)
+    exit 1
+    data/people is byte for byte what it was
+    people
+    == the step written
+    people: migrating to version 3
+    people: the data of version 2 is kept in data/agnos-pre-migration/people-v2
+    people: migrated to version 3
+    exit 0
+    {Id:1 Name:Ana}
+    {Id:2 Name:Root}
+    {Id:3 Name:Guest}
+exit-code: 0
+tree:
+    - file: sandbox/internal/databases/people/database.yaml
+      sha: 82bfcc354aafa5d546e02f6db64518a4006075d705a5b58a00cdbcd455e9ab12
+    - file: sandbox/internal/databases/people/generated.api.go
+      sha: cc2bee78189d7d7940f5327e16ed442fd69ec4bedca9ccafefea62951d1bd648
+    - file: sandbox/internal/databases/people/generated.methods.go
+      sha: eebf81ddda726a862a84ab52da49d03d9e386dbe414fd928dfab2b13d0a32fa8
+    - file: sandbox/internal/databases/people/generated.migrations.go
+      sha: 696ea9e8b1975577d2227377c625e3878b72b615183951b3deae15881da04fce
+    - file: sandbox/internal/databases/people/generated.new.go
+      sha: 838f1a7e61f1c5c7da37a64e3a523ecaa716a835471900f8d657003d736a596e
+    - file: sandbox/internal/databases/people/migrations/v1.yaml
+      sha: edeadcce4c50bbf910d0250020e07b913472d71fbb16034ab06de2c50e031d99
+    - file: sandbox/internal/databases/people/migrations/v2.ops.yaml
+      sha: 597390df60a21e1872aceed44c3c5b6f443b21bb0b91d117fc10132057aef96b
+    - file: sandbox/internal/databases/people/migrations/v2.yaml
+      sha: 2b0d39cce28bd6e251aa8959a1de173de6bca75e7cf3905767b04b95adddd4d2
+    - file: sandbox/internal/databases/people/migrations/v3.go
+      sha: 5ba3ae25148f48f17ae7cb4f777cdc4be2989f8d4b8d7a8f9a88ea8f103378d2
+    - file: sandbox/internal/databases/people/migrations/v3.ops.yaml
+      sha: faee2e2c56063d8edab46b921fc721824fa1cd0e418ab615dbb396f477f22f0e

@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Database
-description: 'Appends one field to a table of the database''s database.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, an object the Add/List pair for the collection nested under each record, and every plain field a Set and a place in the table''s filter.'
+description: 'Appends one field to a table of the database''s database.yaml and runs build. What the field generates is decided by its type: a key brings a Find, a link a Get, an object the Add/List pair for the collection nested under each record, and every plain field a Set and a place in the table''s filter. An optional field reads as empty on every record stored before it; a --required one opens a version of the data, whose migration fills the records already stored from --default or from the hand-written step --fill-by-hand writes, and refuses to finish while one holds no value.'
 examples:
     - add-table-field alias --database app-database --table url --type key --required
 flags:
@@ -31,5 +31,10 @@ flags:
       type: boolean
     - description: the table a link points at (only with --type link)
       id: Target
+    - description: the value the migration gives every record already stored that holds none, for a --required field (never a key's)
+      id: Default
+    - description: write the version's hand-written step, migrations/v<N>.go, to fill a --required field instead of a --default
+      id: FillByHand
+      type: boolean
 priority: 100
 summary: Declare one field on a table of a database

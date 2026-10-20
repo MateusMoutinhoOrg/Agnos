@@ -50,6 +50,17 @@ type Contract struct {
 	// It reports nothing: a missing path and a path just removed are the same outcome.
 	RemoveDir func(path string)
 
+	// Rename moves the file or directory at from to to, in one step where the
+	// host allows it, creating any missing parent of to first. The error
+	// reports a source that does not exist or a destination already taken.
+	Rename func(from string, to string) error
+
+	// Copy copies the file or directory at from to to, every file of a
+	// directory at any depth, each one keeping its permissions. The error
+	// reports a source that could not be read or a file that could not be
+	// written.
+	Copy func(from string, to string) error
+
 	// ListDirs returns the directories directly inside path. Nested
 	// directories are not descended into.
 	ListDirs func(path string) []string

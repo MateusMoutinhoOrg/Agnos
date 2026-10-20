@@ -6,7 +6,7 @@ Delete one declared field from a table
 agnos remove-table-field <Name> --database <database> --table <table> [--parent <parent>] [--help] [--path <path>] [--quiet]
 ```
 
-Drops one field from a table of the database's database.yaml and runs build without compiling: the methods that field generated go with it, and hand-written code may still be calling one.
+Drops one field from a table of the database's database.yaml and runs build without compiling: the methods that field generated go with it, and hand-written code may still be calling one. It opens a version of the data whose migration deletes what the records already stored hold for the field.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

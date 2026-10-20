@@ -3,6 +3,7 @@ package remove_table
 import (
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/api"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/databaseconf"
+	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/declarations/migrationconf"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/stagedfs"
 	"github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/utils"
 )
@@ -10,12 +11,14 @@ import (
 // RemoveTableInternal parses the target database's database.yaml, drops the named
 // table and writes the file back. A table another table links to is refused:
 // the link would name a collection the declaration no longer has, which is the
-// one shape the generator cannot render.
+// one shape the generator cannot render. It opens a version whose one
+// operation deletes every record the table already stored.
 func RemoveTableInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, database string, table string) error {
 	conf, err := utils.LoadDatabaseConf(sandbox, io, database)
 	if err != nil {
 		return err
 	}
+	before := conf.Render()
 
 	name := utils.DatabaseName(sandbox, table)
 	index := utils.FindDatabaseTable(sandbox, conf.Tables, name)
@@ -40,5 +43,9 @@ func RemoveTableInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, database s
 	sandbox.Deps.StdDeps.Logf("remove-table removing %s from %s \n", name, utils.DatabaseConfPath(sandbox, database))
 
 	conf.Tables = utils.RemoveAt(conf.Tables, index)
+	op := migrationconf.Op{Kind: migrationconf.OpRemoveTable, Table: name}
+	if err := utils.OpenDatabaseVersion(sandbox, io, database, before, conf, []migrationconf.Op{op}); err != nil {
+		return err
+	}
 	return utils.SaveDatabaseConf(sandbox, io, database, conf)
 }

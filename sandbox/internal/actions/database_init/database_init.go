@@ -20,8 +20,9 @@ const DatabaseDep = "databasedeps"
 
 // databaseDeps are the contracts the database layer calls into beyond the
 // store itself: the output channels the generated methods log and fail
-// through.
-var databaseDeps = []string{"stddeps"}
+// through, and the filesystem a migration copies, renames and removes the
+// folder of a database through.
+var databaseDeps = []string{"stddeps", "iodeps"}
 
 // InstallDeps installs the store and the contracts the generated code calls
 // into. It is exported for the same reason server-init exports its own: the

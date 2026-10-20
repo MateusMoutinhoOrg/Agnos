@@ -6,7 +6,8 @@ import (
 
 func NewEmpty(sandbox *api.Sandbox) *DatabaseConf {
 	conf := &DatabaseConf{
-		Tables: []Table{},
+		Version: 1,
+		Tables:  []Table{},
 	}
 	BindMethods(sandbox, conf)
 	return conf

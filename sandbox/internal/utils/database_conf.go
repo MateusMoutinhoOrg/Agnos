@@ -24,6 +24,15 @@ const DefaultDatabaseDir = "data"
 // reads --database in front of every command line.
 const DatabaseDirMiddleware = "sandbox/internal/commands/middleware/database_dir"
 
+// DatabaseVersionMiddleware is the cli middleware database-cli renders behind
+// DatabaseDirMiddleware, which refuses data at another version than the code
+// expects.
+const DatabaseVersionMiddleware = "sandbox/internal/commands/middleware/database_version"
+
+// MigrateDatabaseCommand is the project's own migrate-database, which
+// database-cli renders.
+const MigrateDatabaseCommand = "sandbox/internal/commands/database/migrate_database"
+
 // DatabaseConfFile is the declaration every database directory carries, the
 // whole of what its generated.api.go, generated.new.go and generated.methods.go are generated from.
 const DatabaseConfFile = "database.yaml"

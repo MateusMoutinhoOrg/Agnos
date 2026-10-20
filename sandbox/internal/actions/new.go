@@ -9,6 +9,7 @@ import (
 	addCliExampleAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_cli_example"
 	addCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_command"
 	addDatabaseAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_database"
+	addDatabaseMigrationAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_database_migration"
 	addDepAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_dep"
 	addDocAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_doc"
 	addFlagAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/add_flag"
@@ -286,6 +287,9 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.RemoveTableField = func(props api.RemoveTableFieldProps) error {
 		return removeTableFieldAction.RemoveTableField(sandbox, props)
+	}
+	actions.AddDatabaseMigration = func(props api.AddDatabaseMigrationProps) error {
+		return addDatabaseMigrationAction.AddDatabaseMigration(sandbox, props)
 	}
 	actions.ShowDatabase = func(props api.ShowDatabaseProps) ([]string, error) {
 		return showDatabaseAction.ShowDatabase(sandbox, props)

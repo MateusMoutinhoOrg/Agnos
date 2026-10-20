@@ -24,6 +24,7 @@ func New(sandbox *api.Sandbox, content string) (*DatabaseConf, error) {
 	conf := &DatabaseConf{
 		Name:      readString(specs, "name"),
 		KeyPrefix: readString(specs, "key-prefix"),
+		Version:   readVersion(specs),
 		Tables:    []Table{},
 	}
 
@@ -164,6 +165,21 @@ func readString(item *serializabledeps.SerializableObject, key string) string {
 		return ""
 	}
 	return text
+}
+
+// readVersion reads `version`, which a declaration from before versions
+// leaves out: that one is version 1. A value below 1 is kept as written, so
+// `verify` names it instead of the parser hiding it.
+func readVersion(item *serializabledeps.SerializableObject) int {
+	value, _ := item.GetObjectItem("version")
+	if value == nil || !value.IsInt() {
+		return 1
+	}
+	number, err := value.GetInt()
+	if err != nil {
+		return 1
+	}
+	return int(number)
 }
 
 func readBool(item *serializabledeps.SerializableObject, key string) bool {

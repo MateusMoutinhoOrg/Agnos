@@ -13,6 +13,11 @@ func Render(sandbox *api.Sandbox, conf *DatabaseConf) string {
 
 	obj.AddItemToObject("name", conf.Name)
 	obj.AddItemToObject("key-prefix", conf.KeyPrefix)
+	// Version 1 is the one a declaration leaves out, so a database no edit
+	// ever migrated reads as it did before versions existed.
+	if conf.Version != 1 {
+		obj.AddItemToObject("version", conf.Version)
+	}
 	obj.AddItemToObject("tables", tablesArray(sandbox, conf.Tables))
 
 	return sandbox.Deps.SerializableDeps.SerializeToYaml(obj)

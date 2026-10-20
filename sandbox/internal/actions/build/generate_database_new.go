@@ -13,22 +13,25 @@ type databaseGeneratedFile struct {
 	Template string
 }
 
-// databaseGeneratedFiles is the three files of a database package a build
+// databaseGeneratedFiles is the four files of a database package a build
 // writes, in render order, named before utils.GeneratedPrefix. methods_custom.go is not here and never will be: it
 // is the one file of the package agnos neither reads nor rewrites.
 var databaseGeneratedFiles = []databaseGeneratedFile{
 	{"api.go", "templates/database_api.go"},
 	{"new.go", "templates/database_new.go"},
 	{"methods.go", "templates/database_methods.go"},
+	{"migrations.go", "templates/database_migrations.go"},
 }
 
 // GenerateDatabaseNew renders the whole generated half of every declared
 // database: generated.api.go (the records and the struct of function
-// fields), generated.new.go (the databasedeps.Props and the wiring) and
-// generated.methods.go (the body of every method), each from its own template under assets/templates.
+// fields), generated.new.go (the databasedeps.Props and the wiring),
+// generated.methods.go (the body of every method) and generated.migrations.go
+// (every version and what brings the data to it), each from its own template
+// under assets/templates.
 //
 // It is the database layer's GenerateRouteNew, only wider: a route declares
-// one generated file and a database three, because a database has no generic
+// one generated file and a database four, because a database has no generic
 // dispatch to read its declaration back at runtime — its methods are typed by
 // table, so they are spelled out.
 func GenerateDatabaseNew(sandbox *api.Sandbox, io *stagedfs.StagedFS, databases []map[string]any, module string) error {

@@ -21,12 +21,16 @@ import (
 // why: it is Go in a package whose other three files are about to be gone, so
 // leaving it behind would leave the project not compiling.
 //
-// So does the --database middleware: database-cli installs its command.yaml
-// and handler.go, and the build writes generated.new.go and generated.input.go beside them.
+// So do the three commands database-cli renders — the --database and the
+// database-version middlewares and migrate-database: it installs their
+// command.yaml and handler, and the build writes generated.new.go and
+// generated.input.go beside them.
 var databaseDirs = []string{
 	utils.DatabasesDir,
 	utils.DocsDir + "/Databases",
 	utils.DatabaseDirMiddleware,
+	utils.DatabaseVersionMiddleware,
+	utils.MigrateDatabaseCommand,
 }
 
 // DatabasePurgeInternal removes from the target project every file that the

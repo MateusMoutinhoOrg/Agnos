@@ -11,20 +11,24 @@ import (
 )
 
 // Bind fills deps.Deps.OpinionatedAgnosDatabase with the readers and filters
-// every generated.methods.go shares. Nothing here holds a dep: every function
-// is handed the database, the record or the value it reads.
+// every generated.methods.go shares, and the migration engine of migrate.go
+// and migrate_ops.go. Nothing here holds a dep: every function is handed the
+// database, the record or the value it reads, and a migration what it reaches
+// the outside world through in its MigrateProps.
 func Bind(deps *deps.Deps) {
 	deps.OpinionatedAgnosDatabase = opinionatedagnosdatabase.Contract{
-		Fail:         fail,
-		Collection:   collection,
-		ReadString:   readString,
-		ReadInt:      readInt,
-		ReadFloat:    readFloat,
-		ReadBytes:    readBytes,
-		TextMatches:  textMatches,
-		BytesMatches: bytesMatches,
-		IntInRange:   intInRange,
-		FloatInRange: floatInRange,
+		Fail:          fail,
+		Collection:    collection,
+		ReadString:    readString,
+		ReadInt:       readInt,
+		ReadFloat:     readFloat,
+		ReadBytes:     readBytes,
+		TextMatches:   textMatches,
+		BytesMatches:  bytesMatches,
+		IntInRange:    intInRange,
+		FloatInRange:  floatInRange,
+		Migrate:       migrate,
+		CheckVersions: checkVersions,
 	}
 }
 

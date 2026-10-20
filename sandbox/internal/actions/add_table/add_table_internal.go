@@ -22,6 +22,9 @@ func AddTableInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, database stri
 	utils.NoteNormalizedName(sandbox, "table", table)
 
 	name := utils.DatabaseName(sandbox, table)
+	if name == utils.DatabaseVersionTable {
+		return sandbox.Deps.StdDeps.Errorf("a table cannot be named %q: every database already records the version of its data under it", name)
+	}
 	if utils.FindDatabaseTable(sandbox, conf.Tables, name) >= 0 {
 		return sandbox.Deps.StdDeps.Errorf("database %q already declares the table %q",
 			utils.DatabaseName(sandbox, database), name)

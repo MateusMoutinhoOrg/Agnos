@@ -57,7 +57,12 @@ type Table struct {
 type DatabaseConf struct {
 	Name      string
 	KeyPrefix string
-	Tables    []Table
+	// Version is the version of the data the code expects: 1 when the
+	// declaration leaves it out, raised by every edit that changes what the
+	// stored data holds. Each version past the first is one
+	// migrations/v<N>.ops.yaml beside the declaration.
+	Version int
+	Tables  []Table
 
 	// Render serializes the declaration back to the database.yaml shape.
 	Render func() string

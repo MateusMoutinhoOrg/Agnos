@@ -8,8 +8,8 @@ tree:
     - file: adapters/impls/osio/adapter.yaml
       sha: 0b3ef0528bd457d42a7a4ce53e9245602775f1f39015e9f34e4d2dcbddafd792
     - file: adapters/impls/osio/osio.go
-      sha: 84e6b98d8e00133a54e86012f2b46cc644f34cf9a2c680b4d2eaac5705d93fd9
+      sha: b9c4ee4ee9f11333b6b169ff7b9936f98dc2654c7be56a31fb993d67257bf93e
     - file: sandbox/deps/generated.deps.go
       sha: 77f77350369f1516bb0d42bb7251db6c55ccee85c5511803e5ba751e3ec025d6
     - file: sandbox/deps/iodeps/iodeps.go
-      sha: b4fe45bad8cedc80c420d8b876c271bba43933ce3ccf56c239d431dc792b6a20
+      sha: a7366994f42939d0290360acde5d12dc3f4204d34aaab5657ed4c63a117ae986

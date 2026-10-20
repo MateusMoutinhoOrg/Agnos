@@ -5,9 +5,11 @@ import (
 )
 
 // The field ids the declaration commands — add-flag, add-arg, add-path,
-// add-parameter, add-body-field and set-body — constrain each other
-// by. No other command of the surface declares one of them, which is what lets
-// the table below be keyed by id alone.
+// add-parameter, add-body-field, set-body and the add-table-field /
+// set-table-field pair — constrain each other by. No other command of the
+// surface declares one of them, which is what lets the table below be keyed by
+// id alone; where the table-field pair reads one differently, tableFieldVerbs
+// tells them apart.
 const (
 	typeFieldId              = "type"
 	defaultFieldId           = "default"
@@ -26,6 +28,7 @@ const (
 	additionalPropsFieldId   = "additional-properties"
 	noAdditionalPropsFieldId = "no-additional-properties"
 	targetFieldId            = "target"
+	fillByHandFieldId        = "fill-by-hand"
 	triggerTypeFieldId       = "trigger-type"
 	triggerFieldId           = "trigger"
 	triggerNegateFieldId     = "trigger-negate"
@@ -39,12 +42,14 @@ const (
 // value the cli converts, so add-body-field is the only command that sees it.
 const typeObject = "object"
 
-// The two declared field types of a table that the rules below read: a link is
-// the only one that points at another table, and a nested collection is the
-// only one an insert never writes.
+// The declared field types of a table that the rules below read: a link is
+// the only one that points at another table, a nested collection the only one
+// an insert never writes, and a key the only one no single value can fill
+// every record of.
 const (
 	typeLink          = "link"
 	typeNestedRecords = "database"
+	typeKey           = "key"
 )
 
 // tableFieldVerbs are the commands declaring a field of a database table.
@@ -168,8 +173,28 @@ func RuledOutReason(sandbox *api.Sandbox, command api.Command, field Field, valu
 			return "a yes-or-no value is never demanded — not giving it already means no"
 		}
 	case defaultFieldId:
+		// On a table field --default is the opposite of a flag's: it is what
+		// fills the records already stored with a field made required, so it
+		// only exists beside --required — AddTableFieldInternal and
+		// SetTableFieldInternal refuse it anywhere else.
+		if table {
+			if !answeredYes(values, requiredFieldId) {
+				return "only a field made required fills the records already stored"
+			}
+			if typed && kind == typeKey {
+				return "a key holds a value of its own on every record, so no single value fills them all"
+			}
+			break
+		}
 		if answeredYes(values, requiredFieldId) {
 			return "it has to be given, so there is nothing to fall back to"
+		}
+	case fillByHandFieldId:
+		if !answeredYes(values, requiredFieldId) {
+			return "only a field made required fills the records already stored"
+		}
+		if answeredText(sandbox, values, defaultFieldId) != "" {
+			return "the value it falls back to already fills the records already stored"
 		}
 	case optionalFieldId:
 		if answeredYes(values, requiredFieldId) {

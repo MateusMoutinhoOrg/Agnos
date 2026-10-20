@@ -78,12 +78,12 @@ A layer is an extension plus an `<x>-init`/`<x>-purge` pair, and the server laye
 | External input contract | `sandbox/deps/argvdeps/` | `sandbox/deps/serverdeps/` | — (`embeddeps`) | `sandbox/deps/databasedeps/` (a remote dep, not a catalog one) |
 | Surface + constructor | `sandbox/api/generated.{cli,command,trigger}.go` (aliases), `sandbox/internal/cli/generated.new.go` -> `Cli.Commands` | `sandbox/api/generated.{server,route}.go` (aliases), `sandbox/internal/server/generated.new.go` -> `Server.Routes` | — (served through the server's) | — (typed by table: `<db>.New(sandbox)` on the spot) |
 | Constructor package | `sandbox/constructors/cli/` | `sandbox/constructors/server/` | — | — |
-| Opinionated lib (the code every project shares) | `OpinionatedAgnosCli`: `Main` (dispatch, binder, matcher), `Fail`, `FailureOf`, `MatchTrigger` | `OpinionatedAgnosServer`: `Main` (dispatch, binder, matcher), `Fail`, `FailureOf`, `WriteError`, `WriteJSON`, the json-schema validators | `OpinionatedAgnosFront`: `Resolve`, `SafePath`, `ContentTypeOf` | `OpinionatedAgnosDatabase`: the readers and filters every `generated.methods.go` calls |
+| Opinionated lib (the code every project shares) | `OpinionatedAgnosCli`: `Main` (dispatch, binder, matcher), `Fail`, `FailureOf`, `MatchTrigger` | `OpinionatedAgnosServer`: `Main` (dispatch, binder, matcher), `Fail`, `FailureOf`, `WriteError`, `WriteJSON`, the json-schema validators | `OpinionatedAgnosFront`: `Resolve`, `SafePath`, `ContentTypeOf` | `OpinionatedAgnosDatabase`: the readers and filters every `generated.methods.go` calls, and the migration engine (`Migrate`, `CheckVersions`) every `generated.migrations.go` feeds |
 | Answer to bad input | the dispatch, exit 2 | `server/errors/handle_*.go`, written once by `build` | — (the server's) | — |
-| Declared unit | `commands/[<folder>/]<name>/command.yaml` -> `generated.new.go` + `generated.input.go` | `routes/[<folder>/]<name>/route.yaml` -> `generated.new.go` + `generated.input.go`, hand-written `handler.go` | none: `assets/front/**`, served by `routes/front/` | `databases/<db>/database.yaml` -> `generated.{api,new,methods}.go` (+ hand-written `methods_custom.go`) |
-| Declaration package | `declarations/commandconf/` | `declarations/routeconf/` | — (`routeconf`) | `declarations/databaseconf/` |
+| Declared unit | `commands/[<folder>/]<name>/command.yaml` -> `generated.new.go` + `generated.input.go` | `routes/[<folder>/]<name>/route.yaml` -> `generated.new.go` + `generated.input.go`, hand-written `handler.go` | none: `assets/front/**`, served by `routes/front/` | `databases/<db>/database.yaml` + `migrations/v<N>.{yaml,ops.yaml}` -> `generated.{api,new,methods,migrations}.go` (+ hand-written `methods_custom.go`, `migrations/v<N>.go`) |
+| Declaration package | `declarations/commandconf/` | `declarations/routeconf/` | — (`routeconf`) | `declarations/databaseconf/`, `declarations/migrationconf/` |
 | Collectors | `collect_commands.go`, `collect_command_docs.go` | `collect_routes.go`, `collect_route_docs.go` | — | `collect_databases.go`, `collect_database_docs.go` |
-| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_server_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (three files per unit) |
+| Per-unit generator | `generate_command_new.go` | `generate_route_new.go` (two files per unit, + `generate_server_error_handlers.go`, once) | — (`generate_route_new.go`) | `generate_database_new.go` (four files per unit) |
 | Asset groups | `assets/cli/`, `assets/doc-cli/`, `assets/doc-example-cli/` | `assets/server/`, `assets/doc-server/` | `assets/doc-front/` | `assets/database/` (`Config.DatabaseDir`), `assets/database-cli/` (`--database`), `assets/doc-database/` |
 | Catalog | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosCli/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosServer/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosFront/` | `assets/{dep-catalog,adapter-catalog}/OpinionatedAgnosDatabase/` |
 | Extension key | `cli` | `server` | `front` | `database` |
@@ -134,6 +134,19 @@ A route's `Input` is a type of its own per route, so the lib builds, fills and c
 The cli matcher exists twice the same way: the `OpinionatedAgnosCli` lib's `matches.go` and `run.go` (segments, `--key=value`, a number never a flag) and `sandbox/internal/utils/command_match.go`, which `explain-command` reads a `command.yaml` with. A change to one is made to both in the same commit; the same goes for the lib's `trigger.go` and `utils/trigger_conf.go`.
 
 The matcher exists twice: the `OpinionatedAgnosServer` lib's `matches.go` reads an `api.Route` in the scaffolded project, and `sandbox/internal/utils/route_match.go` reads a `route.yaml` for `explain-route`. A change to one — a trigger type, a path type, the segment count — is made to both in the same commit, and the `explain-route` example is what holds them together. A middleware is still a route: `add-route --middleware` changes what is written (`ANY`, rung `10`, a declining stub from `assets/templates/route_middleware_handler.go`), never the yaml's shape.
+
+### A database edit that changes stored data
+
+An editor of a `database.yaml` decides whether the data already stored still reads under the
+new declaration. When it does not, the action renders the declaration before editing it
+(`before := conf.Render()`) and calls `utils.OpenDatabaseVersion(sandbox, io, db, before, conf, ops)`
+before `SaveDatabaseConf`: it freezes `before` as `migrations/v<N>.yaml`, writes `ops` as
+`migrations/v<N+1>.ops.yaml` and raises `conf.Version`. `set_table_field` is the one to copy:
+`utils.DatabaseFieldEditOps` is where a field edit becomes operations, and
+`utils.DatabaseRetypeChangesData` the one place a type change is judged. An operation the engine
+does not run yet is three edits made together — a kind in `declarations/migrationconf/api.go`,
+the same constant in the `OpinionatedAgnosDatabase` contract, and its case in the adapter's
+`applyOp` (`migrate_ops.go`) — and a row in the Migrations table of `assets/doc-database/`.
 
 ## The backoffice: a mechanic that generates nothing
 
@@ -233,6 +246,8 @@ Some files are written once and never rewritten, each by a different mechanic �
 | `routes/<name>/{route.yaml,handler.go}` | `add-route` | `io.CreateFile`, which refuses an existing path |
 | `sandbox/api/{projectsandbox,projectconfig}.go` | `start`, the `start` asset group | `build` never renders that group; `verify` names either one missing |
 | `sandbox/internal/{routeprops,commandprops}/project.go` | `build`, `generate_props_aggregate.go` | only while the package holds no other part; the aggregate beside it is rewritten every build |
+| `sandbox/internal/databases/<db>/migrations/v<N>.go` | `add-database-migration`, `--fill-by-hand`, `utils.WriteDatabaseStep` | `io.IsFile(dest)` |
+| `sandbox/internal/databases/<db>/migrations/v<N>.{yaml,ops.yaml}` | the edit opening a version, `utils.OpenDatabaseVersion` | `io.CreateFile`, which refuses an existing path |
 | `assets/templates/backoffice/**` | `backoffice-init`, `utils.RenderTemplateTree` | `io.ReadFile(dest)` per file |
 
 A write-once file may **not** live in an asset group other than `start`: `utils.RenderGroupExcept` writes every file of a group with `WriteFile` on every build, so a group is the one place it cannot go. Put its template in `assets/templates/` and render it by name. Writing it from `build` rather than from an `<x>-init` is what carries a project that gained the layer before the file existed.

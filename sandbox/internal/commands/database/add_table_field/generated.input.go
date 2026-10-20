@@ -18,4 +18,6 @@ type Input struct {
 	Type        string   `id:"Type"`
 	Required    bool     `id:"Required"`
 	Target      string   `id:"Target"`
+	Default     string   `id:"Default"`
+	FillByHand  bool     `id:"FillByHand"`
 }

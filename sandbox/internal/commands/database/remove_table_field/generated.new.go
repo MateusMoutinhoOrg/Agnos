@@ -26,7 +26,7 @@ func NewCommand(sandbox *api.Sandbox) *api.Command {
 	self.Pattern = "remove-table-field <Name>"
 	self.Category = "Database"
 	self.Summary = "Delete one declared field from a table"
-	self.Description = "Drops one field from a table of the database's database.yaml and runs build without compiling: the methods that field generated go with it, and hand-written code may still be calling one."
+	self.Description = "Drops one field from a table of the database's database.yaml and runs build without compiling: the methods that field generated go with it, and hand-written code may still be calling one. It opens a version of the data whose migration deletes what the records already stored hold for the field."
 	self.Examples = []string{"remove-table-field redirects --database app-database --table url"}
 	self.Hidden = false
 

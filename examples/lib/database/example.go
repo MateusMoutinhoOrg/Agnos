@@ -16,7 +16,9 @@ import (
 // test-dir. DatabaseInit installs the store as a remote dep and turns the
 // mechanic on; it scaffolds no database, because which tables a project wants
 // is a declaration — so every table below is declared here and generated.api.go,
-// generated.new.go and generated.methods.go are generated from that declaration alone.
+// generated.new.go, generated.methods.go and generated.migrations.go are
+// generated from that declaration alone. A required field opens a version of
+// the data, which migrations/ records.
 func main() {
 
 	deps := standard.New()    // every adapter lib bound

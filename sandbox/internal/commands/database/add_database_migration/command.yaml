@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Verb
+      start: 0
+      trigger:
+        type: equal
+        value: add-database-migration
+    - description: the database (identifier or package name) to open the next version of
+      end: 1
+      id: Database
+      required: true
+      start: 1
+category: Database
+description: 'Opens the next version of the database''s database.yaml with no operation of its own — the schema stays, the data changes — and writes its hand-written step, migrations/v<N>.go, once, then runs build. It is the version no editing command opens: a seed, a field computed from others, a value split in two. The project''s migrate-database runs the step on a copy of the data, after the steps before it.'
+examples:
+    - add-database-migration app-database
+priority: 100
+summary: Open the next version of a database for a hand-written step

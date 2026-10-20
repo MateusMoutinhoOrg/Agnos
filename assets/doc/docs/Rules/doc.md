@@ -299,8 +299,8 @@ How a path is resolved, and a bundler's build, is in [FrontUsage](../FrontUsage/
 - Its records live in `backoffice-db`, a database of its own; the project's databases are never
   touched. `./data/backofficedb` is gitignored and survives a purge.
 - Its backups live in `backup`, a database of its own, `./data/backup`, gitignored and kept by a
-  purge: a snapshot holds every other folder of the `--database` folder, and a restore replaces
-  them, never `backup` itself. Every backup route is root only, and one backup job runs at a time.
+  purge: a snapshot holds every other folder of the `--database` folder but the two
+  `migrate-database` works in, and a restore replaces them, never `backup` itself. Every backup route is root only, and one backup job runs at a time.
 
 Routes, roles and the API are in [Backoffice](../Backoffice/doc.md); backups in
 [Backups](../Backups/doc.md).
@@ -308,11 +308,12 @@ Routes, roles and the API are in [Backoffice](../Backoffice/doc.md); backups in
 ## Databases
 
 - A database is `sandbox/internal/databases/<db>/`, declared by `database.yaml` and generated
-  whole from it. `add-database`, `add-table`, `add-table-field`, their `set-` editors and
-  their inverses are its only editors — never by hand. **(verify)**
-- `generated.api.go`, `generated.new.go` and `generated.methods.go` are rewritten by every build; what every `generated.methods.go`
-  shares — resolving a table, reading a stored value, the filter filters — is the
-  `OpinionatedAgnosDatabase` lib. `methods_custom.go` is the one escape: hand-written, in the same
+  whole from it. `add-database`, `add-table`, `add-table-field`, their `set-` editors,
+  their inverses and `add-database-migration` are its only editors, of `database.yaml` and of
+  `migrations/` both — never by hand. **(verify)**
+- `generated.api.go`, `generated.new.go`, `generated.methods.go` and `generated.migrations.go` are
+  rewritten by every build; what every one of them shares — resolving a table, reading a stored
+  value, the filter filters, the migration engine — is the `OpinionatedAgnosDatabase` lib. `methods_custom.go` is the one escape: hand-written, in the same
   package, read and rewritten by nothing. A name it shares with a generated one is a violation.
   **(verify)**
 - A database is **not** a surface of `sandbox/api/`: its methods are typed by table, so there
@@ -337,6 +338,33 @@ Routes, roles and the API are in [Backoffice](../Backoffice/doc.md); backups in
   program runs; a `key-prefix` is a folder inside it, so none starts with `data/`. **(verify)**
   `--database` is read by a generated middleware in front of every command line: no command
   declares a flag of that name.
+- A `key-prefix`'s segments are lower-case letters, digits, `-` and `_`, and none starts with
+  `agnos-migrating` or `agnos-pre-migration`: a migration copies and moves it as a folder beside
+  those two. No table is named `agnos-version`. **(verify)**
+- `version` in `database.yaml` is the version of the stored data the code expects, `1` when left
+  out. An edit that changes what stored data holds opens the next one on its own — a field made
+  required, renamed, removed or given a type some stored value may not read as, a table
+  removed — freezing the declaration as it was into `migrations/v<N>.yaml` and writing what
+  carries the data across into `migrations/v<N+1>.ops.yaml`. A table, an optional field, a
+  `--clear required` or a new `target` opens none. `add-database-migration` opens one for a
+  hand-written step alone. **(verify)**: every past version has its schema, every version past
+  the first its operations, each under the same name and `key-prefix`, and `migrations/` holds
+  nothing else.
+- Every `migrations/v<N>.go` is the project's: written once, never rewritten, one
+  `V<N>(sandbox, from, to databasedeps.Database) error` that runs after that version's
+  operations. It reaches the data through `databasedeps` alone, so it compiles whatever the
+  schema becomes.
+- A migration is forward only and runs on a copy: `{{.ProjectName}} migrate-database` copies a
+  database's folder into `agnos-migrating/`, runs every step from the version its data records,
+  repairs and checks the copy against the last schema — keys unique, required fields held — and
+  only then moves the data it replaces into `agnos-pre-migration/<key-prefix>-v<N>`. A failure
+  leaves the data in use untouched; undoing a migration is moving that folder back.
+{{- if .HasCli }}
+- In front of every command line but `migrate-database`, `help` and `version`, the
+  `database-version` middleware refuses data at another version than the code expects — older,
+  newer, or a migration stopped half way — and stamps a database holding no data yet. It checks
+  once, when the command starts: stop a running server before migrating.
+{{- end }}
 
 Every key of a declaration is in [Databases](../Databases/doc.md).
 {{ end }}

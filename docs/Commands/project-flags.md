@@ -39,6 +39,7 @@ Runs in front of every command line and answers none of them. It reads --path in
 | [`start`](start.md) | always |
 | [`verify`](verify.md) | always |
 | [`add-database`](add-database.md) | always |
+| [`add-database-migration`](add-database-migration.md) | always |
 | [`add-table`](add-table.md) | always |
 | [`add-table-field`](add-table-field.md) | always |
 | [`database-init`](database-init.md) | always |

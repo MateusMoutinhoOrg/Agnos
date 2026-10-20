@@ -446,16 +446,21 @@ type ExplainRouteProps struct {
 // database.yaml. Table is the table it lands in and Parent the nested collection
 // inside that table, "" for a field of the table itself. Type is one of key,
 // string, int, float, link or database; Target names the table a link points
-// at and belongs to a link alone.
+// at and belongs to a link alone. A required field changes what the data
+// already stored has to hold, so it opens a version: Default is the value the
+// migration fills the records holding none with, and FillByHand writes the
+// version's hand-written step instead.
 type AddTableFieldProps struct {
-	Path     string
-	Database string
-	Table    string
-	Parent   string
-	Name     string
-	Type     string
-	Required bool
-	Target   string
+	Path       string
+	Database   string
+	Table      string
+	Parent     string
+	Name       string
+	Type       string
+	Required   bool
+	Target     string
+	Default    string
+	FillByHand bool
 }
 
 // RemoveTableFieldProps names one field to drop from a table of a database's
@@ -475,18 +480,21 @@ type RemoveTableFieldProps struct {
 // overwrite what is there when they are given, and an empty one leaves it as
 // it is. Clear is how a key is taken off again — "required" or "target" —
 // because an empty string cannot say "unset this" and "leave it alone" at
-// once.
+// once. Default and FillByHand are AddTableFieldProps' own, for a field this
+// edit makes required.
 type SetTableFieldProps struct {
-	Path     string
-	Database string
-	Table    string
-	Parent   string
-	Name     string
-	Rename   string
-	Type     string
-	Required bool
-	Target   string
-	Clear    []string
+	Path       string
+	Database   string
+	Table      string
+	Parent     string
+	Name       string
+	Rename     string
+	Type       string
+	Required   bool
+	Target     string
+	Clear      []string
+	Default    string
+	FillByHand bool
 }
 
 // AddPathProps describes one entry to add to a route's `paths`. Name is the
@@ -928,6 +936,14 @@ type RemoveTableProps struct {
 	Name     string
 }
 
+// AddDatabaseMigrationProps describes one AddDatabaseMigration run: Path is
+// the directory holding the project; Database the database to open the next
+// version of.
+type AddDatabaseMigrationProps struct {
+	Path     string
+	Database string
+}
+
 // ShowDatabaseProps describes one ShowDatabase run: Path is the directory
 // holding the project; Name the database to print.
 type ShowDatabaseProps struct {
@@ -1273,6 +1289,12 @@ type Actions struct {
 
 	// RemoveTableField deletes one declared field from a table.
 	RemoveTableField func(props RemoveTableFieldProps) error
+
+	// AddDatabaseMigration opens the next version of a database with no
+	// operation of its own and writes its hand-written step, for a change of
+	// the stored data no editing command makes: a seed, a field computed from
+	// others.
+	AddDatabaseMigration func(props AddDatabaseMigrationProps) error
 
 	// ShowDatabase renders one database's whole declaration — its tables,
 	// their fields and the methods each table generates — as the lines of a

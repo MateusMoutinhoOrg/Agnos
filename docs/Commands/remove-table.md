@@ -6,7 +6,7 @@ Delete one collection from a database
 agnos remove-table <Name> --database <database> [--help] [--path <path>] [--quiet]
 ```
 
-Drops one table from the database's database.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first.
+Drops one table from the database's database.yaml and runs build without compiling: every method spelled after the table goes with it. A table another table still links to is refused — point that link elsewhere first. It opens a version of the data whose migration deletes every record the table already stored.
 
 | Arg | Type | Default | Description |
 | --- | --- | --- | --- |

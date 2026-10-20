@@ -11,7 +11,7 @@ args:
       required: true
       start: 1
 category: Database
-description: 'Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again.'
+description: 'Rewrites one declared field in place and runs build. It is add-table-field applied to a declaration that already exists: the keys given are written over the ones there, --clear takes one off, and the result goes through the same constructor — so changing a type never means removing the field and declaring it again. A rename, a type some stored value may not read as, or a field made required opens a version of the data, whose migration moves, converts and fills what the records already stored hold.'
 examples:
     - set-table-field link --database app-database --table url --required
 flags:
@@ -35,5 +35,10 @@ flags:
     - description: 'a key to take off again: required or target (repeatable)'
       id: Clear
       type: string-array
+    - description: the value the migration gives every record already stored that holds none, for a field this edit makes required (never a key's)
+      id: Default
+    - description: write the version's hand-written step, migrations/v<N>.go, to fill a field this edit makes required instead of a --default
+      id: FillByHand
+      type: boolean
 priority: 100
 summary: Rewrite one declared field of a table

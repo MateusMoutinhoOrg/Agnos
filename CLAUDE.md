@@ -82,7 +82,9 @@ what every build rewrites. One editor per place a declaration holds something:
 | a command's `command.yaml` | `add-flag` / `add-arg` / `set-command`, the `set-` editor and the `remove-` inverse of each |
 | a route's `route.yaml` | `add-route`, `set-route`, `add-path`, `add-parameter`, `set-body`, `add-body-field`, `import-body`, each with its `set-` and `remove-` pair, plus `rename-route` and `rebalance-routes`; `show-route`, `list-routes` and `explain-route` read it back and write nothing |
 | `sandbox/internal/server/errors/handle_*.go` | nobody — eight files `build` writes **once**, then the project's, like a route's `handler.go` |
-| a database's `database.yaml` | `add-database`, `add-table`, `add-table-field`, each with its `set-` and `remove-` pair; `show-database` reads it back and writes nothing |
+| a database's `database.yaml` | `add-database`, `add-table`, `add-table-field`, each with its `set-` and `remove-` pair, and `add-database-migration`; `show-database` reads it back and writes nothing |
+| a database's `migrations/v<N>.yaml`, `v<N>.ops.yaml` | the edit that opened the version (`utils.OpenDatabaseVersion`), once — history, never rewritten |
+| a database's `migrations/v<N>.go` | nobody — written once by `add-database-migration` or `--fill-by-hand`, then the project's |
 | `examples/<side>/<name>/result.yaml` | `update-example <name>`, or `run-examples --update` |
 | an example | `add-cli-example` / `add-lib-example` and their `remove-` pair |
 | a doc | `agnos add-doc` / `agnos remove-doc` |
@@ -132,6 +134,9 @@ editing only the rendered copy is undone in silence.
   field carries `fields` and nests no further, and no table declares a field named `id`, nor
   an `object` named `position` or `values` (Keep reserves both).
   `remove-database` refuses a package carrying a `methods_custom.go`.
+- A database's `key-prefix` is lower-case letters, digits, `-` and `_` — a migration copies and moves
+  it as a folder — and never starts with `agnos-migrating` or `agnos-pre-migration`; no table is
+  named `agnos-version`.
 - A database's `key-prefix` is a folder inside `sandbox.Config.DatabaseDir`, which the generated
   `database_dir` middleware reads from `--database` (default `data`) on every command line. The
   store (Keep) resolves every key under the directory the program runs from and escapes any byte
@@ -227,6 +232,15 @@ escape no build reads. There is no field in `api.Sandbox` and no package in
 `<db>.New(sandbox)` on the spot — which touches no key. A `Find<T>By<Field>` is generated for a
 `key` field and for no other, because that is the only one the store indexes; every other plain
 field is reached through `List<T>s` and its filter.
+
+**The stored data has a version.** `database.yaml`'s `version` (absent = 1) is what the code
+expects; the data records its own in the table `agnos-version`, under its `key-prefix`. An edit
+that changes what stored data holds opens the next version alone — it freezes the declaration
+as it was into `migrations/v<N>.yaml` and writes the operations that carry the data across into
+`migrations/v<N+1>.ops.yaml` — and `build` renders every version into `generated.migrations.go`.
+The engine is the `OpinionatedAgnosDatabase` lib: the project's `<name> migrate-database`
+(`database-cli`) runs it on a copy of the folder and swaps the copy in only once every step and
+check passed, and the `database_version` middleware refuses data at another version.
 
 **Extensions** are declared in `AgnosConfig/extensions.yaml` and nowhere else — `build` never
 infers a mechanic from a directory being present. Ten keys: `sandbox`, `deps`,

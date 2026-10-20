@@ -32,6 +32,7 @@ import (
 	start "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/start"
 	verify "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/core/verify"
 	add_database "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/add_database"
+	add_database_migration "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/add_database_migration"
 	add_table "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/add_table"
 	add_table_field "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/add_table_field"
 	database_init "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/database/database_init"
@@ -116,6 +117,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		add_cli_example.NewCommand(sandbox),
 		add_command.NewCommand(sandbox),
 		add_database.NewCommand(sandbox),
+		add_database_migration.NewCommand(sandbox),
 		add_dep.NewCommand(sandbox),
 		add_doc.NewCommand(sandbox),
 		add_flag.NewCommand(sandbox),

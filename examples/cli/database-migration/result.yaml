@@ -1,0 +1,59 @@
+cli-output: |
+    {Id:1 Nome:Ana}
+    {Id:2 Nome:Bia}
+    == version 2, data at 1
+    people: its data is at version 1 and this build expects version 2: run `test migrate-database`
+    exit 1
+    == migrate-database
+    people: migrating to version 2
+    people: the data of version 1 is kept in data/agnos-pre-migration/people-v1
+    people: migrated to version 2
+    exit 0
+    {Id:1 Name:Ana}
+    {Id:2 Name:Bia}
+    == version 1, data at 2
+    people: its data is at version 2, newer than the version 1 this build knows: it was migrated by a newer build, which is the one to run
+    exit 1
+    == the kept data back, its version record gone
+    people: its data is at version 1 and this build expects version 2: run `test migrate-database`
+    exit 1
+    people: migrating to version 2
+    people: the data of version 1 is kept in data/agnos-pre-migration/people-v1
+    people: migrated to version 2
+    exit 0
+    {Id:1 Name:Ana}
+    {Id:2 Name:Bia}
+exit-code: 0
+tree:
+    - file: sandbox/internal/commands/database/migrate_database/command.yaml
+      sha: 1378da1ef85ade62f8e0643b65605131111ab59380d3d2cc5f547ebfb436b3f4
+    - file: sandbox/internal/commands/database/migrate_database/generated.handler.go
+      sha: 9a69e57b42d720d4a683bd35547d4154f95886d60ac6ee2d25d2150386988c18
+    - file: sandbox/internal/commands/database/migrate_database/generated.input.go
+      sha: 43d081980e6358cab6ef7fa21ee76f6f2785a86744e94f5b33065ff391574998
+    - file: sandbox/internal/commands/database/migrate_database/generated.new.go
+      sha: b9585264de99fc9fa4dd3fe4c493ad4cb6dabf2962c3587e253a797af1f39f41
+    - file: sandbox/internal/commands/middleware/database_version/command.yaml
+      sha: 11f42d4491a37378fede571c5fa0adff38bab73b78068266591421cdd215a384
+    - file: sandbox/internal/commands/middleware/database_version/generated.handler.go
+      sha: 2938872f63ad964fb34340c2c4f63f588695217e7b7262dfb6fd75156384cc71
+    - file: sandbox/internal/commands/middleware/database_version/generated.input.go
+      sha: c478ca731eb810219c613f2a824cc8f84776871f2f619df41a0d241c7691a70c
+    - file: sandbox/internal/commands/middleware/database_version/generated.new.go
+      sha: 785d3f961bd03df07904224c24341c1071b5a062a8933b1d1b0d4f9f89ac637b
+    - file: sandbox/internal/databases/generated.migrations.go
+      sha: 56b6975fbd0c20d89943c4e87dcc359c6951c903b8cc55abacf87b582c3520ae
+    - file: sandbox/internal/databases/people/database.yaml
+      sha: 80f2a51750a90ed20dba507e5f0fcf6c26c2da503a845e2936c0e77f351c3dee
+    - file: sandbox/internal/databases/people/generated.api.go
+      sha: 52ecf388646e77b6b942d760ac60ee272b5c82d1333b52224f87e1c73a9b1a79
+    - file: sandbox/internal/databases/people/generated.methods.go
+      sha: fe021055f506a4840a0b8f5d49174231c276ed1d6b96269ceee4e4a72ab49bab
+    - file: sandbox/internal/databases/people/generated.migrations.go
+      sha: ae8805ee676a791c8a4ccd96278679ea1c3d2a42fd276b3ff25ad3f6f8eca068
+    - file: sandbox/internal/databases/people/generated.new.go
+      sha: 07723227bc0a38c41cb3391ec4d9ca7fb9c65ab454753ff2996be8a14090e159
+    - file: sandbox/internal/databases/people/migrations/v1.yaml
+      sha: 16e68abeb7b5e25bc3f95bc5413274c6df98f60afb45370e01009bc2d32f1800
+    - file: sandbox/internal/databases/people/migrations/v2.ops.yaml
+      sha: f5c24a36ae96ada7eb4f881d4e5a368949549880ef58bc9b10ced236a5f5392d

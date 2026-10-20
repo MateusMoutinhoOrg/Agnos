@@ -28,6 +28,9 @@ func AddDatabaseInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, name strin
 	if conf.KeyPrefix == "" {
 		conf.KeyPrefix = conf.Name
 	}
+	if err := utils.ValidateDatabaseKeyPrefix(sandbox, conf.KeyPrefix); err != nil {
+		return err
+	}
 
 	sandbox.Deps.StdDeps.Logf("add-database creating %s \n", utils.DatabaseDir(sandbox, name))
 

@@ -83,15 +83,20 @@
 | `sandbox/internal/routeprops/project.go` | `build` | once, while the package has no other part. `Project`, the project's own fields of `RouteProps` — declare them there |
 {{- end }}
 {{- if .HasDatabase }}
-| `sandbox/deps/OpinionatedAgnosDatabase/`, `adapters/impls/OpinionatedAgnosDatabase/` | `database-init` | once, like any dep. The readers and filters every `generated.methods.go` shares |
-| `sandbox/internal/databases/<db>/generated.{api,new,methods}.go` | `build` | always. The records, the `databasedeps.Props` and the body of every method, all from `database.yaml` |
+| `sandbox/deps/OpinionatedAgnosDatabase/`, `adapters/impls/OpinionatedAgnosDatabase/` | `database-init` | once, like any dep. The readers and filters every `generated.methods.go` shares, and the migration engine |
+| `sandbox/internal/databases/<db>/generated.{api,new,methods,migrations}.go` | `build` | always. The records, the `databasedeps.Props`, the body of every method and every version with what brings the data to it, all from `database.yaml` and `migrations/` |
+| `sandbox/internal/databases/generated.migrations.go` | `build` | always. `Migrations(sandbox)`: every database, as `migrate-database` and the version guard read them |
 | `docs/Databases/` | `build` | always. Both `doc.md` and `doc.yaml` |
 | `docs/Databases/<db>.md` | `build` | always. One page per declared database; `docs/Databases/doc.md` indexes them |
-| `sandbox/internal/databases/<db>/database.yaml` | `add-database` | once, then rewritten by `add-table` / `add-table-field` / `set-table-field` and their inverses — never by hand |
+| `sandbox/internal/databases/<db>/database.yaml` | `add-database` | once, then rewritten by `add-table` / `add-table-field` / `set-table-field`, their inverses and `add-database-migration` — never by hand |
+| `sandbox/internal/databases/<db>/migrations/v<N>.yaml`, `v<N>.ops.yaml` | the edit that opened version `N+1` / `N` | once. A past version's schema, a version's operations — history, never rewritten |
+| `sandbox/internal/databases/<db>/migrations/v<N>.go` | `add-database-migration`, `--fill-by-hand` | once. Then the project's: the hand-written step of version `N` |
 | `sandbox/internal/databases/<db>/methods_custom.go` | you | never. The one file of the package no build reads and no build rewrites |
 | `sandbox/api/generated.databaseconfig.go` | `build` | always. The database layer's part of `api.Config`: `DatabaseDir`, and `DefaultDatabaseDir` (`data`) |
 {{- if .HasCli }}
 | `sandbox/internal/commands/middleware/database_dir/{command.yaml,generated.handler.go}` | `build` | always. The middleware reading `--database` in front of every command line |
+| `sandbox/internal/commands/middleware/database_version/{command.yaml,generated.handler.go}` | `build` | always. The middleware refusing data at another version than the code expects |
+| `sandbox/internal/commands/database/migrate_database/{command.yaml,generated.handler.go}` | `build` | always. `{{.ProjectName}} migrate-database` |
 {{- end }}
 {{- end }}
 {{- if .HasBackoffice }}

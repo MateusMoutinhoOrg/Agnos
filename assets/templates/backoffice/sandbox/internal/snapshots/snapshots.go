@@ -2,6 +2,7 @@ package snapshots
 
 import (
 	"{{.Module}}/sandbox/api"
+	opinionatedagnosdatabase "{{.Module}}/sandbox/deps/OpinionatedAgnosDatabase"
 	"{{.Module}}/sandbox/internal/databases/backup"
 )
 
@@ -30,6 +31,12 @@ func DataDir(sandbox *api.Sandbox) string {
 // BackupDir is the directory of DataDir the backup database lives in, its
 // key-prefix. It is never put in a snapshot, and a restore never touches it.
 const BackupDir = "backup"
+
+// migrationDirs are the directories of DataDir migrate-database works in: the
+// copy a migration runs on, and the data each migration replaced. They hold
+// no database of their own, so a snapshot leaves them out and a restore keeps
+// them — a restore never takes back the data a migration kept.
+var migrationDirs = []string{opinionatedagnosdatabase.MigratingDir, opinionatedagnosdatabase.PreMigrationDir}
 
 // The status of a snapshot.
 const (
@@ -303,15 +310,18 @@ type collected struct {
 }
 
 // collect is every file a snapshot holds: every file under every database
-// directory of DataDir but BackupDir, in lexical order, leaving out the
-// temporary and lock files the store keeps while it writes.
+// directory of DataDir but BackupDir and the migrationDirs, in lexical order,
+// leaving out the temporary and lock files the store keeps while it writes.
 func collect(sandbox *api.Sandbox) []collected {
 	io := sandbox.Deps.IoDeps
 	root := DataDir(sandbox)
-	backupDir := io.Join(root, BackupDir)
+	skipped := map[string]bool{io.Join(root, BackupDir): true}
+	for _, dir := range migrationDirs {
+		skipped[io.Join(root, dir)] = true
+	}
 	files := []collected{}
 	for _, dir := range io.ListDirs(root) {
-		if dir == backupDir {
+		if skipped[dir] {
 			continue
 		}
 		for _, path := range io.ListFilesRecursively(dir) {

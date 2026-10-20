@@ -15,6 +15,8 @@ Contract is the filesystem library injected whole as the Deps.IoDeps field. Path
 | `Exists` | `func(path string) bool` | Exists reports whether anything exists at path, directory or file. |
 | `CreateDir` | `func(path string)` | CreateDir creates the directory at path together with any missing parent. It reports nothing: a directory that already exists and a directory just created are the same outcome to the caller. |
 | `RemoveDir` | `func(path string)` | RemoveDir removes the directory or file at path and any children it contains. It reports nothing: a missing path and a path just removed are the same outcome. |
+| `Rename` | `func(from string, to string) error` | Rename moves the file or directory at from to to, in one step where the host allows it, creating any missing parent of to first. The error reports a source that does not exist or a destination already taken. |
+| `Copy` | `func(from string, to string) error` | Copy copies the file or directory at from to to, every file of a directory at any depth, each one keeping its permissions. The error reports a source that could not be read or a file that could not be written. |
 | `ListDirs` | `func(path string) []string` | ListDirs returns the directories directly inside path. Nested directories are not descended into. |
 | `ListFiles` | `func(path string) []string` | ListFiles returns the files directly inside path. Directories are not reported. |
 | `ListAll` | `func(path string) []string` | ListAll returns every entry directly inside path, directories and files alike. |

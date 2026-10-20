@@ -38,6 +38,7 @@ Runs in front of every command line. Without --help it hands the line on. With i
 | [`start`](start.md) | always |
 | [`verify`](verify.md) | always |
 | [`add-database`](add-database.md) | always |
+| [`add-database-migration`](add-database-migration.md) | always |
 | [`add-table`](add-table.md) | always |
 | [`add-table-field`](add-table-field.md) | always |
 | [`database-init`](database-init.md) | always |

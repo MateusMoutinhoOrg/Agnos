@@ -1,0 +1,24 @@
+priority: 100
+args:
+  - id: Verb
+    start: 0
+    end: 0
+    trigger: { type: equal, value: migrate-database }
+  - id: Database
+    start: 1
+    end: 1
+    description: the database to migrate, by the name its database.yaml declares (every database when left out)
+category: Database
+summary: Bring the stored data up to the version every database.yaml declares
+description: |-
+  Runs every step from the version a database's data records to the one its
+  database.yaml declares, on a copy of its folder under agnos-migrating/: the
+  operations each version declares, then its hand-written step. The copy is
+  repaired and checked against the last schema — every key unique, every
+  required field held — and only then swapped in: the data it replaced is kept
+  in agnos-pre-migration/<key-prefix>-v<version>. A step that fails leaves the
+  data in use untouched, and a run cut short is settled by the next one. Stop
+  every process using the data first: a running server is not checked again.
+examples:
+  - migrate-database
+  - migrate-database app-database
