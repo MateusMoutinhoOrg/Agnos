@@ -30,6 +30,7 @@ import (
 	depsInitAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_init"
 	depsPurgeAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/deps_purge"
 	disableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/disable_extension"
+	dropSkillsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/drop_skills"
 	enableExtensionAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/enable_extension"
 	explainCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_command"
 	explainRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/explain_route"
@@ -59,6 +60,7 @@ import (
 	removeParameterAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_parameter"
 	removePathAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_path"
 	removeRouteAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_route"
+	removeSkillsAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_skills"
 	removeTableAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table"
 	removeTableFieldAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/remove_table_field"
 	renameCommandAction "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/actions/rename_command"
@@ -313,6 +315,12 @@ func NewActions(sandbox *api.Sandbox) api.Actions {
 	}
 	actions.RemoveDoc = func(props api.RemoveDocProps) error {
 		return removeDocAction.RemoveDoc(sandbox, props)
+	}
+	actions.DropSkills = func(props api.DropSkillsProps) error {
+		return dropSkillsAction.DropSkills(sandbox, props)
+	}
+	actions.RemoveSkills = func(props api.RemoveSkillsProps) error {
+		return removeSkillsAction.RemoveSkills(sandbox, props)
 	}
 	actions.AddCliExample = func(props api.AddCliExampleProps) error {
 		return addCliExampleAction.AddCliExample(sandbox, props)

@@ -86,7 +86,9 @@ lists the flags of the middlewares in front of it too.
 | Command | Does |
 | --- | --- |
 | [`add-doc`](add-doc.md) | Scaffold a new doc directory under docs/ |
+| [`drop-skills`](drop-skills.md) | Turn on the agent skills that teach an LLM to drive this generator |
 | [`remove-doc`](remove-doc.md) | Delete a doc directory from docs/ |
+| [`remove-skills`](remove-skills.md) | Remove the agent skills and turn the skills extension off |
 
 ## Examples
 

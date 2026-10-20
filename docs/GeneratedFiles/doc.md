@@ -12,6 +12,8 @@
 | `go.sum` | `go mod tidy` | - |
 | `LICENSE` | `start` | once. A placeholder; its text is pasted into `README.md`'s License section |
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
+| `{.agents,.claude}/skills/agnos/SKILL.md` | `build` | always. The agent skill: the loop, the files never to edit, the extensions, one line per `agnos` command |
+| `{.agents,.claude}/skills/agnos/commands/<command>.md` | `build` | always. One page per `agnos` command, from the binary running the build |
 | `sandbox/generated.new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/{generated.new.go,new.go}`. Then yours — write your own package there and `generated.new.go` calls it too |
 | `sandbox/api/generated.sandbox.go` | `build` | always. Every struct of `sandbox/api/<x>sandbox.go` embedded, plus `Config` and `Deps` while the project carries the deps layer |

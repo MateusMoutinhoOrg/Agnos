@@ -2,7 +2,7 @@ cli-output: ""
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 45fbf9402376617a4f21354af07cd3f51a149948032c2d3f829f27f015a17954
+      sha: f46a2747777cbcd3e5db679b49d7d74a75a76c83fc2c5b8307f672b29a325094
     - file: docs/Databases/app_database.md
       sha: c1d206f58e89dad717a1a7ec6689fa5c801eb7b5a9e657ff0c482c55cd4e05ea
     - file: docs/Databases/doc.md

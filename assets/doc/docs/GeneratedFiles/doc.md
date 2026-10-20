@@ -14,6 +14,10 @@
 {{- if .HasReadme }}
 | `README.md` | `build` | always. `ReadmeHeader.md` + one index section per theme of `themes.yaml` |
 {{- end }}
+{{- if .HasSkills }}
+| `{.agents,.claude}/skills/{{.GeneratorName}}/SKILL.md` | `build` | always. The agent skill: the loop, the files never to edit, the extensions, one line per `{{.GeneratorName}}` command |
+| `{.agents,.claude}/skills/{{.GeneratorName}}/commands/<command>.md` | `build` | always. One page per `{{.GeneratorName}}` command, from the binary running the build |
+{{- end }}
 {{- if .HasSandbox }}
 | `sandbox/generated.new.go` | `build` | always. One `<x>.Constructor(&self)` per directory of `sandbox/constructors/` |
 | `sandbox/constructors/<x>/constructor.go` | `build` | once, per contract of `sandbox/api/` that has a `sandbox/internal/<x>/{generated.new.go,new.go}`. Then yours — write your own package there and `generated.new.go` calls it too |

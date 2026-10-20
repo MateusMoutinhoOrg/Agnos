@@ -1,0 +1,20 @@
+args:
+    - end: 0
+      id: Verb
+      start: 0
+      trigger:
+        type: equal
+        value: drop-skills
+category: Docs
+description: |-
+    Turns the skills extension on and builds, which writes the agent skill
+    into .agents/skills/<generator>/ and .claude/skills/<generator>/: a SKILL.md
+    an agent loads by its description, plus one page per command of the
+    generator. Every later build rewrites it from the binary running that
+    build, so it follows the generator through each release. Run it again on a
+    project that has it on and only the build runs. remove-skills takes it away.
+examples:
+    - drop-skills
+    - drop-skills --path ./my-project
+priority: 100
+summary: Turn on the agent skills that teach an LLM to drive this generator

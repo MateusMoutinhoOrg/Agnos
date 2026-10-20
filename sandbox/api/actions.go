@@ -973,6 +973,18 @@ type RemoveDocProps struct {
 	Name string
 }
 
+// DropSkillsProps describes one DropSkills run: Path is the directory holding
+// the project.
+type DropSkillsProps struct {
+	Path string
+}
+
+// RemoveSkillsProps describes one RemoveSkills run: Path is the directory
+// holding the project.
+type RemoveSkillsProps struct {
+	Path string
+}
+
 // AddCliExampleProps describes one AddCliExample run: Path is the directory
 // holding the project; Name the example to scaffold.
 type AddCliExampleProps struct {
@@ -1313,6 +1325,14 @@ type Actions struct {
 
 	// RemoveDoc deletes one doc directory and everything under it.
 	RemoveDoc func(props RemoveDocProps) error
+
+	// DropSkills turns the skills extension on, so every build writes the
+	// generator's agent skill into .agents/skills/ and .claude/skills/.
+	DropSkills func(props DropSkillsProps) error
+
+	// RemoveSkills deletes the generator's agent skill from both roots and
+	// turns the skills extension off.
+	RemoveSkills func(props RemoveSkillsProps) error
 
 	// AddCliExample creates one example under examples/cli/, with an
 	// example.sh stub that already runs.

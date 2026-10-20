@@ -323,6 +323,17 @@ Write `docs/<Name>/doc.md`; `README.md`'s index, and the parent `Index.md` of a 
 regenerated. Describe any new path worth naming in `{{.ConfigDir}}/{{.StructureConfFile}}` — that
 file is what renders [Structure](../Structure/doc.md).
 
+## Give an LLM the skill
+
+```bash
+{{.GeneratorName}} drop-skills      # skills: true; every build writes .agents/skills/{{.GeneratorName}}/ and .claude/skills/{{.GeneratorName}}/
+{{.GeneratorName}} remove-skills    # deletes both and writes skills: false
+```
+
+The skill is a `SKILL.md` an agent loads by its description, plus one page per
+`{{.GeneratorName}}` command, rendered from the binary running the build — so it never
+falls behind the `{{.GeneratorName}}` that maintains this tree.
+
 ## Add an example
 
 ```bash

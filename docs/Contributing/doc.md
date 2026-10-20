@@ -67,6 +67,10 @@ answers the line with exit 0, but a failure returned after it still exits 1.
 | `interview/normalize.go` | the command rewrites a name before writing it down: the entry is the noun, and the confirm screen says what the typed name becomes |
 | `interview/followup.go` | the command leaves a thing half-declared, or finishes one another command started: the entry is the command offered next and the answer it inherits, so the route just declared is not typed again |
 
+Every change to agnos's command surface — a command, a flag, a summary — moves the `drop-skills`
+golden: the skill is rendered from the binary's own `Cli.Commands`, so `update-example drop-skills`
+follows it.
+
 `add-flag`/`add-arg` read the command line they are typed on, so never pass a value that is *exactly* one of their own flag spellings (`--identifier --example`, `--example --required`): the parser counts it as an occurrence and the declaration comes out polluted. `--help` joins that set on any command that does not declare a flag of that name, where the dispatch reads it as a request for that command's help screen. Declare such a flag without the short alias instead, and word its `--example` as a whole command line.
 
 ## Add a layer (cli, server, …)
@@ -153,6 +157,16 @@ front of `start-server` instead of an edit to its handler. A mechanic that needs
 `RouteProps`, `CommandProps`, `api.Config` or `api.Sandbox` copies this: one new file, one struct —
 `sandbox/api/<x>config.go` / `<x>sandbox.go` for the last two (`clisandbox.go` holds `Cli`).
 `front-purge` and `database-purge` run `BackofficePurgeInternal` first when it is on.
+
+## The skills: a mechanic read off the binary
+
+`skills` has no asset group either. `GenerateSkillPages` renders `assets/templates/skill.md` and
+`assets/templates/skill_command.md` into every root of `utils.SkillRoots`, from
+`CollectSkillCommands` — the running binary's `Cli.Commands` turned back into
+`commandconf.CommandConf`, then through the same `commandDocsOf` docs/Commands goes through. It
+never reads the tree: a project agnos scaffolded carries none of agnos's `command.yaml`, and the
+skill has to teach the binary that rendered it. `drop-skills` / `remove-skills` own the key; the
+second removes `utils.SkillDirs` and leaves `.claude/` when anything else is in it.
 
 ## Add an extension
 

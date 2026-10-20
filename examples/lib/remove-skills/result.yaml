@@ -1,0 +1,5 @@
+cli-output: "started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nbuild started with path test-dir \nsuccessfully rendered template\nruntime go: go mod tidy \nruntime go: go build ./sandbox/... \ndrop-skills started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\nremove-skills started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: AgnosConfig/extensions.yaml
+      sha: 69a4efa42d45ef7da6f8dc15d05ef8689154738da599631a1ff717d7a4377377

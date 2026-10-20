@@ -1,0 +1,365 @@
+cli-output: "drop-skills started with path test-dir \nbuild started with path test-dir \nsuccessfully rendered template\n"
+exit-code: 0
+tree:
+    - file: .agents/skills/agnos/SKILL.md
+      sha: e6558f03ae2f8961e35a167650afdea5e457fd86eef3c4f74d7cb3386f4fd3ac
+    - file: .agents/skills/agnos/commands/add-adapter.md
+      sha: 5926d7d694234d59cc83049a6a52516cb47b6dbdda674f2d145ca20ee816b313
+    - file: .agents/skills/agnos/commands/add-arg.md
+      sha: c2d35e9e3eadd12fa95d1e6ee8f4efa10c8c67027c076bd1f3659ea8f04b2197
+    - file: .agents/skills/agnos/commands/add-binding.md
+      sha: 9e2933967f64f924bce01a36d9dde7e5f817809f5d3878d89e64794cfb03f91b
+    - file: .agents/skills/agnos/commands/add-body-field.md
+      sha: 03a773330a0a50c76bdb0c013cb42828872ed777769c2a4463a66578fe097ad5
+    - file: .agents/skills/agnos/commands/add-cli-example.md
+      sha: e240278b25ba8bc80ba5a1334c39fd088b6f218261c13853ab356e540a344a0d
+    - file: .agents/skills/agnos/commands/add-command.md
+      sha: 4f86904aaeccf9b622aa899a24d6a974f2ecd380d33b1f48e403b28b5a51bf31
+    - file: .agents/skills/agnos/commands/add-database.md
+      sha: 6a2979e614e0612e4930a0e6b8c2356dfafe0c80198822a61568fbe76d470503
+    - file: .agents/skills/agnos/commands/add-dep.md
+      sha: be0bd26246ae338a6d8a0a3e0a3549f05ac8a80138d8c2c479845e6ad951e790
+    - file: .agents/skills/agnos/commands/add-doc.md
+      sha: 6537bcb951697344a49cd27cdcaffd31b28865f03fc04e2bcb89b213e33f93c6
+    - file: .agents/skills/agnos/commands/add-flag.md
+      sha: d6ec6adf73e996d9f8a2b47db590411f3ecf744469c47b84796597e4e1e62cca
+    - file: .agents/skills/agnos/commands/add-lib-example.md
+      sha: 1e4c253c51990cdc2542445c5fb5c0e1ec48a8a07cbc8a79536ebaf3a03298fa
+    - file: .agents/skills/agnos/commands/add-page.md
+      sha: 94990fda6c96d1079ae07a45762b13c6ace529f57e94b3ebfda7316270a8ae44
+    - file: .agents/skills/agnos/commands/add-parameter.md
+      sha: 1860bb05f40041e87fbfc787e0a5fff8026bd0c220a8d411aa3e5353a486030c
+    - file: .agents/skills/agnos/commands/add-path.md
+      sha: 44fd696b0dd0e74a7246d1dce7d28e14283b9a04c736b990182eea268d4e305c
+    - file: .agents/skills/agnos/commands/add-route.md
+      sha: 2bf9b29c9fa731313e94991fde4b5578dc2461ffa9e98ab7dd654dad452961f1
+    - file: .agents/skills/agnos/commands/add-table-field.md
+      sha: b16dda48373536f6c68b4d2533ef7ca2fa57d07a58a3ed1e7c00e7d42cd49d76
+    - file: .agents/skills/agnos/commands/add-table.md
+      sha: fc499bc62ad57c8957c071f6ff4d0ec74a43706131a0a7c756c265d3facd2e01
+    - file: .agents/skills/agnos/commands/backoffice-init.md
+      sha: ecb6cf937eb0c15a9c26528abd4f08d5d5c63e86eef853cd82065e74624f4e93
+    - file: .agents/skills/agnos/commands/backoffice-purge.md
+      sha: 165f575e8359c080ad5f046299a3db9cbbefd70b89cf5fc3f562266efaa9d4be
+    - file: .agents/skills/agnos/commands/build.md
+      sha: a983953f5a1adbc779108ece93fb2868090e81a885f488f12fc1fc71551e2407
+    - file: .agents/skills/agnos/commands/cli-init.md
+      sha: 55abeecf804890ff110062c3ba357dba82a26bd2fad0089c5fe8ffa0a9a08a61
+    - file: .agents/skills/agnos/commands/cli-purge.md
+      sha: 637a5b3ad35bfa55cb5ff65f902e44cf8c0441224f0b2f8e971c8459c6f27edd
+    - file: .agents/skills/agnos/commands/compile.md
+      sha: 78aaa2a25618f71941928feb036a2c337fc8da89a29c3d47e9b046c33ff7deb8
+    - file: .agents/skills/agnos/commands/database-init.md
+      sha: 7e0e20d2ec11e074c3fcb2ddf7ed7b0890400a4a53b89074db8b251ed10ada80
+    - file: .agents/skills/agnos/commands/database-purge.md
+      sha: 351c717bd0f664567ecd8c927758cfcb5e38f86e269e4859bb983f969c2be61a
+    - file: .agents/skills/agnos/commands/deps-init.md
+      sha: e0ada64b6ea00feaf16f7b9370d4a499843e9defd37116a723b215ffb115cb71
+    - file: .agents/skills/agnos/commands/deps-purge.md
+      sha: d62d5d32e1b00c5bbe65db44487b6601b0d9641a10f27ea3fb05b5693e058da9
+    - file: .agents/skills/agnos/commands/disable-extension.md
+      sha: 1d211e7b282191f9a6fe1c5b0f660085e58b8a7541fe96fa811d44a5f71fa2ef
+    - file: .agents/skills/agnos/commands/drop-skills.md
+      sha: 744aa0997886a64a2cafc099e44fcc63668ada1f2dbc207f9fe24ccbb459f4db
+    - file: .agents/skills/agnos/commands/enable-extension.md
+      sha: 609dfbf19c677a409a99f3774c832001dc7cd936f7d3ba35862f06d6ff892052
+    - file: .agents/skills/agnos/commands/explain-command.md
+      sha: c4481e47614cc8d352dfb3474aa7164585ca51b0648665bf2b92b77f1ddb6d25
+    - file: .agents/skills/agnos/commands/explain-route.md
+      sha: ff3fd765cc55a9521fb28dc3fa634a169dfccb0c4c551a419b7acfe2d7190707
+    - file: .agents/skills/agnos/commands/front-init.md
+      sha: 39b74735e8821223472fda66c1d057515cf318ec621499ddb38968382da192af
+    - file: .agents/skills/agnos/commands/front-purge.md
+      sha: 59196fe57bfb1a3439c3dac688a9dd8a704f05678fd0f641642d6db7b831a3ef
+    - file: .agents/skills/agnos/commands/help-flag.md
+      sha: 23ce9b9a1f8018a129ed6e216af7bc7421bac1c0378680c0cb7b21d2a68ee550
+    - file: .agents/skills/agnos/commands/help.md
+      sha: fe5f3948170b7077317bdb0e36deb5434ba644f2b8be30933447408e3fd0bd3f
+    - file: .agents/skills/agnos/commands/import-body.md
+      sha: 60bd97fff58a7bd8f2ca3c11f42e4e1cbed1cb3129f3b74039f9e315cd40f734
+    - file: .agents/skills/agnos/commands/interview.md
+      sha: b4c3fdd1928ad823fb4b2d0145239ac22aa466a47bdf1279f2e2e5296bc1124f
+    - file: .agents/skills/agnos/commands/list-adapters.md
+      sha: 99278271b3ba0a8953da7ffb5e9f2f95f1200f9c28e7970f5108dc1a3939d9c9
+    - file: .agents/skills/agnos/commands/list-commands.md
+      sha: a624c0a6de3b61c9d0d409bb6f67547dc6a894922a389d232430db62774dd0ac
+    - file: .agents/skills/agnos/commands/list-deps.md
+      sha: f2cd8f8eb85da90ad5d2c3e4a8681fcf442db4e541670b4c7c2d0bf90888926b
+    - file: .agents/skills/agnos/commands/list-extensions.md
+      sha: 0213cd3908ec19b61eab44c3bd6943858604559a538b26f475d46fce734ee1a0
+    - file: .agents/skills/agnos/commands/list-routes.md
+      sha: 6802d7eca892320bd8431518a6502476ea3620f9af61d29a9dd25a6012de5082
+    - file: .agents/skills/agnos/commands/local-install.md
+      sha: d9f2f2d05836b3976f4138962fef55edf4a6cdc7ca0795a2374979fc6dfe073e
+    - file: .agents/skills/agnos/commands/project-flags.md
+      sha: 174e886f59d3a5d4a56045340604374ee5f5ba8e93e33f3680b154ad3a7c76eb
+    - file: .agents/skills/agnos/commands/publish.md
+      sha: 80b5a7f8035c142600c8fcbe3f5c02f2da4df007a7042876c65e9d0501d7f7cd
+    - file: .agents/skills/agnos/commands/rebalance-commands.md
+      sha: 17fb3a6f17db9c6149c687d60d9a6ebbcf136f445069e1b0e9d5ad1af64bcb75
+    - file: .agents/skills/agnos/commands/rebalance-routes.md
+      sha: 136af494004d52f20fcf8e05c2434e4283bd0ff4514f8ecaaa600ec4c342cb11
+    - file: .agents/skills/agnos/commands/remove-adapter.md
+      sha: 15854bf040a32e0419d509a99d46a5ed78bb15e2c1f6adf6c4128c30b66c75ba
+    - file: .agents/skills/agnos/commands/remove-arg.md
+      sha: 81202219b563b4d8e0391be69d56b5e1e3d44994713438edd4d19270d641cfa9
+    - file: .agents/skills/agnos/commands/remove-binding.md
+      sha: fe9d971ddfdab0588a56fe312db5f7f645e67f4cfe492a15c5c311ac757fd38f
+    - file: .agents/skills/agnos/commands/remove-body-field.md
+      sha: 34b30030c95407364a4b735dbba325d28dd40ccd485c3efa79025d9fcf6110ad
+    - file: .agents/skills/agnos/commands/remove-cli-example.md
+      sha: 037389e3e3f9558dbaa2015e26086d8f87380124d86ce0990766b9e86c23f473
+    - file: .agents/skills/agnos/commands/remove-command.md
+      sha: 925f6cc6272b80c48dc8b9f347f9491b246755c520ab5b467920ca05817d7bf4
+    - file: .agents/skills/agnos/commands/remove-database.md
+      sha: 8f5027f604a6754c436568935649d1905ccd37032ee177d3f27e5732e0230af7
+    - file: .agents/skills/agnos/commands/remove-dep.md
+      sha: 9c3e32c6b760097eafac8715d7462e51618350612dc2786661eca2ce4ea1e20c
+    - file: .agents/skills/agnos/commands/remove-doc.md
+      sha: 75bc75745839ab6581230c3d1e5a70154b9eea6e0791f49dc10efacc3931851a
+    - file: .agents/skills/agnos/commands/remove-flag.md
+      sha: 657b5c3f81da72e90448753828f4386cdfcae3ec4ad6c00a02e2fbb0471ac65e
+    - file: .agents/skills/agnos/commands/remove-lib-example.md
+      sha: f69d5d95848bcd3961d40fadf46932237c037116e43f5e43af28e9d51d128e1a
+    - file: .agents/skills/agnos/commands/remove-page.md
+      sha: d9ce82552c94e4b7d9a37bd0711525fc01791aecad073a3e03cc90da3f93edc7
+    - file: .agents/skills/agnos/commands/remove-parameter.md
+      sha: dd3f938e4c8dd37e8cb59fde54299b5baa13d709dcf0288695660b8df356269e
+    - file: .agents/skills/agnos/commands/remove-path.md
+      sha: ed5d364d560981202f58bdef88b994fb41eb969552d6e760b0eea962cbe260e4
+    - file: .agents/skills/agnos/commands/remove-route.md
+      sha: ebc620ff54f2d4a34b97eb10cb9cc5568ab7f066deec177692ee1e5b8c2172cc
+    - file: .agents/skills/agnos/commands/remove-skills.md
+      sha: 780ce8c436028f5c5e77586103c143917f4a42c0df462687f8625832439e9beb
+    - file: .agents/skills/agnos/commands/remove-table-field.md
+      sha: 7870321efef933d45d26ca0ccc4a7a1853c34f8a5c6ea166b4b35f7cfcc52392
+    - file: .agents/skills/agnos/commands/remove-table.md
+      sha: c8185a50809eb516a5e324f53a42042b7db3814a341f9e4a65410562a7aa99af
+    - file: .agents/skills/agnos/commands/rename-command.md
+      sha: 7d96447ce3cc89d63dd64bb8a617db676730e2ec8bb17acccc42e50cac7d502f
+    - file: .agents/skills/agnos/commands/rename-route.md
+      sha: 1156f02f1ce0315f7d6fd4c4cc9511ec7c312f0e8c4749bea6c5de0f11b55ed9
+    - file: .agents/skills/agnos/commands/run-examples.md
+      sha: 60a3f1fa1579b9e83dd95af7a0ebdd06a5eee96a61b5ed1901148bb67c543c74
+    - file: .agents/skills/agnos/commands/server-init.md
+      sha: 9569ad208f57748c83a8461b717f18fb8ccd2eff47e0fe02927fa7f007714e4d
+    - file: .agents/skills/agnos/commands/server-purge.md
+      sha: 15abbc8f0d0e1372c9e8a1226b76c39ab6c9ebb4f7e688d7b16fbc741e3a2d5c
+    - file: .agents/skills/agnos/commands/set-adapter.md
+      sha: eb6105920da7d82976af1dec0198f383e6fd94f4dd773946255b25445d5ff193
+    - file: .agents/skills/agnos/commands/set-arg.md
+      sha: 45e633162ead215c29773384473a3604ca001bc839c9482707160f977fa0eec6
+    - file: .agents/skills/agnos/commands/set-body-field.md
+      sha: 85d95e68bbe94c6c92e483a16992e84ac19dc973834a81b97aa5cf1d95607a27
+    - file: .agents/skills/agnos/commands/set-body.md
+      sha: 568130a85ffb56b9c9bf881802eea1d4422ef0dc241bb32ae4a60315a3752512
+    - file: .agents/skills/agnos/commands/set-command.md
+      sha: a7da0ed946ffa03c7a931cebef18d2917258e85ff3dc5474927602d33087d9b9
+    - file: .agents/skills/agnos/commands/set-dep.md
+      sha: d8a030f8ebed8857d8910a208ea3215310384e7d2d8aeb2e2779dfa4826e1ae8
+    - file: .agents/skills/agnos/commands/set-flag.md
+      sha: 3dd7d59a2c17d7f4d974f537f078fdcfeee089edfe490013d28b24c64fcf0853
+    - file: .agents/skills/agnos/commands/set-parameter.md
+      sha: 97a5b092384a21a8d56b987ad60747dfd2e9347bb0eb536308f103e2dda9ab9d
+    - file: .agents/skills/agnos/commands/set-path.md
+      sha: 7d8d8845cf163a0d19da81f85e350bdf0391a2d5c8429963c872814a62bfc559
+    - file: .agents/skills/agnos/commands/set-route.md
+      sha: f73f80f2b20fdb8a7ddb3696602ddcb8fab6d426aee4594aaf340ae9b4a4db93
+    - file: .agents/skills/agnos/commands/set-table-field.md
+      sha: ec472a6907fd9d23a44af17fe9d305cd5dcae8927c6eebcd8f33a3ad8b0acbd2
+    - file: .agents/skills/agnos/commands/show-command.md
+      sha: fafd89478ce4f2590d7151d9ff6bdcb1bd19092361bd6bc636b459d2f6d5d431
+    - file: .agents/skills/agnos/commands/show-database.md
+      sha: 142e14df01d27ebe3deca40d88631648e6352921e0a0f1b4e666539765abcbd3
+    - file: .agents/skills/agnos/commands/show-route.md
+      sha: 0d59d2761e3ccb326af710c0f3c6798ab401b611ac33b2214f73e81728d5a1a3
+    - file: .agents/skills/agnos/commands/start.md
+      sha: 77ec025ffffc9d1f784e0f6092fc832bbd168362b2ba115ec68e552e5f858fbd
+    - file: .agents/skills/agnos/commands/update-example.md
+      sha: 16f5dfb0148315c08cc00f00d9422d3041b4ef5d65c7ee01f97be213cb78f7b6
+    - file: .agents/skills/agnos/commands/verify.md
+      sha: e9be05588d8d2a0ba74e1b1900452781326ea395d04f46099b99881fbe4621de
+    - file: .agents/skills/agnos/commands/version.md
+      sha: c4ea11d1951383c46f63d9c5bbf51c6244660976e723a5c18028755b0672f373
+    - file: .claude/skills/agnos/SKILL.md
+      sha: e6558f03ae2f8961e35a167650afdea5e457fd86eef3c4f74d7cb3386f4fd3ac
+    - file: .claude/skills/agnos/commands/add-adapter.md
+      sha: 5926d7d694234d59cc83049a6a52516cb47b6dbdda674f2d145ca20ee816b313
+    - file: .claude/skills/agnos/commands/add-arg.md
+      sha: c2d35e9e3eadd12fa95d1e6ee8f4efa10c8c67027c076bd1f3659ea8f04b2197
+    - file: .claude/skills/agnos/commands/add-binding.md
+      sha: 9e2933967f64f924bce01a36d9dde7e5f817809f5d3878d89e64794cfb03f91b
+    - file: .claude/skills/agnos/commands/add-body-field.md
+      sha: 03a773330a0a50c76bdb0c013cb42828872ed777769c2a4463a66578fe097ad5
+    - file: .claude/skills/agnos/commands/add-cli-example.md
+      sha: e240278b25ba8bc80ba5a1334c39fd088b6f218261c13853ab356e540a344a0d
+    - file: .claude/skills/agnos/commands/add-command.md
+      sha: 4f86904aaeccf9b622aa899a24d6a974f2ecd380d33b1f48e403b28b5a51bf31
+    - file: .claude/skills/agnos/commands/add-database.md
+      sha: 6a2979e614e0612e4930a0e6b8c2356dfafe0c80198822a61568fbe76d470503
+    - file: .claude/skills/agnos/commands/add-dep.md
+      sha: be0bd26246ae338a6d8a0a3e0a3549f05ac8a80138d8c2c479845e6ad951e790
+    - file: .claude/skills/agnos/commands/add-doc.md
+      sha: 6537bcb951697344a49cd27cdcaffd31b28865f03fc04e2bcb89b213e33f93c6
+    - file: .claude/skills/agnos/commands/add-flag.md
+      sha: d6ec6adf73e996d9f8a2b47db590411f3ecf744469c47b84796597e4e1e62cca
+    - file: .claude/skills/agnos/commands/add-lib-example.md
+      sha: 1e4c253c51990cdc2542445c5fb5c0e1ec48a8a07cbc8a79536ebaf3a03298fa
+    - file: .claude/skills/agnos/commands/add-page.md
+      sha: 94990fda6c96d1079ae07a45762b13c6ace529f57e94b3ebfda7316270a8ae44
+    - file: .claude/skills/agnos/commands/add-parameter.md
+      sha: 1860bb05f40041e87fbfc787e0a5fff8026bd0c220a8d411aa3e5353a486030c
+    - file: .claude/skills/agnos/commands/add-path.md
+      sha: 44fd696b0dd0e74a7246d1dce7d28e14283b9a04c736b990182eea268d4e305c
+    - file: .claude/skills/agnos/commands/add-route.md
+      sha: 2bf9b29c9fa731313e94991fde4b5578dc2461ffa9e98ab7dd654dad452961f1
+    - file: .claude/skills/agnos/commands/add-table-field.md
+      sha: b16dda48373536f6c68b4d2533ef7ca2fa57d07a58a3ed1e7c00e7d42cd49d76
+    - file: .claude/skills/agnos/commands/add-table.md
+      sha: fc499bc62ad57c8957c071f6ff4d0ec74a43706131a0a7c756c265d3facd2e01
+    - file: .claude/skills/agnos/commands/backoffice-init.md
+      sha: ecb6cf937eb0c15a9c26528abd4f08d5d5c63e86eef853cd82065e74624f4e93
+    - file: .claude/skills/agnos/commands/backoffice-purge.md
+      sha: 165f575e8359c080ad5f046299a3db9cbbefd70b89cf5fc3f562266efaa9d4be
+    - file: .claude/skills/agnos/commands/build.md
+      sha: a983953f5a1adbc779108ece93fb2868090e81a885f488f12fc1fc71551e2407
+    - file: .claude/skills/agnos/commands/cli-init.md
+      sha: 55abeecf804890ff110062c3ba357dba82a26bd2fad0089c5fe8ffa0a9a08a61
+    - file: .claude/skills/agnos/commands/cli-purge.md
+      sha: 637a5b3ad35bfa55cb5ff65f902e44cf8c0441224f0b2f8e971c8459c6f27edd
+    - file: .claude/skills/agnos/commands/compile.md
+      sha: 78aaa2a25618f71941928feb036a2c337fc8da89a29c3d47e9b046c33ff7deb8
+    - file: .claude/skills/agnos/commands/database-init.md
+      sha: 7e0e20d2ec11e074c3fcb2ddf7ed7b0890400a4a53b89074db8b251ed10ada80
+    - file: .claude/skills/agnos/commands/database-purge.md
+      sha: 351c717bd0f664567ecd8c927758cfcb5e38f86e269e4859bb983f969c2be61a
+    - file: .claude/skills/agnos/commands/deps-init.md
+      sha: e0ada64b6ea00feaf16f7b9370d4a499843e9defd37116a723b215ffb115cb71
+    - file: .claude/skills/agnos/commands/deps-purge.md
+      sha: d62d5d32e1b00c5bbe65db44487b6601b0d9641a10f27ea3fb05b5693e058da9
+    - file: .claude/skills/agnos/commands/disable-extension.md
+      sha: 1d211e7b282191f9a6fe1c5b0f660085e58b8a7541fe96fa811d44a5f71fa2ef
+    - file: .claude/skills/agnos/commands/drop-skills.md
+      sha: 744aa0997886a64a2cafc099e44fcc63668ada1f2dbc207f9fe24ccbb459f4db
+    - file: .claude/skills/agnos/commands/enable-extension.md
+      sha: 609dfbf19c677a409a99f3774c832001dc7cd936f7d3ba35862f06d6ff892052
+    - file: .claude/skills/agnos/commands/explain-command.md
+      sha: c4481e47614cc8d352dfb3474aa7164585ca51b0648665bf2b92b77f1ddb6d25
+    - file: .claude/skills/agnos/commands/explain-route.md
+      sha: ff3fd765cc55a9521fb28dc3fa634a169dfccb0c4c551a419b7acfe2d7190707
+    - file: .claude/skills/agnos/commands/front-init.md
+      sha: 39b74735e8821223472fda66c1d057515cf318ec621499ddb38968382da192af
+    - file: .claude/skills/agnos/commands/front-purge.md
+      sha: 59196fe57bfb1a3439c3dac688a9dd8a704f05678fd0f641642d6db7b831a3ef
+    - file: .claude/skills/agnos/commands/help-flag.md
+      sha: 23ce9b9a1f8018a129ed6e216af7bc7421bac1c0378680c0cb7b21d2a68ee550
+    - file: .claude/skills/agnos/commands/help.md
+      sha: fe5f3948170b7077317bdb0e36deb5434ba644f2b8be30933447408e3fd0bd3f
+    - file: .claude/skills/agnos/commands/import-body.md
+      sha: 60bd97fff58a7bd8f2ca3c11f42e4e1cbed1cb3129f3b74039f9e315cd40f734
+    - file: .claude/skills/agnos/commands/interview.md
+      sha: b4c3fdd1928ad823fb4b2d0145239ac22aa466a47bdf1279f2e2e5296bc1124f
+    - file: .claude/skills/agnos/commands/list-adapters.md
+      sha: 99278271b3ba0a8953da7ffb5e9f2f95f1200f9c28e7970f5108dc1a3939d9c9
+    - file: .claude/skills/agnos/commands/list-commands.md
+      sha: a624c0a6de3b61c9d0d409bb6f67547dc6a894922a389d232430db62774dd0ac
+    - file: .claude/skills/agnos/commands/list-deps.md
+      sha: f2cd8f8eb85da90ad5d2c3e4a8681fcf442db4e541670b4c7c2d0bf90888926b
+    - file: .claude/skills/agnos/commands/list-extensions.md
+      sha: 0213cd3908ec19b61eab44c3bd6943858604559a538b26f475d46fce734ee1a0
+    - file: .claude/skills/agnos/commands/list-routes.md
+      sha: 6802d7eca892320bd8431518a6502476ea3620f9af61d29a9dd25a6012de5082
+    - file: .claude/skills/agnos/commands/local-install.md
+      sha: d9f2f2d05836b3976f4138962fef55edf4a6cdc7ca0795a2374979fc6dfe073e
+    - file: .claude/skills/agnos/commands/project-flags.md
+      sha: 174e886f59d3a5d4a56045340604374ee5f5ba8e93e33f3680b154ad3a7c76eb
+    - file: .claude/skills/agnos/commands/publish.md
+      sha: 80b5a7f8035c142600c8fcbe3f5c02f2da4df007a7042876c65e9d0501d7f7cd
+    - file: .claude/skills/agnos/commands/rebalance-commands.md
+      sha: 17fb3a6f17db9c6149c687d60d9a6ebbcf136f445069e1b0e9d5ad1af64bcb75
+    - file: .claude/skills/agnos/commands/rebalance-routes.md
+      sha: 136af494004d52f20fcf8e05c2434e4283bd0ff4514f8ecaaa600ec4c342cb11
+    - file: .claude/skills/agnos/commands/remove-adapter.md
+      sha: 15854bf040a32e0419d509a99d46a5ed78bb15e2c1f6adf6c4128c30b66c75ba
+    - file: .claude/skills/agnos/commands/remove-arg.md
+      sha: 81202219b563b4d8e0391be69d56b5e1e3d44994713438edd4d19270d641cfa9
+    - file: .claude/skills/agnos/commands/remove-binding.md
+      sha: fe9d971ddfdab0588a56fe312db5f7f645e67f4cfe492a15c5c311ac757fd38f
+    - file: .claude/skills/agnos/commands/remove-body-field.md
+      sha: 34b30030c95407364a4b735dbba325d28dd40ccd485c3efa79025d9fcf6110ad
+    - file: .claude/skills/agnos/commands/remove-cli-example.md
+      sha: 037389e3e3f9558dbaa2015e26086d8f87380124d86ce0990766b9e86c23f473
+    - file: .claude/skills/agnos/commands/remove-command.md
+      sha: 925f6cc6272b80c48dc8b9f347f9491b246755c520ab5b467920ca05817d7bf4
+    - file: .claude/skills/agnos/commands/remove-database.md
+      sha: 8f5027f604a6754c436568935649d1905ccd37032ee177d3f27e5732e0230af7
+    - file: .claude/skills/agnos/commands/remove-dep.md
+      sha: 9c3e32c6b760097eafac8715d7462e51618350612dc2786661eca2ce4ea1e20c
+    - file: .claude/skills/agnos/commands/remove-doc.md
+      sha: 75bc75745839ab6581230c3d1e5a70154b9eea6e0791f49dc10efacc3931851a
+    - file: .claude/skills/agnos/commands/remove-flag.md
+      sha: 657b5c3f81da72e90448753828f4386cdfcae3ec4ad6c00a02e2fbb0471ac65e
+    - file: .claude/skills/agnos/commands/remove-lib-example.md
+      sha: f69d5d95848bcd3961d40fadf46932237c037116e43f5e43af28e9d51d128e1a
+    - file: .claude/skills/agnos/commands/remove-page.md
+      sha: d9ce82552c94e4b7d9a37bd0711525fc01791aecad073a3e03cc90da3f93edc7
+    - file: .claude/skills/agnos/commands/remove-parameter.md
+      sha: dd3f938e4c8dd37e8cb59fde54299b5baa13d709dcf0288695660b8df356269e
+    - file: .claude/skills/agnos/commands/remove-path.md
+      sha: ed5d364d560981202f58bdef88b994fb41eb969552d6e760b0eea962cbe260e4
+    - file: .claude/skills/agnos/commands/remove-route.md
+      sha: ebc620ff54f2d4a34b97eb10cb9cc5568ab7f066deec177692ee1e5b8c2172cc
+    - file: .claude/skills/agnos/commands/remove-skills.md
+      sha: 780ce8c436028f5c5e77586103c143917f4a42c0df462687f8625832439e9beb
+    - file: .claude/skills/agnos/commands/remove-table-field.md
+      sha: 7870321efef933d45d26ca0ccc4a7a1853c34f8a5c6ea166b4b35f7cfcc52392
+    - file: .claude/skills/agnos/commands/remove-table.md
+      sha: c8185a50809eb516a5e324f53a42042b7db3814a341f9e4a65410562a7aa99af
+    - file: .claude/skills/agnos/commands/rename-command.md
+      sha: 7d96447ce3cc89d63dd64bb8a617db676730e2ec8bb17acccc42e50cac7d502f
+    - file: .claude/skills/agnos/commands/rename-route.md
+      sha: 1156f02f1ce0315f7d6fd4c4cc9511ec7c312f0e8c4749bea6c5de0f11b55ed9
+    - file: .claude/skills/agnos/commands/run-examples.md
+      sha: 60a3f1fa1579b9e83dd95af7a0ebdd06a5eee96a61b5ed1901148bb67c543c74
+    - file: .claude/skills/agnos/commands/server-init.md
+      sha: 9569ad208f57748c83a8461b717f18fb8ccd2eff47e0fe02927fa7f007714e4d
+    - file: .claude/skills/agnos/commands/server-purge.md
+      sha: 15abbc8f0d0e1372c9e8a1226b76c39ab6c9ebb4f7e688d7b16fbc741e3a2d5c
+    - file: .claude/skills/agnos/commands/set-adapter.md
+      sha: eb6105920da7d82976af1dec0198f383e6fd94f4dd773946255b25445d5ff193
+    - file: .claude/skills/agnos/commands/set-arg.md
+      sha: 45e633162ead215c29773384473a3604ca001bc839c9482707160f977fa0eec6
+    - file: .claude/skills/agnos/commands/set-body-field.md
+      sha: 85d95e68bbe94c6c92e483a16992e84ac19dc973834a81b97aa5cf1d95607a27
+    - file: .claude/skills/agnos/commands/set-body.md
+      sha: 568130a85ffb56b9c9bf881802eea1d4422ef0dc241bb32ae4a60315a3752512
+    - file: .claude/skills/agnos/commands/set-command.md
+      sha: a7da0ed946ffa03c7a931cebef18d2917258e85ff3dc5474927602d33087d9b9
+    - file: .claude/skills/agnos/commands/set-dep.md
+      sha: d8a030f8ebed8857d8910a208ea3215310384e7d2d8aeb2e2779dfa4826e1ae8
+    - file: .claude/skills/agnos/commands/set-flag.md
+      sha: 3dd7d59a2c17d7f4d974f537f078fdcfeee089edfe490013d28b24c64fcf0853
+    - file: .claude/skills/agnos/commands/set-parameter.md
+      sha: 97a5b092384a21a8d56b987ad60747dfd2e9347bb0eb536308f103e2dda9ab9d
+    - file: .claude/skills/agnos/commands/set-path.md
+      sha: 7d8d8845cf163a0d19da81f85e350bdf0391a2d5c8429963c872814a62bfc559
+    - file: .claude/skills/agnos/commands/set-route.md
+      sha: f73f80f2b20fdb8a7ddb3696602ddcb8fab6d426aee4594aaf340ae9b4a4db93
+    - file: .claude/skills/agnos/commands/set-table-field.md
+      sha: ec472a6907fd9d23a44af17fe9d305cd5dcae8927c6eebcd8f33a3ad8b0acbd2
+    - file: .claude/skills/agnos/commands/show-command.md
+      sha: fafd89478ce4f2590d7151d9ff6bdcb1bd19092361bd6bc636b459d2f6d5d431
+    - file: .claude/skills/agnos/commands/show-database.md
+      sha: 142e14df01d27ebe3deca40d88631648e6352921e0a0f1b4e666539765abcbd3
+    - file: .claude/skills/agnos/commands/show-route.md
+      sha: 0d59d2761e3ccb326af710c0f3c6798ab401b611ac33b2214f73e81728d5a1a3
+    - file: .claude/skills/agnos/commands/start.md
+      sha: 77ec025ffffc9d1f784e0f6092fc832bbd168362b2ba115ec68e552e5f858fbd
+    - file: .claude/skills/agnos/commands/update-example.md
+      sha: 16f5dfb0148315c08cc00f00d9422d3041b4ef5d65c7ee01f97be213cb78f7b6
+    - file: .claude/skills/agnos/commands/verify.md
+      sha: e9be05588d8d2a0ba74e1b1900452781326ea395d04f46099b99881fbe4621de
+    - file: .claude/skills/agnos/commands/version.md
+      sha: c4ea11d1951383c46f63d9c5bbf51c6244660976e723a5c18028755b0672f373
+    - file: AgnosConfig/extensions.yaml
+      sha: 9f855a65e5d09c9f2b48ceeed7edc2233fc9421f5cdf73d1bc3507fc6ec4d614

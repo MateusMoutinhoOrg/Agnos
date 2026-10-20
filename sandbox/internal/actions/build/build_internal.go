@@ -54,6 +54,7 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 	hasBackoffice := extensions_conf.IsEnabled(utils.ExtensionBackoffice)
 	hasDoc := extensions_conf.IsEnabled(utils.ExtensionDoc)
 	hasReadme := extensions_conf.IsEnabled(utils.ExtensionReadme)
+	hasSkills := extensions_conf.IsEnabled(utils.ExtensionSkills)
 
 	if hasSandbox {
 		io.CreateDir("sandbox/api")
@@ -283,6 +284,7 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 		"SecretEnv":           utils.SecretEnvName(sandbox, project_conf.ProjectName),
 		"HasDoc":              hasDoc,
 		"HasReadme":           hasReadme,
+		"HasSkills":           hasSkills,
 		"HasAssets":           hasAssets,
 		"Constructors":        constructors,
 		"ConfigStructs":       config_structs,
@@ -374,6 +376,16 @@ func BuildInternal(sandbox *api.Sandbox, io *stagedfs.StagedFS, path string) err
 	// contract of sandbox/deps, indexed by the symbols each one declares.
 	if hasDoc && hasSandbox {
 		if err := GeneratePublicApiPages(sandbox, io, public_api, dep_contracts); err != nil {
+			return err
+		}
+	}
+
+	// The generator's own skill, one page per command it answers. It is read
+	// off the binary running this build, not off the tree: the project carries
+	// none of the generator's declarations, and the skill has to teach the
+	// commands of the binary that rendered it.
+	if hasSkills {
+		if err := GenerateSkillPages(sandbox, io, CollectSkillCommands(sandbox), extensions_conf, vars); err != nil {
 			return err
 		}
 	}

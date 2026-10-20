@@ -1,0 +1,18 @@
+args:
+    - end: 0
+      id: Verb
+      start: 0
+      trigger:
+        type: equal
+        value: remove-skills
+category: Docs
+description: |-
+    Deletes the agent skill drop-skills turned on — the generator's directory
+    under .agents/skills/ and .claude/skills/, then each of those left empty —
+    and writes skills: false. Any other skill under the two roots, and the rest
+    of .claude/, is left where it is.
+examples:
+    - remove-skills
+    - remove-skills --path ./my-project
+priority: 100
+summary: Remove the agent skills and turn the skills extension off

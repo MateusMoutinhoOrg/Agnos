@@ -2,7 +2,7 @@ cli-output: "deps-init started with path test-dir \nbuild started with path test
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: d4ba3ceebe4712af4091e01920464a1706cc545249028ce272e76031b9ab683a
+      sha: 084edd53589eefc12cd8ed77e6f39ad038da0094322760df91fbcd1a93ede35d
     - file: adapters/bindings/standard/binding.yaml
       sha: 3a150d843a1c249764e0a44169bca6e40c86178e9e910d7f5538acfdb606d9a8
     - file: adapters/bindings/standard/generated.new.go

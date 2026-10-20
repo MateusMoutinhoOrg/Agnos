@@ -83,6 +83,7 @@ var extensionInit = map[string]string{
 	utils.ExtensionDeps:       "deps-init",
 	utils.ExtensionDatabase:   "database-init",
 	utils.ExtensionBackoffice: "backoffice-init",
+	utils.ExtensionSkills:     "drop-skills",
 }
 
 // scaffoldedUnits are the units an init writes for itself: help and version
@@ -211,6 +212,8 @@ func nextSteps(state projectState) []step {
 		extensionInit[utils.ExtensionBackoffice], "Give it an admin area — a sign-in page, the people allowed in, and their API keys")
 	steps = appendStep(steps, !enabled(state, utils.ExtensionDeps), false,
 		extensionInit[utils.ExtensionDeps], "Give it the dependency layer — deps, adapters, bindings")
+	steps = appendStep(steps, !enabled(state, utils.ExtensionSkills), false,
+		extensionInit[utils.ExtensionSkills], "Teach AI coding assistants how to work on it — a guide they read on their own")
 
 	return steps
 }

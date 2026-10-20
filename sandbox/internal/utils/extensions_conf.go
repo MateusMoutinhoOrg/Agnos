@@ -12,9 +12,9 @@ import (
 const ExtensionsConfFile = "extensions.yaml"
 
 // The extension names, each the name of the mechanic it turns on and of the
-// <x>-init / <x>-purge pair that owns it. Every one but doc and readme renders
-// into the sandbox and needs it on; those two stand on their own because
-// neither needs the sandbox to be generated.
+// <x>-init / <x>-purge pair that owns it. Every one but doc, readme and skills
+// renders into the sandbox and needs it on; those three stand on their own
+// because none needs the sandbox to be generated.
 const (
 	ExtensionSandbox    = "sandbox"
 	ExtensionDeps       = "deps"
@@ -26,6 +26,7 @@ const (
 	ExtensionBackoffice = "backoffice"
 	ExtensionDoc        = "doc"
 	ExtensionReadme     = "readme"
+	ExtensionSkills     = "skills"
 )
 
 // ExtensionSpec is one mechanic of the catalog: its key, what a fresh project
@@ -52,11 +53,12 @@ func ExtensionCatalog() []ExtensionSpec {
 		{ExtensionBackoffice, false, "the admin backoffice: login, users, API tokens, backups and the /api/admin JSON api"},
 		{ExtensionDoc, true, "the docs/ tree and its Index.md files"},
 		{ExtensionReadme, true, "README.md, built from themes.yaml and the doc index"},
+		{ExtensionSkills, false, "the agent skills: .agents/skills/<generator>/ and .claude/skills/<generator>/, built from the generator's own commands"},
 	}
 }
 
 // ExtensionRequires is what one mechanic needs on to have anything to render
-// into: every mechanic but doc and readme renders into the sandbox, the server layer is opened
+// into: every mechanic but doc, readme and skills renders into the sandbox, the server layer is opened
 // by a command of the cli layer (start-server), and the front layer is served
 // by a route of the server layer.
 func ExtensionRequires(name string) []string {
@@ -67,7 +69,7 @@ func ExtensionRequires(name string) []string {
 		return []string{ExtensionSandbox, ExtensionServer}
 	case ExtensionBackoffice:
 		return []string{ExtensionSandbox, ExtensionServer, ExtensionFront, ExtensionDatabase}
-	case ExtensionSandbox, ExtensionDoc, ExtensionReadme:
+	case ExtensionSandbox, ExtensionDoc, ExtensionReadme, ExtensionSkills:
 		return nil
 	}
 	return []string{ExtensionSandbox}

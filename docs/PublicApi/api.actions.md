@@ -963,6 +963,22 @@ RemoveDocProps describes one RemoveDoc run: Path is the directory holding the pr
 | `Path` | `string` |
 | `Name` | `string` |
 
+## `DropSkillsProps`
+
+DropSkillsProps describes one DropSkills run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
+## `RemoveSkillsProps`
+
+RemoveSkillsProps describes one RemoveSkills run: Path is the directory holding the project.
+
+| Field | Type |
+| --- | --- |
+| `Path` | `string` |
+
 ## `AddCliExampleProps`
 
 AddCliExampleProps describes one AddCliExample run: Path is the directory holding the project; Name the example to scaffold.
@@ -1096,6 +1112,8 @@ Actions is the whole set of operations agnos performs on a project. Every field 
 | `RemovePage` | `func(props RemovePageProps) error` | RemovePage deletes one page, assets/front/<name>.html. |
 | `AddDoc` | `func(props AddDocProps) error` | AddDoc creates one doc directory under docs/, with its doc.yaml and a doc.md to fill in. |
 | `RemoveDoc` | `func(props RemoveDocProps) error` | RemoveDoc deletes one doc directory and everything under it. |
+| `DropSkills` | `func(props DropSkillsProps) error` | DropSkills turns the skills extension on, so every build writes the generator's agent skill into .agents/skills/ and .claude/skills/. |
+| `RemoveSkills` | `func(props RemoveSkillsProps) error` | RemoveSkills deletes the generator's agent skill from both roots and turns the skills extension off. |
 | `AddCliExample` | `func(props AddCliExampleProps) error` | AddCliExample creates one example under examples/cli/, with an example.sh stub that already runs. |
 | `RemoveCliExample` | `func(props RemoveCliExampleProps) error` | RemoveCliExample deletes one example of examples/cli/ whole. |
 | `AddLibExample` | `func(props AddLibExampleProps) error` | AddLibExample creates one example under examples/lib/, with an example.go stub that already runs. |

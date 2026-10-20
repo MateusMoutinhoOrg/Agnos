@@ -60,7 +60,9 @@ Runs in front of every command line. Without --help it hands the line on. With i
 | [`set-adapter`](set-adapter.md) | always |
 | [`set-dep`](set-dep.md) | always |
 | [`add-doc`](add-doc.md) | always |
+| [`drop-skills`](drop-skills.md) | always |
 | [`remove-doc`](remove-doc.md) | always |
+| [`remove-skills`](remove-skills.md) | always |
 | [`add-cli-example`](add-cli-example.md) | always |
 | [`add-lib-example`](add-lib-example.md) | always |
 | [`remove-cli-example`](remove-cli-example.md) | always |

@@ -208,7 +208,7 @@ assets:
     templates:
       order: 13
       dir: true
-      description: single-file scaffolds (command_*, route_*, database_*, front_*, start_server_*, server_handle_*, cli_handle_*, help_command.yaml, doc_page.md, doc_index.md)
+      description: single-file scaffolds (command_*, route_*, database_*, front_*, start_server_*, server_handle_*, cli_handle_*, help_command.yaml, doc_page.md, doc_index.md, skill.md, skill_command.md)
     templates/backoffice:
       order: 14
       dir: true

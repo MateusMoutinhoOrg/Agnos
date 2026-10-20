@@ -2,7 +2,7 @@ cli-output: "started with path test-dir \nbuild started with path test-dir \nsuc
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 50218e4cc11314565ddead0f62c27d4a378f3a174e73fdea1b928835bc89d202
+      sha: 76dd893e4f2888bd31578823c1462de75137d0fee145d815b3d72aa82b5d6c97
     - file: cmd/main/generated.main.go
       sha: 84deecde12beb76e6af544509e315f8d94fe0e29124878ae9ce33cc9bd640268
     - file: sandbox/constructors/cli/constructor.go

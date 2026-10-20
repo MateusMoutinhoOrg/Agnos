@@ -54,7 +54,9 @@ import (
 	set_adapter "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/set_adapter"
 	set_dep "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/deps/set_dep"
 	add_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/docs/add_doc"
+	drop_skills "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/docs/drop_skills"
 	remove_doc "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/docs/remove_doc"
+	remove_skills "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/docs/remove_skills"
 	add_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/add_cli_example"
 	add_lib_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/add_lib_example"
 	remove_cli_example "github.com/MateusMoutinhoOrg/Agnos/sandbox/internal/commands/examples/remove_cli_example"
@@ -137,6 +139,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		deps_init.NewCommand(sandbox),
 		deps_purge.NewCommand(sandbox),
 		disable_extension.NewCommand(sandbox),
+		drop_skills.NewCommand(sandbox),
 		enable_extension.NewCommand(sandbox),
 		explain_command.NewCommand(sandbox),
 		explain_route.NewCommand(sandbox),
@@ -169,6 +172,7 @@ func NewCli(sandbox *api.Sandbox) api.Cli {
 		remove_parameter.NewCommand(sandbox),
 		remove_path.NewCommand(sandbox),
 		remove_route.NewCommand(sandbox),
+		remove_skills.NewCommand(sandbox),
 		remove_table.NewCommand(sandbox),
 		remove_table_field.NewCommand(sandbox),
 		rename_command.NewCommand(sandbox),

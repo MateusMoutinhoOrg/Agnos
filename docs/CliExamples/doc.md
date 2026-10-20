@@ -41,6 +41,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `deps-init` | add the dependency layer to a project that has none | [example.sh](../../examples/cli/deps-init/example.sh) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.sh](../../examples/cli/deps-purge/example.sh) |
 | `disable-extension` |  | [example.sh](../../examples/cli/disable-extension/example.sh) |
+| `drop-skills` |  | [example.sh](../../examples/cli/drop-skills/example.sh) |
 | `enable-extension` |  | [example.sh](../../examples/cli/enable-extension/example.sh) |
 | `explain-route` |  | [example.sh](../../examples/cli/explain-route/example.sh) |
 | `form-body` | declare a form body's form-schema, the one an html form posts without a script | [example.sh](../../examples/cli/form-body/example.sh) |
@@ -61,6 +62,7 @@ remove one; the lib side is [LibExamples](../LibExamples/doc.md).
 | `remove-flag` | delete one declared flag | [example.sh](../../examples/cli/remove-flag/example.sh) |
 | `remove-lib-example` | delete an example of examples/lib/ | [example.sh](../../examples/cli/remove-lib-example/example.sh) |
 | `remove-page` |  | [example.sh](../../examples/cli/remove-page/example.sh) |
+| `remove-skills` |  | [example.sh](../../examples/cli/remove-skills/example.sh) |
 | `route-chain` |  | [example.sh](../../examples/cli/route-chain/example.sh) |
 | `route-docs` |  | [example.sh](../../examples/cli/route-docs/example.sh) |
 | `route-middleware` |  | [example.sh](../../examples/cli/route-middleware/example.sh) |

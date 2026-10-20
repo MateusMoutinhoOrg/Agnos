@@ -8,3 +8,4 @@ front: false
 readme: true
 sandbox: true
 server: false
+skills: true

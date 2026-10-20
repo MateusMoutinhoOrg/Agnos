@@ -2,7 +2,7 @@ cli-output: "cli-purge started with path test-dir \nbuild started with path test
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: d4ba3ceebe4712af4091e01920464a1706cc545249028ce272e76031b9ab683a
+      sha: 084edd53589eefc12cd8ed77e6f39ad038da0094322760df91fbcd1a93ede35d
     - file: docs/Adapters/doc.md
       sha: cfe73b0a3d686a85bbbcbdcfba650b576fdfaca45664100e584bced29440a744
     - file: docs/Adapters/doc.yaml
@@ -12,7 +12,7 @@ tree:
     - file: docs/DepList/doc.yaml
       sha: 2cc46fc3b38a91764ba6ec7d5e8bb661ee7dac155f5782369459e4cd1dd29468
     - file: docs/Extensions/doc.md
-      sha: c98bc44a3f259f063f9a1f59256a24c24999165af324f443171fb37e8729b695
+      sha: 8246317c34883dd9a2b2455b524704e265888efca5b598dd41d17eaec38ebd3d
     - file: docs/Extensions/doc.yaml
       sha: 7de2cd40d2152a82ee767844ab2f1c29b119374cef0f5ef40457c2a84997d0ca
     - file: docs/GeneratedFiles/doc.md
@@ -48,7 +48,7 @@ tree:
     - file: docs/PublicApi/doc.yaml
       sha: 3caaacd844ee23f1ac7bafb5e33750851594291a41495d20aac8c9b753b4f0d1
     - file: docs/Requirements/doc.md
-      sha: 60f1c5f0b3bca78689b52f7f5e8738559773e6ba60d7b9c86c72e6b1fbce857f
+      sha: 7042df2be74740e89ed3b78c274587189f23aa92dbc569bd081658bdc558fa97
     - file: docs/Requirements/doc.yaml
       sha: 020f1578eab42755002c49b2ee93fa1d6bce586db59594175049867986006be3
     - file: docs/Rules/doc.md
@@ -60,7 +60,7 @@ tree:
     - file: docs/Structure/doc.yaml
       sha: 3dfe58ba37ae0dfce499694129c2c02262aed377644de51e31fa0e2fd169de47
     - file: docs/Workflow/doc.md
-      sha: 838f9ce6be339ce1d669f1e792ceb81983840e6f398cc9c16418741f5c46f88e
+      sha: 3e1142ebc4e26216f7597d23d74d65701b37589202d2eb29f999a1d2e194269c
     - file: docs/Workflow/doc.yaml
       sha: 2dd60a781bb75aa75ac6105a986d42b00adb6f0a8f136716db299e47a14c359b
     - file: sandbox/generated.new.go

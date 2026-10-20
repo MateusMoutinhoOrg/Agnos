@@ -94,7 +94,6 @@ type commandDocEntry struct {
 // the page by being declared with `add-command`, `add-flag`, `add-arg` or
 // `set-command`, never by the page being edited.
 func CollectCommandDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) (CommandDocs, error) {
-	docs := CommandDocs{}
 	entries := []commandDocEntry{}
 
 	for _, unit := range utils.CommandDirs(sandbox, io) {
@@ -104,7 +103,7 @@ func CollectCommandDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) (CommandDoc
 		}
 		conf, err := commandconf.New(sandbox, string(content))
 		if err != nil {
-			return docs, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, utils.CommandConfFile, err)
+			return CommandDocs{}, sandbox.Deps.StdDeps.Errorf("%s/%s: %w", unit.Dir, utils.CommandConfFile, err)
 		}
 		if conf.Hidden {
 			continue
@@ -112,6 +111,15 @@ func CollectCommandDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) (CommandDoc
 		entries = append(entries, commandDocEntry{Name: unit.Name, Conf: conf})
 	}
 
+	return commandDocsOf(sandbox, entries), nil
+}
+
+// commandDocsOf groups the pages of a set of declarations by category, in
+// first-seen order, with the middlewares apart — whichever source the
+// declarations were read from: the project's command.yaml files, or the
+// generator's own commands for its skill.
+func commandDocsOf(sandbox *api.Sandbox, entries []commandDocEntry) CommandDocs {
+	docs := CommandDocs{}
 	index := map[string]int{}
 	for _, entry := range entries {
 		doc := commandDoc(sandbox, entry, entries)
@@ -133,7 +141,7 @@ func CollectCommandDocs(sandbox *api.Sandbox, io *stagedfs.StagedFS) (CommandDoc
 		docs.Groups[position].Commands = append(docs.Groups[position].Commands, doc)
 	}
 
-	return docs, nil
+	return docs
 }
 
 // commandDoc turns one parsed declaration into its page, crossed with every

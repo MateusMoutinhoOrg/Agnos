@@ -229,11 +229,15 @@ escape no build reads. There is no field in `api.Sandbox` and no package in
 field is reached through `List<T>s` and its filter.
 
 **Extensions** are declared in `AgnosConfig/extensions.yaml` and nowhere else — `build` never
-infers a mechanic from a directory being present. Ten keys: `sandbox`, `deps`,
+infers a mechanic from a directory being present. Eleven keys: `sandbox`, `deps`,
 `cli`, `server`, `front`, `database`, `backoffice`,
-`example`, `doc`, `readme`. `backoffice` generates nothing: `backoffice-init`
+`example`, `doc`, `readme`, `skills`. `backoffice` generates nothing: `backoffice-init`
 writes `assets/templates/backoffice/**` once — the backups included: the `backup` database,
-`sandbox/internal/snapshots/` and the `*-backup*` routes — and the key gates its doc. `false`
+`sandbox/internal/snapshots/` and the `*-backup*` routes — and the key gates its doc. `skills`
+renders no group either: every build writes `.agents/skills/<generator>/` and
+`.claude/skills/<generator>/` from the running binary's own `Cli.Commands`, never from the
+tree — a scaffolded project carries none of agnos's `command.yaml` — and `drop-skills` /
+`remove-skills` own the key. `false`
 means **stop generating**, never **delete**: what the mechanic wrote stays and becomes the
 project's, and removing it is what `<x>-purge` does.
 

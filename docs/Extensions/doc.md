@@ -16,6 +16,7 @@ front: false
 readme: true
 sandbox: true
 server: false
+skills: false
 ```
 
 | Key | What agnos generates and looks after |
@@ -30,9 +31,10 @@ server: false
 | `backoffice` | nothing on `build`: `backoffice-init` writes the admin backoffice once (routes, `backoffice-db`, the `backup` database and its snapshots, `add-backoffice-user`), and the key turns on its doc. Needs `server`, `front` and `database` |
 | `doc` | the `docs/` tree and every `Index.md`; `add-doc` and `remove-doc` |
 | `readme` | `README.md`, built from `AgnosConfig/docs/ReadmeHeader.md` and the doc index |
+| `skills` | `.agents/skills/agnos/` and `.claude/skills/agnos/`: the agent skill teaching every `agnos` command, rendered from the binary running the build; `drop-skills` and `remove-skills` |
 
-Everything that renders into the sandbox needs `sandbox` on. `doc` and `readme` stand on
-their own.
+Everything that renders into the sandbox needs `sandbox` on. `doc`, `readme` and `skills`
+stand on their own.
 
 ## Turning one on and off
 

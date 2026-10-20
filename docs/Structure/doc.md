@@ -68,7 +68,7 @@ assets/                                         Go text/templates embedded by as
   doc-<x>/                                      rendered when `doc` and every `<x>` it names are on (doc-cli, doc-server, doc-front, doc-database, doc-backoffice, doc-example, doc-example-cli)
   dep-catalog/<dep>/                            one installable contract, dep.yaml beside the target layout it mirrors; dep-catalog/OpinionatedAgnos<X> are the opinionated libs, one per mechanic with code (Cli, Server, Front, Database)
   adapter-catalog/<adapter>/                    one installable adapter, adapter.yaml beside the target layout it mirrors
-  templates/                                    single-file scaffolds (command_*, route_*, database_*, front_*, start_server_*, server_handle_*, cli_handle_*, help_command.yaml, doc_page.md, doc_index.md)
+  templates/                                    single-file scaffolds (command_*, route_*, database_*, front_*, start_server_*, server_handle_*, cli_handle_*, help_command.yaml, doc_page.md, doc_index.md, skill.md, skill_command.md)
   templates/backoffice/                         the tree backoffice-init writes once, at the path each file holds in it; assets/ under it is copied verbatim
 cmd/main/generated.main.go                      (gen) standard.New() -> sandbox.New -> Main(os.Args[1:])
 docs/                                           one dir per doc, holding doc.md + doc.yaml (+ assets, + sub-docs). README.md indexes them all

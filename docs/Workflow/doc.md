@@ -182,6 +182,17 @@ Write `docs/<Name>/doc.md`; `README.md`'s index, and the parent `Index.md` of a 
 regenerated. Describe any new path worth naming in `AgnosConfig/structure.yaml` — that
 file is what renders [Structure](../Structure/doc.md).
 
+## Give an LLM the skill
+
+```bash
+agnos drop-skills      # skills: true; every build writes .agents/skills/agnos/ and .claude/skills/agnos/
+agnos remove-skills    # deletes both and writes skills: false
+```
+
+The skill is a `SKILL.md` an agent loads by its description, plus one page per
+`agnos` command, rendered from the binary running the build — so it never
+falls behind the `agnos` that maintains this tree.
+
 ## Add an example
 
 ```bash

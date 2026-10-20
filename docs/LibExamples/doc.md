@@ -35,6 +35,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `deps-init` | add the dependency layer to a project that has none | [example.go](../../examples/lib/deps-init/example.go) |
 | `deps-purge` | remove the dependency layer and every installed dep | [example.go](../../examples/lib/deps-purge/example.go) |
 | `disable-extension` |  | [example.go](../../examples/lib/disable-extension/example.go) |
+| `drop-skills` |  | [example.go](../../examples/lib/drop-skills/example.go) |
 | `enable-extension` |  | [example.go](../../examples/lib/enable-extension/example.go) |
 | `front-init` |  | [example.go](../../examples/lib/front-init/example.go) |
 | `front-purge` |  | [example.go](../../examples/lib/front-purge/example.go) |
@@ -51,6 +52,7 @@ remove one; the cli side is [CliExamples](../CliExamples/doc.md).
 | `remove-flag` | delete one declared flag | [example.go](../../examples/lib/remove-flag/example.go) |
 | `remove-lib-example` | delete an example of examples/lib/ | [example.go](../../examples/lib/remove-lib-example/example.go) |
 | `remove-page` |  | [example.go](../../examples/lib/remove-page/example.go) |
+| `remove-skills` |  | [example.go](../../examples/lib/remove-skills/example.go) |
 | `server-rest-route` |  | [example.go](../../examples/lib/server-rest-route/example.go) |
 | `server-route` |  | [example.go](../../examples/lib/server-route/example.go) |
 | `set-adapter` |  | [example.go](../../examples/lib/set-adapter/example.go) |

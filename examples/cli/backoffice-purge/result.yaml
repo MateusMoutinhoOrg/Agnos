@@ -2,7 +2,7 @@ cli-output: "backoffice-purge started with path test-dir \nbackoffice-purge kept
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 33d84dec8898adc7015a0325ff68b6c7ee3be650e9de1aead9c3f76e90028d21
+      sha: c19dbcc29a7f471849a5d46927e4b104ccd2db794d2693f4c2806a0f2c167baa
     - file: sandbox/api/generated.config.go
       sha: d0ff9eae54a897d4374bdd6fa68e6e351fce4e8e0881a49cc5ba8aeb2f41c9fd
     - file: sandbox/internal/commands/info/help/command.yaml

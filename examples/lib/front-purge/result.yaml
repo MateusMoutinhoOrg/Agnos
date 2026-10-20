@@ -2,7 +2,7 @@ cli-output: "started with path test-dir \nbuild started with path test-dir \nsuc
 exit-code: 0
 tree:
     - file: AgnosConfig/extensions.yaml
-      sha: 648a95a7bd347beffd2cec2a787bc5003210d1daba355d47cee3bbf55687ad04
+      sha: 2552894e20d4af72cba902a30520d56139dfeff7d12baa98f24f2a2ab52681d7
     - file: assets/front/404.html
       sha: 9f3c3fefc6d887e22bb6d8cf5a59d4959740aa7bafbb9bec7909c26c46e81a2e
     - file: assets/front/about.html
